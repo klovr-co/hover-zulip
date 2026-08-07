@@ -1,0 +1,131 @@
+@font-face {
+    font-family: "SaansMono Local";
+    src:
+        local("SaansMono"), local("Saans Mono");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "SaansMono Fallback";
+    src: url("../../fonts/cofounder/departure-mono.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+:root {
+    /* Source Sans 3 is loaded by Zulip's shared frontend bundle. */
+    --font-saans: "Source Sans 3 VF", sans-serif;
+    --font-saans-mono: "SaansMono Local", "SaansMono Fallback", monospace;
+    --type-display-xl-size: 72px;
+    --type-display-xl-line: 1.05;
+    --type-display-xl-track: -2px;
+    --type-display-lg-size: 56px;
+    --type-display-lg-line: 1.1;
+    --type-display-lg-track: -1.4px;
+    --type-display-md-size: 40px;
+    --type-display-md-line: 1.15;
+    --type-display-md-track: -0.8px;
+    --type-headline-size: 28px;
+    --type-headline-line: 1.2;
+    --type-headline-track: -0.5px;
+    --type-card-title-size: 22px;
+    --type-card-title-line: 1.25;
+    --type-card-title-track: -0.3px;
+    --type-subhead-size: 20px;
+    --type-subhead-line: 1.4;
+    --type-subhead-track: -0.2px;
+    --type-body-lg-size: 18px;
+    --type-body-lg-line: 1.5;
+    --type-body-lg-track: -0.1px;
+    --type-body-size: 16px;
+    --type-body-line: 1.5;
+    --type-body-sm-size: 14px;
+    --type-body-sm-line: 1.5;
+    --type-caption-size: 12px;
+    --type-caption-line: 1.4;
+    --type-button-size: 15px;
+    --type-button-line: 1.2;
+    --type-mono-size: 13px;
+    --type-mono-line: 1.5;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+    font-family: var(--font-saans);
+}
+
+code,
+pre,
+kbd,
+.mono {
+    font-family: var(--font-saans-mono);
+    font-size: var(--type-mono-size);
+    font-weight: 400;
+    line-height: var(--type-mono-line);
+    letter-spacing: 0;
+}
+
+.display-xl {
+    font-size: var(--type-display-xl-size);
+    line-height: var(--type-display-xl-line);
+    letter-spacing: var(--type-display-xl-track);
+}
+
+.display-lg {
+    font-size: var(--type-display-lg-size);
+    line-height: var(--type-display-lg-line);
+    letter-spacing: var(--type-display-lg-track);
+}
+
+.display-md {
+    font-size: var(--type-display-md-size);
+    line-height: var(--type-display-md-line);
+    letter-spacing: var(--type-display-md-track);
+}
+
+.headline {
+    font-size: var(--type-headline-size);
+    line-height: var(--type-headline-line);
+    letter-spacing: var(--type-headline-track);
+}
+
+.card-title {
+    font-size: var(--type-card-title-size);
+    line-height: var(--type-card-title-line);
+    letter-spacing: var(--type-card-title-track);
+}
+
+.display-xl,
+.display-lg,
+.display-md,
+.headline,
+.card-title {
+    font-family: var(--font-saans);
+    font-weight: 500;
+}
+
+@media (width <= 900px) {
+    :root {
+        --type-display-xl-size: 56px;
+        --type-display-lg-size: 48px;
+        --type-display-md-size: 36px;
+    }
+}
+
+@media (width <= 600px) {
+    :root {
+        --type-display-xl-size: 42px;
+        --type-display-lg-size: 36px;
+        --type-display-md-size: 32px;
+        --type-headline-size: 26px;
+        --type-card-title-size: 21px;
+        --type-subhead-size: 19px;
+        --type-body-lg-size: 17px;
+    }
+}

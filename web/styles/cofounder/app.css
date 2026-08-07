@@ -1,0 +1,387 @@
+/* Cofounder application composition
+   Quiet editorial surfaces wrapped around Zulip's operational density. */
+
+body {
+    font-family: var(--font-saans);
+    color: var(--ds-text-primary);
+    background: var(--ds-surface-canvas);
+}
+
+a {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+}
+
+:where(
+        a,
+        button,
+        input,
+        textarea,
+        select,
+        [role="button"],
+        [tabindex]
+    ):focus-visible {
+    outline: 3px solid
+        color-mix(in srgb, var(--ds-focus) 72%, var(--ds-neutral-0));
+    outline-offset: 2px;
+}
+
+:where(button, [role="button"]) {
+    transition:
+        transform var(--ds-duration-fast) var(--ds-ease-out),
+        background-color var(--ds-duration-fast) ease,
+        box-shadow var(--ds-duration-base) var(--ds-ease-out);
+}
+
+:where(button, [role="button"]):active {
+    transform: scale(0.985);
+}
+
+:where(button, [role="button"]):disabled,
+:where(button, [role="button"])[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.45;
+    pointer-events: none;
+    box-shadow: none;
+}
+
+/* Browser and application chrome */
+
+#navbar-fixed-container {
+    border-bottom: 1px solid var(--ds-border-subtle);
+    background: color-mix(in srgb, var(--ds-surface-paper) 92%, transparent);
+    backdrop-filter: blur(14px);
+}
+
+#navbar-middle .column-middle-inner,
+.header,
+#message_view_header {
+    background: transparent;
+    box-shadow: none;
+}
+
+.header-button {
+    border-radius: var(--ds-radius-control);
+}
+
+.header-button-avatar-image {
+    border: 1px solid var(--ds-border-subtle);
+    box-shadow: var(--ds-shadow-control);
+}
+
+#searchbox .navbar-search {
+    border: 1px solid var(--ds-border-subtle);
+    border-radius: var(--ds-radius-control);
+    transition: box-shadow var(--ds-duration-base) var(--ds-ease-out);
+}
+
+#searchbox .navbar-search:not(.expanded):hover,
+#searchbox .navbar-search.expanded {
+    box-shadow: var(--ds-shadow-control);
+}
+
+#searchbox .navbar-search:has(#searchbox-input-container:focus-visible) {
+    outline: 3px solid
+        color-mix(in srgb, var(--ds-focus) 72%, var(--ds-neutral-0));
+    outline-offset: 2px;
+}
+
+#message_view_header .message-header-navbar-title {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+#message_view_header .narrow_description {
+    color: var(--ds-text-secondary);
+}
+
+/* Sidebars */
+
+.app-main .column-left .left-sidebar,
+.app-main .column-right .right-sidebar {
+    box-sizing: border-box;
+    background: var(--ds-surface-canvas);
+}
+
+.app-main .column-left .left-sidebar {
+    border-right: 1px solid var(--ds-border-subtle);
+}
+
+.app-main .column-right .right-sidebar {
+    border-left: 1px solid var(--ds-border-subtle);
+}
+
+#left-sidebar-search,
+#userlist-header,
+.stream-list-subsection-header,
+.left-sidebar-section-header {
+    background: var(--ds-surface-canvas);
+}
+
+.left-sidebar-title,
+.right-sidebar-title,
+.buddy-list-subsection-header {
+    font-size: var(--type-caption-size);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.input-element-wrapper .input-element,
+#searchbox-input-container,
+.pill-container {
+    border-radius: var(--ds-radius-control);
+}
+
+.filters li,
+.buddy-list-section li,
+.buddy-list-user-link,
+.invite-user-shortcut {
+    border-radius: var(--ds-radius-sm);
+}
+
+.filters li,
+.buddy-list-section li {
+    transition:
+        color var(--ds-duration-fast) ease,
+        background-color var(--ds-duration-fast) ease;
+}
+
+.filters li:is(:hover, :focus-within),
+.buddy-list-section li:is(:hover, :focus-within) {
+    box-shadow: none;
+}
+
+.narrow-filter.active-filter,
+.narrow-filter.selected-home-view,
+.buddy-list-section li.highlighted_user {
+    box-shadow: inset 3px 0 0 var(--ds-action-accent);
+}
+
+.unread_count:not(:empty) {
+    min-width: 22px;
+    border-radius: var(--ds-radius-pill);
+    font-family: var(--font-saans-mono);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Message feed: each conversation is a paper surface. */
+
+#message_feed_container {
+    background:
+        radial-gradient(
+            circle at 85% 7%,
+            color-mix(in srgb, var(--ds-action-accent) 8%, transparent),
+            transparent 28%
+        ),
+        var(--ds-surface-canvas);
+}
+
+.message-feed .recipient_row {
+    margin: 0 var(--ds-space-3) var(--ds-space-3);
+    border-radius: var(--ds-radius-card);
+    box-shadow: var(--ds-shadow-card);
+    transition:
+        box-shadow var(--ds-duration-base) var(--ds-ease-out),
+        transform var(--ds-duration-base) var(--ds-ease-out);
+}
+
+.message-feed .recipient_row:hover {
+    box-shadow: 0 20px 48px hsl(40deg 8% 15% / 10%);
+}
+
+.message_header .message-header-contents {
+    min-height: 32px;
+    height: auto;
+    border-radius: var(--ds-radius-card) var(--ds-radius-card) 0 0;
+    background: var(--ds-neutral-100);
+}
+
+.message_header.message_header_stream .message-header-contents {
+    /* Recipient colors are written inline by the message renderer. The
+       Cofounder system keeps that identity in the channel icon and makes
+       the reading surface quiet and consistently accessible. */
+    background: var(--ds-neutral-100) !important;
+}
+
+.message_header .stream_label,
+.message_header .stream_topic,
+.message_header_private_message .message_label_clickable {
+    font-weight: 500;
+}
+
+.message_row {
+    border-color: var(--ds-border-subtle);
+}
+
+.message-feed .recipient_row .message_row:last-of-type {
+    border-radius: 0 0 var(--ds-radius-card) var(--ds-radius-card);
+}
+
+.message-feed .recipient_row .message_row:last-of-type .messagebox {
+    border-radius: 0 0 var(--ds-radius-card) var(--ds-radius-card);
+    padding-bottom: var(--ds-space-2);
+}
+
+.messagebox-content {
+    padding-block: 2px;
+}
+
+.messagebox-content .sender_name {
+    font-weight: 500;
+    letter-spacing: -0.005em;
+}
+
+.messagebox-content .timestamp,
+.messagebox-content .message_time,
+.messagebox-content .message_edit_notice {
+    color: var(--ds-text-secondary);
+    font-family: var(--font-saans-mono);
+    font-size: var(--type-caption-size);
+    font-variant-numeric: tabular-nums;
+}
+
+.messagebox-content .message_content:not(.status-message) {
+    max-width: var(--ds-measure);
+}
+
+.message_row:hover {
+    background: var(--ds-surface-raised);
+}
+
+.message_row.selected_message .messagebox-content {
+    border-radius: var(--ds-radius-sm);
+    outline: 2px solid var(--color-selected-message-outline);
+}
+
+.reaction_button {
+    border-radius: var(--ds-radius-pill);
+}
+
+/* Composer: the strongest product window in the interface. */
+
+#compose-content {
+    padding: var(--ds-space-2);
+    border: 1px solid var(--ds-border-subtle);
+    border-radius: var(--ds-radius-window) var(--ds-radius-window) 0 0;
+    background: color-mix(in srgb, var(--ds-surface-paper) 96%, transparent);
+    box-shadow: var(--ds-shadow-float);
+    backdrop-filter: blur(16px);
+}
+
+#legacy-closed-compose-box .reply_button_container,
+#legacy-closed-compose-box .compose_mobile_button,
+#legacy-closed-compose-box #new_direct_message_button {
+    min-height: 40px;
+    border-radius: var(--ds-radius-control);
+}
+
+#legacy-closed-compose-box #left_bar_compose_reply_button_big,
+#legacy-closed-compose-box #new_conversation_button {
+    min-height: 38px;
+    border-radius: calc(var(--ds-radius-control) - 1px);
+}
+
+#compose-recipient,
+#compose-channel-recipient,
+#compose-direct-recipient .pill-container,
+#compose_select_recipient_widget {
+    border-radius: var(--ds-radius-control) !important;
+}
+
+#message-content-container {
+    border-radius: var(--ds-radius-card);
+    background: var(--ds-surface-raised);
+}
+
+#message-formatting-controls-container {
+    border-radius: 0 0 var(--ds-radius-control) var(--ds-radius-control);
+}
+
+#compose-send-button {
+    min-width: 44px;
+    min-height: 40px;
+    border-radius: var(--ds-radius-control);
+    box-shadow: var(--ds-shadow-control);
+}
+
+#compose-send-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 7px 16px hsl(203deg 43% 12% / 20%);
+}
+
+#compose-send-button:active {
+    transform: scale(0.985);
+}
+
+/* Floating surfaces and reusable controls */
+
+.popover,
+.dropdown-menu,
+.tippy-box,
+.modal-content,
+.emoji-picker-popover,
+.typeahead.dropdown-menu {
+    border-color: var(--ds-border-subtle);
+    border-radius: var(--ds-radius-card);
+    box-shadow: var(--ds-shadow-float);
+}
+
+.action-button,
+.zulip-button,
+.modal button,
+.settings-button {
+    border-radius: var(--ds-radius-control);
+}
+
+.action-button {
+    transition:
+        transform var(--ds-duration-fast) var(--ds-ease-out),
+        background-color var(--ds-duration-fast) ease,
+        box-shadow var(--ds-duration-base) var(--ds-ease-out);
+}
+
+.action-button:active {
+    clip-path: none;
+    transform: scale(0.985);
+}
+
+.input-element-wrapper .input-element {
+    min-height: 32px;
+    transition:
+        outline-color var(--ds-duration-fast) ease,
+        box-shadow var(--ds-duration-base) var(--ds-ease-out);
+}
+
+@media (width <= 900px) {
+    .message-feed .recipient_row {
+        margin-inline: var(--ds-space-2);
+    }
+}
+
+@media (width <= 600px) {
+    .message-feed .recipient_row {
+        margin-inline: var(--ds-space-1);
+        border-radius: var(--ds-radius-control);
+    }
+
+    .message_header .message-header-contents {
+        border-radius: var(--ds-radius-control) var(--ds-radius-control) 0 0;
+    }
+
+    #compose-content {
+        border-radius: var(--ds-radius-card) var(--ds-radius-card) 0 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0ms !important;
+        animation-duration: 0ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

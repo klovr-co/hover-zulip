@@ -62,6 +62,9 @@ import "../../styles/color_picker.css";
 import "../../styles/animate.css";
 import "@uppy/core/css/style.min.css";
 import "@uppy/image-editor/css/style.min.css";
+import "../../styles/cofounder/design-system.css";
+import "../../styles/cofounder/typography.css";
+import "../../styles/cofounder/app.css";
 
 // This should be last.
 import "../ui_init.js";

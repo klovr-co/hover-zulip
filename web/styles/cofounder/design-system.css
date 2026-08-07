@@ -1,0 +1,298 @@
+:root,
+:root.color-scheme-automatic,
+:root.dark-theme {
+    color-scheme: light;
+
+    /* Cofounder primitives */
+    /* stylelint-disable color-no-hex */
+    --ds-blue-500: #2297df;
+    --ds-blue-600: #1a6fd1;
+    --ds-cyan-400: #75d2c5;
+    --ds-green-500: #69bd65;
+    --ds-navy-950: #071826;
+    --ds-neutral-0: #fff;
+    --ds-neutral-25: #fbfbf8;
+    --ds-neutral-50: #f5f5f2;
+    --ds-neutral-100: #edede9;
+    --ds-neutral-200: #d8d7d2;
+    --ds-neutral-500: #777572;
+    --ds-neutral-800: #3d3b39;
+    --ds-neutral-950: #252422;
+
+    /* Cofounder semantic color */
+    --ds-surface-canvas: var(--ds-neutral-50);
+    --ds-surface-paper: var(--ds-neutral-25);
+    --ds-surface-raised: var(--ds-neutral-0);
+    --ds-surface-inverse: var(--ds-navy-950);
+    --ds-text-primary: var(--ds-neutral-800);
+    --ds-text-secondary: var(--ds-neutral-500);
+    --ds-text-inverse: #f8fbff;
+    --ds-border-subtle: var(--ds-neutral-200);
+    --ds-action-primary: var(--ds-neutral-950);
+    --ds-action-accent: var(--ds-blue-500);
+    --ds-focus: #0b75bd;
+    --ds-selection: #bce8ff;
+    /* stylelint-enable color-no-hex */
+
+    /* Spacing, shape, depth, and motion */
+    --ds-space-1: 4px;
+    --ds-space-2: 8px;
+    --ds-space-3: 12px;
+    --ds-space-4: 16px;
+    --ds-space-5: 20px;
+    --ds-space-6: 24px;
+    --ds-space-8: 32px;
+    --ds-space-10: 40px;
+    --ds-space-12: 48px;
+    --ds-space-16: 64px;
+    --ds-space-20: 80px;
+    --ds-space-24: 96px;
+    --ds-space-30: 120px;
+    --ds-radius-sm: 6px;
+    --ds-radius-control: 8px;
+    --ds-radius-card: 14px;
+    --ds-radius-window: 20px;
+    --ds-radius-pill: 999px;
+    --ds-shadow-control: 0 3px 7px hsl(30deg 6% 10% / 14%);
+    --ds-shadow-card: 0 18px 45px hsl(40deg 8% 15% / 7%);
+    --ds-shadow-float: 0 24px 70px hsl(203deg 43% 12% / 16%);
+    --ds-duration-fast: 160ms;
+    --ds-duration-base: 240ms;
+    --ds-duration-slow: 700ms;
+    --ds-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ds-container-wide: 1220px;
+    --ds-container-content: 1115px;
+    --ds-measure: 70ch;
+    --ds-header-height: 91px;
+
+    /* Compatibility aliases for incrementally migrated interfaces. */
+    --surface: var(--ds-surface-canvas);
+    --paper: var(--ds-surface-paper);
+    --ink: var(--ds-text-primary);
+    --muted: var(--ds-text-secondary);
+    --line: var(--ds-border-subtle);
+    --blue: var(--ds-action-accent);
+    --deep-blue: var(--ds-blue-600);
+    --green: var(--ds-green-500);
+    --shadow: var(--ds-shadow-card);
+    --ease: var(--ds-ease-out);
+
+    /* Bridge the Cofounder system to Zulip's production semantic tokens. */
+    --color-background: var(--ds-surface-canvas);
+    --color-background-navbar: var(--ds-surface-paper);
+    --color-background-stream-message-content: var(--ds-surface-paper);
+    --color-background-private-message-content: var(--ds-surface-paper);
+    --color-background-private-message-header: var(--ds-neutral-100);
+    --color-background-active-narrow-filter: var(--ds-surface-raised);
+    --color-background-hover-narrow-filter: var(--ds-neutral-100);
+    --color-background-navigation-item-hover: color-mix(
+        in srgb,
+        var(--ds-action-accent) 9%,
+        transparent
+    );
+    --color-background-sidebar-action-hover: color-mix(
+        in srgb,
+        var(--ds-action-accent) 12%,
+        transparent
+    );
+    --color-background-sidebar-action-heading-hover: var(
+        --color-background-navigation-item-hover
+    );
+    --color-message-list-border: var(--ds-border-subtle);
+    --color-message-header-contents-border: var(--ds-border-subtle);
+    --color-message-header-contents-border-bottom: var(--ds-border-subtle);
+    --color-private-message-header-border: var(--ds-border-subtle);
+    --color-private-message-header-border-bottom: var(--ds-border-subtle);
+    --color-navbar-bottom-border: var(--ds-border-subtle);
+    --color-border-sidebar: var(--ds-border-subtle);
+    --color-border-sidebar-subheader: var(--ds-border-subtle);
+    --color-outline-focus: var(--ds-focus);
+    --color-selected-message-outline: color-mix(
+        in srgb,
+        var(--ds-action-accent) 64%,
+        transparent
+    );
+    --color-unread-marker: var(--ds-action-accent);
+    --color-background-unread-counter-prominent: var(--ds-action-accent);
+    --color-background-unread-counter-normal: color-mix(
+        in srgb,
+        var(--ds-action-accent) 16%,
+        transparent
+    );
+    --color-background-unread-counter-dot: var(--ds-action-accent);
+    --color-unread-counter-normal: var(--ds-blue-600);
+    --color-text-default: var(--ds-text-primary);
+    --color-text-message-default: var(--ds-text-primary);
+    --color-text-message-view-header: var(--ds-text-primary);
+    --color-text-message-header: var(--ds-text-primary);
+    --color-text-sender-name: var(--ds-text-primary);
+    --color-text-sidebar-row: var(--ds-text-primary);
+    --color-text-sidebar-base: var(--ds-text-primary);
+    --color-text-sidebar-heading: var(--ds-text-secondary);
+    --color-text-sidebar-action-heading: var(--ds-blue-600);
+    --color-text-sidebar-action-heading-hover: var(--ds-blue-600);
+    --color-sidebar-action: var(--ds-blue-600);
+    --color-sidebar-action-hover: var(--ds-blue-600);
+    --color-text-url: var(--ds-blue-600);
+    --color-text-url-hover: var(--ds-action-accent);
+    --color-text-link: var(--ds-blue-600);
+    --color-text-link-hover: var(--ds-action-accent);
+    --color-text-generic-link: var(--ds-blue-600);
+    --color-text-generic-link-interactive: var(--ds-action-accent);
+    --color-text-sender-name-hover: var(--ds-blue-600);
+    --color-date: color-mix(
+        in srgb,
+        var(--ds-text-secondary) 84%,
+        transparent
+    );
+    --color-background-search: var(--ds-surface-raised);
+    --color-background-search-collapsed: var(--ds-neutral-100);
+    --color-background-search-option-hover: var(--ds-neutral-100);
+    --color-search-box-hover-shadow: hsl(30deg 6% 10% / 10%);
+    --color-search-shadow-wide: hsl(30deg 6% 10% / 12%);
+    --color-search-shadow-tight: hsl(30deg 6% 10% / 7%);
+    --color-search-dropdown-top-border: var(--ds-border-subtle);
+    --color-search-icons: var(--ds-text-primary);
+    --color-background-popover-menu: var(--ds-surface-raised);
+    --color-background-popover: var(--ds-surface-raised);
+    --color-border-popover-menu: var(--ds-border-subtle);
+    --color-border-popover-menu-separator: var(--ds-border-subtle);
+    --color-background-hover-popover-menu: var(--ds-neutral-100);
+    --color-background-active-popover-menu: var(--ds-neutral-200);
+    --color-background-compose-new-message-button: var(--ds-surface-paper);
+    --color-background-compose-new-message-button-hover: var(--ds-neutral-100);
+    --color-background-compose-new-message-button-active: var(--ds-neutral-200);
+    --color-border-compose-new-message-button: var(--ds-border-subtle);
+    --color-border-compose-new-message-button-hover: var(--ds-neutral-500);
+    --color-border-compose-new-message-button-active: var(--ds-neutral-500);
+    --color-compose-box-background: var(--ds-surface-paper);
+    --color-compose-message-content-background: var(--ds-surface-raised);
+    --color-border-compose-content: var(--ds-border-subtle);
+    --color-compose-send-button-background: var(--ds-action-primary);
+    --color-compose-send-button-background-interactive: var(--ds-blue-600);
+    --color-compose-send-button-focus-border: var(--ds-focus);
+    --color-compose-send-control-button: var(--ds-text-secondary);
+    --color-compose-send-control-button-interactive: var(--ds-text-primary);
+    --color-compose-recipient-box-background-color: var(--ds-surface-raised);
+    --color-compose-recipient-box-border-color: var(--ds-border-subtle);
+    --color-compose-collapsed-reply-button-area-background: var(
+        --ds-surface-paper
+    );
+    --color-compose-collapsed-reply-button-area-background-interactive: var(
+        --ds-neutral-100
+    );
+    --color-compose-collapsed-reply-button-area-border: var(--ds-border-subtle);
+    --color-compose-collapsed-reply-button-area-border-interactive: var(
+        --ds-neutral-500
+    );
+    --color-compose-embedded-button-text-color: var(--ds-text-secondary);
+    --color-compose-embedded-button-text-color-hover: var(--ds-text-primary);
+    --color-compose-embedded-button-background-hover: var(--ds-neutral-100);
+    --color-compose-embedded-button-background-interactive: var(
+        --ds-neutral-200
+    );
+    --color-composebox-button-background: var(--ds-surface-paper);
+    --color-composebox-button-background-hover: var(--ds-neutral-100);
+    --color-message-formatting-controls-container: var(--ds-neutral-50);
+    --color-message-content-container-border: var(--ds-border-subtle);
+    --color-message-content-container-border-focus: var(--ds-action-accent);
+    --color-compose-control-button-background-hover: var(--ds-neutral-100);
+    --color-compose-formatting-button-divider: var(--ds-border-subtle);
+    --color-compose-focus-ring: var(--ds-focus);
+    --color-navbar-icon: var(--ds-text-secondary);
+    --color-header-button-hover: var(--ds-neutral-100);
+    --color-header-button-focus: var(--ds-neutral-200);
+    --color-background-zulip-button: var(--ds-surface-paper);
+    --color-background-zulip-button-hover: var(--ds-neutral-100);
+    --color-background-zulip-button-active: var(--ds-neutral-200);
+    --color-border-zulip-button: var(--ds-border-subtle);
+    --color-border-zulip-button-interactive: var(--ds-neutral-500);
+    --color-text-input: var(--ds-text-primary);
+    --color-background-input: var(--ds-surface-raised);
+    --color-background-input-focus: var(--ds-surface-raised);
+    --color-outline-input: var(--ds-border-subtle);
+    --color-outline-input-hover: var(--ds-neutral-500);
+    --color-outline-input-focus: var(--ds-action-accent);
+    --color-box-shadow-input-focus: color-mix(
+        in srgb,
+        var(--ds-action-accent) 18%,
+        transparent
+    );
+    --color-text-neutral-solid-action-button: var(--ds-text-inverse);
+    --color-background-neutral-solid-action-button: var(--ds-action-primary);
+    --color-background-neutral-solid-action-button-hover: var(--ds-neutral-800);
+    --color-background-neutral-solid-action-button-active: var(--ds-neutral-950);
+    --color-text-neutral-subtle-action-button: var(--ds-text-primary);
+    --color-background-neutral-subtle-action-button: var(--ds-neutral-100);
+    --color-background-neutral-subtle-action-button-hover: var(--ds-neutral-200);
+    --color-background-neutral-subtle-action-button-active: var(--ds-neutral-200);
+    --color-text-brand-solid-action-button: var(--ds-text-inverse);
+    --color-background-brand-solid-action-button: var(--ds-action-accent);
+    --color-background-brand-solid-action-button-hover: var(--ds-blue-600);
+    --color-background-brand-solid-action-button-active: var(--ds-blue-600);
+    --color-text-brand-subtle-action-button: var(--ds-blue-600);
+    --color-background-brand-subtle-action-button: color-mix(
+        in srgb,
+        var(--ds-action-accent) 12%,
+        transparent
+    );
+    --color-background-brand-subtle-action-button-hover: color-mix(
+        in srgb,
+        var(--ds-action-accent) 18%,
+        transparent
+    );
+    --color-background-brand-subtle-action-button-active: color-mix(
+        in srgb,
+        var(--ds-action-accent) 24%,
+        transparent
+    );
+}
+
+html {
+    accent-color: var(--ds-action-accent);
+    scrollbar-color: hsl(40deg 4% 65%) var(--ds-surface-canvas);
+}
+
+body {
+    text-rendering: optimizelegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+    color: var(--ds-neutral-950);
+    background: var(--ds-selection);
+}
+
+.ds-surface {
+    border: 1px solid var(--ds-border-subtle);
+    border-radius: var(--ds-radius-card);
+    background: var(--ds-surface-paper);
+    box-shadow: var(--ds-shadow-card);
+}
+
+.ds-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding-inline: var(--ds-space-3);
+    border: 1px solid var(--ds-border-subtle);
+    border-radius: var(--ds-radius-pill);
+    background: var(--ds-surface-paper);
+    color: var(--ds-text-secondary);
+    font-size: var(--type-caption-size, 12px);
+    line-height: 1;
+}
+
+@media (width <= 600px) {
+    :root {
+        --ds-header-height: 71px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --ds-duration-fast: 0ms;
+        --ds-duration-base: 0ms;
+        --ds-duration-slow: 0ms;
+    }
+}
