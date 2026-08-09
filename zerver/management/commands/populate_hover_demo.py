@@ -210,10 +210,6 @@ class Command(ZulipBaseCommand):
             Message.objects.filter(id=message.id).update(date_sent=post.sent_at)
             message.date_sent = post.sent_at
 
-        stale_messages = list(candidates.exclude(id=message.id))
-        if stale_messages:
-            do_delete_messages(stream.realm, stale_messages, acting_user=owner)
-
         return message
 
     def populate_home_views(
