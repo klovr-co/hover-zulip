@@ -35,6 +35,8 @@ from zerver.models.clients import get_client
 from zerver.models.users import get_user_by_delivery_email
 
 
+# Source-derived demo updates use one assistant identity and one configured
+# publication topic; external sender identities remain part of source evidence.
 HOVER_AI_EMAIL = "hover-ai@hover.test"
 HOVER_DISPLAY_NAME = "Hover"
 SUMMARY_TOPIC = "Summary"
