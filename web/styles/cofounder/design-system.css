@@ -5,33 +5,37 @@
 
     /* Cofounder primitives */
     /* stylelint-disable color-no-hex */
-    --ds-blue-500: #2297df;
-    --ds-blue-600: #1a6fd1;
-    --ds-cyan-400: #75d2c5;
-    --ds-green-500: #69bd65;
-    --ds-navy-950: #071826;
+    --ds-blue-500: #004ac6;
+    --ds-blue-600: #003ea8;
+    --ds-cyan-400: #38bdf8;
+    --ds-green-500: #22c55e;
+    --ds-navy-950: #131b2e;
     --ds-neutral-0: #fff;
-    --ds-neutral-25: #fbfbf8;
-    --ds-neutral-50: #f5f5f2;
-    --ds-neutral-100: #edede9;
-    --ds-neutral-200: #d8d7d2;
-    --ds-neutral-500: #777572;
-    --ds-neutral-800: #3d3b39;
-    --ds-neutral-950: #252422;
+    --ds-neutral-25: #faf8ff;
+    --ds-neutral-50: #f2f3ff;
+    --ds-neutral-100: #f6f6fe;
+    --ds-neutral-200: #c3c6d7;
+    --ds-neutral-500: #737686;
+    --ds-neutral-800: #434655;
+    --ds-neutral-950: #131b2e;
 
     /* Cofounder semantic color */
     --ds-surface-canvas: var(--ds-neutral-50);
     --ds-surface-paper: var(--ds-neutral-25);
-    --ds-surface-raised: var(--ds-neutral-0);
+    --ds-surface-raised: var(--ds-neutral-25);
     --ds-surface-inverse: var(--ds-navy-950);
     --ds-text-primary: var(--ds-neutral-800);
     --ds-text-secondary: var(--ds-neutral-500);
     --ds-text-inverse: #f8fbff;
     --ds-border-subtle: var(--ds-neutral-200);
-    --ds-action-primary: var(--ds-neutral-950);
+    --ds-border-muted: var(--ds-neutral-200);
+    --ds-surface-selected: #f8f7ff;
+    --ds-surface-hover: #e2e7ff;
+    --ds-border-selection: #ccd9f4;
+    --ds-action-primary: var(--ds-blue-500);
     --ds-action-accent: var(--ds-blue-500);
-    --ds-focus: #0b75bd;
-    --ds-selection: #bce8ff;
+    --ds-focus: #0053db;
+    --ds-selection: #dbe1ff;
     /* stylelint-enable color-no-hex */
 
     /* Spacing, shape, depth, and motion */
@@ -48,22 +52,53 @@
     --ds-space-20: 80px;
     --ds-space-24: 96px;
     --ds-space-30: 120px;
-    --ds-radius-sm: 6px;
-    --ds-radius-control: 8px;
-    --ds-radius-card: 14px;
-    --ds-radius-window: 20px;
+    --ds-radius-sm: 4px;
+    --ds-radius-control: 5px;
+    --ds-radius-card: 9px;
+    --ds-radius-window: 9px;
     --ds-radius-pill: 999px;
-    --ds-shadow-control: 0 3px 7px hsl(30deg 6% 10% / 14%);
-    --ds-shadow-card: 0 18px 45px hsl(40deg 8% 15% / 7%);
-    --ds-shadow-float: 0 24px 70px hsl(203deg 43% 12% / 16%);
+    --ds-shadow-control: none;
+    --ds-shadow-card: none;
+    --ds-shadow-float: none;
     --ds-duration-fast: 160ms;
     --ds-duration-base: 240ms;
     --ds-duration-slow: 700ms;
     --ds-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-    --ds-container-wide: 1220px;
-    --ds-container-content: 1115px;
+    --ds-container-wide: 1422px;
+    --ds-container-content: 802px;
     --ds-measure: 70ch;
-    --ds-header-height: 91px;
+    --ds-header-height: 70px;
+
+    /* The desktop reference resolves to a rigid 310 / 802 / 310 grid. */
+    --ds-sidebar-width: 310px;
+    --ds-conversation-gutter: 27px;
+
+    /* Override Zulip's density-aware geometry at full desktop widths. */
+    --base-font-size-px: 16px;
+    --header-height: var(--ds-header-height);
+    --header-line-height: var(--ds-header-height);
+    --header-padding-bottom: 14px;
+    --left-sidebar-width: var(--ds-sidebar-width);
+    --left-sidebar-max-width: var(--ds-sidebar-width);
+    --left-sidebar-padding-left: 0px;
+    --left-sidebar-right-margin: 0px;
+    --right-sidebar-width: var(--ds-sidebar-width);
+    --right-sidebar-max-width: var(--ds-sidebar-width);
+    --right-sidebar-left-spacing: 0px;
+    --message-area-max-width: var(--ds-container-content);
+    --search-box-width: 283px;
+    --search-box-height: 40px;
+    --font-weight-sidebar-heading: 400;
+    --font-weight-sidebar-action-heading: 400;
+    --font-variant-sidebar-action-heading: normal;
+    --font-feature-settings-sidebar-action-heading: normal;
+    --text-transform-sidebar-action-heading: none;
+    --letter-spacing-sidebar-heading: 0;
+    --line-height-sidebar-row-prominent: 38px;
+    --line-height-sidebar-row: 34px;
+    --line-height-sidebar-row-with-avatars: 32px;
+    --line-height-sidebar-topic-inner: 24px;
+    --spacing-top-bottom-sidebar-topic-inner: 5px;
 
     /* Compatibility aliases for incrementally migrated interfaces. */
     --surface: var(--ds-surface-canvas);
@@ -82,9 +117,9 @@
     --color-background-navbar: var(--ds-surface-paper);
     --color-background-stream-message-content: var(--ds-surface-paper);
     --color-background-private-message-content: var(--ds-surface-paper);
-    --color-background-private-message-header: var(--ds-neutral-100);
+    --color-background-private-message-header: var(--ds-surface-canvas);
     --color-background-active-narrow-filter: var(--ds-surface-raised);
-    --color-background-hover-narrow-filter: var(--ds-neutral-100);
+    --color-background-hover-narrow-filter: var(--ds-surface-hover);
     --color-background-navigation-item-hover: color-mix(
         in srgb,
         var(--ds-action-accent) 9%,
@@ -99,8 +134,8 @@
         --color-background-navigation-item-hover
     );
     --color-message-list-border: var(--ds-border-subtle);
-    --color-message-header-contents-border: var(--ds-border-subtle);
-    --color-message-header-contents-border-bottom: var(--ds-border-subtle);
+    --color-message-header-contents-border: var(--ds-border-muted);
+    --color-message-header-contents-border-bottom: var(--ds-border-muted);
     --color-private-message-header-border: var(--ds-border-subtle);
     --color-private-message-header-border-bottom: var(--ds-border-subtle);
     --color-navbar-bottom-border: var(--ds-border-subtle);
@@ -140,11 +175,7 @@
     --color-text-generic-link: var(--ds-blue-600);
     --color-text-generic-link-interactive: var(--ds-action-accent);
     --color-text-sender-name-hover: var(--ds-blue-600);
-    --color-date: color-mix(
-        in srgb,
-        var(--ds-text-secondary) 84%,
-        transparent
-    );
+    --color-date: color-mix(in srgb, var(--ds-text-secondary) 84%, transparent);
     --color-background-search: var(--ds-surface-raised);
     --color-background-search-collapsed: var(--ds-neutral-100);
     --color-background-search-option-hover: var(--ds-neutral-100);
@@ -159,6 +190,82 @@
     --color-border-popover-menu-separator: var(--ds-border-subtle);
     --color-background-hover-popover-menu: var(--ds-neutral-100);
     --color-background-active-popover-menu: var(--ds-neutral-200);
+    --color-background-modal-overlay: hsl(226deg 36% 13% / 28%);
+    --color-modal-heading-text: var(--ds-neutral-950);
+    --color-background-modal: var(--ds-surface-paper);
+    --color-background-modal-bar: var(--ds-surface-canvas);
+    --color-border-modal: var(--ds-border-subtle);
+    --color-border-modal-bar: var(--ds-border-subtle);
+    --color-active-row-modal: var(--ds-surface-selected);
+    --color-modal-selectable-icon: var(--ds-action-accent);
+    --color-modal-selectable-icon-hover: var(--ds-blue-600);
+    --background-color-modal-selectable-icon-hover: var(--ds-surface-hover);
+    --background-color-readonly-modal-input: var(--ds-neutral-100);
+    --color-background-disabled-modal-select: var(--ds-neutral-100);
+    --color-background-disabled-settings-select: var(--ds-neutral-100);
+    --color-exit-button-text: var(--ds-text-primary);
+    --color-exit-button-border: var(--ds-border-subtle);
+    --color-exit-button-background: var(--ds-neutral-100);
+    --color-exit-button-background-interactive: var(--ds-neutral-200);
+    --color-stream-group-row-checked-icon: var(--ds-action-accent);
+    --color-stream-group-row-checked-icon-hover: var(--ds-blue-600);
+    --color-stream-group-row-checked-icon-disabled: color-mix(
+        in srgb,
+        var(--ds-action-accent) 48%,
+        transparent
+    );
+    --color-stream-group-row-plus-icon: var(--ds-text-secondary);
+    --color-stream-group-row-plus-icon-hover: var(--ds-text-primary);
+    --color-stream-group-row-plus-icon-disabled: color-mix(
+        in srgb,
+        var(--ds-text-secondary) 48%,
+        transparent
+    );
+    --color-text-settings-field-hint: var(--ds-text-secondary);
+    --color-text-settings-plus-button: var(--ds-text-primary);
+    --color-background-settings-plus-button: var(--ds-surface-paper);
+    --color-border-settings-plus-button: var(--ds-border-subtle);
+    --color-background-tab-switcher-ind-tab: var(--ds-surface-paper);
+    --color-background-tab-switcher-ind-tab-selected: var(--ds-action-accent);
+    --color-border-tab-switcher-ind-tab: var(--ds-border-subtle);
+    --color-border-tab-switcher-ind-tab-selected: var(--ds-action-accent);
+    --color-text-tab-switcher-ind-tab-disabled: var(--ds-neutral-500);
+    --color-border-tab-switcher-ind-tab-disabled: var(--ds-border-subtle);
+    --color-background-inbox: var(--ds-surface-canvas);
+    --color-background-inbox-no-unreads-illustration: var(--ds-green-500);
+    --color-border-inbox-folder-component: var(--ds-border-subtle);
+    --color-background-inbox-search: var(--ds-surface-paper);
+    --color-background-inbox-search-hover: var(--ds-surface-paper);
+    --color-background-inbox-search-focus: var(--ds-surface-paper);
+    --color-border-inbox-search: var(--ds-border-subtle);
+    --color-border-inbox-search-hover: var(--ds-neutral-500);
+    --color-border-inbox-search-focus: var(--ds-action-accent);
+    --color-box-shadow-inbox-search-focus: color-mix(
+        in srgb,
+        var(--ds-action-accent) 18%,
+        transparent
+    );
+    --color-background-inbox-row: var(--ds-surface-paper);
+    --color-background-inbox-row-hover: var(--ds-surface-hover);
+    --color-background-button-inbox-selected: var(--ds-surface-selected);
+    --color-icons-inbox: var(--ds-text-secondary);
+    --color-inbox-row-chevron: var(--ds-text-secondary);
+    --color-border-recent-view-table: var(--ds-border-subtle);
+    --color-background-recent-view-row: var(--ds-surface-paper);
+    --color-background-recent-view-row-hover: var(--ds-surface-hover);
+    --color-background-recent-view-table-thead-th: var(--ds-surface-canvas);
+    --color-background-recent-view-table-thead-sort-header: var(
+        --ds-neutral-100
+    );
+    --color-text-recent-view-table-thead-th: var(--ds-text-secondary);
+    --color-arrow-recent-view-table-thead-th: var(--ds-text-secondary);
+    --color-recent-view-link: var(--ds-text-primary);
+    --color-recent-view-link-unread: var(--ds-neutral-950);
+    --color-text-recent-view-last-msg-time: var(--ds-text-secondary);
+    --color-text-recent-view-last-msg-time-unread: var(--ds-text-secondary);
+    --color-background-recent-view-participant-overflow: var(--ds-neutral-100);
+    --color-recent-view-participant-overflow-text: var(--ds-text-secondary);
+    --color-recent-view-loading-spinner: var(--ds-action-accent);
     --color-background-compose-new-message-button: var(--ds-surface-paper);
     --color-background-compose-new-message-button-hover: var(--ds-neutral-100);
     --color-background-compose-new-message-button-active: var(--ds-neutral-200);
@@ -166,7 +273,7 @@
     --color-border-compose-new-message-button-hover: var(--ds-neutral-500);
     --color-border-compose-new-message-button-active: var(--ds-neutral-500);
     --color-compose-box-background: var(--ds-surface-paper);
-    --color-compose-message-content-background: var(--ds-surface-raised);
+    --color-compose-message-content-background: var(--ds-neutral-100);
     --color-border-compose-content: var(--ds-border-subtle);
     --color-compose-send-button-background: var(--ds-action-primary);
     --color-compose-send-button-background-interactive: var(--ds-blue-600);
@@ -193,7 +300,7 @@
     );
     --color-composebox-button-background: var(--ds-surface-paper);
     --color-composebox-button-background-hover: var(--ds-neutral-100);
-    --color-message-formatting-controls-container: var(--ds-neutral-50);
+    --color-message-formatting-controls-container: var(--ds-neutral-100);
     --color-message-content-container-border: var(--ds-border-subtle);
     --color-message-content-container-border-focus: var(--ds-action-accent);
     --color-compose-control-button-background-hover: var(--ds-neutral-100);
@@ -221,11 +328,17 @@
     --color-text-neutral-solid-action-button: var(--ds-text-inverse);
     --color-background-neutral-solid-action-button: var(--ds-action-primary);
     --color-background-neutral-solid-action-button-hover: var(--ds-neutral-800);
-    --color-background-neutral-solid-action-button-active: var(--ds-neutral-950);
+    --color-background-neutral-solid-action-button-active: var(
+        --ds-neutral-950
+    );
     --color-text-neutral-subtle-action-button: var(--ds-text-primary);
     --color-background-neutral-subtle-action-button: var(--ds-neutral-100);
-    --color-background-neutral-subtle-action-button-hover: var(--ds-neutral-200);
-    --color-background-neutral-subtle-action-button-active: var(--ds-neutral-200);
+    --color-background-neutral-subtle-action-button-hover: var(
+        --ds-neutral-200
+    );
+    --color-background-neutral-subtle-action-button-active: var(
+        --ds-neutral-200
+    );
     --color-text-brand-solid-action-button: var(--ds-text-inverse);
     --color-background-brand-solid-action-button: var(--ds-action-accent);
     --color-background-brand-solid-action-button-hover: var(--ds-blue-600);
@@ -250,7 +363,7 @@
 
 html {
     accent-color: var(--ds-action-accent);
-    scrollbar-color: hsl(40deg 4% 65%) var(--ds-surface-canvas);
+    scrollbar-color: var(--ds-border-subtle) var(--ds-surface-canvas);
 }
 
 body {
@@ -267,7 +380,7 @@ body {
     border: 1px solid var(--ds-border-subtle);
     border-radius: var(--ds-radius-card);
     background: var(--ds-surface-paper);
-    box-shadow: var(--ds-shadow-card);
+    box-shadow: none;
 }
 
 .ds-pill {
@@ -283,9 +396,9 @@ body {
     line-height: 1;
 }
 
-@media (width <= 600px) {
+@media (width <= 1100px) {
     :root {
-        --ds-header-height: 71px;
+        --ds-header-height: 40px;
     }
 }
 
