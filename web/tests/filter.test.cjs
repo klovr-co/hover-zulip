@@ -2829,10 +2829,10 @@ test("navbar_helpers", ({override}) => {
         {
             terms: is_mentioned,
             is_common_narrow: true,
-            zulip_icon: "at-sign",
-            title: "translated: Mentions",
+            zulip_icon: "sun",
+            title: "translated: Daily Brief",
             redirect_url_with_search: "/#narrow/is/mentioned",
-            description: "translated: Messages where you are mentioned.",
+            description: "translated: Your personal morning plan, composed by Hover.",
             link: "/help/view-your-mentions",
         },
         {

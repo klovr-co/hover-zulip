@@ -115,6 +115,7 @@ run_test("get_built_in_views", () => {
     assert.equal(built_in_views_meta_data.inbox.name, "translated: For You");
     assert.equal(built_in_views_meta_data.all_messages.name, "translated: All activity");
     assert.equal(built_in_views_meta_data.recent_view.name, "translated: Team Pulse");
+    assert.equal(built_in_views_meta_data.mentions.name, "translated: Daily Brief");
     assert.equal(built_in_views_meta_data.reminders.name, "translated: Todos");
     assert.equal(built_in_views_meta_data.starred_messages.name, "translated: Saved");
 });

@@ -21,7 +21,7 @@ run_test("narrowing", ({override_rewire}) => {
         "select_top_left_corner_item",
         (narrow_to_activate) => {
             const targets = [
-                ".top_left_mentions",
+                ".top_left_daily_brief",
                 ".top_left_starred_messages",
                 ".top_left_all_messages",
                 ".top_left_recent_view",
@@ -41,7 +41,7 @@ run_test("narrowing", ({override_rewire}) => {
     // activating narrow
 
     left_sidebar_navigation_area.handle_narrow_activated(filter);
-    assert.ok($(".top_left_mentions").hasClass("top-left-active-filter"));
+    assert.ok($(".top_left_daily_brief").hasClass("top-left-active-filter"));
 
     filter = new Filter([{operator: "is", operand: "starred"}]);
     left_sidebar_navigation_area.handle_narrow_activated(filter);
@@ -56,7 +56,7 @@ run_test("narrowing", ({override_rewire}) => {
     left_sidebar_navigation_area.handle_narrow_activated(new Filter([]));
 
     assert.ok(!$(".top_left_all_messages").hasClass("top-left-active-filter"));
-    assert.ok(!$(".top_left_mentions").hasClass("top-left-active-filter"));
+    assert.ok(!$(".top_left_daily_brief").hasClass("top-left-active-filter"));
     assert.ok(!$(".top_left_starred_messages").hasClass("top-left-active-filter"));
     assert.ok(!$(".top_left_recent_view").hasClass("top-left-active-filter"));
     assert.ok(!$(".top_left_inbox").hasClass("top-left-active-filter"));
@@ -66,7 +66,7 @@ run_test("narrowing", ({override_rewire}) => {
     });
     left_sidebar_navigation_area.highlight_recent_view();
     assert.ok(!$(".top_left_all_messages").hasClass("top-left-active-filter"));
-    assert.ok(!$(".top_left_mentions").hasClass("top-left-active-filter"));
+    assert.ok(!$(".top_left_daily_brief").hasClass("top-left-active-filter"));
     assert.ok(!$(".top_left_starred_messages").hasClass("top-left-active-filter"));
     assert.ok(!$(".top_left_inbox").hasClass("top-left-active-filter"));
     assert.ok($(".top_left_recent_view").hasClass("top-left-active-filter"));
@@ -74,13 +74,13 @@ run_test("narrowing", ({override_rewire}) => {
     left_sidebar_navigation_area.handle_narrow_activated(new Filter([]));
     left_sidebar_navigation_area.highlight_inbox_view();
     assert.ok(!$(".top_left_all_messages").hasClass("top-left-active-filter"));
-    assert.ok(!$(".top_left_mentions").hasClass("top-left-active-filter"));
+    assert.ok(!$(".top_left_daily_brief").hasClass("top-left-active-filter"));
     assert.ok(!$(".top_left_starred_messages").hasClass("top-left-active-filter"));
     assert.ok(!$(".top_left_recent_view").hasClass("top-left-active-filter"));
     assert.ok($(".top_left_inbox").hasClass("top-left-active-filter"));
 
     left_sidebar_navigation_area.highlight_all_messages_view();
-    assert.ok(!$(".top_left_mentions").hasClass("top-left-active-filter"));
+    assert.ok(!$(".top_left_daily_brief").hasClass("top-left-active-filter"));
     assert.ok(!$(".top_left_starred_messages").hasClass("top-left-active-filter"));
     assert.ok(!$(".top_left_recent_view").hasClass("top-left-active-filter"));
     assert.ok(!$(".top_left_inbox").hasClass("top-left-active-filter"));
@@ -112,7 +112,7 @@ run_test("update_count_in_dom", () => {
 
     $(".selected-home-view").set_find_results(".sidebar-menu-icon", $("<menu-icon>"));
 
-    make_elem($(".top_left_mentions"), "<mentioned-count>");
+    make_elem($(".top_left_daily_brief"), "<mentioned-count>");
 
     make_elem($(".top_left_inbox"), "<home-count>");
 

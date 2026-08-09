@@ -525,6 +525,7 @@ test("hover_generated_update_vars", () => {
         ["WhatsApp", "GitHub", "Instagram"],
     );
     assert.equal(hover_update.has_hover_source_integrations, true);
+    assert.equal(hover_update.hover_source_context, "Across 3 sources");
     assert.equal(human_post.is_hover_generated_update, false);
     assert.equal(human_post.has_hover_source_integrations, false);
     assert.equal(human_post.hover_source_integrations, undefined);
@@ -537,6 +538,7 @@ test("hover_generated_update_renders_native_card_chrome", () => {
         include_sender: false,
         is_hover_generated_update: true,
         has_hover_source_integrations: true,
+        hover_source_context: "Across 4 sources",
         hover_source_integrations: [
             {
                 key: "whatsapp",
@@ -567,7 +569,7 @@ test("hover_generated_update_renders_native_card_chrome", () => {
 
     assert.match(html, /class="[^"]*hover-generated-update[^"]*"/);
     assert.match(html, />translated: AI update</);
-    assert.match(html, />translated: Source-backed update</);
+    assert.match(html, />Across 4 sources</);
     assert.match(html, /Event readiness update/);
     assert.match(html, /fa-whatsapp/);
     assert.match(html, /fa-github/);

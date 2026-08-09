@@ -19,6 +19,14 @@ let last_mention_count = 0;
 const ls_key = "left_sidebar_views_state";
 const ls = localstorage();
 
+const hover_home_view_order = new Map([
+    ["inbox", 0],
+    ["recent", 1],
+    ["narrow/is/mentioned", 2],
+    ["reminders", 3],
+    ["narrow/is/starred", 4],
+]);
+
 const STATES = {
     EXPANDED: "expanded",
     CONDENSED: "condensed",
@@ -73,7 +81,7 @@ export let update_dom_with_unread_counts = function (
     // Note that direct message counts are handled in pm_list.ts.
 
     // mentioned/home views have simple integer counts
-    const $mentioned_li = $(".top_left_mentions");
+    const $mentioned_li = $(".top_left_daily_brief");
     const $home_view_li = $(".selected-home-view");
     const $condensed_view_li = $(".top_left_condensed_unread_marker");
 
@@ -128,7 +136,7 @@ export function handle_narrow_activated(filter: Filter): void {
             return;
         }
         if (filter_name === "mentioned") {
-            select_top_left_corner_item(".top_left_mentions");
+            select_top_left_corner_item(".top_left_daily_brief");
             return;
         }
     }
@@ -298,6 +306,7 @@ export function get_built_in_primary_condensed_views(): navigation_views.BuiltIn
     // Get the top 5 prioritized views.
     return navigation_views
         .get_built_in_views()
+        .filter((view) => hover_home_view_order.has(view.fragment) || view.is_home_view)
         .toSorted((view1, view2) => score(view2) - score(view1))
         .slice(0, 5);
     // TODO: Think about filtering out scheduled message and reminders views with UI to support less than 5 views.
@@ -305,7 +314,7 @@ export function get_built_in_primary_condensed_views(): navigation_views.BuiltIn
 
 export function get_built_in_popover_condensed_views(): navigation_views.BuiltInViewMetadata[] {
     const visible_condensed_views = get_built_in_primary_condensed_views();
-    const all_views = navigation_views.get_built_in_views();
+    const all_views = get_built_in_views();
     return all_views.filter((view) => {
         if (view.fragment === "scheduled") {
             const scheduled_message_count = scheduled_messages.get_count();
@@ -334,7 +343,14 @@ export function get_built_in_popover_condensed_views(): navigation_views.BuiltIn
 }
 
 export function get_built_in_views(): navigation_views.BuiltInViewMetadata[] {
-    return navigation_views.get_built_in_views();
+    return navigation_views
+        .get_built_in_views()
+        .filter((view) => hover_home_view_order.has(view.fragment) || view.is_home_view)
+        .toSorted(
+            (view1, view2) =>
+                (hover_home_view_order.get(view1.fragment) ?? -1) -
+                (hover_home_view_order.get(view2.fragment) ?? -1),
+        );
 }
 
 export function initialize(): void {

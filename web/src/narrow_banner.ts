@@ -33,11 +33,11 @@ const SPECTATOR_STREAM_NARROW_BANNER = {
 };
 
 const MENTIONS_VIEW_EMPTY_BANNER = {
-    title: $t({defaultMessage: "This view will show messages where you are mentioned."}),
+    title: $t({defaultMessage: "Your Daily Brief will appear here each morning."}),
     html: $t_html(
         {
             defaultMessage:
-                "To call attention to a message, you can mention a user, a group, topic participants, or all subscribers to a channel. Type @ in the compose box, and choose who you'd like to mention from the list of suggestions. <z-link>Learn more</z-link>",
+                "Hover composes it from the latest updates, confirmed Todos, and work connected to your Spaces. <z-link>Learn how personal mentions work</z-link>",
         },
         {
             "z-link": (content_html) =>

@@ -429,6 +429,8 @@ export class TopicListWidget {
                 this.$stream_li.find(".simplebar-content").append($(html));
             } else if (this.for_modal) {
                 this.$stream_li.find(".topic-list-scroll-container").append($(html));
+            } else if (this.$stream_li.find(".hover-source-ledger").length > 0) {
+                this.$stream_li.find(".hover-source-ledger").before($(html));
             } else {
                 this.$stream_li.append($(html));
             }

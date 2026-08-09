@@ -21,6 +21,7 @@ from zerver.actions.streams import (
 )
 from zerver.actions.user_settings import do_change_full_name
 from zerver.lib.management import ZulipBaseCommand
+from zerver.lib.message import access_message
 from zerver.lib.streams import create_stream_if_needed
 from zerver.models import (
     ChannelFolder,
@@ -34,7 +35,6 @@ from zerver.models import (
 from zerver.models.clients import get_client
 from zerver.models.users import get_user_by_delivery_email
 
-
 # Source-derived demo updates use one assistant identity and one configured
 # publication topic; external sender identities remain part of source evidence.
 HOVER_AI_EMAIL = "hover-ai@hover.test"
@@ -47,6 +47,7 @@ class DemoPost:
     content: str
     sent_at: datetime.datetime
     for_you: bool = False
+    saved: bool = False
     todo_note: str | None = None
     todo_due_after: datetime.timedelta | None = None
 
@@ -147,6 +148,42 @@ DEMO_POSTS = [
 _AI-generated from linked sources. Verify details before acting._""",
         sent_at=demo_time(10, 0, 15),
         for_you=True,
+        saved=True,
+    ),
+    DemoPost(
+        content="""## Good morning, @**King Hamlet**
+
+### Your AIMTO daily brief
+
+The event is moving in the right direction. Volunteer coverage is stronger, the public experience is taking shape, and most of the delivery plan is already settled. A focused start should be enough to keep today manageable.
+
+### A good place to start
+
+Close the two coordination gaps that still touch several teams: confirm **Mandarin, Malay, and Tamil coverage**, then give the **blue discovery/community zone** one clear owner. Once those are moving, the rest of the floor plan can settle around them.
+
+### Once that's moving
+
+The Monday volunteer briefing is the best moment to make ownership visible. Publishing the agenda with named zone leads will turn several scattered confirmations into one shared plan.
+
+### You can leave this with the team
+
+The website, leaderboard, certificates, stickers, and lobby formats are already progressing. The final creative check can stay with the outreach team after the event details are confirmed.
+
+### The reassuring bit
+
+Day 1's open volunteer slots are filled, production quantities are locked, and the public-site work has momentum. You do not need to reopen those decisions today.
+
+**Prepared from today's AIMTO Summary**
+
+- **WhatsApp · All Learn-a-thon Mentors & Volunteers**
+- **WhatsApp · 500 volunteers @ Learnathon**
+- **WhatsApp · Resident Lounge**
+- [GitHub · LearnAIMTO](https://github.com/ashvinpraveen/learnaimto)
+- [Instagram · @aimto_26](https://www.instagram.com/aimto_26/)
+
+_Hover composed this briefing from the latest source-backed updates. Open AIMTO Events → Summary to verify the underlying details._""",
+        sent_at=demo_time(10, 0, 35),
+        for_you=True,
     ),
 ]
 
@@ -189,6 +226,7 @@ class Command(ZulipBaseCommand):
         owner: UserProfile,
     ) -> Message:
         candidates = Message.objects.filter(
+            realm_id=stream.realm_id,
             recipient=stream.recipient,
             sender=sender,
             subject=SUMMARY_TOPIC,
@@ -207,7 +245,7 @@ class Command(ZulipBaseCommand):
             )
             assert send_request is not None
             message_id = do_send_messages([send_request])[0].message_id
-            message = Message.objects.get(id=message_id)
+            message = access_message(owner, message_id, is_modifying_message=False)
         elif message.date_sent != post.sent_at:
             Message.objects.filter(id=message.id).update(date_sent=post.sent_at)
             message.date_sent = post.sent_at
@@ -221,12 +259,12 @@ class Command(ZulipBaseCommand):
         posts_and_messages: list[tuple[DemoPost, Message]],
     ) -> None:
         message_ids = [message.id for _post, message in posts_and_messages]
-        for_you_message_ids = [
-            message.id for post, message in posts_and_messages if post.for_you
-        ]
+        for_you_message_ids = [message.id for post, message in posts_and_messages if post.for_you]
+        saved_message_ids = [message.id for post, message in posts_and_messages if post.saved]
 
         do_update_message_flags(viewer, "add", "read", message_ids)
         do_update_message_flags(viewer, "remove", "read", for_you_message_ids)
+        do_update_message_flags(viewer, "add", "starred", saved_message_ids)
 
         desired_todos = [
             (post, message)
@@ -344,23 +382,24 @@ class Command(ZulipBaseCommand):
             bulk_remove_subscriptions(realm, extra_subscribers, [stream], acting_user=owner)
         bulk_add_subscriptions(realm, [stream], subscribers, acting_user=owner)
 
-        posts_and_messages = []
-        for post in DEMO_POSTS:
-            posts_and_messages.append(
-                (
+        posts_and_messages = [
+            (
+                post,
+                self.reconcile_demo_message(
                     post,
-                    self.reconcile_demo_message(
-                        post,
-                        stream=stream,
-                        sender=hover_user,
-                        owner=owner,
-                    ),
-                )
+                    stream=stream,
+                    sender=hover_user,
+                    owner=owner,
+                ),
             )
+            for post in DEMO_POSTS
+        ]
 
         current_message_ids = [message.id for _post, message in posts_and_messages]
         stale_messages = list(
-            Message.objects.filter(recipient=stream.recipient).exclude(id__in=current_message_ids)
+            Message.objects.filter(realm_id=realm.id, recipient=stream.recipient).exclude(
+                id__in=current_message_ids
+            )
         )
         if stale_messages:
             do_delete_messages(stream.realm, stale_messages, acting_user=owner)
@@ -370,7 +409,8 @@ class Command(ZulipBaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 f"AIMTO Events is ready with {len(DEMO_POSTS)} native Hover posts, "
-                "3 For You items, and 3 Todos "
+                f"{sum(post.for_you for post in DEMO_POSTS)} For You items, "
+                f"{sum(post.saved for post in DEMO_POSTS)} Saved item, and 3 Todos "
                 f"in {realm.string_id}."
             )
         )

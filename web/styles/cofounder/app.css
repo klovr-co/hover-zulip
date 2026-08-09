@@ -419,6 +419,121 @@ a {
     font-weight: 520;
 }
 
+.hover-source-ledger {
+    display: none;
+    margin: 7px 8px 12px 31px;
+    padding: 10px 10px 9px;
+    border: 1px solid
+        color-mix(in srgb, var(--ds-border-muted) 78%, transparent);
+    border-radius: var(--ds-radius-control);
+    background: color-mix(in srgb, var(--ds-neutral-25) 76%, transparent);
+    line-height: 1.2;
+}
+
+#stream_filters .narrow-filter.stream-expanded > .hover-source-ledger {
+    display: block;
+}
+
+.hover-source-ledger__header {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 3px 7px;
+    color: var(--ds-text-secondary);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.hover-source-ledger__count {
+    color: color-mix(in srgb, var(--ds-text-secondary) 74%, transparent);
+    font-weight: 580;
+    letter-spacing: 0.04em;
+    text-transform: none;
+}
+
+.hover-source-ledger__list {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hover-source-ledger__item {
+    display: grid;
+    grid-template-columns: 23px minmax(0, 1fr) 12px;
+    gap: 7px;
+    align-items: center;
+    min-height: 33px;
+    padding: 4px 5px;
+    border-radius: 6px;
+    color: var(--ds-text-primary);
+    text-decoration: none;
+}
+
+.hover-source-ledger__item:hover,
+.hover-source-ledger__item:focus-visible {
+    background: color-mix(in srgb, var(--ds-action-accent) 7%, transparent);
+    color: var(--ds-text-primary);
+    text-decoration: none;
+}
+
+.hover-source-ledger__icon {
+    display: grid;
+    width: 23px;
+    height: 23px;
+    place-items: center;
+    border-radius: 6px;
+    background: var(--ds-neutral-100);
+    color: var(--ds-neutral-700);
+    font-size: 13px;
+}
+
+.hover-source-ledger__item--whatsapp .hover-source-ledger__icon {
+    background: hsl(142deg 58% 93%);
+    color: hsl(142deg 70% 30%);
+}
+
+.hover-source-ledger__item--github .hover-source-ledger__icon {
+    background: hsl(225deg 13% 91%);
+    color: hsl(225deg 18% 24%);
+}
+
+.hover-source-ledger__item--instagram .hover-source-ledger__icon {
+    background: hsl(330deg 72% 94%);
+    color: hsl(330deg 62% 42%);
+}
+
+.hover-source-ledger__copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.hover-source-ledger__name,
+.hover-source-ledger__detail {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hover-source-ledger__name {
+    font-size: 11px;
+    font-weight: 620;
+}
+
+.hover-source-ledger__detail {
+    margin-top: -1px;
+    color: var(--ds-text-secondary);
+    font-size: 9px;
+}
+
+.hover-source-ledger__external {
+    color: var(--ds-text-secondary);
+    font-size: 9px;
+}
+
 #stream_filters .stream-list-subsection-header {
     margin-top: 5px;
 }
@@ -641,6 +756,7 @@ a {
     display: flex;
     gap: 9px;
     align-items: center;
+    min-width: 0;
     margin: 14px 0 8px;
     font-family: var(--font-saans);
     font-size: 12px;
@@ -657,8 +773,11 @@ a {
 }
 
 .hover-generated-update-label__context {
+    overflow: hidden;
     color: var(--ds-text-secondary);
     font-weight: 550;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .hover-generated-update .message_content h2 {

@@ -40,3 +40,29 @@ run_test("returns no integrations for an ordinary message", () => {
 
     assert.deepEqual(hover.get_source_integrations(rendered_content), []);
 });
+
+run_test("lists the five sources attached to AIMTO", () => {
+    const sources = hover.get_aimto_attached_sources("#narrow/aimto/summary");
+
+    assert.equal(sources.length, 5);
+    assert.deepEqual(
+        sources.map((source) => source.key),
+        ["whatsapp", "whatsapp", "whatsapp", "github", "instagram"],
+    );
+    assert.equal(sources[0].url, "#narrow/aimto/summary");
+    assert.equal(sources[3].url, "https://github.com/ashvinpraveen/learnaimto");
+    assert.equal(sources[4].name, "@aimto_26");
+});
+
+run_test("describes the source context without creating extra bot identities", () => {
+    assert.equal(
+        hover.get_source_context("<ul><li><strong>WhatsApp · Resident Lounge</strong></li></ul>"),
+        "From Resident Lounge",
+    );
+    assert.equal(
+        hover.get_source_context(
+            '<ul><li><strong>WhatsApp · Mentors</strong></li><li><a href="https://github.com/example/repo">GitHub · repo</a></li></ul>',
+        ),
+        "Across 2 sources",
+    );
+});

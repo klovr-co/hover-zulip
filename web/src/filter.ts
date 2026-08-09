@@ -1572,7 +1572,7 @@ export class Filter {
                 zulip_icon = "star";
                 break;
             case "is-mentioned":
-                zulip_icon = "at-sign";
+                zulip_icon = "sun";
                 break;
             case "dm":
                 zulip_icon = "user";
@@ -1687,7 +1687,7 @@ export class Filter {
                 case "is-starred":
                     return $t({defaultMessage: "Starred messages"});
                 case "is-mentioned":
-                    return $t({defaultMessage: "Mentions"});
+                    return $t({defaultMessage: "Daily Brief"});
                 case "is-dm":
                     return $t({defaultMessage: "Direct message feed"});
                 case "not-is-dm":
@@ -1720,7 +1720,9 @@ export class Filter {
         switch (term_types[0]) {
             case "is-mentioned":
                 return {
-                    description: $t({defaultMessage: "Messages where you are mentioned."}),
+                    description: $t({
+                        defaultMessage: "Your personal morning plan, composed by Hover.",
+                    }),
                     link: "/help/view-your-mentions",
                 };
             case "is-starred":

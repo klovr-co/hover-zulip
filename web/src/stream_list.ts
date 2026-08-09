@@ -18,6 +18,7 @@ import * as channel_folders from "./channel_folders.ts";
 import * as compose_actions from "./compose_actions.ts";
 import type {Filter} from "./filter.ts";
 import * as hash_util from "./hash_util.ts";
+import * as hover from "./hover.ts";
 import {$t} from "./i18n.ts";
 import * as keydown_util from "./keydown_util.ts";
 import * as left_sidebar_navigation_area from "./left_sidebar_navigation_area.ts";
@@ -841,6 +842,7 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
     const is_muted = stream_data.is_muted(sub.stream_id);
     const can_post_messages = stream_data.can_post_messages_in_stream(sub);
     const url = hash_util.channel_url_by_user_setting(sub.stream_id);
+    const is_hover_aimto_space = name === hover.AIMTO_SPACE_NAME;
     const args = {
         name,
         id: sub.stream_id,
@@ -856,6 +858,12 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
         ),
         is_empty_topic_only_channel: stream_data.is_empty_topic_only_channel(sub.stream_id),
         for_modal,
+        ...(is_hover_aimto_space && {
+            is_hover_aimto_space,
+            hover_attached_sources: hover.get_aimto_attached_sources(
+                hash_util.by_stream_topic_url(sub.stream_id, hover.AIMTO_SUMMARY_TOPIC),
+            ),
+        }),
     };
     const $list_item = $(render_stream_sidebar_row(args));
     return $list_item;
