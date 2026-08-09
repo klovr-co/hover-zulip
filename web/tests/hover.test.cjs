@@ -12,26 +12,31 @@ run_test("recognizes Hover AI updates", () => {
     assert.equal(hover.is_generated_update({sender_email: "aisha@hover.test"}), false);
 });
 
-run_test("adds accessible source logos to generated update evidence", () => {
+run_test("extracts source integrations for a generated update footer", () => {
     const rendered_content =
-        '<p>Event readiness update</p><ul><li><strong>WhatsApp · Mentors</strong></li><li><a href="https://github.com/ashvinpraveen/learnaimto">GitHub · LearnAIMTO</a></li><li><a href="https://www.instagram.com/aimto_26/">Instagram · @aimto_26</a></li></ul>';
+        '<p>Event readiness update</p><ul><li><strong>WhatsApp · Mentors</strong></li><li><strong>WhatsApp · Volunteers</strong></li><li><strong>WhatsApp · Resident Lounge</strong></li><li><a href="https://github.com/ashvinpraveen/learnaimto">GitHub · LearnAIMTO</a></li><li><a href="https://www.instagram.com/aimto_26/">Instagram · @aimto_26</a></li></ul>';
 
-    const result = hover.add_source_logos(rendered_content);
-
-    assert.match(result, /hover-source-logo--whatsapp/);
-    assert.match(result, /fa-whatsapp/);
-    assert.match(result, /hover-source-logo--github/);
-    assert.match(result, /fa-github/);
-    assert.match(result, /hover-source-logo--instagram/);
-    assert.match(result, /fa-instagram/);
-    assert.equal(result.match(/aria-hidden="true"/g).length, 3);
-    assert.match(result, /WhatsApp · Mentors/);
-    assert.match(result, /GitHub · LearnAIMTO/);
-    assert.match(result, /Instagram · @aimto_26/);
+    assert.deepEqual(hover.get_source_integrations(rendered_content), [
+        {key: "whatsapp", name: "WhatsApp", icon_class: "fa fa-whatsapp", count: 3},
+        {
+            key: "github",
+            name: "GitHub",
+            icon_class: "fa fa-github",
+            count: 1,
+            url: "https://github.com/ashvinpraveen/learnaimto",
+        },
+        {
+            key: "instagram",
+            name: "Instagram",
+            icon_class: "fa fa-instagram",
+            count: 1,
+            url: "https://www.instagram.com/aimto_26/",
+        },
+    ]);
 });
 
-run_test("leaves ordinary rendered message content unchanged", () => {
+run_test("returns no integrations for an ordinary message", () => {
     const rendered_content = "<p>A human project update without linked sources.</p>";
 
-    assert.equal(hover.add_source_logos(rendered_content), rendered_content);
+    assert.deepEqual(hover.get_source_integrations(rendered_content), []);
 });

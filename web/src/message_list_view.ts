@@ -61,7 +61,8 @@ export type MessageContainer = {
     include_sender: boolean;
     is_hidden: boolean;
     is_hover_generated_update: boolean;
-    hover_rendered_content?: string;
+    has_hover_source_integrations: boolean;
+    hover_source_integrations?: hover.SourceIntegration[];
     last_edit_timestamp: number | undefined;
     last_moved_timestamp: number | undefined;
     mention_classname: string | undefined;
@@ -602,7 +603,8 @@ export class MessageListView {
         should_add_guest_indicator_for_sender: boolean;
         is_hidden: boolean;
         is_hover_generated_update: boolean;
-        hover_rendered_content?: string;
+        has_hover_source_integrations: boolean;
+        hover_source_integrations?: hover.SourceIntegration[];
         mention_classname: string | undefined;
         include_sender: boolean;
         status_message: string | false;
@@ -696,6 +698,9 @@ export class MessageListView {
         }
 
         const is_hover_generated_update = hover.is_generated_update(message);
+        const hover_source_integrations = is_hover_generated_update
+            ? hover.get_source_integrations(message.content)
+            : [];
 
         return {
             timestr: get_timestr(message),
@@ -708,8 +713,9 @@ export class MessageListView {
             should_add_guest_indicator_for_sender,
             is_hidden,
             is_hover_generated_update,
-            ...(is_hover_generated_update && {
-                hover_rendered_content: hover.add_source_logos(message.content),
+            has_hover_source_integrations: hover_source_integrations.length > 0,
+            ...(hover_source_integrations.length > 0 && {
+                hover_source_integrations,
             }),
             mention_classname,
             include_sender,

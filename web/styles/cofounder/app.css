@@ -697,36 +697,48 @@ a {
     margin-bottom: 8px;
 }
 
-.hover-source-logo {
-    display: inline-flex;
-    width: 23px;
-    height: 23px;
-    align-items: center;
-    justify-content: center;
-    margin-right: 7px;
-    border: 1px solid hsl(218deg 20% 84% / 85%);
-    border-radius: 50%;
-    background: var(--ds-neutral-25);
-    box-shadow: 0 2px 7px hsl(220deg 30% 24% / 8%);
-    font-family: FontAwesome;
-    font-size: 14px;
-    line-height: 1;
-    vertical-align: -2px;
+.hover-source-reactions {
+    align-items: center !important;
+    margin-top: 15px;
 }
 
-.hover-source-logo--whatsapp {
-    border-color: hsl(142deg 55% 73% / 85%);
-    background: hsl(142deg 70% 96%);
+.hover-source-reactions__label {
+    margin-right: 3px;
+    color: var(--ds-text-secondary);
+    font-family: var(--font-saans);
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.hover-source-reaction {
+    min-width: 38px !important;
+    padding-inline: 6px !important;
+    text-decoration: none !important;
+}
+
+.hover-source-reaction:not(a) {
+    cursor: default !important;
+}
+
+.hover-source-reaction__icon {
+    width: 17px;
+    margin: 1px 3px;
+    font-size: 17px;
+    line-height: 1;
+    text-align: center;
+}
+
+.hover-source-reaction--whatsapp .hover-source-reaction__icon {
     color: hsl(147deg 77% 31%);
 }
 
-.hover-source-logo--github {
+.hover-source-reaction--github .hover-source-reaction__icon {
     color: hsl(213deg 13% 16%);
 }
 
-.hover-source-logo--instagram {
-    border-color: hsl(330deg 45% 80% / 85%);
-    background: hsl(330deg 70% 97%);
+.hover-source-reaction--instagram .hover-source-reaction__icon {
     color: hsl(326deg 57% 48%);
 }
 

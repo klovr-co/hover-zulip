@@ -65,11 +65,7 @@
         {{#if use_match_properties}}
             {{rendered_markdown msg/match_content}}
         {{else}}
-            {{#if hover_rendered_content}}
-                {{rendered_markdown hover_rendered_content}}
-            {{else}}
-                {{rendered_markdown msg/content}}
-            {{/if}}
+            {{rendered_markdown msg/content}}
         {{/if}}
     </div>
     {{else}}
@@ -85,9 +81,13 @@
 
 <div class="message_length_controller"></div>
 
-{{#unless (or is_hidden (eq msg.message_reactions.length 0))}}
-    {{> message_reactions . }}
-{{/unless}}
+{{#if has_hover_source_integrations}}
+    {{> hover_source_reactions integrations=hover_source_integrations}}
+{{else}}
+    {{#unless (or is_hidden (eq msg.message_reactions.length 0))}}
+        {{> message_reactions . }}
+    {{/unless}}
+{{/if}}
 
 {{#unless (eq msg.reminders.length 0)}}
     {{> message_reminders . }}

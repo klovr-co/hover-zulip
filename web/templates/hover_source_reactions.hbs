@@ -1,0 +1,18 @@
+<div class="message_reactions hover-source-reactions" aria-label="{{t 'Knowledge sources'}}">
+    <span class="hover-source-reactions__label">{{t "Sources"}}</span>
+    {{#each integrations}}
+        <div class="message_reaction_container">
+            {{#if url}}
+                <a class="message_reaction hover-source-reaction hover-source-reaction--{{key}}" href="{{url}}" target="_blank" rel="noopener noreferrer" aria-label="{{name}}" title="{{name}}">
+                    <i class="{{icon_class}} hover-source-reaction__icon" aria-hidden="true"></i>
+                    <span class="message_reaction_count">{{count}}</span>
+                </a>
+            {{else}}
+                <span class="message_reaction hover-source-reaction hover-source-reaction--{{key}}" aria-label="{{name}}" title="{{name}}">
+                    <i class="{{icon_class}} hover-source-reaction__icon" aria-hidden="true"></i>
+                    <span class="message_reaction_count">{{count}}</span>
+                </span>
+            {{/if}}
+        </div>
+    {{/each}}
+</div>

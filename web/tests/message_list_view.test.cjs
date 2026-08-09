@@ -520,11 +520,14 @@ test("hover_generated_update_vars", () => {
     );
 
     assert.equal(hover_update.is_hover_generated_update, true);
-    assert.match(hover_update.hover_rendered_content, /fa-whatsapp/);
-    assert.match(hover_update.hover_rendered_content, /fa-github/);
-    assert.match(hover_update.hover_rendered_content, /fa-instagram/);
+    assert.deepEqual(
+        hover_update.hover_source_integrations.map((integration) => integration.name),
+        ["WhatsApp", "GitHub", "Instagram"],
+    );
+    assert.equal(hover_update.has_hover_source_integrations, true);
     assert.equal(human_post.is_hover_generated_update, false);
-    assert.equal(human_post.hover_rendered_content, undefined);
+    assert.equal(human_post.has_hover_source_integrations, false);
+    assert.equal(human_post.hover_source_integrations, undefined);
 });
 
 test("hover_generated_update_renders_native_card_chrome", () => {
@@ -533,8 +536,22 @@ test("hover_generated_update_renders_native_card_chrome", () => {
     const html = require("../templates/single_message.hbs")({
         include_sender: false,
         is_hover_generated_update: true,
-        hover_rendered_content:
-            '<p>Event readiness update</p><ul><li><span class="hover-source-logo hover-source-logo--whatsapp" aria-hidden="true"><i class="fa fa-whatsapp"></i></span><strong>WhatsApp · Mentors</strong></li><li><span class="hover-source-logo hover-source-logo--github" aria-hidden="true"><i class="fa fa-github"></i></span><a href="https://github.com/ashvinpraveen/learnaimto">GitHub · LearnAIMTO</a></li></ul>',
+        has_hover_source_integrations: true,
+        hover_source_integrations: [
+            {
+                key: "whatsapp",
+                name: "WhatsApp",
+                icon_class: "fa fa-whatsapp",
+                count: 3,
+            },
+            {
+                key: "github",
+                name: "GitHub",
+                icon_class: "fa fa-github",
+                count: 1,
+                url: "https://github.com/ashvinpraveen/learnaimto",
+            },
+        ],
         message_list_id: 1,
         timestr: "9:00 PM",
         msg: {
@@ -554,6 +571,8 @@ test("hover_generated_update_renders_native_card_chrome", () => {
     assert.match(html, /Event readiness update/);
     assert.match(html, /fa-whatsapp/);
     assert.match(html, /fa-github/);
+    assert.match(html, />3</);
+    assert.match(html, /href="https:\/\/github.com\/ashvinpraveen\/learnaimto"/);
 });
 
 test("merge_message_groups", ({mock_template}) => {
