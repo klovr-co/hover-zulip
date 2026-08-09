@@ -19,6 +19,7 @@ from zerver.actions.streams import (
     do_change_stream_folder,
     do_change_stream_permission,
 )
+from zerver.actions.user_settings import do_change_full_name
 from zerver.lib.management import ZulipBaseCommand
 from zerver.lib.streams import create_stream_if_needed
 from zerver.models import (
@@ -35,16 +36,14 @@ from zerver.models.users import get_user_by_delivery_email
 
 
 HOVER_AI_EMAIL = "hover-ai@hover.test"
+HOVER_DISPLAY_NAME = "Hover"
+SUMMARY_TOPIC = "Summary"
 
 
 @dataclass(frozen=True)
 class DemoPost:
-    sender_email: str
-    sender_name: str
-    topic: str
     content: str
     sent_at: datetime.datetime
-    is_bot: bool = False
     for_you: bool = False
     todo_note: str | None = None
     todo_due_after: datetime.timedelta | None = None
@@ -56,12 +55,11 @@ def demo_time(day: int, hour: int, minute: int) -> datetime.datetime:
 
 DEMO_POSTS = [
     DemoPost(
-        sender_email="aisha@hover.test",
-        sender_name="Aisha Rahman",
-        topic="Volunteer coordination",
         content=(
             "Monday's **9:00 PM volunteer briefing** is confirmed. Please react once you've "
-            "read the floor plan so we know every zone has an owner before event day."
+            "read the floor plan so we know every zone has an owner before event day.\n\n"
+            "**Source reviewed**\n\n"
+            "- **WhatsApp · All Learn-a-thon Mentors & Volunteers**"
         ),
         sent_at=demo_time(7, 1, 18),
         for_you=True,
@@ -69,24 +67,22 @@ DEMO_POSTS = [
         todo_due_after=datetime.timedelta(hours=8),
     ),
     DemoPost(
-        sender_email="daniel@hover.test",
-        sender_name="Daniel Tan",
-        topic="Volunteer coordination",
         content=(
             "Day 1 coverage is now filled: three volunteers have taken the open slots. We still "
             "need to confirm Mandarin, Malay, and Tamil support across registration and the builder "
-            "area."
+            "area.\n\n"
+            "**Source reviewed**\n\n"
+            "- **WhatsApp · 500 volunteers @ Learnathon**"
         ),
         sent_at=demo_time(7, 6, 42),
     ),
     DemoPost(
-        sender_email="mei@hover.test",
-        sender_name="Mei Lin",
-        topic="Event operations",
         content=(
             "Sticker quantities are locked at **1,500**: 900 beginner, 300 medium, 300 pro, plus "
             "50 mentor stickers. The remaining floor-plan question is ownership of the blue "
-            "discovery and community zone."
+            "discovery and community zone.\n\n"
+            "**Source reviewed**\n\n"
+            "- **WhatsApp · All Learn-a-thon Mentors & Volunteers**"
         ),
         sent_at=demo_time(8, 2, 5),
         for_you=True,
@@ -94,32 +90,26 @@ DEMO_POSTS = [
         todo_due_after=datetime.timedelta(days=1, hours=3),
     ),
     DemoPost(
-        sender_email="aisha@hover.test",
-        sender_name="Aisha Rahman",
-        topic="Promotion",
         content=(
             "The lobby artwork needs both **16:9** and **9:16** versions, with **FREE** prominent. "
-            "The university leaderboard and certificate page give us a stronger outreach story."
+            "The university leaderboard and certificate page give us a stronger outreach story.\n\n"
+            "**Source reviewed**\n\n"
+            "- **WhatsApp · Resident Lounge**"
         ),
         sent_at=demo_time(8, 8, 30),
         todo_note="AIMTO · Approve final lobby assets",
         todo_due_after=datetime.timedelta(days=2),
     ),
     DemoPost(
-        sender_email="daniel@hover.test",
-        sender_name="Daniel Tan",
-        topic="Event operations",
         content=(
             "The website work is moving: certificate and university leaderboard updates are in, "
-            "and the homepage refresh is ready for a final event-details pass."
+            "and the homepage refresh is ready for a final event-details pass.\n\n"
+            "**Source reviewed**\n\n"
+            "- [GitHub · LearnAIMTO](https://github.com/ashvinpraveen/learnaimto)"
         ),
         sent_at=demo_time(9, 3, 20),
     ),
     DemoPost(
-        sender_email=HOVER_AI_EMAIL,
-        sender_name="Hover AI",
-        topic="Event readiness",
-        is_bot=True,
         content="""## Event readiness update
 
 **12 August · Campus Ampang**
@@ -170,23 +160,23 @@ class Command(ZulipBaseCommand):
             help="Subscribe this existing user to the private demo Space (defaults to its owner).",
         )
 
-    def get_or_create_demo_user(
-        self, post: DemoPost, *, realm: Realm, owner: UserProfile
-    ) -> UserProfile:
+    def get_or_create_hover_user(self, *, realm: Realm, owner: UserProfile) -> UserProfile:
         try:
-            return get_user_by_delivery_email(post.sender_email, realm)
+            hover_user = get_user_by_delivery_email(HOVER_AI_EMAIL, realm)
         except UserProfile.DoesNotExist:
-            pass
+            return do_create_user(
+                HOVER_AI_EMAIL,
+                "hover-demo",
+                realm,
+                HOVER_DISPLAY_NAME,
+                bot_type=UserProfile.DEFAULT_BOT,
+                bot_owner=owner,
+                acting_user=owner,
+            )
 
-        return do_create_user(
-            post.sender_email,
-            "hover-demo",
-            realm,
-            post.sender_name,
-            bot_type=UserProfile.DEFAULT_BOT if post.is_bot else None,
-            bot_owner=owner if post.is_bot else None,
-            acting_user=owner,
-        )
+        if hover_user.full_name != HOVER_DISPLAY_NAME:
+            do_change_full_name(hover_user, HOVER_DISPLAY_NAME, acting_user=owner, notify=True)
+        return hover_user
 
     def reconcile_demo_message(
         self,
@@ -199,7 +189,7 @@ class Command(ZulipBaseCommand):
         candidates = Message.objects.filter(
             recipient=stream.recipient,
             sender=sender,
-            subject=post.topic,
+            subject=SUMMARY_TOPIC,
         ).order_by("id")
         message = candidates.filter(content=post.content).first()
 
@@ -207,7 +197,7 @@ class Command(ZulipBaseCommand):
             send_request = internal_prep_stream_message(
                 sender,
                 stream,
-                post.topic,
+                SUMMARY_TOPIC,
                 post.content,
                 forged=True,
                 forged_timestamp=post.sent_at.timestamp(),
@@ -319,7 +309,7 @@ class Command(ZulipBaseCommand):
             realm,
             "AIMTO Events",
             stream_description=(
-                "Human coordination and source-backed AI updates for the AIMTO Learn-a-thon."
+                "Source-backed Hover updates and teammate collaboration for the AIMTO Learn-a-thon."
             ),
             invite_only=True,
             folder=folder,
@@ -336,13 +326,9 @@ class Command(ZulipBaseCommand):
                 acting_user=owner,
             )
 
-        users_by_email: dict[str, UserProfile] = {}
-        for post in DEMO_POSTS:
-            users_by_email[post.sender_email] = self.get_or_create_demo_user(
-                post, realm=realm, owner=owner
-            )
+        hover_user = self.get_or_create_hover_user(realm=realm, owner=owner)
 
-        subscribers_by_id = {user.id: user for user in users_by_email.values()}
+        subscribers_by_id = {hover_user.id: hover_user}
         subscribers_by_id[owner.id] = owner
         subscribers_by_id[viewer.id] = viewer
         subscribers = list(subscribers_by_id.values())
@@ -362,18 +348,24 @@ class Command(ZulipBaseCommand):
 
         posts_and_messages = []
         for post in DEMO_POSTS:
-            sender = users_by_email[post.sender_email]
             posts_and_messages.append(
                 (
                     post,
                     self.reconcile_demo_message(
                         post,
                         stream=stream,
-                        sender=sender,
+                        sender=hover_user,
                         owner=owner,
                     ),
                 )
             )
+
+        current_message_ids = [message.id for _post, message in posts_and_messages]
+        stale_messages = list(
+            Message.objects.filter(recipient=stream.recipient).exclude(id__in=current_message_ids)
+        )
+        if stale_messages:
+            do_delete_messages(stream.realm, stale_messages, acting_user=owner)
 
         self.populate_home_views(viewer=viewer, posts_and_messages=posts_and_messages)
 

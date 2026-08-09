@@ -29,7 +29,7 @@ class PopulateHoverDemoTest(ZulipTestCase):
         self.assertTrue(stream.invite_only)
         self.assertFalse(stream.history_public_to_subscribers)
         self.assertFalse(stream.is_web_public)
-        self.assertIn("human coordination", stream.description.lower())
+        self.assertIn("source-backed hover updates", stream.description.lower())
         self.assertTrue(
             Subscription.objects.filter(
                 user_profile=self.example_user("hamlet"), recipient=stream.recipient, active=True
@@ -43,12 +43,13 @@ class PopulateHoverDemoTest(ZulipTestCase):
 
         messages = Message.objects.filter(recipient=stream.recipient).order_by("id")
         self.assertEqual(messages.count(), 6)
+        self.assertEqual(set(messages.values_list("subject", flat=True)), {"Summary"})
         self.assertEqual(
-            set(messages.values_list("subject", flat=True)),
-            {"Event operations", "Event readiness", "Promotion", "Volunteer coordination"},
+            set(messages.values_list("sender__delivery_email", flat=True)),
+            {"hover-ai@hover.test"},
         )
 
-        update = messages.get(sender__delivery_email="hover-ai@hover.test")
+        update = messages.get(content__contains="Event readiness update")
         self.assertIn("Event readiness update", update.content)
         self.assertIn("WhatsApp · Mentors & Volunteers", update.content)
         self.assertIn("WhatsApp · 500 volunteers @ Learnathon", update.content)
@@ -56,11 +57,10 @@ class PopulateHoverDemoTest(ZulipTestCase):
         self.assertIn("https://github.com/ashvinpraveen/learnaimto", update.content)
         self.assertIn("https://www.instagram.com/aimto_26/", update.content)
         self.assertIn("Event readiness update", update.rendered_content)
-        self.assertTrue(
-            UserProfile.objects.filter(
-                realm=realm, delivery_email="hover-ai@hover.test", is_bot=True
-            ).exists()
+        hover_user = UserProfile.objects.get(
+            realm=realm, delivery_email="hover-ai@hover.test", is_bot=True
         )
+        self.assertEqual(hover_user.full_name, "Hover")
 
         self.assertEqual(
             list(messages.values_list("date_sent", flat=True)),
@@ -77,10 +77,7 @@ class PopulateHoverDemoTest(ZulipTestCase):
             if not user_message.flags.read
         ]
         self.assertEqual(len(for_you_messages), 3)
-        self.assertEqual(
-            {message.subject for message in for_you_messages},
-            {"Volunteer coordination", "Event operations", "Event readiness"},
-        )
+        self.assertEqual({message.subject for message in for_you_messages}, {"Summary"})
 
         reminders = ScheduledMessage.objects.filter(
             sender=hamlet,
@@ -105,7 +102,7 @@ class PopulateHoverDemoTest(ZulipTestCase):
             UserProfile.objects.get(realm=realm, delivery_email="hover-ai@hover.test"),
             "AIMTO Events",
             "Stale generated update from an earlier fixture version.",
-            "Event readiness",
+            "Summary",
             read_by_sender=False,
         )
         self.assertEqual(Message.objects.filter(recipient=stream.recipient).count(), 7)
