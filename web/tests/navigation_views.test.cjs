@@ -111,6 +111,12 @@ run_test("get_built_in_views", () => {
     const inbox_view = built_in_views.find((view) => view.fragment === "inbox");
     assert.ok(inbox_view);
     assert.equal(inbox_view.is_pinned, built_in_views_meta_data.inbox.is_pinned);
+
+    assert.equal(built_in_views_meta_data.inbox.name, "translated: For You");
+    assert.equal(built_in_views_meta_data.all_messages.name, "translated: All activity");
+    assert.equal(built_in_views_meta_data.recent_view.name, "translated: Team Pulse");
+    assert.equal(built_in_views_meta_data.reminders.name, "translated: Todos");
+    assert.equal(built_in_views_meta_data.starred_messages.name, "translated: Saved");
 });
 
 run_test("get_all_navigation_views", () => {
