@@ -499,6 +499,29 @@ test("muted_message_vars", () => {
     })();
 });
 
+test("hover_generated_update_vars", () => {
+    const list = new MessageListView({id: 1}, true, true);
+    const shared_message_fields = {
+        content: "<p>Event readiness update</p>",
+        sender_id: 10,
+        type: "private",
+    };
+
+    const hover_update = list.get_calculated_message_container_variables(
+        {...shared_message_fields, sender_email: "hover-ai@hover.test"},
+        true,
+        false,
+    );
+    const human_post = list.get_calculated_message_container_variables(
+        {...shared_message_fields, sender_email: "aisha@hover.test"},
+        true,
+        false,
+    );
+
+    assert.equal(hover_update.is_hover_generated_update, true);
+    assert.equal(human_post.is_hover_generated_update, false);
+});
+
 test("merge_message_groups", ({mock_template}) => {
     mock_template("message_list.hbs", false, () => "<message-list-stub>");
     mock_template("bookend.hbs", false, () => "<bookend-stub>");

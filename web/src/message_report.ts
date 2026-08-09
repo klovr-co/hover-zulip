@@ -9,6 +9,7 @@ import * as condense from "./condense.ts";
 import * as dialog_widget from "./dialog_widget.ts";
 import type {Option} from "./dropdown_widget.ts";
 import * as dropdown_widget from "./dropdown_widget.ts";
+import * as hover from "./hover.ts";
 import {$t, $t_html} from "./i18n.ts";
 import {
     type MessageContainer,
@@ -71,6 +72,7 @@ function get_message_container_for_preview(message: Message): MessageContainer {
         include_sender: true,
         // Message report preview will be automatically collapsed
         is_hidden: false,
+        is_hover_generated_update: hover.is_generated_update(message),
         msg: message,
         sender_is_bot: people.sender_is_bot(message),
         sender_is_deactivated: people.sender_is_deactivated(message),

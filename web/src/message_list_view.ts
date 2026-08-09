@@ -17,6 +17,7 @@ import * as blueslip from "./blueslip.ts";
 import * as compose_fade from "./compose_fade.ts";
 import * as condense from "./condense.ts";
 import * as hash_util from "./hash_util.ts";
+import * as hover from "./hover.ts";
 import {$t} from "./i18n.ts";
 import * as internal_url from "./internal_url.ts";
 import * as message_edit from "./message_edit.ts";
@@ -59,6 +60,7 @@ export type MessageContainer = {
     include_recipient: boolean;
     include_sender: boolean;
     is_hidden: boolean;
+    is_hover_generated_update: boolean;
     last_edit_timestamp: number | undefined;
     last_moved_timestamp: number | undefined;
     mention_classname: string | undefined;
@@ -598,6 +600,7 @@ export class MessageListView {
         sender_is_deactivated: boolean;
         should_add_guest_indicator_for_sender: boolean;
         is_hidden: boolean;
+        is_hover_generated_update: boolean;
         mention_classname: string | undefined;
         include_sender: boolean;
         status_message: string | false;
@@ -700,6 +703,7 @@ export class MessageListView {
             sender_is_deactivated,
             should_add_guest_indicator_for_sender,
             is_hidden,
+            is_hover_generated_update: hover.is_generated_update(message),
             mention_classname,
             include_sender,
             ...this._maybe_get_me_message(is_hidden, message),

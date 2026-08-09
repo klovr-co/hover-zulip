@@ -55,6 +55,12 @@
 
 {{#unless status_message}}
     {{#unless is_hidden}}
+    {{#if is_hover_generated_update}}
+    <div class="hover-generated-update-label">
+        <span class="hover-generated-update-label__chip">{{t "AI update"}}</span>
+        <span class="hover-generated-update-label__context">{{t "Source-backed update"}}</span>
+    </div>
+    {{/if}}
     <div class="message_content rendered_markdown">
         {{#if use_match_properties}}
             {{rendered_markdown msg/match_content}}

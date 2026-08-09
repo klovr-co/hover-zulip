@@ -103,7 +103,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
     },
     starred_messages: {
         fragment: "narrow/is/starred",
-        name: $t({defaultMessage: "Starred messages"}),
+        name: $t({defaultMessage: "Saved"}),
         is_pinned: true,
         icon: "zulip-icon-star",
         css_class_suffix: "starred_messages",
@@ -113,7 +113,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         supports_masked_unread: true,
         hidden_for_spectators: true,
         menu_icon_class: "starred-messages-sidebar-menu-icon",
-        menu_aria_label: $t({defaultMessage: "Starred messages options"}),
+        menu_aria_label: $t({defaultMessage: "Saved options"}),
         home_view_code: "",
         prioritize_in_condensed_view: true,
     },

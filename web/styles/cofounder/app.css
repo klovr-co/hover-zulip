@@ -89,7 +89,7 @@ a {
     border-radius: 5px;
     background: var(--ds-action-accent);
     color: var(--ds-neutral-0);
-    content: "C";
+    content: "H";
     font-size: 16px;
     font-weight: 600;
     letter-spacing: 0;
@@ -97,7 +97,7 @@ a {
 }
 
 #top_navbar > .column-left .brand::after {
-    content: "COFOUNDER";
+    content: "HOVER";
 }
 
 #top_navbar > .column-left .nav-logo {
@@ -323,6 +323,10 @@ a {
     background: transparent;
 }
 
+.hover-spaces-heading {
+    padding: 8px 9px 7px;
+}
+
 .filters li,
 .buddy-list-section li,
 .buddy-list-user-link,
@@ -544,6 +548,97 @@ a {
     line-height: 1.55;
 }
 
+.message_row.hover-generated-update {
+    width: calc(100% - 12px);
+    margin: 16px 0 18px -9px;
+    border: 1px solid var(--ds-border-selection);
+    border-radius: var(--ds-radius-card);
+    background: linear-gradient(
+        145deg,
+        var(--ds-neutral-25) 0%,
+        var(--ds-surface-selected) 100%
+    );
+    box-shadow: 0 12px 32px hsl(220deg 60% 28% / 8%);
+}
+
+.message_row.hover-generated-update:hover {
+    background: linear-gradient(
+        145deg,
+        var(--ds-neutral-25) 0%,
+        var(--ds-surface-selected) 100%
+    );
+}
+
+.message_row.hover-generated-update .messagebox {
+    width: 100%;
+    margin-left: 0;
+    padding: 22px 25px 20px;
+}
+
+.message_row.hover-generated-update .messagebox-content {
+    padding: 0;
+}
+
+.hover-generated-update-label {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    margin: 14px 0 8px;
+    font-family: var(--font-saans);
+    font-size: 12px;
+}
+
+.hover-generated-update-label__chip {
+    padding: 4px 8px;
+    border-radius: var(--ds-radius-pill);
+    background: var(--ds-navy-950);
+    color: var(--ds-text-inverse);
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.hover-generated-update-label__context {
+    color: var(--ds-text-secondary);
+    font-weight: 550;
+}
+
+.hover-generated-update .message_content h2 {
+    margin: 9px 0 4px;
+    color: var(--ds-neutral-950);
+    font-family: var(--font-headline);
+    font-size: 27px;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+}
+
+.hover-generated-update .message_content h3 {
+    margin-top: 24px;
+    color: var(--ds-neutral-950);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.hover-generated-update .message_content blockquote {
+    margin: 18px 0;
+    padding: 13px 15px;
+    border: 1px solid var(--ds-border-selection);
+    border-left: 4px solid var(--ds-blue-500);
+    border-radius: 0 var(--ds-radius-control) var(--ds-radius-control) 0;
+    background: hsl(219deg 100% 98% / 82%);
+}
+
+.hover-generated-update .message_content ul,
+.hover-generated-update .message_content ol {
+    margin-block: 8px 14px;
+}
+
+.hover-generated-update .message_content li {
+    margin-bottom: 8px;
+}
+
 .messagebox-content .timestamp,
 .messagebox-content .message_time,
 .messagebox-content .message_edit_notice {
@@ -568,6 +663,18 @@ a {
 .message_row.selected_message .messagebox-content {
     border-radius: 0;
     outline: 0;
+}
+
+.message_row.hover-generated-update.selected_message {
+    left: auto;
+    width: calc(100% - 12px);
+    padding-inline: 0;
+    background: linear-gradient(
+        145deg,
+        var(--ds-neutral-25) 0%,
+        var(--ds-surface-selected) 100%
+    );
+    outline: 2px solid var(--ds-border-selection);
 }
 
 #message_feed_container .message_feed_divider {
