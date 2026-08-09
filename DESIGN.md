@@ -6,11 +6,10 @@ This document describes the Cofounder visual system implemented in the Zulip
 web application. It is the design contract for application chrome, navigation,
 message surfaces, controls, and the composer.
 
-The system is intentionally quiet and editorial. Warm neutral surfaces carry
-conversation content, while blue identifies primary action and intelligence.
-Cyan and green are reserved for system activity and successful progress.
-Expressive brand moments should remain concentrated in dedicated marketing
-surfaces rather than spread through the operational interface.
+The system is intentionally quiet and workspace-like. Pale lavender side rails
+frame a near-white conversation surface, while saturated blue identifies the
+brand, links, focus, and primary action. Dividers and control outlines provide
+structure without shadows or nested cards.
 
 ## Sources of truth
 
@@ -30,16 +29,16 @@ component behavior take precedence. Update this document in the same change.
 
 ## Principles
 
-1. **Quiet by default.** Start with canvas, paper, and raised neutral surfaces.
-   Introduce color only when it communicates identity, state, or action.
+1. **Quiet by default.** Start with lavender canvas, conversation paper, and
+   outlined controls. Introduce stronger color only for identity or state.
 2. **Hierarchy is explicit.** Use type size, weight, spacing, and contrast before
    adding labels, borders, or decoration.
 3. **Product evidence over ornament.** Interface surfaces should clarify actual
    workflows. Decorative effects must not compete with conversation content.
 4. **Human control is visible.** Hover, active, focus, selected, disabled, and
    reduced-motion states are required behavior.
-5. **Mono means data.** Reserve monospace typography for code, measurements,
-   timestamps, counters, identifiers, and other system metadata.
+5. **Mono means data.** Reserve monospace typography for authored code and
+   identifiers; timestamps and counters use tabular proportional numerals.
 6. **Italics are semantic.** Do not apply italic styling to layout containers or
    general interface copy. Use italics only for authored emphasis or an existing
    Zulip state whose meaning depends on it.
@@ -48,14 +47,15 @@ component behavior take precedence. Update this document in the same change.
 
 ### Font families
 
-**Source Sans 3 VF** is the production proportional typeface for all interface
-copy, controls, navigation, messages, and headings. It is an open-source
-variable font already loaded by Zulip's shared frontend bundle.
+**Be Vietnam Pro** is the preferred typeface for interface copy, controls,
+navigation, and messages. **Manrope** is preferred for brand and display text.
+**Avenir Next** and **Source Sans 3 VF** (already loaded by Zulip's shared
+frontend bundle) provide metrically similar system and cross-platform fallbacks.
 
-The compatibility token `--font-saans` currently resolves to
-`"Source Sans 3 VF", sans-serif`. The token name remains temporarily to avoid an
-unrelated migration across component styles; it does not mean that the licensed
-Saans family is in use.
+The compatibility token `--font-saans` resolves to
+`"Be Vietnam Pro", "Avenir Next", "Source Sans 3 VF", sans-serif`, while
+`--font-headline` begins with Manrope. The `--font-saans` token name remains to
+avoid an unrelated migration across component styles.
 
 **Saans Mono**, when installed locally, and the bundled **Departure Mono**
 fallback serve code and system metadata through `--font-saans-mono`. Monospace
@@ -63,7 +63,8 @@ text should be functional rather than decorative.
 
 Use these defaults:
 
-- Body and interface copy: Source Sans 3, weight 400.
+- Body and interface copy: Be Vietnam Pro, with Avenir Next or Source Sans 3 as
+  fallbacks, weight 400.
 - Headings, sender names, selected navigation, and concise labels: weight 500.
 - Avoid weights above 600 in routine application chrome.
 - Use upright text by default. Never set `font-style: italic` on `body`, page
@@ -99,17 +100,17 @@ intended role.
 
 | Intent          | Semantic token         | Current value          |
 | --------------- | ---------------------- | ---------------------- |
-| Page canvas     | `--ds-surface-canvas`  | Neutral 50, `#f5f5f2`  |
-| Paper content   | `--ds-surface-paper`   | Neutral 25, `#fbfbf8`  |
-| Raised control  | `--ds-surface-raised`  | White, `#ffffff`       |
-| Inverse surface | `--ds-surface-inverse` | Navy 950, `#071826`    |
-| Primary text    | `--ds-text-primary`    | Neutral 800, `#3d3b39` |
-| Secondary text  | `--ds-text-secondary`  | Neutral 500, `#777572` |
-| Subtle border   | `--ds-border-subtle`   | Neutral 200, `#d8d7d2` |
-| Primary action  | `--ds-action-primary`  | Neutral 950, `#252422` |
-| Accent action   | `--ds-action-accent`   | Blue 500, `#2297df`    |
-| Keyboard focus  | `--ds-focus`           | `#0b75bd`              |
-| Text selection  | `--ds-selection`       | `#bce8ff`              |
+| Page canvas     | `--ds-surface-canvas`  | Lavender 50, `#f2f3ff` |
+| Paper content   | `--ds-surface-paper`   | Lavender 25, `#faf8ff` |
+| Raised control  | `--ds-surface-raised`  | Lavender 25, `#faf8ff` |
+| Inverse surface | `--ds-surface-inverse` | Navy 950, `#131b2e`    |
+| Primary text    | `--ds-text-primary`    | Slate 800, `#434655`   |
+| Secondary text  | `--ds-text-secondary`  | Slate 500, `#737686`   |
+| Subtle border   | `--ds-border-subtle`   | Slate 200, `#c3c6d7`   |
+| Primary action  | `--ds-action-primary`  | Blue 500, `#004ac6`    |
+| Accent action   | `--ds-action-accent`   | Blue 500, `#004ac6`    |
+| Keyboard focus  | `--ds-focus`           | `#0053db`               |
+| Text selection  | `--ds-selection`       | `#dbe1ff`               |
 
 Use blue for primary interaction, links, focus, unread state, and selection.
 Use cyan and green only for meaningful activity or success. Do not create large
@@ -120,55 +121,47 @@ decorative blue surfaces in reading regions.
 Spacing uses a four-pixel base through `--ds-space-1` to `--ds-space-30`.
 Choose the nearest token rather than introducing one-off values.
 
-- Small inline shape: `--ds-radius-sm` (`6px`).
-- Controls and inputs: `--ds-radius-control` (`8px`).
-- Cards and message groups: `--ds-radius-card` (`14px`).
-- Composer and large product windows: `--ds-radius-window` (`20px`).
+- Small inline shape: `--ds-radius-sm` (`4px`).
+- Controls and inputs: `--ds-radius-control` (`5px`).
+- Selected messages: `--ds-radius-card` (`9px`).
+- Composer: `--ds-radius-window` (`9px`).
 - Pills and counters: `--ds-radius-pill`.
 
-Shadows always combine a vertical offset with a soft blur:
+Application surfaces are flat. Use borders and surface contrast in the main UI;
+reserve a soft shadow for transient menus, dialogs, and popovers only.
 
-- `--ds-shadow-control` for compact floating controls.
-- `--ds-shadow-card` for paper conversation surfaces.
-- `--ds-shadow-float` for the composer, dialogs, and popovers.
-
-Do not stack multiple paper cards inside one another. Nested content should use
-spacing, dividers, or a raised control surface instead.
+At the 1422px reference viewport, the application uses a precise
+`310px / 802px / 310px` grid with 27px conversation gutters and a 70px header.
 
 ## Application composition
 
 ### Navigation and sidebars
 
-The top navigation is a lightly translucent paper surface with a subtle border
-and restrained blur. Sidebars sit directly on the warm canvas and use borders to
-separate regions.
+The top navigation is split by the same vertical dividers as the page. Sidebars
+sit directly on the lavender canvas and use borders to separate regions.
 
-Section labels are compact uppercase captions. Selected navigation uses a blue
-inset marker rather than a filled accent background. Unread counters use the
-mono stack and tabular numerals.
+Section labels use readable title case. Selected navigation uses a pale outlined
+surface. Unread counters use tabular numerals.
 
 ### Message feed
 
-Each conversation group is a paper card on the canvas. Message headers use a
-consistent neutral surface; channel identity remains visible through icons and
-labels instead of colored header bands.
+The conversation feed stays open and flat. Topic headers use a compact lavender
+outlined bar; channel identity remains visible through icons and labels.
 
 Message text is the primary evidence and receives the strongest readability.
-Metadata is secondary, compact, and monospace where it represents time or
-system state. Selected messages use a visible blue outline without recoloring
-their content.
+Metadata is secondary and uses tabular numerals. Selected messages use a pale
+lavender fill and visible blue outline without recoloring their content.
 
 ### Composer
 
-The composer is the strongest product window in the interface. It uses the
-large window radius, the floating shadow, and a lightly translucent paper
-surface. The send action uses the strongest local contrast. Embedded formatting
-controls stay quiet until hover or focus.
+The composer is an outlined lavender window anchored 17px from the desktop
+viewport bottom. The send action uses the strongest local contrast. Embedded
+formatting controls stay quiet until hover or focus.
 
 ### Floating surfaces
 
 Popovers, menus, dialogs, autocomplete results, and the emoji picker share the
-card radius, subtle border, raised paper surface, and floating shadow. They are
+card radius, subtle border, paper surface, and soft shadow. They are
 page-specific compositions, not nested generic cards.
 
 ## Components and interaction
@@ -198,10 +191,12 @@ animations while preserving all state information.
 
 ## Responsive behavior
 
-The primary breakpoints are 900px and 600px.
+The desktop reconstruction transitions back to Zulip's fluid layout below
+1100px; typography continues to step down at 900px and 600px.
 
-- At 900px, conversation cards reduce horizontal margin and display typography
-  steps down.
+- Below 1100px, the rigid desktop columns, fixed user filter, and 70px header
+  return to Zulip's responsive geometry.
+- At 900px, display typography steps down.
 - At 600px, cards and the composer use tighter radii and spacing while retaining
   readable body text and reachable controls.
 - Horizontal page overflow is never permitted.
@@ -224,8 +219,9 @@ The primary breakpoints are 900px and 600px.
 1. Add literal values as primitive tokens, then map them to semantic intent.
 2. Components should consume semantic tokens rather than primitive colors.
 3. Prefer the existing type classes and tokens over local font declarations.
-4. Do not add a new font download when Source Sans 3 or the mono stack covers the
-   use case.
+4. Keep Source Sans 3 as the bundled fallback when the preferred Stitch faces
+   are unavailable; do not make application startup depend on a third-party font
+   host.
 5. Do not override inline channel colors unless identity remains visible through
    another accessible cue.
 6. Keep the Cofounder styles loaded after Zulip's base component styles.
@@ -238,7 +234,7 @@ The primary breakpoints are 900px and 600px.
 Before merging a design change, confirm:
 
 - The change uses semantic tokens and the established type scale.
-- Source Sans 3 remains upright for general UI and message content.
+- General UI and message content remain upright in the proportional UI stack.
 - Monospace is limited to data, code, identifiers, or system metadata.
 - Hover, active, focus-visible, selected, and disabled states are present.
 - Touch targets and contrast remain accessible.

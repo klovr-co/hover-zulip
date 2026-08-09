@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Help Menu Dropdown</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Manrope', 'sans-serif'],
+          },
+          colors: {
+            primary: '#2563eb',
+            surface: '#faf8ff',
+            'surface-dim': '#d2d9f4',
+            'surface-bright': '#faf8ff',
+            'surface-container-lowest': '#ffffff',
+            'surface-container-low': '#f2f3ff',
+            'surface-container': '#ebeeff',
+            'surface-container-high': '#e3e8ff',
+            'surface-container-highest': '#dbe2ff',
+            'on-surface': '#181b25',
+            'on-surface-variant': '#434653',
+            outline: '#747785',
+            'outline-variant': '#c3c6d5',
+          },
+          borderRadius: {
+            'xl': '0.5rem', // ROUND_EIGHT
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-utilities">
+    .menu-item-hover:hover {
+      background-color: theme('colors.surface-container-high');
+    }
+
+    /* Triangle pointing up */
+    .dropdown-arrow {
+      position: absolute;
+      top: -6px;
+      left: 24px;
+      width: 12px;
+      height: 12px;
+      background-color: theme('colors.surface-container-lowest');
+      transform: rotate(45deg);
+      border-top: 1px solid theme('colors.outline-variant');
+      border-left: 1px solid theme('colors.outline-variant');
+    }
+  </style>
+</head>
+<body class="bg-surface-container-highest min-h-screen flex items-start justify-center pt-20 font-sans text-on-surface">
+<!-- BEGIN: NavigationBar -->
+<nav class="absolute top-0 left-0 right-0 h-16 bg-surface-container-lowest border-b border-outline-variant flex items-center justify-end px-6 space-x-2">
+<!-- Help Button (Active) -->
+<button class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-high text-primary hover:bg-surface-container-highest transition-colors">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Settings Button -->
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Profile Avatar -->
+<button class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden ml-2 flex items-center justify-center">
+<svg fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#747785"></path>
+<path d="M2 17L12 22L22 17" stroke="#747785" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M2 12L12 17L22 12" stroke="#747785" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</nav>
+<!-- END: NavigationBar -->
+<!-- BEGIN: DropdownMenu -->
+<div class="relative mt-2 z-10 w-[300px]">
+<!-- Dropdown Container -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-lg py-2 relative">
+<!-- Arrow pointing to trigger -->
+<div class="dropdown-arrow"></div>
+<!-- Menu Items -->
+<nav class="flex flex-col text-sm">
+<a class="flex items-center px-4 py-2.5 menu-item-hover text-on-surface transition-colors gap-3" href="#">
+<svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[15px]">Help center</span>
+</a>
+<a class="flex items-center justify-between px-4 py-2.5 menu-item-hover text-on-surface transition-colors gap-3" href="#">
+<div class="flex items-center gap-3">
+<svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M6.75 7.5h10.5M6.75 10.5h10.5m-10.5 3h10.5m-10.5 3h10.5M3 6.75A2.25 2.25 0 015.25 4.5h13.5A2.25 2.25 0 0121 6.75v10.5A2.25 2.25 0 0118.75 19.5H5.25A2.25 2.25 0 013 17.25V6.75z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[15px]">Keyboard shortcuts</span>
+</div>
+<span class="text-xs text-outline border border-outline-variant rounded px-1.5 py-0.5 bg-surface font-medium">?</span>
+</a>
+<a class="flex items-center px-4 py-2.5 menu-item-hover text-on-surface transition-colors gap-3" href="#">
+<svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[15px]">Message formatting</span>
+</a>
+<a class="flex items-center px-4 py-2.5 menu-item-hover text-on-surface transition-colors gap-3" href="#">
+<svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[15px]">Search filters</span>
+</a>
+<a class="flex items-center px-4 py-2.5 menu-item-hover text-on-surface transition-colors gap-3" href="#">
+<svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[15px]">About Zulip</span>
+</a>
+<a class="flex items-center px-4 py-2.5 menu-item-hover text-on-surface transition-colors gap-3" href="#">
+<svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.974 0-5.699-.993-7.843-2.678" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[15px]">Contact support</span>
+</a>
+<a class="flex items-center px-4 py-2.5 menu-item-hover text-on-surface transition-colors gap-3" href="#">
+<svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.999 2.999 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.999 2.999 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[15px]">Contact sales</span>
+</a>
+</nav>
+</div>
+</div>
+<!-- END: DropdownMenu -->
+</body></html>
