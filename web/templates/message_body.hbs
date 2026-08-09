@@ -65,7 +65,11 @@
         {{#if use_match_properties}}
             {{rendered_markdown msg/match_content}}
         {{else}}
-            {{rendered_markdown msg/content}}
+            {{#if hover_rendered_content}}
+                {{rendered_markdown hover_rendered_content}}
+            {{else}}
+                {{rendered_markdown msg/content}}
+            {{/if}}
         {{/if}}
     </div>
     {{else}}

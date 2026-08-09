@@ -61,6 +61,7 @@ export type MessageContainer = {
     include_sender: boolean;
     is_hidden: boolean;
     is_hover_generated_update: boolean;
+    hover_rendered_content?: string;
     last_edit_timestamp: number | undefined;
     last_moved_timestamp: number | undefined;
     mention_classname: string | undefined;
@@ -601,6 +602,7 @@ export class MessageListView {
         should_add_guest_indicator_for_sender: boolean;
         is_hidden: boolean;
         is_hover_generated_update: boolean;
+        hover_rendered_content?: string;
         mention_classname: string | undefined;
         include_sender: boolean;
         status_message: string | false;
@@ -693,6 +695,8 @@ export class MessageListView {
             background_color = stream_data.get_color(message.stream_id);
         }
 
+        const is_hover_generated_update = hover.is_generated_update(message);
+
         return {
             timestr: get_timestr(message),
             // this is only relevant for streams, don't use it if it wasn't set
@@ -703,7 +707,10 @@ export class MessageListView {
             sender_is_deactivated,
             should_add_guest_indicator_for_sender,
             is_hidden,
-            is_hover_generated_update: hover.is_generated_update(message),
+            is_hover_generated_update,
+            ...(is_hover_generated_update && {
+                hover_rendered_content: hover.add_source_logos(message.content),
+            }),
             mention_classname,
             include_sender,
             ...this._maybe_get_me_message(is_hidden, message),

@@ -68,11 +68,15 @@ function get_message_group_for_message_preview(message: Message): MessageGroup {
 }
 
 function get_message_container_for_preview(message: Message): MessageContainer {
+    const is_hover_generated_update = hover.is_generated_update(message);
     const computed_variables = {
         include_sender: true,
         // Message report preview will be automatically collapsed
         is_hidden: false,
-        is_hover_generated_update: hover.is_generated_update(message),
+        is_hover_generated_update,
+        ...(is_hover_generated_update && {
+            hover_rendered_content: hover.add_source_logos(message.content),
+        }),
         msg: message,
         sender_is_bot: people.sender_is_bot(message),
         sender_is_deactivated: people.sender_is_deactivated(message),

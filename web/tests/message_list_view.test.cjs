@@ -502,7 +502,8 @@ test("muted_message_vars", () => {
 test("hover_generated_update_vars", () => {
     const list = new MessageListView({id: 1}, true, true);
     const shared_message_fields = {
-        content: "<p>Event readiness update</p>",
+        content:
+            '<p>Event readiness update</p><ul><li><strong>WhatsApp · Mentors</strong></li><li><a href="https://github.com/ashvinpraveen/learnaimto">GitHub · LearnAIMTO</a></li><li><a href="https://www.instagram.com/aimto_26/">Instagram · @aimto_26</a></li></ul>',
         sender_id: 10,
         type: "private",
     };
@@ -519,7 +520,11 @@ test("hover_generated_update_vars", () => {
     );
 
     assert.equal(hover_update.is_hover_generated_update, true);
+    assert.match(hover_update.hover_rendered_content, /fa-whatsapp/);
+    assert.match(hover_update.hover_rendered_content, /fa-github/);
+    assert.match(hover_update.hover_rendered_content, /fa-instagram/);
     assert.equal(human_post.is_hover_generated_update, false);
+    assert.equal(human_post.hover_rendered_content, undefined);
 });
 
 test("hover_generated_update_renders_native_card_chrome", () => {
@@ -528,6 +533,8 @@ test("hover_generated_update_renders_native_card_chrome", () => {
     const html = require("../templates/single_message.hbs")({
         include_sender: false,
         is_hover_generated_update: true,
+        hover_rendered_content:
+            '<p>Event readiness update</p><ul><li><span class="hover-source-logo hover-source-logo--whatsapp" aria-hidden="true"><i class="fa fa-whatsapp"></i></span><strong>WhatsApp · Mentors</strong></li><li><span class="hover-source-logo hover-source-logo--github" aria-hidden="true"><i class="fa fa-github"></i></span><a href="https://github.com/ashvinpraveen/learnaimto">GitHub · LearnAIMTO</a></li></ul>',
         message_list_id: 1,
         timestr: "9:00 PM",
         msg: {
@@ -545,6 +552,8 @@ test("hover_generated_update_renders_native_card_chrome", () => {
     assert.match(html, />translated: AI update</);
     assert.match(html, />translated: Source-backed update</);
     assert.match(html, /Event readiness update/);
+    assert.match(html, /fa-whatsapp/);
+    assert.match(html, /fa-github/);
 });
 
 test("merge_message_groups", ({mock_template}) => {

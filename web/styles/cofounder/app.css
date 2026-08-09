@@ -697,6 +697,39 @@ a {
     margin-bottom: 8px;
 }
 
+.hover-source-logo {
+    display: inline-flex;
+    width: 23px;
+    height: 23px;
+    align-items: center;
+    justify-content: center;
+    margin-right: 7px;
+    border: 1px solid hsl(218deg 20% 84% / 85%);
+    border-radius: 50%;
+    background: var(--ds-neutral-25);
+    box-shadow: 0 2px 7px hsl(220deg 30% 24% / 8%);
+    font-family: FontAwesome;
+    font-size: 14px;
+    line-height: 1;
+    vertical-align: -2px;
+}
+
+.hover-source-logo--whatsapp {
+    border-color: hsl(142deg 55% 73% / 85%);
+    background: hsl(142deg 70% 96%);
+    color: hsl(147deg 77% 31%);
+}
+
+.hover-source-logo--github {
+    color: hsl(213deg 13% 16%);
+}
+
+.hover-source-logo--instagram {
+    border-color: hsl(330deg 45% 80% / 85%);
+    background: hsl(330deg 70% 97%);
+    color: hsl(326deg 57% 48%);
+}
+
 .messagebox-content .timestamp,
 .messagebox-content .message_time,
 .messagebox-content .message_edit_notice {
