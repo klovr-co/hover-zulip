@@ -522,6 +522,31 @@ test("hover_generated_update_vars", () => {
     assert.equal(human_post.is_hover_generated_update, false);
 });
 
+test("hover_generated_update_renders_native_card_chrome", () => {
+    const list = new MessageListView({id: 1}, true, true);
+    assert.ok(list);
+    const html = require("../templates/single_message.hbs")({
+        include_sender: false,
+        is_hover_generated_update: true,
+        message_list_id: 1,
+        timestr: "9:00 PM",
+        msg: {
+            content: "<p>Event readiness update</p>",
+            failed_request: true,
+            id: 42,
+            is_stream: true,
+            locally_echoed: true,
+            message_reactions: [],
+            reminders: [],
+        },
+    });
+
+    assert.match(html, /class="[^"]*hover-generated-update[^"]*"/);
+    assert.match(html, />translated: AI update</);
+    assert.match(html, />translated: Source-backed update</);
+    assert.match(html, /Event readiness update/);
+});
+
 test("merge_message_groups", ({mock_template}) => {
     mock_template("message_list.hbs", false, () => "<message-list-stub>");
     mock_template("bookend.hbs", false, () => "<bookend-stub>");

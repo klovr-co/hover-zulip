@@ -14,17 +14,27 @@ class PopulateHoverDemoTest(ZulipTestCase):
             call_command("populate_hover_demo", "--realm=zulip")
 
     def test_command_builds_native_aimto_space_idempotently(self) -> None:
-        call_command("populate_hover_demo", "--realm=zulip")
+        call_command(
+            "populate_hover_demo", "--realm=zulip", "--viewer-email=hamlet@zulip.com"
+        )
 
         realm = get_realm("zulip")
         stream = Stream.objects.select_related("folder", "recipient").get(
             realm=realm, name="AIMTO Events"
         )
         self.assertEqual(stream.folder.name, "Events")
+        self.assertTrue(stream.invite_only)
+        self.assertFalse(stream.history_public_to_subscribers)
+        self.assertFalse(stream.is_web_public)
         self.assertIn("human coordination", stream.description.lower())
         self.assertTrue(
             Subscription.objects.filter(
                 user_profile=self.example_user("hamlet"), recipient=stream.recipient, active=True
+            ).exists()
+        )
+        self.assertFalse(
+            Subscription.objects.filter(
+                user_profile=self.example_user("othello"), recipient=stream.recipient, active=True
             ).exists()
         )
 
@@ -39,6 +49,7 @@ class PopulateHoverDemoTest(ZulipTestCase):
         self.assertIn("Event readiness update", update.content)
         self.assertIn("WhatsApp · Mentors & Volunteers", update.content)
         self.assertIn("WhatsApp · 500 volunteers @ Learnathon", update.content)
+        self.assertIn("WhatsApp · Resident Lounge (AIMTO excerpts)", update.content)
         self.assertIn("https://github.com/ashvinpraveen/learnaimto", update.content)
         self.assertIn("https://www.instagram.com/aimto_26/", update.content)
         self.assertIn("Event readiness update", update.rendered_content)
@@ -48,5 +59,13 @@ class PopulateHoverDemoTest(ZulipTestCase):
             ).exists()
         )
 
-        call_command("populate_hover_demo", "--realm=zulip")
+        call_command(
+            "populate_hover_demo", "--realm=zulip", "--viewer-email=hamlet@zulip.com"
+        )
         self.assertEqual(Message.objects.filter(recipient=stream.recipient).count(), 6)
+
+    def test_command_rejects_unknown_viewer(self) -> None:
+        with self.assertRaisesRegex(CommandError, "No user with email nobody@example.com"):
+            call_command(
+                "populate_hover_demo", "--realm=zulip", "--viewer-email=nobody@example.com"
+            )
