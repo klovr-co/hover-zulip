@@ -16,8 +16,9 @@
 }
 
 :root {
-    /* Source Sans 3 is loaded by Zulip's shared frontend bundle. */
-    --font-saans: "Source Sans 3 VF", sans-serif;
+    /* The first two faces mirror the Stitch export; Source Sans 3 is bundled. */
+    --font-saans: "Be Vietnam Pro", "Avenir Next", "Source Sans 3 VF", sans-serif;
+    --font-headline: "Manrope", "Avenir Next", "Source Sans 3 VF", sans-serif;
     --font-saans-mono: "SaansMono Local", "SaansMono Fallback", monospace;
     --type-display-xl-size: 72px;
     --type-display-xl-line: 1.05;
@@ -106,7 +107,7 @@ kbd,
 .display-md,
 .headline,
 .card-title {
-    font-family: var(--font-saans);
+    font-family: var(--font-headline);
     font-weight: 500;
 }
 

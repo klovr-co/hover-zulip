@@ -139,7 +139,7 @@ export function sort_groups(
         muted_streams: [],
         inactive_streams: [],
     };
-    const NORMAL_SECTION_TITLE_WITH_OTHER_FOLDERS = $t({defaultMessage: "OTHER"});
+    const NORMAL_SECTION_TITLE_WITH_OTHER_FOLDERS = $t({defaultMessage: "Other"});
 
     // With a "topic:" prefix search, we only match on topic names, not
     // channel names, folder names, or section titles.

@@ -583,7 +583,7 @@ export class BuddyList extends BuddyListConf {
             $(
                 render_section_header({
                     id: "buddy-list-participants-section-heading",
-                    header_text: $t({defaultMessage: "THIS CONVERSATION"}),
+                    header_text: $t({defaultMessage: "This Conversation"}),
                     is_collapsed: this.participants_section.is_collapsed,
                 }),
             ),
@@ -594,8 +594,8 @@ export class BuddyList extends BuddyListConf {
                 render_section_header({
                     id: "buddy-list-users-matching-view-section-heading",
                     header_text: current_sub
-                        ? $t({defaultMessage: "THIS CHANNEL"})
-                        : $t({defaultMessage: "THIS CONVERSATION"}),
+                        ? $t({defaultMessage: "This Channel"})
+                        : $t({defaultMessage: "This Conversation"}),
                     is_collapsed: this.users_matching_view_section.is_collapsed,
                 }),
             ),
@@ -605,7 +605,7 @@ export class BuddyList extends BuddyListConf {
             $(
                 render_section_header({
                     id: "buddy-list-other-users-section-heading",
-                    header_text: $t({defaultMessage: "OTHERS"}),
+                    header_text: $t({defaultMessage: "Others"}),
                     is_collapsed: this.other_users_section.is_collapsed,
                 }),
             ),

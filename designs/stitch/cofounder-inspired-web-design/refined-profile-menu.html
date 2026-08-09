@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Profile Dropdown</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Manrope', 'sans-serif'],
+          },
+          colors: {
+            surface: '#faf8ff',
+            'surface-dim': '#d2d9f4',
+            'surface-bright': '#faf8ff',
+            'surface-container-lowest': '#ffffff',
+            'surface-container-low': '#f2f3ff',
+            'surface-container': '#ebeeff',
+            'surface-container-high': '#e3e8ff',
+            'surface-container-highest': '#dbe2ff',
+            primary: '#4c5c92',
+            'on-primary': '#ffffff',
+            'primary-container': '#dce1ff',
+            'on-primary-container': '#05184b',
+            secondary: '#595e72',
+            'on-secondary': '#ffffff',
+            'secondary-container': '#dee2f9',
+            'on-secondary-container': '#161b2c',
+            outline: '#767680',
+            'outline-variant': '#c6c6d0',
+          },
+          borderRadius: {
+            'xl': '0.75rem',
+            '2xl': '1rem',
+          },
+          boxShadow: {
+            'dropdown': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+          }
+        }
+      }
+    }
+  </script>
+<style type="text/tailwindcss">
+    @layer utilities {
+      .font-manrope {
+        font-family: 'Manrope', sans-serif;
+      }
+    }
+  </style>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Include Phosphor Icons for geometric/clean aesthetic -->
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body class="bg-surface-container-low min-h-screen flex items-start justify-center p-12 font-manrope text-[#1a1b21]">
+<!-- BEGIN: Profile Dropdown -->
+<div class="relative w-80 bg-surface-container-lowest rounded-2xl shadow-dropdown border border-outline-variant/30 overflow-hidden" data-purpose="profile-dropdown">
+<!-- Header/User Info -->
+<div class="p-4 flex items-center gap-4">
+<div class="relative">
+<div class="w-16 h-16 rounded-xl bg-surface-container overflow-hidden flex flex-wrap p-1 gap-[2px]">
+<!-- Geometric Avatar Pattern -->
+<div class="w-[calc(50%-1px)] h-[calc(50%-1px)] bg-[#4c5c92] rounded-tl-lg"></div>
+<div class="w-[calc(50%-1px)] h-[calc(50%-1px)] bg-[#72c2cf] rounded-tr-sm"></div>
+<div class="w-[calc(50%-1px)] h-[calc(50%-1px)] bg-[#72c2cf] rounded-bl-sm"></div>
+<div class="w-[calc(50%-1px)] h-[calc(50%-1px)] bg-[#4c5c92] rounded-br-lg"></div>
+</div>
+<div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-surface-container-lowest"></div>
+</div>
+<div>
+<h2 class="text-xl font-bold tracking-tight text-[#1a1b21]">Desdemona</h2>
+<p class="text-sm font-medium text-secondary">Owner</p>
+</div>
+</div>
+<!-- Status Section -->
+<div class="px-4 py-3 border-t border-outline-variant/30 flex flex-col gap-2">
+<button class="flex items-center justify-between w-full p-2 hover:bg-surface-container rounded-lg transition-colors group">
+<div class="flex items-center gap-3 text-[#1a1b21]">
+<i class="ph ph-smiley text-xl text-primary"></i>
+<span class="font-medium text-sm group-hover:text-primary transition-colors">Set status</span>
+</div>
+<div class="flex gap-1">
+<kbd class="px-1.5 py-0.5 text-xs border border-outline-variant rounded bg-surface text-secondary shadow-sm">⇧</kbd>
+<kbd class="px-1.5 py-0.5 text-xs border border-outline-variant rounded bg-surface text-secondary shadow-sm">Y</kbd>
+</div>
+</button>
+<button class="flex items-center gap-3 w-full p-2 hover:bg-surface-container rounded-lg transition-colors group">
+<i class="ph ph-prohibit text-xl text-primary"></i>
+<span class="font-medium text-sm text-[#1a1b21] group-hover:text-primary transition-colors">Go invisible</span>
+</button>
+</div>
+<!-- Actions Section -->
+<div class="px-4 py-3 border-t border-outline-variant/30 flex flex-col gap-1">
+<button class="flex items-center gap-3 w-full p-2 hover:bg-surface-container rounded-lg transition-colors group">
+<i class="ph ph-user text-xl text-primary"></i>
+<span class="font-medium text-sm text-[#1a1b21] group-hover:text-primary transition-colors">View your profile</span>
+</button>
+<button class="flex items-center gap-3 w-full p-2 hover:bg-surface-container rounded-lg transition-colors group">
+<i class="ph ph-users text-xl text-primary"></i>
+<span class="font-medium text-sm text-[#1a1b21] group-hover:text-primary transition-colors">View messages with yourself</span>
+</button>
+<button class="flex items-center gap-3 w-full p-2 hover:bg-surface-container rounded-lg transition-colors group">
+<i class="ph ph-chat-circle-text text-xl text-primary"></i>
+<span class="font-medium text-sm text-[#1a1b21] group-hover:text-primary transition-colors">View messages sent</span>
+</button>
+</div>
+<!-- Settings & Controls -->
+<div class="px-4 py-3 border-t border-outline-variant/30 flex flex-col gap-3">
+<button class="flex items-center gap-3 w-full p-2 hover:bg-surface-container rounded-lg transition-colors group">
+<i class="ph ph-wrench text-xl text-primary"></i>
+<span class="font-medium text-sm text-[#1a1b21] group-hover:text-primary transition-colors">Settings</span>
+</button>
+<!-- Theme Toggle -->
+<div class="flex items-center bg-surface-container-high rounded-lg p-1 gap-1">
+<button class="flex-1 flex justify-center items-center py-1.5 bg-surface-container-lowest rounded shadow-sm text-primary">
+<i class="ph ph-monitor text-lg"></i>
+</button>
+<button class="flex-1 flex justify-center items-center py-1.5 rounded text-secondary hover:text-primary hover:bg-surface-container-lowest/50 transition-colors">
+<i class="ph ph-sun text-lg"></i>
+</button>
+<button class="flex-1 flex justify-center items-center py-1.5 rounded text-secondary hover:text-primary hover:bg-surface-container-lowest/50 transition-colors">
+<i class="ph ph-moon text-lg"></i>
+</button>
+</div>
+<!-- Typography Controls -->
+<div class="flex items-center gap-2">
+<div class="flex-1 flex items-center justify-between border border-outline-variant/50 rounded-lg p-1 bg-surface-container-lowest">
+<button class="w-8 h-8 flex items-center justify-center text-secondary hover:bg-surface-container rounded transition-colors"><i class="ph ph-minus"></i></button>
+<span class="text-sm font-semibold text-secondary">A</span>
+<button class="w-8 h-8 flex items-center justify-center text-secondary hover:bg-surface-container rounded transition-colors"><i class="ph ph-plus"></i></button>
+</div>
+<div class="flex-1 flex items-center justify-between border border-outline-variant/50 rounded-lg p-1 bg-surface-container-lowest">
+<button class="w-8 h-8 flex items-center justify-center text-secondary hover:bg-surface-container rounded transition-colors"><i class="ph ph-minus"></i></button>
+<i class="ph ph-text-aa text-lg text-secondary"></i>
+<button class="w-8 h-8 flex items-center justify-center text-secondary hover:bg-surface-container rounded transition-colors"><i class="ph ph-plus"></i></button>
+</div>
+</div>
+</div>
+<!-- Footer Action -->
+<div class="px-4 py-3 border-t border-outline-variant/30">
+<button class="flex items-center gap-3 w-full p-2 hover:bg-surface-container rounded-lg transition-colors group">
+<i class="ph ph-sign-out text-xl text-primary"></i>
+<span class="font-medium text-sm text-[#1a1b21] group-hover:text-primary transition-colors">Log out</span>
+</button>
+</div>
+</div>
+<!-- END: Profile Dropdown -->
+</body></html>
