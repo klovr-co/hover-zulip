@@ -1,13 +1,18 @@
+import datetime
 from dataclasses import dataclass
 from typing import Any
 
 from django.conf import settings
 from django.core.management.base import CommandError, CommandParser
+from django.utils.timezone import now as timezone_now
 from typing_extensions import override
 
 from zerver.actions.channel_folders import check_add_channel_folder
 from zerver.actions.create_user import do_create_user
+from zerver.actions.message_delete import do_delete_messages
+from zerver.actions.message_flags import do_update_message_flags
 from zerver.actions.message_send import do_send_messages, internal_prep_stream_message
+from zerver.actions.reminders import do_delete_reminder, schedule_reminder_for_message
 from zerver.actions.streams import (
     bulk_add_subscriptions,
     bulk_remove_subscriptions,
@@ -16,7 +21,16 @@ from zerver.actions.streams import (
 )
 from zerver.lib.management import ZulipBaseCommand
 from zerver.lib.streams import create_stream_if_needed
-from zerver.models import ChannelFolder, Message, Realm, Subscription, UserProfile
+from zerver.models import (
+    ChannelFolder,
+    Message,
+    Realm,
+    ScheduledMessage,
+    Stream,
+    Subscription,
+    UserProfile,
+)
+from zerver.models.clients import get_client
 from zerver.models.users import get_user_by_delivery_email
 
 
@@ -29,7 +43,15 @@ class DemoPost:
     sender_name: str
     topic: str
     content: str
+    sent_at: datetime.datetime
     is_bot: bool = False
+    for_you: bool = False
+    todo_note: str | None = None
+    todo_due_after: datetime.timedelta | None = None
+
+
+def demo_time(day: int, hour: int, minute: int) -> datetime.datetime:
+    return datetime.datetime(2026, 8, day, hour, minute, tzinfo=datetime.timezone.utc)
 
 
 DEMO_POSTS = [
@@ -41,6 +63,10 @@ DEMO_POSTS = [
             "Monday's **9:00 PM volunteer briefing** is confirmed. Please react once you've "
             "read the floor plan so we know every zone has an owner before event day."
         ),
+        sent_at=demo_time(7, 1, 18),
+        for_you=True,
+        todo_note="AIMTO · Publish the volunteer briefing agenda",
+        todo_due_after=datetime.timedelta(hours=8),
     ),
     DemoPost(
         sender_email="daniel@hover.test",
@@ -51,6 +77,7 @@ DEMO_POSTS = [
             "need to confirm Mandarin, Malay, and Tamil support across registration and the builder "
             "area."
         ),
+        sent_at=demo_time(7, 6, 42),
     ),
     DemoPost(
         sender_email="mei@hover.test",
@@ -61,6 +88,10 @@ DEMO_POSTS = [
             "50 mentor stickers. The remaining floor-plan question is ownership of the blue "
             "discovery and community zone."
         ),
+        sent_at=demo_time(8, 2, 5),
+        for_you=True,
+        todo_note="AIMTO · Assign the blue zone owner",
+        todo_due_after=datetime.timedelta(days=1, hours=3),
     ),
     DemoPost(
         sender_email="aisha@hover.test",
@@ -70,6 +101,9 @@ DEMO_POSTS = [
             "The lobby artwork needs both **16:9** and **9:16** versions, with **FREE** prominent. "
             "The university leaderboard and certificate page give us a stronger outreach story."
         ),
+        sent_at=demo_time(8, 8, 30),
+        todo_note="AIMTO · Approve final lobby assets",
+        todo_due_after=datetime.timedelta(days=2),
     ),
     DemoPost(
         sender_email="daniel@hover.test",
@@ -79,6 +113,7 @@ DEMO_POSTS = [
             "The website work is moving: certificate and university leaderboard updates are in, "
             "and the homepage refresh is ready for a final event-details pass."
         ),
+        sent_at=demo_time(9, 3, 20),
     ),
     DemoPost(
         sender_email=HOVER_AI_EMAIL,
@@ -118,6 +153,8 @@ DEMO_POSTS = [
 - [Instagram · @aimto_26](https://www.instagram.com/aimto_26/) — linked promotion source; post contents not inferred
 
 _AI-generated from linked sources. Verify details before acting._""",
+        sent_at=demo_time(10, 0, 15),
+        for_you=True,
     ),
 ]
 
@@ -150,6 +187,101 @@ class Command(ZulipBaseCommand):
             bot_owner=owner if post.is_bot else None,
             acting_user=owner,
         )
+
+    def reconcile_demo_message(
+        self,
+        post: DemoPost,
+        *,
+        stream: Stream,
+        sender: UserProfile,
+        owner: UserProfile,
+    ) -> Message:
+        candidates = Message.objects.filter(
+            recipient=stream.recipient,
+            sender=sender,
+            subject=post.topic,
+        ).order_by("id")
+        message = candidates.filter(content=post.content).first()
+
+        if message is None:
+            send_request = internal_prep_stream_message(
+                sender,
+                stream,
+                post.topic,
+                post.content,
+                forged=True,
+                forged_timestamp=post.sent_at.timestamp(),
+                acting_user=owner,
+            )
+            assert send_request is not None
+            message_id = do_send_messages([send_request])[0].message_id
+            message = Message.objects.get(id=message_id)
+        elif message.date_sent != post.sent_at:
+            Message.objects.filter(id=message.id).update(date_sent=post.sent_at)
+            message.date_sent = post.sent_at
+
+        stale_messages = list(candidates.exclude(id=message.id))
+        if stale_messages:
+            do_delete_messages(stream.realm, stale_messages, acting_user=owner)
+
+        return message
+
+    def populate_home_views(
+        self,
+        *,
+        viewer: UserProfile,
+        posts_and_messages: list[tuple[DemoPost, Message]],
+    ) -> None:
+        message_ids = [message.id for _post, message in posts_and_messages]
+        for_you_message_ids = [
+            message.id for post, message in posts_and_messages if post.for_you
+        ]
+
+        do_update_message_flags(viewer, "add", "read", message_ids)
+        do_update_message_flags(viewer, "remove", "read", for_you_message_ids)
+
+        desired_todos = [
+            (post, message)
+            for post, message in posts_and_messages
+            if post.todo_note is not None and post.todo_due_after is not None
+        ]
+        desired_notes = [post.todo_note for post, _message in desired_todos]
+        existing_reminders = ScheduledMessage.objects.filter(
+            sender=viewer,
+            delivery_type=ScheduledMessage.REMIND,
+            delivered=False,
+            reminder_note__in=desired_notes,
+        ).order_by("id")
+        reminders_by_note: dict[str, list[ScheduledMessage]] = {}
+        for reminder in existing_reminders:
+            assert reminder.reminder_note is not None
+            reminders_by_note.setdefault(reminder.reminder_note, []).append(reminder)
+
+        client = get_client("Internal")
+        for post, message in desired_todos:
+            assert post.todo_note is not None
+            assert post.todo_due_after is not None
+            matching_reminders = reminders_by_note.get(post.todo_note, [])
+            current_reminder = next(
+                (
+                    reminder
+                    for reminder in matching_reminders
+                    if reminder.reminder_target_message_id == message.id
+                ),
+                None,
+            )
+            for reminder in matching_reminders:
+                if reminder.id != getattr(current_reminder, "id", None):
+                    do_delete_reminder(viewer, reminder)
+
+            if current_reminder is None:
+                schedule_reminder_for_message(
+                    viewer,
+                    client,
+                    message.id,
+                    timezone_now() + post.todo_due_after,
+                    post.todo_note,
+                )
 
     @override
     def handle(self, *args: Any, **options: Any) -> None:
@@ -228,25 +360,27 @@ class Command(ZulipBaseCommand):
             bulk_remove_subscriptions(realm, extra_subscribers, [stream], acting_user=owner)
         bulk_add_subscriptions(realm, [stream], subscribers, acting_user=owner)
 
-        pending_messages = []
+        posts_and_messages = []
         for post in DEMO_POSTS:
             sender = users_by_email[post.sender_email]
-            if Message.objects.filter(
-                recipient=stream.recipient,
-                sender=sender,
-                subject=post.topic,
-                content=post.content,
-            ).exists():
-                continue
-            pending_messages.append(
-                internal_prep_stream_message(sender, stream, post.topic, post.content)
+            posts_and_messages.append(
+                (
+                    post,
+                    self.reconcile_demo_message(
+                        post,
+                        stream=stream,
+                        sender=sender,
+                        owner=owner,
+                    ),
+                )
             )
 
-        if pending_messages:
-            do_send_messages(pending_messages)
+        self.populate_home_views(viewer=viewer, posts_and_messages=posts_and_messages)
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"AIMTO Events is ready with {len(DEMO_POSTS)} native Hover posts in {realm.string_id}."
+                f"AIMTO Events is ready with {len(DEMO_POSTS)} native Hover posts, "
+                "3 For You items, and 3 Todos "
+                f"in {realm.string_id}."
             )
         )
