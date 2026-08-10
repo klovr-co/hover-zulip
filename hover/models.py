@@ -296,6 +296,10 @@ class SpaceAttachment(models.Model):
     history_timezone = models.CharField(max_length=MAX_TIMEZONE_LENGTH)
     history_start_at = models.DateTimeField()
     custom_start_date = models.DateField(null=True)
+    publication_cursor = models.TextField(default="")
+    last_publication_sync_at = models.DateTimeField(null=True)
+    last_publication_sync_error = models.CharField(max_length=64, default="")
+    publication_sync_failures = models.PositiveIntegerField(default=0)
     attached_by = models.ForeignKey(
         UserProfile,
         null=True,
@@ -348,17 +352,49 @@ class GeneratedItem(models.Model):
 
     realm = models.ForeignKey(Realm, on_delete=CASCADE)
     message = models.OneToOneField(Message, on_delete=CASCADE, related_name="hover_generated_item")
+    attachment = models.ForeignKey(
+        SpaceAttachment,
+        null=True,
+        on_delete=RESTRICT,
+        related_name="generated_items",
+    )
+    publication_id = models.TextField(null=True, unique=True)
+    idempotency_key = models.TextField(null=True)
+    business_identity = models.TextField(default="")
     output_type = models.TextField(choices=OutputType.choices)
     module_key = models.TextField()
     module_name = models.TextField()
     module_version = models.TextField()
     source_summary = models.TextField()
+    payload = models.JSONField(default=dict)
+    importance = models.TextField(
+        choices=[
+            ("low", "Low"),
+            ("normal", "Normal"),
+            ("high", "High"),
+            ("urgent", "Urgent"),
+        ],
+        default="normal",
+    )
+    run_reference = models.TextField(default="")
+    covered_start_at = models.DateTimeField(null=True)
+    covered_end_at = models.DateTimeField(null=True)
+    occurred_at = models.DateTimeField(null=True)
+    generated_at = models.DateTimeField(null=True)
+    published_at = models.DateTimeField(null=True)
+    lineage_key = models.TextField(null=True)
+    parent_publication_id = models.TextField(null=True)
+    material_change = models.BooleanField(default=False)
 
     def clean(self) -> None:
         super().clean()
         if self.message_id is not None and self.realm_id != self.message.realm_id:
             raise ValidationError(
                 {"message": "Generated items and messages must share an organization."}
+            )
+        if self.attachment_id is not None and self.realm_id != self.attachment.realm_id:
+            raise ValidationError(
+                {"attachment": "Generated items and attachments must share an organization."}
             )
 
 
@@ -367,6 +403,13 @@ class EvidenceLink(models.Model):
         GeneratedItem, on_delete=CASCADE, related_name="evidence_links"
     )
     realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    source = models.ForeignKey(
+        Source,
+        null=True,
+        on_delete=RESTRICT,
+        related_name="evidence_links",
+    )
+    evidence_ref = models.TextField(default="")
     position = models.PositiveIntegerField()
     provider_key = models.TextField()
     provider_name = models.TextField()
@@ -378,7 +421,12 @@ class EvidenceLink(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["generated_item", "position"], name="hover_evidence_link_unique_position"
-            )
+            ),
+            models.UniqueConstraint(
+                fields=["generated_item", "evidence_ref"],
+                condition=~Q(evidence_ref=""),
+                name="hover_evidence_link_unique_ref",
+            ),
         ]
 
     def clean(self) -> None:
@@ -386,4 +434,8 @@ class EvidenceLink(models.Model):
         if self.generated_item_id is not None and self.realm_id != self.generated_item.realm_id:
             raise ValidationError(
                 {"generated_item": "Evidence links and generated items must share an organization."}
+            )
+        if self.source_id is not None and self.realm_id != self.source.realm_id:
+            raise ValidationError(
+                {"source": "Evidence links and Sources must share an organization."}
             )

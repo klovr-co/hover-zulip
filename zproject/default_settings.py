@@ -695,6 +695,9 @@ OUTGOING_WEBHOOK_TIMEOUT_SECONDS = 10
 # and each value is that realm's dedicated hvr_srv_ bearer credential.
 HOVER_STUDIO_API_URL = ""
 HOVER_STUDIO_SERVER_CREDENTIALS: dict[str, str] = {}
+# Realm-local bot used to materialize validated Clawer publications as native
+# Hover messages. The pilot uses one configured assistant identity.
+HOVER_ASSISTANT_EMAIL = ""
 
 # Maximum length of message content allowed.
 # Any message content exceeding this limit will be truncated.

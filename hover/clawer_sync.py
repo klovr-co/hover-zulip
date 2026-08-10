@@ -7,15 +7,27 @@ from uuid import UUID
 import requests
 from django.conf import settings
 from django.utils.translation import gettext as _
+from pydantic import ValidationError
 from typing_extensions import override
 
 from hover.models import Source
+from hover.publication_contracts import (
+    ClawerPublicationPage,
+    ResolvedEvidence,
+    ResolvedEvidenceBatch,
+)
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.outgoing_http import OutgoingSession
 
 MAX_DISCOVERY_LIMIT = 100
+MAX_PUBLICATION_LIMIT = 100
+MAX_EVIDENCE_LIMIT = 100
 MAX_RESPONSE_BYTES = 2_000_000
-STUDIO_OPERATION_PATHS = {"source_discovery": "sources/discover"}
+STUDIO_OPERATION_PATHS = {
+    "source_discovery": "sources/discover",
+    "sync": "sync",
+    "evidence_resolution": "evidence/resolve",
+}
 SERVER_CREDENTIAL_PATTERN = re.compile(r"hvr_srv_[A-Za-z0-9_-]{32,128}")
 UNSAFE_DISPLAY_NAME_PATTERN = re.compile(r"(?:\d[\s()+-]*){8,}|@(?:g\.us|lid)$", re.IGNORECASE)
 REQUEST_ID_PATTERN = re.compile(
@@ -28,6 +40,7 @@ STUDIO_ERROR_STATUS = {
     "forbidden": (403, False),
     "connected_account_not_found": (404, False),
     "selector_not_found": (404, False),
+    "evidence_not_resolvable": (404, False),
     "rate_limited": (429, True),
     "clawer_unavailable": (503, True),
     "clawer_timeout": (504, True),
@@ -98,6 +111,26 @@ class ClawerSync(Protocol):
         query: str | None,
     ) -> ClawerSourcePage: ...
 
+    def sync_publications(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        source_ref: str,
+        cursor: str | None,
+        limit: int,
+        start_at: str,
+    ) -> ClawerPublicationPage: ...
+
+    def resolve_evidence(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        source_ref: str,
+        refs: list[str],
+    ) -> list[ResolvedEvidence]: ...
+
 
 def _validate_discovery_request(*, cursor: str | None, limit: int, query: str | None) -> None:
     if limit < 1 or limit > MAX_DISCOVERY_LIMIT:
@@ -115,6 +148,10 @@ class InMemoryClawerSync:
     ) -> None:
         self.sources = dict(sources or {})
         self.discovery_calls: list[dict[str, object]] = []
+        self.publication_pages: dict[tuple[str, str, str, str | None], ClawerPublicationPage] = {}
+        self.evidence: dict[tuple[str, str, str], ResolvedEvidence] = {}
+        self.sync_calls: list[dict[str, object]] = []
+        self.evidence_calls: list[dict[str, object]] = []
 
     def discover_sources(
         self,
@@ -160,6 +197,70 @@ class InMemoryClawerSync:
             next_cursor=f"memory:{next_offset}",
             has_more=next_offset < len(candidates),
         )
+
+    def sync_publications(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        source_ref: str,
+        cursor: str | None,
+        limit: int,
+        start_at: str,
+    ) -> ClawerPublicationPage:
+        _validate_publication_request(
+            source_ref=source_ref,
+            cursor=cursor,
+            limit=limit,
+            start_at=start_at,
+        )
+        self.sync_calls.append(
+            {
+                "realm_uuid": realm_uuid,
+                "account_external_id": account_external_id,
+                "source_ref": source_ref,
+                "cursor": cursor,
+                "limit": limit,
+                "start_at": start_at,
+            }
+        )
+        return self.publication_pages.get(
+            (str(realm_uuid), str(account_external_id), source_ref, cursor),
+            ClawerPublicationPage(
+                publications=[],
+                next_cursor=cursor or "memory:empty",
+                has_more=False,
+            ),
+        )
+
+    def resolve_evidence(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        source_ref: str,
+        refs: list[str],
+    ) -> list[ResolvedEvidence]:
+        _validate_evidence_request(source_ref=source_ref, refs=refs)
+        self.evidence_calls.append(
+            {
+                "realm_uuid": realm_uuid,
+                "account_external_id": account_external_id,
+                "source_ref": source_ref,
+                "refs": list(refs),
+            }
+        )
+        try:
+            return [
+                self.evidence[(str(realm_uuid), source_ref, evidence_ref)] for evidence_ref in refs
+            ]
+        except KeyError:
+            raise ClawerSyncError(
+                error_code="evidence_not_resolvable",
+                operation="evidence_resolution",
+                http_status_code=404,
+                retryable=False,
+            )
 
 
 class StudioClawerSync:
@@ -393,6 +494,95 @@ class StudioClawerSync:
             has_more=payload["has_more"],
         )
 
+    def sync_publications(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        source_ref: str,
+        cursor: str | None,
+        limit: int,
+        start_at: str,
+    ) -> ClawerPublicationPage:
+        _validate_publication_request(
+            source_ref=source_ref,
+            cursor=cursor,
+            limit=limit,
+            start_at=start_at,
+        )
+        body: dict[str, object] = {
+            "source_ref": source_ref,
+            "limit": limit,
+            "start_at": start_at,
+        }
+        if cursor is not None:
+            body["cursor"] = cursor
+        payload = self._request(
+            realm_uuid=realm_uuid,
+            account_external_id=account_external_id,
+            operation="sync",
+            body=body,
+        )
+        try:
+            page = ClawerPublicationPage.model_validate(payload)
+        except ValidationError:
+            raise self._invalid_contract("sync")
+        if any(publication.source_ref != source_ref for publication in page.publications):
+            raise self._invalid_contract("sync")
+        return page
+
+    def resolve_evidence(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        source_ref: str,
+        refs: list[str],
+    ) -> list[ResolvedEvidence]:
+        _validate_evidence_request(source_ref=source_ref, refs=refs)
+        payload = self._request(
+            realm_uuid=realm_uuid,
+            account_external_id=account_external_id,
+            operation="evidence_resolution",
+            body={"source_ref": source_ref, "refs": refs},
+        )
+        try:
+            batch = ResolvedEvidenceBatch.model_validate(payload)
+        except ValidationError:
+            raise self._invalid_contract("evidence_resolution")
+        returned_refs = [item.evidence_ref for item in batch.evidence]
+        if (
+            len(returned_refs) != len(refs)
+            or len(set(returned_refs)) != len(returned_refs)
+            or set(returned_refs) != set(refs)
+            or any(item.source_ref != source_ref for item in batch.evidence)
+        ):
+            raise self._invalid_contract("evidence_resolution")
+        by_ref = {item.evidence_ref: item for item in batch.evidence}
+        return [by_ref[ref] for ref in refs]
+
 
 def get_clawer_sync() -> ClawerSync:
     return StudioClawerSync()
+
+
+def _validate_publication_request(
+    *, source_ref: str, cursor: str | None, limit: int, start_at: str
+) -> None:
+    if re.fullmatch(r"src_[0-9a-f]{32}", source_ref) is None:
+        raise ValueError("invalid publication source")
+    if limit < 1 or limit > MAX_PUBLICATION_LIMIT:
+        raise ValueError("invalid publication limit")
+    if cursor is not None and not 1 <= len(cursor) <= 10_000:
+        raise ValueError("invalid publication cursor")
+    if not start_at or len(start_at) > 100:
+        raise ValueError("invalid publication start boundary")
+
+
+def _validate_evidence_request(*, source_ref: str, refs: list[str]) -> None:
+    if re.fullmatch(r"src_[0-9a-f]{32}", source_ref) is None:
+        raise ValueError("invalid evidence source")
+    if not refs or len(refs) > MAX_EVIDENCE_LIMIT or len(refs) != len(set(refs)):
+        raise ValueError("invalid evidence references")
+    if any(not ref or len(ref) > 100 for ref in refs):
+        raise ValueError("invalid evidence reference")

@@ -1,0 +1,241 @@
+"""Strict, versioned contracts accepted from Clawer through Studio.
+
+This module intentionally mirrors the public transport contract rather than
+importing Clawer internals.  Hover is a separate trust boundary and must reject
+malformed data before any native message is created.
+"""
+
+from __future__ import annotations
+
+from datetime import date, datetime
+from typing import Annotated, Literal
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+
+class _ContractModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+class DigestMetrics(_ContractModel):
+    messages: int = Field(ge=0)
+    text: int = Field(ge=0)
+    media: int = Field(ge=0)
+    voice: int = Field(ge=0)
+
+    @model_validator(mode="after")
+    def component_counts_fit_total(self) -> DigestMetrics:
+        if self.text + self.media + self.voice > self.messages:
+            raise ValueError("digest metric components exceed message count")
+        return self
+
+
+class DigestPayload(_ContractModel):
+    contract: Literal["digest"]
+    schema_version: Literal["1.0"]
+    title: str = Field(min_length=1, max_length=300)
+    timezone: str = Field(min_length=1, max_length=100)
+    operation: str = Field(min_length=1, max_length=100_000)
+    marketing: str = Field(min_length=1, max_length=100_000)
+    metrics: DigestMetrics
+    generation_context: str = Field(min_length=1, max_length=300)
+    # Personal editions are not one of the six Space pipelines.  Preserve the
+    # additive field at the transport boundary without interpreting it here.
+    personal: dict[str, object] | None = None
+
+
+class FeedUpdatePayload(_ContractModel):
+    contract: Literal["feed_update"]
+    schema_version: Literal["1.0"]
+    title: str = Field(min_length=1, max_length=300)
+    update_type: Literal["development", "milestone", "blocker"]
+    developments: list[str] = Field(min_length=1, max_length=50)
+
+
+class ProgressUpdatePayload(_ContractModel):
+    contract: Literal["progress_update"]
+    schema_version: Literal["1.0"]
+    title: str = Field(min_length=1, max_length=300)
+    status: Literal["not_started", "in_progress", "blocked", "completed"]
+    updates: list[str] = Field(min_length=1, max_length=50)
+    resolved_items: list[str] = Field(default_factory=list, max_length=50)
+    blockers: list[str] = Field(default_factory=list, max_length=50)
+
+
+class DecisionPayload(_ContractModel):
+    contract: Literal["decision"]
+    schema_version: Literal["1.0"]
+    title: str = Field(min_length=1, max_length=300)
+    decision: str = Field(min_length=1, max_length=50_000)
+    rationale: str = Field(min_length=1, max_length=50_000)
+    lifecycle: Literal["active", "superseded", "reversed"]
+    supersedes_publication_id: str | None = None
+    reverses_publication_id: str | None = None
+
+    @model_validator(mode="after")
+    def valid_lifecycle(self) -> DecisionPayload:
+        if self.lifecycle == "active" and (
+            self.supersedes_publication_id or self.reverses_publication_id
+        ):
+            raise ValueError("active decision cannot reference another decision")
+        if self.lifecycle == "superseded" and not self.supersedes_publication_id:
+            raise ValueError("superseded decision requires its predecessor")
+        if self.lifecycle == "reversed" and not self.reverses_publication_id:
+            raise ValueError("reversed decision requires its predecessor")
+        if self.lifecycle != "superseded" and self.supersedes_publication_id:
+            raise ValueError("unexpected superseded decision reference")
+        if self.lifecycle != "reversed" and self.reverses_publication_id:
+            raise ValueError("unexpected reversed decision reference")
+        return self
+
+
+class SuggestedActionAssignee(_ContractModel):
+    kind: Literal["user", "member"]
+    ref: str = Field(pattern=r"^person_[0-9a-f]{32}$")
+    display_name: str = Field(min_length=1, max_length=200)
+
+
+class SuggestedActionPayload(_ContractModel):
+    contract: Literal["suggested_action"]
+    schema_version: Literal["1.0"]
+    wording: str = Field(min_length=1, max_length=50_000)
+    proposed_assignee: SuggestedActionAssignee | None
+    proposed_due_date: date | None
+
+
+class AnalysisFinding(_ContractModel):
+    title: str = Field(min_length=1, max_length=300)
+    detail: str = Field(min_length=1, max_length=50_000)
+
+
+class AnalysisSentiment(_ContractModel):
+    label: Literal["positive", "neutral", "negative"]
+    summary: str = Field(min_length=1, max_length=50_000)
+
+
+class AnalysisPayload(_ContractModel):
+    contract: Literal["analysis"]
+    schema_version: Literal["1.0"]
+    title: str = Field(min_length=1, max_length=300)
+    timezone: str = Field(min_length=1, max_length=100)
+    summary: str = Field(min_length=1, max_length=50_000)
+    findings: list[AnalysisFinding] = Field(min_length=1, max_length=50)
+    generation_context: str = Field(min_length=1, max_length=300)
+    sentiment: AnalysisSentiment | None
+
+
+PublicationPayload = Annotated[
+    DigestPayload
+    | FeedUpdatePayload
+    | ProgressUpdatePayload
+    | DecisionPayload
+    | SuggestedActionPayload
+    | AnalysisPayload,
+    Field(discriminator="contract"),
+]
+
+
+class CoveredPeriod(_ContractModel):
+    start: datetime
+    end: datetime
+
+    @model_validator(mode="after")
+    def valid_period(self) -> CoveredPeriod:
+        if self.start.tzinfo is None or self.end.tzinfo is None or self.start >= self.end:
+            raise ValueError("covered period must be timezone-aware and increasing")
+        return self
+
+
+class ClawerPublication(_ContractModel):
+    publication_id: str = Field(min_length=1, max_length=500)
+    idempotency_key: str = Field(min_length=1, max_length=1000)
+    business_identity: str = Field(min_length=1, max_length=1000)
+    contract: Literal[
+        "digest",
+        "feed_update",
+        "progress_update",
+        "decision",
+        "suggested_action",
+        "analysis",
+    ]
+    schema_version: Literal["1.0"]
+    producer_key: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]{0,199}$")
+    producer_name: str = Field(min_length=1, max_length=200)
+    producing_version: str = Field(min_length=1, max_length=1000)
+    run_reference: str = Field(min_length=1, max_length=1000)
+    source_ref: str = Field(pattern=r"^src_[0-9a-f]{32}$")
+    covered_period: CoveredPeriod
+    payload: PublicationPayload
+    evidence_refs: list[str] = Field(max_length=100)
+    importance: Literal["low", "normal", "high", "urgent"]
+    occurred_at: datetime
+    generated_at: datetime
+    published_at: datetime
+    lineage_key: str | None
+    parent_publication_id: str | None
+    material_change: bool
+
+    @field_validator("occurred_at", "generated_at", "published_at")
+    @classmethod
+    def timezone_aware_timestamp(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("publication timestamps must be timezone-aware")
+        return value
+
+    @field_validator("evidence_refs")
+    @classmethod
+    def unique_evidence_refs(cls, value: list[str]) -> list[str]:
+        if any(not ref or len(ref) > 100 for ref in value) or len(value) != len(set(value)):
+            raise ValueError("publication evidence references must be unique and bounded")
+        return value
+
+    @model_validator(mode="after")
+    def matching_contract(self) -> ClawerPublication:
+        if self.payload.contract != self.contract:
+            raise ValueError("publication payload contract does not match envelope")
+        return self
+
+
+class ClawerPublicationPage(_ContractModel):
+    publications: list[ClawerPublication] = Field(max_length=100)
+    next_cursor: str = Field(min_length=1, max_length=10_000)
+    has_more: bool
+
+
+class EvidenceSender(_ContractModel):
+    ref: str = Field(min_length=1, max_length=100)
+    display_name: str = Field(min_length=1, max_length=200)
+
+
+class EvidenceContent(_ContractModel):
+    text: str | None
+    voice_transcript: str | None
+    media_description: str | None
+
+
+class EvidenceMedia(_ContractModel):
+    type: str = Field(min_length=1, max_length=100)
+    mime_type: str | None = Field(default=None, max_length=200)
+    byte_size: int | None = Field(default=None, ge=0)
+    sha256: str | None = Field(default=None, max_length=200)
+    available: bool
+
+
+class ResolvedEvidence(_ContractModel):
+    evidence_ref: str = Field(min_length=1, max_length=100)
+    source_ref: str = Field(pattern=r"^src_[0-9a-f]{32}$")
+    sender: EvidenceSender
+    timestamp: datetime
+    content: EvidenceContent
+    media: EvidenceMedia | None
+
+    @field_validator("timestamp")
+    @classmethod
+    def timestamp_is_aware(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("evidence timestamp must be timezone-aware")
+        return value
+
+
+class ResolvedEvidenceBatch(_ContractModel):
+    evidence: list[ResolvedEvidence] = Field(max_length=100)

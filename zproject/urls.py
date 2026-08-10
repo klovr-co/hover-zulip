@@ -21,6 +21,7 @@ from hover.views_connected_accounts import (
     update_connected_account,
     upsert_connected_account_grant,
 )
+from hover.views_publications import resolve_generated_item_evidence
 from hover.views_sources import attach_source, discover_sources, preview_source
 from hover.views_spaces import (
     add_space_administrator,
@@ -616,6 +617,10 @@ v1_api_and_json_patterns = [
         POST=preview_source,
     ),
     rest_path("hover/spaces/<int:space_id>/sources", POST=attach_source),
+    rest_path(
+        "hover/spaces/<int:space_id>/generated-items/<int:generated_item_id>/evidence",
+        POST=resolve_generated_item_evidence,
+    ),
     rest_path("hover/connected_accounts", GET=list_connected_accounts),
     rest_path(
         "hover/connected_accounts/<int:account_id>",
