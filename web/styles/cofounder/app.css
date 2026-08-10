@@ -1785,6 +1785,220 @@ a {
     }
 }
 
+/* Connected Account administration stays deliberately operational: compact,
+   legible, and explicit about the privacy boundary. */
+#connected-account-settings {
+    --hover-account-border: color-mix(in srgb, var(--ds-border-subtle) 82%, transparent);
+    --hover-account-success: var(--color-text-success-subtle-action-button);
+    --hover-account-success-bg: var(--color-background-success-subtle-action-button);
+    --hover-account-warning: var(--color-text-warning-subtle-action-button);
+    --hover-account-warning-bg: var(--color-background-warning-subtle-action-button);
+    --hover-account-danger: var(--color-text-danger-subtle-action-button);
+    --hover-account-danger-bg: var(--color-background-danger-subtle-action-button);
+}
+
+.hover-connected-account-heading,
+.hover-connected-account-card-header,
+.hover-connected-account-actions,
+.hover-connected-account-grants li {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+}
+
+.hover-settings-kicker,
+.hover-connected-account-provider {
+    margin: 0 0 3px;
+    color: var(--ds-text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.hover-secret-safe-badge {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding: 5px 9px;
+    border: 1px solid var(--hover-account-success);
+    border-radius: 999px;
+    color: var(--hover-account-success);
+    background: var(--hover-account-success-bg);
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.hover-connected-account-intro {
+    max-width: 760px;
+    margin: 8px 0 18px;
+}
+
+.hover-connected-accounts-list {
+    display: grid;
+    gap: 14px;
+}
+
+.hover-connected-account-card {
+    overflow: hidden;
+    border: 1px solid var(--hover-account-border);
+    border-radius: 9px;
+    background: var(--ds-surface-paper);
+    box-shadow: 0 8px 25px color-mix(in srgb, var(--ds-navy-950) 5%, transparent);
+}
+
+.hover-connected-account-card-header {
+    align-items: flex-start;
+    padding: 16px 18px 13px;
+    border-bottom: 1px solid var(--hover-account-border);
+    background: linear-gradient(120deg, var(--ds-surface-paper), var(--ds-surface-canvas));
+}
+
+.hover-connected-account-card h4 {
+    margin: 0;
+    color: var(--ds-text-primary);
+    font-family: var(--font-headline);
+    font-size: 17px;
+}
+
+.hover-connected-account-owner {
+    margin-top: 4px;
+    color: var(--ds-text-secondary);
+    font-size: 12px;
+}
+
+.hover-connected-account-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+.hover-account-state,
+.hover-account-health {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    padding: 3px 7px;
+    border-radius: 999px;
+    color: var(--ds-text-secondary);
+    background: var(--ds-surface-hover);
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.hover-account-state-approved,
+.hover-account-health-healthy {
+    color: var(--hover-account-success);
+    background: var(--hover-account-success-bg);
+}
+
+.hover-account-state-pending,
+.hover-account-health-degraded {
+    color: var(--hover-account-warning);
+    background: var(--hover-account-warning-bg);
+}
+
+.hover-account-state-revoked,
+.hover-account-health-unavailable {
+    color: var(--hover-account-danger);
+    background: var(--hover-account-danger-bg);
+}
+
+.hover-connected-account-facts {
+    display: grid;
+    grid-template-columns: minmax(240px, 1.6fr) repeat(2, minmax(130px, 1fr));
+    gap: 14px;
+    margin: 0;
+    padding: 13px 18px;
+}
+
+.hover-connected-account-facts dt {
+    color: var(--ds-text-secondary);
+    font-size: 11px;
+}
+
+.hover-connected-account-facts dd {
+    overflow: hidden;
+    margin: 3px 0 0;
+    color: var(--ds-text-primary);
+    font-size: 12px;
+    text-overflow: ellipsis;
+}
+
+.hover-connected-account-facts code {
+    padding: 2px 4px;
+    border-radius: 4px;
+    background: var(--ds-surface-hover);
+    font-size: 11px;
+}
+
+.hover-connected-account-actions {
+    justify-content: flex-start;
+    padding: 0 18px 14px;
+}
+
+.hover-connected-account-grants {
+    padding: 13px 18px 16px;
+    border-top: 1px solid var(--hover-account-border);
+    background: color-mix(in srgb, var(--ds-surface-canvas) 68%, transparent);
+}
+
+.hover-connected-account-grants h5 {
+    margin: 0 0 8px;
+    color: var(--ds-text-primary);
+    font-size: 12px;
+}
+
+.hover-connected-account-grants ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hover-connected-account-grants li {
+    min-height: 38px;
+    padding: 6px 0;
+    border-top: 1px solid var(--hover-account-border);
+}
+
+.hover-connected-account-grant-summary {
+    display: block;
+    margin-top: 2px;
+    color: var(--ds-text-secondary);
+    font-size: 11px;
+}
+
+.hover-connected-account-grant-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.hover-connected-account-empty,
+.hover-connected-account-empty-grants {
+    margin: 0;
+    color: var(--ds-text-secondary);
+    font-size: 12px;
+}
+
+@media (width <= 760px) {
+    .hover-connected-account-heading,
+    .hover-connected-account-card-header,
+    .hover-connected-account-grants li {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .hover-connected-account-badges {
+        justify-content: flex-start;
+    }
+
+    .hover-connected-account-facts {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

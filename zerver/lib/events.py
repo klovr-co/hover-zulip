@@ -11,6 +11,7 @@ from django.conf import settings
 from django.utils.translation import gettext as _
 from typing_extensions import NotRequired, TypedDict
 
+from hover.lib_connected_accounts import get_visible_connected_account_data
 from hover.lib_spaces import get_accessible_spaces, get_space_data
 from version import API_FEATURE_LEVEL, ZULIP_MERGE_BASE, ZULIP_VERSION
 from zerver.actions.default_streams import default_stream_groups_to_dicts_sorted
@@ -860,6 +861,17 @@ def fetch_initial_state_data(
             if user_profile is None
             else [get_space_data(space) for space in get_accessible_spaces(user_profile)]
         )
+
+    if want("hover_connected_account"):
+        if user_profile is None:
+            connected_accounts: list[dict[str, Any]] = []
+            connected_account_grants: list[dict[str, Any]] = []
+        else:
+            connected_accounts, connected_account_grants = get_visible_connected_account_data(
+                user_profile
+            )
+        state["hover_connected_accounts"] = connected_accounts
+        state["hover_connected_account_grants"] = connected_account_grants
 
     if want("update_message_flags") and want("message"):
         # Keeping unread_msgs updated requires both message flag updates and
@@ -2047,6 +2059,32 @@ def apply_event(
             state["hover_spaces"] = [
                 space for space in state["hover_spaces"] if space["id"] != event["space_id"]
             ]
+        else:
+            raise AssertionError("Unexpected event type {type}/{op}".format(**event))
+    elif event["type"] == "hover_connected_account":
+        if event["op"] in {"account_add", "account_update"}:
+            state["hover_connected_accounts"] = [
+                account
+                for account in state["hover_connected_accounts"]
+                if account["id"] != event["account"]["id"]
+            ]
+            state["hover_connected_accounts"].append(event["account"])
+            state["hover_connected_accounts"].sort(
+                key=lambda account: (
+                    account["provider_name"].lower(),
+                    account["display_name"].lower(),
+                )
+            )
+        elif event["op"] == "grant_upsert":
+            state["hover_connected_account_grants"] = [
+                grant
+                for grant in state["hover_connected_account_grants"]
+                if grant["id"] != event["grant"]["id"]
+            ]
+            state["hover_connected_account_grants"].append(event["grant"])
+            state["hover_connected_account_grants"].sort(
+                key=lambda grant: (grant["account_id"], grant["user_id"])
+            )
         else:
             raise AssertionError("Unexpected event type {type}/{op}".format(**event))
     elif event["type"] == "has_zoom_token":

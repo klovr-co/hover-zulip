@@ -1,6 +1,10 @@
 import * as z from "zod/mini";
 
 import {server_add_bot_schema} from "./bot_types.ts";
+import {
+    connected_account_grant_schema,
+    connected_account_schema,
+} from "./hover_connected_accounts.ts";
 import {hover_space_schema} from "./hover_spaces.ts";
 import {realm_default_settings_schema} from "./realm_user_settings_defaults.ts";
 import {api_stream_subscription_schema, never_subscribed_stream_schema} from "./stream_types.ts";
@@ -683,6 +687,10 @@ export const split_state_data_schema = z.object({
     user_groups: z.object({realm_user_groups: z.array(raw_user_group_schema)}),
     channel_folders: z.object({channel_folders: z.array(channel_folder_schema)}),
     hover_spaces: z.object({hover_spaces: z.array(hover_space_schema)}),
+    hover_connected_accounts: z.object({
+        hover_connected_accounts: z.array(connected_account_schema),
+        hover_connected_account_grants: z.array(connected_account_grant_schema),
+    }),
     unread: z.object({
         unread_msgs: z.object({
             pms: z.array(unread_direct_message_info_schema),

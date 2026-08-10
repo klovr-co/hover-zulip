@@ -1290,6 +1290,7 @@ class FetchQueriesTest(ZulipTestCase):
             drafts=1,
             giphy=0,
             hover_space=0,
+            hover_connected_account=0,
             klipy=0,
             tenor=0,
             message=1,

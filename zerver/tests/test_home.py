@@ -84,6 +84,8 @@ class HomeTest(ZulipTestCase):
         "can_invite_others_to_realm",
         "channel_folders",
         "hover_spaces",
+        "hover_connected_accounts",
+        "hover_connected_account_grants",
         "cross_realm_bots",
         "custom_profile_field_types",
         "custom_profile_fields",

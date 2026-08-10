@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import CASCADE, Q, RESTRICT, SET_NULL
+from django.db.models import CASCADE, RESTRICT, SET_NULL, Q
 from django.db.models.functions import Lower
 from django.utils.timezone import now as timezone_now
 
@@ -85,11 +86,157 @@ class SpaceAdministrator(models.Model):
     def clean(self) -> None:
         super().clean()
         if self.space_id is not None and self.realm_id != self.space.realm_id:
-            raise ValidationError({"space": "Space administrators must share the Space organization."})
+            raise ValidationError(
+                {"space": "Space administrators must share the Space organization."}
+            )
         if self.user_id is not None and self.realm_id != self.user.realm_id:
-            raise ValidationError({"user": "Space administrators must share the Space organization."})
+            raise ValidationError(
+                {"user": "Space administrators must share the Space organization."}
+            )
         if self.added_by_id is not None and self.realm_id != self.added_by.realm_id:
-            raise ValidationError({"added_by": "Space administrators must share the actor organization."})
+            raise ValidationError(
+                {"added_by": "Space administrators must share the actor organization."}
+            )
+
+
+provider_key_validator = RegexValidator(
+    regex=r"^[a-z][a-z0-9_]{0,31}$",
+    message="Provider keys must start with a letter and contain only lowercase letters, digits, and underscores.",
+)
+selector_type_validator = RegexValidator(
+    regex=r"^[a-z][a-z0-9_]{0,63}$",
+    message="Selector types must start with a letter and contain only lowercase letters, digits, and underscores.",
+)
+source_ref_validator = RegexValidator(
+    regex=r"^src_[0-9a-f]{32}$",
+    message="Source references must be opaque Studio source IDs.",
+)
+
+
+class ConnectedAccount(models.Model):
+    MAX_DISPLAY_NAME_LENGTH = 100
+    MAX_PROVIDER_NAME_LENGTH = 60
+
+    class ApprovalState(models.TextChoices):
+        PENDING = "pending", "Pending approval"
+        APPROVED = "approved", "Approved"
+        REVOKED = "revoked", "Revoked"
+
+    class HealthStatus(models.TextChoices):
+        UNKNOWN = "unknown", "Unknown"
+        HEALTHY = "healthy", "Healthy"
+        DEGRADED = "degraded", "Degraded"
+        UNAVAILABLE = "unavailable", "Unavailable"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_connected_accounts")
+    provider_key = models.CharField(max_length=32, validators=[provider_key_validator])
+    provider_name = models.CharField(max_length=MAX_PROVIDER_NAME_LENGTH)
+    external_account_id = models.UUIDField()
+    display_name = models.CharField(max_length=MAX_DISPLAY_NAME_LENGTH)
+    created_by = models.ForeignKey(
+        UserProfile,
+        null=True,
+        on_delete=SET_NULL,
+        related_name="created_hover_connected_accounts",
+    )
+    owner = models.ForeignKey(
+        UserProfile,
+        null=True,
+        on_delete=SET_NULL,
+        related_name="owned_hover_connected_accounts",
+    )
+    approval_state = models.TextField(choices=ApprovalState.choices, default=ApprovalState.PENDING)
+    health_status = models.TextField(choices=HealthStatus.choices, default=HealthStatus.UNKNOWN)
+    health_checked_at = models.DateTimeField(null=True)
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["realm", "provider_key", "external_account_id"],
+                name="hover_connected_account_unique_external_id",
+            )
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        if self.created_by_id is not None and self.created_by.realm_id != self.realm_id:
+            raise ValidationError(
+                {"created_by": "Connected Accounts and creators must share an organization."}
+            )
+        if self.owner_id is not None and self.owner.realm_id != self.realm_id:
+            raise ValidationError(
+                {"owner": "Connected Accounts and owners must share an organization."}
+            )
+
+
+class ConnectedAccountGrant(models.Model):
+    class State(models.TextChoices):
+        ACTIVE = "active", "Active"
+        REVOKED = "revoked", "Revoked"
+
+    realm = models.ForeignKey(
+        Realm, on_delete=CASCADE, related_name="hover_connected_account_grants"
+    )
+    account = models.ForeignKey(ConnectedAccount, on_delete=CASCADE, related_name="grants")
+    user = models.ForeignKey(
+        UserProfile, on_delete=CASCADE, related_name="hover_connected_account_grants"
+    )
+    created_by = models.ForeignKey(
+        UserProfile,
+        null=True,
+        on_delete=SET_NULL,
+        related_name="created_hover_connected_account_grants",
+    )
+    state = models.TextField(choices=State.choices, default=State.ACTIVE)
+    all_selectors = models.BooleanField(default=False)
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["account", "user"], name="hover_connected_account_grant_unique_user"
+            )
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        if self.account_id is not None and self.account.realm_id != self.realm_id:
+            raise ValidationError({"account": "Grants and accounts must share an organization."})
+        if self.user_id is not None and self.user.realm_id != self.realm_id:
+            raise ValidationError({"user": "Grants and users must share an organization."})
+        if self.created_by_id is not None and self.created_by.realm_id != self.realm_id:
+            raise ValidationError(
+                {"created_by": "Grants and their creators must share an organization."}
+            )
+
+
+class ConnectedAccountGrantSelector(models.Model):
+    MAX_DISPLAY_NAME_LENGTH = 100
+    MAX_SOURCE_REF_LENGTH = 36
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    grant = models.ForeignKey(ConnectedAccountGrant, on_delete=CASCADE, related_name="selectors")
+    selector_type = models.CharField(max_length=64, validators=[selector_type_validator])
+    source_ref = models.CharField(
+        max_length=MAX_SOURCE_REF_LENGTH, validators=[source_ref_validator]
+    )
+    display_name = models.CharField(max_length=MAX_DISPLAY_NAME_LENGTH)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["grant", "selector_type", "source_ref"],
+                name="hover_connected_account_grant_unique_selector",
+            )
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        if self.grant_id is not None and self.grant.realm_id != self.realm_id:
+            raise ValidationError({"grant": "Grant selectors must share the grant organization."})
 
 
 class GeneratedItem(models.Model):
@@ -112,7 +259,9 @@ class GeneratedItem(models.Model):
     def clean(self) -> None:
         super().clean()
         if self.message_id is not None and self.realm_id != self.message.realm_id:
-            raise ValidationError({"message": "Generated items and messages must share an organization."})
+            raise ValidationError(
+                {"message": "Generated items and messages must share an organization."}
+            )
 
 
 class EvidenceLink(models.Model):

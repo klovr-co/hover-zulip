@@ -5,6 +5,7 @@ import * as attachments_ui from "./attachments_ui.ts";
 import * as blueslip from "./blueslip.ts";
 import * as settings_account from "./settings_account.ts";
 import * as settings_bots from "./settings_bots.ts";
+import * as settings_connected_accounts from "./settings_connected_accounts.ts";
 import * as settings_emoji from "./settings_emoji.ts";
 import * as settings_exports from "./settings_exports.ts";
 import * as settings_folders from "./settings_folders.ts";
@@ -84,6 +85,7 @@ export function initialize(): void {
         settings_realm_user_settings_defaults.set_up,
     );
     load_func_dict.set("channel-folders", settings_folders.set_up);
+    load_func_dict.set("connected-account-settings", settings_connected_accounts.set_up);
 }
 
 export function load_settings_section(section: string, base: string): void {
@@ -122,5 +124,6 @@ export function reset_sections(): void {
     settings_muted_users.reset();
     alert_words_ui.reset();
     settings_folders.reset();
+    settings_connected_accounts.reset();
     // settings_users doesn't need a reset()
 }

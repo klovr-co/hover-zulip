@@ -14,6 +14,13 @@ from django.urls.resolvers import URLPattern, URLResolver
 from django.utils.module_loading import import_string
 from django.views.generic import RedirectView
 
+from hover.views_connected_accounts import (
+    get_connected_account,
+    list_connected_accounts,
+    revoke_connected_account_grant,
+    update_connected_account,
+    upsert_connected_account_grant,
+)
 from hover.views_spaces import (
     add_space_administrator,
     create_space,
@@ -598,6 +605,20 @@ v1_api_and_json_patterns = [
     rest_path(
         "hover/spaces/<int:space_id>/admins/<int:user_id>",
         DELETE=remove_space_administrator,
+    ),
+    rest_path("hover/connected_accounts", GET=list_connected_accounts),
+    rest_path(
+        "hover/connected_accounts/<int:account_id>",
+        GET=get_connected_account,
+        PATCH=update_connected_account,
+    ),
+    rest_path(
+        "hover/connected_accounts/<int:account_id>/grants",
+        POST=upsert_connected_account_grant,
+    ),
+    rest_path(
+        "hover/connected_accounts/<int:account_id>/grants/<int:grant_id>",
+        DELETE=revoke_connected_account_grant,
     ),
     # topic-muting -> zerver.views.user_topics
     # (deprecated and will be removed once clients are migrated to use '/user_topics')

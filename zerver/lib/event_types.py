@@ -131,6 +131,46 @@ class HoverSpaceDeleteEvent(BaseEvent):
     space_id: int
 
 
+class HoverConnectedAccount(BaseModel):
+    id: int
+    provider_key: str
+    provider_name: str
+    external_account_id: str
+    display_name: str
+    created_by_id: int | None
+    owner_id: int | None
+    approval_state: Literal["pending", "approved", "revoked"]
+    health_status: Literal["unknown", "healthy", "degraded", "unavailable"]
+    health_checked_at: str | None
+
+
+class HoverConnectedAccountSelector(BaseModel):
+    selector_type: str
+    source_ref: str
+    display_name: str
+
+
+class HoverConnectedAccountGrant(BaseModel):
+    id: int
+    account_id: int
+    user_id: int
+    state: Literal["active", "revoked"]
+    all_selectors: bool
+    selectors: list[HoverConnectedAccountSelector]
+
+
+class HoverConnectedAccountAccountEvent(BaseEvent):
+    type: Literal["hover_connected_account"]
+    op: Literal["account_add", "account_update"]
+    account: HoverConnectedAccount
+
+
+class HoverConnectedAccountGrantEvent(BaseEvent):
+    type: Literal["hover_connected_account"]
+    op: Literal["grant_upsert"]
+    grant: HoverConnectedAccountGrant
+
+
 class DetailedCustomProfileCore(BaseModel):
     id: int
     type: int

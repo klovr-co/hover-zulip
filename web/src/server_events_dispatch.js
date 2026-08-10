@@ -24,6 +24,7 @@ import * as emoji_frequency from "./emoji_frequency.ts";
 import * as emoji_picker from "./emoji_picker.ts";
 import * as gear_menu from "./gear_menu.ts";
 import * as gif_state from "./gif_state.ts";
+import * as hover_connected_accounts from "./hover_connected_accounts.ts";
 import * as hover_spaces from "./hover_spaces.ts";
 import * as inbox_ui from "./inbox_ui.ts";
 import * as inbox_util from "./inbox_util.ts";
@@ -66,6 +67,7 @@ import * as scroll_bar from "./scroll_bar.ts";
 import * as settings_account from "./settings_account.ts";
 import * as settings_bots from "./settings_bots.ts";
 import * as settings_components from "./settings_components.ts";
+import * as settings_connected_accounts from "./settings_connected_accounts.ts";
 import * as settings_config from "./settings_config.ts";
 import * as settings_emoji from "./settings_emoji.ts";
 import * as settings_exports from "./settings_exports.ts";
@@ -170,6 +172,15 @@ export function dispatch_normal_event(event) {
                 hover_spaces.upsert(event.space);
             }
             stream_list.update_streams_sidebar(true);
+            break;
+
+        case "hover_connected_account":
+            if (event.op === "grant_upsert") {
+                hover_connected_accounts.upsert_grant(event.grant);
+            } else {
+                hover_connected_accounts.upsert_account(event.account);
+            }
+            settings_connected_accounts.rerender();
             break;
 
         case "custom_profile_fields":
@@ -385,6 +396,10 @@ export function dispatch_normal_event(event) {
                 gif_rating_policy: gif_state.update_gif_icon_visibility,
                 hover_enabled: () => {
                     $("body").toggleClass("hover-enabled", realm.realm_hover_enabled);
+                    $(".hover-connected-account-settings-entry").toggleClass(
+                        "hide",
+                        !realm.realm_hover_enabled,
+                    );
                     navigation_views.set_hover_enabled(realm.realm_hover_enabled);
                     stream_list.update_streams_sidebar(true);
                     if (realm.realm_hover_enabled) {
@@ -399,6 +414,15 @@ export function dispatch_normal_event(event) {
                                 hover_spaces.initialize({hover_spaces: spaces});
                                 if (realm.realm_hover_enabled) {
                                     stream_list.update_streams_sidebar(true);
+                                }
+                            },
+                        });
+                        void channel.get({
+                            url: "/json/hover/connected_accounts",
+                            success(raw_data) {
+                                hover_connected_accounts.replace_from_response(raw_data);
+                                if (realm.realm_hover_enabled) {
+                                    settings_connected_accounts.rerender();
                                 }
                             },
                         });

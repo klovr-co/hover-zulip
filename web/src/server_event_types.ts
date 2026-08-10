@@ -1,5 +1,9 @@
 import * as z from "zod/mini";
 
+import {
+    connected_account_grant_schema,
+    connected_account_schema,
+} from "./hover_connected_accounts.ts";
 import {hover_space_schema} from "./hover_spaces.ts";
 import {group_setting_value_schema, topic_link_schema} from "./types.ts";
 
@@ -16,6 +20,7 @@ export const FETCH_EVENT_TYPES: string[] = [
     "device",
     "drafts",
     "giphy",
+    "hover_connected_account",
     "hover_space",
     "klipy",
     "message",
@@ -144,3 +149,19 @@ export const hover_space_event_schema = z.discriminatedUnion("op", [
     }),
 ]);
 export type HoverSpaceEvent = z.output<typeof hover_space_event_schema>;
+
+export const hover_connected_account_event_schema = z.discriminatedUnion("op", [
+    z.object({
+        id: z.number(),
+        type: z.literal("hover_connected_account"),
+        op: z.enum(["account_add", "account_update"]),
+        account: connected_account_schema,
+    }),
+    z.object({
+        id: z.number(),
+        type: z.literal("hover_connected_account"),
+        op: z.literal("grant_upsert"),
+        grant: connected_account_grant_schema,
+    }),
+]);
+export type HoverConnectedAccountEvent = z.output<typeof hover_connected_account_event_schema>;
