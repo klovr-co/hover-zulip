@@ -3,6 +3,7 @@ import {$} from "jquery";
 import render_hover_all_view_filters from "../templates/hover_all_view_filters.hbs";
 
 import * as hover_spaces from "./hover_spaces.ts";
+import {$t} from "./i18n.ts";
 import * as narrow_state from "./narrow_state.ts";
 
 let active_filter = "all";
@@ -66,8 +67,17 @@ export function initialize(): void {
         const label = $button.clone().children().remove().end().text().trim();
         $(".hover-all-view-filters__status").text(
             active_filter === "all"
-                ? "Showing teammate posts and the latest meaningful state of every enabled Module."
-                : `Showing ${label} updates from the same native Space history.`,
+                ? $t({
+                      defaultMessage:
+                          "Showing teammate posts and the latest meaningful state of every enabled Module.",
+                  })
+                : $t(
+                      {
+                          defaultMessage:
+                              "Showing {label} updates from the same native Space history.",
+                      },
+                      {label},
+                  ),
         );
         apply_filter();
     });
