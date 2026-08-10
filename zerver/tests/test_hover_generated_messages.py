@@ -119,7 +119,9 @@ class HoverGeneratedMessageTest(BaseAction):
         self.assertEqual(event_metadata["presentation"]["label"], "Progress update")
         self.assertEqual(event_metadata["presentation"]["importance"], "normal")
         self.assertTrue(event_metadata["lineage"]["is_latest"])
-        self.assertEqual([source["key"] for source in event_metadata["sources"]], ["whatsapp", "github"])
+        self.assertEqual(
+            [source["key"] for source in event_metadata["sources"]], ["whatsapp", "github"]
+        )
 
     def test_lineage_projects_latest_state_and_authorized_history(self) -> None:
         hamlet = self.example_user("hamlet")

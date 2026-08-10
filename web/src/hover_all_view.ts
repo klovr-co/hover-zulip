@@ -45,7 +45,7 @@ function refresh(): void {
                 ?.generated_count ?? 0,
     }));
     $("#message_feed_container").prepend(
-        $($.parseHTML(render_hover_all_view_filters({space_name: space.name, modules, sources}))),
+        render_hover_all_view_filters({space_name: space.name, modules, sources}),
     );
     apply_filter();
 }

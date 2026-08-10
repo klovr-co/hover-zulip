@@ -2,7 +2,9 @@ from collections import OrderedDict, defaultdict
 from datetime import datetime, timezone
 from typing import Any
 
-from hover.models import GeneratedItem, IntegrationMessageProvenance
+from django.db.models import Q
+
+from hover.models import GeneratedItem, IntegrationMessageProvenance, Space
 
 PROVIDER_ICON_CLASSES = {
     "whatsapp": "fa fa-whatsapp",
@@ -20,30 +22,58 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
             message_id__in=message_ids,
             message__realm_id=realm_id,
         )
-        .select_related("attachment")
+        .select_related("attachment", "message")
         .prefetch_related("evidence_links")
         .order_by("id")
     )
-    lineage_spaces = {
-        (item.attachment.space_id, item.lineage_key)
-        for item in items
-        if item.attachment is not None and item.lineage_key
-    }
-    lineage_items: dict[tuple[int, str], list[GeneratedItem]] = defaultdict(list)
-    if lineage_spaces:
-        space_ids = {space_id for space_id, _lineage_key in lineage_spaces}
-        keys = {lineage_key for _space_id, lineage_key in lineage_spaces}
-        related_items = GeneratedItem.objects.filter(
+    recipient_ids = {item.message.recipient_id for item in items}
+    space_by_recipient_id = dict(
+        Space.objects.filter(
             realm_id=realm_id,
-            attachment__space_id__in=space_ids,
-            lineage_key__in=keys,
-            message__realm_id=realm_id,
-        ).select_related("attachment", "message")
+            stream__recipient_id__in=recipient_ids,
+        ).values_list("stream__recipient_id", "id")
+    )
+
+    def lineage_scope(item: GeneratedItem) -> tuple[str, int, str] | None:
+        if not item.lineage_key:
+            return None
+        if item.attachment is not None:
+            return ("space", item.attachment.space_id, item.lineage_key)
+        space_id = space_by_recipient_id.get(item.message.recipient_id)
+        if space_id is not None:
+            return ("space", space_id, item.lineage_key)
+        return ("recipient", item.message.recipient_id, item.lineage_key)
+
+    requested_lineages = {scope for item in items if (scope := lineage_scope(item)) is not None}
+    lineage_items: dict[tuple[str, int, str], list[GeneratedItem]] = defaultdict(list)
+    if requested_lineages:
+        space_ids = {scope_id for kind, scope_id, _key in requested_lineages if kind == "space"}
+        fallback_recipient_ids = {
+            scope_id for kind, scope_id, _key in requested_lineages if kind == "recipient"
+        }
+        space_recipient_ids = {
+            recipient_id
+            for recipient_id, space_id in space_by_recipient_id.items()
+            if space_id in space_ids
+        }
+        keys = {lineage_key for _kind, _scope_id, lineage_key in requested_lineages}
+        related_items = (
+            GeneratedItem.objects.filter(
+                realm_id=realm_id,
+                lineage_key__in=keys,
+                message__realm_id=realm_id,
+            )
+            .filter(
+                Q(attachment__space_id__in=space_ids)
+                | Q(message__recipient_id__in=space_recipient_ids | fallback_recipient_ids)
+            )
+            .select_related("attachment", "message")
+        )
         for related in related_items:
-            assert related.attachment is not None
-            key = (related.attachment.space_id, related.lineage_key or "")
-            if key in lineage_spaces:
-                lineage_items[key].append(related)
+            scope = lineage_scope(related)
+            if scope in requested_lineages:
+                assert scope is not None
+                lineage_items[scope].append(related)
 
     def item_time(item: GeneratedItem) -> tuple[datetime, int]:
         return (
@@ -83,11 +113,14 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
         payload = item.payload if isinstance(item.payload, dict) else {}
         lifecycle = payload.get("lifecycle")
         status = payload.get("status")
-        state = lifecycle if isinstance(lifecycle, str) else status if isinstance(status, str) else None
+        state = (
+            lifecycle if isinstance(lifecycle, str) else status if isinstance(status, str) else None
+        )
         lineage_history: list[dict[str, Any]] = []
         is_latest = True
-        if item.attachment is not None and item.lineage_key:
-            history = lineage_items.get((item.attachment.space_id, item.lineage_key), [])
+        scope = lineage_scope(item)
+        if scope is not None:
+            history = lineage_items.get(scope, [])
             is_latest = not history or history[-1].id == item.id
             for related in reversed(history):
                 related_payload = related.payload if isinstance(related.payload, dict) else {}
