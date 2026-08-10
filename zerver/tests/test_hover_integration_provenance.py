@@ -104,7 +104,8 @@ class HoverIntegrationProvenanceTest(ZulipTestCase):
         )
         self.space, _ = do_launch_space(self.space, acting_user=self.actor)
         assert self.space.stream is not None
-        self.subscribe(self.bot, self.space.stream.name, invite_only=True)
+        self.stream = self.space.stream
+        self.subscribe(self.bot, self.stream.name, invite_only=True)
 
     def associate(self) -> IntegrationRouteAssociation:
         route, created = do_associate_integration_route(
@@ -117,9 +118,7 @@ class HoverIntegrationProvenanceTest(ZulipTestCase):
         return route
 
     def integration_url(self, integration_name: str) -> str:
-        stream = self.space.stream
-        assert stream is not None
-        query = urlencode({"stream": stream.name, "api_key": self.bot.api_key})
+        query = urlencode({"stream": self.stream.name, "api_key": self.bot.api_key})
         return f"/api/v1/external/{integration_name}?{query}"
 
     def test_api_is_idempotent_projects_safe_route_and_requires_member_admin_grant(self) -> None:
@@ -167,13 +166,13 @@ class HoverIntegrationProvenanceTest(ZulipTestCase):
 
     def test_native_message_preserves_body_and_gets_immutable_convergent_provenance(self) -> None:
         before_id = self.send_stream_message(
-            self.bot, self.space.stream.name, content="native body", topic_name="push"
+            self.bot, self.stream.name, content="native body", topic_name="push"
         )
         self.assertFalse(IntegrationMessageProvenance.objects.filter(message_id=before_id).exists())
         route = self.associate()
 
         message_id = self.send_stream_message(
-            self.bot, self.space.stream.name, content="native body", topic_name="push"
+            self.bot, self.stream.name, content="native body", topic_name="push"
         )
         message = Message.objects.get(id=message_id)
         self.assertEqual(message.content, "native body")
@@ -197,7 +196,7 @@ class HoverIntegrationProvenanceTest(ZulipTestCase):
 
         do_detach_integration_route(acting_user=self.actor, space=self.space, route_id=route.id)
         after_id = self.send_stream_message(
-            self.bot, self.space.stream.name, content="after detach", topic_name="push"
+            self.bot, self.stream.name, content="after detach", topic_name="push"
         )
         self.assertFalse(IntegrationMessageProvenance.objects.filter(message_id=after_id).exists())
         self.assertTrue(IntegrationMessageProvenance.objects.filter(message_id=message_id).exists())
@@ -248,7 +247,7 @@ class HoverIntegrationProvenanceTest(ZulipTestCase):
             content_type="application/json",
         )
 
-        self.assertEqual(message.topic_name(), "(no topic)")
+        self.assertEqual(message.topic_name(), "")
         self.assertEqual(message.content, "New Instagram mention from Apify")
         provenance = IntegrationMessageProvenance.objects.get(message=message)
         self.assertEqual(provenance.association, route)
@@ -263,7 +262,7 @@ class HoverIntegrationProvenanceTest(ZulipTestCase):
 
         self.account.approval_state = ConnectedAccount.ApprovalState.REVOKED
         self.account.save(update_fields=["approval_state", "date_updated"])
-        revoked_id = self.send_stream_message(self.bot, self.space.stream.name)
+        revoked_id = self.send_stream_message(self.bot, self.stream.name)
         self.assertFalse(
             IntegrationMessageProvenance.objects.filter(message_id=revoked_id).exists()
         )
@@ -304,13 +303,14 @@ class HoverIntegrationProvenanceTest(ZulipTestCase):
         self.associate()
         before = Message.objects.count()
         with (
+            self.artificial_transaction_savepoint(),
             patch(
                 "hover.integration_capture.IntegrationMessageProvenance.objects.bulk_create",
                 side_effect=RuntimeError("capture failed"),
             ),
             self.assertRaisesRegex(RuntimeError, "capture failed"),
         ):
-            self.send_stream_message(self.bot, self.space.stream.name)
+            self.send_stream_message(self.bot, self.stream.name)
         self.assertEqual(Message.objects.count(), before)
 
     def test_models_reject_unsafe_links_and_cross_realm_bots(self) -> None:

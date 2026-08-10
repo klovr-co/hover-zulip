@@ -109,7 +109,7 @@ class HoverModulesTest(ZulipTestCase):
         result = self.client_get("/json/hover/modules")
         self.assert_json_success(result)
         modules = orjson.loads(result.content)["modules"]
-        self.assertEqual(len(modules), 6)
+        self.assert_length(modules, 6)
         marketing = next(item for item in modules if item["definition_key"] == "marketing_digest")
         self.assertEqual(marketing["supported_triggers"], ["manual", "schedule"])
         self.assertEqual(marketing["requirements"][0]["maximum_count"], 1)
@@ -274,7 +274,12 @@ class HoverModulesTest(ZulipTestCase):
         )
         self.assert_json_success(detached)
         detached_space = orjson.loads(detached.content)["space"]
-        self.assertEqual([item["id"] for item in detached_space["attachments"]], [second.id])
+        self.assertEqual(
+            [item["id"] for item in detached_space["attachments"]],
+            [self.attachment.id, second.id],
+        )
+        self.assertEqual(detached_space["attachments"][0]["state"], "detached")
+        self.assertTrue(detached_space["attachments"][0]["can_browse_records"])
         self.assertEqual(detached_space["module_installations"][0]["state"], "paused_detached")
         installation.refresh_from_db()
         self.assertEqual(installation.state, ModuleInstallation.State.PAUSED_DETACHED)

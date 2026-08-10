@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("live_since", models.DateTimeField(default=django.utils.timezone.now)),
-                ("detached_at", models.DateTimeField(null=True)),
+                ("detached_at", models.DateTimeField(blank=True, null=True)),
                 ("date_created", models.DateTimeField(default=django.utils.timezone.now)),
                 ("date_updated", models.DateTimeField(auto_now=True)),
                 (

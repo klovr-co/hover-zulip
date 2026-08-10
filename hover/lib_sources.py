@@ -4,7 +4,7 @@ from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from django.core import signing
-from django.db.models import Prefetch
+from django.db.models import Prefetch, QuerySet
 from django.utils.timezone import now as timezone_now
 from django.utils.translation import gettext as _
 
@@ -32,7 +32,7 @@ class HistoryBoundary:
     custom_start_date: date | None
 
 
-def attachment_queryset() -> Prefetch:
+def attachment_queryset() -> Prefetch[str, QuerySet[SpaceAttachment], str]:
     return Prefetch(
         "attachments",
         queryset=SpaceAttachment.objects.filter(

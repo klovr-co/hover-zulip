@@ -2,6 +2,7 @@ from datetime import date, datetime
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils.timezone import now as timezone_now
 from django.utils.translation import gettext as _
 
 from hover.clawer_sync import ClawerSource, ClawerSync
@@ -151,7 +152,11 @@ def _attach_canonical_source(
                 raise HistoryWindowConflictError
             if attachment.state == SpaceAttachment.State.DETACHED:
                 attachment.state = SpaceAttachment.State.ACTIVE
-                attachment.save(update_fields=["state", "date_updated"])
+                attachment.detached_at = None
+                attachment.detached_by = None
+                attachment.save(
+                    update_fields=["state", "detached_at", "detached_by", "date_updated"]
+                )
             return attachment, False
 
         attachment = SpaceAttachment.objects.create(
@@ -263,7 +268,9 @@ def do_detach_source(
     if attachment.state == SpaceAttachment.State.DETACHED:
         return attachment, False
     attachment.state = SpaceAttachment.State.DETACHED
-    attachment.save(update_fields=["state", "date_updated"])
+    attachment.detached_at = timezone_now()
+    attachment.detached_by = acting_user
+    attachment.save(update_fields=["state", "detached_at", "detached_by", "date_updated"])
     from hover.actions_modules import pause_installations_for_attachment
 
     pause_installations_for_attachment(attachment)

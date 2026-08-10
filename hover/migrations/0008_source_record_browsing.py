@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="spaceattachment",
             name="detached_at",
-            field=models.DateTimeField(null=True),
+            field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddConstraint(
             model_name="spaceattachment",
@@ -40,6 +40,7 @@ class Migration(migrations.Migration):
             model_name="spaceattachment",
             name="detached_by",
             field=models.ForeignKey(
+                blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="hover_space_attachments_detached",

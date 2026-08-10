@@ -1,9 +1,14 @@
+from collections.abc import Iterable
+from typing import Any
+
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import CASCADE, RESTRICT, SET_NULL, Q
+from django.db.models.base import ModelBase
 from django.db.models.functions import Lower
 from django.utils.timezone import now as timezone_now
+from typing_extensions import override
 
 from zerver.models.channel_folders import ChannelFolder
 from zerver.models.messages import Message
@@ -52,13 +57,16 @@ class Space(models.Model):
             ),
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if self.category_id is not None and self.realm_id != self.category.realm_id:
+        if self.realm_id != self.category.realm_id:
             raise ValidationError({"category": "Spaces and categories must share an organization."})
-        if self.created_by_id is not None and self.realm_id != self.created_by.realm_id:
+        created_by = self.created_by
+        if created_by is not None and self.realm_id != created_by.realm_id:
             raise ValidationError({"created_by": "Spaces and creators must share an organization."})
-        if self.stream_id is not None and self.realm_id != self.stream.realm_id:
+        stream = self.stream
+        if stream is not None and self.realm_id != stream.realm_id:
             raise ValidationError({"stream": "Spaces and channels must share an organization."})
 
 
@@ -83,17 +91,19 @@ class SpaceAdministrator(models.Model):
             )
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if self.space_id is not None and self.realm_id != self.space.realm_id:
+        if self.realm_id != self.space.realm_id:
             raise ValidationError(
                 {"space": "Space administrators must share the Space organization."}
             )
-        if self.user_id is not None and self.realm_id != self.user.realm_id:
+        if self.realm_id != self.user.realm_id:
             raise ValidationError(
                 {"user": "Space administrators must share the Space organization."}
             )
-        if self.added_by_id is not None and self.realm_id != self.added_by.realm_id:
+        added_by = self.added_by
+        if added_by is not None and self.realm_id != added_by.realm_id:
             raise ValidationError(
                 {"added_by": "Space administrators must share the actor organization."}
             )
@@ -130,13 +140,15 @@ class SpaceMembership(models.Model):
             )
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if self.space_id is not None and self.realm_id != self.space.realm_id:
+        if self.realm_id != self.space.realm_id:
             raise ValidationError({"space": "Space memberships must share the Space organization."})
-        if self.user_id is not None and self.realm_id != self.user.realm_id:
+        if self.realm_id != self.user.realm_id:
             raise ValidationError({"user": "Space memberships must share the user organization."})
-        if self.added_by_id is not None and self.realm_id != self.added_by.realm_id:
+        added_by = self.added_by
+        if added_by is not None and self.realm_id != added_by.realm_id:
             raise ValidationError(
                 {"added_by": "Space memberships must share the actor organization."}
             )
@@ -184,13 +196,15 @@ class SpaceMembershipSuggestion(models.Model):
             ),
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if self.space_id is not None and self.realm_id != self.space.realm_id:
+        if self.realm_id != self.space.realm_id:
             raise ValidationError({"space": "Suggestions must share the Space organization."})
-        if self.user_id is not None and self.realm_id != self.user.realm_id:
+        if self.realm_id != self.user.realm_id:
             raise ValidationError({"user": "Suggestions must share the user organization."})
-        if self.updated_by_id is not None and self.realm_id != self.updated_by.realm_id:
+        updated_by = self.updated_by
+        if updated_by is not None and self.realm_id != updated_by.realm_id:
             raise ValidationError({"updated_by": "Suggestions must share the actor organization."})
 
 
@@ -268,13 +282,16 @@ class ConnectedAccount(models.Model):
             )
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if self.created_by_id is not None and self.created_by.realm_id != self.realm_id:
+        created_by = self.created_by
+        if created_by is not None and created_by.realm_id != self.realm_id:
             raise ValidationError(
                 {"created_by": "Connected Accounts and creators must share an organization."}
             )
-        if self.owner_id is not None and self.owner.realm_id != self.realm_id:
+        owner = self.owner
+        if owner is not None and owner.realm_id != self.realm_id:
             raise ValidationError(
                 {"owner": "Connected Accounts and owners must share an organization."}
             )
@@ -329,13 +346,15 @@ class ConnectedAccountGrant(models.Model):
             )
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if self.account_id is not None and self.account.realm_id != self.realm_id:
+        if self.account.realm_id != self.realm_id:
             raise ValidationError({"account": "Grants and accounts must share an organization."})
-        if self.user_id is not None and self.user.realm_id != self.realm_id:
+        if self.user.realm_id != self.realm_id:
             raise ValidationError({"user": "Grants and users must share an organization."})
-        if self.created_by_id is not None and self.created_by.realm_id != self.realm_id:
+        created_by = self.created_by
+        if created_by is not None and created_by.realm_id != self.realm_id:
             raise ValidationError(
                 {"created_by": "Grants and their creators must share an organization."}
             )
@@ -361,9 +380,10 @@ class ConnectedAccountGrantSelector(models.Model):
             )
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if self.grant_id is not None and self.grant.realm_id != self.realm_id:
+        if self.grant.realm_id != self.realm_id:
             raise ValidationError({"grant": "Grant selectors must share the grant organization."})
 
 
@@ -401,9 +421,10 @@ class Source(models.Model):
             )
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if self.account_id is not None and self.account.realm_id != self.realm_id:
+        if self.account.realm_id != self.realm_id:
             raise ValidationError({"account": "Sources and accounts must share an organization."})
         if self.external_url and not self.external_url.startswith("https://"):
             raise ValidationError({"external_url": "Source links must use HTTPS."})
@@ -460,9 +481,10 @@ class SpaceAttachment(models.Model):
         on_delete=SET_NULL,
         related_name="hover_space_attachments_added",
     )
-    detached_at = models.DateTimeField(null=True)
+    detached_at = models.DateTimeField(blank=True, null=True)
     detached_by = models.ForeignKey(
         UserProfile,
+        blank=True,
         null=True,
         on_delete=SET_NULL,
         related_name="hover_space_attachments_detached",
@@ -493,21 +515,24 @@ class SpaceAttachment(models.Model):
             ),
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if self.space_id is not None and self.space.realm_id != self.realm_id:
+        if self.space.realm_id != self.realm_id:
             raise ValidationError(
                 {"space": "Space attachments and Spaces must share an organization."}
             )
-        if self.source_id is not None and self.source.realm_id != self.realm_id:
+        if self.source.realm_id != self.realm_id:
             raise ValidationError(
                 {"source": "Space attachments and Sources must share an organization."}
             )
-        if self.attached_by_id is not None and self.attached_by.realm_id != self.realm_id:
+        attached_by = self.attached_by
+        if attached_by is not None and attached_by.realm_id != self.realm_id:
             raise ValidationError(
                 {"attached_by": "Space attachments and actors must share an organization."}
             )
-        if self.detached_by_id is not None and self.detached_by.realm_id != self.realm_id:
+        detached_by = self.detached_by
+        if detached_by is not None and detached_by.realm_id != self.realm_id:
             raise ValidationError(
                 {
                     "detached_by": "Space attachments and detaching actors must share an organization."
@@ -536,7 +561,7 @@ class IntegrationRouteAssociation(models.Model):
         related_name="configured_hover_integration_routes",
     )
     live_since = models.DateTimeField(default=timezone_now)
-    detached_at = models.DateTimeField(null=True)
+    detached_at = models.DateTimeField(blank=True, null=True)
     date_created = models.DateTimeField(default=timezone_now)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -554,38 +579,35 @@ class IntegrationRouteAssociation(models.Model):
             ),
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if self.attachment_id is not None and self.attachment.realm_id != self.realm_id:
+        if self.attachment.realm_id != self.realm_id:
             raise ValidationError({"attachment": "Integration routes must share the organization."})
-        if self.bot_id is not None and self.bot.realm_id != self.realm_id:
+        if self.bot.realm_id != self.realm_id:
             raise ValidationError({"bot": "Integration routes must share the organization."})
-        if self.stream_id is not None and self.stream.realm_id != self.realm_id:
+        if self.stream.realm_id != self.realm_id:
             raise ValidationError({"stream": "Integration routes must share the organization."})
-        if self.configured_by_id is not None and self.configured_by.realm_id != self.realm_id:
+        configured_by = self.configured_by
+        if configured_by is not None and configured_by.realm_id != self.realm_id:
             raise ValidationError(
                 {"configured_by": "Integration routes and actors must share an organization."}
             )
-        if (
-            self.attachment_id is not None
-            and self.stream_id is not None
-            and self.attachment.space.stream_id != self.stream_id
-        ):
+        if self.attachment.space.stream_id != self.stream_id:
             raise ValidationError({"stream": "Use the attached Space destination."})
-        if self.bot_id is not None and (
+        if (
             not self.bot.is_active
             or not self.bot.is_bot
             or self.bot.bot_type != UserProfile.INCOMING_WEBHOOK_BOT
         ):
             raise ValidationError({"bot": "Choose an active incoming webhook bot."})
-        if self.attachment_id is not None and self.bot_id is not None:
-            source = self.attachment.source
-            if (
-                source.account.connection_kind != ConnectedAccount.ConnectionKind.NATIVE_INTEGRATION
-                or source.account.incoming_webhook_bot_id != self.bot_id
-                or not source.supports_live_capture
-            ):
-                raise ValidationError({"bot": "Use the bot configured for this native Source."})
+        source = self.attachment.source
+        if (
+            source.account.connection_kind != ConnectedAccount.ConnectionKind.NATIVE_INTEGRATION
+            or source.account.incoming_webhook_bot_id != self.bot_id
+            or not source.supports_live_capture
+        ):
+            raise ValidationError({"bot": "Use the bot configured for this native Source."})
 
 
 class IntegrationMessageProvenance(models.Model):
@@ -607,6 +629,7 @@ class IntegrationMessageProvenance(models.Model):
     display_name = models.CharField(max_length=Source.MAX_DISPLAY_NAME_LENGTH)
     external_url = models.URLField(blank=True)
 
+    @override
     def clean(self) -> None:
         super().clean()
         related_realms = {
@@ -646,15 +669,31 @@ class ModuleDefinition(models.Model):
             )
         ]
 
-    def save(self, *args: object, **kwargs: object) -> None:
-        if self.pk is not None and self.versions.exists():
+    @override
+    def save(
+        self,
+        *,
+        force_insert: bool | tuple[ModelBase, ...] = False,
+        force_update: bool = False,
+        using: str | None = None,
+        update_fields: Iterable[str] | None = None,
+    ) -> None:
+        if not self._state.adding and self.versions.exists():
             raise ValidationError("Published Module definitions are immutable.")
-        super().save(*args, **kwargs)
+        super().save(
+            force_insert=force_insert,
+            force_update=force_update,
+            using=using,
+            update_fields=update_fields,
+        )
 
-    def delete(self, *args: object, **kwargs: object) -> tuple[int, dict[str, int]]:
+    @override
+    def delete(
+        self, using: Any | None = None, keep_parents: bool = False
+    ) -> tuple[int, dict[str, int]]:
         if self.versions.exists():
             raise ValidationError("Published Module definitions cannot be deleted.")
-        return super().delete(*args, **kwargs)
+        return super().delete(using=using, keep_parents=keep_parents)
 
 
 class ModuleVersion(models.Model):
@@ -684,20 +723,35 @@ class ModuleVersion(models.Model):
             ),
         ]
 
-    def save(self, *args: object, **kwargs: object) -> None:
-        if self.pk is not None and ModuleVersion.objects.filter(pk=self.pk).exists():
+    @override
+    def save(
+        self,
+        *,
+        force_insert: bool | tuple[ModelBase, ...] = False,
+        force_update: bool = False,
+        using: str | None = None,
+        update_fields: Iterable[str] | None = None,
+    ) -> None:
+        if not self._state.adding:
             raise ValidationError("Published Module versions are immutable.")
-        super().save(*args, **kwargs)
+        super().save(
+            force_insert=force_insert,
+            force_update=force_update,
+            using=using,
+            update_fields=update_fields,
+        )
 
-    def delete(self, *args: object, **kwargs: object) -> tuple[int, dict[str, int]]:
+    @override
+    def delete(
+        self, using: Any | None = None, keep_parents: bool = False
+    ) -> tuple[int, dict[str, int]]:
         raise ValidationError("Published Module versions cannot be deleted.")
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if (
-            self.published_by_id is not None
-            and self.published_by.realm_id != self.definition.realm_id
-        ):
+        published_by = self.published_by
+        if published_by is not None and published_by.realm_id != self.definition.realm_id:
             raise ValidationError(
                 {"published_by": "Module publishers must share the definition organization."}
             )
@@ -721,12 +775,28 @@ class ModuleSourceRequirement(models.Model):
             ),
         ]
 
-    def save(self, *args: object, **kwargs: object) -> None:
-        if self.pk is not None and ModuleSourceRequirement.objects.filter(pk=self.pk).exists():
+    @override
+    def save(
+        self,
+        *,
+        force_insert: bool | tuple[ModelBase, ...] = False,
+        force_update: bool = False,
+        using: str | None = None,
+        update_fields: Iterable[str] | None = None,
+    ) -> None:
+        if not self._state.adding:
             raise ValidationError("Published Module requirements are immutable.")
-        super().save(*args, **kwargs)
+        super().save(
+            force_insert=force_insert,
+            force_update=force_update,
+            using=using,
+            update_fields=update_fields,
+        )
 
-    def delete(self, *args: object, **kwargs: object) -> tuple[int, dict[str, int]]:
+    @override
+    def delete(
+        self, using: Any | None = None, keep_parents: bool = False
+    ) -> tuple[int, dict[str, int]]:
         raise ValidationError("Published Module requirements cannot be deleted.")
 
 
@@ -748,12 +818,28 @@ class ModuleSupportedTrigger(models.Model):
             )
         ]
 
-    def save(self, *args: object, **kwargs: object) -> None:
-        if self.pk is not None and ModuleSupportedTrigger.objects.filter(pk=self.pk).exists():
+    @override
+    def save(
+        self,
+        *,
+        force_insert: bool | tuple[ModelBase, ...] = False,
+        force_update: bool = False,
+        using: str | None = None,
+        update_fields: Iterable[str] | None = None,
+    ) -> None:
+        if not self._state.adding:
             raise ValidationError("Published Module triggers are immutable.")
-        super().save(*args, **kwargs)
+        super().save(
+            force_insert=force_insert,
+            force_update=force_update,
+            using=using,
+            update_fields=update_fields,
+        )
 
-    def delete(self, *args: object, **kwargs: object) -> tuple[int, dict[str, int]]:
+    @override
+    def delete(
+        self, using: Any | None = None, keep_parents: bool = False
+    ) -> tuple[int, dict[str, int]]:
         raise ValidationError("Published Module triggers cannot be deleted.")
 
 
@@ -818,21 +904,24 @@ class ModuleInstallation(models.Model):
             ),
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if self.space_id is not None and self.realm_id != self.space.realm_id:
+        if self.realm_id != self.space.realm_id:
             raise ValidationError(
                 {"space": "Module installations must share the Space organization."}
             )
-        if self.version_id is not None and self.realm_id != self.version.definition.realm_id:
+        if self.realm_id != self.version.definition.realm_id:
             raise ValidationError(
                 {"version": "Module installations must use an organization Module version."}
             )
-        if self.configured_by_id is not None and self.realm_id != self.configured_by.realm_id:
+        configured_by = self.configured_by
+        if configured_by is not None and self.realm_id != configured_by.realm_id:
             raise ValidationError(
                 {"configured_by": "Module installations must share the actor organization."}
             )
-        if self.disabled_by_id is not None and self.realm_id != self.disabled_by.realm_id:
+        disabled_by = self.disabled_by
+        if disabled_by is not None and self.realm_id != disabled_by.realm_id:
             raise ValidationError(
                 {"disabled_by": "Module installations must share the actor organization."}
             )
@@ -853,19 +942,14 @@ class ModuleInstallationBinding(models.Model):
             )
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if (
-            self.requirement_id is not None
-            and self.installation.version_id != self.requirement.version_id
-        ):
+        if self.installation.version_id != self.requirement.version_id:
             raise ValidationError(
                 {"requirement": "The requirement must belong to the pinned version."}
             )
-        if (
-            self.attachment_id is not None
-            and self.installation.space_id != self.attachment.space_id
-        ):
+        if self.installation.space_id != self.attachment.space_id:
             raise ValidationError(
                 {"attachment": "The binding must use an attachment from its Space."}
             )
@@ -891,12 +975,10 @@ class ModuleInstallationTrigger(models.Model):
             )
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if (
-            self.supported_trigger_id is not None
-            and self.installation.version_id != self.supported_trigger.version_id
-        ):
+        if self.installation.version_id != self.supported_trigger.version_id:
             raise ValidationError(
                 {"supported_trigger": "The trigger must belong to the pinned version."}
             )
@@ -962,6 +1044,7 @@ class GeneratedItem(models.Model):
             ),
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
         if self.realm_id != self.message.realm_id:
@@ -1028,13 +1111,15 @@ class EvidenceLink(models.Model):
             ),
         ]
 
+    @override
     def clean(self) -> None:
         super().clean()
-        if self.generated_item_id is not None and self.realm_id != self.generated_item.realm_id:
+        if self.realm_id != self.generated_item.realm_id:
             raise ValidationError(
                 {"generated_item": "Evidence links and generated items must share an organization."}
             )
-        if self.source_id is not None and self.realm_id != self.source.realm_id:
+        source = self.source
+        if source is not None and self.realm_id != source.realm_id:
             raise ValidationError(
                 {"source": "Evidence links and Sources must share an organization."}
             )

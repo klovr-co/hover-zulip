@@ -1,11 +1,11 @@
 import hashlib
 from datetime import date, datetime, timezone
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 import orjson
-from django.http import HttpResponse
 from typing_extensions import override
 
 from hover.clawer_sync import ClawerSyncError, InMemoryClawerSync, StudioClawerSync
@@ -16,6 +16,9 @@ from zerver.actions.channel_folders import check_add_channel_folder
 from zerver.lib.streams import create_stream_if_needed
 from zerver.lib.test_classes import ZulipTestCase
 from zerver.models import Message, UserMessage
+
+if TYPE_CHECKING:
+    from django.test.client import _MonkeyPatchedWSGIResponse as TestHttpResponse
 
 SOURCE_REF = "src_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 SOURCE_RECORD_FIXTURE = Path(__file__).parent / "fixtures" / "hover" / "source_records_v1.json"
@@ -140,7 +143,7 @@ class HoverSourceRecordsTest(ZulipTestCase):
         ] = source_record_page()
         self.login_user(self.member)
 
-    def post(self, **overrides: object) -> HttpResponse:
+    def post(self, **overrides: object) -> "TestHttpResponse":
         data: dict[str, object] = {"limit": 20, "query": ""}
         data.update(overrides)
         return self.client_post(
@@ -174,7 +177,7 @@ class HoverSourceRecordsTest(ZulipTestCase):
         with patch("hover.views_source_records.get_clawer_sync", return_value=self.adapter):
             denied = self.post()
         self.assertEqual(denied.status_code, 404)
-        self.assert_json_error(denied, "Source not found.")
+        self.assert_json_error(denied, "Source not found.", status_code=404)
         self.assertEqual(self.adapter.source_record_calls, [])
 
         guest = self.example_user("polonius")
@@ -189,7 +192,7 @@ class HoverSourceRecordsTest(ZulipTestCase):
         with patch("hover.views_source_records.get_clawer_sync", return_value=self.adapter):
             guest_denied = self.post()
         self.assertEqual(guest_denied.status_code, 404)
-        self.assert_json_error(guest_denied, "Source not found.")
+        self.assert_json_error(guest_denied, "Source not found.", status_code=404)
         self.assertEqual(self.adapter.source_record_calls, [])
 
         self.login_user(self.member)
@@ -198,7 +201,7 @@ class HoverSourceRecordsTest(ZulipTestCase):
         with patch("hover.views_source_records.get_clawer_sync", return_value=self.adapter):
             pending = self.post()
         self.assertEqual(pending.status_code, 404)
-        self.assert_json_error(pending, "Source not found.")
+        self.assert_json_error(pending, "Source not found.", status_code=404)
         self.assertEqual(self.adapter.source_record_calls, [])
 
     def test_detached_history_remains_browseable(self) -> None:
@@ -225,7 +228,7 @@ class HoverSourceRecordsTest(ZulipTestCase):
         with patch("hover.views_source_records.get_clawer_sync", return_value=adapter):
             response = self.post()
         self.assertEqual(response.status_code, 404)
-        self.assert_json_error(response, "Source not found.")
+        self.assert_json_error(response, "Source not found.", status_code=404)
 
 
 class StudioSourceRecordsContractTest(ZulipTestCase):
@@ -257,7 +260,7 @@ class StudioSourceRecordsContractTest(ZulipTestCase):
             limit=20,
             query="venue",
         )
-        self.assertEqual(len(page.records), 5)
+        self.assert_length(page.records, 5)
         session.post.assert_called_once_with(
             f"https://studio.example.test/api/hover/v1/connected-accounts/{account_uuid}/records/browse",
             json={

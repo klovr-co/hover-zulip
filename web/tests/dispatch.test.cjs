@@ -720,6 +720,8 @@ run_test("realm settings", ({override}) => {
         created_by_id: test_user.user_id,
         stream_id: null,
         attachments: [],
+        module_installations: [],
+        module_catalog: [],
         administrators: [{user_id: test_user.user_id, full_name: test_user.full_name}],
         memberships: [
             {

@@ -5,9 +5,13 @@ import django.db.models.deletion
 import django.utils.timezone
 from django.conf import settings
 from django.db import migrations, models
+from django.db.backends.base.schema import BaseDatabaseSchemaEditor
+from django.db.migrations.state import StateApps
 
 
-def seed_existing_source_capabilities(apps, schema_editor):  # type: ignore[no-untyped-def]
+def seed_existing_source_capabilities(
+    apps: StateApps, schema_editor: BaseDatabaseSchemaEditor
+) -> None:
     Source = apps.get_model("hover", "Source")
     SourceCapability = apps.get_model("hover", "SourceCapability")
     SourceCapability.objects.bulk_create(
@@ -19,7 +23,6 @@ def seed_existing_source_capabilities(apps, schema_editor):  # type: ignore[no-u
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("hover", "0009_integration_provenance"),
         ("zerver", "0809_alter_realm_can_create_spaces_group"),
@@ -92,7 +95,7 @@ class Migration(migrations.Migration):
                 choices=[
                     ("pending_sync", "Pending sync"),
                     ("active", "Active"),
-                    ("detached", "Detached"),
+                    ("detached", "Detached with retained history"),
                 ],
                 default="pending_sync",
             ),
