@@ -11,11 +11,12 @@ export const hover_source_schema = z.object({
 
 export const hover_space_attachment_schema = z.object({
     id: z.number(),
-    state: z.literal("active"),
+    state: z.enum(["active", "detached"]),
     history_window: z.enum(["today", "last_30_days", "custom"]),
     history_timezone: z.string(),
     history_start_at: z.string(),
     custom_start_date: z.nullable(z.string()),
+    can_browse_records: z.boolean(),
     source: hover_source_schema,
 });
 
@@ -119,13 +120,26 @@ export function get_sidebar_sources(space: HoverSpace): {
     detail: string;
     icon_class: string;
     is_external: false;
+    attachment_id: number;
+    can_browse_records: boolean;
+    is_history_retained: boolean;
 }[] {
-    return space.attachments.map(({source}) => ({
-        key: source.provider_key,
-        source_key: String(source.id),
-        name: source.display_name,
-        detail: `${source.account_display_name} · ${source.source_type}`,
-        icon_class: source.provider_key === "whatsapp" ? "fa fa-whatsapp" : "fa fa-plug",
-        is_external: false,
-    }));
+    return space.attachments
+        .map((attachment) => ({
+            attachment_id: attachment.id,
+            can_browse_records: attachment.can_browse_records,
+            is_history_retained: attachment.state === "detached",
+            source: attachment.source,
+        }))
+        .map(({attachment_id, can_browse_records, is_history_retained, source}) => ({
+            key: source.provider_key,
+            source_key: String(source.id),
+            name: source.display_name,
+            detail: `${source.account_display_name} · ${source.source_type}`,
+            icon_class: source.provider_key === "whatsapp" ? "fa fa-whatsapp" : "fa fa-plug",
+            is_external: false,
+            attachment_id,
+            can_browse_records,
+            is_history_retained,
+        }));
 }

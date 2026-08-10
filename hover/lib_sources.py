@@ -28,7 +28,9 @@ class HistoryBoundary:
 def attachment_queryset() -> Prefetch:
     return Prefetch(
         "attachments",
-        queryset=SpaceAttachment.objects.filter(state=SpaceAttachment.State.ACTIVE)
+        queryset=SpaceAttachment.objects.filter(
+            state__in=[SpaceAttachment.State.ACTIVE, SpaceAttachment.State.DETACHED]
+        )
         .select_related("source", "source__account")
         .order_by("source__display_name", "id"),
     )
@@ -57,6 +59,10 @@ def get_attachment_data(attachment: SpaceAttachment) -> dict[str, Any]:
             if attachment.custom_start_date is not None
             else None
         ),
+        "can_browse_records": (
+            attachment.space.state == Space.State.LAUNCHED
+            and attachment.state in [SpaceAttachment.State.ACTIVE, SpaceAttachment.State.DETACHED]
+        ),
         "source": get_source_data(attachment.source),
     }
 
@@ -65,7 +71,7 @@ def get_space_attachment_data(space: Space) -> list[dict[str, Any]]:
     return [
         get_attachment_data(attachment)
         for attachment in space.attachments.all()
-        if attachment.state == SpaceAttachment.State.ACTIVE
+        if attachment.state in [SpaceAttachment.State.ACTIVE, SpaceAttachment.State.DETACHED]
     ]
 
 

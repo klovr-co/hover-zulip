@@ -25,6 +25,7 @@ import * as emoji_picker from "./emoji_picker.ts";
 import * as gear_menu from "./gear_menu.ts";
 import * as gif_state from "./gif_state.ts";
 import * as hover_connected_accounts from "./hover_connected_accounts.ts";
+import * as hover_source_view from "./hover_source_view.ts";
 import * as hover_spaces from "./hover_spaces.ts";
 import * as inbox_ui from "./inbox_ui.ts";
 import * as inbox_util from "./inbox_util.ts";
@@ -172,6 +173,7 @@ export function dispatch_normal_event(event) {
                 hover_spaces.upsert(event.space);
             }
             stream_list.update_streams_sidebar(true);
+            hover_source_view.handle_space_event();
             break;
 
         case "hover_connected_account":

@@ -10,6 +10,7 @@ import * as drafts_overlay_ui from "./drafts_overlay_ui.ts";
 import {Filter} from "./filter.ts";
 import * as hash_parser from "./hash_parser.ts";
 import * as hash_util from "./hash_util.ts";
+import * as hover_source_view from "./hover_source_view.ts";
 import {$t_html} from "./i18n.ts";
 import * as inbox_ui from "./inbox_ui.ts";
 import * as info_overlay from "./info_overlay.ts";
@@ -175,6 +176,9 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
     // Even if the URL bar says #%41%42%43%44, the value here will
     // be #ABCD.
     const hash = window.location.hash.split("/");
+    if (hash[0] !== "#hover") {
+        hover_source_view.hide();
+    }
 
     const narrow_opts: message_view.ShowMessageViewOpts = {
         change_hash: false, // already set
@@ -265,6 +269,32 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
         case "#feed":
             show_all_message_view(narrow_opts);
             break;
+        case "#hover": {
+            if (
+                hash.length === 6 &&
+                hash[1] === "space" &&
+                util.is_numeric_string(hash[2]!) &&
+                hash[3] === "source" &&
+                util.is_numeric_string(hash[4]!) &&
+                hash[5] === ""
+            ) {
+                // Accept the canonical trailing-slash form below as well.
+                hash.pop();
+            }
+            if (
+                hash.length !== 5 ||
+                hash[1] !== "space" ||
+                !util.is_numeric_string(hash[2]!) ||
+                hash[3] !== "source" ||
+                !util.is_numeric_string(hash[4]!) ||
+                !hover_source_view.show(Number(hash[2]), Number(hash[4]))
+            ) {
+                hover_source_view.hide();
+                show_home_view(narrow_opts);
+                return false;
+            }
+            return true;
+        }
         case "#keyboard-shortcuts":
         case "#message-formatting":
         case "#search-operators":

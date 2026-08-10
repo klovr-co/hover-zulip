@@ -278,6 +278,7 @@ test_ui("AIMTO modules are native topic links", ({mock_template, override}) => {
                         history_timezone: "Asia/Kuala_Lumpur",
                         history_start_at: "2026-08-11T00:00:00Z",
                         custom_start_date: null,
+                        can_browse_records: true,
                         source: {
                             id: 1,
                             provider_key: "whatsapp",
@@ -319,7 +320,7 @@ test_ui("AIMTO modules are native topic links", ({mock_template, override}) => {
                 count: 3,
             },
         );
-        assert.equal(data.hover_attached_sources[0].url.includes("/topic/"), false);
+        assert.equal(data.hover_attached_sources[0].url, "#hover/space/1/source/1");
         return "<aimto-sidebar-row-stub>";
     });
 

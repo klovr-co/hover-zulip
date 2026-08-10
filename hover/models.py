@@ -377,6 +377,7 @@ class SpaceAttachment(models.Model):
     class State(models.TextChoices):
         PENDING_SYNC = "pending_sync", "Pending sync"
         ACTIVE = "active", "Active"
+        DETACHED = "detached", "Detached with retained history"
 
     class HistoryWindow(models.TextChoices):
         TODAY = "today", "Today"
@@ -414,6 +415,13 @@ class SpaceAttachment(models.Model):
         on_delete=SET_NULL,
         related_name="hover_space_attachments_added",
     )
+    detached_at = models.DateTimeField(null=True)
+    detached_by = models.ForeignKey(
+        UserProfile,
+        null=True,
+        on_delete=SET_NULL,
+        related_name="hover_space_attachments_detached",
+    )
     date_created = models.DateTimeField(default=timezone_now)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -431,6 +439,13 @@ class SpaceAttachment(models.Model):
                 ),
                 name="hover_space_attachment_custom_date_matches_window",
             ),
+            models.CheckConstraint(
+                condition=(
+                    Q(state="detached", detached_at__isnull=False)
+                    | Q(state__in=["pending_sync", "active"], detached_at__isnull=True)
+                ),
+                name="hover_space_attachment_detachment_matches_state",
+            ),
         ]
 
     def clean(self) -> None:
@@ -446,6 +461,12 @@ class SpaceAttachment(models.Model):
         if self.attached_by_id is not None and self.attached_by.realm_id != self.realm_id:
             raise ValidationError(
                 {"attached_by": "Space attachments and actors must share an organization."}
+            )
+        if self.detached_by_id is not None and self.detached_by.realm_id != self.realm_id:
+            raise ValidationError(
+                {
+                    "detached_by": "Space attachments and detaching actors must share an organization."
+                }
             )
 
 

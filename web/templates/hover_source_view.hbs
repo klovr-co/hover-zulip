@@ -1,0 +1,69 @@
+<div class="hover-source-shell">
+    <header class="hover-source-header">
+        <div class="hover-source-breadcrumb">{{space_name}}
+            <span aria-hidden="true">/</span>
+            {{t "Sources"}}</div>
+        <div class="hover-source-title-row">
+            <i class="{{icon_class}}" aria-hidden="true"></i>
+            <h1>{{source.display_name}}</h1>
+            <span class="hover-source-readonly-badge">{{t
+                    "Source records · Read-only"
+                }}</span>
+            {{#if source.is_history_retained}}<span
+                    class="hover-source-retained-badge"
+                >{{t "History retained"}}</span>{{/if}}
+        </div>
+        <div class="hover-source-metadata">
+            <span>{{source.account_display_name}}</span>
+            <span aria-hidden="true">&middot;</span>
+            <span>{{source.source_type}}</span>
+        </div>
+        <p>{{t
+                "These records came from the connected Source. Replies and other actions are unavailable here."
+            }}</p>
+        <form id="hover-source-search-form" role="search">
+            <label for="hover-source-search">{{t "Search this Source"}}</label>
+            <div class="hover-source-search-controls">
+                <input
+                    id="hover-source-search"
+                    type="search"
+                    value="{{query}}"
+                    maxlength="100"
+                    autocomplete="off"
+                />
+                <button type="submit" class="button rounded">{{t
+                        "Search"
+                    }}</button>
+            </div>
+        </form>
+    </header>
+    <div
+        class="hover-source-status"
+        role="status"
+        aria-live="polite"
+    >{{status}}</div>
+    {{#if show_load_older}}
+        <button
+            id="hover-source-load-older"
+            type="button"
+            class="button rounded"
+        >{{t "Load older"}}</button>
+    {{/if}}
+    {{#if show_retry}}
+        <button id="hover-source-retry" type="button" class="button rounded">{{t
+                "Retry"
+            }}</button>
+    {{/if}}
+    <div
+        class="hover-source-record-list"
+        role="list"
+        aria-label="{{t 'Source records'}}"
+    >
+        {{#each date_groups}}
+            <section class="hover-source-date-group">
+                <h2>{{date_label}}</h2>
+                {{{records_html}}}
+            </section>
+        {{/each}}
+    </div>
+</div>

@@ -1,6 +1,7 @@
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Protocol
 from uuid import UUID
 
@@ -16,17 +17,20 @@ from hover.publication_contracts import (
     ResolvedEvidence,
     ResolvedEvidenceBatch,
 )
+from hover.source_record_contracts import ClawerSourceRecordPage
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.outgoing_http import OutgoingSession
 
 MAX_DISCOVERY_LIMIT = 100
 MAX_PUBLICATION_LIMIT = 100
 MAX_EVIDENCE_LIMIT = 100
+MAX_SOURCE_RECORD_LIMIT = 50
 MAX_RESPONSE_BYTES = 2_000_000
 STUDIO_OPERATION_PATHS = {
     "source_discovery": "sources/discover",
     "sync": "sync",
     "evidence_resolution": "evidence/resolve",
+    "source_records": "records/browse",
 }
 SERVER_CREDENTIAL_PATTERN = re.compile(r"hvr_srv_[A-Za-z0-9_-]{32,128}")
 UNSAFE_DISPLAY_NAME_PATTERN = re.compile(r"(?:\d[\s()+-]*){8,}|@(?:g\.us|lid)$", re.IGNORECASE)
@@ -131,6 +135,18 @@ class ClawerSync(Protocol):
         refs: list[str],
     ) -> list[ResolvedEvidence]: ...
 
+    def browse_source_records(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        source_ref: str,
+        start_at: str,
+        cursor: str | None,
+        limit: int,
+        query: str | None,
+    ) -> ClawerSourceRecordPage: ...
+
 
 def _validate_discovery_request(*, cursor: str | None, limit: int, query: str | None) -> None:
     if limit < 1 or limit > MAX_DISCOVERY_LIMIT:
@@ -152,6 +168,10 @@ class InMemoryClawerSync:
         self.evidence: dict[tuple[str, str, str], ResolvedEvidence] = {}
         self.sync_calls: list[dict[str, object]] = []
         self.evidence_calls: list[dict[str, object]] = []
+        self.source_record_pages: dict[
+            tuple[str, str, str, str | None, str | None], ClawerSourceRecordPage
+        ] = {}
+        self.source_record_calls: list[dict[str, object]] = []
 
     def discover_sources(
         self,
@@ -261,6 +281,50 @@ class InMemoryClawerSync:
                 http_status_code=404,
                 retryable=False,
             )
+
+    def browse_source_records(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        source_ref: str,
+        start_at: str,
+        cursor: str | None,
+        limit: int,
+        query: str | None,
+    ) -> ClawerSourceRecordPage:
+        _validate_source_records_request(
+            source_ref=source_ref,
+            start_at=start_at,
+            cursor=cursor,
+            limit=limit,
+            query=query,
+        )
+        self.source_record_calls.append(
+            {
+                "realm_uuid": realm_uuid,
+                "account_external_id": account_external_id,
+                "source_ref": source_ref,
+                "start_at": start_at,
+                "cursor": cursor,
+                "limit": limit,
+                "query": query,
+            }
+        )
+        page = self.source_record_pages.get(
+            (str(realm_uuid), str(account_external_id), source_ref, cursor, query),
+            ClawerSourceRecordPage(
+                schema_version="1.0", records=[], next_cursor="", has_more=False
+            ),
+        )
+        _validate_source_record_page(
+            page,
+            source_ref=source_ref,
+            start_at=start_at,
+            cursor=cursor,
+            limit=limit,
+        )
+        return page
 
 
 class StudioClawerSync:
@@ -561,6 +625,55 @@ class StudioClawerSync:
         by_ref = {item.evidence_ref: item for item in batch.evidence}
         return [by_ref[ref] for ref in refs]
 
+    def browse_source_records(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        source_ref: str,
+        start_at: str,
+        cursor: str | None,
+        limit: int,
+        query: str | None,
+    ) -> ClawerSourceRecordPage:
+        _validate_source_records_request(
+            source_ref=source_ref,
+            start_at=start_at,
+            cursor=cursor,
+            limit=limit,
+            query=query,
+        )
+        body: dict[str, object] = {
+            "source_ref": source_ref,
+            "start_at": start_at,
+            "limit": limit,
+        }
+        if cursor is not None:
+            body["cursor"] = cursor
+        if query is not None:
+            body["query"] = query
+        payload = self._request(
+            realm_uuid=realm_uuid,
+            account_external_id=account_external_id,
+            operation="source_records",
+            body=body,
+        )
+        try:
+            page = ClawerSourceRecordPage.model_validate(payload)
+        except ValidationError:
+            raise self._invalid_contract("source_records")
+        try:
+            _validate_source_record_page(
+                page,
+                source_ref=source_ref,
+                start_at=start_at,
+                cursor=cursor,
+                limit=limit,
+            )
+        except ClawerSyncError:
+            raise self._invalid_contract("source_records")
+        return page
+
 
 def get_clawer_sync() -> ClawerSync:
     return StudioClawerSync()
@@ -586,3 +699,50 @@ def _validate_evidence_request(*, source_ref: str, refs: list[str]) -> None:
         raise ValueError("invalid evidence references")
     if any(not ref or len(ref) > 100 for ref in refs):
         raise ValueError("invalid evidence reference")
+
+
+def _validate_source_records_request(
+    *, source_ref: str, start_at: str, cursor: str | None, limit: int, query: str | None
+) -> None:
+    if re.fullmatch(r"src_[0-9a-f]{32}", source_ref) is None:
+        raise ValueError("invalid Source record Source")
+    try:
+        parsed_start = datetime.fromisoformat(start_at.replace("Z", "+00:00"))
+    except ValueError:
+        raise ValueError("invalid Source record boundary")
+    if parsed_start.tzinfo is None or len(start_at) > 100:
+        raise ValueError("invalid Source record boundary")
+    if cursor is not None and not 1 <= len(cursor) <= 10_000:
+        raise ValueError("invalid Source record cursor")
+    if not 1 <= limit <= MAX_SOURCE_RECORD_LIMIT:
+        raise ValueError("invalid Source record limit")
+    if query is not None and (not 1 <= len(query) <= 100 or " ".join(query.split()) != query):
+        raise ValueError("invalid Source record query")
+
+
+def _validate_source_record_page(
+    page: ClawerSourceRecordPage,
+    *,
+    source_ref: str,
+    start_at: str,
+    cursor: str | None,
+    limit: int,
+) -> None:
+    start = datetime.fromisoformat(start_at.replace("Z", "+00:00"))
+    if (
+        len(page.records) > limit
+        or (page.has_more and not page.records)
+        or (page.has_more and page.next_cursor == cursor)
+        or any(
+            record.source_ref != source_ref
+            or record.timestamp < start
+            or (record.reply_context is not None and record.reply_context.timestamp < start)
+            for record in page.records
+        )
+    ):
+        raise ClawerSyncError(
+            error_code="invalid_upstream_contract",
+            operation="source_records",
+            http_status_code=502,
+            retryable=False,
+        )

@@ -30577,6 +30577,7 @@ components:
               - history_timezone
               - history_start_at
               - custom_start_date
+              - can_browse_records
               - source
             properties:
               id:
@@ -30585,6 +30586,7 @@ components:
                 type: string
                 enum:
                   - active
+                  - detached
               history_window:
                 type: string
                 enum:
@@ -30598,6 +30600,11 @@ components:
               custom_start_date:
                 type: string
                 nullable: true
+              can_browse_records:
+                type: boolean
+                description: |
+                  Whether this attachment can be opened in the read-only Source
+                  record browser. This is false during Space setup.
               source:
                 type: object
                 additionalProperties: false

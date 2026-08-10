@@ -13,6 +13,204 @@ body.hover-enabled {
     background: var(--ds-surface-paper);
 }
 
+/* Hover Source record browsing is a deliberately separate, read-only surface. */
+.hover-source-view {
+    box-sizing: border-box;
+    height: 100%;
+    overflow-y: auto;
+    background: var(--color-background);
+}
+
+.hover-source-shell {
+    width: min(760px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 32px 0 80px;
+}
+
+.hover-source-header {
+    padding: 24px;
+    border: 1px solid hsl(220deg 14% 88%);
+    border-radius: 14px;
+    background: hsl(0deg 0% 100%);
+    box-shadow: 0 8px 28px hsl(220deg 30% 20% / 6%);
+}
+
+.hover-source-breadcrumb {
+    margin-bottom: 12px;
+    color: hsl(220deg 8% 44%);
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.hover-source-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.hover-source-title-row h1 {
+    margin: 0;
+    font-size: 1.45rem;
+}
+
+.hover-source-title-row .fa-whatsapp {
+    color: hsl(142deg 70% 36%);
+    font-size: 1.35rem;
+}
+
+.hover-source-metadata {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    color: hsl(220deg 8% 44%);
+    font-size: 0.8rem;
+}
+
+.hover-source-readonly-badge,
+.hover-source-retained-badge {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: hsl(220deg 20% 94%);
+    color: hsl(220deg 22% 30%);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.hover-source-retained-badge {
+    background: hsl(42deg 82% 91%);
+    color: hsl(34deg 70% 28%);
+}
+
+#hover-source-search-form {
+    margin-top: 20px;
+}
+
+#hover-source-search-form label,
+.hover-source-content-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.hover-source-search-controls {
+    display: flex;
+    gap: 8px;
+}
+
+#hover-source-search {
+    box-sizing: border-box;
+    flex: 1;
+    min-width: 0;
+    padding: 9px 11px;
+    border: 1px solid hsl(220deg 14% 76%);
+    border-radius: 8px;
+}
+
+#hover-source-search:focus-visible,
+.hover-source-view button:focus-visible {
+    outline: 3px solid hsl(214deg 88% 62% / 45%);
+    outline-offset: 2px;
+}
+
+.hover-source-status {
+    min-height: 22px;
+    margin: 18px 0 8px;
+    color: hsl(220deg 8% 42%);
+}
+
+#hover-source-load-older,
+#hover-source-retry {
+    display: block;
+    margin: 10px auto 20px;
+}
+
+.hover-source-date-group h2 {
+    margin: 24px 0 10px;
+    color: hsl(220deg 9% 44%);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.hover-source-record {
+    padding: 16px 18px;
+    border: 1px solid hsl(220deg 14% 88%);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    background: hsl(0deg 0% 100%);
+}
+
+.hover-source-record-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 7px;
+}
+
+.hover-source-record-header time {
+    color: hsl(220deg 8% 48%);
+    font-size: 0.78rem;
+}
+
+.hover-source-record p {
+    margin: 6px 0 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.hover-source-reply {
+    padding: 8px 10px;
+    border-left: 3px solid hsl(214deg 50% 70%);
+    margin: 8px 0;
+    background: hsl(214deg 30% 97%);
+    color: hsl(220deg 12% 38%);
+}
+
+.hover-source-reply strong,
+.hover-source-reply span {
+    display: block;
+}
+
+.hover-source-transcript,
+.hover-source-media {
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    background: hsl(220deg 18% 96%);
+}
+
+.hover-source-media {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: hsl(220deg 10% 38%);
+    font-size: 0.8rem;
+}
+
+.hover-source-media-unavailable {
+    margin-left: auto;
+    color: hsl(5deg 58% 45%);
+    font-weight: 600;
+}
+
+@media (width <= 520px) {
+    .hover-source-shell {
+        width: calc(100% - 20px);
+        padding-top: 10px;
+    }
+
+    .hover-source-header {
+        padding: 16px;
+    }
+
+    .hover-source-search-controls {
+        flex-direction: column;
+    }
+}
+
 a {
     text-underline-offset: 0.16em;
 }

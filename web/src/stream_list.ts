@@ -977,9 +977,12 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
                 has_count: hover_module.key === "suggested_actions",
                 count: hover_module.key === "suggested_actions" ? 3 : 0,
             })),
-            hover_attached_sources: hover_spaces
-                .get_sidebar_sources(hover_space)
-                .map((source) => ({...source, url: aggregate_url})),
+            hover_attached_sources: hover_spaces.get_sidebar_sources(hover_space).map((source) => ({
+                ...source,
+                url: source.can_browse_records
+                    ? hash_util.hover_source_url(hover_space.id, source.attachment_id)
+                    : aggregate_url,
+            })),
         }),
     };
     const $list_item = $(render_stream_sidebar_row(args));

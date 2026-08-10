@@ -25,8 +25,16 @@ _Avoid_: Chat ID, JID, phone number
 
 **Space Attachment**:
 The durable association between a Space and a Source. It records the actor and
-an immutable, explicitly bounded history start in UTC for later ingestion.
+an immutable, explicitly bounded history start in UTC for later ingestion. A
+detached attachment can retain its bounded history for authorized, read-only
+browsing without continuing to represent an active connection.
 _Avoid_: Import, sync run, all history
+
+**Source Record**:
+A transient, read-only projection of a record fetched from an attached Source
+within its approved history boundary. Hover exposes only safe display fields
+and never stores the provider record or turns browsing into a Zulip message.
+_Avoid_: Imported message, raw provider event, synced chat
 
 **Space Membership Suggestion**:
 An internal, pending relationship inferred from an attached Source observation

@@ -58,6 +58,7 @@ import * as hashchange from "./hashchange.ts";
 import * as hotkey from "./hotkey.ts";
 import * as hover_connected_accounts from "./hover_connected_accounts.ts";
 import * as hover_evidence from "./hover_evidence.ts";
+import * as hover_source_view from "./hover_source_view.ts";
 import * as hover_spaces from "./hover_spaces.ts";
 import * as i18n from "./i18n.ts";
 import * as inbox_ui from "./inbox_ui.ts";
@@ -542,6 +543,7 @@ export async function initialize_everything(state_data) {
     hover_connected_accounts.initialize(state_data.hover_connected_accounts);
     hover_evidence.initialize();
     hover_spaces.initialize(state_data.hover_spaces);
+    hover_source_view.initialize();
 
     // These components must be initialized early, because other
     // modules' initialization has not been audited for whether they

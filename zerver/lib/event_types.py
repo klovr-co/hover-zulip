@@ -114,11 +114,12 @@ class HoverSpaceSource(BaseModel):
 
 class HoverSpaceAttachment(BaseModel):
     id: int
-    state: Literal["active"]
+    state: Literal["active", "detached"]
     history_window: Literal["today", "last_30_days", "custom"]
     history_timezone: str
     history_start_at: str
     custom_start_date: str | None
+    can_browse_records: bool
     source: HoverSpaceSource
 
 
