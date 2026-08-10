@@ -2,6 +2,11 @@
   "private": true,
   "packageManager": "pnpm@11.17.0+sha512.cca3cea332ad254bb84145f966d19f4879615210346fc92c79a047f23a0d7b3cca3c3792f0076ba1f1831d277efbcf0a9119b31a9a60eca7fb3d6231f331ef72",
   "type": "module",
+  "scripts": {
+    "storybook": "pnpm generate-storybook-catalog && storybook dev --port 6010",
+    "build-storybook": "pnpm generate-storybook-catalog && storybook build",
+    "generate-storybook-catalog": "node tools/generate_storybook_template_catalog.mjs"
+  },
   "dependencies": {
     "@babel/core": "^8.0.1",
     "@babel/preset-env": "^8.0.2",
@@ -105,6 +110,10 @@
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^10.0.1",
     "@formatjs/cli": "^6.0.0",
+    "@storybook/addon-a11y": "8.6.14",
+    "@storybook/addon-essentials": "8.6.14",
+    "@storybook/html": "8.6.14",
+    "@storybook/html-webpack5": "8.6.14",
     "@types/autosize": "^4.0.1",
     "@types/babel__core": "^7.20.5",
     "@types/babel__preset-env": "^7.10.0",
@@ -167,6 +176,7 @@
     "puppeteer": "^25.4.0",
     "remark-cli": "^12.0.1",
     "source-map": "npm:source-map-js@^1.2.1",
+    "storybook": "8.6.14",
     "stylelint": "^17.1.0",
     "stylelint-config-standard": "^40.0.0",
     "stylelint-high-performance-animation": "^2.0.0",
