@@ -7,10 +7,20 @@ malformed data before any native message is created.
 
 from __future__ import annotations
 
+import re
 from datetime import date, datetime
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+UNSAFE_DISPLAY_NAME_PATTERN = re.compile(r"(?:\d[\s()+-]*){8,}|@(?:g\.us|lid)$", re.IGNORECASE)
+EVIDENCE_REF_PATTERN = re.compile(r"^evidence_[0-9a-f]{32}$")
+
+
+def _validated_display_name(value: str) -> str:
+    if " ".join(value.strip().split()) != value or UNSAFE_DISPLAY_NAME_PATTERN.search(value):
+        raise ValueError("display name must be normalized and cannot expose a provider identifier")
+    return value
 
 
 class _ContractModel(BaseModel):
@@ -93,6 +103,11 @@ class SuggestedActionAssignee(_ContractModel):
     kind: Literal["user", "member"]
     ref: str = Field(pattern=r"^person_[0-9a-f]{32}$")
     display_name: str = Field(min_length=1, max_length=200)
+
+    @field_validator("display_name")
+    @classmethod
+    def safe_display_name(cls, value: str) -> str:
+        return _validated_display_name(value)
 
 
 class SuggestedActionPayload(_ContractModel):
@@ -182,10 +197,17 @@ class ClawerPublication(_ContractModel):
             raise ValueError("publication timestamps must be timezone-aware")
         return value
 
+    @field_validator("producer_name")
+    @classmethod
+    def safe_producer_name(cls, value: str) -> str:
+        return _validated_display_name(value)
+
     @field_validator("evidence_refs")
     @classmethod
     def unique_evidence_refs(cls, value: list[str]) -> list[str]:
-        if any(not ref or len(ref) > 100 for ref in value) or len(value) != len(set(value)):
+        if any(EVIDENCE_REF_PATTERN.fullmatch(ref) is None for ref in value) or len(value) != len(
+            set(value)
+        ):
             raise ValueError("publication evidence references must be unique and bounded")
         return value
 
@@ -203,14 +225,19 @@ class ClawerPublicationPage(_ContractModel):
 
 
 class EvidenceSender(_ContractModel):
-    ref: str = Field(min_length=1, max_length=100)
+    ref: str = Field(pattern=r"^person_[0-9a-f]{32}$")
     display_name: str = Field(min_length=1, max_length=200)
+
+    @field_validator("display_name")
+    @classmethod
+    def safe_display_name(cls, value: str) -> str:
+        return _validated_display_name(value)
 
 
 class EvidenceContent(_ContractModel):
-    text: str | None
-    voice_transcript: str | None
-    media_description: str | None
+    text: str | None = Field(min_length=1)
+    voice_transcript: str | None = Field(min_length=1)
+    media_description: str | None = Field(min_length=1)
 
 
 class EvidenceMedia(_ContractModel):
@@ -222,7 +249,7 @@ class EvidenceMedia(_ContractModel):
 
 
 class ResolvedEvidence(_ContractModel):
-    evidence_ref: str = Field(min_length=1, max_length=100)
+    evidence_ref: str = Field(pattern=r"^evidence_[0-9a-f]{32}$")
     source_ref: str = Field(pattern=r"^src_[0-9a-f]{32}$")
     sender: EvidenceSender
     timestamp: datetime
@@ -235,6 +262,17 @@ class ResolvedEvidence(_ContractModel):
         if value.tzinfo is None:
             raise ValueError("evidence timestamp must be timezone-aware")
         return value
+
+    @model_validator(mode="after")
+    def has_exact_content(self) -> ResolvedEvidence:
+        if (
+            self.content.text is None
+            and self.content.voice_transcript is None
+            and self.content.media_description is None
+            and self.media is None
+        ):
+            raise ValueError("evidence must contain source content or media")
+        return self
 
 
 class ResolvedEvidenceBatch(_ContractModel):

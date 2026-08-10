@@ -103,7 +103,7 @@ class HoverSpaceCategory(BaseModel):
     name: str
 
 
-class HoverSource(BaseModel):
+class HoverSpaceSource(BaseModel):
     id: int
     provider_key: str
     source_type: str
@@ -119,7 +119,7 @@ class HoverSpaceAttachment(BaseModel):
     history_timezone: str
     history_start_at: str
     custom_start_date: str | None
-    source: HoverSource
+    source: HoverSpaceSource
 
 
 class HoverSpaceAdministrator(BaseModel):
@@ -278,7 +278,7 @@ class HoverModule(BaseModel):
     version: str
 
 
-class HoverSource(BaseModel):
+class HoverGeneratedSource(BaseModel):
     key: str
     name: str
     icon_class: str
@@ -292,7 +292,8 @@ class HoverGeneratedItem(BaseModel):
     module: HoverModule
     source_summary: str
     evidence_available: bool
-    sources: list[HoverSource]
+    evidence_url: str | None
+    sources: list[HoverGeneratedSource]
 
 
 class DirectMessageDisplayRecipient(BaseModel):

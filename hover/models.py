@@ -383,6 +383,12 @@ class SpaceAttachment(models.Model):
         LAST_30_DAYS = "last_30_days", "Last 30 days"
         CUSTOM = "custom", "Custom start date"
 
+    class PublicationSyncState(models.TextChoices):
+        IDLE = "idle", "Idle"
+        LEASED = "leased", "Leased"
+        BACKOFF = "backoff", "Retry backoff"
+        BLOCKED = "blocked", "Blocked"
+
     realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_space_attachments")
     space = models.ForeignKey(Space, on_delete=CASCADE, related_name="attachments")
     source = models.ForeignKey(Source, on_delete=RESTRICT, related_name="space_attachments")
@@ -395,6 +401,13 @@ class SpaceAttachment(models.Model):
     last_publication_sync_at = models.DateTimeField(null=True)
     last_publication_sync_error = models.CharField(max_length=64, default="")
     publication_sync_failures = models.PositiveIntegerField(default=0)
+    publication_sync_state = models.TextField(
+        choices=PublicationSyncState.choices,
+        default=PublicationSyncState.IDLE,
+    )
+    publication_sync_lease_token = models.UUIDField(null=True)
+    publication_sync_lease_expires_at = models.DateTimeField(null=True)
+    next_publication_sync_at = models.DateTimeField(default=timezone_now, null=True)
     attached_by = models.ForeignKey(
         UserProfile,
         null=True,
@@ -453,8 +466,9 @@ class GeneratedItem(models.Model):
         on_delete=RESTRICT,
         related_name="generated_items",
     )
-    publication_id = models.TextField(null=True, unique=True)
+    publication_id = models.TextField(null=True)
     idempotency_key = models.TextField(null=True)
+    publication_envelope_hash = models.CharField(max_length=64, default="")
     business_identity = models.TextField(default="")
     output_type = models.TextField(choices=OutputType.choices)
     module_key = models.TextField()
@@ -481,16 +495,53 @@ class GeneratedItem(models.Model):
     parent_publication_id = models.TextField(null=True)
     material_change = models.BooleanField(default=False)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["attachment", "publication_id"],
+                condition=Q(attachment__isnull=False, publication_id__isnull=False),
+                name="hover_generated_item_unique_attachment_publication",
+            ),
+            models.UniqueConstraint(
+                fields=["attachment", "idempotency_key"],
+                condition=Q(attachment__isnull=False, idempotency_key__isnull=False),
+                name="hover_generated_item_unique_attachment_idempotency",
+            ),
+        ]
+
     def clean(self) -> None:
         super().clean()
-        if self.message_id is not None and self.realm_id != self.message.realm_id:
+        if self.realm_id != self.message.realm_id:
             raise ValidationError(
                 {"message": "Generated items and messages must share an organization."}
             )
-        if self.attachment_id is not None and self.realm_id != self.attachment.realm_id:
+        attachment = self.attachment
+        if attachment is not None and self.realm_id != attachment.realm_id:
             raise ValidationError(
                 {"attachment": "Generated items and attachments must share an organization."}
             )
+
+
+class PublicationSyncAttempt(models.Model):
+    class Outcome(models.TextChoices):
+        SUCCESS = "success", "Success"
+        ERROR = "error", "Error"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    attachment = models.ForeignKey(
+        SpaceAttachment,
+        on_delete=CASCADE,
+        related_name="publication_sync_attempts",
+    )
+    outcome = models.TextField(choices=Outcome.choices)
+    error_code = models.CharField(max_length=64, default="")
+    retryable = models.BooleanField(default=False)
+    publication_count = models.PositiveIntegerField(default=0)
+    created_count = models.PositiveIntegerField(default=0)
+    replayed_count = models.PositiveIntegerField(default=0)
+    requested_cursor_hash = models.CharField(max_length=64, default="")
+    returned_cursor_hash = models.CharField(max_length=64, default="")
+    date_created = models.DateTimeField(default=timezone_now)
 
 
 class EvidenceLink(models.Model):

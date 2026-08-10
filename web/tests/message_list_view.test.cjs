@@ -520,6 +520,7 @@ test("hover_generated_update_vars", () => {
                 module: {key: "marketing_digest", name: "Marketing Digest", version: "v1"},
                 source_summary: "Across 3 sources",
                 evidence_available: true,
+                evidence_url: "/json/hover/spaces/7/generated-items/1/evidence",
                 sources: [
                     {
                         key: "whatsapp",
@@ -549,6 +550,10 @@ test("hover_generated_update_vars", () => {
     );
 
     assert.equal(hover_update.is_hover_generated_update, true);
+    assert.equal(
+        hover_update.hover_evidence_url,
+        "/json/hover/spaces/7/generated-items/1/evidence",
+    );
     assert.deepEqual(
         hover_update.hover_source_integrations.map((integration) => integration.name),
         ["WhatsApp", "GitHub", "Instagram"],
@@ -572,6 +577,7 @@ test("hover_generated_update_renders_native_card_chrome", () => {
         hover_module_key: "progress_tracker",
         hover_module_name: "Progress Tracker",
         hover_source_context: "Across 4 sources",
+        hover_evidence_url: "/json/hover/spaces/7/generated-items/42/evidence",
         hover_source_integrations: [
             {
                 key: "whatsapp",
@@ -596,7 +602,20 @@ test("hover_generated_update_renders_native_card_chrome", () => {
             id: 42,
             is_stream: true,
             locally_echoed: false,
-            message_reactions: [],
+            message_reactions: [
+                {
+                    class: "message_reaction reacted",
+                    count: 1,
+                    emoji_alt_code: false,
+                    emoji_code: "1f44d",
+                    emoji_name: "thumbs_up",
+                    is_realm_emoji: false,
+                    label: "You reacted with thumbs up",
+                    local_id: "unicode_emoji,1f44d",
+                    reaction_type: "unicode_emoji",
+                    vote_text: "1",
+                },
+            ],
             reminders: [],
             url: "/#narrow/channel/42/topic/Project-status/near/42",
         },
@@ -611,6 +630,12 @@ test("hover_generated_update_renders_native_card_chrome", () => {
     assert.match(html, /fa-github/);
     assert.match(html, />3</);
     assert.match(html, /href="https:\/\/github.com\/ashvinpraveen\/learnaimto"/);
+    assert.match(html, /View sources/);
+    assert.match(html, /class="hover-source-pill hover-view-evidence"/);
+    assert.doesNotMatch(html, /class="message_reaction hover-view-evidence"/);
+    assert.match(html, /class="hover-message-reactions"/);
+    assert.match(html, /class="message_reactions"/);
+    assert.match(html, /emoji-1f44d/);
 });
 
 test("hover generated update visual fixture compares generated and ordinary messages", () => {

@@ -22,8 +22,6 @@ import {is_browser_unsupported_old_version} from "./browser_support.ts";
 import * as channel from "./channel.ts";
 import * as channel_folders from "./channel_folders.ts";
 import * as channel_folders_popover from "./channel_folders_popover.ts";
-import * as hover_connected_accounts from "./hover_connected_accounts.ts";
-import * as hover_spaces from "./hover_spaces.ts";
 import * as click_handlers from "./click_handlers.ts";
 import * as color_picker_popover from "./color_picker_popover.ts";
 import * as common from "./common.ts";
@@ -58,6 +56,9 @@ import * as gif_state from "./gif_state.ts";
 import * as group_permission_settings from "./group_permission_settings.ts";
 import * as hashchange from "./hashchange.ts";
 import * as hotkey from "./hotkey.ts";
+import * as hover_connected_accounts from "./hover_connected_accounts.ts";
+import * as hover_evidence from "./hover_evidence.ts";
+import * as hover_spaces from "./hover_spaces.ts";
 import * as i18n from "./i18n.ts";
 import * as inbox_ui from "./inbox_ui.ts";
 import * as information_density from "./information_density.ts";
@@ -539,6 +540,7 @@ export async function initialize_everything(state_data) {
     // Channel folders data must be initialized before left sidebar.
     channel_folders.initialize(state_data.channel_folders);
     hover_connected_accounts.initialize(state_data.hover_connected_accounts);
+    hover_evidence.initialize();
     hover_spaces.initialize(state_data.hover_spaces);
 
     // These components must be initialized early, because other

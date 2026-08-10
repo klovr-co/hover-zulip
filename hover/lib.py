@@ -19,6 +19,7 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
             message_id__in=message_ids,
             message__realm_id=realm_id,
         )
+        .select_related("attachment")
         .prefetch_related("evidence_links")
         .order_by("id")
     )
@@ -44,6 +45,7 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
             if evidence.url and not source["url"]:
                 source["url"] = evidence.url
 
+        attachment_space_id = item.attachment.space_id if item.attachment is not None else None
         metadata_by_message_id[item.message_id] = {
             "id": item.id,
             "output_type": item.output_type,
@@ -54,6 +56,11 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
             },
             "source_summary": item.source_summary,
             "evidence_available": bool(sources),
+            "evidence_url": (
+                f"/json/hover/spaces/{attachment_space_id}/generated-items/{item.id}/evidence"
+                if attachment_space_id is not None and sources
+                else None
+            ),
             "sources": list(sources.values()),
         }
 

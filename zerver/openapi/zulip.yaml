@@ -27565,6 +27565,79 @@ paths:
                         "url": "https://example.constructor.app/groups/room/room-123",
                       }
 
+  /hover/spaces/{space_id}/generated-items/{generated_item_id}/evidence:
+    post:
+      operationId: resolve-hover-generated-item-evidence
+      summary: Resolve evidence for a generated Hover item
+      tags: ["messages"]
+      description: |
+        Resolve the exact evidence attached to a generated item in a launched
+        Hover Space. The server uses its stored opaque evidence references;
+        clients cannot submit provider identifiers or evidence references.
+
+        The requesting user must be a confirmed member of the Space. Evidence
+        that no longer exists returns an `evidence_not_resolvable` error, while
+        transient upstream failures indicate whether the request can be retried.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      parameters:
+        - name: space_id
+          in: path
+          required: true
+          description: The ID of the Hover Space containing the generated item.
+          schema:
+            type: integer
+        - name: generated_item_id
+          in: path
+          required: true
+          description: The ID of the generated item whose evidence should be resolved.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - additionalProperties: false
+                    required:
+                      - evidence
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      evidence:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverResolvedEvidence"
+                    example:
+                      {
+                        "evidence":
+                          [
+                            {
+                              "content":
+                                {
+                                  "media_description": null,
+                                  "text": "Venue ownership was confirmed.",
+                                  "voice_transcript": null,
+                                },
+                              "evidence_ref": "evidence_0123456789abcdef0123456789abcdef",
+                              "media": null,
+                              "sender":
+                                {
+                                  "display_name": "AIMTO volunteer",
+                                  "ref": "person_0123456789abcdef0123456789abcdef",
+                                },
+                              "source_ref": "src_0123456789abcdef0123456789abcdef",
+                              "timestamp": "2026-08-11T10:00:00Z",
+                            },
+                          ],
+                        "msg": "",
+                        "result": "success",
+                      }
+
 components:
   #######################
   # Security definitions
@@ -30619,6 +30692,85 @@ components:
                 enum:
                   - verified_email
                   - verified_phone
+    HoverResolvedEvidence:
+      type: object
+      additionalProperties: false
+      required:
+        - evidence_ref
+        - source_ref
+        - sender
+        - timestamp
+        - content
+        - media
+      description: |
+        Sanitized source evidence resolved from an opaque reference stored by
+        Hover when the generated item was created.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      properties:
+        evidence_ref:
+          type: string
+          pattern: ^evidence_[0-9a-f]{32}$
+        source_ref:
+          type: string
+          pattern: ^src_[0-9a-f]{32}$
+        sender:
+          type: object
+          additionalProperties: false
+          required:
+            - ref
+            - display_name
+          properties:
+            ref:
+              type: string
+              pattern: ^person_[0-9a-f]{32}$
+            display_name:
+              type: string
+        timestamp:
+          type: string
+          format: date-time
+        content:
+          type: object
+          additionalProperties: false
+          required:
+            - text
+            - voice_transcript
+            - media_description
+          properties:
+            text:
+              type: string
+              nullable: true
+            voice_transcript:
+              type: string
+              nullable: true
+            media_description:
+              type: string
+              nullable: true
+        media:
+          type: object
+          nullable: true
+          additionalProperties: false
+          required:
+            - type
+            - mime_type
+            - byte_size
+            - sha256
+            - available
+          properties:
+            type:
+              type: string
+            mime_type:
+              type: string
+              nullable: true
+            byte_size:
+              type: integer
+              minimum: 0
+              nullable: true
+            sha256:
+              type: string
+              nullable: true
+            available:
+              type: boolean
     JsonResponseBase:
       type: object
       properties:

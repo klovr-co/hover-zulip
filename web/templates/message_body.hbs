@@ -82,7 +82,12 @@
 <div class="message_length_controller"></div>
 
 {{#if has_hover_source_integrations}}
-    {{> hover_source_reactions integrations=hover_source_integrations}}
+    <div class="hover-message-reactions">
+        {{> hover_source_reactions integrations=hover_source_integrations evidence_url=hover_evidence_url}}
+        {{#unless (or is_hidden (eq msg.message_reactions.length 0))}}
+            {{> message_reactions . }}
+        {{/unless}}
+    </div>
 {{else}}
     {{#unless (or is_hidden (eq msg.message_reactions.length 0))}}
         {{> message_reactions . }}

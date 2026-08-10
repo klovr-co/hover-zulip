@@ -65,6 +65,7 @@ export type MessageContainer = {
     hover_module_key?: string;
     hover_module_name?: string;
     hover_source_context?: string;
+    hover_evidence_url?: string;
     hover_source_integrations?: hover.SourceIntegration[];
     last_edit_timestamp: number | undefined;
     last_moved_timestamp: number | undefined;
@@ -610,6 +611,7 @@ export class MessageListView {
         hover_module_key?: string;
         hover_module_name?: string;
         hover_source_context?: string;
+        hover_evidence_url?: string;
         hover_source_integrations?: hover.SourceIntegration[];
         mention_classname: string | undefined;
         include_sender: boolean;
@@ -726,6 +728,9 @@ export class MessageListView {
             }),
             ...(hover_generated_item !== undefined && {
                 hover_source_context: hover_generated_item.source_summary,
+                ...(hover_generated_item.evidence_url !== null && {
+                    hover_evidence_url: hover_generated_item.evidence_url,
+                }),
             }),
             ...(hover_source_integrations.length > 0 && {
                 hover_source_integrations,

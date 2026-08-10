@@ -83,6 +83,9 @@ function get_message_container_for_preview(message: Message): MessageContainer {
             hover_module_key: message.hover_generated_item.module.key,
             hover_module_name: message.hover_generated_item.module.name,
             hover_source_context: message.hover_generated_item.source_summary,
+            ...(message.hover_generated_item.evidence_url !== null && {
+                hover_evidence_url: message.hover_generated_item.evidence_url,
+            }),
         }),
         msg: message,
         sender_is_bot: people.sender_is_bot(message),

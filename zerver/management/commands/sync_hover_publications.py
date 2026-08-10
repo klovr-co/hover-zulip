@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.core.management.base import CommandError, CommandParser
+from django.db.models import Q
+from django.utils import timezone
 from typing_extensions import override
 
 from hover.clawer_sync import get_clawer_sync
@@ -22,18 +24,38 @@ class Command(ZulipBaseCommand):
         assistant_email = str(settings.HOVER_ASSISTANT_EMAIL).strip()
         if not assistant_email:
             raise CommandError("HOVER_ASSISTANT_EMAIL is not configured")
-        max_pages = int(options["max_pages"])
+        max_pages_option = options["max_pages"]
+        assert isinstance(max_pages_option, int)
+        max_pages = max_pages_option
         if max_pages < 1 or max_pages > 100:
             raise CommandError("--max-pages must be between 1 and 100")
 
-        attachments = SpaceAttachment.objects.filter(
-            state=SpaceAttachment.State.ACTIVE,
-            space__state=Space.State.LAUNCHED,
-            space__stream__isnull=False,
-        ).select_related("realm")
+        now = timezone.now()
+        attachments = (
+            SpaceAttachment.objects.filter(
+                state=SpaceAttachment.State.ACTIVE,
+                space__state=Space.State.LAUNCHED,
+                space__stream__isnull=False,
+            )
+            .filter(
+                Q(
+                    publication_sync_state__in=[
+                        SpaceAttachment.PublicationSyncState.IDLE,
+                        SpaceAttachment.PublicationSyncState.BACKOFF,
+                    ],
+                    next_publication_sync_at__lte=now,
+                )
+                | Q(
+                    publication_sync_state=SpaceAttachment.PublicationSyncState.LEASED,
+                    publication_sync_lease_expires_at__lte=now,
+                )
+            )
+            .select_related("realm")
+        )
         attachment_id = options.get("attachment_id")
         if attachment_id is not None:
-            attachments = attachments.filter(id=int(attachment_id))
+            assert isinstance(attachment_id, int)
+            attachments = attachments.filter(id=attachment_id)
 
         adapter = get_clawer_sync()
         failures = 0

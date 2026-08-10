@@ -62,6 +62,7 @@ const hover_generated_item_schema = z.object({
     module: z.object({key: z.string(), name: z.string(), version: z.string()}),
     source_summary: z.string(),
     evidence_available: z.boolean(),
+    evidence_url: z.nullable(z.string()),
     sources: z.array(
         z.object({
             key: z.string(),

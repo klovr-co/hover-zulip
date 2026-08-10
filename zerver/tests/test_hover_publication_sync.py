@@ -1,7 +1,10 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from typing import Any, cast
 from unittest.mock import patch
-from uuid import UUID
+from uuid import UUID, uuid4
 
+import orjson
+from django.utils import timezone as django_timezone
 from typing_extensions import override
 
 from hover.actions_connected_accounts import (
@@ -14,13 +17,31 @@ from hover.actions_sources import do_attach_source
 from hover.actions_spaces import do_create_space
 from hover.clawer_sync import ClawerSource, ClawerSyncError, InMemoryClawerSync
 from hover.lib import add_hover_metadata
-from hover.models import ConnectedAccount, EvidenceLink, GeneratedItem, Space
-from hover.publication_contracts import ClawerPublication, ClawerPublicationPage, ResolvedEvidence
-from hover.publication_sync import PublicationSyncError, sync_space_attachment
+from hover.models import (
+    ConnectedAccount,
+    EvidenceLink,
+    GeneratedItem,
+    PublicationSyncAttempt,
+    Space,
+    SpaceAttachment,
+    SpaceMembership,
+)
+from hover.publication_contracts import (
+    ClawerPublication,
+    ClawerPublicationPage,
+    DigestPayload,
+    ProgressUpdatePayload,
+    ResolvedEvidence,
+)
+from hover.publication_sync import (
+    MAX_PUBLICATION_SYNC_BATCH,
+    PublicationSyncError,
+    sync_space_attachment,
+)
 from zerver.actions.channel_folders import check_add_channel_folder
 from zerver.lib.test_classes import ZulipTestCase
 from zerver.lib.user_groups import get_system_user_group_by_name
-from zerver.models import Message
+from zerver.models import Message, Subscription
 from zerver.models.groups import SystemGroups
 
 
@@ -50,12 +71,6 @@ class HoverPublicationSyncTest(ZulipTestCase):
             description="",
             category=category,
         )
-        stream = self.subscribe(self.actor, "AIMTO Events", invite_only=True)
-        self.subscribe(self.assistant, "AIMTO Events", invite_only=True)
-        self.space.state = Space.State.LAUNCHED
-        self.space.stream = stream
-        self.space.save(update_fields=["state", "stream", "date_updated"])
-
         self.account = do_create_connected_account(
             realm=self.realm,
             provider_key="whatsapp",
@@ -106,6 +121,10 @@ class HoverPublicationSyncTest(ZulipTestCase):
             clawer_sync=self.adapter,
             now=datetime(2026, 8, 11, 12, tzinfo=timezone.utc),
         )
+        stream = self.subscribe(self.actor, "AIMTO Events", invite_only=True)
+        self.space.state = Space.State.LAUNCHED
+        self.space.stream = stream
+        self.space.save(update_fields=["state", "stream", "date_updated"])
 
     def publication(self, number: int, payload: dict[str, object]) -> ClawerPublication:
         timestamp = "2026-08-11T10:00:00Z"
@@ -126,7 +145,10 @@ class HoverPublicationSyncTest(ZulipTestCase):
                     "end": timestamp,
                 },
                 "payload": payload,
-                "evidence_refs": [f"evidence-{number}-a", f"evidence-{number}-b"],
+                "evidence_refs": [
+                    f"evidence_{number:02x}a{'0' * 29}",
+                    f"evidence_{number:02x}b{'0' * 29}",
+                ],
                 "importance": "normal",
                 "occurred_at": timestamp,
                 "generated_at": timestamp,
@@ -238,6 +260,28 @@ class HoverPublicationSyncTest(ZulipTestCase):
             has_more=False,
         )
 
+    def test_contract_rejects_raw_provider_identifiers_in_display_names(self) -> None:
+        raw = self.six_publications()[0].model_dump(mode="json")
+        raw["producer_name"] = "12025550123@g.us"
+        with self.assertRaisesRegex(ValueError, "provider identifier"):
+            ClawerPublication.model_validate(raw)
+
+        with self.assertRaisesRegex(ValueError, "source content or media"):
+            ResolvedEvidence.model_validate(
+                {
+                    "evidence_ref": f"evidence_{'0' * 32}",
+                    "source_ref": self.SOURCE_REF,
+                    "sender": {"ref": f"person_{'a' * 32}", "display_name": "Participant"},
+                    "timestamp": "2026-08-11T10:00:00Z",
+                    "content": {
+                        "text": None,
+                        "voice_transcript": None,
+                        "media_description": None,
+                    },
+                    "media": None,
+                }
+            )
+
     def test_all_six_outputs_materialize_once_and_replay_advances_cursor(self) -> None:
         publications = self.six_publications()
         self.set_page(cursor=None, next_cursor="cursor:one", publications=publications)
@@ -265,16 +309,18 @@ class HoverPublicationSyncTest(ZulipTestCase):
                 .order_by("position")
                 .values_list("evidence_ref", flat=True)
             ),
-            ["evidence-3-a", "evidence-3-b"],
+            [f"evidence_03a{'0' * 29}", f"evidence_03b{'0' * 29}"],
         )
         suggested = GeneratedItem.objects.get(publication_id="publication-3")
         self.assertIn("Awaiting confirmation", suggested.message.content)
-        message_dict = {"id": suggested.message_id}
+        message_dict: dict[str, Any] = {"id": suggested.message_id}
         add_hover_metadata([message_dict], realm_id=self.realm.id)
         self.assertEqual(
             message_dict["hover_generated_item"]["evidence_url"],
             f"/json/hover/spaces/{self.space.id}/generated-items/{suggested.id}/evidence",
         )
+
+        GeneratedItem.objects.update(publication_envelope_hash="")
 
         self.set_page(
             cursor="cursor:one",
@@ -290,13 +336,25 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.assertEqual(replay.replayed, 6)
         self.assertEqual(GeneratedItem.objects.count(), 6)
         self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 6)
+        assert self.space.stream is not None
+        self.assertTrue(
+            Subscription.objects.filter(
+                user_profile=self.assistant,
+                recipient=self.space.stream.recipient,
+                active=True,
+            ).exists()
+        )
+        self.assertFalse(
+            SpaceMembership.objects.filter(space=self.space, user=self.assistant).exists()
+        )
+        self.assertFalse(GeneratedItem.objects.filter(publication_envelope_hash="").exists())
         self.attachment.refresh_from_db()
         self.assertEqual(self.attachment.publication_cursor, "cursor:two")
 
     def test_batch_failure_rolls_back_message_provenance_and_cursor(self) -> None:
         publications = self.six_publications()[:2]
         progress = publications[1]
-        progress.payload.updates = ["x" * 20_000]
+        cast(ProgressUpdatePayload, progress.payload).updates = ["x" * 20_000]
         self.set_page(cursor=None, next_cursor="cursor:invalid", publications=publications)
 
         with self.assertRaisesRegex(PublicationSyncError, "publication_content_too_long"):
@@ -315,6 +373,14 @@ class HoverPublicationSyncTest(ZulipTestCase):
             self.attachment.last_publication_sync_error, "publication_content_too_long"
         )
         self.assertEqual(self.attachment.publication_sync_failures, 1)
+        self.assertEqual(
+            self.attachment.publication_sync_state,
+            SpaceAttachment.PublicationSyncState.BLOCKED,
+        )
+        attempt = PublicationSyncAttempt.objects.get()
+        self.assertEqual(attempt.error_code, "publication_content_too_long")
+        self.assertFalse(attempt.retryable)
+        self.assertEqual(attempt.publication_count, 2)
 
     def test_authorized_evidence_resolution_uses_stored_refs_in_order(self) -> None:
         publication = self.six_publications()[0]
@@ -362,6 +428,96 @@ class HoverPublicationSyncTest(ZulipTestCase):
         )
         self.assertEqual(self.adapter.evidence_calls[-1]["refs"], publication.evidence_refs)
 
+    def test_evidence_resolution_rechecks_membership_and_classifies_failures(self) -> None:
+        publication = self.six_publications()[0]
+        self.set_page(cursor=None, next_cursor="cursor:evidence-errors", publications=[publication])
+        sync_space_attachment(
+            attachment_id=self.attachment.id,
+            assistant=self.assistant,
+            clawer_sync=self.adapter,
+        )
+        item = GeneratedItem.objects.get(publication_id=publication.publication_id)
+
+        non_member = self.example_user("iago")
+        self.login_user(non_member)
+        with patch("hover.views_publications.get_clawer_sync", return_value=self.adapter):
+            denied = self.client_post(
+                f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
+            )
+        self.assert_json_error(denied, "Invalid Space ID")
+        self.assertEqual(self.adapter.evidence_calls, [])
+
+        SpaceMembership.objects.create(
+            realm=self.realm,
+            space=self.space,
+            user=non_member,
+            role=SpaceMembership.Role.SUBSCRIBER,
+            added_by=self.actor,
+        )
+        denied_native_message = self.client_post(
+            f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
+        )
+        self.assert_json_error(denied_native_message, "Invalid message(s)")
+        self.assertEqual(self.adapter.evidence_calls, [])
+        SpaceMembership.objects.filter(space=self.space, user=non_member).delete()
+
+        class RetryableEvidenceAdapter(InMemoryClawerSync):
+            @override
+            def resolve_evidence(self, **_kwargs: object) -> list[ResolvedEvidence]:
+                raise ClawerSyncError(
+                    error_code="clawer_timeout",
+                    operation="evidence_resolution",
+                    http_status_code=504,
+                    retryable=True,
+                )
+
+        self.login_user(self.actor)
+        with (
+            self.settings(TEST_SUITE=False),
+            patch(
+                "hover.views_publications.get_clawer_sync",
+                return_value=RetryableEvidenceAdapter(),
+            ),
+        ):
+            self.client.raise_request_exception = False
+            try:
+                retrying = self.client_post(
+                    f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
+                )
+            finally:
+                self.client.raise_request_exception = True
+        retrying_payload = orjson.loads(retrying.content)
+        self.assertEqual(retrying.status_code, 504)
+        self.assertTrue(retrying_payload["retryable"])
+        self.assertEqual(retrying_payload["error_code"], "clawer_timeout")
+
+        self.account.approval_state = ConnectedAccount.ApprovalState.REVOKED
+        self.account.save(update_fields=["approval_state", "date_updated"])
+        with patch("hover.views_publications.get_clawer_sync", return_value=self.adapter):
+            revoked_account = self.client_post(
+                f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
+            )
+        revoked_account_payload = orjson.loads(revoked_account.content)
+        self.assertEqual(revoked_account.status_code, 404)
+        self.assertEqual(revoked_account_payload["error_code"], "evidence_not_resolvable")
+        self.account.approval_state = ConnectedAccount.ApprovalState.APPROVED
+        self.account.save(update_fields=["approval_state", "date_updated"])
+
+        EvidenceLink.objects.filter(generated_item=item).delete()
+        missing = self.client_post(
+            f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
+        )
+        missing_payload = orjson.loads(missing.content)
+        self.assertEqual(missing.status_code, 404)
+        self.assertFalse(missing_payload["retryable"])
+        self.assertEqual(missing_payload["error_code"], "evidence_not_resolvable")
+
+        SpaceMembership.objects.filter(space=self.space, user=self.actor).delete()
+        revoked = self.client_post(
+            f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
+        )
+        self.assert_json_error(revoked, "Invalid Space ID")
+
     def test_invalid_upstream_contract_records_content_free_failure(self) -> None:
         class InvalidAdapter(InMemoryClawerSync):
             @override
@@ -383,3 +539,201 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.assertEqual(GeneratedItem.objects.count(), 0)
         self.attachment.refresh_from_db()
         self.assertEqual(self.attachment.last_publication_sync_error, "invalid_upstream_contract")
+
+    def test_changed_replay_is_rejected_by_immutable_envelope_hash(self) -> None:
+        publication = self.six_publications()[0]
+        self.set_page(cursor=None, next_cursor="cursor:accepted", publications=[publication])
+        sync_space_attachment(
+            attachment_id=self.attachment.id,
+            assistant=self.assistant,
+            clawer_sync=self.adapter,
+        )
+
+        cast(DigestPayload, publication.payload).title = "Changed after publication"
+        self.set_page(
+            cursor="cursor:accepted",
+            next_cursor="cursor:collision",
+            publications=[publication],
+        )
+        with self.assertRaisesRegex(PublicationSyncError, "publication_identity_conflict"):
+            sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=self.adapter,
+            )
+
+        self.assertEqual(GeneratedItem.objects.count(), 1)
+        self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 1)
+        self.attachment.refresh_from_db()
+        self.assertEqual(self.attachment.publication_cursor, "cursor:accepted")
+        self.assertEqual(
+            self.attachment.publication_sync_state,
+            SpaceAttachment.PublicationSyncState.BLOCKED,
+        )
+
+    def test_publication_identity_is_scoped_to_each_space_attachment(self) -> None:
+        second_space = do_create_space(
+            self.actor,
+            name="AIMTO Archive",
+            description="",
+            category=self.space.category,
+        )
+        second_attachment, _created = do_attach_source(
+            acting_user=self.actor,
+            space=second_space,
+            account_id=self.account.id,
+            source_ref=self.SOURCE_REF,
+            history_window="today",
+            history_timezone="UTC",
+            custom_start_date=None,
+            clawer_sync=self.adapter,
+            now=datetime(2026, 8, 11, 12, tzinfo=timezone.utc),
+        )
+        second_stream = self.subscribe(self.actor, "AIMTO Archive", invite_only=True)
+        second_space.state = Space.State.LAUNCHED
+        second_space.stream = second_stream
+        second_space.save(update_fields=["state", "stream", "date_updated"])
+
+        publication = self.six_publications()[0]
+        self.set_page(cursor=None, next_cursor="cursor:shared", publications=[publication])
+        for attachment in [self.attachment, second_attachment]:
+            sync_space_attachment(
+                attachment_id=attachment.id,
+                assistant=self.assistant,
+                clawer_sync=self.adapter,
+            )
+
+        self.assertEqual(
+            GeneratedItem.objects.filter(publication_id=publication.publication_id).count(),
+            2,
+        )
+        self.assertEqual(
+            GeneratedItem.objects.filter(
+                publication_id=publication.publication_id,
+                attachment=second_attachment,
+            ).count(),
+            1,
+        )
+
+    def test_active_lease_prevents_duplicate_fetch_and_expired_lease_is_recoverable(self) -> None:
+        self.attachment.publication_sync_state = SpaceAttachment.PublicationSyncState.LEASED
+        self.attachment.publication_sync_lease_token = uuid4()
+        self.attachment.publication_sync_lease_expires_at = django_timezone.now() + timedelta(
+            minutes=1
+        )
+        self.attachment.save(
+            update_fields=[
+                "publication_sync_state",
+                "publication_sync_lease_token",
+                "publication_sync_lease_expires_at",
+            ]
+        )
+        with self.assertRaisesRegex(PublicationSyncError, "publication_sync_already_leased"):
+            sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=self.adapter,
+            )
+        self.assertEqual(self.adapter.sync_calls, [])
+
+        self.attachment.publication_sync_lease_expires_at = django_timezone.now() - timedelta(
+            seconds=1
+        )
+        self.attachment.save(update_fields=["publication_sync_lease_expires_at"])
+        self.set_page(cursor=None, next_cursor="cursor:recovered", publications=[])
+        result = sync_space_attachment(
+            attachment_id=self.attachment.id,
+            assistant=self.assistant,
+            clawer_sync=self.adapter,
+        )
+        self.assertEqual(result.next_cursor, "cursor:recovered")
+
+    def test_retryable_transport_failure_enters_exponential_backoff(self) -> None:
+        class RetryableAdapter(InMemoryClawerSync):
+            @override
+            def sync_publications(self, **_kwargs: object) -> ClawerPublicationPage:
+                raise ClawerSyncError(
+                    error_code="clawer_timeout",
+                    operation="sync",
+                    http_status_code=504,
+                    retryable=True,
+                )
+
+        before = django_timezone.now()
+        with self.assertRaisesRegex(PublicationSyncError, "clawer_timeout"):
+            sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=RetryableAdapter(),
+            )
+        self.attachment.refresh_from_db()
+        self.assertEqual(
+            self.attachment.publication_sync_state,
+            SpaceAttachment.PublicationSyncState.BACKOFF,
+        )
+        assert self.attachment.next_publication_sync_at is not None
+        self.assertGreaterEqual(
+            self.attachment.next_publication_sync_at,
+            before + timedelta(seconds=60),
+        )
+        self.assertTrue(PublicationSyncAttempt.objects.get().retryable)
+
+    def test_attachment_lifecycle_is_rechecked_after_fetch(self) -> None:
+        publication = self.six_publications()[0]
+
+        class RacingAdapter(InMemoryClawerSync):
+            @override
+            def sync_publications(self, **_kwargs: object) -> ClawerPublicationPage:
+                SpaceAttachment.objects.filter(id=self_attachment.id).update(
+                    state=SpaceAttachment.State.PENDING_SYNC
+                )
+                return ClawerPublicationPage(
+                    publications=[publication],
+                    next_cursor="cursor:raced",
+                    has_more=False,
+                )
+
+        self_attachment = self.attachment
+        with self.assertRaisesRegex(PublicationSyncError, "attachment_not_syncable"):
+            sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=RacingAdapter(),
+            )
+        self.assertEqual(GeneratedItem.objects.count(), 0)
+        self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 0)
+
+    def test_connected_account_approval_is_rechecked_after_fetch(self) -> None:
+        publication = self.six_publications()[0]
+
+        class RacingAdapter(InMemoryClawerSync):
+            @override
+            def sync_publications(self, **_kwargs: object) -> ClawerPublicationPage:
+                ConnectedAccount.objects.filter(id=account.id).update(
+                    approval_state=ConnectedAccount.ApprovalState.REVOKED
+                )
+                return ClawerPublicationPage(
+                    publications=[publication],
+                    next_cursor="cursor:revoked",
+                    has_more=False,
+                )
+
+        account = self.account
+        with self.assertRaisesRegex(PublicationSyncError, "attachment_not_syncable"):
+            sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=RacingAdapter(),
+            )
+        self.assertEqual(GeneratedItem.objects.count(), 0)
+        self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 0)
+
+    def test_materialization_batch_limit_is_stricter_than_transport_limit(self) -> None:
+        with self.assertRaisesRegex(PublicationSyncError, "invalid_publication_batch_limit"):
+            sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=self.adapter,
+                limit=MAX_PUBLICATION_SYNC_BATCH + 1,
+            )
+        self.assertEqual(self.adapter.sync_calls, [])
