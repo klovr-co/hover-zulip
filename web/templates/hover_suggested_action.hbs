@@ -1,0 +1,68 @@
+<section
+    class="hover-suggested-action"
+    data-hover-suggested-action-message-id="{{message_id}}"
+    aria-label="{{t 'Suggested Action'}}"
+    tabindex="-1"
+>
+    <div class="hover-suggested-action__heading">
+        <h4>{{t "Suggested Action"}}</h4>
+        <span class="hover-suggested-action__state">
+            {{#if is_pending}}{{t "Awaiting confirmation"}}{{/if}}
+            {{#if is_approved}}{{t "Active Todo"}}{{/if}}
+            {{#if is_not_action}}{{t "Not an action"}}{{/if}}
+        </span>
+    </div>
+    <p class="hover-suggested-action__wording">{{wording}}</p>
+    <dl class="hover-suggested-action__facts">
+        <div><dt>{{t "Responsibility"}}</dt><dd>{{responsibility}}</dd></div>
+        <div><dt>{{t "Due"}}</dt><dd>{{due_date}}</dd></div>
+    </dl>
+    {{#if is_not_action}}
+        <p class="hover-suggested-action__history">
+            {{#tr}}Marked by {{latest_actor}} at {{latest_time}}{{/tr}}
+            {{#if latest_reason}} — {{latest_reason}}{{/if}}
+        </p>
+    {{/if}}
+    {{#if is_approved}}
+        <p class="hover-suggested-action__todo">{{#tr}}Todo #{{todo_id}}
+                is active{{/tr}}</p>
+    {{else}}
+        <div class="hover-suggested-action__controls">
+            {{#if is_pending}}
+                <button
+                    type="button"
+                    class="button rounded sea-green"
+                    data-hover-action-decision="approve"
+                    data-hover-message-id="{{message_id}}"
+                >{{t "Approve"}}</button>
+                <input
+                    type="text"
+                    maxlength="1000"
+                    data-hover-action-reason
+                    aria-label="{{t 'Optional reason for Not an action'}}"
+                    placeholder="{{t 'Optional reason'}}"
+                />
+                <button
+                    type="button"
+                    class="button rounded"
+                    data-hover-action-decision="not_action"
+                    data-hover-message-id="{{message_id}}"
+                >{{t "Not an action"}}</button>
+            {{/if}}
+            {{#if is_not_action}}
+                <button
+                    type="button"
+                    class="button rounded"
+                    data-hover-action-decision="restore"
+                    data-hover-message-id="{{message_id}}"
+                >{{t "Restore"}}</button>
+            {{/if}}
+        </div>
+    {{/if}}
+    <span
+        class="hover-suggested-action__status"
+        data-hover-action-status
+        role="status"
+        aria-live="polite"
+    ></span>
+</section>

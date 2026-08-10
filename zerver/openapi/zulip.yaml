@@ -27601,6 +27601,84 @@ paths:
                         "url": "https://example.constructor.app/groups/room/room-123",
                       }
 
+  /hover/spaces/{space_id}/generated-items/{generated_item_id}/suggested-action/decisions:
+    post:
+      operationId: decide-hover-suggested-action
+      summary: Decide a Hover Suggested Action
+      tags: ["messages"]
+      description: |
+        Atomically approve a pending Suggested Action into one active Todo,
+        mark it as Not an action, or restore a dismissed proposal. The caller
+        must be an active confirmed Contributor or Subscriber in the exact
+        launched Space. Request IDs make retries idempotent and expected
+        versions prevent reordered clients from overwriting newer decisions.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      parameters:
+        - name: space_id
+          in: path
+          required: true
+          schema: {type: integer}
+        - name: generated_item_id
+          in: path
+          required: true
+          schema: {type: integer}
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [decision, request_id, expected_version]
+              properties:
+                decision:
+                  type: string
+                  enum: [approve, not_action, restore]
+                request_id:
+                  type: string
+                  format: uuid
+                expected_version:
+                  type: integer
+                  minimum: 1
+                reason:
+                  type: string
+                  nullable: true
+                  maxLength: 1000
+                  description: Optional only for `not_action`.
+      responses:
+        "200":
+          description: Success, including an idempotent replay.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - additionalProperties: false
+                    required: [changed, suggested_action]
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      changed: {type: boolean}
+                      suggested_action:
+                        $ref: "#/components/schemas/HoverSuggestedAction"
+        "409":
+          description: The expected version or transition is stale.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [result, msg, suggested_action]
+                properties:
+                  result:
+                    type: string
+                    enum: [error]
+                  msg: {type: string}
+                  suggested_action:
+                    $ref: "#/components/schemas/HoverSuggestedAction"
+
   /hover/spaces/{space_id}/generated-items/{generated_item_id}/evidence:
     post:
       operationId: resolve-hover-generated-item-evidence
@@ -29827,6 +29905,11 @@ components:
                   - evidence_url
                   - review_request
                   - resolution
+            suggested_action:
+              oneOf:
+                - $ref: "#/components/schemas/HoverSuggestedAction"
+                - type: object
+                  nullable: true
           required:
             - id
             - output_type
@@ -29840,6 +29923,7 @@ components:
             - reviewed_payload
             - revisions
             - disputed_details
+            - suggested_action
         hover_response:
           type: object
           additionalProperties: false
@@ -31081,6 +31165,107 @@ components:
                 enum:
                   - verified_email
                   - verified_phone
+    HoverSuggestedAction:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - state
+        - version
+        - wording
+        - source_proposal
+        - assignee
+        - due_date
+        - history_count
+        - recent_transitions
+        - todo
+      properties:
+        id: {type: integer}
+        state:
+          type: string
+          enum: [pending, approved, not_action]
+        version:
+          type: integer
+          minimum: 1
+        wording: {type: string}
+        source_proposal:
+          type: object
+          additionalProperties: false
+          required: [assignee_ref, assignee_display_name]
+          properties:
+            assignee_ref:
+              type: string
+              nullable: true
+              pattern: ^person_[0-9a-f]{32}$
+            assignee_display_name:
+              type: string
+              nullable: true
+        assignee:
+          type: object
+          nullable: true
+          additionalProperties: false
+          required: [user_id, full_name]
+          properties:
+            user_id: {type: integer}
+            full_name: {type: string}
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        history_count:
+          type: integer
+          minimum: 0
+        recent_transitions:
+          type: array
+          maxItems: 5
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              [
+                id,
+                kind,
+                from_state,
+                to_state,
+                actor_id,
+                actor_name,
+                occurred_at,
+                reason,
+              ]
+            properties:
+              id: {type: integer}
+              kind:
+                type: string
+                enum: [approve, not_action, restore]
+              from_state:
+                type: string
+                enum: [pending, approved, not_action]
+              to_state:
+                type: string
+                enum: [pending, approved, not_action]
+              actor_id: {type: integer}
+              actor_name: {type: string}
+              occurred_at:
+                type: string
+                format: date-time
+              reason: {type: string}
+        todo:
+          type: object
+          nullable: true
+          additionalProperties: false
+          required: [id, state, assignee_user_id, due_date]
+          properties:
+            id: {type: integer}
+            state:
+              type: string
+              enum: [active]
+            assignee_user_id:
+              type: integer
+              nullable: true
+            due_date:
+              type: string
+              format: date
+              nullable: true
     HoverResolvedEvidence:
       type: object
       additionalProperties: false

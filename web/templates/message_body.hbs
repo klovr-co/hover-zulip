@@ -82,7 +82,9 @@
             {{#if hover_importance}}<span class="hover-generated-update-importance hover-generated-update-importance--{{hover_importance}}">{{hover_importance}}</span>{{/if}}
         </div>
         {{/if}}
-        {{#if use_match_properties}}
+        {{#if is_hover_suggested_action}}
+            {{> hover_suggested_action hover_suggested_action}}
+        {{else if use_match_properties}}
             {{rendered_markdown msg/match_content}}
         {{else}}
             {{rendered_markdown msg/content}}

@@ -18,6 +18,10 @@ from hover.actions_review_requests import (
     ReviewRequestMaterializationError,
     materialize_disputed_details,
 )
+from hover.actions_suggested_actions import (
+    create_suggested_action_for_generated_item,
+    send_suggested_action_projection_event,
+)
 from hover.clawer_sync import ClawerSync, ClawerSyncError
 from hover.models import (
     ConnectedAccount,
@@ -102,7 +106,6 @@ def render_publication(publication: ClawerPublication) -> tuple[str, str]:
         sections = [
             "## Suggested action",
             payload.wording,
-            "**Status:** Awaiting confirmation",
         ]
         if payload.proposed_assignee is not None:
             sections.append(f"**Proposed assignee:** {payload.proposed_assignee.display_name}")
@@ -327,6 +330,9 @@ def _create_generated_item(
         details=publication.disputed_details,
         evidence_by_ref={link.evidence_ref: link for link in evidence_links},
     )
+    if isinstance(publication.payload, SuggestedActionPayload):
+        action = create_suggested_action_for_generated_item(generated_item, publication.payload)
+        send_suggested_action_projection_event(action)
     return generated_item
 
 

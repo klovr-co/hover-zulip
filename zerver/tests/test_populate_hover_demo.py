@@ -18,6 +18,7 @@ from hover.models import (
     SpaceAttachment,
     SpaceMembership,
 )
+from hover.publication_contracts import SuggestedActionPayload
 from zerver.lib.test_classes import ZulipTestCase
 from zerver.management.commands.populate_hover_demo import DEMO_POSTS, MODULE_NAMES
 from zerver.models import Message, ScheduledMessage, Stream, Subscription, UserMessage, UserProfile
@@ -228,6 +229,11 @@ class PopulateHoverDemoTest(ZulipTestCase):
         self.assertTrue(
             all("Status: Awaiting confirmation" in message.content for message in suggested_actions)
         )
+        for message in suggested_actions:
+            item = GeneratedItem.objects.get(message=message)
+            proposal = SuggestedActionPayload.model_validate(item.payload)
+            self.assertEqual(proposal.contract, "suggested_action")
+            self.assertEqual(item.reviewed_payload, item.payload)
 
         marketing_posts = [
             message for message in messages if message.topic_name() == "Marketing Digest"

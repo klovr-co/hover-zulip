@@ -97,3 +97,22 @@ _Avoid_: Reviewer permission, exclusive assignee
 The first Hover Space, used to prove the product through a real mixed feed of
 human activity and source-backed AI updates.
 _Avoid_: AIMTO app, AIMTO dashboard
+
+**Suggested Action**:
+A Hover-owned, versioned proposal projected from one immutable Suggested Action
+publication. Its current reviewed wording and due date can be approved, marked
+Not an action, or restored by a confirmed Space member; an opaque upstream
+person reference is never treated as a Hover teammate.
+_Avoid_: Todo before approval, inferred assignee, editable source proposal
+
+**Action Transition**:
+An append-only, request-identified record of one legal Suggested Action state
+change. It preserves actor, time, optional dismissal reason, and the approved
+snapshot without rewriting the native message, publication, or evidence.
+_Avoid_: Status toggle, deletion, client-only state
+
+**Todo**:
+The durable accountable-work aggregate created exactly once when a Suggested
+Action is approved. Todo Events form its append-only history and later workflow
+features extend the same record.
+_Avoid_: Suggested Action, reminder, copied Home task

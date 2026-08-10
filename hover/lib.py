@@ -4,7 +4,16 @@ from typing import Any
 
 from django.db.models import Q
 
-from hover.models import GeneratedItem, IntegrationMessageProvenance, Response, ReviewRequest, Space
+from hover.actions_suggested_actions import suggested_action_data
+from hover.models import (
+    GeneratedItem,
+    IntegrationMessageProvenance,
+    Response,
+    ReviewRequest,
+    Space,
+    SuggestedAction,
+)
+from zerver.models.users import UserProfile
 
 PROVIDER_ICON_CLASSES = {
     "whatsapp": "fa fa-whatsapp",
@@ -13,7 +22,13 @@ PROVIDER_ICON_CLASSES = {
 }
 
 
-def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) -> None:
+def add_hover_metadata(
+    message_dicts: list[dict[str, Any]],
+    *,
+    realm_id: int,
+    user_profile: UserProfile | None = None,
+    include_suggested_actions: bool = False,
+) -> None:
     """Add Hover metadata to native messages after message access has been authorized."""
     message_ids = [message["id"] for message in message_dicts]
     responses = list(
@@ -42,7 +57,12 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
             realm_id=realm_id,
             message__realm_id=realm_id,
         )
-        .select_related("attachment", "message")
+        .select_related(
+            "attachment",
+            "message",
+            "suggested_action__assignee",
+            "suggested_action__todo",
+        )
         .prefetch_related(
             "evidence_links",
             "revisions__actor",
@@ -50,6 +70,7 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
             "disputed_details__conflicting_evidence",
             "disputed_details__resolved_by_revision__actor",
             "disputed_details__review_request__targets__user",
+            "suggested_action__transitions__actor",
         )
         .order_by("id")
     )
@@ -60,6 +81,21 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
             stream__recipient_id__in=recipient_ids,
         ).values_list("stream__recipient_id", "id")
     )
+    allowed_action_space_ids: set[int] = set()
+    if include_suggested_actions:
+        allowed_action_space_ids = set(space_by_recipient_id.values())
+    elif (
+        user_profile is not None
+        and user_profile.realm_id == realm_id
+        and user_profile.is_active
+        and not user_profile.is_guest
+        and not user_profile.is_bot
+    ):
+        allowed_action_space_ids = set(
+            user_profile.hover_space_memberships.filter(
+                space_id__in=space_by_recipient_id.values()
+            ).values_list("space_id", flat=True)
+        )
 
     def lineage_scope(item: GeneratedItem) -> tuple[str, int, str] | None:
         if not item.lineage_key:
@@ -221,6 +257,17 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
                 }
             )
 
+        try:
+            suggested_action = item.suggested_action
+        except SuggestedAction.DoesNotExist:
+            suggested_action_projection = None
+        else:
+            if suggested_action.space_id in allowed_action_space_ids:
+                suggested_action_projection = suggested_action_data(suggested_action)
+                state = suggested_action.state
+            else:
+                suggested_action_projection = None
+
         metadata_by_message_id[item.message_id] = {
             "id": item.id,
             "output_type": item.output_type,
@@ -269,6 +316,7 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
                 for revision in item.revisions.all()
             ],
             "disputed_details": disputed_details,
+            "suggested_action": suggested_action_projection,
         }
 
     for message in message_dicts:

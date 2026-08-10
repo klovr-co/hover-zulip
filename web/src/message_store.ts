@@ -56,6 +56,42 @@ const message_reaction_schema = z.object({
     user_id: z.number(),
 });
 
+export const hover_suggested_action_schema = z.object({
+    id: z.number(),
+    state: z.enum(["pending", "approved", "not_action"]),
+    version: z.number(),
+    wording: z.string(),
+    source_proposal: z.object({
+        assignee_ref: z.nullable(z.string()),
+        assignee_display_name: z.nullable(z.string()),
+    }),
+    assignee: z.nullable(z.object({user_id: z.number(), full_name: z.string()})),
+    due_date: z.nullable(z.string()),
+    history_count: z.number(),
+    recent_transitions: z.array(
+        z.object({
+            id: z.number(),
+            kind: z.enum(["approve", "not_action", "restore"]),
+            from_state: z.enum(["pending", "approved", "not_action"]),
+            to_state: z.enum(["pending", "approved", "not_action"]),
+            actor_id: z.number(),
+            actor_name: z.string(),
+            occurred_at: z.string(),
+            reason: z.string(),
+        }),
+    ),
+    todo: z.nullable(
+        z.object({
+            id: z.number(),
+            state: z.literal("active"),
+            assignee_user_id: z.nullable(z.number()),
+            due_date: z.nullable(z.string()),
+        }),
+    ),
+});
+
+export type HoverSuggestedAction = z.infer<typeof hover_suggested_action_schema>;
+
 export const hover_generated_item_schema = z.object({
     id: z.number(),
     output_type: z.string(),
@@ -140,6 +176,7 @@ export const hover_generated_item_schema = z.object({
             ),
         }),
     ),
+    suggested_action: z.nullable(hover_suggested_action_schema),
 });
 
 export type HoverGeneratedItem = z.infer<typeof hover_generated_item_schema>;

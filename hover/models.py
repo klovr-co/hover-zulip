@@ -1409,3 +1409,233 @@ class ReviewRequestTarget(models.Model):
             or not SpaceMembership.objects.filter(space=attachment.space, user=self.user).exists()
         ):
             raise ValidationError("Review request targets must be confirmed active Space members.")
+
+
+person_ref_validator = RegexValidator(
+    regex=r"^person_[0-9a-f]{32}$",
+    message="Proposed assignees must use opaque person references.",
+)
+
+
+class SuggestedAction(models.Model):
+    class State(models.TextChoices):
+        PENDING = "pending", "Pending"
+        APPROVED = "approved", "Approved"
+        NOT_ACTION = "not_action", "Not an action"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_suggested_actions")
+    space = models.ForeignKey(Space, on_delete=CASCADE, related_name="suggested_actions")
+    generated_item = models.OneToOneField(
+        GeneratedItem, on_delete=RESTRICT, related_name="suggested_action"
+    )
+    state = models.TextField(choices=State.choices, default=State.PENDING)
+    wording = models.TextField()
+    proposed_assignee_ref = models.CharField(
+        max_length=39, blank=True, validators=[person_ref_validator]
+    )
+    proposed_assignee_display_name = models.CharField(max_length=200, blank=True)
+    assignee = models.ForeignKey(
+        UserProfile,
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="hover_assigned_suggested_actions",
+    )
+    due_date = models.DateField(null=True, blank=True, db_index=True)
+    version = models.PositiveIntegerField(default=1)
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["space", "state"], name="hover_action_space_state")]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        item = self.generated_item
+        if (
+            self.realm_id != self.space.realm_id
+            or self.realm_id != item.realm_id
+            or self.space.state != Space.State.LAUNCHED
+            or item.output_type != GeneratedItem.OutputType.SUGGESTED_ACTION
+            or item.attachment_id is None
+            or item.attachment.space_id != self.space_id
+            or self.space.stream_id is None
+            or item.message.recipient_id != self.space.stream.recipient_id
+        ):
+            raise ValidationError(
+                "Suggested Actions must belong to their launched Space publication."
+            )
+        if self.assignee_id is not None and (
+            self.assignee.realm_id != self.realm_id
+            or not self.assignee.is_active
+            or self.assignee.is_guest
+            or self.assignee.is_bot
+            or not SpaceMembership.objects.filter(space=self.space, user=self.assignee).exists()
+        ):
+            raise ValidationError({"assignee": "Assignees must be active confirmed Space members."})
+
+
+class SuggestedActionTransition(models.Model):
+    class Kind(models.TextChoices):
+        APPROVE = "approve", "Approve"
+        NOT_ACTION = "not_action", "Not an action"
+        RESTORE = "restore", "Restore"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    action = models.ForeignKey(SuggestedAction, on_delete=RESTRICT, related_name="transitions")
+    request_id = models.UUIDField()
+    kind = models.TextField(choices=Kind.choices)
+    from_state = models.TextField(choices=SuggestedAction.State.choices)
+    to_state = models.TextField(choices=SuggestedAction.State.choices)
+    actor = models.ForeignKey(
+        UserProfile, on_delete=RESTRICT, related_name="hover_action_transitions"
+    )
+    reason = models.TextField(default="")
+    before_wording = models.TextField()
+    after_wording = models.TextField()
+    before_assignee_id = models.PositiveIntegerField(null=True)
+    after_assignee_id = models.PositiveIntegerField(null=True)
+    before_due_date = models.DateField(null=True)
+    after_due_date = models.DateField(null=True)
+    todo = models.OneToOneField(
+        "Todo", null=True, blank=True, on_delete=RESTRICT, related_name="approval_transition"
+    )
+    date_created = models.DateTimeField(default=timezone_now)
+
+    class Meta:
+        ordering = ["date_created", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["action", "request_id"], name="hover_action_transition_unique_request"
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(kind="approve", from_state="pending", to_state="approved")
+                    | Q(kind="not_action", from_state="pending", to_state="not_action")
+                    | Q(kind="restore", from_state="not_action", to_state="pending")
+                ),
+                name="hover_action_transition_legal_state",
+            ),
+        ]
+
+    @override
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        if not self._state.adding:
+            raise ValidationError("Suggested Action transitions are append-only.")
+        super().save(*args, **kwargs)
+
+    @override
+    def delete(
+        self, using: Any | None = None, keep_parents: bool = False
+    ) -> tuple[int, dict[str, int]]:
+        raise ValidationError("Suggested Action transitions are append-only.")
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.realm_id != self.action.realm_id or self.actor.realm_id != self.realm_id:
+            raise ValidationError(
+                "Suggested Action transitions and actors must share one organization."
+            )
+        if len(self.reason) > 1000 or (self.kind != self.Kind.NOT_ACTION and self.reason):
+            raise ValidationError({"reason": "Only a dismissal may include a short reason."})
+        todo = self.todo
+        if self.kind == self.Kind.APPROVE:
+            if todo is None or todo.suggested_action_id != self.action_id:
+                raise ValidationError({"todo": "Approval transitions must link their Todo."})
+        elif todo is not None:
+            raise ValidationError({"todo": "Only approval transitions may create a Todo."})
+
+
+class Todo(models.Model):
+    class State(models.TextChoices):
+        ACTIVE = "active", "Active"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_todos")
+    space = models.ForeignKey(Space, on_delete=CASCADE, related_name="todos")
+    suggested_action = models.OneToOneField(
+        SuggestedAction, on_delete=RESTRICT, related_name="todo"
+    )
+    state = models.TextField(choices=State.choices, default=State.ACTIVE)
+    wording = models.TextField()
+    assignee = models.ForeignKey(
+        UserProfile, null=True, blank=True, on_delete=RESTRICT, related_name="hover_todos"
+    )
+    due_date = models.DateField(null=True, blank=True, db_index=True)
+    created_by = models.ForeignKey(
+        UserProfile, on_delete=RESTRICT, related_name="hover_created_todos"
+    )
+    version = models.PositiveIntegerField(default=1)
+    date_created = models.DateTimeField(default=timezone_now)
+
+    class Meta:
+        indexes = [models.Index(fields=["space", "state"], name="hover_todo_space_state")]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        action = self.suggested_action
+        if (
+            self.realm_id != self.space.realm_id
+            or self.realm_id != action.realm_id
+            or self.space_id != action.space_id
+            or self.created_by.realm_id != self.realm_id
+        ):
+            raise ValidationError(
+                "Todos must belong to their Suggested Action organization and Space."
+            )
+        if self.assignee_id is not None and (
+            self.assignee.realm_id != self.realm_id
+            or not self.assignee.is_active
+            or self.assignee.is_guest
+            or self.assignee.is_bot
+            or not SpaceMembership.objects.filter(space=self.space, user=self.assignee).exists()
+        ):
+            raise ValidationError(
+                {"assignee": "Todo assignees must be active confirmed Space members."}
+            )
+
+
+class TodoEvent(models.Model):
+    class Kind(models.TextChoices):
+        APPROVED = "approved", "Approved"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    todo = models.ForeignKey(Todo, on_delete=RESTRICT, related_name="events")
+    transition = models.OneToOneField(
+        SuggestedActionTransition, on_delete=RESTRICT, related_name="todo_event"
+    )
+    kind = models.TextField(choices=Kind.choices)
+    actor = models.ForeignKey(UserProfile, on_delete=RESTRICT, related_name="hover_todo_events")
+    version = models.PositiveIntegerField(default=1)
+    date_created = models.DateTimeField(default=timezone_now)
+
+    class Meta:
+        ordering = ["date_created", "id"]
+
+    @override
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        if not self._state.adding:
+            raise ValidationError("Todo events are append-only.")
+        super().save(*args, **kwargs)
+
+    @override
+    def delete(
+        self, using: Any | None = None, keep_parents: bool = False
+    ) -> tuple[int, dict[str, int]]:
+        raise ValidationError("Todo events are append-only.")
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if (
+            self.realm_id != self.todo.realm_id
+            or self.realm_id != self.transition.realm_id
+            or self.realm_id != self.actor.realm_id
+            or self.transition.todo_id != self.todo_id
+            or self.transition.action_id != self.todo.suggested_action_id
+        ):
+            raise ValidationError(
+                "Todo events must belong to their approval transition and organization."
+            )

@@ -3348,6 +3348,101 @@ a {
     font-size: 12px;
 }
 
+.hover-suggested-action {
+    --hover-action-accent: hsl(28deg 83% 38%);
+
+    margin: 10px 0 4px;
+    padding: 15px 16px;
+    border: 1px solid color-mix(in srgb, var(--hover-action-accent) 35%, var(--ds-border-subtle));
+    border-left: 4px solid var(--hover-action-accent);
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--hover-action-accent) 6%, var(--ds-surface-paper));
+}
+
+.hover-suggested-action__heading,
+.hover-suggested-action__controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.hover-suggested-action__heading {
+    justify-content: space-between;
+}
+
+.hover-suggested-action__heading h4,
+.hover-suggested-action__wording,
+.hover-suggested-action__facts,
+.hover-suggested-action__history,
+.hover-suggested-action__todo {
+    margin: 0;
+}
+
+.hover-suggested-action__heading h4 {
+    font-family: var(--font-headline);
+    font-size: 14px;
+}
+
+.hover-suggested-action__state {
+    padding: 3px 8px;
+    border-radius: 999px;
+    color: var(--ds-text-secondary);
+    background: var(--ds-surface-paper);
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.hover-suggested-action__wording {
+    padding: 12px 0;
+    color: var(--ds-text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.hover-suggested-action__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    padding-bottom: 12px;
+}
+
+.hover-suggested-action__facts div {
+    min-width: 150px;
+}
+
+.hover-suggested-action__facts dt {
+    color: var(--ds-text-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.hover-suggested-action__facts dd {
+    margin: 2px 0 0;
+}
+
+.hover-suggested-action__controls input {
+    min-width: 150px;
+    flex: 1;
+}
+
+.hover-suggested-action__history,
+.hover-suggested-action__todo {
+    padding-bottom: 10px;
+    color: var(--ds-text-secondary);
+    font-size: 12px;
+}
+
+.hover-suggested-action__status {
+    display: block;
+    min-height: 1em;
+    margin-top: 6px;
+    color: var(--ds-text-secondary);
+    font-size: 11px;
+}
+
 @media (width <= 760px) {
     .hover-connected-account-heading,
     .hover-connected-account-card-header,
@@ -3362,6 +3457,24 @@ a {
 
     .hover-connected-account-facts {
         grid-template-columns: 1fr;
+    }
+
+    .hover-suggested-action {
+        padding: 13px;
+    }
+
+    .hover-suggested-action__heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .hover-suggested-action__controls .button {
+        min-height: 40px;
+    }
+
+    .hover-suggested-action__controls {
+        align-items: stretch;
+        flex-direction: column;
     }
 }
 

@@ -45,6 +45,7 @@ from hover.views_spaces import (
     remove_space_administrator,
     remove_space_member,
 )
+from hover.views_suggested_actions import decide_suggested_action_view
 from zerver.forms import LoggingSetPasswordForm
 from zerver.lib.integrations import INCOMING_WEBHOOK_INTEGRATIONS
 from zerver.lib.rest import rest_path
@@ -662,6 +663,10 @@ v1_api_and_json_patterns = [
         "<int:disputed_detail_id>/evidence",
         GET=resolve_disputed_detail_evidence,
         POST=resolve_disputed_detail_evidence,
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/generated-items/<int:generated_item_id>/suggested-action/decisions",
+        POST=decide_suggested_action_view,
     ),
     rest_path("hover/connected_accounts", GET=list_connected_accounts),
     rest_path(

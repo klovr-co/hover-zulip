@@ -27,6 +27,7 @@ import * as gif_state from "./gif_state.ts";
 import * as hover_connected_accounts from "./hover_connected_accounts.ts";
 import * as hover_source_view from "./hover_source_view.ts";
 import * as hover_spaces from "./hover_spaces.ts";
+import * as hover_suggested_actions from "./hover_suggested_actions.ts";
 import * as inbox_ui from "./inbox_ui.ts";
 import * as inbox_util from "./inbox_util.ts";
 import * as information_density from "./information_density.ts";
@@ -68,8 +69,8 @@ import * as scroll_bar from "./scroll_bar.ts";
 import * as settings_account from "./settings_account.ts";
 import * as settings_bots from "./settings_bots.ts";
 import * as settings_components from "./settings_components.ts";
-import * as settings_connected_accounts from "./settings_connected_accounts.ts";
 import * as settings_config from "./settings_config.ts";
+import * as settings_connected_accounts from "./settings_connected_accounts.ts";
 import * as settings_emoji from "./settings_emoji.ts";
 import * as settings_exports from "./settings_exports.ts";
 import * as settings_folders from "./settings_folders.ts";
@@ -174,6 +175,10 @@ export function dispatch_normal_event(event) {
             }
             stream_list.update_streams_sidebar(true);
             hover_source_view.handle_space_event();
+            break;
+
+        case "hover_suggested_action":
+            hover_suggested_actions.apply_projection(event.message_id, event.generated_item);
             break;
 
         case "hover_connected_account":
@@ -396,7 +401,7 @@ export function dispatch_normal_event(event) {
                 video_chat_provider: compose_call_ui.update_audio_and_video_chat_button_display,
                 jitsi_server_url: compose_call_ui.update_audio_and_video_chat_button_display,
                 gif_rating_policy: gif_state.update_gif_icon_visibility,
-                hover_enabled: () => {
+                hover_enabled() {
                     $("body").toggleClass("hover-enabled", realm.realm_hover_enabled);
                     $(".hover-connected-account-settings-entry").toggleClass(
                         "hide",

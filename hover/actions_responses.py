@@ -5,6 +5,7 @@ import orjson
 from django.utils.translation import gettext as _
 
 from hover.actions_review_requests import resolve_matching_dispute
+from hover.actions_suggested_actions import sync_suggested_action_from_reviewed_payload
 from hover.models import GeneratedItem, Response, Revision, SpaceMembership
 from zerver.lib.exceptions import JsonableError
 from zerver.models import Message, UserProfile
@@ -120,5 +121,6 @@ def create_response(
             reason=message.content,
         )
         resolve_matching_dispute(revision)
+        sync_suggested_action_from_reviewed_payload(generated_item)
 
     return response

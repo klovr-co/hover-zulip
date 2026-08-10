@@ -12,3 +12,7 @@
   and Review metadata. Explicit Reviews apply one existing payload field and
   expose append-only revision history; ambiguous Reviews request clarification
   without changing current state.
+* Added the structured `suggested_action` projection to Hover-generated native
+  messages and the versioned Suggested Action decision endpoint. Approval creates
+  one durable active Todo; Not-an-action and restore decisions retain append-only
+  history.

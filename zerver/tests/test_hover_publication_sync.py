@@ -30,6 +30,7 @@ from hover.models import (
     Space,
     SpaceAttachment,
     SpaceMembership,
+    SuggestedAction,
 )
 from hover.publication_contracts import (
     ClawerPublication,
@@ -360,12 +361,18 @@ class HoverPublicationSyncTest(ZulipTestCase):
             [f"evidence_03a{'0' * 29}", f"evidence_03b{'0' * 29}"],
         )
         suggested = GeneratedItem.objects.get(publication_id="publication-3")
-        self.assertIn("Awaiting confirmation", suggested.message.content)
+        self.assertNotIn("Awaiting confirmation", suggested.message.content)
+        action = SuggestedAction.objects.get(generated_item=suggested)
+        self.assertEqual(action.state, SuggestedAction.State.PENDING)
+        self.assertEqual(action.wording, "Confirm language coverage.")
         message_dict: dict[str, Any] = {"id": suggested.message_id}
-        add_hover_metadata([message_dict], realm_id=self.realm.id)
+        add_hover_metadata([message_dict], realm_id=self.realm.id, user_profile=self.actor)
         self.assertEqual(
             message_dict["hover_generated_item"]["evidence_url"],
             f"/json/hover/spaces/{self.space.id}/generated-items/{suggested.id}/evidence",
+        )
+        self.assertEqual(
+            message_dict["hover_generated_item"]["suggested_action"]["state"], "pending"
         )
 
         GeneratedItem.objects.update(publication_envelope_hash="")

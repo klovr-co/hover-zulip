@@ -64,7 +64,7 @@ export type MessageContainer = {
     is_hover_review_request: boolean;
     hover_review_request_state?: string;
     has_hover_disputed_details: boolean;
-    hover_disputed_details: Array<{
+    hover_disputed_details: {
         field_path: string;
         field_label: string;
         summary: string;
@@ -75,7 +75,7 @@ export type MessageContainer = {
         show_review_action: boolean;
         target_label?: string | undefined;
         resolution_label?: string | undefined;
-    }>;
+    }[];
     has_hover_source_integrations: boolean;
     hover_module_key?: string;
     hover_module_name?: string;
@@ -636,7 +636,7 @@ export class MessageListView {
         is_hover_review_request: boolean;
         hover_review_request_state?: string;
         has_hover_disputed_details: boolean;
-        hover_disputed_details: Array<{
+        hover_disputed_details: {
             field_path: string;
             field_label: string;
             summary: string;
@@ -647,10 +647,24 @@ export class MessageListView {
             show_review_action: boolean;
             target_label?: string | undefined;
             resolution_label?: string | undefined;
-        }>;
+        }[];
         is_hover_response: boolean;
         is_hover_review: boolean;
         hover_response_clarification_required: boolean;
+        is_hover_suggested_action: boolean;
+        hover_suggested_action?: {
+            message_id: number;
+            wording: string;
+            responsibility: string;
+            due_date: string;
+            is_pending: boolean;
+            is_approved: boolean;
+            is_not_action: boolean;
+            latest_actor?: string;
+            latest_time?: string;
+            latest_reason?: string;
+            todo_id?: number;
+        };
         has_hover_revisions: boolean;
         hover_revisions: (message_store.HoverRevision & {
             previous_value_display: string | undefined;
@@ -805,6 +819,8 @@ export class MessageListView {
             .join(" ");
         const hover_response = message.hover_response;
         const hover_review_request = message.hover_review_request;
+        const suggested_action = hover_generated_item?.suggested_action;
+        const latest_transition = suggested_action?.recent_transitions[0];
         const hover_revisions = (hover_generated_item?.revisions ?? []).map((revision) => ({
             ...revision,
             previous_value_display: JSON.stringify(revision.previous_value),
@@ -813,9 +829,7 @@ export class MessageListView {
         const hover_disputed_details = (hover_generated_item?.disputed_details ?? []).map(
             (detail) => {
                 const targets = detail.review_request?.targets ?? [];
-                const is_targeted = targets.some((target) =>
-                    people.is_my_user_id(target.user_id),
-                );
+                const is_targeted = targets.some((target) => people.is_my_user_id(target.user_id));
                 let target_label: string | undefined;
                 if (detail.material && detail.state === "needs_review") {
                     target_label = is_targeted
@@ -883,6 +897,30 @@ export class MessageListView {
             is_hover_response: hover_response !== undefined,
             is_hover_review: hover_response?.type === "review",
             hover_response_clarification_required: hover_response?.clarification_required === true,
+            is_hover_suggested_action: suggested_action !== null && suggested_action !== undefined,
+            ...(suggested_action !== null &&
+                suggested_action !== undefined && {
+                    hover_suggested_action: {
+                        message_id: message.id,
+                        wording: suggested_action.wording,
+                        responsibility:
+                            suggested_action.assignee?.full_name ??
+                            suggested_action.source_proposal.assignee_display_name ??
+                            $t({defaultMessage: "Unassigned"}),
+                        due_date: suggested_action.due_date ?? $t({defaultMessage: "No due date"}),
+                        is_pending: suggested_action.state === "pending",
+                        is_approved: suggested_action.state === "approved",
+                        is_not_action: suggested_action.state === "not_action",
+                        ...(latest_transition !== undefined && {
+                            latest_actor: latest_transition.actor_name,
+                            latest_time: latest_transition.occurred_at,
+                            latest_reason: latest_transition.reason,
+                        }),
+                        ...(suggested_action.todo !== null && {
+                            todo_id: suggested_action.todo.id,
+                        }),
+                    },
+                }),
             has_hover_revisions: hover_revisions.length > 0,
             hover_revisions,
             has_hover_source_integrations: hover_source_integrations.length > 0,

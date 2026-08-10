@@ -5,6 +5,7 @@ import {
     connected_account_schema,
 } from "./hover_connected_accounts.ts";
 import {hover_space_schema} from "./hover_spaces.ts";
+import type {event_schema as HoverSuggestedActionEventSchema} from "./hover_suggested_actions.ts";
 import {group_setting_value_schema, topic_link_schema} from "./types.ts";
 
 // Event types the web app requests from /register via fetch_event_types.
@@ -22,6 +23,7 @@ export const FETCH_EVENT_TYPES: string[] = [
     "giphy",
     "hover_connected_account",
     "hover_space",
+    "hover_suggested_action",
     "klipy",
     "message",
     "muted_topics",
@@ -149,6 +151,9 @@ export const hover_space_event_schema = z.discriminatedUnion("op", [
     }),
 ]);
 export type HoverSpaceEvent = z.output<typeof hover_space_event_schema>;
+
+export {event_schema as hover_suggested_action_event_schema} from "./hover_suggested_actions.ts";
+export type HoverSuggestedActionEvent = z.output<typeof HoverSuggestedActionEventSchema>;
 
 export const hover_connected_account_event_schema = z.discriminatedUnion("op", [
     z.object({

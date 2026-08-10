@@ -421,6 +421,47 @@ class HoverDisputedDetail(BaseModel):
     resolution: HoverDisputeResolution | None
 
 
+class HoverSuggestedActionSourceProposal(BaseModel):
+    assignee_ref: str | None
+    assignee_display_name: str | None
+
+
+class HoverSuggestedActionAssignee(BaseModel):
+    user_id: int
+    full_name: str
+
+
+class HoverSuggestedActionTransition(BaseModel):
+    id: int
+    kind: Literal["approve", "not_action", "restore"]
+    from_state: Literal["pending", "approved", "not_action"]
+    to_state: Literal["pending", "approved", "not_action"]
+    actor_id: int
+    actor_name: str
+    occurred_at: str
+    reason: str
+
+
+class HoverSuggestedActionTodo(BaseModel):
+    id: int
+    state: Literal["active"]
+    assignee_user_id: int | None
+    due_date: str | None
+
+
+class HoverSuggestedAction(BaseModel):
+    id: int
+    state: Literal["pending", "approved", "not_action"]
+    version: int
+    wording: str
+    source_proposal: HoverSuggestedActionSourceProposal
+    assignee: HoverSuggestedActionAssignee | None
+    due_date: str | None
+    history_count: int
+    recent_transitions: list[HoverSuggestedActionTransition]
+    todo: HoverSuggestedActionTodo | None
+
+
 class HoverGeneratedItem(BaseModel):
     id: int
     output_type: str
@@ -434,6 +475,13 @@ class HoverGeneratedItem(BaseModel):
     reviewed_payload: dict[str, object]
     revisions: list[dict[str, object]]
     disputed_details: list[HoverDisputedDetail]
+    suggested_action: HoverSuggestedAction | None
+
+
+class HoverSuggestedActionEvent(BaseEvent):
+    type: Literal["hover_suggested_action"]
+    message_id: int
+    generated_item: HoverGeneratedItem
 
 
 class HoverResponse(BaseModel):

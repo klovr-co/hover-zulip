@@ -114,6 +114,7 @@ run_test("message_event preserves Hover workflow metadata", ({override}) => {
         reviewed_payload: {title: "Reviewed title"},
         revisions: [],
         disputed_details: [],
+        suggested_action: null,
         sources: [],
         presentation: {
             label: "Digest",

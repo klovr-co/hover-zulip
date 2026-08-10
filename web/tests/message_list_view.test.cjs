@@ -596,6 +596,7 @@ test("hover_generated_update_vars", () => {
                     run_reference: "run-13",
                 },
                 lineage: {is_latest: true, history_count: 1, history: []},
+                suggested_action: null,
             },
         },
         true,

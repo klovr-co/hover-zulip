@@ -64,6 +64,7 @@ import * as hover_response from "./hover_response.ts";
 import * as hover_review_request from "./hover_review_request.ts";
 import * as hover_source_view from "./hover_source_view.ts";
 import * as hover_spaces from "./hover_spaces.ts";
+import * as hover_suggested_actions from "./hover_suggested_actions.ts";
 import * as i18n from "./i18n.ts";
 import * as inbox_ui from "./inbox_ui.ts";
 import * as information_density from "./information_density.ts";
@@ -549,6 +550,7 @@ export async function initialize_everything(state_data) {
     hover_generated_details.initialize();
     hover_response.initialize();
     hover_review_request.initialize();
+    hover_suggested_actions.initialize();
     hover_spaces.initialize(state_data.hover_spaces);
     hover_all_view.initialize();
     hover_source_view.initialize();

@@ -23,6 +23,7 @@ from hover.models import (
     SpaceAdministrator,
     SpaceAttachment,
     SpaceMembership,
+    SuggestedAction,
 )
 from hover.publication_contracts import (
     AnalysisFinding,
@@ -152,6 +153,7 @@ class DemoPost:
     evidence_keys: tuple[str, ...]
     for_you: bool = False
     saved: bool = False
+    suggested_action_payload: dict[str, object] | None = None
 
 
 def demo_post(
@@ -162,6 +164,7 @@ def demo_post(
     *,
     for_you: bool = False,
     saved: bool = False,
+    suggested_action_payload: dict[str, object] | None = None,
 ) -> DemoPost:
     return DemoPost(
         module_key=module_key,
@@ -170,6 +173,7 @@ def demo_post(
         evidence_keys=evidence_keys,
         for_you=for_you,
         saved=saved,
+        suggested_action_payload=suggested_action_payload,
     )
 
 
@@ -460,6 +464,17 @@ Monday, 10 August · 8:00 PM — one hour before the confirmed briefing.
         demo_time(8, 16, 12),
         ("mentors_volunteers",),
         for_you=True,
+        suggested_action_payload={
+            "contract": "suggested_action",
+            "schema_version": "1.0",
+            "wording": "Post the volunteer briefing agenda before the Monday 9:00 PM call.",
+            "proposed_assignee": {
+                "kind": "member",
+                "ref": "person_11111111111111111111111111111111",
+                "display_name": "Lizzie",
+            },
+            "proposed_due_date": "2026-08-10",
+        },
     ),
     demo_post(
         "suggested_actions",
@@ -485,6 +500,17 @@ During the Monday 9:00 PM briefing, before the role roster is shared.
         demo_time(8, 16, 26),
         ("mentors_volunteers",),
         for_you=True,
+        suggested_action_payload={
+            "contract": "suggested_action",
+            "schema_version": "1.0",
+            "wording": "Assign the blue zone owner and decide its purpose.",
+            "proposed_assignee": {
+                "kind": "member",
+                "ref": "person_11111111111111111111111111111111",
+                "display_name": "Lizzie",
+            },
+            "proposed_due_date": "2026-08-10",
+        },
     ),
     demo_post(
         "marketing_digest",
@@ -669,6 +695,13 @@ Confirm during the Monday 9:00 PM briefing so the promise is operational before 
         demo_time(9, 11, 2),
         ("mentors_volunteers", "resident_lounge"),
         for_you=True,
+        suggested_action_payload={
+            "contract": "suggested_action",
+            "schema_version": "1.0",
+            "wording": "Confirm Mandarin, Malay, and Tamil volunteer coverage.",
+            "proposed_assignee": None,
+            "proposed_due_date": "2026-08-10",
+        },
     ),
     demo_post(
         "topic_analysis",
@@ -1012,6 +1045,30 @@ class Command(ZulipBaseCommand):
             message=message,
             defaults=generated_item_defaults,
         )
+        proposal = (
+            SuggestedActionPayload.model_validate(post.suggested_action_payload)
+            if post.suggested_action_payload is not None
+            else None
+        )
+        if proposal is not None and (_created or not generated_item.payload):
+            generated_item.payload = proposal.model_dump(mode="json")
+            generated_item.reviewed_payload = proposal.model_dump(mode="json")
+            generated_item.save(update_fields=["payload", "reviewed_payload"])
+        if proposal is not None and generated_item.attachment_id is not None:
+            assignee = proposal.proposed_assignee
+            SuggestedAction.objects.get_or_create(
+                realm=stream.realm,
+                space=generated_item.attachment.space,
+                generated_item=generated_item,
+                defaults={
+                    "wording": proposal.wording,
+                    "proposed_assignee_ref": assignee.ref if assignee is not None else "",
+                    "proposed_assignee_display_name": (
+                        assignee.display_name if assignee is not None else ""
+                    ),
+                    "due_date": proposal.proposed_due_date,
+                },
+            )
         generated_item.evidence_links.all().delete()
         EvidenceLink.objects.bulk_create(
             [
