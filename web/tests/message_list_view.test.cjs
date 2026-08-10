@@ -21,6 +21,7 @@ mock_esm("../src/timerender", {
 });
 
 mock_esm("../src/people", {
+    is_my_user_id: () => false,
     sender_is_bot: () => false,
     sender_is_guest: () => false,
     sender_is_deactivated: () => false,
@@ -624,7 +625,7 @@ test("hover_generated_update_vars", () => {
     assert.equal(hover_update.hover_source_context, "Across 3 sources");
     assert.equal(hover_update.has_hover_revisions, true);
     assert.equal(hover_update.has_hover_disputed_details, true);
-    assert.equal(hover_update.hover_disputed_details[0].state_label, "Needs review");
+    assert.equal(hover_update.hover_disputed_details[0].state_label, "translated: Needs review");
     assert.equal(hover_update.hover_disputed_details[0].show_review_action, true);
     assert.equal(hover_update.hover_revisions[0].previous_value_display, '"Launch likely"');
     assert.equal(human_post.is_hover_generated_update, false);

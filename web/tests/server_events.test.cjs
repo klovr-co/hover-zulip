@@ -103,7 +103,7 @@ run_test("message_event", ({override}) => {
     assert.ok(inserted);
 });
 
-run_test("message_event preserves Hover response metadata", ({override}) => {
+run_test("message_event preserves Hover workflow metadata", ({override}) => {
     const generated_item = {
         id: 7,
         output_type: "digest",
@@ -113,6 +113,7 @@ run_test("message_event preserves Hover response metadata", ({override}) => {
         evidence_url: "/hover/evidence/7",
         reviewed_payload: {title: "Reviewed title"},
         revisions: [],
+        disputed_details: [],
         sources: [],
         presentation: {
             label: "Digest",
@@ -131,9 +132,17 @@ run_test("message_event preserves Hover response metadata", ({override}) => {
         root_message_id: 42,
         generated_item,
     };
+    const hover_review_request = {
+        id: 9,
+        root_message_id: 42,
+        generated_item,
+        field_path: "title",
+        state: "open",
+        target_user_ids: [2],
+    };
     const event = {
         type: "message",
-        message: {...message, id: 2, hover_response},
+        message: {...message, id: 2, hover_response, hover_review_request},
         flags: [],
         local_message_id: "local-hover-review",
     };
@@ -141,6 +150,7 @@ run_test("message_event preserves Hover response metadata", ({override}) => {
     let inserted;
     override(message_events, "insert_new_messages", (message_data) => {
         assert.deepEqual(message_data.raw_messages[0].hover_response, hover_response);
+        assert.deepEqual(message_data.raw_messages[0].hover_review_request, hover_review_request);
         inserted = true;
         return message_data.raw_messages;
     });

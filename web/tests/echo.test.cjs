@@ -128,6 +128,11 @@ run_test("process_from_server for differently rendered messages", ({override}) =
     // in local echo.
     const old_value = "old_value";
     const new_value = "new_value";
+    const hover_response = {
+        type: "review",
+        root_message_id: 42,
+        generated_item: {disputed_details: []},
+    };
     const waiting_for_ack = new Map([
         [
             "100.1",
@@ -148,7 +153,7 @@ run_test("process_from_server for differently rendered messages", ({override}) =
             is_me_message: new_value,
             submessages: new_value,
             topic_links: new_value,
-            hover_response: {type: "review"},
+            hover_response,
         },
     ];
     echo_state._patch_waiting_for_ack(waiting_for_ack);
@@ -163,7 +168,7 @@ run_test("process_from_server for differently rendered messages", ({override}) =
             is_me_message: new_value,
             submessages: new_value,
             topic_links: new_value,
-            hover_response: {type: "review"},
+            hover_response,
         },
     ]);
 });
