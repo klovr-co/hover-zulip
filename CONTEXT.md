@@ -93,6 +93,21 @@ verified Source participant bindings or a deterministic Space Administrator
 fallback.
 _Avoid_: Reviewer permission, exclusive assignee
 
+**For You**:
+A live personal-relevance projection over the latest meaningful state of
+generated items, Reviews, and Todos in a teammate's confirmed Contributor and
+Subscriber Spaces. It ranks direct assignment, ownership, mentions, Review
+requests, personal activity, importance, and membership relationship without
+creating another feed record or acknowledgement state.
+_Avoid_: Personal inbox, copied update, acknowledgement queue
+
+**Team Pulse**:
+A live shared-importance projection over the latest meaningful state of the
+same Hover records in a teammate's confirmed Contributor and Subscriber
+Spaces. Its rank has no personal activity or read-state inputs, so teammates
+with identical Space memberships receive the same result.
+_Avoid_: Organization-wide feed, personalized pulse, copied update
+
 **AIMTO Events**:
 The first Hover Space, used to prove the product through a real mixed feed of
 human activity and source-backed AI updates.

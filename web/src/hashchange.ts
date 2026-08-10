@@ -10,6 +10,7 @@ import * as drafts_overlay_ui from "./drafts_overlay_ui.ts";
 import {Filter} from "./filter.ts";
 import * as hash_parser from "./hash_parser.ts";
 import * as hash_util from "./hash_util.ts";
+import * as hover_awareness_view from "./hover_awareness_view.ts";
 import * as hover_source_view from "./hover_source_view.ts";
 import {$t_html} from "./i18n.ts";
 import * as inbox_ui from "./inbox_ui.ts";
@@ -144,7 +145,11 @@ function show_home_view(narrow_opts?: message_view.ShowMessageViewOpts): void {
     // rendered without a hash.
     switch (user_settings.web_home_view) {
         case "recent": {
-            recent_view_ui.show();
+            if (page_params.realm_hover_enabled) {
+                hover_awareness_view.show("team_pulse");
+            } else {
+                recent_view_ui.show();
+            }
             break;
         }
         case "all_messages": {
@@ -153,7 +158,11 @@ function show_home_view(narrow_opts?: message_view.ShowMessageViewOpts): void {
             break;
         }
         case "inbox": {
-            inbox_ui.show();
+            if (page_params.realm_hover_enabled) {
+                hover_awareness_view.show("for_you");
+            } else {
+                inbox_ui.show();
+            }
             break;
         }
         default: {
@@ -178,6 +187,9 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
     const hash = window.location.hash.split("/");
     if (hash[0] !== "#hover") {
         hover_source_view.hide();
+    }
+    if (hash[0] !== "#inbox" && hash[0] !== "#recent") {
+        hover_awareness_view.hide();
     }
 
     const narrow_opts: message_view.ShowMessageViewOpts = {
@@ -249,14 +261,26 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
             // for #recent permanently. We show the view and then
             // replace the current URL hash in a way designed to hide
             // this detail in the browser's forward/back session history.
-            recent_view_ui.show();
+            if (page_params.realm_hover_enabled) {
+                hover_awareness_view.show("team_pulse");
+            } else {
+                recent_view_ui.show();
+            }
             window.location.replace("#recent");
             break;
         case "#recent":
-            recent_view_ui.show();
+            if (page_params.realm_hover_enabled) {
+                hover_awareness_view.show("team_pulse");
+            } else {
+                recent_view_ui.show();
+            }
             break;
         case "#inbox":
-            inbox_ui.show();
+            if (page_params.realm_hover_enabled) {
+                hover_awareness_view.show("for_you");
+            } else {
+                inbox_ui.show();
+            }
             break;
         case "#all_messages":
             // "#all_messages" was renamed to "#feed" in 2024. Unlike

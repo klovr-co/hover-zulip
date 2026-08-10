@@ -21,6 +21,7 @@ from hover.views_connected_accounts import (
     update_connected_account,
     upsert_connected_account_grant,
 )
+from hover.views_awareness import get_awareness
 from hover.views_integrations import associate_integration_route, detach_integration_route
 from hover.views_modules import (
     disable_module,
@@ -619,6 +620,7 @@ v1_api_and_json_patterns = [
     rest_path("channel_folders", GET=get_channel_folders, PATCH=reorder_realm_channel_folders),
     rest_path("channel_folders/<int:channel_folder_id>", PATCH=update_channel_folder),
     rest_path("hover/spaces", GET=list_spaces, POST=create_space),
+    rest_path("hover/awareness", GET=get_awareness),
     rest_path("hover/spaces/<int:space_id>", GET=get_space),
     rest_path("hover/spaces/<int:space_id>/members", POST=confirm_space_member),
     rest_path("hover/spaces/<int:space_id>/members/<int:user_id>", DELETE=remove_space_member),

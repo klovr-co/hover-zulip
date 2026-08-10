@@ -34,6 +34,7 @@ const theme = mock_esm("../src/theme");
 const emoji_frequency = mock_esm("../src/emoji_frequency");
 const emoji_picker = mock_esm("../src/emoji_picker");
 const gear_menu = mock_esm("../src/gear_menu");
+mock_esm("../src/hover_awareness_view", {handle_realtime_change: noop});
 mock_esm("../src/inbox_ui", {
     complete_rerender: noop,
 });

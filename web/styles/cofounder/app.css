@@ -21,6 +21,214 @@ body.hover-enabled {
     background: var(--color-background);
 }
 
+/* For You and Team Pulse are ranked projections over live Hover records. */
+.hover-awareness-view {
+    box-sizing: border-box;
+    height: 100%;
+    overflow-y: auto;
+    background: var(--ds-surface-paper);
+}
+
+.hover-awareness-shell {
+    margin: 0 var(--ds-conversation-gutter);
+    padding: 74px 0 88px;
+}
+
+.hover-awareness-status {
+    min-height: 30px;
+    color: var(--ds-text-secondary);
+    font-size: 14px;
+}
+
+#hover-awareness-retry {
+    margin-inline-start: 10px;
+}
+
+.hover-awareness-feed {
+    display: grid;
+    gap: 18px;
+}
+
+.hover-awareness-card {
+    position: relative;
+    box-sizing: border-box;
+    padding: 22px 25px 20px;
+    border: 1px solid var(--ds-border-selection);
+    border-radius: var(--ds-radius-card);
+    background: linear-gradient(
+        145deg,
+        var(--ds-neutral-25) 0%,
+        var(--ds-surface-selected) 100%
+    );
+    box-shadow: 0 12px 32px hsl(220deg 60% 28% / 8%);
+}
+
+.hover-awareness-card--unread {
+    box-shadow:
+        inset 4px 0 0 var(--ds-action-accent),
+        0 12px 32px hsl(220deg 60% 28% / 8%);
+}
+
+.hover-awareness-card__body {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 18px;
+}
+
+.hover-awareness-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 7px;
+    object-fit: cover;
+}
+
+.hover-awareness-card__main {
+    min-width: 0;
+}
+
+.hover-awareness-card__meta,
+.hover-awareness-card__footer,
+.hover-awareness-card__footer nav,
+.hover-awareness-card__reasons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.hover-awareness-card__meta {
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--ds-text-secondary);
+    font-family: var(--font-saans);
+    font-size: 16px;
+}
+
+.hover-awareness-card__meta strong {
+    color: var(--ds-neutral-950);
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.hover-awareness-unread {
+    color: var(--ds-action-accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.hover-awareness-card__reasons {
+    gap: 6px;
+    margin: -2px 0 10px;
+}
+
+.hover-awareness-reason {
+    padding: 3px 8px;
+    border: 1px solid var(--ds-border-selection);
+    border-radius: var(--ds-radius-pill);
+    color: var(--ds-blue-600);
+    background: color-mix(in srgb, var(--ds-blue-500) 7%, transparent);
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.hover-awareness-card__content {
+    max-width: var(--ds-measure);
+    color: var(--ds-text-primary);
+    font-size: 17px;
+    line-height: 1.55;
+}
+
+.hover-awareness-card__content > :first-child {
+    margin-top: 0;
+}
+
+.hover-awareness-card__content > :last-child {
+    margin-bottom: 0;
+}
+
+.hover-awareness-current-state,
+.hover-awareness-todo {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 10px 12px;
+    border: 1px solid var(--ds-border-selection);
+    border-radius: var(--ds-radius-control);
+    color: var(--ds-text-primary);
+    background: var(--ds-surface-selected);
+    font-size: 13px;
+}
+
+.hover-awareness-card__footer {
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--ds-border-muted);
+    color: var(--ds-text-secondary);
+    font-size: 12px;
+}
+
+.hover-awareness-card__footer nav {
+    gap: 14px;
+}
+
+.hover-awareness-card__footer a,
+.hover-awareness-card__footer button {
+    color: var(--ds-action-primary);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.hover-awareness-card__footer a:hover,
+.hover-awareness-card__footer button:hover {
+    text-decoration: underline;
+}
+
+.hover-awareness-card a:focus-visible,
+.hover-awareness-card button:focus-visible,
+#hover-awareness-retry:focus-visible {
+    border-radius: 3px;
+    outline: 2px solid var(--ds-focus);
+    outline-offset: 2px;
+}
+
+@media (width <= 560px) {
+    .hover-awareness-shell {
+        margin-inline: 12px;
+        padding-top: 56px;
+    }
+
+    .hover-awareness-card {
+        padding: 17px 16px 15px;
+    }
+
+    .hover-awareness-card__body {
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 11px;
+    }
+
+    .hover-awareness-avatar {
+        width: 38px;
+        height: 38px;
+    }
+
+    .hover-awareness-card__footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hover-awareness-card,
+    .hover-awareness-view {
+        scroll-behavior: auto;
+        transition: none;
+    }
+}
+
 .hover-source-shell {
     width: min(760px, calc(100% - 40px));
     margin: 0 auto;

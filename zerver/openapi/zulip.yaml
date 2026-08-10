@@ -27787,6 +27787,50 @@ paths:
                   suggested_action:
                     $ref: "#/components/schemas/HoverSuggestedAction"
 
+  /hover/awareness:
+    get:
+      operationId: get-hover-awareness
+      summary: Get a ranked Hover awareness projection
+      tags: ["messages"]
+      description: |
+        Returns either For You (personal relevance) or Team Pulse (shared
+        importance) over the requesting teammate's confirmed Contributor and
+        Subscriber Spaces. Items reference canonical native messages and Hover
+        records; the projection does not copy Review, lineage, Todo, or read
+        state.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-hover-awareness).
+      parameters:
+        - name: surface
+          in: query
+          required: true
+          description: The awareness ranking policy to apply.
+          schema:
+            type: string
+            enum: [for_you, team_pulse]
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - type: object
+                    additionalProperties: false
+                    required: [surface, items]
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      surface:
+                        type: string
+                        enum: [for_you, team_pulse]
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverAwarenessItem"
+
   /hover/spaces/{space_id}/generated-items/{generated_item_id}/evidence:
     post:
       operationId: resolve-hover-generated-item-evidence
@@ -31467,6 +31511,78 @@ components:
                   - $ref: "#/components/schemas/HoverTodoPerson"
               reason: {type: string}
               notification_message_id: {type: integer, nullable: true}
+    HoverAwarenessItem:
+      type: object
+      additionalProperties: false
+      required:
+        - message_id
+        - generated_item_id
+        - space_id
+        - space_name
+        - stream_id
+        - topic
+        - rendered_content
+        - sender_id
+        - sender_name
+        - timestamp
+        - is_unread
+        - rank
+        - reasons
+        - hover_generated_item
+      description: |
+        A ranked reference to one canonical generated item and its native
+        message. The nested state is the same live serializer used by message
+        fetches and realtime events.
+      properties:
+        message_id:
+          type: integer
+        generated_item_id:
+          type: integer
+        space_id:
+          type: integer
+        space_name:
+          type: string
+        stream_id:
+          type: integer
+        topic:
+          type: string
+        rendered_content:
+          type: string
+        sender_id:
+          type: integer
+        sender_name:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        is_unread:
+          type: boolean
+        rank:
+          type: integer
+          minimum: 0
+        reasons:
+          type: array
+          items:
+            type: string
+            enum:
+              - assignment
+              - ownership
+              - mention
+              - review_request
+              - personal_activity
+              - important
+              - contributor_space
+              - urgent
+              - high_importance
+              - open_review
+              - active_todo
+              - material_change
+        hover_generated_item:
+          type: object
+          description: |
+            Canonical Hover generated-item metadata, including reviewed state,
+            revisions, disputes, evidence, lineage, and Todo when present.
+          additionalProperties: true
     HoverResolvedEvidence:
       type: object
       additionalProperties: false

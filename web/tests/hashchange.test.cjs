@@ -17,6 +17,10 @@ const history = set_global("history", {state: null});
 
 const admin = mock_esm("../src/admin");
 const drafts_overlay_ui = mock_esm("../src/drafts_overlay_ui");
+const hover_awareness_view = mock_esm("../src/hover_awareness_view", {
+    hide() {},
+    show() {},
+});
 const info_overlay = mock_esm("../src/info_overlay");
 const message_viewport = mock_esm("../src/message_viewport");
 const overlays = mock_esm("../src/overlays");
@@ -252,6 +256,19 @@ run_test("hash_interactions", ({override, override_rewire}) => {
         [message_viewport, "stop_auto_scrolling"],
     ]);
     assert.equal(window.location.hash, "#recent");
+
+    let awareness_surface;
+    override(hover_awareness_view, "show", (surface) => {
+        awareness_surface = surface;
+    });
+    page_params.realm_hover_enabled = true;
+    window.location.hash = "#inbox";
+    $window_stub.trigger("hashchange");
+    assert.equal(awareness_surface, "for_you");
+    window.location.hash = "#recent";
+    $window_stub.trigger("hashchange");
+    assert.equal(awareness_surface, "team_pulse");
+    page_params.realm_hover_enabled = false;
 
     const denmark_id = 1;
     stream_data.add_sub_for_tests(

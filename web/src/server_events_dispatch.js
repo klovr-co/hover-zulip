@@ -24,6 +24,7 @@ import * as emoji_frequency from "./emoji_frequency.ts";
 import * as emoji_picker from "./emoji_picker.ts";
 import * as gear_menu from "./gear_menu.ts";
 import * as gif_state from "./gif_state.ts";
+import * as hover_awareness_view from "./hover_awareness_view.ts";
 import * as hover_connected_accounts from "./hover_connected_accounts.ts";
 import * as hover_source_view from "./hover_source_view.ts";
 import * as hover_spaces from "./hover_spaces.ts";
@@ -176,14 +177,17 @@ export function dispatch_normal_event(event) {
             }
             stream_list.update_streams_sidebar(true);
             hover_source_view.handle_space_event();
+            hover_awareness_view.handle_realtime_change();
             break;
 
         case "hover_suggested_action":
             hover_suggested_actions.apply_projection(event.message_id, event.generated_item);
+            hover_awareness_view.handle_realtime_change();
             break;
 
         case "hover_todo":
             hover_todos.apply_projection(event.todo);
+            hover_awareness_view.handle_realtime_change();
             break;
 
         case "hover_connected_account":
@@ -210,6 +214,7 @@ export function dispatch_normal_event(event) {
 
         case "delete_message": {
             const msg_ids = event.message_ids;
+            hover_awareness_view.handle_realtime_change();
 
             // A delete_message event for DMs doesn't identify the
             // conversation, so we derive it from a deleted message before
@@ -1219,6 +1224,7 @@ export function dispatch_normal_event(event) {
         }
 
         case "update_message_flags": {
+            hover_awareness_view.handle_realtime_change();
             const new_value = event.op === "add";
             switch (event.flag) {
                 case "starred":
