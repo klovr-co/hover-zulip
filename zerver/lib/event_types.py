@@ -122,6 +122,28 @@ class HoverSpaceAttachment(BaseModel):
     source: HoverSource
 
 
+class HoverSpaceAdministrator(BaseModel):
+    user_id: int
+    full_name: str
+
+
+class HoverSpaceMembership(BaseModel):
+    id: int
+    user_id: int
+    full_name: str
+    role: Literal["contributor", "subscriber"]
+    is_administrator: bool
+
+
+class HoverSpaceMembershipSuggestion(BaseModel):
+    id: int
+    user_id: int
+    full_name: str
+    suggested_role: Literal["contributor", "subscriber"]
+    state: Literal["pending"]
+    match_basis: Literal["verified_email", "verified_phone"]
+
+
 class HoverSpace(BaseModel):
     id: int
     name: str
@@ -131,6 +153,9 @@ class HoverSpace(BaseModel):
     created_by_id: int | None
     stream_id: int | None
     attachments: list[HoverSpaceAttachment]
+    administrators: list[HoverSpaceAdministrator]
+    memberships: list[HoverSpaceMembership]
+    membership_suggestions: list[HoverSpaceMembershipSuggestion]
 
 
 class HoverSpaceAddEvent(BaseEvent):

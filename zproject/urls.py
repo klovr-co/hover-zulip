@@ -25,10 +25,13 @@ from hover.views_publications import resolve_generated_item_evidence
 from hover.views_sources import attach_source, discover_sources, preview_source
 from hover.views_spaces import (
     add_space_administrator,
+    confirm_space_member,
     create_space,
     get_space,
+    launch_space,
     list_spaces,
     remove_space_administrator,
+    remove_space_member,
 )
 from zerver.forms import LoggingSetPasswordForm
 from zerver.lib.integrations import INCOMING_WEBHOOK_INTEGRATIONS
@@ -603,6 +606,9 @@ v1_api_and_json_patterns = [
     rest_path("channel_folders/<int:channel_folder_id>", PATCH=update_channel_folder),
     rest_path("hover/spaces", GET=list_spaces, POST=create_space),
     rest_path("hover/spaces/<int:space_id>", GET=get_space),
+    rest_path("hover/spaces/<int:space_id>/members", POST=confirm_space_member),
+    rest_path("hover/spaces/<int:space_id>/members/<int:user_id>", DELETE=remove_space_member),
+    rest_path("hover/spaces/<int:space_id>/launch", POST=launch_space),
     rest_path("hover/spaces/<int:space_id>/admins", POST=add_space_administrator),
     rest_path(
         "hover/spaces/<int:space_id>/admins/<int:user_id>",

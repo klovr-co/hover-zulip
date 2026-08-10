@@ -2,7 +2,7 @@ import orjson
 from typing_extensions import override
 
 from hover.actions_spaces import do_create_space
-from hover.models import Space, SpaceAdministrator
+from hover.models import Space, SpaceAdministrator, SpaceMembership
 from zerver.actions.channel_folders import check_add_channel_folder
 from zerver.actions.realm_settings import do_set_realm_property
 from zerver.lib.events import apply_events, fetch_initial_state_data
@@ -170,18 +170,25 @@ class HoverSpacesTest(ZulipTestCase):
             self.assert_json_error(result, "Invalid Space ID")
 
         self.login_user(realm_admin)
+        SpaceMembership.objects.create(
+            realm=self.realm,
+            space=space,
+            user=realm_admin,
+            role=SpaceMembership.Role.CONTRIBUTOR,
+            added_by=self.creator,
+        )
         result = self.client_delete(f"/json/hover/spaces/{space.id}/admins/{self.creator.id}")
         self.assert_json_error(result, "A Space must have at least one administrator.")
 
-        with self.capture_send_event_calls(expected_num_events=1) as events:
+        with self.capture_send_event_calls(expected_num_events=2) as events:
             result = self.client_post(
                 f"/json/hover/spaces/{space.id}/admins",
                 {"user_id": orjson.dumps(realm_admin.id).decode()},
             )
         self.assert_json_success(result)
-        self.assertEqual(events[0]["users"], [realm_admin.id])
-        self.assertNotIn(self.example_user("cordelia").id, events[0]["users"])
-        self.assertEqual(events[0]["event"]["op"], "add")
+        add_event = next(event for event in events if event["event"]["op"] == "add")
+        self.assertEqual(add_event["users"], [realm_admin.id])
+        self.assertNotIn(self.example_user("cordelia").id, add_event["users"])
 
         result = self.client_get(f"/json/hover/spaces/{space.id}")
         self.assert_json_success(result)

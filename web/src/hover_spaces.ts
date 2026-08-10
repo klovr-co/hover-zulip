@@ -28,6 +28,32 @@ export const hover_space_schema = z.object({
     created_by_id: z.nullable(z.number()),
     stream_id: z.nullable(z.number()),
     attachments: z.array(hover_space_attachment_schema),
+    administrators: z._default(z.array(z.object({user_id: z.number(), full_name: z.string()})), []),
+    memberships: z._default(
+        z.array(
+            z.object({
+                id: z.number(),
+                user_id: z.number(),
+                full_name: z.string(),
+                role: z.enum(["contributor", "subscriber"]),
+                is_administrator: z.boolean(),
+            }),
+        ),
+        [],
+    ),
+    membership_suggestions: z._default(
+        z.array(
+            z.object({
+                id: z.number(),
+                user_id: z.number(),
+                full_name: z.string(),
+                suggested_role: z.enum(["contributor", "subscriber"]),
+                state: z.literal("pending"),
+                match_basis: z.enum(["verified_email", "verified_phone"]),
+            }),
+        ),
+        [],
+    ),
 });
 
 export const hover_spaces_response_schema = z.object({

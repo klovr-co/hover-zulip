@@ -14,7 +14,7 @@ from hover.actions_connected_accounts import (
     do_upsert_connected_account_grant,
 )
 from hover.actions_sources import do_attach_source
-from hover.actions_spaces import do_create_space
+from hover.actions_spaces import do_create_space, do_launch_space
 from hover.clawer_sync import ClawerSource, ClawerSyncError, InMemoryClawerSync, StudioClawerSync
 from hover.lib_sources import history_boundary
 from hover.models import ConnectedAccount, Source, SpaceAttachment
@@ -358,6 +358,49 @@ class HoverSourcesTest(ZulipTestCase):
         self.assertEqual(conflict.status_code, 409)
         self.assertEqual(orjson.loads(conflict.content)["error_code"], "history_window_conflict")
         self.assertEqual(adapter.discovery_calls, [])
+
+    def test_attachment_persistence_rechecks_setup_after_launch_race(self) -> None:
+        do_upsert_connected_account_grant(
+            self.account,
+            self.actor,
+            all_selectors=True,
+            selector_specs=[],
+            acting_user=self.example_user("iago"),
+        )
+        self.login_user(self.actor)
+        adapter = self.adapter()
+        with patch("hover.views_sources.get_clawer_sync", return_value=adapter):
+            self.assert_json_success(
+                self.client_post(
+                    f"/json/hover/spaces/{self.space.id}/sources",
+                    self.source_post_data(),
+                )
+            )
+
+        raced_ref = "src_abcdef0123456789abcdef0123456789"
+
+        def launch_during_canonical_lookup(**kwargs: object) -> ClawerSource:
+            do_launch_space(self.space, acting_user=self.actor)
+            return ClawerSource(
+                source_ref=raced_ref,
+                provider="whatsapp",
+                source_type="group",
+                display_name="Raced source",
+            )
+
+        source_count = Source.objects.count()
+        attachment_count = SpaceAttachment.objects.count()
+        with patch(
+            "hover.actions_sources.canonical_source_for_attachment",
+            side_effect=launch_during_canonical_lookup,
+        ):
+            result = self.client_post(
+                f"/json/hover/spaces/{self.space.id}/sources",
+                self.source_post_data(source_ref=raced_ref),
+            )
+        self.assert_json_error(result, "Invalid Space ID")
+        self.assertEqual(Source.objects.count(), source_count)
+        self.assertEqual(SpaceAttachment.objects.count(), attachment_count)
 
     def test_source_identity_is_reused_across_spaces(self) -> None:
         second_space = do_create_space(

@@ -28,6 +28,20 @@ The durable association between a Space and a Source. It records the actor and
 an immutable, explicitly bounded history start in UTC for later ingestion.
 _Avoid_: Import, sync run, all history
 
+**Space Membership Suggestion**:
+An internal, pending relationship inferred from an attached Source observation
+after a verified email or phone mapping resolves to an active teammate in the
+same organization. It grants no Space visibility or subscription until a Space
+Administrator confirms it.
+_Avoid_: External participant, invite, automatic member
+
+**Space Membership**:
+The single confirmed access relationship between an internal teammate and a
+Space, with a Contributor or Subscriber role. During Setup, visibility remains
+limited to Space Administrators; at launch, confirmed memberships become the
+exact native subscription cohort.
+_Avoid_: Connected Account grant, Source participant, channel guest
+
 **AIMTO Events**:
 The first Hover Space, used to prove the product through a real mixed feed of
 human activity and source-backed AI updates.

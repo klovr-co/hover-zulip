@@ -11,6 +11,7 @@ import * as dialog_widget from "./dialog_widget.ts";
 import * as hover_connected_accounts from "./hover_connected_accounts.ts";
 import * as hover_spaces from "./hover_spaces.ts";
 import {$t, $t_html} from "./i18n.ts";
+import * as people from "./people.ts";
 import {current_user, realm} from "./state_data.ts";
 import * as stream_list from "./stream_list.ts";
 import * as ui_report from "./ui_report.ts";
@@ -33,6 +34,11 @@ const preview_response_schema = z.object({source: discovered_source_schema});
 const attach_response_schema = z.object({
     space: hover_spaces.hover_space_schema,
     attachment: hover_spaces.hover_space_attachment_schema,
+    created: z.boolean(),
+});
+const membership_response_schema = z.object({space: hover_spaces.hover_space_schema});
+const launch_response_schema = z.object({
+    space: hover_spaces.hover_space_schema,
     created: z.boolean(),
 });
 type DiscoveredSource = z.output<typeof discovered_source_schema>;
@@ -85,6 +91,14 @@ export function open_setup_space(space_id: number): void {
         return;
     }
     const space = maybe_space;
+    const related_user_ids = new Set([
+        ...space.memberships.map((membership) => membership.user_id),
+        ...space.membership_suggestions.map((suggestion) => suggestion.user_id),
+    ]);
+    const eligible_users = people
+        .get_realm_active_human_users()
+        .filter((user) => !related_user_ids.has(user.user_id))
+        .toSorted((a, b) => a.full_name.localeCompare(b.full_name));
     const accounts = hover_connected_accounts
         .get_accounts()
         .filter(
@@ -244,14 +258,41 @@ export function open_setup_space(space_id: number): void {
         );
     }
 
+    function show_membership_error(): void {
+        ui_report.client_error(
+            $t_html({defaultMessage: "Could not update Space membership."}),
+            $("#dialog_error"),
+        );
+    }
+
+    function reopen_with_space(raw_data: unknown): void {
+        const {space: updated_space} = membership_response_schema.parse(raw_data);
+        hover_spaces.upsert(updated_space);
+        stream_list.update_streams_sidebar(true);
+        dialog_widget.close(() => {
+            open_setup_space(space.id);
+        });
+    }
+
+    function confirm_member(user_id: number, role: string): void {
+        void channel.post({
+            url: `/json/hover/spaces/${space.id}/members`,
+            data: {user_id: JSON.stringify(user_id), role: JSON.stringify(role)},
+            success: reopen_with_space,
+            error: show_membership_error,
+        });
+    }
+
     dialog_widget.launch({
         id: "hover-space-setup-modal",
         modal_title_text: $t({defaultMessage: "Space Setup"}),
         modal_content_html: render_hover_space_setup_modal({
             space,
             accounts,
+            eligible_users,
             has_attachments: space.attachments.length > 0,
             has_accounts: accounts.length > 0,
+            has_eligible_users: eligible_users.length > 0,
         }),
         modal_submit_button_text: $t({defaultMessage: "Attach Source"}),
         form_id: "hover_source_attachment_form",
@@ -296,6 +337,61 @@ export function open_setup_space(space_id: number): void {
             if (accounts.length > 0) {
                 discover();
             }
+            $("#hover-space-membership-panel").on("click", "[data-membership-action]", (event) => {
+                const $button = $(event.currentTarget);
+                const action = $button.attr("data-membership-action");
+                const user_id = Number($button.attr("data-user-id"));
+                switch (action) {
+                    case "confirm-suggestion":
+                        confirm_member(user_id, $button.attr("data-role")!);
+                        break;
+                    case "remove":
+                        void channel.del({
+                            url: `/json/hover/spaces/${space.id}/members/${user_id}`,
+                            success: reopen_with_space,
+                            error: show_membership_error,
+                        });
+                        break;
+                    case "promote":
+                        void channel.post({
+                            url: `/json/hover/spaces/${space.id}/admins`,
+                            data: {user_id: JSON.stringify(user_id)},
+                            success() {
+                                dialog_widget.close(() => {
+                                    open_setup_space(space.id);
+                                });
+                            },
+                            error: show_membership_error,
+                        });
+                        break;
+                }
+            });
+            $(".hover-member-add-button").on("click", () => {
+                confirm_member(
+                    Number($<HTMLSelectElement>("#hover_member_user").val()),
+                    String($<HTMLSelectElement>("#hover_member_role").val()),
+                );
+            });
+            $(".hover-space-launch-button").on("click", () => {
+                void channel.post({
+                    url: `/json/hover/spaces/${space.id}/launch`,
+                    success(raw_data) {
+                        const {space: launched_space} = launch_response_schema.parse(raw_data);
+                        hover_spaces.upsert(launched_space);
+                        stream_list.update_streams_sidebar(true);
+                        dialog_widget.close();
+                    },
+                    error() {
+                        ui_report.client_error(
+                            $t_html({
+                                defaultMessage:
+                                    "Launch is not ready. Resolve the highlighted setup requirements.",
+                            }),
+                            $("#dialog_error"),
+                        );
+                    },
+                });
+            });
         },
     });
 }

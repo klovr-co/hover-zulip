@@ -99,6 +99,101 @@ class SpaceAdministrator(models.Model):
             )
 
 
+observation_basis_validator = RegexValidator(
+    regex=r"^obs_[0-9a-f]{32}$",
+    message="Observation bases must be opaque observation IDs.",
+)
+
+
+class SpaceMembership(models.Model):
+    class Role(models.TextChoices):
+        CONTRIBUTOR = "contributor", "Contributor"
+        SUBSCRIBER = "subscriber", "Subscriber"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    space = models.ForeignKey(Space, on_delete=CASCADE, related_name="memberships")
+    user = models.ForeignKey(UserProfile, on_delete=CASCADE, related_name="hover_space_memberships")
+    role = models.TextField(choices=Role.choices)
+    added_by = models.ForeignKey(
+        UserProfile,
+        null=True,
+        on_delete=SET_NULL,
+        related_name="hover_space_memberships_added",
+    )
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["space", "user"], name="hover_space_membership_unique_user"
+            )
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        if self.space_id is not None and self.realm_id != self.space.realm_id:
+            raise ValidationError({"space": "Space memberships must share the Space organization."})
+        if self.user_id is not None and self.realm_id != self.user.realm_id:
+            raise ValidationError({"user": "Space memberships must share the user organization."})
+        if self.added_by_id is not None and self.realm_id != self.added_by.realm_id:
+            raise ValidationError(
+                {"added_by": "Space memberships must share the actor organization."}
+            )
+
+
+class SpaceMembershipSuggestion(models.Model):
+    class State(models.TextChoices):
+        PENDING = "pending", "Pending review"
+        CONFIRMED = "confirmed", "Confirmed"
+        REMOVED = "removed", "Removed"
+
+    class MatchBasis(models.TextChoices):
+        VERIFIED_EMAIL = "verified_email", "Verified email"
+        VERIFIED_PHONE = "verified_phone", "Verified phone"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    space = models.ForeignKey(Space, on_delete=CASCADE, related_name="membership_suggestions")
+    user = models.ForeignKey(
+        UserProfile, on_delete=CASCADE, related_name="hover_space_membership_suggestions"
+    )
+    suggested_role = models.TextField(choices=SpaceMembership.Role.choices)
+    state = models.TextField(choices=State.choices, default=State.PENDING)
+    match_basis = models.TextField(choices=MatchBasis.choices)
+    observation_basis = models.CharField(max_length=36, validators=[observation_basis_validator])
+    updated_by = models.ForeignKey(
+        UserProfile,
+        null=True,
+        on_delete=SET_NULL,
+        related_name="hover_space_membership_suggestions_updated",
+    )
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["space", "user"], name="hover_space_suggestion_unique_user"
+            ),
+            models.CheckConstraint(
+                condition=Q(
+                    match_basis__in=["verified_email", "verified_phone"],
+                    observation_basis__startswith="obs_",
+                ),
+                name="hover_space_suggestion_observation_basis",
+            ),
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        if self.space_id is not None and self.realm_id != self.space.realm_id:
+            raise ValidationError({"space": "Suggestions must share the Space organization."})
+        if self.user_id is not None and self.realm_id != self.user.realm_id:
+            raise ValidationError({"user": "Suggestions must share the user organization."})
+        if self.updated_by_id is not None and self.realm_id != self.updated_by.realm_id:
+            raise ValidationError({"updated_by": "Suggestions must share the actor organization."})
+
+
 provider_key_validator = RegexValidator(
     regex=r"^[a-z][a-z0-9_]{0,31}$",
     message="Provider keys must start with a letter and contain only lowercase letters, digits, and underscores.",

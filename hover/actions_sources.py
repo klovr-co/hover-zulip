@@ -98,8 +98,12 @@ def _attach_canonical_source(
     boundary: HistoryBoundary,
 ) -> tuple[SpaceAttachment, bool]:
     with transaction.atomic(durable=True):
-        locked_space = Space.objects.select_for_update().get(id=space.id, realm=space.realm)
-        locked_account = ConnectedAccount.objects.select_for_update().get(
+        locked_space = Space.objects.select_for_update(no_key=False).get(
+            id=space.id, realm=space.realm
+        )
+        if locked_space.state != Space.State.SETUP:
+            raise JsonableError(_("Invalid Space ID"))
+        locked_account = ConnectedAccount.objects.select_for_update(no_key=False).get(
             id=account.id, realm=space.realm
         )
         _assert_local_authorization(
@@ -133,7 +137,7 @@ def _attach_canonical_source(
             source.save(update_fields=["display_name", "date_updated"])
 
         attachment = (
-            SpaceAttachment.objects.select_for_update()
+            SpaceAttachment.objects.select_for_update(no_key=False)
             .select_related("source", "source__account")
             .filter(space=locked_space, source=source)
             .first()
