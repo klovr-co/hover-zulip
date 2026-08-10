@@ -16,6 +16,7 @@ from hover.lib_spaces import (
     access_space_for_administration,
     get_accessible_spaces,
     get_space_data,
+    space_projection_queryset,
 )
 from hover.models import Space
 from zerver.decorator import require_non_guest_user
@@ -115,7 +116,8 @@ def confirm_space_member(
     except UserProfile.DoesNotExist:
         raise JsonableError(_("Invalid user ID"))
     do_confirm_space_member(space, target, role=role, acting_user=user_profile)
-    return json_success(request, data={"space": get_space_data(space)})
+    updated_space = space_projection_queryset().get(id=space.id)
+    return json_success(request, data={"space": get_space_data(updated_space)})
 
 
 @require_non_guest_user
@@ -133,7 +135,8 @@ def remove_space_member(
     except UserProfile.DoesNotExist:
         raise JsonableError(_("Invalid user ID"))
     do_remove_space_member(space, target, acting_user=user_profile)
-    return json_success(request, data={"space": get_space_data(space)})
+    updated_space = space_projection_queryset().get(id=space.id)
+    return json_success(request, data={"space": get_space_data(updated_space)})
 
 
 @require_non_guest_user

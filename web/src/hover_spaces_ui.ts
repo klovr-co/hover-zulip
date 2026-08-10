@@ -343,7 +343,14 @@ export function open_setup_space(space_id: number): void {
                 const user_id = Number($button.attr("data-user-id"));
                 switch (action) {
                     case "confirm-suggestion":
-                        confirm_member(user_id, $button.attr("data-role")!);
+                        confirm_member(
+                            user_id,
+                            String(
+                                $<HTMLSelectElement>(
+                                    `.hover-member-role-select[data-user-id='${user_id}']`,
+                                ).val(),
+                            ),
+                        );
                         break;
                     case "remove":
                         void channel.del({
@@ -364,6 +371,16 @@ export function open_setup_space(space_id: number): void {
                             error: show_membership_error,
                         });
                         break;
+                }
+            });
+            $(".hover-member-role-select").on("change", (event) => {
+                const $select = $(event.currentTarget);
+                const user_id = Number($select.attr("data-user-id"));
+                const is_pending = $select
+                    .closest(".hover-member-row")
+                    .find("[data-membership-action='confirm-suggestion']").length;
+                if (!is_pending) {
+                    confirm_member(user_id, String($select.val()));
                 }
             });
             $(".hover-member-add-button").on("click", () => {

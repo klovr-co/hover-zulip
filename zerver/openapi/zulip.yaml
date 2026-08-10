@@ -6600,6 +6600,87 @@ paths:
                                 }
                             - type: object
                               additionalProperties: false
+                              required:
+                                - id
+                                - type
+                                - op
+                                - space
+                              description: |
+                                Event sent to authorized users when a Hover Space is created or
+                                its setup, membership, Source, or launch projection changes.
+
+                                **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+                              properties:
+                                id:
+                                  $ref: "#/components/schemas/EventIdSchema"
+                                type:
+                                  allOf:
+                                    - $ref: "#/components/schemas/EventTypeSchema"
+                                    - enum:
+                                        - hover_space
+                                op:
+                                  type: string
+                                  enum:
+                                    - add
+                                    - update
+                                space:
+                                  $ref: "#/components/schemas/HoverSpace"
+                              example:
+                                {
+                                  "id": 0,
+                                  "type": "hover_space",
+                                  "op": "add",
+                                  "space":
+                                    {
+                                      "id": 17,
+                                      "name": "Launch readiness",
+                                      "description": "Prepare the program before launch.",
+                                      "state": "setup",
+                                      "category": {"id": 3, "name": "Programs"},
+                                      "created_by_id": 10,
+                                      "stream_id": null,
+                                      "attachments": [],
+                                      "administrators": [],
+                                      "memberships": [],
+                                      "membership_suggestions": [],
+                                    },
+                                }
+                            - type: object
+                              additionalProperties: false
+                              required:
+                                - id
+                                - type
+                                - op
+                                - space_id
+                              description: |
+                                Event sent when a user loses access to a Hover Space.
+
+                                **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+                              properties:
+                                id:
+                                  $ref: "#/components/schemas/EventIdSchema"
+                                type:
+                                  allOf:
+                                    - $ref: "#/components/schemas/EventTypeSchema"
+                                    - enum:
+                                        - hover_space
+                                op:
+                                  type: string
+                                  enum:
+                                    - delete
+                                space_id:
+                                  type: integer
+                                  description: |
+                                    The ID of the Hover Space that is no longer accessible.
+                              example:
+                                {
+                                  "id": 0,
+                                  "type": "hover_space",
+                                  "op": "delete",
+                                  "space_id": 17,
+                                }
+                            - type: object
+                              additionalProperties: false
                               description: |
                                 Event sent to users in an organization when a channel folder is created.
 
@@ -19408,6 +19489,18 @@ paths:
                           visible to spectators.
 
                           **Changes**: New in Zulip 11.0 (feature level 389).
+                      hover_spaces:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverSpace"
+                        description: |
+                          Present if `hover_space` is present in `fetch_event_types`.
+
+                          Contains every Hover Space the user may access. Setup Spaces are
+                          visible only to their Space Administrators; launched Spaces are
+                          visible to confirmed members.
+
+                          **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
                       unread_msgs:
                         type: object
                         description: |
@@ -30349,6 +30442,183 @@ components:
           type: boolean
           description: |
             Whether the channel folder is archived or not.
+    HoverSpace:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - description
+        - state
+        - category
+        - created_by_id
+        - stream_id
+        - attachments
+        - administrators
+        - memberships
+        - membership_suggestions
+      description: |
+        The sanitized server projection of a Hover Space. It includes only Source
+        metadata and internal-user identity matches that the requesting user is
+        authorized to review.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        state:
+          type: string
+          enum:
+            - setup
+            - launched
+        category:
+          type: object
+          additionalProperties: false
+          required:
+            - id
+            - name
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+        created_by_id:
+          type: integer
+          nullable: true
+        stream_id:
+          type: integer
+          nullable: true
+        attachments:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - id
+              - state
+              - history_window
+              - history_timezone
+              - history_start_at
+              - custom_start_date
+              - source
+            properties:
+              id:
+                type: integer
+              state:
+                type: string
+                enum:
+                  - active
+              history_window:
+                type: string
+                enum:
+                  - today
+                  - last_30_days
+                  - custom
+              history_timezone:
+                type: string
+              history_start_at:
+                type: string
+              custom_start_date:
+                type: string
+                nullable: true
+              source:
+                type: object
+                additionalProperties: false
+                required:
+                  - id
+                  - provider_key
+                  - source_type
+                  - display_name
+                  - account_id
+                  - account_display_name
+                properties:
+                  id:
+                    type: integer
+                  provider_key:
+                    type: string
+                  source_type:
+                    type: string
+                  display_name:
+                    type: string
+                  account_id:
+                    type: integer
+                  account_display_name:
+                    type: string
+        administrators:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - user_id
+              - full_name
+            properties:
+              user_id:
+                type: integer
+              full_name:
+                type: string
+        memberships:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - id
+              - user_id
+              - full_name
+              - role
+              - is_administrator
+            properties:
+              id:
+                type: integer
+              user_id:
+                type: integer
+              full_name:
+                type: string
+              role:
+                type: string
+                enum:
+                  - contributor
+                  - subscriber
+              is_administrator:
+                type: boolean
+        membership_suggestions:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - id
+              - user_id
+              - full_name
+              - suggested_role
+              - state
+              - match_basis
+            properties:
+              id:
+                type: integer
+              user_id:
+                type: integer
+              full_name:
+                type: string
+              suggested_role:
+                type: string
+                enum:
+                  - contributor
+                  - subscriber
+              state:
+                type: string
+                enum:
+                  - pending
+              match_basis:
+                type: string
+                enum:
+                  - verified_email
+                  - verified_phone
     JsonResponseBase:
       type: object
       properties:

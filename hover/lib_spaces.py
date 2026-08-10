@@ -9,11 +9,34 @@ from zerver.lib.exceptions import JsonableError
 from zerver.models.users import UserProfile
 
 
+def space_projection_queryset() -> QuerySet[Space]:
+    return Space.objects.select_related("category", "created_by", "stream").prefetch_related(
+        attachment_queryset(),
+        Prefetch(
+            "memberships",
+            queryset=SpaceMembership.objects.select_related("user").order_by(
+                "user__full_name", "user_id"
+            ),
+        ),
+        Prefetch(
+            "administrator_assignments",
+            queryset=SpaceAdministrator.objects.select_related("user").order_by(
+                "user__full_name", "user_id"
+            ),
+        ),
+        Prefetch(
+            "membership_suggestions",
+            queryset=SpaceMembershipSuggestion.objects.select_related("user").filter(
+                state=SpaceMembershipSuggestion.State.PENDING
+            ),
+        ),
+    )
+
+
 def get_accessible_spaces(user_profile: UserProfile) -> QuerySet[Space]:
     spaces = (
-        Space.objects.filter(
-            realm=user_profile.realm,
-        )
+        space_projection_queryset()
+        .filter(realm=user_profile.realm)
         .filter(
             Q(
                 state=Space.State.SETUP,
@@ -25,28 +48,6 @@ def get_accessible_spaces(user_profile: UserProfile) -> QuerySet[Space]:
                 memberships__user=user_profile,
                 memberships__user__is_active=True,
             )
-        )
-        .select_related("category", "created_by", "stream")
-        .prefetch_related(
-            attachment_queryset(),
-            Prefetch(
-                "memberships",
-                queryset=SpaceMembership.objects.select_related("user").order_by(
-                    "user__full_name", "user_id"
-                ),
-            ),
-            Prefetch(
-                "administrator_assignments",
-                queryset=SpaceAdministrator.objects.select_related("user").order_by(
-                    "user__full_name", "user_id"
-                ),
-            ),
-            Prefetch(
-                "membership_suggestions",
-                queryset=SpaceMembershipSuggestion.objects.select_related("user").filter(
-                    state=SpaceMembershipSuggestion.State.PENDING
-                ),
-            ),
         )
         .distinct()
         .order_by("category__order", "name", "id")
@@ -82,18 +83,19 @@ def access_space_for_administration(user_profile: UserProfile, space_id: int) ->
 
 
 def get_space_data(space: Space) -> dict[str, Any]:
+    required_prefetches = {
+        "attachments",
+        "memberships",
+        "administrator_assignments",
+        "membership_suggestions",
+    }
+    prefetch_cache = getattr(space, "_prefetched_objects_cache", {})
+    if not required_prefetches.issubset(prefetch_cache):
+        space = space_projection_queryset().get(id=space.id)
     administrators = list(space.administrator_assignments.all())
     administrator_ids = {assignment.user_id for assignment in administrators}
     memberships = list(space.memberships.all())
-    suggestions = (
-        list(
-            space.membership_suggestions.filter(
-                state=SpaceMembershipSuggestion.State.PENDING
-            ).select_related("user")
-        )
-        if space.state == Space.State.SETUP
-        else []
-    )
+    suggestions = list(space.membership_suggestions.all()) if space.state == Space.State.SETUP else []
     return {
         "id": space.id,
         "name": space.name,

@@ -720,6 +720,26 @@ run_test("realm settings", ({override}) => {
         created_by_id: test_user.user_id,
         stream_id: null,
         attachments: [],
+        administrators: [{user_id: test_user.user_id, full_name: test_user.full_name}],
+        memberships: [
+            {
+                id: 2,
+                user_id: test_user.user_id,
+                full_name: test_user.full_name,
+                role: "contributor",
+                is_administrator: true,
+            },
+        ],
+        membership_suggestions: [
+            {
+                id: 3,
+                user_id: 99,
+                full_name: "Observed teammate",
+                suggested_role: "subscriber",
+                state: "pending",
+                match_basis: "verified_email",
+            },
+        ],
     };
     const accessible_connected_account = {
         id: 2,

@@ -8,14 +8,12 @@ from hover.lib_spaces import get_space_data, user_is_space_administrator
 from hover.models import Space, SpaceAdministrator, SpaceMembership, SpaceMembershipSuggestion
 from hover.observations import ResolvedIdentityObservation
 from zerver.lib.exceptions import JsonableError
-from zerver.models.users import UserProfile
+from zerver.models.users import UserProfile, base_bulk_get_user_queryset
 from zerver.tornado.django_api import send_event_on_commit
 
 
 def _lock_setup_space(space: Space) -> Space:
-    locked = (
-        Space.objects.select_for_update(no_key=False).select_related("category").get(id=space.id)
-    )
+    locked = Space.objects.select_for_update(no_key=True).get(id=space.id)
     if locked.state != Space.State.SETUP:
         raise JsonableError(_("This Space has already launched."))
     return locked
@@ -67,28 +65,42 @@ def refresh_space_membership_suggestions(
     _require_space_administrator(space, acting_user)
     changed: list[SpaceMembershipSuggestion] = []
 
-    for observation in observations:
-        if observation.user_id is None:
-            continue
-        if observation.match_basis not in {
+    eligible_observations = {
+        observation.user_id: observation
+        for observation in observations
+        if observation.user_id is not None
+        and observation.match_basis
+        in {
             SpaceMembershipSuggestion.MatchBasis.VERIFIED_EMAIL,
             SpaceMembershipSuggestion.MatchBasis.VERIFIED_PHONE,
-        }:
-            continue
-        if re.fullmatch(r"obs_[0-9a-f]{32}", observation.observation_basis) is None:
-            continue
-        if observation.suggested_role not in SpaceMembership.Role.values:
-            continue
-        try:
-            target = UserProfile.objects.get(
-                id=observation.user_id,
-                realm=space.realm,
-                is_active=True,
-                is_bot=False,
-            )
-        except UserProfile.DoesNotExist:
-            continue
-        if target.is_guest or SpaceMembership.objects.filter(space=space, user=target).exists():
+        }
+        and re.fullmatch(r"obs_[0-9a-f]{32}", observation.observation_basis) is not None
+        and observation.suggested_role in SpaceMembership.Role.values
+    }
+    users_by_id = {
+        user.id: user
+        for user in base_bulk_get_user_queryset().filter(
+            id__in=eligible_observations,
+            realm=space.realm,
+            is_active=True,
+            is_bot=False,
+        )
+        if not user.is_guest
+    }
+    existing_member_ids = set(
+        SpaceMembership.objects.filter(space=space, user_id__in=users_by_id).values_list(
+            "user_id", flat=True
+        )
+    )
+    existing_suggestion_ids = set(
+        SpaceMembershipSuggestion.objects.filter(
+            space=space, user_id__in=users_by_id
+        ).values_list("user_id", flat=True)
+    )
+
+    for user_id, observation in eligible_observations.items():
+        target = users_by_id.get(user_id)
+        if target is None or user_id in existing_member_ids or user_id in existing_suggestion_ids:
             continue
         suggestion, created = SpaceMembershipSuggestion.objects.get_or_create(
             realm=space.realm,
@@ -105,6 +117,7 @@ def refresh_space_membership_suggestions(
         # Refresh never resurrects or rewrites an explicit admin decision.
         if created:
             changed.append(suggestion)
+            existing_suggestion_ids.add(user_id)
 
     if changed:
         _send_admin_update(space)

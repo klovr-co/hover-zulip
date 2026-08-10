@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from unittest.mock import patch
 from uuid import uuid4
 
+import orjson
 from typing_extensions import override
 
 from hover.actions_memberships import (
@@ -208,6 +209,49 @@ class HoverMembershipsTest(ZulipTestCase):
         self.assertFalse(get_accessible_spaces(self.member).filter(id=self.space.id).exists())
         do_remove_space_member(self.space, self.member, acting_user=self.creator)
         self.assertFalse(get_accessible_spaces(self.member).filter(id=self.space.id).exists())
+
+    def test_membership_mutation_responses_use_fresh_projection(self) -> None:
+        refresh_space_membership_suggestions(
+            self.space,
+            [
+                ResolvedIdentityObservation(
+                    user_id=self.member.id,
+                    match_basis="verified_email",
+                    observation_basis="obs_0123456789abcdef0123456789abcdef",
+                )
+            ],
+            acting_user=self.creator,
+        )
+        self.login_user(self.creator)
+
+        result = self.client_post(
+            f"/json/hover/spaces/{self.space.id}/members",
+            {
+                "user_id": orjson.dumps(self.member.id).decode(),
+                "role": orjson.dumps(SpaceMembership.Role.CONTRIBUTOR).decode(),
+            },
+        )
+        self.assert_json_success(result)
+        confirmed_space = orjson.loads(result.content)["space"]
+        self.assertEqual(confirmed_space["membership_suggestions"], [])
+        self.assertEqual(
+            next(
+                membership
+                for membership in confirmed_space["memberships"]
+                if membership["user_id"] == self.member.id
+            )["role"],
+            SpaceMembership.Role.CONTRIBUTOR,
+        )
+
+        result = self.client_delete(
+            f"/json/hover/spaces/{self.space.id}/members/{self.member.id}"
+        )
+        self.assert_json_success(result)
+        removed_space = orjson.loads(result.content)["space"]
+        self.assertNotIn(
+            self.member.id,
+            [membership["user_id"] for membership in removed_space["memberships"]],
+        )
 
     def test_launch_is_atomic_quiet_idempotent_and_uses_exact_confirmed_cohort(self) -> None:
         self.add_ready_attachment()

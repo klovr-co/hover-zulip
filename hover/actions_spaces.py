@@ -110,7 +110,7 @@ def do_create_space(
 def do_add_space_administrator(
     space: Space, target: UserProfile, *, acting_user: UserProfile
 ) -> None:
-    space = Space.objects.select_for_update(no_key=False).get(id=space.id)
+    space = Space.objects.select_for_update(no_key=True).get(id=space.id)
     if space.state != Space.State.SETUP:
         raise JsonableError(_("Space administrators can only be changed during Setup."))
     if acting_user.realm_id != space.realm_id or (
@@ -144,7 +144,7 @@ def do_add_space_administrator(
 def do_remove_space_administrator(
     space: Space, target: UserProfile, *, acting_user: UserProfile
 ) -> None:
-    space = Space.objects.select_for_update(no_key=False).get(id=space.id)
+    space = Space.objects.select_for_update(no_key=True).get(id=space.id)
     if space.state != Space.State.SETUP:
         raise JsonableError(_("Space administrators can only be changed during Setup."))
     if acting_user.realm_id != space.realm_id or (
@@ -155,7 +155,7 @@ def do_remove_space_administrator(
     assignment = SpaceAdministrator.objects.filter(space=space, user=target).first()
     if assignment is None:
         return
-    if SpaceAdministrator.objects.select_for_update(no_key=False).filter(space=space).count() == 1:
+    if SpaceAdministrator.objects.select_for_update(no_key=True).filter(space=space).count() == 1:
         raise JsonableError(_("A Space must have at least one administrator."))
 
     assignment.delete()
@@ -196,7 +196,9 @@ def _validate_launch_attachments(space: Space) -> None:
 @transaction.atomic(durable=True)
 def do_launch_space(space: Space, *, acting_user: UserProfile) -> tuple[Space, bool]:
     space = (
-        Space.objects.select_for_update(no_key=False).select_related("category").get(id=space.id)
+        Space.objects.select_for_update(no_key=True, of=("self",))
+        .select_related("category")
+        .get(id=space.id)
     )
     if acting_user.realm_id != space.realm_id or (
         not acting_user.is_realm_admin and not user_is_space_administrator(acting_user, space)
@@ -225,7 +227,7 @@ def do_launch_space(space: Space, *, acting_user: UserProfile) -> tuple[Space, b
     member_ids = {membership.user_id for membership in memberships}
     administrators = list(
         SpaceAdministrator.objects.select_related("user")
-        .select_for_update(no_key=False)
+        .select_for_update(no_key=True, of=("self",))
         .filter(space=space)
     )
     if not administrators or any(

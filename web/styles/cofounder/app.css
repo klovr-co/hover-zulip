@@ -758,6 +758,12 @@ a {
     white-space: nowrap;
 }
 
+.hover-member-role-select {
+    width: 126px;
+    min-width: 118px;
+    margin: 0;
+}
+
 .hover-member-add-row {
     display: grid;
     grid-template-columns: minmax(150px, 1fr) minmax(130px, 1fr) auto;
@@ -1009,6 +1015,36 @@ a {
     .hover-source-preview-button {
         grid-column: 3;
         justify-self: start;
+    }
+
+    .hover-member-row {
+        grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+
+    .hover-member-row > span:first-child {
+        grid-column: 1 / -1;
+    }
+
+    .hover-member-role-select {
+        width: 100%;
+    }
+
+    .hover-member-add-row {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    .hover-member-add-row label {
+        grid-column: auto;
+    }
+
+    .hover-space-launch-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .hover-space-launch-button {
+        align-self: end;
     }
 }
 

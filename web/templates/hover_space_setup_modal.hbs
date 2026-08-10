@@ -3,32 +3,31 @@
         <div class="hover-space-setup-kicker">{{t "Private Setup"}}</div>
         <h2>{{space.name}}</h2>
         <div class="hover-space-setup-category">
-            <i
-              class="zulip-icon zulip-icon-folder"
-              aria-hidden="true"
-              ></i>
+            <i class="zulip-icon zulip-icon-folder" aria-hidden="true"></i>
             {{space.category.name}}
         </div>
         {{#if space.description}}<p>{{space.description}}</p>{{/if}}
         <p class="settings-field-description">
-            {{t "This Space has no channel, subscribers, or notifications until it is launched."}}
+            {{t
+                "This Space has no channel, subscribers, or notifications until it is launched."
+            }}
         </p>
     </div>
 
     {{! Render attached Source metadata only when the caller confirms it is nonempty. }}
     {{#if has_attachments}}
         <section
-          class="hover-setup-attached-sources"
-          aria-label="{{t 'Attached sources'}}"
-          >
+            class="hover-setup-attached-sources"
+            aria-label="{{t 'Attached sources'}}"
+        >
             <h3>{{t "Sources"}}</h3>
             <ul>
                 {{#each space.attachments}}
                     <li>
                         <span
-                          class="hover-source-ledger__icon"
-                          aria-hidden="true"
-                          >
+                            class="hover-source-ledger__icon"
+                            aria-hidden="true"
+                        >
                             {{#if (eq source.provider_key "whatsapp")}}
                                 <i class="fa fa-whatsapp"></i>
                             {{else}}
@@ -48,19 +47,16 @@
     {{/if}}
 
     <section
-      id="hover-space-membership-panel"
-      class="hover-space-membership-panel"
-      >
+        id="hover-space-membership-panel"
+        class="hover-space-membership-panel"
+    >
         <div class="hover-source-attachment-heading">
             <div>
                 <p class="hover-space-setup-kicker">{{t "Access review"}}</p>
                 <h3>{{t "Teammates"}}</h3>
             </div>
             <span class="hover-source-private-badge">
-                <i
-                  class="fa fa-eye-slash"
-                  aria-hidden="true"
-                  ></i>
+                <i class="fa fa-eye-slash" aria-hidden="true"></i>
                 {{t "Admins only in Setup"}}
             </span>
         </div>
@@ -71,26 +67,35 @@
                     <strong>{{full_name}}</strong>
                     <small>{{t "Verified internal match"}}</small>
                 </span>
-                <span class="hover-member-role">
+                <select
+                    class="modal_select hover-member-role-select"
+                    data-user-id="{{user_id}}"
+                    aria-label="{{t 'Role'}}: {{full_name}}"
+                >
                     {{#if (eq suggested_role "contributor")}}
-                        {{t "Contributor"}}
+                        <option value="contributor" selected>{{t
+                                "Contributor"
+                            }}</option>
+                        <option value="subscriber">{{t "Subscriber"}}</option>
                     {{else}}
-                        {{t "Subscriber"}}
+                        <option value="contributor">{{t "Contributor"}}</option>
+                        <option value="subscriber" selected>{{t
+                                "Subscriber"
+                            }}</option>
                     {{/if}}
-                </span>
+                </select>
                 <button
-                  type="button"
-                  class="button rounded small"
-                  data-membership-action="confirm-suggestion"
-                  data-user-id="{{user_id}}"
-                  data-role="{{suggested_role}}"
-                  >{{t "Confirm"}}</button>
+                    type="button"
+                    class="button rounded small"
+                    data-membership-action="confirm-suggestion"
+                    data-user-id="{{user_id}}"
+                >{{t "Confirm"}}</button>
                 <button
-                  type="button"
-                  class="button rounded small"
-                  data-membership-action="remove"
-                  data-user-id="{{user_id}}"
-                  >{{t "Remove"}}</button>
+                    type="button"
+                    class="button rounded small"
+                    data-membership-action="remove"
+                    data-user-id="{{user_id}}"
+                >{{t "Remove"}}</button>
             </div>
         {{/each}}
 
@@ -106,73 +111,99 @@
                         {{/if}}
                     </small>
                 </span>
-                <span class="hover-member-role">
-                    {{#if (eq role "contributor")}}
-                        {{t "Contributor"}}
-                    {{else}}
-                        {{t "Subscriber"}}
-                    {{/if}}
-                </span>
+                {{#if is_administrator}}
+                    <span class="hover-member-role">
+                        {{#if (eq role "contributor")}}
+                            {{t "Contributor"}}
+                        {{else}}
+                            {{t "Subscriber"}}
+                        {{/if}}
+                    </span>
+                {{else}}
+                    <select
+                        class="modal_select hover-member-role-select"
+                        data-user-id="{{user_id}}"
+                        aria-label="{{t 'Role'}}: {{full_name}}"
+                    >
+                        {{#if (eq role "contributor")}}
+                            <option value="contributor" selected>{{t
+                                    "Contributor"
+                                }}</option>
+                            <option value="subscriber">{{t
+                                    "Subscriber"
+                                }}</option>
+                        {{else}}
+                            <option value="contributor">{{t
+                                    "Contributor"
+                                }}</option>
+                            <option value="subscriber" selected>{{t
+                                    "Subscriber"
+                                }}</option>
+                        {{/if}}
+                    </select>
+                {{/if}}
                 {{#unless is_administrator}}
                     <button
-                      type="button"
-                      class="button rounded small"
-                      data-membership-action="promote"
-                      data-user-id="{{user_id}}"
-                      >{{t "Make admin"}}</button>
+                        type="button"
+                        class="button rounded small"
+                        data-membership-action="promote"
+                        data-user-id="{{user_id}}"
+                    >{{t "Make admin"}}</button>
                     <button
-                      type="button"
-                      class="button rounded small"
-                      data-membership-action="remove"
-                      data-user-id="{{user_id}}"
-                      >{{t "Remove"}}</button>
+                        type="button"
+                        class="button rounded small"
+                        data-membership-action="remove"
+                        data-user-id="{{user_id}}"
+                    >{{t "Remove"}}</button>
                 {{/unless}}
             </div>
         {{/each}}
 
         {{#if has_eligible_users}}
             <div class="hover-member-add-row">
-                <label for="hover_member_user">{{t "Add an internal teammate"}}</label>
+                <label for="hover_member_user">{{t
+                        "Add an internal teammate"
+                    }}</label>
                 <select id="hover_member_user" class="modal_select">
                     {{#each eligible_users}}
-                        <option
-                          value="{{user_id}}"
-                          >
+                        <option value="{{user_id}}">
                             {{full_name}}
                         </option>
                     {{/each}}
                 </select>
                 <select
-                  id="hover_member_role"
-                  class="modal_select"
-                  aria-label="{{t 'Role'}}"
-                  >
+                    id="hover_member_role"
+                    class="modal_select"
+                    aria-label="{{t 'Role'}}"
+                >
                     <option value="contributor">{{t "Contributor"}}</option>
                     <option value="subscriber">{{t "Subscriber"}}</option>
                 </select>
                 <button
-                  type="button"
-                  class="button rounded hover-member-add-button"
-                  >{{t "Add teammate"}}</button>
+                    type="button"
+                    class="button rounded hover-member-add-button"
+                >{{t "Add teammate"}}</button>
             </div>
         {{/if}}
 
         <div class="hover-space-launch-row">
             <span>
                 <strong>{{t "Ready to launch?"}}</strong>
-                <small>{{t "Launch creates one private channel and subscribes only confirmed members."}}</small>
+                <small>{{t
+                        "Launch creates one private channel and subscribes only confirmed members."
+                    }}</small>
             </span>
             <button
-              type="button"
-              class="button rounded sea-green hover-space-launch-button"
-              >{{t "Launch Space"}}</button>
+                type="button"
+                class="button rounded sea-green hover-space-launch-button"
+            >{{t "Launch Space"}}</button>
         </div>
     </section>
 
     <section
-      id="hover-source-attachment-panel"
-      class="hover-source-attachment-panel"
-      >
+        id="hover-source-attachment-panel"
+        class="hover-source-attachment-panel"
+    >
         <div class="hover-source-attachment-heading">
             <div>
                 <p class="hover-space-setup-kicker">
@@ -181,17 +212,16 @@
                 <h3>{{t "Attach a Source"}}</h3>
             </div>
             <span class="hover-source-private-badge">
-                <i
-                  class="fa fa-lock"
-                  aria-hidden="true"
-                  ></i>
+                <i class="fa fa-lock" aria-hidden="true"></i>
                 {{t "Safe metadata only"}}
             </span>
         </div>
         {{! Account collections require an explicit boolean in Zulip templates. }}
         {{#if has_accounts}}
             <div class="hover-source-discovery-controls">
-                <label for="hover_source_account">{{t "Assigned account"}}</label>
+                <label for="hover_source_account">{{t
+                        "Assigned account"
+                    }}</label>
                 <select id="hover_source_account" class="modal_select">
                     {{#each accounts}}
                         <option value="{{id}}">
@@ -201,41 +231,60 @@
                         </option>
                     {{/each}}
                 </select>
-                <label for="hover_source_query">{{t "Find a permitted conversation"}}</label>
+                <label for="hover_source_query">{{t
+                        "Find a permitted conversation"
+                    }}</label>
                 <div class="hover-source-search-row">
                     <input
-                      id="hover_source_query"
-                      type="search"
-                      maxlength="100"
-                      autocomplete="off"
-                      placeholder="{{t 'Search by Source name'}}"
-                      />
+                        id="hover_source_query"
+                        type="search"
+                        maxlength="100"
+                        autocomplete="off"
+                        placeholder="{{t 'Search by Source name'}}"
+                    />
                     <button
-                      type="button"
-                      class="button rounded hover-source-search-button"
-                      >{{t "Search"}}</button>
+                        type="button"
+                        class="button rounded hover-source-search-button"
+                    >{{t "Search"}}</button>
                 </div>
             </div>
-            <div id="hover_source_discovery_status" class="hover-source-discovery-status" aria-live="polite"></div>
+            <div
+                id="hover_source_discovery_status"
+                class="hover-source-discovery-status"
+                aria-live="polite"
+            ></div>
             <div id="hover_source_discovery_results"></div>
-            <div id="hover_source_preview" class="hover-source-preview hide"></div>
+            <div
+                id="hover_source_preview"
+                class="hover-source-preview hide"
+            ></div>
             <div class="hover-source-window-grid">
                 <div>
-                    <label for="hover_source_history_window">{{t "History window"}}</label>
+                    <label for="hover_source_history_window">{{t
+                            "History window"
+                        }}</label>
                     <select
-                      id="hover_source_history_window"
-                      class="modal_select"
-                      >
+                        id="hover_source_history_window"
+                        class="modal_select"
+                    >
                         <option value="today">{{t "Today"}}</option>
-                        <option value="last_30_days">{{t "Last 30 days"}}</option>
-                        <option value="custom">{{t "Custom start date"}}</option>
+                        <option value="last_30_days">{{t
+                                "Last 30 days"
+                            }}</option>
+                        <option value="custom">{{t
+                                "Custom start date"
+                            }}</option>
                     </select>
                     <p class="settings-field-description">
-                        {{t "History is always bounded. All available history is never selected automatically."}}
+                        {{t
+                            "History is always bounded. All available history is never selected automatically."
+                        }}
                     </p>
                 </div>
                 <div class="hover-source-custom-date hide">
-                    <label for="hover_source_custom_start_date">{{t "Start date"}}</label>
+                    <label for="hover_source_custom_start_date">{{t
+                            "Start date"
+                        }}</label>
                     <input id="hover_source_custom_start_date" type="date" />
                 </div>
             </div>
@@ -243,7 +292,9 @@
             <div class="hover-source-empty-state">
                 <i class="fa fa-plug" aria-hidden="true"></i>
                 <p>
-                    {{t "You need an approved Connected Account grant before discovering Sources."}}
+                    {{t
+                        "You need an approved Connected Account grant before discovering Sources."
+                    }}
                 </p>
             </div>
         {{/if}}
