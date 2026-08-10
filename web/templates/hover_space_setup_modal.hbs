@@ -46,6 +46,157 @@
         </section>
     {{/if}}
 
+    <section class="hover-module-setup-panel" aria-label="{{t 'AI Modules'}}">
+        <div class="hover-source-attachment-heading">
+            <div>
+                <p class="hover-space-setup-kicker">{{t
+                        "Pinned automation"
+                    }}</p>
+                <h3>{{t "AI Modules"}}</h3>
+            </div>
+            <span class="hover-source-private-badge">
+                <i class="fa fa-thumb-tack" aria-hidden="true"></i>
+                {{t "Version pinned"}}
+            </span>
+        </div>
+        {{#if has_module_installations}}
+            <div class="hover-module-installed-list">
+                {{#each space.module_installations}}
+                    <div class="hover-module-installed-row">
+                        <span>
+                            <strong>{{name}}</strong>
+                            <small>{{t "Version"}}
+                                {{version}}
+                                ·
+                                {{state}}</small>
+                        </span>
+                        {{#unless (eq state "disabled")}}
+                            <button
+                                type="button"
+                                class="button rounded small hover-module-disable-button"
+                                data-installation-id="{{id}}"
+                            >{{t "Disable"}}</button>
+                        {{/unless}}
+                    </div>
+                {{/each}}
+            </div>
+        {{/if}}
+        {{#if has_module_catalog}}
+            <div class="hover-module-catalog">
+                {{#each module_catalog}}
+                    {{#unless is_installed}}
+                        <article
+                            class="hover-module-card"
+                            data-version-id="{{id}}"
+                        >
+                            <div class="hover-module-card__heading">
+                                <span
+                                    class="hover-module-card__icon"
+                                    aria-hidden="true"
+                                >
+                                    <i
+                                        class="zulip-icon {{navigation_icon}}"
+                                    ></i>
+                                </span>
+                                <span>
+                                    <strong>{{name}}</strong>
+                                    <small>{{t "Version"}}
+                                        {{version}}
+                                        ·
+                                        {{destination_topic}}</small>
+                                </span>
+                            </div>
+                            <p>{{description}}</p>
+                            <fieldset>
+                                <legend>{{t "Bind attached Sources"}}</legend>
+                                {{#each attachments}}
+                                    <label class="hover-module-source-option">
+                                        <input
+                                            type="checkbox"
+                                            value="{{id}}"
+                                            data-module-attachment
+                                        />
+                                        <span>{{source.display_name}}</span>
+                                    </label>
+                                {{/each}}
+                            </fieldset>
+                            <div class="hover-module-policy-grid">
+                                <label>
+                                    {{t "Trigger"}}
+                                    <select
+                                        class="modal_select hover-module-trigger-select"
+                                    >
+                                        {{#if supports_manual}}<option
+                                                value="manual"
+                                            >{{t "Manual"}}</option>{{/if}}
+                                        {{#if supports_new_source}}<option
+                                                value="new_source"
+                                            >{{t "New Source"}}</option>{{/if}}
+                                        {{#if supports_schedule}}<option
+                                                value="schedule"
+                                            >{{t "Schedule"}}</option>{{/if}}
+                                    </select>
+                                </label>
+                                <label class="hover-module-debounce-field hide">
+                                    {{t "Debounce"}}
+                                    <span>{{t "5 minutes"}}</span>
+                                </label>
+                                <div class="hover-module-schedule-fields hide">
+                                    <label>
+                                        {{t "Cadence"}}
+                                        <select
+                                            class="modal_select hover-module-cadence"
+                                        >
+                                            <option value="daily">{{t
+                                                    "Daily"
+                                                }}</option>
+                                            <option value="weekly">{{t
+                                                    "Weekly"
+                                                }}</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        {{t "Local time"}}
+                                        <input
+                                            class="hover-module-local-time"
+                                            type="time"
+                                            value="09:00"
+                                        />
+                                    </label>
+                                </div>
+                            </div>
+                            <details class="hover-module-backfill">
+                                <summary>{{t
+                                        "Earlier bounded history"
+                                    }}</summary>
+                                <label>
+                                    {{t "Start after Source availability"}}
+                                    <input
+                                        class="hover-module-backfill-start"
+                                        type="datetime-local"
+                                    />
+                                </label>
+                                <label class="hover-module-confirm-row">
+                                    <input
+                                        class="hover-module-backfill-confirm"
+                                        type="checkbox"
+                                    />
+                                    <span>{{t
+                                            "I confirm this earlier bounded backfill."
+                                        }}</span>
+                                </label>
+                            </details>
+                            <button
+                                type="button"
+                                class="button rounded sea-green hover-module-install-button"
+                            >{{t "Enable Module"}}</button>
+                        </article>
+                    {{/unless}}
+                {{/each}}
+            </div>
+        {{/if}}
+    </section>
+
     <section
         id="hover-space-membership-panel"
         class="hover-space-membership-panel"

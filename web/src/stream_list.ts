@@ -971,11 +971,9 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
         ...(hover_space && {
             is_hover_space: true,
             hover_space,
-            hover_ai_modules: hover_spaces.pilot_ai_modules.map((hover_module) => ({
+            hover_ai_modules: hover_spaces.get_sidebar_modules(hover_space).map((hover_module) => ({
                 ...hover_module,
-                url: hash_util.by_stream_topic_url(sub.stream_id, hover_module.name),
-                has_count: hover_module.key === "suggested_actions",
-                count: hover_module.key === "suggested_actions" ? 3 : 0,
+                url: hash_util.by_stream_topic_url(sub.stream_id, hover_module.topic),
             })),
             hover_attached_sources: hover_spaces.get_sidebar_sources(hover_space).map((source) => ({
                 ...source,

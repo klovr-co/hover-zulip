@@ -302,6 +302,35 @@ test_ui("AIMTO modules are native topic links", ({mock_template, override}) => {
                         ],
                     },
                 ],
+                module_installations: [
+                    {
+                        id: 1,
+                        state: "enabled",
+                        definition_key: "conversation_digest",
+                        name: "Conversation Digest",
+                        destination_topic: "Conversation Digest",
+                        navigation_icon: "zulip-icon-align-left",
+                        navigation_order: 10,
+                    },
+                    {
+                        id: 2,
+                        state: "enabled",
+                        definition_key: "suggested_actions",
+                        name: "Suggested Actions",
+                        destination_topic: "Suggested Actions",
+                        navigation_icon: "zulip-icon-sparkles",
+                        navigation_order: 30,
+                    },
+                    {
+                        id: 3,
+                        state: "disabled",
+                        definition_key: "decisions",
+                        name: "Decisions",
+                        destination_topic: "Decisions",
+                        navigation_icon: "zulip-icon-check-circle",
+                        navigation_order: 40,
+                    },
+                ],
             },
         ],
     });
@@ -317,22 +346,18 @@ test_ui("AIMTO modules are native topic links", ({mock_template, override}) => {
 
     mock_template("stream_sidebar_row.hbs", false, (data) => {
         assert.equal(data.url, "#narrow/channel/222-AIMTO-Events");
-        assert.equal(data.hover_ai_modules.length, 6);
+        assert.equal(data.hover_ai_modules.length, 2);
         assert.equal(
             data.hover_ai_modules[0].url,
             "#narrow/channel/222-AIMTO-Events/topic/Conversation.20Digest",
         );
-        assert.deepEqual(
-            data.hover_ai_modules.find((module) => module.key === "suggested_actions"),
-            {
-                key: "suggested_actions",
-                name: "Suggested Actions",
-                icon: "zulip-icon-sparkles",
-                url: "#narrow/channel/222-AIMTO-Events/topic/Suggested.20Actions",
-                has_count: true,
-                count: 3,
-            },
-        );
+        assert.deepEqual(data.hover_ai_modules[1], {
+            key: "suggested_actions",
+            name: "Suggested Actions",
+            icon: "zulip-icon-sparkles",
+            topic: "Suggested Actions",
+            url: "#narrow/channel/222-AIMTO-Events/topic/Suggested.20Actions",
+        });
         assert.equal(data.hover_attached_sources[0].url, "#hover/space/1/source/1");
         return "<aimto-sidebar-row-stub>";
     });

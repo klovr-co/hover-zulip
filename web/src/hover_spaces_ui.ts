@@ -41,6 +41,10 @@ const launch_response_schema = z.object({
     space: hover_spaces.hover_space_schema,
     created: z.boolean(),
 });
+const module_mutation_response_schema = z.object({
+    space: hover_spaces.hover_space_schema,
+    installation: hover_spaces.hover_module_installation_schema,
+});
 type DiscoveredSource = z.output<typeof discovered_source_schema>;
 
 export function open_create_space(): void {
@@ -111,6 +115,17 @@ export function open_setup_space(space_id: number): void {
                             grant.user_id === current_user.user_id && grant.state === "active",
                     ),
         );
+    const module_catalog = space.module_catalog.map((module) => ({
+        ...module,
+        attachments: space.attachments,
+        is_installed: space.module_installations.some(
+            (installation) =>
+                installation.version_id === module.id && installation.state !== "disabled",
+        ),
+        supports_manual: module.supported_triggers.includes("manual"),
+        supports_new_source: module.supported_triggers.includes("new_source"),
+        supports_schedule: module.supported_triggers.includes("schedule"),
+    }));
     let selected_source: DiscoveredSource | undefined;
     let next_cursor: string | undefined;
 
@@ -293,6 +308,9 @@ export function open_setup_space(space_id: number): void {
             has_attachments: space.attachments.length > 0,
             has_accounts: accounts.length > 0,
             has_eligible_users: eligible_users.length > 0,
+            module_catalog,
+            has_module_catalog: module_catalog.length > 0,
+            has_module_installations: space.module_installations.length > 0,
         }),
         modal_submit_button_text: $t({defaultMessage: "Attach Source"}),
         form_id: "hover_source_attachment_form",
@@ -388,6 +406,93 @@ export function open_setup_space(space_id: number): void {
                     Number($<HTMLSelectElement>("#hover_member_user").val()),
                     String($<HTMLSelectElement>("#hover_member_role").val()),
                 );
+            });
+            $(".hover-module-trigger-select").on("change", (event) => {
+                const $select = $(event.currentTarget);
+                const $card = $select.closest(".hover-module-card");
+                $card
+                    .find(".hover-module-schedule-fields")
+                    .toggleClass("hide", $select.val() !== "schedule");
+                $card
+                    .find(".hover-module-debounce-field")
+                    .toggleClass("hide", $select.val() !== "new_source");
+            });
+            $(".hover-module-install-button").on("click", (event) => {
+                const $card = $(event.currentTarget).closest(".hover-module-card");
+                const version_id = Number($card.attr("data-version-id"));
+                const attachment_ids = $card
+                    .find<HTMLInputElement>("input[data-module-attachment]:checked")
+                    .map((_index, element) => Number(element.value))
+                    .get();
+                const trigger_kind = String(
+                    $card.find<HTMLSelectElement>(".hover-module-trigger-select").val(),
+                );
+                const backfill_value =
+                    $card.find<HTMLInputElement>(".hover-module-backfill-start").val() ?? "";
+                void channel.post({
+                    url: `/json/hover/spaces/${space.id}/modules`,
+                    data: {
+                        version_id: JSON.stringify(version_id),
+                        attachment_ids: JSON.stringify(attachment_ids),
+                        trigger_kind: JSON.stringify(trigger_kind),
+                        activation_timezone: new Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        cadence: JSON.stringify(
+                            trigger_kind === "schedule"
+                                ? $card.find<HTMLSelectElement>(".hover-module-cadence").val()
+                                : null,
+                        ),
+                        local_time: JSON.stringify(
+                            trigger_kind === "schedule"
+                                ? $card.find<HTMLInputElement>(".hover-module-local-time").val()
+                                : null,
+                        ),
+                        debounce_seconds: JSON.stringify(
+                            trigger_kind === "new_source" ? 300 : null,
+                        ),
+                        backfill_start_at: JSON.stringify(
+                            backfill_value === "" ? null : new Date(backfill_value).toISOString(),
+                        ),
+                        backfill_confirmed: JSON.stringify(
+                            backfill_value !== "" &&
+                                $card
+                                    .find<HTMLInputElement>(".hover-module-backfill-confirm")
+                                    .prop("checked"),
+                        ),
+                    },
+                    success(raw_data) {
+                        const {space: updated_space} =
+                            module_mutation_response_schema.parse(raw_data);
+                        hover_spaces.upsert(updated_space);
+                        stream_list.update_streams_sidebar(true);
+                        dialog_widget.close(() => {
+                            open_setup_space(space.id);
+                        });
+                    },
+                    error() {
+                        ui_report.client_error(
+                            $t_html({defaultMessage: "Could not enable this Module."}),
+                            $("#dialog_error"),
+                        );
+                    },
+                });
+            });
+            $(".hover-module-disable-button").on("click", (event) => {
+                const installation_id = Number($(event.currentTarget).attr("data-installation-id"));
+                void channel.post({
+                    url: `/json/hover/module-installations/${installation_id}/disable`,
+                    success() {
+                        void channel.get({
+                            url: `/json/hover/spaces/${space.id}`,
+                            success: reopen_with_space,
+                        });
+                    },
+                    error() {
+                        ui_report.client_error(
+                            $t_html({defaultMessage: "Could not disable this Module."}),
+                            $("#dialog_error"),
+                        );
+                    },
+                });
             });
             $(".hover-space-launch-button").on("click", () => {
                 void channel.post({

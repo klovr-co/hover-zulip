@@ -926,6 +926,147 @@ a {
     background: var(--ds-surface-paper);
 }
 
+.hover-module-setup-panel {
+    margin-bottom: 14px;
+    padding: 16px;
+    border: 1px solid
+        color-mix(in srgb, var(--ds-action-accent) 18%, var(--ds-border-muted));
+    border-radius: var(--ds-radius-control);
+    background: color-mix(in srgb, var(--ds-action-accent) 2%, var(--ds-surface-paper));
+}
+
+.hover-module-catalog,
+.hover-module-installed-list {
+    display: grid;
+    gap: 10px;
+}
+
+.hover-module-installed-list {
+    margin-bottom: 12px;
+}
+
+.hover-module-installed-row,
+.hover-module-card__heading {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.hover-module-installed-row {
+    padding: 9px 10px;
+    border: 1px solid var(--ds-border-muted);
+    border-radius: var(--ds-radius-control);
+    background: var(--ds-surface-paper);
+}
+
+.hover-module-installed-row > span,
+.hover-module-card__heading > span:last-child {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.hover-module-installed-row small,
+.hover-module-card small,
+.hover-module-card p {
+    color: var(--ds-text-secondary);
+    font-size: 11px;
+}
+
+.hover-module-card {
+    display: grid;
+    gap: 10px;
+    padding: 13px;
+    border: 1px solid var(--ds-border-muted);
+    border-radius: var(--ds-radius-control);
+    background: var(--ds-surface-paper);
+}
+
+.hover-module-card p {
+    margin: 0;
+}
+
+.hover-module-card__heading {
+    justify-content: start;
+}
+
+.hover-module-card__icon {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--ds-action-accent) 10%, transparent);
+    color: var(--ds-action-accent);
+}
+
+.hover-module-card fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    margin: 0;
+    padding: 9px;
+    border: 1px solid var(--ds-border-muted);
+    border-radius: var(--ds-radius-control);
+}
+
+.hover-module-card legend,
+.hover-module-policy-grid label,
+.hover-module-backfill label {
+    color: var(--ds-text-secondary);
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.hover-module-source-option,
+.hover-module-confirm-row {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.hover-module-policy-grid,
+.hover-module-schedule-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.hover-module-policy-grid label,
+.hover-module-backfill label {
+    display: grid;
+    gap: 4px;
+}
+
+.hover-module-schedule-fields {
+    grid-column: 1 / -1;
+}
+
+.hover-module-backfill {
+    padding: 8px 0;
+    border-top: 1px solid var(--ds-border-muted);
+    border-bottom: 1px solid var(--ds-border-muted);
+}
+
+.hover-module-backfill summary {
+    margin-bottom: 8px;
+    color: var(--ds-text-secondary);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.hover-module-backfill .hover-module-confirm-row {
+    display: flex;
+    margin-top: 7px;
+}
+
+.hover-module-install-button {
+    justify-self: end;
+}
+
 .hover-member-row {
     display: grid;
     grid-template-columns: minmax(150px, 1fr) auto auto auto;
@@ -1243,6 +1384,21 @@ a {
 
     .hover-space-launch-button {
         align-self: end;
+    }
+
+    .hover-module-policy-grid,
+    .hover-module-schedule-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .hover-module-installed-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .hover-module-install-button {
+        width: 100%;
+        justify-self: stretch;
     }
 }
 

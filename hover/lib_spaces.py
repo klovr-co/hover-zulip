@@ -4,7 +4,13 @@ from django.db.models import Prefetch, Q, QuerySet
 from django.utils.translation import gettext as _
 
 from hover.lib_sources import attachment_queryset, get_space_attachment_data
-from hover.models import Space, SpaceAdministrator, SpaceMembership, SpaceMembershipSuggestion
+from hover.models import (
+    ModuleInstallation,
+    Space,
+    SpaceAdministrator,
+    SpaceMembership,
+    SpaceMembershipSuggestion,
+)
 from zerver.lib.exceptions import JsonableError
 from zerver.models.users import UserProfile
 
@@ -29,6 +35,16 @@ def space_projection_queryset() -> QuerySet[Space]:
             queryset=SpaceMembershipSuggestion.objects.select_related("user").filter(
                 state=SpaceMembershipSuggestion.State.PENDING
             ),
+        ),
+        Prefetch(
+            "module_installations",
+            queryset=ModuleInstallation.objects.select_related("version__definition")
+            .prefetch_related(
+                "bindings__requirement",
+                "bindings__attachment",
+                "triggers__supported_trigger",
+            )
+            .order_by("version__navigation_order", "id"),
         ),
     )
 
@@ -88,6 +104,7 @@ def get_space_data(space: Space) -> dict[str, Any]:
         "memberships",
         "administrator_assignments",
         "membership_suggestions",
+        "module_installations",
     }
     prefetch_cache = getattr(space, "_prefetched_objects_cache", {})
     if not required_prefetches.issubset(prefetch_cache):
@@ -95,7 +112,11 @@ def get_space_data(space: Space) -> dict[str, Any]:
     administrators = list(space.administrator_assignments.all())
     administrator_ids = {assignment.user_id for assignment in administrators}
     memberships = list(space.memberships.all())
-    suggestions = list(space.membership_suggestions.all()) if space.state == Space.State.SETUP else []
+    suggestions = (
+        list(space.membership_suggestions.all()) if space.state == Space.State.SETUP else []
+    )
+    from hover.actions_modules import get_module_catalog, installation_data
+
     return {
         "id": space.id,
         "name": space.name,
@@ -130,6 +151,10 @@ def get_space_data(space: Space) -> dict[str, Any]:
             }
             for suggestion in suggestions
         ],
+        "module_installations": [
+            installation_data(installation) for installation in space.module_installations.all()
+        ],
+        "module_catalog": get_module_catalog(space.realm),
     }
 
 

@@ -158,6 +158,65 @@ class HoverSpaceMembershipSuggestion(BaseModel):
     match_basis: Literal["verified_email", "verified_phone"]
 
 
+class HoverModuleRequirement(BaseModel):
+    id: int
+    key: str
+    capability: str
+    minimum_count: int
+    maximum_count: int
+
+
+class HoverModuleVersion(BaseModel):
+    id: int
+    definition_key: str
+    name: str
+    description: str
+    version: str
+    output_type: str
+    destination_topic: str
+    navigation_icon: str
+    navigation_order: int
+    content_hash: str
+    published_at: str
+    requirements: list[HoverModuleRequirement]
+    supported_triggers: list[Literal["manual", "new_source", "schedule"]]
+
+
+class HoverModuleBinding(BaseModel):
+    requirement_key: str
+    attachment_id: int
+
+
+class HoverModuleTrigger(BaseModel):
+    kind: Literal["manual", "new_source", "schedule"]
+    cadence: Literal["daily", "weekly"] | None
+    local_time: str | None
+    timezone: str | None
+    debounce_seconds: int | None
+
+
+class HoverModuleInstallation(BaseModel):
+    id: int
+    state: Literal["configured", "enabled", "disabled", "paused_detached"]
+    version_id: int
+    definition_key: str
+    name: str
+    version: str
+    output_type: str
+    destination_topic: str
+    navigation_icon: str
+    navigation_order: int
+    content_hash: str
+    activated_at: str | None
+    processing_start_at: str | None
+    activation_timezone: str
+    policy_revision: int
+    policy_hash: str
+    predecessor_id: int | None
+    bindings: list[HoverModuleBinding]
+    triggers: list[HoverModuleTrigger]
+
+
 class HoverSpace(BaseModel):
     id: int
     name: str
@@ -170,6 +229,8 @@ class HoverSpace(BaseModel):
     administrators: list[HoverSpaceAdministrator]
     memberships: list[HoverSpaceMembership]
     membership_suggestions: list[HoverSpaceMembershipSuggestion]
+    module_installations: list[HoverModuleInstallation]
+    module_catalog: list[HoverModuleVersion]
 
 
 class HoverSpaceAddEvent(BaseEvent):

@@ -22,9 +22,16 @@ from hover.views_connected_accounts import (
     upsert_connected_account_grant,
 )
 from hover.views_integrations import associate_integration_route, detach_integration_route
+from hover.views_modules import (
+    disable_module,
+    install_module,
+    list_module_catalog,
+    rebind_resume_module,
+    upgrade_module,
+)
 from hover.views_publications import resolve_generated_item_evidence
 from hover.views_source_records import browse_source_records
-from hover.views_sources import attach_source, discover_sources, preview_source
+from hover.views_sources import attach_source, detach_source, discover_sources, preview_source
 from hover.views_spaces import (
     add_space_administrator,
     confirm_space_member,
@@ -611,6 +618,14 @@ v1_api_and_json_patterns = [
     rest_path("hover/spaces/<int:space_id>/members", POST=confirm_space_member),
     rest_path("hover/spaces/<int:space_id>/members/<int:user_id>", DELETE=remove_space_member),
     rest_path("hover/spaces/<int:space_id>/launch", POST=launch_space),
+    rest_path("hover/modules", GET=list_module_catalog),
+    rest_path("hover/spaces/<int:space_id>/modules", POST=install_module),
+    rest_path("hover/module-installations/<int:installation_id>/disable", POST=disable_module),
+    rest_path("hover/module-installations/<int:installation_id>/upgrade", POST=upgrade_module),
+    rest_path(
+        "hover/module-installations/<int:installation_id>/rebind-resume",
+        POST=rebind_resume_module,
+    ),
     rest_path("hover/spaces/<int:space_id>/admins", POST=add_space_administrator),
     rest_path(
         "hover/spaces/<int:space_id>/admins/<int:user_id>",
@@ -625,6 +640,7 @@ v1_api_and_json_patterns = [
         POST=preview_source,
     ),
     rest_path("hover/spaces/<int:space_id>/sources", POST=attach_source),
+    rest_path("hover/spaces/<int:space_id>/sources/<int:attachment_id>", DELETE=detach_source),
     rest_path("hover/spaces/<int:space_id>/integration-routes", POST=associate_integration_route),
     rest_path(
         "hover/spaces/<int:space_id>/integration-routes/<int:route_id>",

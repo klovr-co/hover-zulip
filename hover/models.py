@@ -625,6 +625,283 @@ class IntegrationMessageProvenance(models.Model):
             raise ValidationError({"external_url": "Source links must use HTTPS."})
 
 
+module_key_validator = RegexValidator(
+    regex=r"^[a-z][a-z0-9_]{0,63}$",
+    message="Module keys must start with a letter and contain only lowercase letters, digits, and underscores.",
+)
+
+
+class ModuleDefinition(models.Model):
+    """The stable, realm-scoped identity of a reusable Hover Module."""
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_module_definitions")
+    stable_key = models.CharField(max_length=64, validators=[module_key_validator])
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=1024, default="")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["realm", "stable_key"], name="hover_module_definition_unique_key"
+            )
+        ]
+
+    def save(self, *args: object, **kwargs: object) -> None:
+        if self.pk is not None and self.versions.exists():
+            raise ValidationError("Published Module definitions are immutable.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args: object, **kwargs: object) -> tuple[int, dict[str, int]]:
+        if self.versions.exists():
+            raise ValidationError("Published Module definitions cannot be deleted.")
+        return super().delete(*args, **kwargs)
+
+
+class ModuleVersion(models.Model):
+    """An immutable published execution and presentation contract."""
+
+    definition = models.ForeignKey(ModuleDefinition, on_delete=RESTRICT, related_name="versions")
+    version = models.CharField(max_length=32)
+    output_type = models.CharField(max_length=32)
+    runtime_key = models.CharField(max_length=100)
+    prompt_key = models.CharField(max_length=100)
+    destination_topic = models.CharField(max_length=60)
+    navigation_icon = models.CharField(max_length=64, default="zulip-icon-sparkles")
+    navigation_order = models.PositiveSmallIntegerField()
+    content_hash = models.CharField(max_length=64)
+    published_by = models.ForeignKey(
+        UserProfile, null=True, on_delete=SET_NULL, related_name="published_hover_module_versions"
+    )
+    published_at = models.DateTimeField(default=timezone_now)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["definition", "version"], name="hover_module_version_unique_version"
+            ),
+            models.UniqueConstraint(
+                fields=["definition", "content_hash"], name="hover_module_version_unique_hash"
+            ),
+        ]
+
+    def save(self, *args: object, **kwargs: object) -> None:
+        if self.pk is not None and ModuleVersion.objects.filter(pk=self.pk).exists():
+            raise ValidationError("Published Module versions are immutable.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args: object, **kwargs: object) -> tuple[int, dict[str, int]]:
+        raise ValidationError("Published Module versions cannot be deleted.")
+
+    def clean(self) -> None:
+        super().clean()
+        if (
+            self.published_by_id is not None
+            and self.published_by.realm_id != self.definition.realm_id
+        ):
+            raise ValidationError(
+                {"published_by": "Module publishers must share the definition organization."}
+            )
+
+
+class ModuleSourceRequirement(models.Model):
+    version = models.ForeignKey(ModuleVersion, on_delete=RESTRICT, related_name="requirements")
+    key = models.CharField(max_length=64, validators=[module_key_validator])
+    capability = models.CharField(max_length=64, validators=[module_key_validator])
+    minimum_count = models.PositiveSmallIntegerField(default=1)
+    maximum_count = models.PositiveSmallIntegerField(default=1)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["version", "key"], name="hover_module_requirement_unique_key"
+            ),
+            models.CheckConstraint(
+                condition=Q(minimum_count__gte=1) & Q(maximum_count__gte=models.F("minimum_count")),
+                name="hover_module_requirement_valid_cardinality",
+            ),
+        ]
+
+    def save(self, *args: object, **kwargs: object) -> None:
+        if self.pk is not None and ModuleSourceRequirement.objects.filter(pk=self.pk).exists():
+            raise ValidationError("Published Module requirements are immutable.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args: object, **kwargs: object) -> tuple[int, dict[str, int]]:
+        raise ValidationError("Published Module requirements cannot be deleted.")
+
+
+class ModuleSupportedTrigger(models.Model):
+    class Kind(models.TextChoices):
+        MANUAL = "manual", "Manual"
+        NEW_SOURCE = "new_source", "New Source"
+        SCHEDULE = "schedule", "Schedule"
+
+    version = models.ForeignKey(
+        ModuleVersion, on_delete=RESTRICT, related_name="supported_triggers"
+    )
+    kind = models.TextField(choices=Kind.choices)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["version", "kind"], name="hover_module_supported_trigger_unique_kind"
+            )
+        ]
+
+    def save(self, *args: object, **kwargs: object) -> None:
+        if self.pk is not None and ModuleSupportedTrigger.objects.filter(pk=self.pk).exists():
+            raise ValidationError("Published Module triggers are immutable.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args: object, **kwargs: object) -> tuple[int, dict[str, int]]:
+        raise ValidationError("Published Module triggers cannot be deleted.")
+
+
+class SourceCapability(models.Model):
+    source = models.ForeignKey(Source, on_delete=CASCADE, related_name="capabilities")
+    capability = models.CharField(max_length=64, validators=[module_key_validator])
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source", "capability"], name="hover_source_capability_unique"
+            )
+        ]
+
+
+class ModuleInstallation(models.Model):
+    class State(models.TextChoices):
+        CONFIGURED = "configured", "Configured"
+        ENABLED = "enabled", "Enabled"
+        DISABLED = "disabled", "Disabled"
+        PAUSED_DETACHED = "paused_detached", "Paused after Source detach"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_module_installations")
+    space = models.ForeignKey(Space, on_delete=CASCADE, related_name="module_installations")
+    version = models.ForeignKey(ModuleVersion, on_delete=RESTRICT, related_name="installations")
+    state = models.TextField(choices=State.choices)
+    activation_timezone = models.CharField(max_length=SpaceAttachment.MAX_TIMEZONE_LENGTH)
+    activated_at = models.DateTimeField(null=True)
+    processing_start_at = models.DateTimeField(null=True)
+    backfill_confirmed = models.BooleanField(default=False)
+    policy_revision = models.PositiveIntegerField(default=1)
+    policy_hash = models.CharField(max_length=64)
+    configured_by = models.ForeignKey(
+        UserProfile, null=True, on_delete=SET_NULL, related_name="configured_hover_modules"
+    )
+    disabled_by = models.ForeignKey(
+        UserProfile,
+        null=True,
+        on_delete=SET_NULL,
+        related_name="disabled_hover_modules",
+    )
+    predecessor = models.OneToOneField(
+        "self", null=True, on_delete=RESTRICT, related_name="successor"
+    )
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(state="configured", activated_at__isnull=True)
+                    | Q(state="disabled")
+                    | Q(state__in=["enabled", "paused_detached"], activated_at__isnull=False)
+                ),
+                name="hover_module_installation_activation_matches_state",
+            ),
+            models.UniqueConstraint(
+                fields=["space", "version"],
+                condition=Q(state__in=["configured", "enabled", "paused_detached"]),
+                name="hover_module_installation_unique_current_version",
+            ),
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        if self.space_id is not None and self.realm_id != self.space.realm_id:
+            raise ValidationError(
+                {"space": "Module installations must share the Space organization."}
+            )
+        if self.version_id is not None and self.realm_id != self.version.definition.realm_id:
+            raise ValidationError(
+                {"version": "Module installations must use an organization Module version."}
+            )
+        if self.configured_by_id is not None and self.realm_id != self.configured_by.realm_id:
+            raise ValidationError(
+                {"configured_by": "Module installations must share the actor organization."}
+            )
+        if self.disabled_by_id is not None and self.realm_id != self.disabled_by.realm_id:
+            raise ValidationError(
+                {"disabled_by": "Module installations must share the actor organization."}
+            )
+
+
+class ModuleInstallationBinding(models.Model):
+    installation = models.ForeignKey(ModuleInstallation, on_delete=CASCADE, related_name="bindings")
+    requirement = models.ForeignKey(ModuleSourceRequirement, on_delete=RESTRICT)
+    attachment = models.ForeignKey(
+        SpaceAttachment, on_delete=RESTRICT, related_name="module_bindings"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["installation", "requirement", "attachment"],
+                name="hover_module_binding_unique_attachment",
+            )
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        if (
+            self.requirement_id is not None
+            and self.installation.version_id != self.requirement.version_id
+        ):
+            raise ValidationError(
+                {"requirement": "The requirement must belong to the pinned version."}
+            )
+        if (
+            self.attachment_id is not None
+            and self.installation.space_id != self.attachment.space_id
+        ):
+            raise ValidationError(
+                {"attachment": "The binding must use an attachment from its Space."}
+            )
+
+
+class ModuleInstallationTrigger(models.Model):
+    class Cadence(models.TextChoices):
+        DAILY = "daily", "Daily"
+        WEEKLY = "weekly", "Weekly"
+
+    installation = models.ForeignKey(ModuleInstallation, on_delete=CASCADE, related_name="triggers")
+    supported_trigger = models.ForeignKey(ModuleSupportedTrigger, on_delete=RESTRICT)
+    cadence = models.TextField(choices=Cadence.choices, null=True)
+    local_time = models.TimeField(null=True)
+    timezone = models.CharField(max_length=SpaceAttachment.MAX_TIMEZONE_LENGTH, default="")
+    debounce_seconds = models.PositiveIntegerField(null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["installation", "supported_trigger"],
+                name="hover_module_installation_trigger_unique_kind",
+            )
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        if (
+            self.supported_trigger_id is not None
+            and self.installation.version_id != self.supported_trigger.version_id
+        ):
+            raise ValidationError(
+                {"supported_trigger": "The trigger must belong to the pinned version."}
+            )
+
+
 class GeneratedItem(models.Model):
     class OutputType(models.TextChoices):
         FEED_UPDATE = "feed_update", "Feed update"

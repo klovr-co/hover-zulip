@@ -5,7 +5,7 @@ from django.http import HttpRequest, HttpResponse
 from django.utils.translation import gettext as _
 from pydantic import Field, Json, StringConstraints
 
-from hover.actions_sources import do_attach_source
+from hover.actions_sources import do_attach_source, do_detach_source
 from hover.clawer_sync import get_clawer_sync
 from hover.lib_connected_accounts import access_connected_account
 from hover.lib_sources import (
@@ -14,7 +14,12 @@ from hover.lib_sources import (
     get_actor_grant,
     get_attachment_data,
 )
-from hover.lib_spaces import access_space_by_id, get_space_data, user_is_space_administrator
+from hover.lib_spaces import (
+    access_space_by_id,
+    get_space_data,
+    space_projection_queryset,
+    user_is_space_administrator,
+)
 from hover.models import ConnectedAccountGrantSelector, SpaceAttachment
 from zerver.decorator import require_non_guest_user
 from zerver.lib.exceptions import JsonableError
@@ -137,5 +142,28 @@ def attach_source(
             "space": get_space_data(refreshed_space),
             "attachment": get_attachment_data(attachment),
             "created": created,
+        },
+    )
+
+
+@require_non_guest_user
+@typed_endpoint
+def detach_source(
+    request: HttpRequest,
+    user_profile: UserProfile,
+    *,
+    space_id: PathOnly[int],
+    attachment_id: PathOnly[int],
+) -> HttpResponse:
+    space = access_space_by_id(user_profile, space_id)
+    attachment, changed = do_detach_source(
+        acting_user=user_profile, space=space, attachment_id=attachment_id
+    )
+    return json_success(
+        request,
+        data={
+            "space": get_space_data(space_projection_queryset().get(id=space.id)),
+            "attachment_id": attachment.id,
+            "changed": changed,
         },
     )

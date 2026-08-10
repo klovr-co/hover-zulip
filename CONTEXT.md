@@ -49,6 +49,18 @@ whose active Integration Route captured it. It includes configured display
 metadata and an optional HTTPS link, never credentials or opaque adapter IDs.
 _Avoid_: Generated Item, raw webhook payload
 
+**Module Definition**:
+A realm-scoped stable identity for reusable Hover automation. Published Module
+Versions carry its execution and presentation contracts; changing those
+contracts never mutates the definition or an existing version.
+_Avoid_: Prompt, bot, mutable template
+
+**Module Installation**:
+A Space-owned, pinned use of one immutable published Module Version, with
+explicit attached-Source bindings, a supported structured trigger, and a
+bounded processing start. An upgrade creates a successor installation.
+_Avoid_: Latest Module, inferred Source, cron string
+
 **Space Membership Suggestion**:
 An internal, pending relationship inferred from an attached Source observation
 after a verified email or phone mapping resolves to an active teammate in the

@@ -4,6 +4,7 @@ from django.utils.translation import gettext as _
 from hover.lib_spaces import get_space_data, user_is_space_administrator
 from hover.models import (
     ConnectedAccount,
+    ModuleInstallation,
     Space,
     SpaceAdministrator,
     SpaceAttachment,
@@ -245,6 +246,35 @@ def do_launch_space(space: Space, *, acting_user: UserProfile) -> tuple[Space, b
     if Stream.objects.filter(realm=space.realm, name__iexact=space.name).exists():
         raise JsonableError(_("A channel already uses this Space name."))
 
+    configured_installations = list(
+        ModuleInstallation.objects.select_for_update(no_key=True)
+        .prefetch_related("bindings__attachment__source__capabilities", "version__requirements")
+        .filter(space=space, state=ModuleInstallation.State.CONFIGURED)
+    )
+    for installation in configured_installations:
+        bindings = list(installation.bindings.all())
+        requirements = list(installation.version.requirements.all())
+        if any(binding.attachment.state != SpaceAttachment.State.ACTIVE for binding in bindings):
+            raise JsonableError(_("A configured Module is bound to an inactive Source."))
+        for requirement in requirements:
+            matching_bindings = [
+                binding for binding in bindings if binding.requirement_id == requirement.id
+            ]
+            count = len(matching_bindings)
+            if not requirement.minimum_count <= count <= requirement.maximum_count:
+                raise JsonableError(
+                    _("A configured Module no longer satisfies Source requirements.")
+                )
+            if any(
+                requirement.capability
+                not in {
+                    capability.capability
+                    for capability in binding.attachment.source.capabilities.all()
+                }
+                for binding in matching_bindings
+            ):
+                raise JsonableError(_("A configured Module Source lost a required capability."))
+
     administrator_ids = {assignment.user_id for assignment in administrators}
     contributor_ids = {
         membership.user_id
@@ -291,6 +321,15 @@ def do_launch_space(space: Space, *, acting_user: UserProfile) -> tuple[Space, b
     space.stream = stream
     space.state = Space.State.LAUNCHED
     space.save(update_fields=["stream", "state", "date_updated"])
+    launch_time = space.date_updated
+    for installation in configured_installations:
+        installation.state = ModuleInstallation.State.ENABLED
+        installation.activated_at = launch_time
+        if installation.processing_start_at is None:
+            installation.processing_start_at = launch_time
+        installation.save(
+            update_fields=["state", "activated_at", "processing_start_at", "date_updated"]
+        )
     send_event_on_commit(
         space.realm,
         {"type": "hover_space", "op": "update", "space": get_space_data(space)},

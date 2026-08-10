@@ -33,6 +33,60 @@ export const hover_space_attachment_schema = z.object({
     ),
 });
 
+export const hover_module_version_schema = z.object({
+    id: z.number(),
+    definition_key: z.string(),
+    name: z.string(),
+    description: z.string(),
+    version: z.string(),
+    output_type: z.string(),
+    destination_topic: z.string(),
+    navigation_icon: z.string(),
+    navigation_order: z.number(),
+    content_hash: z.string(),
+    published_at: z.string(),
+    requirements: z.array(
+        z.object({
+            id: z.number(),
+            key: z.string(),
+            capability: z.string(),
+            minimum_count: z.number(),
+            maximum_count: z.number(),
+        }),
+    ),
+    supported_triggers: z.array(z.enum(["manual", "new_source", "schedule"])),
+});
+
+export const hover_module_installation_schema = z.object({
+    id: z.number(),
+    state: z.enum(["configured", "enabled", "disabled", "paused_detached"]),
+    version_id: z.number(),
+    definition_key: z.string(),
+    name: z.string(),
+    version: z.string(),
+    output_type: z.string(),
+    destination_topic: z.string(),
+    navigation_icon: z.string(),
+    navigation_order: z.number(),
+    content_hash: z.string(),
+    activated_at: z.nullable(z.string()),
+    processing_start_at: z.nullable(z.string()),
+    activation_timezone: z.string(),
+    policy_revision: z.number(),
+    policy_hash: z.string(),
+    predecessor_id: z.nullable(z.number()),
+    bindings: z.array(z.object({requirement_key: z.string(), attachment_id: z.number()})),
+    triggers: z.array(
+        z.object({
+            kind: z.enum(["manual", "new_source", "schedule"]),
+            cadence: z.nullable(z.enum(["daily", "weekly"])),
+            local_time: z.nullable(z.string()),
+            timezone: z.nullable(z.string()),
+            debounce_seconds: z.nullable(z.number()),
+        }),
+    ),
+});
+
 export const hover_space_schema = z.object({
     id: z.number(),
     name: z.string(),
@@ -68,6 +122,8 @@ export const hover_space_schema = z.object({
         ),
         [],
     ),
+    module_installations: z._default(z.array(hover_module_installation_schema), []),
+    module_catalog: z._default(z.array(hover_module_version_schema), []),
 });
 
 export const hover_spaces_response_schema = z.object({
@@ -76,15 +132,6 @@ export const hover_spaces_response_schema = z.object({
 
 export type HoverSpace = z.infer<typeof hover_space_schema>;
 export type HoverSource = z.infer<typeof hover_source_schema>;
-
-export const pilot_ai_modules = [
-    {key: "conversation_digest", name: "Conversation Digest", icon: "zulip-icon-align-left"},
-    {key: "progress_tracker", name: "Progress Tracker", icon: "zulip-icon-trending-up"},
-    {key: "suggested_actions", name: "Suggested Actions", icon: "zulip-icon-sparkles"},
-    {key: "decisions", name: "Decisions", icon: "zulip-icon-check-circle"},
-    {key: "marketing_digest", name: "Marketing Digest", icon: "zulip-icon-megaphone"},
-    {key: "topic_analysis", name: "Topic Analysis", icon: "zulip-icon-chart-bar"},
-] as const;
 
 let spaces_by_id = new Map<number, HoverSpace>();
 
@@ -167,4 +214,21 @@ export function get_sidebar_sources(space: HoverSpace): {
                 };
             },
         );
+}
+
+export function get_sidebar_modules(space: HoverSpace): {
+    key: string;
+    name: string;
+    icon: string;
+    topic: string;
+}[] {
+    return space.module_installations
+        .filter((installation) => installation.state === "enabled")
+        .toSorted((a, b) => a.navigation_order - b.navigation_order || a.id - b.id)
+        .map((installation) => ({
+            key: installation.definition_key,
+            name: installation.name,
+            icon: installation.navigation_icon,
+            topic: installation.destination_topic,
+        }));
 }

@@ -137,3 +137,52 @@ run_test("server-projected attachments become provider-neutral sidebar Sources",
         },
     ]);
 });
+
+run_test("server-owned enabled installations become Module navigation", () => {
+    const module_space = {
+        ...launched_space,
+        module_installations: [
+            {
+                id: 3,
+                state: "paused_detached",
+                definition_key: "decisions",
+                name: "Decisions",
+                destination_topic: "Decisions",
+                navigation_icon: "zulip-icon-check-circle",
+                navigation_order: 40,
+            },
+            {
+                id: 2,
+                state: "enabled",
+                definition_key: "suggested_actions",
+                name: "Suggested Actions",
+                destination_topic: "Suggested Actions",
+                navigation_icon: "zulip-icon-sparkles",
+                navigation_order: 30,
+            },
+            {
+                id: 1,
+                state: "enabled",
+                definition_key: "conversation_digest",
+                name: "Conversation Digest",
+                destination_topic: "Conversation Digest",
+                navigation_icon: "zulip-icon-align-left",
+                navigation_order: 10,
+            },
+        ],
+    };
+    assert.deepEqual(hover_spaces.get_sidebar_modules(module_space), [
+        {
+            key: "conversation_digest",
+            name: "Conversation Digest",
+            icon: "zulip-icon-align-left",
+            topic: "Conversation Digest",
+        },
+        {
+            key: "suggested_actions",
+            name: "Suggested Actions",
+            icon: "zulip-icon-sparkles",
+            topic: "Suggested Actions",
+        },
+    ]);
+});

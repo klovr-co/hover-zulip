@@ -17,9 +17,11 @@ from hover.models import (
     ConnectedAccount,
     ConnectedAccountGrant,
     Source,
+    SourceCapability,
     Space,
     SpaceAdministrator,
     SpaceAttachment,
+    SpaceMembership,
 )
 from zerver.lib.exceptions import ErrorCode, InvalidJSONError, JsonableError
 from zerver.models.realm_audit_logs import AuditLogEventType, RealmAuditLog
@@ -128,6 +130,7 @@ def _attach_canonical_source(
                 source.full_clean()
             except ValidationError as exc:
                 raise InvalidJSONError(str(exc))
+            SourceCapability.objects.create(source=source, capability="message_history")
         elif (
             source.provider_key != canonical_source.provider
             or source.source_type != canonical_source.source_type
@@ -146,6 +149,9 @@ def _attach_canonical_source(
         if attachment is not None:
             if not _same_semantic_window(attachment, boundary):
                 raise HistoryWindowConflictError
+            if attachment.state == SpaceAttachment.State.DETACHED:
+                attachment.state = SpaceAttachment.State.ACTIVE
+                attachment.save(update_fields=["state", "date_updated"])
             return attachment, False
 
         attachment = SpaceAttachment.objects.create(
@@ -237,3 +243,42 @@ def do_attach_source(
         canonical_source=canonical_source,
         boundary=boundary,
     )
+
+
+@transaction.atomic(durable=True)
+def do_detach_source(
+    *, acting_user: UserProfile, space: Space, attachment_id: int
+) -> tuple[SpaceAttachment, bool]:
+    locked_space = Space.objects.select_for_update(no_key=True).get(id=space.id)
+    _assert_space_administrator(acting_user=acting_user, space=locked_space)
+    try:
+        attachment = (
+            SpaceAttachment.objects.select_for_update(no_key=True, of=("self",))
+            .select_related("source__account")
+            .get(id=attachment_id, space=locked_space)
+        )
+    except SpaceAttachment.DoesNotExist:
+        raise JsonableError(_("Invalid Space attachment."))
+    get_actor_grant(acting_user, attachment.source.account)
+    if attachment.state == SpaceAttachment.State.DETACHED:
+        return attachment, False
+    attachment.state = SpaceAttachment.State.DETACHED
+    attachment.save(update_fields=["state", "date_updated"])
+    from hover.actions_modules import pause_installations_for_attachment
+
+    pause_installations_for_attachment(attachment)
+    projected_space = Space.objects.get(id=locked_space.id)
+    send_event_on_commit(
+        locked_space.realm,
+        {"type": "hover_space", "op": "update", "space": get_space_data(projected_space)},
+        (
+            _space_administrator_ids(locked_space)
+            if locked_space.state == Space.State.SETUP
+            else list(
+                SpaceMembership.objects.filter(
+                    space=locked_space, user__is_active=True
+                ).values_list("user_id", flat=True)
+            )
+        ),
+    )
+    return attachment, True
