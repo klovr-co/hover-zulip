@@ -951,6 +951,7 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
     const hover_space = realm.realm_hover_enabled
         ? hover_spaces.get_by_stream_id(sub.stream_id)
         : undefined;
+    const hover_ai_modules = hover_space ? hover_spaces.get_sidebar_modules(hover_space) : [];
     const aggregate_url = hash_util.by_stream_url(sub.stream_id);
     const url = hover_space ? aggregate_url : hash_util.channel_url_by_user_setting(sub.stream_id);
     const args = {
@@ -971,7 +972,8 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
         ...(hover_space && {
             is_hover_space: true,
             hover_space,
-            hover_ai_modules: hover_spaces.get_sidebar_modules(hover_space).map((hover_module) => ({
+            has_hover_ai_modules: hover_ai_modules.length > 0,
+            hover_ai_modules: hover_ai_modules.map((hover_module) => ({
                 ...hover_module,
                 url: hash_util.by_stream_topic_url(sub.stream_id, hover_module.topic),
             })),

@@ -347,6 +347,7 @@ test_ui("AIMTO modules are native topic links", ({mock_template, override}) => {
     mock_template("stream_sidebar_row.hbs", false, (data) => {
         assert.equal(data.url, "#narrow/channel/222-AIMTO-Events");
         assert.equal(data.hover_ai_modules.length, 2);
+        assert.equal(data.has_hover_ai_modules, true);
         assert.equal(
             data.hover_ai_modules[0].url,
             "#narrow/channel/222-AIMTO-Events/topic/Conversation.20Digest",
