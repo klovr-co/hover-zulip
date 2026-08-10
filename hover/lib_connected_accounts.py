@@ -90,6 +90,8 @@ def get_connected_account_data(account: ConnectedAccount) -> dict[str, Any]:
         "provider_name": account.provider_name,
         "external_account_id": str(account.external_account_id),
         "display_name": account.display_name,
+        "connection_kind": account.connection_kind,
+        "incoming_webhook_bot_id": account.incoming_webhook_bot_id,
         "created_by_id": account.created_by_id,
         "owner_id": account.owner_id,
         "approval_state": account.approval_state,

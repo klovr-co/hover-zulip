@@ -21,6 +21,8 @@ export const connected_account_schema = z.object({
     provider_name: z.string(),
     external_account_id: z.string(),
     display_name: z.string(),
+    connection_kind: z.enum(["remote_studio", "native_integration"]),
+    incoming_webhook_bot_id: z.nullable(z.number()),
     created_by_id: z.nullable(z.number()),
     owner_id: z.nullable(z.number()),
     approval_state: z.enum(["pending", "approved", "revoked"]),

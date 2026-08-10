@@ -13,6 +13,8 @@ const account = {
     provider_name: "WhatsApp",
     external_account_id: "d38c68c4-d70f-44ec-a17e-c7c845f91c03",
     display_name: "Founder conversations",
+    connection_kind: "remote_studio",
+    incoming_webhook_bot_id: null,
     created_by_id: 10,
     owner_id: 10,
     approval_state: "approved",

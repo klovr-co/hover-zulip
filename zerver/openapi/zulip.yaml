@@ -9059,6 +9059,7 @@ paths:
                                 display_recipient: {}
                                 edit_history: {}
                                 hover_generated_item: {}
+                                hover_source_provenance: {}
                                 id: {}
                                 is_me_message: {}
                                 last_edit_timestamp: {}
@@ -10451,6 +10452,7 @@ paths:
                               display_recipient: {}
                               edit_history: {}
                               hover_generated_item: {}
+                              hover_source_provenance: {}
                               id: {}
                               is_me_message: {}
                               last_edit_timestamp: {}
@@ -27323,6 +27325,7 @@ paths:
                           display_recipient: {}
                           edit_history: {}
                           hover_generated_item: {}
+                          hover_source_provenance: {}
                           id: {}
                           is_me_message: {}
                           last_edit_timestamp: {}
@@ -29283,6 +29286,7 @@ components:
             display_recipient: {}
             edit_history: {}
             hover_generated_item: {}
+            hover_source_provenance: {}
             id: {}
             is_me_message: {}
             last_edit_timestamp: {}
@@ -29544,6 +29548,44 @@ components:
             - source_summary
             - evidence_available
             - sources
+        hover_source_provenance:
+          type: object
+          additionalProperties: false
+          description: |
+            Safe, immutable Source metadata captured for a message sent through
+            an active Hover native integration route. Omitted for messages sent
+            before association, after detachment, or outside the exact route.
+          properties:
+            captured_at:
+              type: string
+              format: date-time
+            source:
+              type: object
+              additionalProperties: false
+              properties:
+                id:
+                  type: integer
+                provider_key:
+                  type: string
+                provider_name:
+                  type: string
+                source_type:
+                  type: string
+                display_name:
+                  type: string
+                external_url:
+                  type: string
+                  description: An HTTPS Source link, or an empty string.
+              required:
+                - id
+                - provider_key
+                - provider_name
+                - source_type
+                - display_name
+                - external_url
+          required:
+            - captured_at
+            - source
         is_me_message:
           type: boolean
           description: |

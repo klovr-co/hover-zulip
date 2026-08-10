@@ -36,6 +36,19 @@ within its approved history boundary. Hover exposes only safe display fields
 and never stores the provider record or turns browsing into a Zulip message.
 _Avoid_: Imported message, raw provider event, synced chat
 
+**Integration Route**:
+An explicitly configured live association between one dedicated native incoming
+webhook bot, the exact channel of a launched Space, and one Space Attachment.
+It labels only messages received while the route is active; it never backfills
+earlier messages.
+_Avoid_: Webhook credential, historical import, provider-specific route
+
+**Source Provenance**:
+An immutable, safe snapshot linking a native integration Message to the Source
+whose active Integration Route captured it. It includes configured display
+metadata and an optional HTTPS link, never credentials or opaque adapter IDs.
+_Avoid_: Generated Item, raw webhook payload
+
 **Space Membership Suggestion**:
 An internal, pending relationship inferred from an attached Source observation
 after a verified email or phone mapping resolves to an active teammate in the

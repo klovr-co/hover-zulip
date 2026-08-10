@@ -567,6 +567,47 @@ test("hover_generated_update_vars", () => {
     assert.equal(human_post.hover_source_integrations, undefined);
 });
 
+test("native integration messages keep normal chrome and show Source provenance", () => {
+    const list = new MessageListView({id: 1}, true, true);
+    const message = list.get_calculated_message_container_variables(
+        {
+            content: "<p>New Instagram mention from Apify</p>",
+            sender_email: "apify-bot@example.com",
+            sender_id: 10,
+            stream_id: 42,
+            topic: "Instagram",
+            type: "stream",
+            hover_source_provenance: {
+                captured_at: "2026-08-11T00:00:00+00:00",
+                source: {
+                    id: 81,
+                    provider_key: "instagram",
+                    provider_name: "Instagram",
+                    source_type: "profile_events",
+                    display_name: "AIMTO Instagram",
+                    external_url: "https://www.instagram.com/aimto.my/",
+                },
+            },
+        },
+        true,
+        false,
+    );
+
+    assert.equal(message.is_hover_generated_update, false);
+    assert.equal(message.has_hover_source_integrations, true);
+    assert.deepEqual(message.hover_source_integrations, [
+        {
+            key: "instagram",
+            name: "Instagram: AIMTO Instagram",
+            icon_class: "zulip-icon zulip-icon-link",
+            count: 1,
+            url: "https://www.instagram.com/aimto.my/",
+        },
+    ]);
+    assert.equal(message.hover_module_name, undefined);
+    assert.equal(message.hover_source_context, undefined);
+});
+
 test("hover_generated_update_renders_native_card_chrome", () => {
     const list = new MessageListView({id: 1}, true, true);
     assert.ok(list);

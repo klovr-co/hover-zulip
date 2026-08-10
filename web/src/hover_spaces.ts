@@ -3,8 +3,11 @@ import * as z from "zod/mini";
 export const hover_source_schema = z.object({
     id: z.number(),
     provider_key: z.string(),
+    provider_name: z.string(),
     source_type: z.string(),
     display_name: z.string(),
+    external_url: z.string(),
+    supports_live_capture: z.boolean(),
     account_id: z.number(),
     account_display_name: z.string(),
 });
@@ -18,6 +21,16 @@ export const hover_space_attachment_schema = z.object({
     custom_start_date: z.nullable(z.string()),
     can_browse_records: z.boolean(),
     source: hover_source_schema,
+    integration_routes: z.array(
+        z.object({
+            id: z.number(),
+            state: z.literal("active"),
+            bot_user_id: z.number(),
+            bot_name: z.string(),
+            stream_id: z.number(),
+            live_since: z.string(),
+        }),
+    ),
 });
 
 export const hover_space_schema = z.object({
@@ -119,7 +132,8 @@ export function get_sidebar_sources(space: HoverSpace): {
     name: string;
     detail: string;
     icon_class: string;
-    is_external: false;
+    is_external: boolean;
+    url?: string;
     attachment_id: number;
     can_browse_records: boolean;
     is_history_retained: boolean;
@@ -130,16 +144,27 @@ export function get_sidebar_sources(space: HoverSpace): {
             can_browse_records: attachment.can_browse_records,
             is_history_retained: attachment.state === "detached",
             source: attachment.source,
+            integration_routes: attachment.integration_routes,
         }))
-        .map(({attachment_id, can_browse_records, is_history_retained, source}) => ({
-            key: source.provider_key,
-            source_key: String(source.id),
-            name: source.display_name,
-            detail: `${source.account_display_name} · ${source.source_type}`,
-            icon_class: source.provider_key === "whatsapp" ? "fa fa-whatsapp" : "fa fa-plug",
-            is_external: false,
-            attachment_id,
-            can_browse_records,
-            is_history_retained,
-        }));
+        .map(
+            ({attachment_id, can_browse_records, is_history_retained, source, integration_routes}) => {
+                const is_external = !can_browse_records && source.external_url !== "";
+                return {
+                    key: source.provider_key,
+                    source_key: String(source.id),
+                    name: source.display_name,
+                    detail:
+                        integration_routes.length > 0
+                            ? `${source.provider_name} · Live since ${new Date(integration_routes[0]!.live_since).toLocaleDateString()}`
+                            : `${source.account_display_name} · ${source.source_type}`,
+                    icon_class:
+                        source.provider_key === "whatsapp" ? "fa fa-whatsapp" : "fa fa-plug",
+                    is_external,
+                    ...(is_external && {url: source.external_url}),
+                    attachment_id,
+                    can_browse_records,
+                    is_history_retained,
+                };
+            },
+        );
 }

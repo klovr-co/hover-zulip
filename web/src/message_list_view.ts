@@ -707,7 +707,20 @@ export class MessageListView {
 
         const is_hover_generated_update = hover.is_generated_update(message);
         const hover_generated_item = message.hover_generated_item;
-        const hover_source_integrations = hover_generated_item?.sources ?? [];
+        const hover_source_provenance = message.hover_source_provenance;
+        const hover_source_integrations =
+            hover_generated_item?.sources ??
+            (hover_source_provenance === undefined
+                ? []
+                : [
+                      {
+                          key: hover_source_provenance.source.provider_key,
+                          name: `${hover_source_provenance.source.provider_name}: ${hover_source_provenance.source.display_name}`,
+                          icon_class: "zulip-icon zulip-icon-link",
+                          count: 1,
+                          url: hover_source_provenance.source.external_url,
+                      },
+                  ]);
         const hover_module = hover_generated_item?.module;
 
         return {

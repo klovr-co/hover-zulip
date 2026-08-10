@@ -9,7 +9,14 @@ from django.utils.timezone import now as timezone_now
 from django.utils.translation import gettext as _
 
 from hover.clawer_sync import MAX_DISCOVERY_LIMIT, ClawerSource, ClawerSync, ClawerSyncError
-from hover.models import ConnectedAccount, ConnectedAccountGrant, Source, Space, SpaceAttachment
+from hover.models import (
+    ConnectedAccount,
+    ConnectedAccountGrant,
+    IntegrationRouteAssociation,
+    Source,
+    Space,
+    SpaceAttachment,
+)
 from zerver.lib.exceptions import JsonableError, ResourceNotFoundError
 from zerver.models.users import UserProfile
 
@@ -32,6 +39,16 @@ def attachment_queryset() -> Prefetch:
             state__in=[SpaceAttachment.State.ACTIVE, SpaceAttachment.State.DETACHED]
         )
         .select_related("source", "source__account")
+        .prefetch_related(
+            Prefetch(
+                "integration_routes",
+                queryset=IntegrationRouteAssociation.objects.filter(
+                    state=IntegrationRouteAssociation.State.ACTIVE
+                )
+                .select_related("bot", "stream")
+                .order_by("id"),
+            )
+        )
         .order_by("source__display_name", "id"),
     )
 
@@ -40,14 +57,29 @@ def get_source_data(source: Source) -> dict[str, Any]:
     return {
         "id": source.id,
         "provider_key": source.provider_key,
+        "provider_name": source.provider_name,
         "source_type": source.source_type,
         "display_name": source.display_name,
+        "external_url": source.external_url,
+        "supports_live_capture": source.supports_live_capture,
         "account_id": source.account_id,
         "account_display_name": source.account.display_name,
     }
 
 
 def get_attachment_data(attachment: SpaceAttachment) -> dict[str, Any]:
+    routes = [
+        {
+            "id": route.id,
+            "state": route.state,
+            "bot_user_id": route.bot_id,
+            "bot_name": route.bot.full_name,
+            "stream_id": route.stream_id,
+            "live_since": route.live_since.isoformat(),
+        }
+        for route in attachment.integration_routes.all()
+        if route.state == IntegrationRouteAssociation.State.ACTIVE
+    ]
     return {
         "id": attachment.id,
         "state": attachment.state,
@@ -64,6 +96,7 @@ def get_attachment_data(attachment: SpaceAttachment) -> dict[str, Any]:
             and attachment.state in [SpaceAttachment.State.ACTIVE, SpaceAttachment.State.DETACHED]
         ),
         "source": get_source_data(attachment.source),
+        "integration_routes": routes,
     }
 
 

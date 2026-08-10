@@ -118,6 +118,7 @@ def _attach_canonical_source(
             defaults={
                 "adapter_key": "clawer_sync",
                 "provider_key": canonical_source.provider,
+                "provider_name": locked_account.provider_name,
                 "source_type": canonical_source.source_type,
                 "display_name": canonical_source.display_name,
             },

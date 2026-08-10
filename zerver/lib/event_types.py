@@ -106,10 +106,22 @@ class HoverSpaceCategory(BaseModel):
 class HoverSpaceSource(BaseModel):
     id: int
     provider_key: str
+    provider_name: str
     source_type: str
     display_name: str
+    external_url: str
+    supports_live_capture: bool
     account_id: int
     account_display_name: str
+
+
+class HoverIntegrationRoute(BaseModel):
+    id: int
+    state: Literal["active"]
+    bot_user_id: int
+    bot_name: str
+    stream_id: int
+    live_since: str
 
 
 class HoverSpaceAttachment(BaseModel):
@@ -121,6 +133,7 @@ class HoverSpaceAttachment(BaseModel):
     custom_start_date: str | None
     can_browse_records: bool
     source: HoverSpaceSource
+    integration_routes: list[HoverIntegrationRoute]
 
 
 class HoverSpaceAdministrator(BaseModel):
@@ -183,6 +196,8 @@ class HoverConnectedAccount(BaseModel):
     provider_name: str
     external_account_id: str
     display_name: str
+    connection_kind: Literal["remote_studio", "native_integration"]
+    incoming_webhook_bot_id: int | None
     created_by_id: int | None
     owner_id: int | None
     approval_state: Literal["pending", "approved", "revoked"]
@@ -297,6 +312,20 @@ class HoverGeneratedItem(BaseModel):
     sources: list[HoverGeneratedSource]
 
 
+class HoverProvenanceSource(BaseModel):
+    id: int
+    provider_key: str
+    provider_name: str
+    source_type: str
+    display_name: str
+    external_url: str
+
+
+class HoverSourceProvenance(BaseModel):
+    captured_at: str
+    source: HoverProvenanceSource
+
+
 class DirectMessageDisplayRecipient(BaseModel):
     id: int
     is_mirror_dummy: bool
@@ -324,6 +353,7 @@ class MessageFieldForDirectMessageEvent(BaseModel):
     type: str
     display_recipient: list[DirectMessageDisplayRecipient]
     hover_generated_item: HoverGeneratedItem | None = None
+    hover_source_provenance: HoverSourceProvenance | None = None
 
 
 class DirectMessageEvent(BaseEvent):
@@ -402,6 +432,7 @@ class MessageFieldForMessageEvent(BaseModel):
     display_recipient: str
     stream_id: int
     hover_generated_item: HoverGeneratedItem | None = None
+    hover_source_provenance: HoverSourceProvenance | None = None
 
 
 class MessageEvent(BaseEvent):

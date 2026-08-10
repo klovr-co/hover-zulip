@@ -981,7 +981,7 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
                 ...source,
                 url: source.can_browse_records
                     ? hash_util.hover_source_url(hover_space.id, source.attachment_id)
-                    : aggregate_url,
+                    : (source.url ?? aggregate_url),
             })),
         }),
     };

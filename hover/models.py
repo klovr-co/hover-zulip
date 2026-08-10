@@ -223,11 +223,25 @@ class ConnectedAccount(models.Model):
         DEGRADED = "degraded", "Degraded"
         UNAVAILABLE = "unavailable", "Unavailable"
 
+    class ConnectionKind(models.TextChoices):
+        REMOTE_STUDIO = "remote_studio", "Remote Studio"
+        NATIVE_INTEGRATION = "native_integration", "Native integration"
+
     realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_connected_accounts")
     provider_key = models.CharField(max_length=32, validators=[provider_key_validator])
     provider_name = models.CharField(max_length=MAX_PROVIDER_NAME_LENGTH)
     external_account_id = models.UUIDField()
     display_name = models.CharField(max_length=MAX_DISPLAY_NAME_LENGTH)
+    connection_kind = models.TextField(
+        choices=ConnectionKind.choices, default=ConnectionKind.REMOTE_STUDIO
+    )
+    incoming_webhook_bot = models.OneToOneField(
+        UserProfile,
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="hover_connected_account",
+    )
     created_by = models.ForeignKey(
         UserProfile,
         null=True,
@@ -264,6 +278,25 @@ class ConnectedAccount(models.Model):
             raise ValidationError(
                 {"owner": "Connected Accounts and owners must share an organization."}
             )
+        if self.connection_kind == self.ConnectionKind.REMOTE_STUDIO:
+            if self.incoming_webhook_bot_id is not None:
+                raise ValidationError(
+                    {"incoming_webhook_bot": "Remote Studio accounts cannot use a local bot."}
+                )
+        elif self.connection_kind == self.ConnectionKind.NATIVE_INTEGRATION:
+            bot = self.incoming_webhook_bot
+            if bot is None or bot.realm_id != self.realm_id:
+                raise ValidationError(
+                    {"incoming_webhook_bot": "Native integration bots must share the organization."}
+                )
+            if (
+                not bot.is_active
+                or not bot.is_bot
+                or bot.bot_type != UserProfile.INCOMING_WEBHOOK_BOT
+            ):
+                raise ValidationError(
+                    {"incoming_webhook_bot": "Choose an active incoming webhook bot."}
+                )
 
 
 class ConnectedAccountGrant(models.Model):
@@ -354,6 +387,9 @@ class Source(models.Model):
         validators=[source_ref_validator],
     )
     display_name = models.CharField(max_length=MAX_DISPLAY_NAME_LENGTH)
+    provider_name = models.CharField(max_length=ConnectedAccount.MAX_PROVIDER_NAME_LENGTH)
+    external_url = models.URLField(blank=True)
+    supports_live_capture = models.BooleanField(default=False)
     date_created = models.DateTimeField(default=timezone_now)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -369,6 +405,15 @@ class Source(models.Model):
         super().clean()
         if self.account_id is not None and self.account.realm_id != self.realm_id:
             raise ValidationError({"account": "Sources and accounts must share an organization."})
+        if self.external_url and not self.external_url.startswith("https://"):
+            raise ValidationError({"external_url": "Source links must use HTTPS."})
+        if (
+            self.supports_live_capture
+            and self.account.connection_kind != ConnectedAccount.ConnectionKind.NATIVE_INTEGRATION
+        ):
+            raise ValidationError(
+                {"supports_live_capture": "Live capture requires a native integration account."}
+            )
 
 
 class SpaceAttachment(models.Model):
@@ -468,6 +513,116 @@ class SpaceAttachment(models.Model):
                     "detached_by": "Space attachments and detaching actors must share an organization."
                 }
             )
+
+
+class IntegrationRouteAssociation(models.Model):
+    class State(models.TextChoices):
+        ACTIVE = "active", "Active"
+        DETACHED = "detached", "Detached"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    attachment = models.ForeignKey(
+        SpaceAttachment, on_delete=RESTRICT, related_name="integration_routes"
+    )
+    bot = models.ForeignKey(
+        UserProfile, on_delete=RESTRICT, related_name="hover_integration_routes"
+    )
+    stream = models.ForeignKey(Stream, on_delete=RESTRICT, related_name="hover_integration_routes")
+    state = models.TextField(choices=State.choices, default=State.ACTIVE)
+    configured_by = models.ForeignKey(
+        UserProfile,
+        null=True,
+        on_delete=SET_NULL,
+        related_name="configured_hover_integration_routes",
+    )
+    live_since = models.DateTimeField(default=timezone_now)
+    detached_at = models.DateTimeField(null=True)
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["attachment"],
+                condition=Q(state="active"),
+                name="hover_route_unique_active_attachment",
+            ),
+            models.UniqueConstraint(
+                fields=["bot"],
+                condition=Q(state="active"),
+                name="hover_route_unique_active_bot",
+            ),
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        if self.attachment_id is not None and self.attachment.realm_id != self.realm_id:
+            raise ValidationError({"attachment": "Integration routes must share the organization."})
+        if self.bot_id is not None and self.bot.realm_id != self.realm_id:
+            raise ValidationError({"bot": "Integration routes must share the organization."})
+        if self.stream_id is not None and self.stream.realm_id != self.realm_id:
+            raise ValidationError({"stream": "Integration routes must share the organization."})
+        if self.configured_by_id is not None and self.configured_by.realm_id != self.realm_id:
+            raise ValidationError(
+                {"configured_by": "Integration routes and actors must share an organization."}
+            )
+        if (
+            self.attachment_id is not None
+            and self.stream_id is not None
+            and self.attachment.space.stream_id != self.stream_id
+        ):
+            raise ValidationError({"stream": "Use the attached Space destination."})
+        if self.bot_id is not None and (
+            not self.bot.is_active
+            or not self.bot.is_bot
+            or self.bot.bot_type != UserProfile.INCOMING_WEBHOOK_BOT
+        ):
+            raise ValidationError({"bot": "Choose an active incoming webhook bot."})
+        if self.attachment_id is not None and self.bot_id is not None:
+            source = self.attachment.source
+            if (
+                source.account.connection_kind != ConnectedAccount.ConnectionKind.NATIVE_INTEGRATION
+                or source.account.incoming_webhook_bot_id != self.bot_id
+                or not source.supports_live_capture
+            ):
+                raise ValidationError({"bot": "Use the bot configured for this native Source."})
+
+
+class IntegrationMessageProvenance(models.Model):
+    message = models.OneToOneField(
+        Message, on_delete=CASCADE, related_name="hover_source_provenance"
+    )
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    association = models.ForeignKey(
+        IntegrationRouteAssociation, on_delete=RESTRICT, related_name="message_provenance"
+    )
+    attachment = models.ForeignKey(
+        SpaceAttachment, on_delete=RESTRICT, related_name="message_provenance"
+    )
+    source = models.ForeignKey(Source, on_delete=RESTRICT, related_name="message_provenance")
+    captured_at = models.DateTimeField(default=timezone_now)
+    provider_key = models.CharField(max_length=Source.MAX_PROVIDER_KEY_LENGTH)
+    provider_name = models.CharField(max_length=ConnectedAccount.MAX_PROVIDER_NAME_LENGTH)
+    source_type = models.CharField(max_length=Source.MAX_SOURCE_TYPE_LENGTH)
+    display_name = models.CharField(max_length=Source.MAX_DISPLAY_NAME_LENGTH)
+    external_url = models.URLField(blank=True)
+
+    def clean(self) -> None:
+        super().clean()
+        related_realms = {
+            self.message.realm_id,
+            self.association.realm_id,
+            self.attachment.realm_id,
+            self.source.realm_id,
+        }
+        if related_realms != {self.realm_id}:
+            raise ValidationError("Message provenance must share one organization.")
+        if self.association.attachment_id != self.attachment_id:
+            raise ValidationError({"attachment": "Provenance must use the route attachment."})
+        if self.attachment.source_id != self.source_id:
+            raise ValidationError({"source": "Provenance must use the attached Source."})
+        if self.external_url and not self.external_url.startswith("https://"):
+            raise ValidationError({"external_url": "Source links must use HTTPS."})
 
 
 class GeneratedItem(models.Model):

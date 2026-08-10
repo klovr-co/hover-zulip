@@ -110,6 +110,8 @@ def do_create_connected_account(
     display_name: str,
     created_by: UserProfile,
     owner: UserProfile,
+    connection_kind: str = ConnectedAccount.ConnectionKind.REMOTE_STUDIO,
+    incoming_webhook_bot: UserProfile | None = None,
 ) -> ConnectedAccount:
     _check_grantee(created_by, realm)
     _check_grantee(owner, realm)
@@ -121,6 +123,8 @@ def do_create_connected_account(
         display_name=display_name.strip(),
         created_by=created_by,
         owner=owner,
+        connection_kind=connection_kind,
+        incoming_webhook_bot=incoming_webhook_bot,
     )
     if ConnectedAccount.objects.filter(
         realm=realm,

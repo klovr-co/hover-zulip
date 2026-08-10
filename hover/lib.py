@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import Any
 
-from hover.models import GeneratedItem
+from hover.models import GeneratedItem, IntegrationMessageProvenance
 
 PROVIDER_ICON_CLASSES = {
     "whatsapp": "fa fa-whatsapp",
@@ -68,3 +68,26 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
         metadata = metadata_by_message_id.get(message["id"])
         if metadata is not None:
             message["hover_generated_item"] = metadata
+
+    provenance_by_message_id = {
+        provenance.message_id: {
+            "captured_at": provenance.captured_at.isoformat(),
+            "source": {
+                "id": provenance.source_id,
+                "provider_key": provenance.provider_key,
+                "provider_name": provenance.provider_name,
+                "source_type": provenance.source_type,
+                "display_name": provenance.display_name,
+                "external_url": provenance.external_url,
+            },
+        }
+        for provenance in IntegrationMessageProvenance.objects.filter(
+            realm_id=realm_id,
+            message_id__in=message_ids,
+            message__realm_id=realm_id,
+        )
+    }
+    for message in message_dicts:
+        provenance = provenance_by_message_id.get(message["id"])
+        if provenance is not None:
+            message["hover_source_provenance"] = provenance

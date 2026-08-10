@@ -76,6 +76,20 @@ const hover_generated_item_schema = z.object({
 
 export type HoverGeneratedItem = z.infer<typeof hover_generated_item_schema>;
 
+const hover_source_provenance_schema = z.object({
+    captured_at: z.string(),
+    source: z.object({
+        id: z.number(),
+        provider_key: z.string(),
+        provider_name: z.string(),
+        source_type: z.string(),
+        display_name: z.string(),
+        external_url: z.string(),
+    }),
+});
+
+export type HoverSourceProvenance = z.infer<typeof hover_source_provenance_schema>;
+
 export type MessageReaction = z.infer<typeof message_reaction_schema>;
 
 export const single_message_content_schema = z.object({
@@ -117,6 +131,7 @@ export const raw_message_schema = z.intersection(
             sender_full_name: z.string(),
             sender_id: z.number(),
             hover_generated_item: z.optional(hover_generated_item_schema),
+            hover_source_provenance: z.optional(hover_source_provenance_schema),
             // The web app doesn't use sender_realm_str; ignore.
             // sender_realm_str: z.string(),
             submessages: z.array(submessage_schema),
@@ -192,6 +207,7 @@ export type Message = (
 ) & {
     clean_reactions: Map<string, MessageCleanReaction>;
     hover_generated_item?: HoverGeneratedItem | undefined;
+    hover_source_provenance?: HoverSourceProvenance | undefined;
 
     // Local echo state cluster of fields.
     locally_echoed?: boolean;
