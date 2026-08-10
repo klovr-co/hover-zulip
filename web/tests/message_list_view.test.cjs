@@ -505,7 +505,9 @@ test("hover_generated_update_vars", () => {
         content:
             '<p>Event readiness update</p><ul><li><strong>WhatsApp · Mentors</strong></li><li><a href="https://github.com/ashvinpraveen/learnaimto">GitHub · LearnAIMTO</a></li><li><a href="https://www.instagram.com/aimto_26/">Instagram · @aimto_26</a></li></ul>',
         sender_id: 10,
-        type: "private",
+        stream_id: 42,
+        topic: "Marketing Digest",
+        type: "stream",
     };
 
     const hover_update = list.get_calculated_message_container_variables(
@@ -525,6 +527,8 @@ test("hover_generated_update_vars", () => {
         ["WhatsApp", "GitHub", "Instagram"],
     );
     assert.equal(hover_update.has_hover_source_integrations, true);
+    assert.equal(hover_update.hover_module_key, "marketing_digest");
+    assert.equal(hover_update.hover_module_name, "Marketing Digest");
     assert.equal(hover_update.hover_source_context, "Across 3 sources");
     assert.equal(human_post.is_hover_generated_update, false);
     assert.equal(human_post.has_hover_source_integrations, false);
@@ -538,6 +542,8 @@ test("hover_generated_update_renders_native_card_chrome", () => {
         include_sender: false,
         is_hover_generated_update: true,
         has_hover_source_integrations: true,
+        hover_module_key: "progress_tracker",
+        hover_module_name: "Progress Tracker",
         hover_source_context: "Across 4 sources",
         hover_source_integrations: [
             {
@@ -568,7 +574,8 @@ test("hover_generated_update_renders_native_card_chrome", () => {
     });
 
     assert.match(html, /class="[^"]*hover-generated-update[^"]*"/);
-    assert.match(html, />translated: AI update</);
+    assert.match(html, /class="[^"]*hover-module--progress_tracker[^"]*"/);
+    assert.match(html, />Progress Tracker<\/span>/);
     assert.match(html, />Across 4 sources</);
     assert.match(html, /Event readiness update/);
     assert.match(html, /fa-whatsapp/);

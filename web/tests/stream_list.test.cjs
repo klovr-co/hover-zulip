@@ -245,6 +245,54 @@ test_ui("create_sidebar_row", ({override, override_rewire, mock_template}) => {
     assert.ok(removed);
 });
 
+test_ui("AIMTO modules are native topic links", ({mock_template}) => {
+    const aimto = make_stream({
+        name: "AIMTO Events",
+        stream_id: 222,
+        color: "blue",
+        subscribed: true,
+        is_recently_active: true,
+        can_create_topic_group: everyone_group.id,
+        can_send_message_group: everyone_group.id,
+    });
+    stream_data.add_sub_for_tests(aimto);
+
+    const $row = $("<aimto-sidebar-row-stub>");
+    const $subscription_block = $.create("aimto-block");
+    $row.set_find_results(".subscription_block", $subscription_block);
+    $subscription_block.set_find_results(".unread_count", $.create("aimto-count"));
+    $subscription_block.set_find_results(
+        ".unread_mention_info",
+        $.create("aimto-unread-mention-info"),
+    );
+
+    mock_template("stream_sidebar_row.hbs", false, (data) => {
+        assert.equal(data.url, "#narrow/channel/222-AIMTO-Events");
+        assert.equal(data.hover_ai_modules.length, 6);
+        assert.equal(
+            data.hover_ai_modules[0].url,
+            "#narrow/channel/222-AIMTO-Events/topic/Conversation.20Digest",
+        );
+        assert.deepEqual(
+            data.hover_ai_modules.find((module) => module.key === "suggested_actions"),
+            {
+                key: "suggested_actions",
+                name: "Suggested Actions",
+                icon: "zulip-icon-sparkles",
+                url: "#narrow/channel/222-AIMTO-Events/topic/Suggested.20Actions",
+                has_count: true,
+                count: 3,
+            },
+        );
+        assert.equal(data.hover_attached_sources[0].url.includes("/topic/"), false);
+        return "<aimto-sidebar-row-stub>";
+    });
+
+    unread_unmuted_count = 0;
+    stream_has_any_unread_mentions = false;
+    stream_list.create_sidebar_row(aimto);
+});
+
 test_ui("pinned_streams_never_inactive", ({mock_template, override_rewire}) => {
     override_rewire(stream_list, "update_stream_section_mention_indicators", noop);
     override_rewire(stream_list, "update_dom_with_unread_counts", noop);

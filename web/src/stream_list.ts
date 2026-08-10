@@ -841,8 +841,18 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
     const name = sub.name;
     const is_muted = stream_data.is_muted(sub.stream_id);
     const can_post_messages = stream_data.can_post_messages_in_stream(sub);
-    const url = hash_util.channel_url_by_user_setting(sub.stream_id);
     const is_hover_aimto_space = name === hover.AIMTO_SPACE_NAME;
+    const aggregate_url = hash_util.by_stream_url(sub.stream_id);
+    const url = is_hover_aimto_space
+        ? aggregate_url
+        : hash_util.channel_url_by_user_setting(sub.stream_id);
+    // These are canonical filter terms, so source operands are raw text rather
+    // than the quoted syntax a user would enter in the search box.
+    const filtered_channel_url = (search_operand: string): string =>
+        hash_util.search_terms_to_hash([
+            {operator: "channel", operand: sub.stream_id.toString()},
+            {operator: "search", operand: search_operand},
+        ]);
     const args = {
         name,
         id: sub.stream_id,
@@ -860,9 +870,23 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
         for_modal,
         ...(is_hover_aimto_space && {
             is_hover_aimto_space,
-            hover_attached_sources: hover.get_aimto_attached_sources(
-                hash_util.by_stream_topic_url(sub.stream_id, hover.AIMTO_SUMMARY_TOPIC),
-            ),
+            hover_ai_modules: hover.AIMTO_AI_MODULES.map((hover_module) => ({
+                ...hover_module,
+                url: hash_util.by_stream_topic_url(sub.stream_id, hover_module.name),
+                has_count: hover_module.key === "suggested_actions",
+                count: hover_module.key === "suggested_actions" ? 3 : 0,
+            })),
+            hover_attached_sources: hover.get_aimto_attached_sources(aggregate_url, {
+                mentors_volunteers: filtered_channel_url(
+                    hover.get_source_search_operand("mentors_volunteers"),
+                ),
+                resident_lounge: filtered_channel_url(
+                    hover.get_source_search_operand("resident_lounge"),
+                ),
+                volunteers_500: filtered_channel_url(
+                    hover.get_source_search_operand("volunteers_500"),
+                ),
+            }),
         }),
     };
     const $list_item = $(render_stream_sidebar_row(args));
@@ -1198,6 +1222,30 @@ function deselect_stream_items(): void {
     $("ul#stream_filters li").removeClass("active-filter stream-expanded");
 }
 
+function update_hover_sidebar_filter_selection($stream_li: JQuery, filter: Filter): void {
+    const search_operand = filter.terms_with_operator("search")[0]?.operand;
+    const topic_operand = filter.terms_with_operator("topic")[0]?.operand;
+    const active_module =
+        topic_operand === undefined ? undefined : hover.get_module_from_topic(topic_operand);
+
+    $stream_li.find(".hover-ai-modules__item").each(function () {
+        $(this).toggleClass(
+            "is-active",
+            $(this).attr("data-hover-module-key") === active_module?.key,
+        );
+    });
+    $stream_li.find(".hover-source-ledger__item").each(function () {
+        const source_key = $(this).attr("data-hover-source-key");
+        const is_active_source =
+            source_key === "mentors_volunteers" ||
+            source_key === "resident_lounge" ||
+            source_key === "volunteers_500"
+                ? search_operand === hover.get_source_search_operand(source_key)
+                : false;
+        $(this).toggleClass("is-active", is_active_source);
+    });
+}
+
 export function update_stream_sidebar_for_topic_search(): void {
     // In "topic:" search mode the sidebar renders only the channels
     // whose topics matched the search. get_stream_ids() returns the
@@ -1259,6 +1307,9 @@ export function update_stream_sidebar_for_narrow(filter: Filter): JQuery | undef
     // topic is selected or not. This is required for proper styling
     // masked unread counts.
     $stream_li.addClass("stream-expanded");
+    if (stream_data.get_sub_by_id(stream_id)?.name === hover.AIMTO_SPACE_NAME) {
+        update_hover_sidebar_filter_selection($stream_li, filter);
+    }
 
     if (stream_id !== topic_list.active_stream_id()) {
         clear_topics_if_not_searching();

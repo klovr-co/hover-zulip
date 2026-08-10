@@ -410,9 +410,9 @@ run_test("show_empty_narrow_message", ({mock_template, override, override_rewire
     assert.equal(
         $(".empty_feed_notice_main").html(),
         empty_narrow_html(
-            "translated: This view will show messages where you are mentioned.",
+            "translated: Your Daily Brief will appear here each morning.",
             undefined,
-            'translated: To call attention to a message, you can mention a user, a group, topic participants, or all subscribers to a channel. Type @ in the compose box, and choose who you\'d like to mention from the list of suggestions. <a target="_blank" rel="noopener noreferrer" href="/help/mention-a-user-or-group">Learn more</a>',
+            'translated: Hover composes it from the latest updates, confirmed Todos, and work connected to your Spaces. <a target="_blank" rel="noopener noreferrer" href="/help/mention-a-user-or-group">Learn how personal mentions work</a>',
         ),
     );
 

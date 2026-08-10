@@ -2,9 +2,28 @@ import type {Message} from "./message_store.ts";
 
 export const HOVER_AI_EMAIL = "hover-ai@hover.test";
 export const AIMTO_SPACE_NAME = "AIMTO Events";
-export const AIMTO_SUMMARY_TOPIC = "Summary";
+
+export const AIMTO_AI_MODULES = [
+    {key: "conversation_digest", name: "Conversation Digest", icon: "zulip-icon-align-left"},
+    {key: "progress_tracker", name: "Progress Tracker", icon: "zulip-icon-trending-up"},
+    {key: "suggested_actions", name: "Suggested Actions", icon: "zulip-icon-sparkles"},
+    {key: "decisions", name: "Decisions", icon: "zulip-icon-check-circle"},
+    {key: "marketing_digest", name: "Marketing Digest", icon: "zulip-icon-megaphone"},
+    {key: "topic_analysis", name: "Topic Analysis", icon: "zulip-icon-chart-bar"},
+] as const;
+
+export type HoverModuleKey = (typeof AIMTO_AI_MODULES)[number]["key"];
+export type HoverModule = (typeof AIMTO_AI_MODULES)[number];
+export type AimtoWhatsappSourceKey = "mentors_volunteers" | "resident_lounge" | "volunteers_500";
+
+const WHATSAPP_SOURCE_SEARCH_OPERANDS: Record<AimtoWhatsappSourceKey, string> = {
+    mentors_volunteers: "Mentors",
+    resident_lounge: "Resident Lounge",
+    volunteers_500: "500 volunteers",
+};
 
 export type AttachedSource = {
+    source_key: AimtoWhatsappSourceKey | "github" | "instagram";
     key: "whatsapp" | "github" | "instagram";
     name: string;
     detail: string;
@@ -21,33 +40,48 @@ export type SourceIntegration = {
     url?: string;
 };
 
-export function get_aimto_attached_sources(summary_url: string): AttachedSource[] {
+export function get_module_from_topic(topic_name: string): HoverModule | undefined {
+    return AIMTO_AI_MODULES.find((hover_module) => hover_module.name === topic_name);
+}
+
+export function get_source_search_operand(source_key: AimtoWhatsappSourceKey): string {
+    return WHATSAPP_SOURCE_SEARCH_OPERANDS[source_key];
+}
+
+export function get_aimto_attached_sources(
+    summary_url: string,
+    whatsapp_urls: Partial<Record<AimtoWhatsappSourceKey, string>> = {},
+): AttachedSource[] {
     return [
         {
+            source_key: "mentors_volunteers",
             key: "whatsapp",
             name: "Mentors & Volunteers",
             detail: "WhatsApp group",
             icon_class: "fa fa-whatsapp",
-            url: summary_url,
+            url: whatsapp_urls.mentors_volunteers ?? summary_url,
             is_external: false,
         },
         {
+            source_key: "resident_lounge",
             key: "whatsapp",
             name: "Resident Lounge",
             detail: "WhatsApp group",
             icon_class: "fa fa-whatsapp",
-            url: summary_url,
+            url: whatsapp_urls.resident_lounge ?? summary_url,
             is_external: false,
         },
         {
+            source_key: "volunteers_500",
             key: "whatsapp",
             name: "500 volunteers",
             detail: "WhatsApp group",
             icon_class: "fa fa-whatsapp",
-            url: summary_url,
+            url: whatsapp_urls.volunteers_500 ?? summary_url,
             is_external: false,
         },
         {
+            source_key: "github",
             key: "github",
             name: "learnaimto",
             detail: "GitHub repository",
@@ -56,6 +90,7 @@ export function get_aimto_attached_sources(summary_url: string): AttachedSource[
             is_external: true,
         },
         {
+            source_key: "instagram",
             key: "instagram",
             name: "@aimto_26",
             detail: "Instagram account",

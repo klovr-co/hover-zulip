@@ -1,10 +1,10 @@
 import datetime
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 
 from django.conf import settings
 from django.core.management.base import CommandError, CommandParser
-from django.utils.timezone import now as timezone_now
+from django.db import connection
 from typing_extensions import override
 
 from zerver.actions.channel_folders import check_add_channel_folder
@@ -12,7 +12,7 @@ from zerver.actions.create_user import do_create_user
 from zerver.actions.message_delete import do_delete_messages
 from zerver.actions.message_flags import do_update_message_flags
 from zerver.actions.message_send import do_send_messages, internal_prep_stream_message
-from zerver.actions.reminders import do_delete_reminder, schedule_reminder_for_message
+from zerver.actions.reminders import do_delete_reminder
 from zerver.actions.streams import (
     bulk_add_subscriptions,
     bulk_remove_subscriptions,
@@ -32,24 +32,62 @@ from zerver.models import (
     Subscription,
     UserProfile,
 )
-from zerver.models.clients import get_client
 from zerver.models.users import get_user_by_delivery_email
 
-# Source-derived demo updates use one assistant identity and one configured
-# publication topic; external sender identities remain part of source evidence.
+# Source-derived demo updates use one assistant identity and one native topic
+# per AI module; external sender identities remain part of source evidence.
 HOVER_AI_EMAIL = "hover-ai@hover.test"
 HOVER_DISPLAY_NAME = "Hover"
-SUMMARY_TOPIC = "Summary"
+
+HoverModuleKey = Literal[
+    "conversation_digest",
+    "progress_tracker",
+    "suggested_actions",
+    "decisions",
+    "marketing_digest",
+    "topic_analysis",
+]
+
+MODULE_NAMES: dict[HoverModuleKey, str] = {
+    "conversation_digest": "Conversation Digest",
+    "progress_tracker": "Progress Tracker",
+    "suggested_actions": "Suggested Actions",
+    "decisions": "Decisions",
+    "marketing_digest": "Marketing Digest",
+    "topic_analysis": "Topic Analysis",
+}
+
+LEGACY_DEMO_TODO_NOTES = {
+    "AIMTO · Publish the volunteer briefing agenda",
+    "AIMTO · Assign the blue zone owner",
+    "AIMTO · Approve final lobby assets",
+}
 
 
 @dataclass(frozen=True)
 class DemoPost:
+    module_key: HoverModuleKey
     content: str
     sent_at: datetime.datetime
     for_you: bool = False
     saved: bool = False
-    todo_note: str | None = None
-    todo_due_after: datetime.timedelta | None = None
+
+
+def demo_post(
+    module_key: HoverModuleKey,
+    content: str,
+    sent_at: datetime.datetime,
+    *,
+    for_you: bool = False,
+    saved: bool = False,
+) -> DemoPost:
+    return DemoPost(
+        module_key=module_key,
+        content=content,
+        sent_at=sent_at,
+        for_you=for_you,
+        saved=saved,
+    )
 
 
 def demo_time(day: int, hour: int, minute: int) -> datetime.datetime:
@@ -57,133 +95,469 @@ def demo_time(day: int, hour: int, minute: int) -> datetime.datetime:
 
 
 DEMO_POSTS = [
-    DemoPost(
-        content=(
-            "Monday's **9:00 PM volunteer briefing** is confirmed. Please react once you've "
-            "read the floor plan so we know every zone has an owner before event day.\n\n"
-            "**Source reviewed**\n\n"
-            "- **WhatsApp · All Learn-a-thon Mentors & Volunteers**"
-        ),
-        sent_at=demo_time(7, 1, 18),
+    demo_post(
+        "conversation_digest",
+        """## Mentors & Volunteers · coordination took shape
+
+**Main thread**
+The group moved from an initial floor-plan walkthrough into volunteer recruitment, zone preferences, language support, materials, and a shared briefing.
+
+**What meaningfully changed**
+
+- The organizer asked for about **10 more volunteers** on 5 August; the group had **17 volunteers** by the evening of 6 August and another large intake joined on 7 August.
+- Orange, purple/pink, green, blue, and stage areas were explained. Tharshen offered to cover orange and purple, or green if needed, but Lizzie said final placement would be sorted after more people joined.
+- A **Monday 9:00 PM** volunteer briefing was announced for detailed roles.
+
+**Confirmed**
+Orange is registration and the dream wall; purple/pink is the main builder-support area; green is debug/deploy; the stage hosts workshops and two show-and-tells. Outreach copy and the public site link are ready to share.
+
+**Still unresolved**
+The blue zone remains tentative, final zone ownership is unpublished, and the chat asks for Mandarin-, Malay-, and Tamil-speaking volunteers without confirming coverage.
+
+**Why AIMTO should care**
+Recruitment momentum is strong, but the briefing needs to turn offers into a named operating plan for a deliberately broad, beginner-friendly audience.
+
+**Source reviewed**
+
+- **WhatsApp · All Learn-a-thon Mentors & Volunteers** — 5–8 August 2026""",
+        demo_time(8, 14, 20),
+    ),
+    demo_post(
+        "progress_tracker",
+        """## Progress · Floor plan and zone ownership
+
+> **Status: In progress**
+
+**Current status**
+Four operating areas have a clear purpose; the blue discovery/community area is still tentative.
+
+**What changed**
+The organizer translated the floor plan into registration/dream wall, builder support, debug/deploy, stage programming, and a possible community-discovery area.
+
+**Completed work**
+Orange, purple/pink, green, and stage responsibilities are described. Tharshen volunteered for orange and purple, with green as a fallback.
+
+**Blocker or dependency**
+Lizzie deferred final placement until more volunteers joined. No final owner or final purpose is recorded for blue.
+
+**Next milestone**
+Publish named zone leads during the Monday 9:00 PM briefing.
+
+**Supporting source**
+
+- **WhatsApp · All Learn-a-thon Mentors & Volunteers** — floor-plan thread, 5 August 2026""",
+        demo_time(8, 14, 32),
         for_you=True,
-        todo_note="AIMTO · Publish the volunteer briefing agenda",
-        todo_due_after=datetime.timedelta(hours=8),
     ),
-    DemoPost(
-        content=(
-            "Day 1 coverage is now filled: three volunteers have taken the open slots. We still "
-            "need to confirm Mandarin, Malay, and Tamil support across registration and the builder "
-            "area.\n\n"
-            "**Source reviewed**\n\n"
-            "- **WhatsApp · 500 volunteers @ Learnathon**"
-        ),
-        sent_at=demo_time(7, 6, 42),
+    demo_post(
+        "conversation_digest",
+        """## 500 volunteers · Day 1 coverage closed quickly
+
+**Main thread**
+This subgroup was created for 500 Global / malaysian.ai volunteers to coordinate their own practical details while keeping the main mentors group as the source of overall event direction.
+
+**What meaningfully changed**
+A request for **three Day 1 volunteers** moved from open to filled in under an hour: Andrew, Bede, and Gracie offered full-day availability that matched the request.
+
+**Confirmed**
+The roles cover event setup and attendance for the private Day 1 event. Lunch is provided, and the subgroup can coordinate items such as lunch and sticker distribution.
+
+**Still unresolved**
+Detailed instructions were promised but are not present in the export. Gabriel offered partial Tuesday availability, which Lizzie indicated might not fit the role.
+
+**Why AIMTO should care**
+The staffing ask is closed, but the accepted volunteers still need one concise handoff so subgroup logistics do not diverge from the main event plan.
+
+**Source reviewed**
+
+- **WhatsApp · 500 volunteers @ Learnathon** — 8 August 2026""",
+        demo_time(8, 15, 5),
     ),
-    DemoPost(
-        content=(
-            "Sticker quantities are locked at **1,500**: 900 beginner, 300 medium, 300 pro, plus "
-            "50 mentor stickers. The remaining floor-plan question is ownership of the blue "
-            "discovery and community zone.\n\n"
-            "**Source reviewed**\n\n"
-            "- **WhatsApp · All Learn-a-thon Mentors & Volunteers**"
-        ),
-        sent_at=demo_time(8, 2, 5),
+    demo_post(
+        "decisions",
+        """## Decision · Keep overall coordination in the main group
+
+> **Lifecycle: Active**
+
+**Decision**
+Use “All Learnathon Volunteers/Mentors” for overall event updates and coordination; use the 500 / malaysian.ai subgroup only for team-specific details such as lunch and sticker distribution.
+
+**When**
+8 August 2026, when the subgroup was opened.
+
+**Participants / conversation**
+Lizzie set the operating boundary for members of **500 volunteers @ Learnathon**.
+
+**Rationale**
+Volunteers are coming from several organizers, so the main group needs to remain the common coordination channel.
+
+**Supporting evidence**
+
+- **WhatsApp · 500 volunteers @ Learnathon** — subgroup welcome and scope""",
+        demo_time(8, 15, 18),
+    ),
+    demo_post(
+        "progress_tracker",
+        """## Progress · Volunteer staffing and coverage
+
+> **Status: On track**
+
+**Current status**
+Recruitment expanded materially, and the separate three-person Day 1 requirement is filled.
+
+**What changed**
+The main group reported 17 volunteers on 6 August, then added a sizeable new cohort on 7 August. On 8 August, the 500 subgroup filled all three requested Day 1 roles.
+
+**Completed work**
+Andrew, Bede, and Gracie supplied the three full-day Day 1 commitments. The main mentors group also has named offers for several Learn-a-thon zones.
+
+**Blocker or dependency**
+The exports do not show a final role roster or coverage map for Day 2.
+
+**Next milestone**
+Convert availability into named zone assignments at the volunteer briefing.
+
+**Supporting sources**
+
+- **WhatsApp · All Learn-a-thon Mentors & Volunteers** — recruitment and group growth
+- **WhatsApp · 500 volunteers @ Learnathon** — Day 1 call for three people""",
+        demo_time(8, 15, 31),
+    ),
+    demo_post(
+        "decisions",
+        """## Decision · Fill the three Day 1 volunteer slots
+
+> **Lifecycle: Active**
+
+**Decision**
+Proceed with Andrew, Bede, and Gracie for the three requested Day 1 setup and attendance roles.
+
+**When**
+8 August 2026, between 8:15 PM and 8:58 PM.
+
+**Participants / conversation**
+Lizzie requested three people; Andrew, Bede, and Gracie each confirmed availability. Lizzie acknowledged the final offer with “awesome”.
+
+**Rationale**
+Their offers satisfy the stated requirement for three volunteers. Gabriel's partial-day offer was discussed separately and was not treated as one of the three full commitments.
+
+**Supporting evidence**
+
+- **WhatsApp · 500 volunteers @ Learnathon** — Day 1 staffing thread""",
+        demo_time(8, 15, 44),
+        saved=True,
+    ),
+    demo_post(
+        "decisions",
+        """## Decision · Hold the volunteer briefing Monday at 9:00 PM
+
+> **Lifecycle: Active**
+
+**Decision**
+Run the volunteer briefing call on **Monday at 9:00 PM** and use it to walk through roles in more detail.
+
+**When**
+8 August 2026 at 10:11 PM.
+
+**Participants / conversation**
+Lizzie announced the time to All Learn-a-thon Mentors & Volunteers and asked everyone to react once read.
+
+**Rationale**
+The floor plan is known, but detailed role allocation still needs a shared coordination moment.
+
+**Supporting evidence**
+
+- **WhatsApp · All Learn-a-thon Mentors & Volunteers** — briefing announcement""",
+        demo_time(8, 15, 58),
         for_you=True,
-        todo_note="AIMTO · Assign the blue zone owner",
-        todo_due_after=datetime.timedelta(days=1, hours=3),
     ),
-    DemoPost(
-        content=(
-            "The lobby artwork needs both **16:9** and **9:16** versions, with **FREE** prominent. "
-            "The university leaderboard and certificate page give us a stronger outreach story.\n\n"
-            "**Source reviewed**\n\n"
-            "- **WhatsApp · Resident Lounge**"
-        ),
-        sent_at=demo_time(8, 8, 30),
-        todo_note="AIMTO · Approve final lobby assets",
-        todo_due_after=datetime.timedelta(days=2),
+    demo_post(
+        "suggested_actions",
+        """## Suggested action · Publish the volunteer briefing agenda
+
+> **Status: Awaiting confirmation**
+
+**Proposed action**
+Post a short agenda before the Monday 9:00 PM call: zone walkthrough, named leads, language coverage, arrivals, and escalation path.
+
+**Why Hover is suggesting it**
+The time is confirmed and the call will cover roles, but no agenda or final role roster appears in the source history.
+
+**Suggested teammate**
+Lizzie, because she scheduled the call and has been coordinating volunteer placements.
+
+**Suggested due date**
+Monday, 10 August · 8:00 PM — one hour before the confirmed briefing.
+
+**Supporting WhatsApp evidence**
+
+- **WhatsApp · All Learn-a-thon Mentors & Volunteers** — briefing announcement and floor-plan thread""",
+        demo_time(8, 16, 12),
+        for_you=True,
     ),
-    DemoPost(
-        content=(
-            "The website work is moving: certificate and university leaderboard updates are in, "
-            "and the homepage refresh is ready for a final event-details pass.\n\n"
-            "**Source reviewed**\n\n"
-            "- [GitHub · LearnAIMTO](https://github.com/ashvinpraveen/learnaimto)"
-        ),
-        sent_at=demo_time(9, 3, 20),
+    demo_post(
+        "suggested_actions",
+        """## Suggested action · Assign the blue zone owner and purpose
+
+> **Status: Awaiting confirmation**
+
+**Proposed action**
+Choose one owner for the blue zone and decide whether it is primarily discovery support, community introductions, or both.
+
+**Why Hover is suggesting it**
+The zone is explicitly marked TBD. Other areas have clear functions, while a volunteer's offer to cover orange/purple/green does not resolve blue.
+
+**Suggested teammate**
+Lizzie, because she said final zone placement would be sorted after recruitment expanded.
+
+**Suggested due date**
+During the Monday 9:00 PM briefing, before the role roster is shared.
+
+**Supporting WhatsApp evidence**
+
+- **WhatsApp · All Learn-a-thon Mentors & Volunteers** — floor plan and placement follow-up""",
+        demo_time(8, 16, 26),
+        for_you=True,
     ),
-    DemoPost(
-        content="""## Event readiness update
+    demo_post(
+        "marketing_digest",
+        """## Worth sharing · LearnAIMTO has a public, open-source front door
 
-**12 August · Campus Ampang**
+**Why this is remarkable**
+[learn.aimto.my](https://learn.aimto.my/) is now more than an event-information page: the community can use it to introduce true beginners to the Learn-a-thon and contribute improvements through its public repository.
 
-> **Readiness: On track, with two coordination gaps.** Volunteer coverage improved and the public website is moving, but language coverage and one floor-plan zone still need owners.
+**The news**
 
-### What changed
+- Ashvin publicly shared the site and [GitHub repository](https://github.com/ashvinpraveen/learnaimto) on 1 August, inviting feedback, forks, and contributions.
+- The public experience now includes beginner guidance, project inspiration, registration paths, FAQs, a university leaderboard, and certificates.
+- The open-source route gives collaborators something concrete to improve and gives outreach partners one consistent destination to share.
 
-- **Volunteer coverage:** The three open Day 1 roles are filled. The wider mentor group has also grown since the initial call for ten more volunteers.
-- **Event operations:** The floor plan now covers registration, the dream wall, builder support, debug/deploy, workshops, and two show-and-tells. Sticker production is locked at 1,500 plus 50 mentor stickers.
-- **Public delivery:** Recent LearnAIMTO work added the certificate page, university leaderboard, homepage refresh, partner logos, and event metadata.
-- **Promotion:** Outreach is converging on inclusive, multilingual positioning and lobby artwork that makes the free entry unmistakable.
+**Amplification angle**
+Share the launch as a community-built invitation: people can attend without coding experience, explore what they could build, or contribute directly to the event experience.
 
-### Needs attention
-
-- Confirm **Mandarin, Malay, and Tamil** coverage at registration and in the builder area.
-- Assign a final owner and purpose to the **blue discovery/community zone**.
-
-### Next best actions
-
-1. Publish the Monday 9:00 PM briefing agenda with named zone owners.
-2. Lock the 16:9 and 9:16 lobby assets after one final event-details check.
-3. Use the leaderboard and certificate flow in the next university outreach push.
+**Source boundary**
+[Instagram · @aimto_26](https://www.instagram.com/aimto_26/) is linked for monitoring or publication; no account-post content is inferred here.
 
 **Sources reviewed**
 
-- **WhatsApp · Mentors & Volunteers** — briefing, staffing, floor plan, language coverage, and stickers
-- **WhatsApp · 500 volunteers @ Learnathon** — Day 1 assignments and subgroup coordination
-- **WhatsApp · Resident Lounge (AIMTO excerpts)** — lobby formats and inclusive promotion direction
-- [GitHub · LearnAIMTO](https://github.com/ashvinpraveen/learnaimto) — public-site delivery
-- [Instagram · @aimto_26](https://www.instagram.com/aimto_26/) — linked promotion source; post contents not inferred
+- **WhatsApp · Resident Lounge** — site feedback and repository link
+- [GitHub · LearnAIMTO](https://github.com/ashvinpraveen/learnaimto)
+- [Instagram · @aimto_26](https://www.instagram.com/aimto_26/) — linked destination only""",
+        demo_time(9, 2, 40),
+    ),
+    demo_post(
+        "marketing_digest",
+        """## Worth sharing · The university challenge is visible live
 
-_AI-generated from linked sources. Verify details before acting._""",
-        sent_at=demo_time(10, 0, 15),
+**Why this is remarkable**
+University participation now has a public scoreboard and a tangible outcome for every builder, giving campus communities a reason to rally together rather than treating the Learn-a-thon as another generic event invitation.
+
+**The news**
+
+- Janelle shared outreach copy featuring rewards for the top two universities, an official certificate for every project submission, free AI credits, and mentor guidance.
+- The [live leaderboard](https://learn.aimto.my/leaderboard) gives communities a visible result to follow and share.
+- The message was cleared for broad sharing, including university groups and LinkedIn. An AIMTO Instagram post was proposed but is not confirmed in the export.
+
+**Amplification angle**
+Invite each university to move its name up the leaderboard while emphasizing that beginners can still leave with a completed project and certificate.
+
+**Sources reviewed**
+
+- **WhatsApp · All Learn-a-thon Mentors & Volunteers** — shareable university message
+- **WhatsApp · Resident Lounge** — campaign framing and Instagram proposal
+- [GitHub · LearnAIMTO](https://github.com/ashvinpraveen/learnaimto)
+- [Instagram · @aimto_26](https://www.instagram.com/aimto_26/) — proposed destination, publication not confirmed""",
+        demo_time(9, 9, 45),
+    ),
+    demo_post(
+        "conversation_digest",
+        """## Resident Lounge · promotion moved into final production
+
+**Main thread**
+The AIMTO conversation combined public-site feedback, open-source delivery, lobby creative, beginner positioning, and university outreach.
+
+**What meaningfully changed**
+The LearnAIMTO repository accumulated public-facing improvements, the leaderboard and certificate routes landed, and lobby artwork moved from concept comparisons to a request for final **16:9 and 9:16** versions.
+
+**Confirmed**
+The AICB placement is intended to attract building tenants and visitors to the Learn-a-thon. PNG is preferred, “FREE” should be more obvious, and the message should work for people who do not know how to start with AI.
+
+**Still unresolved**
+The export ends while Maxine is generating final visuals. It does not show final asset approval, final copy, or a published Instagram post.
+
+**Why AIMTO should care**
+The operational ask is now a final creative handoff: preserve consistent event details across two ratios while keeping the beginner promise unmistakable.
+
+**Sources reviewed**
+
+- **WhatsApp · Resident Lounge** — 1–10 August 2026
+- [GitHub · LearnAIMTO](https://github.com/ashvinpraveen/learnaimto)
+- [Instagram · @aimto_26](https://www.instagram.com/aimto_26/) — linked for monitoring only""",
+        demo_time(9, 10, 5),
+    ),
+    demo_post(
+        "marketing_digest",
+        """## Worth sharing · Supabase CEO Show & Tell opened publicly
+
+**Why this is remarkable**
+Paul Copplestone, Supabase co-founder and CEO, is joining a special Malaysian.ai Show & Tell while he is in Kuala Lumpur—a rare chance for local builders to hear his journey and show what Malaysia is building.
+
+**The news**
+
+- Isaac announced that registration was live on 7 August: [open the Luma event](https://luma.com/zkxj8z7b).
+- The plan combines Paul's founder journey, a curated showcase of 10–15 builders, and networking with the local community.
+- The group explicitly confirmed that the event could be shared publicly, including on social channels.
+
+**Amplification angle**
+Share the Luma link with builders who have something strong to demonstrate, and frame the event as a window into both Supabase's story and Malaysia's active builder scene.
+
+**Source reviewed**
+
+- **WhatsApp · Resident Lounge** — launch announcement and public-sharing confirmation, 6–7 August 2026
+- [Luma · Supabase's first move + Malaysian.ai Show & Tell](https://luma.com/zkxj8z7b)""",
+        demo_time(9, 10, 19),
+    ),
+    demo_post(
+        "progress_tracker",
+        """## Progress · AICB lobby poster delivery
+
+> **Status: In progress**
+
+**Owner**
+Maxine.
+
+**Current status**
+The AICB lobby campaign has moved from early concepts into final production for the building's LED screens.
+
+**What changed**
+Maxine shared three initial directions, incorporated feedback to emphasize Day 2, restored event logos, and took ownership of polishing the selected direction in both **16:9 and 9:16**.
+
+**Completed work**
+The placement goal, beginner audience, practical workflow/automation positioning, PNG preference, and need to make **FREE** more obvious are all established. Draft visuals received positive reactions.
+
+**Blocker or dependency**
+The export ends before final copy refinement, final asset approval, or confirmation that the files reached AICB.
+
+**Next milestone**
+Share the polished 16:9 and 9:16 PNG files for final copy review and placement approval.
+
+**Supporting source**
+
+- **WhatsApp · Resident Lounge** — Maxine's AICB lobby artwork thread, 8–9 August 2026""",
+        demo_time(9, 10, 34),
+    ),
+    demo_post(
+        "progress_tracker",
+        """## Progress · Language-support coverage
+
+> **Status: At risk**
+
+**Current status**
+The need is clear, but named coverage is not.
+
+**What changed**
+E asked the volunteer group to identify Mandarin speakers; Lizzie separately welcomed Malay- and Tamil-speaking volunteers. Resident Lounge outreach also framed Mandarin coaching as part of the beginner promise.
+
+**Completed work**
+Language access is now present in both volunteer recruitment and public-facing campaign thinking.
+
+**Blocker or dependency**
+No exported message confirms a Mandarin, Malay, or Tamil speaker assigned to registration, builder support, or another zone.
+
+**Next milestone**
+Confirm at least one named contact and location for each requested language during the volunteer briefing.
+
+**Supporting sources**
+
+- **WhatsApp · All Learn-a-thon Mentors & Volunteers** — Mandarin, Malay, and Tamil recruitment
+- **WhatsApp · Resident Lounge** — beginner flyer concept with Mandarin mentor support""",
+        demo_time(9, 10, 48),
         for_you=True,
+    ),
+    demo_post(
+        "suggested_actions",
+        """## Suggested action · Confirm Mandarin, Malay, and Tamil coverage
+
+> **Status: Awaiting confirmation**
+
+**Proposed action**
+Name the available Mandarin-, Malay-, and Tamil-speaking volunteers and place each person at registration, builder support, or an on-call escalation point.
+
+**Why Hover is suggesting it**
+The organizer explicitly invited all three language groups, and public outreach promises a beginner-friendly experience. The exports contain no assignment confirmation.
+
+**Suggested due date**
+Confirm during the Monday 9:00 PM briefing so the promise is operational before event day.
+
+**Supporting WhatsApp evidence**
+
+- **WhatsApp · All Learn-a-thon Mentors & Volunteers** — language recruitment on 5 August
+- **WhatsApp · Resident Lounge** — Mandarin-support outreach concept on 9 August""",
+        demo_time(9, 11, 2),
+        for_you=True,
+    ),
+    demo_post(
+        "topic_analysis",
+        """## Topic analysis · Volunteer readiness and ownership gaps
+
+**Question**
+Is the volunteer operation ready to move from recruitment into delivery?
+
+**Main finding**
+Staffing momentum is healthy, but ownership information is lagging behind headcount.
+
+**Supporting signals**
+
+- The main group grew from a request for roughly ten more people to 17 reported volunteers, followed by another large intake.
+- The 500 subgroup filled its separate three-person Day 1 ask with Andrew, Bede, and Gracie.
+- Orange, purple/pink, green, and stage functions are described, but final placements were deferred and blue remains TBD.
+- A Monday 9:00 PM briefing is confirmed specifically to explain roles in more detail.
+
+**Uncertainty**
+The exports do not include a final Day 2 roster, check-in plan, or a named blue-zone owner.
+
+**Practical implication**
+Do not recruit blindly. Use the briefing to publish a compact coverage matrix: person, time window, zone, language, and escalation lead.
+
+**Supporting sources**
+
+- **WhatsApp · All Learn-a-thon Mentors & Volunteers** — staffing, floor plan, briefing
+- **WhatsApp · 500 volunteers @ Learnathon** — Day 1 role fill""",
+        demo_time(9, 11, 16),
         saved=True,
     ),
-    DemoPost(
-        content="""## Good morning, @**King Hamlet**
+    demo_post(
+        "topic_analysis",
+        """## Topic analysis · Language access and message consistency
 
-### Your AIMTO daily brief
+**Question**
+Does the event's inclusive promise line up with operational coverage and public communication?
 
-The event is moving in the right direction. Volunteer coverage is stronger, the public experience is taking shape, and most of the delivery plan is already settled. A focused start should be enough to keep today manageable.
+**Main finding**
+The intent is consistent—all ages, true beginners, broad Malaysian participation—but the language promise is ahead of verified staffing.
 
-### A good place to start
+**Supporting signals**
 
-Close the two coordination gaps that still touch several teams: confirm **Mandarin, Malay, and Tamil coverage**, then give the **blue discovery/community zone** one clear owner. Once those are moving, the rest of the floor plan can settle around them.
+- Mentors & Volunteers explicitly seeks Mandarin speakers, then adds Malay and Tamil to the recruitment call.
+- Resident Lounge frames the morning-market flyer around people with no coding experience and proposes reassuring non-English speakers that Mandarin mentors can coach them.
+- Lobby creative discussion asks for “FREE” to be more obvious and for practical workflow/automation language that works beyond technical audiences.
+- LearnAIMTO's public repository describes a beginner-friendly experience with guided learning and practical project inspiration.
 
-### Once that's moving
+**Uncertainty**
+No export confirms who covers each language, and no final lobby asset or Instagram publication is shown.
 
-The Monday volunteer briefing is the best moment to make ownership visible. Publishing the agenda with named zone leads will turn several scattered confirmations into one shared plan.
+**Practical implication**
+Use one verified accessibility line everywhere: which languages are available, where attendees find help, and what “beginner-friendly” includes.
 
-### You can leave this with the team
+**Supporting sources**
 
-The website, leaderboard, certificates, stickers, and lobby formats are already progressing. The final creative check can stay with the outreach team after the event details are confirmed.
-
-### The reassuring bit
-
-Day 1's open volunteer slots are filled, production quantities are locked, and the public-site work has momentum. You do not need to reopen those decisions today.
-
-**Prepared from today's AIMTO Summary**
-
-- **WhatsApp · All Learn-a-thon Mentors & Volunteers**
-- **WhatsApp · 500 volunteers @ Learnathon**
-- **WhatsApp · Resident Lounge**
-- [GitHub · LearnAIMTO](https://github.com/ashvinpraveen/learnaimto)
-- [Instagram · @aimto_26](https://www.instagram.com/aimto_26/)
-
-_Hover composed this briefing from the latest source-backed updates. Open AIMTO Events → Summary to verify the underlying details._""",
-        sent_at=demo_time(10, 0, 35),
+- **WhatsApp · All Learn-a-thon Mentors & Volunteers** — language recruitment
+- **WhatsApp · Resident Lounge** — beginner flyer and lobby positioning
+- [GitHub · LearnAIMTO](https://github.com/ashvinpraveen/learnaimto) — public experience
+- [Instagram · @aimto_26](https://www.instagram.com/aimto_26/) — monitoring destination only""",
+        demo_time(10, 0, 15),
         for_you=True,
+        saved=True,
     ),
 ]
 
@@ -229,7 +603,7 @@ class Command(ZulipBaseCommand):
             realm_id=stream.realm_id,
             recipient=stream.recipient,
             sender=sender,
-            subject=SUMMARY_TOPIC,
+            subject=MODULE_NAMES[post.module_key],
         ).order_by("id")
         message = candidates.filter(content=post.content).first()
 
@@ -237,7 +611,7 @@ class Command(ZulipBaseCommand):
             send_request = internal_prep_stream_message(
                 sender,
                 stream,
-                SUMMARY_TOPIC,
+                MODULE_NAMES[post.module_key],
                 post.content,
                 forged=True,
                 forged_timestamp=post.sent_at.timestamp(),
@@ -266,47 +640,41 @@ class Command(ZulipBaseCommand):
         do_update_message_flags(viewer, "remove", "read", for_you_message_ids)
         do_update_message_flags(viewer, "add", "starred", saved_message_ids)
 
-        desired_todos = [
-            (post, message)
-            for post, message in posts_and_messages
-            if post.todo_note is not None and post.todo_due_after is not None
-        ]
-        desired_notes = [post.todo_note for post, _message in desired_todos]
-        existing_reminders = ScheduledMessage.objects.filter(
+        # Suggested Actions are proposals, not active Todos. Remove reminders
+        # created by older versions of this fixture so rerunning the command
+        # preserves that human-confirmation boundary.
+        legacy_reminders = ScheduledMessage.objects.filter(
             sender=viewer,
             delivery_type=ScheduledMessage.REMIND,
             delivered=False,
-            reminder_note__in=desired_notes,
+            reminder_note__in=LEGACY_DEMO_TODO_NOTES,
         ).order_by("id")
-        reminders_by_note: dict[str, list[ScheduledMessage]] = {}
-        for reminder in existing_reminders:
-            assert reminder.reminder_note is not None
-            reminders_by_note.setdefault(reminder.reminder_note, []).append(reminder)
+        for reminder in legacy_reminders:
+            do_delete_reminder(viewer, reminder)
 
-        client = get_client("Internal")
-        for post, message in desired_todos:
-            assert post.todo_note is not None
-            assert post.todo_due_after is not None
-            matching_reminders = reminders_by_note.get(post.todo_note, [])
-            current_reminder = next(
-                (
-                    reminder
-                    for reminder in matching_reminders
-                    if reminder.reminder_target_message_id == message.id
-                ),
-                None,
+    def populate_search_vectors(self, messages: list[Message]) -> None:
+        # Streamlined development servers do not run the asynchronous FTS
+        # worker. Populate this fixture's vectors synchronously so attached
+        # source filters work immediately after running the command.
+        message_ids = [message.id for message in messages]
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE zerver_message
+                SET search_tsvector =
+                    to_tsvector('zulip.english_us_search', subject || rendered_content)
+                WHERE id = ANY(%s)
+                """,
+                [message_ids],
             )
-            for reminder in matching_reminders:
-                if reminder.id != getattr(current_reminder, "id", None):
-                    do_delete_reminder(viewer, reminder)
-
-            if current_reminder is None:
-                schedule_reminder_for_message(
-                    viewer,
-                    client,
-                    message.id,
-                    timezone_now() + post.todo_due_after,
-                    post.todo_note,
+            if settings.USING_PGROONGA:
+                cursor.execute(
+                    """
+                    UPDATE zerver_message
+                    SET search_pgroonga = escape_html(subject) || ' ' || rendered_content
+                    WHERE id = ANY(%s)
+                    """,
+                    [message_ids],
                 )
 
     @override
@@ -404,13 +772,16 @@ class Command(ZulipBaseCommand):
         if stale_messages:
             do_delete_messages(stream.realm, stale_messages, acting_user=owner)
 
+        self.populate_search_vectors([message for _post, message in posts_and_messages])
         self.populate_home_views(viewer=viewer, posts_and_messages=posts_and_messages)
 
         self.stdout.write(
             self.style.SUCCESS(
                 f"AIMTO Events is ready with {len(DEMO_POSTS)} native Hover posts, "
+                f"{len(MODULE_NAMES)} AI module topics, "
                 f"{sum(post.for_you for post in DEMO_POSTS)} For You items, "
-                f"{sum(post.saved for post in DEMO_POSTS)} Saved item, and 3 Todos "
+                f"{sum(post.saved for post in DEMO_POSTS)} Saved items, and "
+                "3 Suggested Actions awaiting confirmation "
                 f"in {realm.string_id}."
             )
         )

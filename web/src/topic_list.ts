@@ -422,6 +422,15 @@ export class TopicListWidget {
     }
 
     build(spinner = false, formatter: (conversation: TopicInfo) => ListInfoNode): void {
+        // AIMTO's six AI modules are native topics presented in their own
+        // purpose-built topic navigator, so avoid rendering a duplicate
+        // standard topic list immediately above it.
+        if (!this.for_modal && this.$stream_li.find(".hover-ai-modules").length > 0) {
+            this.remove();
+            this.prior_dom = undefined;
+            return;
+        }
+
         const new_dom = this.build_list(spinner, formatter);
         const replace_content = (html: string): void => {
             this.remove();
@@ -429,8 +438,6 @@ export class TopicListWidget {
                 this.$stream_li.find(".simplebar-content").append($(html));
             } else if (this.for_modal) {
                 this.$stream_li.find(".topic-list-scroll-container").append($(html));
-            } else if (this.$stream_li.find(".hover-source-ledger").length > 0) {
-                this.$stream_li.find(".hover-source-ledger").before($(html));
             } else {
                 this.$stream_li.append($(html));
             }

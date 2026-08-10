@@ -62,6 +62,8 @@ export type MessageContainer = {
     is_hidden: boolean;
     is_hover_generated_update: boolean;
     has_hover_source_integrations: boolean;
+    hover_module_key?: hover.HoverModuleKey;
+    hover_module_name?: string;
     hover_source_context?: string;
     hover_source_integrations?: hover.SourceIntegration[];
     last_edit_timestamp: number | undefined;
@@ -605,6 +607,8 @@ export class MessageListView {
         is_hidden: boolean;
         is_hover_generated_update: boolean;
         has_hover_source_integrations: boolean;
+        hover_module_key?: hover.HoverModuleKey;
+        hover_module_name?: string;
         hover_source_context?: string;
         hover_source_integrations?: hover.SourceIntegration[];
         mention_classname: string | undefined;
@@ -703,6 +707,10 @@ export class MessageListView {
         const hover_source_integrations = is_hover_generated_update
             ? hover.get_source_integrations(message.content)
             : [];
+        const hover_module =
+            is_hover_generated_update && message.type === "stream"
+                ? hover.get_module_from_topic(message.topic)
+                : undefined;
 
         return {
             timestr: get_timestr(message),
@@ -716,6 +724,10 @@ export class MessageListView {
             is_hidden,
             is_hover_generated_update,
             has_hover_source_integrations: hover_source_integrations.length > 0,
+            ...(hover_module !== undefined && {
+                hover_module_key: hover_module.key,
+                hover_module_name: hover_module.name,
+            }),
             ...(is_hover_generated_update && {
                 hover_source_context: hover.get_source_context(message.content),
             }),

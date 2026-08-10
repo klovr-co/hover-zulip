@@ -32,15 +32,28 @@
         </a>
     </div>
     {{#if is_hover_aimto_space}}
+    <section class="hover-ai-modules" aria-label="{{t 'AI Modules' }}">
+        <div class="hover-ai-modules__header">{{t "AI Modules"}}</div>
+        <ul class="hover-ai-modules__list">
+            {{#each hover_ai_modules}}
+                <li>
+                    <a class="hover-ai-modules__item hover-ai-modules__item--{{key}}" href="{{url}}" data-hover-module-key="{{key}}">
+                        <i class="zulip-icon {{icon}} hover-ai-modules__icon" aria-hidden="true"></i>
+                        <span class="hover-ai-modules__name">{{name}}</span>
+                        {{#if has_count}}<span class="hover-ai-modules__count">{{count}}</span>{{/if}}
+                    </a>
+                </li>
+            {{/each}}
+        </ul>
+    </section>
     <section class="hover-source-ledger" aria-label="{{t 'Attached sources' }}">
         <div class="hover-source-ledger__header">
             <span>{{t "Sources"}}</span>
-            <span class="hover-source-ledger__count">{{hover_attached_sources.length}} {{t "attached"}}</span>
         </div>
         <ul class="hover-source-ledger__list">
             {{#each hover_attached_sources}}
                 <li>
-                    <a class="hover-source-ledger__item hover-source-ledger__item--{{key}}" href="{{url}}" {{#if is_external}}target="_blank" rel="noopener noreferrer"{{/if}}>
+                    <a class="hover-source-ledger__item hover-source-ledger__item--{{key}}" href="{{url}}" data-hover-source-key="{{source_key}}" {{#if is_external}}target="_blank" rel="noopener noreferrer"{{/if}}>
                         <span class="hover-source-ledger__icon" aria-hidden="true"><i class="{{icon_class}}"></i></span>
                         <span class="hover-source-ledger__copy">
                             <span class="hover-source-ledger__name">{{name}}</span>
