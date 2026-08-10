@@ -1684,6 +1684,279 @@ a {
     white-space: nowrap;
 }
 
+.hover-generated-update-state,
+.hover-generated-update-importance {
+    flex: none;
+    padding: 3px 7px;
+    border: 1px solid var(--ds-border-strong);
+    border-radius: var(--ds-radius-pill);
+    color: var(--ds-text-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.hover-generated-update-state--active {
+    border-color: hsl(155deg 44% 63%);
+    background: hsl(151deg 54% 94%);
+    color: hsl(155deg 64% 23%);
+}
+
+.hover-generated-update-state--superseded,
+.hover-generated-update-state--reversed {
+    border-color: hsl(26deg 55% 69%);
+    background: hsl(31deg 78% 95%);
+    color: hsl(24deg 63% 28%);
+}
+
+.hover-generated-update-importance--normal,
+.hover-generated-update-importance--low {
+    display: none;
+}
+
+.hover-generated-update-importance--high,
+.hover-generated-update-importance--urgent {
+    border-color: hsl(5deg 58% 70%);
+    background: hsl(4deg 80% 96%);
+    color: hsl(4deg 65% 34%);
+}
+
+.hover-generated-update-actions {
+    display: flex;
+    gap: 13px;
+    align-items: center;
+    margin-top: 13px;
+    font-family: var(--font-saans);
+    font-size: 12px;
+}
+
+.hover-generated-update-actions button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ds-blue-700);
+    font-weight: 650;
+}
+
+.hover-generated-update-actions button:hover {
+    color: var(--ds-navy-950);
+    text-decoration: underline;
+}
+
+.hover-generated-earlier-label {
+    color: var(--ds-text-tertiary);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.hover-all-filtered-out {
+    display: none !important;
+}
+
+.hover-all-view-filters {
+    box-sizing: border-box;
+    width: calc(100% - 26px);
+    max-width: 920px;
+    margin: 14px auto 8px;
+    padding: 17px 20px 15px;
+    border: 1px solid var(--ds-border-selection);
+    border-radius: var(--ds-radius-card);
+    background:
+        linear-gradient(90deg, hsl(42deg 72% 96% / 92%), hsl(202deg 52% 97% / 94%)),
+        var(--ds-neutral-25);
+    box-shadow: 0 8px 24px hsl(220deg 40% 30% / 6%);
+    font-family: var(--font-saans);
+}
+
+.hover-all-view-filters__heading {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 11px;
+    align-items: baseline;
+    margin-bottom: 12px;
+}
+
+.hover-all-view-filters__heading strong {
+    color: var(--ds-neutral-950);
+    font-family: var(--font-headline);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+}
+
+.hover-all-view-filters__heading > span:last-child {
+    grid-column: 2;
+    color: var(--ds-text-secondary);
+    font-size: 12px;
+}
+
+.hover-all-view-filters__eyebrow {
+    grid-row: 1 / span 2;
+    align-self: center;
+    padding: 5px 8px;
+    border-radius: var(--ds-radius-control);
+    background: var(--ds-navy-950);
+    color: var(--ds-text-inverse);
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.hover-all-view-filters__rail {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+}
+
+.hover-all-filter {
+    display: inline-flex;
+    flex: none;
+    gap: 6px;
+    align-items: center;
+    min-height: 31px;
+    padding: 5px 10px;
+    border: 1px solid var(--ds-border-strong);
+    border-radius: var(--ds-radius-pill);
+    background: hsl(0deg 0% 100% / 76%);
+    color: var(--ds-text-secondary);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.hover-all-filter > span {
+    min-width: 16px;
+    padding: 1px 5px;
+    border-radius: var(--ds-radius-pill);
+    background: hsl(215deg 20% 90%);
+    color: var(--ds-text-secondary);
+    font-size: 10px;
+    text-align: center;
+}
+
+.hover-all-filter:hover,
+.hover-all-filter.is-active {
+    border-color: var(--ds-navy-950);
+    background: var(--ds-navy-950);
+    color: var(--ds-text-inverse);
+}
+
+.hover-all-filter.is-active > span {
+    background: hsl(0deg 0% 100% / 18%);
+    color: inherit;
+}
+
+.hover-all-view-filters__status {
+    margin: 7px 1px 0;
+    color: var(--ds-text-tertiary);
+    font-size: 11px;
+}
+
+.hover-generated-details {
+    color: var(--ds-text-primary);
+    font-family: var(--font-saans);
+}
+
+.hover-generated-details__summary {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--ds-border-weak);
+}
+
+.hover-generated-technical-details {
+    display: grid;
+    gap: 0;
+    margin: 8px 0 0;
+}
+
+.hover-generated-technical-details > div {
+    display: grid;
+    grid-template-columns: minmax(120px, 0.36fr) 1fr;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--ds-border-weak);
+}
+
+.hover-generated-technical-details dt {
+    color: var(--ds-text-tertiary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.hover-generated-technical-details dd {
+    margin: 0;
+}
+
+.hover-generated-details__note {
+    margin: 15px 0 0;
+    color: var(--ds-text-tertiary);
+    font-size: 12px;
+}
+
+.hover-generated-history {
+    display: grid;
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hover-generated-history__entry {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--ds-border-weak);
+    border-radius: var(--ds-radius-control);
+    background: var(--ds-neutral-25);
+}
+
+.hover-generated-history__entry > span {
+    color: var(--ds-text-tertiary);
+    font-size: 11px;
+    text-transform: capitalize;
+}
+
+.hover-generated-history__current {
+    grid-column: 2;
+    grid-row: 1;
+    color: var(--ds-blue-700) !important;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase !important;
+}
+
+@media (width <= 700px) {
+    .hover-all-view-filters {
+        width: calc(100% - 12px);
+        margin-top: 7px;
+        padding: 13px 12px 11px;
+        border-radius: var(--ds-radius-control);
+    }
+
+    .hover-all-view-filters__heading > span:last-child,
+    .hover-generated-update-label__context {
+        display: none;
+    }
+
+    .hover-generated-update-label {
+        flex-wrap: wrap;
+    }
+
+    .hover-generated-technical-details > div {
+        grid-template-columns: 1fr;
+        gap: 3px;
+    }
+}
+
 .hover-generated-update .message_content h2 {
     margin: 9px 0 4px;
     color: var(--ds-neutral-950);

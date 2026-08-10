@@ -58,8 +58,10 @@
     <div class="message_content rendered_markdown">
         {{#if is_hover_generated_update}}
         <div class="hover-generated-update-label">
-            <span class="hover-generated-update-label__chip">{{#if hover_module_name}}{{hover_module_name}}{{else}}{{t "AI update"}}{{/if}}</span>
+            <span class="hover-generated-update-label__chip">{{#if hover_output_label}}{{hover_output_label}}{{else}}{{#if hover_module_name}}{{hover_module_name}}{{else}}{{t "AI update"}}{{/if}}{{/if}}</span>
             <span class="hover-generated-update-label__context">{{hover_source_context}}</span>
+            {{#if hover_state}}<span class="hover-generated-update-state hover-generated-update-state--{{hover_state}}">{{hover_state}}</span>{{/if}}
+            {{#if hover_importance}}<span class="hover-generated-update-importance hover-generated-update-importance--{{hover_importance}}">{{hover_importance}}</span>{{/if}}
         </div>
         {{/if}}
         {{#if use_match_properties}}
@@ -74,6 +76,16 @@
     </div>
     {{/unless}}
 {{/unless}}
+
+{{#if is_hover_generated_update}}
+<div class="hover-generated-update-actions" aria-label="{{t 'Update details' }}">
+    <button type="button" class="hover-generated-details-button" data-hover-message-id="{{msg/id}}">{{t "Details"}}</button>
+    {{#if hover_has_history}}
+    <button type="button" class="hover-generated-history-button" data-hover-message-id="{{msg/id}}">{{#tr}}View history ({{hover_history_count}}){{/tr}}</button>
+    {{/if}}
+    {{#if hover_is_earlier}}<span class="hover-generated-earlier-label">{{t "Earlier state"}}</span>{{/if}}
+</div>
+{{/if}}
 
 {{#if message_edit_notices_in_left_col}}
 {{> edited_notice .}}

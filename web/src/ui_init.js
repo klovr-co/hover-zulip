@@ -56,8 +56,10 @@ import * as gif_state from "./gif_state.ts";
 import * as group_permission_settings from "./group_permission_settings.ts";
 import * as hashchange from "./hashchange.ts";
 import * as hotkey from "./hotkey.ts";
+import * as hover_all_view from "./hover_all_view.ts";
 import * as hover_connected_accounts from "./hover_connected_accounts.ts";
 import * as hover_evidence from "./hover_evidence.ts";
+import * as hover_generated_details from "./hover_generated_details.ts";
 import * as hover_source_view from "./hover_source_view.ts";
 import * as hover_spaces from "./hover_spaces.ts";
 import * as i18n from "./i18n.ts";
@@ -542,7 +544,9 @@ export async function initialize_everything(state_data) {
     channel_folders.initialize(state_data.channel_folders);
     hover_connected_accounts.initialize(state_data.hover_connected_accounts);
     hover_evidence.initialize();
+    hover_generated_details.initialize();
     hover_spaces.initialize(state_data.hover_spaces);
+    hover_all_view.initialize();
     hover_source_view.initialize();
 
     // These components must be initialized early, because other

@@ -31,6 +31,7 @@ export const hover_space_attachment_schema = z.object({
             live_since: z.string(),
         }),
     ),
+    generated_count: z._default(z.number(), 0),
 });
 
 export const hover_module_version_schema = z.object({
@@ -85,6 +86,7 @@ export const hover_module_installation_schema = z.object({
             debounce_seconds: z.nullable(z.number()),
         }),
     ),
+    generated_count: z._default(z.number(), 0),
 });
 
 export const hover_space_schema = z.object({
@@ -194,7 +196,13 @@ export function get_sidebar_sources(space: HoverSpace): {
             integration_routes: attachment.integration_routes,
         }))
         .map(
-            ({attachment_id, can_browse_records, is_history_retained, source, integration_routes}) => {
+            ({
+                attachment_id,
+                can_browse_records,
+                is_history_retained,
+                source,
+                integration_routes,
+            }) => {
                 const is_external = !can_browse_records && source.external_url !== "";
                 return {
                     key: source.provider_key,
@@ -221,6 +229,7 @@ export function get_sidebar_modules(space: HoverSpace): {
     name: string;
     icon: string;
     topic: string;
+    count: number;
 }[] {
     return space.module_installations
         .filter((installation) => installation.state === "enabled")
@@ -230,5 +239,6 @@ export function get_sidebar_modules(space: HoverSpace): {
             name: installation.name,
             icon: installation.navigation_icon,
             topic: installation.destination_topic,
+            count: installation.generated_count,
         }));
 }

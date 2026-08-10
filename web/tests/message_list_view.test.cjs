@@ -523,14 +523,23 @@ test("hover_generated_update_vars", () => {
                 evidence_url: "/json/hover/spaces/7/generated-items/1/evidence",
                 sources: [
                     {
+                        id: null,
                         key: "whatsapp",
                         name: "WhatsApp",
                         icon_class: "fa fa-whatsapp",
                         count: 1,
                         url: "",
                     },
-                    {key: "github", name: "GitHub", icon_class: "fa fa-github", count: 1, url: ""},
                     {
+                        id: null,
+                        key: "github",
+                        name: "GitHub",
+                        icon_class: "fa fa-github",
+                        count: 1,
+                        url: "",
+                    },
+                    {
+                        id: null,
                         key: "instagram",
                         name: "Instagram",
                         icon_class: "fa fa-instagram",
@@ -538,6 +547,16 @@ test("hover_generated_update_vars", () => {
                         url: "",
                     },
                 ],
+                presentation: {
+                    label: "Digest",
+                    importance: "high",
+                    state: null,
+                    occurred_at: "2026-08-11T01:00:00+00:00",
+                    generated_at: "2026-08-11T01:01:00+00:00",
+                    published_at: "2026-08-11T01:02:00+00:00",
+                    run_reference: "run-13",
+                },
+                lineage: {is_latest: true, history_count: 1, history: []},
             },
         },
         true,
@@ -561,6 +580,9 @@ test("hover_generated_update_vars", () => {
     assert.equal(hover_update.has_hover_source_integrations, true);
     assert.equal(hover_update.hover_module_key, "marketing_digest");
     assert.equal(hover_update.hover_module_name, "Marketing Digest");
+    assert.equal(hover_update.hover_output_label, "Digest");
+    assert.equal(hover_update.hover_importance, "high");
+    assert.equal(hover_update.hover_is_latest, true);
     assert.equal(hover_update.hover_source_context, "Across 3 sources");
     assert.equal(human_post.is_hover_generated_update, false);
     assert.equal(human_post.has_hover_source_integrations, false);
@@ -597,6 +619,7 @@ test("native integration messages keep normal chrome and show Source provenance"
     assert.equal(message.has_hover_source_integrations, true);
     assert.deepEqual(message.hover_source_integrations, [
         {
+            id: 81,
             key: "instagram",
             name: "Instagram: AIMTO Instagram",
             icon_class: "zulip-icon zulip-icon-link",
@@ -605,6 +628,8 @@ test("native integration messages keep normal chrome and show Source provenance"
         },
     ]);
     assert.equal(message.hover_module_name, undefined);
+    assert.equal(message.has_hover_source_provenance, true);
+    assert.equal(message.hover_filter_classes.includes("hover-raw-source-record"), true);
     assert.equal(message.hover_source_context, undefined);
 });
 

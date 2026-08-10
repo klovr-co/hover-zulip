@@ -975,6 +975,7 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
             has_hover_ai_modules: hover_ai_modules.length > 0,
             hover_ai_modules: hover_ai_modules.map((hover_module) => ({
                 ...hover_module,
+                has_count: true,
                 url: hash_util.by_stream_topic_url(sub.stream_id, hover_module.topic),
             })),
             hover_attached_sources: hover_spaces.get_sidebar_sources(hover_space).map((source) => ({

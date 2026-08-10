@@ -65,6 +65,7 @@ const hover_generated_item_schema = z.object({
     evidence_url: z.nullable(z.string()),
     sources: z.array(
         z.object({
+            id: z.nullable(z.number()),
             key: z.string(),
             name: z.string(),
             icon_class: z.string(),
@@ -72,6 +73,28 @@ const hover_generated_item_schema = z.object({
             url: z.string(),
         }),
     ),
+    presentation: z.object({
+        label: z.string(),
+        importance: z.string(),
+        state: z.nullable(z.string()),
+        occurred_at: z.nullable(z.string()),
+        generated_at: z.nullable(z.string()),
+        published_at: z.nullable(z.string()),
+        run_reference: z.string(),
+    }),
+    lineage: z.object({
+        is_latest: z.boolean(),
+        history_count: z.number(),
+        history: z.array(
+            z.object({
+                message_id: z.number(),
+                title: z.string(),
+                state: z.nullable(z.string()),
+                occurred_at: z.nullable(z.string()),
+                is_current: z.boolean(),
+            }),
+        ),
+    }),
 });
 
 export type HoverGeneratedItem = z.infer<typeof hover_generated_item_schema>;

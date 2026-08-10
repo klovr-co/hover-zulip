@@ -1,6 +1,7 @@
 import type {Message} from "./message_store.ts";
 
 export type SourceIntegration = {
+    id: number | null;
     key: string;
     name: string;
     icon_class: string;

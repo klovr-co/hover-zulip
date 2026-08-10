@@ -116,7 +116,38 @@ class HoverGeneratedMessageTest(BaseAction):
         self.assertEqual(fetched_messages[0]["hover_generated_item"], event_metadata)
         self.assertEqual(event_metadata["output_type"], "progress_update")
         self.assertEqual(event_metadata["module"]["version"], "v3")
+        self.assertEqual(event_metadata["presentation"]["label"], "Progress update")
+        self.assertEqual(event_metadata["presentation"]["importance"], "normal")
+        self.assertTrue(event_metadata["lineage"]["is_latest"])
         self.assertEqual([source["key"] for source in event_metadata["sources"]], ["whatsapp", "github"])
+
+    def test_lineage_projects_latest_state_and_authorized_history(self) -> None:
+        hamlet = self.example_user("hamlet")
+        self.login_user(hamlet)
+        first_id = self.send_stream_message(hamlet, "Verona", "First state", "Decisions")
+        latest_id = self.send_stream_message(hamlet, "Verona", "Latest state", "Decisions")
+        for message_id, lifecycle in [(first_id, "active"), (latest_id, "reversed")]:
+            GeneratedItem.objects.create(
+                realm=hamlet.realm,
+                message=Message.objects.get(id=message_id),
+                output_type=GeneratedItem.OutputType.DECISION,
+                module_key="decisions",
+                module_name="Decisions",
+                module_version="v1",
+                source_summary="From Operations",
+                lineage_key="decision-13",
+                payload={"title": f"State {lifecycle}", "lifecycle": lifecycle},
+            )
+
+        fetched = self.get_messages(anchor=latest_id, num_before=1, num_after=0)
+        by_id = {message["id"]: message["hover_generated_item"] for message in fetched}
+        self.assertFalse(by_id[first_id]["lineage"]["is_latest"])
+        self.assertTrue(by_id[latest_id]["lineage"]["is_latest"])
+        self.assertEqual(by_id[latest_id]["presentation"]["state"], "reversed")
+        self.assertEqual(
+            [entry["message_id"] for entry in by_id[latest_id]["lineage"]["history"]],
+            [latest_id, first_id],
+        )
 
     def test_ordinary_message_has_no_hover_metadata(self) -> None:
         hamlet = self.example_user("hamlet")

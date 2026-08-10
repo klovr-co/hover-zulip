@@ -134,6 +134,7 @@ class HoverSpaceAttachment(BaseModel):
     can_browse_records: bool
     source: HoverSpaceSource
     integration_routes: list[HoverIntegrationRoute]
+    generated_count: int
 
 
 class HoverSpaceAdministrator(BaseModel):
@@ -215,6 +216,7 @@ class HoverModuleInstallation(BaseModel):
     predecessor_id: int | None
     bindings: list[HoverModuleBinding]
     triggers: list[HoverModuleTrigger]
+    generated_count: int
 
 
 class HoverSpace(BaseModel):
@@ -356,11 +358,36 @@ class HoverModule(BaseModel):
 
 
 class HoverGeneratedSource(BaseModel):
+    id: int | None
     key: str
     name: str
     icon_class: str
     count: int
     url: str
+
+
+class HoverGeneratedPresentation(BaseModel):
+    label: str
+    importance: str
+    state: str | None
+    occurred_at: str | None
+    generated_at: str | None
+    published_at: str | None
+    run_reference: str
+
+
+class HoverGeneratedHistoryEntry(BaseModel):
+    message_id: int
+    title: str
+    state: str | None
+    occurred_at: str | None
+    is_current: bool
+
+
+class HoverGeneratedLineage(BaseModel):
+    is_latest: bool
+    history_count: int
+    history: list[HoverGeneratedHistoryEntry]
 
 
 class HoverGeneratedItem(BaseModel):
@@ -371,6 +398,8 @@ class HoverGeneratedItem(BaseModel):
     evidence_available: bool
     evidence_url: str | None
     sources: list[HoverGeneratedSource]
+    presentation: HoverGeneratedPresentation
+    lineage: HoverGeneratedLineage
 
 
 class HoverProvenanceSource(BaseModel):

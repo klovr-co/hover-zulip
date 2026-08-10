@@ -29518,12 +29518,22 @@ components:
               type: string
             evidence_available:
               type: boolean
+            evidence_url:
+              type: string
+              nullable: true
+              description: |
+                Authorized endpoint for resolving exact supporting evidence,
+                or `null` when no evidence is available.
             sources:
               type: array
               items:
                 type: object
                 additionalProperties: false
                 properties:
+                  id:
+                    type: integer
+                    nullable: true
+                    description: The stable Source ID, when retained.
                   key:
                     type: string
                   name:
@@ -29536,18 +29546,96 @@ components:
                   url:
                     type: string
                 required:
+                  - id
                   - key
                   - name
                   - icon_class
                   - count
                   - url
+            presentation:
+              type: object
+              additionalProperties: false
+              description: Contract-aware fields used by normal feed presentation.
+              properties:
+                label:
+                  type: string
+                importance:
+                  type: string
+                  enum: [low, normal, high, urgent]
+                state:
+                  type: string
+                  nullable: true
+                occurred_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                generated_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                published_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                run_reference:
+                  type: string
+              required:
+                - label
+                - importance
+                - state
+                - occurred_at
+                - generated_at
+                - published_at
+                - run_reference
+            lineage:
+              type: object
+              additionalProperties: false
+              description: Same-Space linked material-change history for this native message.
+              properties:
+                is_latest:
+                  type: boolean
+                history_count:
+                  type: integer
+                  minimum: 0
+                history:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      message_id:
+                        type: integer
+                      title:
+                        type: string
+                      state:
+                        type: string
+                        nullable: true
+                      occurred_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                      is_current:
+                        type: boolean
+                    required:
+                      - message_id
+                      - title
+                      - state
+                      - occurred_at
+                      - is_current
+              required:
+                - is_latest
+                - history_count
+                - history
           required:
             - id
             - output_type
             - module
             - source_summary
             - evidence_available
+            - evidence_url
             - sources
+            - presentation
+            - lineage
         hover_source_provenance:
           type: object
           additionalProperties: false

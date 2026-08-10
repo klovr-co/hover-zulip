@@ -67,6 +67,17 @@ export type MessageContainer = {
     hover_source_context?: string;
     hover_evidence_url?: string;
     hover_source_integrations?: hover.SourceIntegration[];
+    hover_output_label?: string;
+    hover_importance?: string;
+    hover_state?: string;
+    hover_is_latest?: boolean;
+    hover_is_earlier?: boolean;
+    hover_has_history?: boolean;
+    hover_history_count?: number;
+    has_hover_source_provenance?: boolean;
+    hover_provenance_source_id?: number;
+    hover_provenance_source_key?: string;
+    hover_filter_classes?: string;
     last_edit_timestamp: number | undefined;
     last_moved_timestamp: number | undefined;
     mention_classname: string | undefined;
@@ -613,6 +624,17 @@ export class MessageListView {
         hover_source_context?: string;
         hover_evidence_url?: string;
         hover_source_integrations?: hover.SourceIntegration[];
+        hover_output_label?: string;
+        hover_importance?: string;
+        hover_state?: string;
+        hover_is_latest?: boolean;
+        hover_is_earlier?: boolean;
+        hover_has_history?: boolean;
+        hover_history_count?: number;
+        has_hover_source_provenance?: boolean;
+        hover_provenance_source_id?: number;
+        hover_provenance_source_key?: string;
+        hover_filter_classes?: string;
         mention_classname: string | undefined;
         include_sender: boolean;
         status_message: string | false;
@@ -714,6 +736,7 @@ export class MessageListView {
                 ? []
                 : [
                       {
+                          id: hover_source_provenance.source.id,
                           key: hover_source_provenance.source.provider_key,
                           name: `${hover_source_provenance.source.provider_name}: ${hover_source_provenance.source.display_name}`,
                           icon_class: "zulip-icon zulip-icon-link",
@@ -722,6 +745,26 @@ export class MessageListView {
                       },
                   ]);
         const hover_module = hover_generated_item?.module;
+        const hover_filter_classes = [
+            is_hover_generated_update
+                ? hover_generated_item?.lineage.is_latest
+                    ? "hover-lineage-latest"
+                    : "hover-lineage-earlier"
+                : undefined,
+            hover_source_provenance === undefined ? undefined : "hover-raw-source-record",
+            hover_source_provenance === undefined
+                ? undefined
+                : `hover-source-id--${hover_source_provenance.source.id}`,
+            hover_source_provenance === undefined
+                ? undefined
+                : `hover-source-key--${hover_source_provenance.source.provider_key}`,
+            ...hover_source_integrations.flatMap((source) => [
+                `hover-source-key--${source.key}`,
+                source.id === null ? undefined : `hover-source-id--${source.id}`,
+            ]),
+        ]
+            .filter((value) => value !== undefined)
+            .join(" ");
 
         return {
             timestr: get_timestr(message),
@@ -734,6 +777,12 @@ export class MessageListView {
             should_add_guest_indicator_for_sender,
             is_hidden,
             is_hover_generated_update,
+            hover_filter_classes,
+            has_hover_source_provenance: hover_source_provenance !== undefined,
+            ...(hover_source_provenance !== undefined && {
+                hover_provenance_source_id: hover_source_provenance.source.id,
+                hover_provenance_source_key: hover_source_provenance.source.provider_key,
+            }),
             has_hover_source_integrations: hover_source_integrations.length > 0,
             ...(hover_module !== undefined && {
                 hover_module_key: hover_module.key,
@@ -741,6 +790,15 @@ export class MessageListView {
             }),
             ...(hover_generated_item !== undefined && {
                 hover_source_context: hover_generated_item.source_summary,
+                hover_output_label: hover_generated_item.presentation.label,
+                hover_importance: hover_generated_item.presentation.importance,
+                ...(hover_generated_item.presentation.state !== null && {
+                    hover_state: hover_generated_item.presentation.state,
+                }),
+                hover_is_latest: hover_generated_item.lineage.is_latest,
+                hover_is_earlier: !hover_generated_item.lineage.is_latest,
+                hover_has_history: hover_generated_item.lineage.history_count > 1,
+                hover_history_count: hover_generated_item.lineage.history_count,
                 ...(hover_generated_item.evidence_url !== null && {
                     hover_evidence_url: hover_generated_item.evidence_url,
                 }),

@@ -1,11 +1,13 @@
 from typing import Any
 
-from django.db.models import Prefetch, Q, QuerySet
+from django.db.models import Count, Prefetch, Q, QuerySet
 from django.utils.translation import gettext as _
 
 from hover.lib_sources import attachment_queryset, get_space_attachment_data
 from hover.models import (
     ModuleInstallation,
+    EvidenceLink,
+    GeneratedItem,
     Space,
     SpaceAdministrator,
     SpaceMembership,
@@ -117,6 +119,28 @@ def get_space_data(space: Space) -> dict[str, Any]:
     )
     from hover.actions_modules import get_module_catalog, installation_data
 
+    module_counts = {
+        row["module_key"]: row["count"]
+        for row in GeneratedItem.objects.filter(attachment__space=space)
+        .values("module_key")
+        .annotate(count=Count("id"))
+    }
+    source_counts = {
+        row["source_id"]: row["count"]
+        for row in EvidenceLink.objects.filter(generated_item__attachment__space=space)
+        .exclude(source_id=None)
+        .values("source_id")
+        .annotate(count=Count("generated_item_id", distinct=True))
+    }
+    attachments = get_space_attachment_data(space)
+    for attachment in attachments:
+        attachment["generated_count"] = source_counts.get(attachment["source"]["id"], 0)
+    installations = []
+    for installation in space.module_installations.all():
+        data = installation_data(installation)
+        data["generated_count"] = module_counts.get(data["definition_key"], 0)
+        installations.append(data)
+
     return {
         "id": space.id,
         "name": space.name,
@@ -125,7 +149,7 @@ def get_space_data(space: Space) -> dict[str, Any]:
         "category": {"id": space.category_id, "name": space.category.name},
         "created_by_id": space.created_by_id,
         "stream_id": space.stream_id,
-        "attachments": get_space_attachment_data(space),
+        "attachments": attachments,
         "administrators": [
             {"user_id": assignment.user_id, "full_name": assignment.user.full_name}
             for assignment in administrators
@@ -151,9 +175,7 @@ def get_space_data(space: Space) -> dict[str, Any]:
             }
             for suggestion in suggestions
         ],
-        "module_installations": [
-            installation_data(installation) for installation in space.module_installations.all()
-        ],
+        "module_installations": installations,
         "module_catalog": get_module_catalog(space.realm),
     }
 
