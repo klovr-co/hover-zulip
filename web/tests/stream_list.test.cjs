@@ -357,6 +357,8 @@ test_ui("AIMTO modules are native topic links", ({mock_template, override}) => {
             name: "Suggested Actions",
             icon: "zulip-icon-sparkles",
             topic: "Suggested Actions",
+            count: 0,
+            has_count: true,
             url: "#narrow/channel/222-AIMTO-Events/topic/Suggested.20Actions",
         });
         assert.equal(data.hover_attached_sources[0].url, "#hover/space/1/source/1");

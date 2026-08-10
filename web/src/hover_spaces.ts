@@ -239,6 +239,6 @@ export function get_sidebar_modules(space: HoverSpace): {
             name: installation.name,
             icon: installation.navigation_icon,
             topic: installation.destination_topic,
-            count: installation.generated_count,
+            count: installation.generated_count ?? 0,
         }));
 }

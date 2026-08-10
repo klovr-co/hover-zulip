@@ -32,7 +32,7 @@ def prepare_response(
         raise JsonableError(_("You do not have permission to review this update."))
     try:
         generated_item = (
-            GeneratedItem.objects.select_for_update(no_key=True)
+            GeneratedItem.objects.select_for_update(no_key=True, of=("self",))
             .select_related("attachment__space__stream", "message")
             .get(id=generated_item_id, realm=actor.realm, attachment__isnull=False)
         )

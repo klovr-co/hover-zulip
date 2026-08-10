@@ -27,7 +27,11 @@ export function configure_for_reply(message: Message | undefined): void {
 
     generated_item_id = generated_item.id;
     const $field = $("#hover-review-field").empty();
-    $field.append($("<option>").val("").text($t({defaultMessage: "Choose a field"})));
+    $field.append(
+        $("<option>")
+            .val("")
+            .text($t({defaultMessage: "Choose a field"})),
+    );
     for (const key of Object.keys(generated_item.reviewed_payload).toSorted()) {
         $field.append($("<option>").val(key).text(key.replaceAll("_", " ")));
     }

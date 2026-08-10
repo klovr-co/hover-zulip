@@ -622,12 +622,10 @@ export class MessageListView {
         is_hover_review: boolean;
         hover_response_clarification_required: boolean;
         has_hover_revisions: boolean;
-        hover_revisions: (
-            message_store.HoverRevision & {
-                previous_value_display: string | undefined;
-                new_value_display: string | undefined;
-            }
-        )[];
+        hover_revisions: (message_store.HoverRevision & {
+            previous_value_display: string | undefined;
+            new_value_display: string | undefined;
+        })[];
         has_hover_source_integrations: boolean;
         hover_module_key?: string;
         hover_module_name?: string;

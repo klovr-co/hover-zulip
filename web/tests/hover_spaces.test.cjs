@@ -177,12 +177,14 @@ run_test("server-owned enabled installations become Module navigation", () => {
             name: "Conversation Digest",
             icon: "zulip-icon-align-left",
             topic: "Conversation Digest",
+            count: 0,
         },
         {
             key: "suggested_actions",
             name: "Suggested Actions",
             icon: "zulip-icon-sparkles",
             topic: "Suggested Actions",
+            count: 0,
         },
     ]);
 });
