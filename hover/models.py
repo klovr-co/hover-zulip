@@ -1011,6 +1011,10 @@ class GeneratedItem(models.Model):
     module_version = models.TextField()
     source_summary = models.TextField()
     payload = models.JSONField(default=dict)
+    # `payload` is the immutable publication-time interpretation. Human Reviews
+    # update this separate projection so the original wording and evidence stay
+    # available for comparison.
+    reviewed_payload = models.JSONField(default=dict)
     importance = models.TextField(
         choices=[
             ("low", "Low"),
@@ -1123,3 +1127,57 @@ class EvidenceLink(models.Model):
             raise ValidationError(
                 {"source": "Evidence links and Sources must share an organization."}
             )
+
+
+class Response(models.Model):
+    class ResponseType(models.TextChoices):
+        REPLY = "reply", "Reply"
+        REVIEW = "review", "Review"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    generated_item = models.ForeignKey(GeneratedItem, on_delete=CASCADE, related_name="responses")
+    message = models.OneToOneField(Message, on_delete=CASCADE, related_name="hover_response")
+    response_type = models.TextField(choices=ResponseType.choices)
+    clarification_required = models.BooleanField(default=False)
+    date_created = models.DateTimeField(default=timezone_now)
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.realm_id != self.generated_item.realm_id or self.realm_id != self.message.realm_id:
+            raise ValidationError(
+                "Responses, generated items, and messages must share an organization."
+            )
+        if self.generated_item.message.recipient_id != self.message.recipient_id:
+            raise ValidationError("Responses must be sent beneath their generated root.")
+        if self.generated_item.message.topic_name() != self.message.topic_name():
+            raise ValidationError("Responses must be sent beneath their generated root.")
+
+
+class Revision(models.Model):
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    generated_item = models.ForeignKey(GeneratedItem, on_delete=CASCADE, related_name="revisions")
+    response = models.OneToOneField(Response, on_delete=RESTRICT, related_name="revision")
+    actor = models.ForeignKey(UserProfile, on_delete=RESTRICT, related_name="hover_revisions")
+    field_path = models.TextField()
+    previous_value = models.JSONField(null=True)
+    new_value = models.JSONField(null=True)
+    reason = models.TextField(default="")
+    date_created = models.DateTimeField(default=timezone_now)
+
+    class Meta:
+        ordering = ["date_created", "id"]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if (
+            self.realm_id != self.generated_item.realm_id
+            or self.realm_id != self.response.realm_id
+            or self.realm_id != self.actor.realm_id
+        ):
+            raise ValidationError("Revisions and their related records must share an organization.")
+        if self.response.generated_item_id != self.generated_item_id:
+            raise ValidationError("A revision must belong to its originating Review.")
+        if self.response.response_type != Response.ResponseType.REVIEW:
+            raise ValidationError("Only a Review can originate a revision.")

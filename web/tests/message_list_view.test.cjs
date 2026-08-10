@@ -521,6 +521,19 @@ test("hover_generated_update_vars", () => {
                 source_summary: "Across 3 sources",
                 evidence_available: true,
                 evidence_url: "/json/hover/spaces/7/generated-items/1/evidence",
+                reviewed_payload: {summary: "Launch confirmed"},
+                revisions: [
+                    {
+                        id: 3,
+                        field_path: "summary",
+                        previous_value: "Launch likely",
+                        new_value: "Launch confirmed",
+                        actor: {id: 9, full_name: "Reviewer"},
+                        timestamp: "2026-08-11T12:00:00+00:00",
+                        reason: "Confirmed with the team.",
+                        review_message_id: 99,
+                    },
+                ],
                 sources: [
                     {
                         id: null,
@@ -584,6 +597,8 @@ test("hover_generated_update_vars", () => {
     assert.equal(hover_update.hover_importance, "high");
     assert.equal(hover_update.hover_is_latest, true);
     assert.equal(hover_update.hover_source_context, "Across 3 sources");
+    assert.equal(hover_update.has_hover_revisions, true);
+    assert.equal(hover_update.hover_revisions[0].previous_value_display, '"Launch likely"');
     assert.equal(human_post.is_hover_generated_update, false);
     assert.equal(human_post.has_hover_source_integrations, false);
     assert.equal(human_post.hover_source_integrations, undefined);

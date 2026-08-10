@@ -56,6 +56,18 @@
 {{#unless status_message}}
     {{#unless is_hidden}}
     <div class="message_content rendered_markdown">
+        {{#if is_hover_response}}
+        <div class="hover-response-label {{#if is_hover_review}}hover-response-label--review{{/if}}">
+            <span>{{#if is_hover_review}}{{t "Review"}}{{else}}{{t "Reply"}}{{/if}}</span>
+            <small>{{t "to Hover update"}}</small>
+        </div>
+        {{#if hover_response_clarification_required}}
+        <div class="hover-review-clarification" role="status">
+            <strong>{{t "Clarification needed"}}</strong>
+            {{t "Choose the field and exact new value before Hover changes its interpretation."}}
+        </div>
+        {{/if}}
+        {{/if}}
         {{#if is_hover_generated_update}}
         <div class="hover-generated-update-label">
             <span class="hover-generated-update-label__chip">{{#if hover_output_label}}{{hover_output_label}}{{else}}{{#if hover_module_name}}{{hover_module_name}}{{else}}{{t "AI update"}}{{/if}}{{/if}}</span>
@@ -68,6 +80,9 @@
             {{rendered_markdown msg/match_content}}
         {{else}}
             {{rendered_markdown msg/content}}
+        {{/if}}
+        {{#if has_hover_revisions}}
+            {{> hover_revision_history revisions=hover_revisions}}
         {{/if}}
     </div>
     {{else}}

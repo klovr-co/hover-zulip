@@ -20,6 +20,10 @@ type SendMessageData = {
     content: string;
     resend?: boolean;
     locally_echoed?: boolean;
+    hover_generated_item_id?: number;
+    hover_response_type?: "reply" | "review";
+    hover_review_field?: string;
+    hover_review_value?: string;
 } & (
     | {
           type: "stream";

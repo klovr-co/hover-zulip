@@ -4,7 +4,7 @@ from typing import Any
 
 from django.db.models import Q
 
-from hover.models import GeneratedItem, IntegrationMessageProvenance, Space
+from hover.models import GeneratedItem, IntegrationMessageProvenance, Response, Space
 
 PROVIDER_ICON_CLASSES = {
     "whatsapp": "fa fa-whatsapp",
@@ -16,14 +16,22 @@ PROVIDER_ICON_CLASSES = {
 def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) -> None:
     """Add Hover metadata to native messages after message access has been authorized."""
     message_ids = [message["id"] for message in message_dicts]
-    items = list(
-        GeneratedItem.objects.filter(
+    responses = list(
+        Response.objects.filter(
             realm_id=realm_id,
             message_id__in=message_ids,
             message__realm_id=realm_id,
+        ).select_related("generated_item__message")
+    )
+    response_item_ids = [response.generated_item_id for response in responses]
+    items = list(
+        GeneratedItem.objects.filter(
+            Q(message_id__in=message_ids) | Q(id__in=response_item_ids),
+            realm_id=realm_id,
+            message__realm_id=realm_id,
         )
         .select_related("attachment", "message")
-        .prefetch_related("evidence_links")
+        .prefetch_related("evidence_links", "revisions__actor", "revisions__response")
         .order_by("id")
     )
     recipient_ids = {item.message.recipient_id for item in items}
@@ -86,6 +94,7 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
 
     for history in lineage_items.values():
         history.sort(key=item_time)
+    items_by_id = {item.id: item for item in items}
     metadata_by_message_id: dict[int, dict[str, Any]] = {}
     for item in items:
         sources: OrderedDict[str, dict[str, Any]] = OrderedDict()
@@ -173,12 +182,42 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
                 else None
             ),
             "sources": list(sources.values()),
+            "reviewed_payload": item.reviewed_payload or item.payload,
+            "revisions": [
+                {
+                    "id": revision.id,
+                    "field_path": revision.field_path,
+                    "previous_value": revision.previous_value,
+                    "new_value": revision.new_value,
+                    "actor": {
+                        "id": revision.actor_id,
+                        "full_name": revision.actor.full_name,
+                    },
+                    "timestamp": revision.date_created.isoformat(),
+                    "reason": revision.reason,
+                    "review_message_id": revision.response.message_id,
+                }
+                for revision in item.revisions.all()
+            ],
         }
 
     for message in message_dicts:
         metadata = metadata_by_message_id.get(message["id"])
         if metadata is not None:
             message["hover_generated_item"] = metadata
+
+    for response in responses:
+        item = items_by_id[response.generated_item_id]
+        root_metadata = metadata_by_message_id[item.message_id]
+        for message in message_dicts:
+            if message["id"] == response.message_id:
+                message["hover_response"] = {
+                    "type": response.response_type,
+                    "clarification_required": response.clarification_required,
+                    "root_message_id": item.message_id,
+                    "generated_item": root_metadata,
+                }
+                break
 
     provenance_by_message_id = {
         provenance.message_id: {

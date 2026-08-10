@@ -400,6 +400,15 @@ class HoverGeneratedItem(BaseModel):
     sources: list[HoverGeneratedSource]
     presentation: HoverGeneratedPresentation
     lineage: HoverGeneratedLineage
+    reviewed_payload: dict[str, object]
+    revisions: list[dict[str, object]]
+
+
+class HoverResponse(BaseModel):
+    type: Literal["reply", "review"]
+    clarification_required: bool
+    root_message_id: int
+    generated_item: HoverGeneratedItem
 
 
 class HoverProvenanceSource(BaseModel):
@@ -443,6 +452,7 @@ class MessageFieldForDirectMessageEvent(BaseModel):
     type: str
     display_recipient: list[DirectMessageDisplayRecipient]
     hover_generated_item: HoverGeneratedItem | None = None
+    hover_response: HoverResponse | None = None
     hover_source_provenance: HoverSourceProvenance | None = None
 
 
@@ -522,6 +532,7 @@ class MessageFieldForMessageEvent(BaseModel):
     display_recipient: str
     stream_id: int
     hover_generated_item: HoverGeneratedItem | None = None
+    hover_response: HoverResponse | None = None
     hover_source_provenance: HoverSourceProvenance | None = None
 
 

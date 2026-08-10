@@ -8385,6 +8385,29 @@ paths:
 
                     **Changes**: New in Zulip 8.0 (feature level 236).
                   example: true
+                hover_generated_item_id:
+                  type: integer
+                  description: |
+                    The generated Hover root being answered. This internal
+                    extension is accepted only from a confirmed Space member
+                    posting beneath that root.
+                hover_response_type:
+                  type: string
+                  enum: [reply, review]
+                  description: |
+                    Whether the native human-authored message is discussion or
+                    a Review of Hover's interpretation.
+                hover_review_field:
+                  type: string
+                  description: |
+                    An existing top-level reviewed-payload field to revise.
+                    Used only with `hover_response_type=review`.
+                hover_review_value:
+                  type: string
+                  description: |
+                    The new field value encoded as JSON. A Review with no valid
+                    field/value pair is recorded as requiring clarification and
+                    does not mutate current state.
               required:
                 - type
                 - to
@@ -9365,6 +9388,16 @@ paths:
                           user automatically unmuting or following the topic in question.
 
                           **Changes**: New in Zulip 8.0 (feature level 218).
+                      hover_response:
+                        type: object
+                        additionalProperties: false
+                        properties:
+                          type:
+                            type: string
+                            enum: [reply, review]
+                          clarification_required:
+                            type: boolean
+                        required: [type, clarification_required]
                     example:
                       {
                         "msg": "",
@@ -29286,6 +29319,7 @@ components:
             display_recipient: {}
             edit_history: {}
             hover_generated_item: {}
+            hover_response: {}
             hover_source_provenance: {}
             id: {}
             is_me_message: {}
@@ -29626,6 +29660,47 @@ components:
                 - is_latest
                 - history_count
                 - history
+            reviewed_payload:
+              type: object
+              additionalProperties: true
+              description: The current interpretation after applied Reviews.
+            revisions:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  id:
+                    type: integer
+                  field_path:
+                    type: string
+                  previous_value: {}
+                  new_value: {}
+                  actor:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: integer
+                      full_name:
+                        type: string
+                    required: [id, full_name]
+                  timestamp:
+                    type: string
+                    format: date-time
+                  reason:
+                    type: string
+                  review_message_id:
+                    type: integer
+                required:
+                  - id
+                  - field_path
+                  - previous_value
+                  - new_value
+                  - actor
+                  - timestamp
+                  - reason
+                  - review_message_id
           required:
             - id
             - output_type
@@ -29636,6 +29711,29 @@ components:
             - sources
             - presentation
             - lineage
+            - reviewed_payload
+            - revisions
+        hover_response:
+          type: object
+          additionalProperties: false
+          description: |
+            Typed Hover metadata for a native human-authored response beneath
+            a generated update. Omitted for ordinary messages.
+          properties:
+            type:
+              type: string
+              enum: [reply, review]
+            clarification_required:
+              type: boolean
+            root_message_id:
+              type: integer
+            generated_item:
+              $ref: "#/components/schemas/MessagesBase/properties/hover_generated_item"
+          required:
+            - type
+            - clarification_required
+            - root_message_id
+            - generated_item
         hover_source_provenance:
           type: object
           additionalProperties: false

@@ -16,6 +16,7 @@ import * as drafts from "./drafts.ts";
 import * as echo from "./echo.ts";
 import type {RawLocalMessage} from "./echo.ts";
 import {Filter} from "./filter.ts";
+import * as hover_response from "./hover_response.ts";
 import * as lightbox from "./lightbox.ts";
 import * as message_edit from "./message_edit.ts";
 import * as message_edit_history from "./message_edit_history.ts";
@@ -323,6 +324,8 @@ export function insert_new_messages(opts: InsertNewMessagesOpts): Message[] {
         // a few places, but otherwise we can treat them like regular messages.
         messages = local_messages;
     }
+
+    hover_response.apply_realtime_responses(messages);
 
     const any_untracked_unread_messages = unread.process_loaded_messages(messages, false);
     direct_message_group_data.process_loaded_messages(messages);

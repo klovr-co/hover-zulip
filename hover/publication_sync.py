@@ -287,6 +287,7 @@ def _create_generated_item(
         module_version=publication.producing_version,
         source_summary=f"From {attachment.source.display_name}",
         payload=publication.payload.model_dump(mode="json"),
+        reviewed_payload=publication.payload.model_dump(mode="json"),
         importance=publication.importance,
         run_reference=publication.run_reference,
         covered_start_at=publication.covered_period.start,

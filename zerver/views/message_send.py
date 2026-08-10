@@ -5,10 +5,12 @@ from typing import Annotated, Literal, cast
 
 from django.core import validators
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.http import HttpRequest, HttpResponse
 from django.utils.translation import gettext as _
 from pydantic import Json
 
+from hover.actions_responses import create_response, prepare_response
 from zerver.actions.message_send import (
     check_send_message,
     compute_irc_user_fullname,
@@ -19,6 +21,7 @@ from zerver.actions.message_send import (
 )
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.markdown import render_message_markdown
+from zerver.lib.message import access_message
 from zerver.lib.request import RequestNotes
 from zerver.lib.response import json_success
 from zerver.lib.typed_endpoint import (
@@ -102,6 +105,7 @@ def same_realm_jabber_user(user_profile: UserProfile, email: str) -> bool:
     return RealmDomain.objects.filter(realm=user_profile.realm, domain=domain).exists()
 
 
+@transaction.atomic(durable=True)
 @typed_endpoint
 def send_message_backend(
     request: HttpRequest,
@@ -126,7 +130,14 @@ def send_message_backend(
     widget_content: Annotated[
         str | None, ApiParamConfig("widget_content", documentation_status=DOCUMENTATION_PENDING)
     ] = None,
+    hover_generated_item_id: Json[int] | None = None,
+    hover_response_type: Literal["reply", "review"] | None = None,
+    hover_review_field: str | None = None,
+    hover_review_value: str | None = None,
 ) -> HttpResponse:
+    if (hover_generated_item_id is None) != (hover_response_type is None):
+        raise JsonableError(_("Invalid Hover response metadata."))
+
     recipient_type_name = req_type
     if recipient_type_name == "direct":
         # For now, use "private" from Message.API_RECIPIENT_TYPES.
@@ -219,7 +230,19 @@ def send_message_backend(
         # automatically marked as read for yourself.
         read_by_sender = client.default_read_by_sender()
 
-    data: dict[str, int] = {}
+    prepared_response = None
+    if hover_generated_item_id is not None and hover_response_type is not None:
+        if forged:
+            raise JsonableError(_("Hover responses cannot be forged."))
+        prepared_response = prepare_response(
+            user_profile,
+            generated_item_id=hover_generated_item_id,
+            response_type=hover_response_type,
+            review_field=hover_review_field,
+            review_value=hover_review_value,
+        )
+
+    data: dict[str, object] = {}
     sent_message_result = check_send_message(
         sender,
         client,
@@ -235,8 +258,23 @@ def send_message_backend(
         sender_queue_id=queue_id,
         widget_content=widget_content,
         read_by_sender=read_by_sender,
+        allow_hover_response=prepared_response is not None,
     )
     data["id"] = sent_message_result.message_id
+    if prepared_response is not None:
+        response = create_response(
+            prepared_response,
+            message=access_message(
+                user_profile,
+                sent_message_result.message_id,
+                is_modifying_message=False,
+            ),
+            actor=user_profile,
+        )
+        data["hover_response"] = {
+            "type": response.response_type,
+            "clarification_required": response.clarification_required,
+        }
     if sent_message_result.automatic_new_visibility_policy:
         data["automatic_new_visibility_policy"] = (
             sent_message_result.automatic_new_visibility_policy

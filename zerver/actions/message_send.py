@@ -1483,6 +1483,7 @@ def check_send_message(
     widget_content: str | None = None,
     *,
     skip_stream_access_check: bool = False,
+    allow_hover_response: bool = False,
     read_by_sender: bool = False,
 ) -> SentMessageResult:
     addressee = Addressee.legacy_build(sender, recipient_type_name, message_to, topic_name)
@@ -1499,6 +1500,7 @@ def check_send_message(
         sender_queue_id,
         widget_content,
         skip_stream_access_check=skip_stream_access_check,
+        allow_hover_response=allow_hover_response,
     )
     return do_send_messages(
         [message_request],
@@ -1768,6 +1770,7 @@ def check_message(
     email_gateway: bool = False,
     *,
     skip_stream_access_check: bool = False,
+    allow_hover_response: bool = False,
     message_type: int = Message.MessageType.NORMAL,
     mention_backend: MentionBackend | None = None,
     limit_unread_user_ids: set[int] | None = None,
@@ -1820,7 +1823,7 @@ def check_message(
 
         user_group_membership_details = UserGroupMembershipDetails(user_recursive_group_ids=None)
         system_groups_name_dict = get_realm_system_groups_name_dict(stream.realm_id)
-        if not skip_stream_access_check:
+        if not skip_stream_access_check and not allow_hover_response:
             access_stream_for_send_message(
                 sender=sender,
                 stream=stream,
@@ -1829,7 +1832,7 @@ def check_message(
                 user_group_membership_details=user_group_membership_details,
                 system_groups_name_dict=system_groups_name_dict,
             )
-        else:
+        elif skip_stream_access_check:
             # Defensive assertion - the only currently supported use case
             # for this option is for outgoing webhook bots and since this
             # is security-sensitive code, it's beneficial to ensure nothing

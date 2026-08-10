@@ -63,6 +63,19 @@ const hover_generated_item_schema = z.object({
     source_summary: z.string(),
     evidence_available: z.boolean(),
     evidence_url: z.nullable(z.string()),
+    reviewed_payload: z.record(z.string(), z.unknown()),
+    revisions: z.array(
+        z.object({
+            id: z.number(),
+            field_path: z.string(),
+            previous_value: z.unknown(),
+            new_value: z.unknown(),
+            actor: z.object({id: z.number(), full_name: z.string()}),
+            timestamp: z.string(),
+            reason: z.string(),
+            review_message_id: z.number(),
+        }),
+    ),
     sources: z.array(
         z.object({
             id: z.nullable(z.number()),
@@ -98,6 +111,16 @@ const hover_generated_item_schema = z.object({
 });
 
 export type HoverGeneratedItem = z.infer<typeof hover_generated_item_schema>;
+export type HoverRevision = HoverGeneratedItem["revisions"][number];
+
+const hover_response_schema = z.object({
+    type: z.enum(["reply", "review"]),
+    clarification_required: z.boolean(),
+    root_message_id: z.number(),
+    generated_item: hover_generated_item_schema,
+});
+
+export type HoverResponse = z.infer<typeof hover_response_schema>;
 
 const hover_source_provenance_schema = z.object({
     captured_at: z.string(),
@@ -154,6 +177,7 @@ export const raw_message_schema = z.intersection(
             sender_full_name: z.string(),
             sender_id: z.number(),
             hover_generated_item: z.optional(hover_generated_item_schema),
+            hover_response: z.optional(hover_response_schema),
             hover_source_provenance: z.optional(hover_source_provenance_schema),
             // The web app doesn't use sender_realm_str; ignore.
             // sender_realm_str: z.string(),
@@ -230,6 +254,7 @@ export type Message = (
 ) & {
     clean_reactions: Map<string, MessageCleanReaction>;
     hover_generated_item?: HoverGeneratedItem | undefined;
+    hover_response?: HoverResponse | undefined;
     hover_source_provenance?: HoverSourceProvenance | undefined;
 
     // Local echo state cluster of fields.

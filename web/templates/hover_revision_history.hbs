@@ -1,0 +1,15 @@
+<details class="hover-revision-history">
+    <summary>{{t "Reviewed interpretation"}} · {{revisions.length}} {{t "revision(s)"}}</summary>
+    <ol>
+        {{#each revisions}}
+            <li>
+                <div class="hover-revision-history__meta">
+                    <strong>{{actor.full_name}}</strong>
+                    <time datetime="{{timestamp}}">{{timestamp}}</time>
+                </div>
+                <div><code>{{field_path}}</code>: <del>{{previous_value_display}}</del> <span aria-hidden="true">→</span> <ins>{{new_value_display}}</ins></div>
+                {{#if reason}}<p>{{reason}}</p>{{/if}}
+            </li>
+        {{/each}}
+    </ol>
+</details>

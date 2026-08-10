@@ -8,3 +8,7 @@
   triggers, activation, and provenance state.
 * Added `POST /hover/spaces/{space_id}/generated-items/{generated_item_id}/evidence`
   to resolve exact, authorized evidence for generated Hover items.
+* Extended native message send and message/event objects with typed Hover Reply
+  and Review metadata. Explicit Reviews apply one existing payload field and
+  expose append-only revision history; ambiguous Reviews request clarification
+  without changing current state.

@@ -618,6 +618,16 @@ export class MessageListView {
         should_add_guest_indicator_for_sender: boolean;
         is_hidden: boolean;
         is_hover_generated_update: boolean;
+        is_hover_response: boolean;
+        is_hover_review: boolean;
+        hover_response_clarification_required: boolean;
+        has_hover_revisions: boolean;
+        hover_revisions: (
+            message_store.HoverRevision & {
+                previous_value_display: string | undefined;
+                new_value_display: string | undefined;
+            }
+        )[];
         has_hover_source_integrations: boolean;
         hover_module_key?: string;
         hover_module_name?: string;
@@ -765,6 +775,12 @@ export class MessageListView {
         ]
             .filter((value) => value !== undefined)
             .join(" ");
+        const hover_response = message.hover_response;
+        const hover_revisions = (hover_generated_item?.revisions ?? []).map((revision) => ({
+            ...revision,
+            previous_value_display: JSON.stringify(revision.previous_value),
+            new_value_display: JSON.stringify(revision.new_value),
+        }));
 
         return {
             timestr: get_timestr(message),
@@ -783,6 +799,11 @@ export class MessageListView {
                 hover_provenance_source_id: hover_source_provenance.source.id,
                 hover_provenance_source_key: hover_source_provenance.source.provider_key,
             }),
+            is_hover_response: hover_response !== undefined,
+            is_hover_review: hover_response?.type === "review",
+            hover_response_clarification_required: hover_response?.clarification_required === true,
+            has_hover_revisions: hover_revisions.length > 0,
+            hover_revisions,
             has_hover_source_integrations: hover_source_integrations.length > 0,
             ...(hover_module !== undefined && {
                 hover_module_key: hover_module.key,

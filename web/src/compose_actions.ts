@@ -18,6 +18,7 @@ import * as compose_validate from "./compose_validate.ts";
 import * as composebox_typeahead from "./composebox_typeahead.ts";
 import * as drafts from "./drafts.ts";
 import * as feedback_widget from "./feedback_widget.ts";
+import * as hover_response from "./hover_response.ts";
 import {$t} from "./i18n.ts";
 import * as message_lists from "./message_lists.ts";
 import type {Message} from "./message_store.ts";
@@ -474,6 +475,7 @@ export let start = (raw_opts: ComposeActionsStartOpts): void => {
 
     // Show either stream/topic fields or "You and" field.
     show_compose_box(opts);
+    hover_response.configure_for_reply(opts.message);
 
     if (opts.draft_id) {
         drafts.set_compose_draft_id(opts.draft_id);
