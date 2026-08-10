@@ -29,7 +29,10 @@ from hover.views_modules import (
     rebind_resume_module,
     upgrade_module,
 )
-from hover.views_publications import resolve_generated_item_evidence
+from hover.views_publications import (
+    resolve_disputed_detail_evidence,
+    resolve_generated_item_evidence,
+)
 from hover.views_source_records import browse_source_records
 from hover.views_sources import attach_source, detach_source, discover_sources, preview_source
 from hover.views_spaces import (
@@ -653,6 +656,12 @@ v1_api_and_json_patterns = [
     rest_path(
         "hover/spaces/<int:space_id>/generated-items/<int:generated_item_id>/evidence",
         POST=resolve_generated_item_evidence,
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/generated-items/<int:generated_item_id>/disputed-details/"
+        "<int:disputed_detail_id>/evidence",
+        GET=resolve_disputed_detail_evidence,
+        POST=resolve_disputed_detail_evidence,
     ),
     rest_path("hover/connected_accounts", GET=list_connected_accounts),
     rest_path(

@@ -15,6 +15,7 @@ from hover.lib_spaces import get_accessible_spaces, get_space_data
 from hover.models import (
     ConnectedAccount,
     Source,
+    SourceParticipantBinding,
     Space,
     SpaceAdministrator,
     SpaceAttachment,
@@ -140,6 +141,23 @@ class HoverMembershipsTest(ZulipTestCase):
             SpaceMembershipSuggestion.objects.filter(space=self.space, user_id=outsider.id).exists()
         )
 
+    def test_verified_observation_persists_only_opaque_source_participant_binding(self) -> None:
+        attachment = self.add_ready_attachment()
+        observation = ResolvedIdentityObservation(
+            user_id=self.member.id,
+            match_basis="verified_email",
+            observation_basis="obs_0123456789abcdef0123456789abcdef",
+            source_ref=attachment.source.external_ref,
+            participant_ref=f"person_{'a' * 32}",
+        )
+        refresh_space_membership_suggestions(self.space, [observation], acting_user=self.creator)
+        binding = SourceParticipantBinding.objects.get()
+        self.assertEqual(binding.source, attachment.source)
+        self.assertEqual(binding.user, self.member)
+        self.assertEqual(binding.participant_ref, observation.participant_ref)
+        self.assertEqual(binding.match_basis, "verified_email")
+        self.assertNotIn("@", str(binding.__dict__))
+
     def test_admin_confirmation_role_change_removal_and_admin_promotion(self) -> None:
         suggestion = refresh_space_membership_suggestions(
             self.space,
@@ -243,9 +261,7 @@ class HoverMembershipsTest(ZulipTestCase):
             SpaceMembership.Role.CONTRIBUTOR,
         )
 
-        result = self.client_delete(
-            f"/json/hover/spaces/{self.space.id}/members/{self.member.id}"
-        )
+        result = self.client_delete(f"/json/hover/spaces/{self.space.id}/members/{self.member.id}")
         self.assert_json_success(result)
         removed_space = orjson.loads(result.content)["space"]
         self.assertNotIn(

@@ -5,7 +5,14 @@ from django.db import transaction
 from django.utils.translation import gettext as _
 
 from hover.lib_spaces import get_space_data, user_is_space_administrator
-from hover.models import Space, SpaceAdministrator, SpaceMembership, SpaceMembershipSuggestion
+from hover.models import (
+    Source,
+    SourceParticipantBinding,
+    Space,
+    SpaceAdministrator,
+    SpaceMembership,
+    SpaceMembershipSuggestion,
+)
 from hover.observations import ResolvedIdentityObservation
 from zerver.lib.exceptions import JsonableError
 from zerver.models.users import UserProfile, base_bulk_get_user_queryset
@@ -64,6 +71,7 @@ def refresh_space_membership_suggestions(
     space = _lock_setup_space(space)
     _require_space_administrator(space, acting_user)
     changed: list[SpaceMembershipSuggestion] = []
+    observations = list(observations)
 
     eligible_observations = {
         observation.user_id: observation
@@ -87,15 +95,44 @@ def refresh_space_membership_suggestions(
         )
         if not user.is_guest
     }
+    for observation in observations:
+        if (
+            observation.user_id not in users_by_id
+            or observation.source_ref is None
+            or re.fullmatch(r"src_[0-9a-f]{32}", observation.source_ref) is None
+            or observation.participant_ref is None
+            or re.fullmatch(r"person_[0-9a-f]{32}", observation.participant_ref) is None
+            or re.fullmatch(r"obs_[0-9a-f]{32}", observation.observation_basis) is None
+        ):
+            continue
+        sources = list(
+            Source.objects.filter(
+                realm=space.realm,
+                external_ref=observation.source_ref,
+                space_attachments__space=space,
+            ).distinct()[:2]
+        )
+        if len(sources) != 1:
+            continue
+        SourceParticipantBinding.objects.get_or_create(
+            realm=space.realm,
+            source=sources[0],
+            participant_ref=observation.participant_ref,
+            defaults={
+                "user": users_by_id[observation.user_id],
+                "match_basis": observation.match_basis,
+                "observation_basis": observation.observation_basis,
+            },
+        )
     existing_member_ids = set(
         SpaceMembership.objects.filter(space=space, user_id__in=users_by_id).values_list(
             "user_id", flat=True
         )
     )
     existing_suggestion_ids = set(
-        SpaceMembershipSuggestion.objects.filter(
-            space=space, user_id__in=users_by_id
-        ).values_list("user_id", flat=True)
+        SpaceMembershipSuggestion.objects.filter(space=space, user_id__in=users_by_id).values_list(
+            "user_id", flat=True
+        )
     )
 
     for user_id, observation in eligible_observations.items():

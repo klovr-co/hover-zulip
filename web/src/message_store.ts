@@ -108,6 +108,38 @@ export const hover_generated_item_schema = z.object({
             }),
         ),
     }),
+    disputed_details: z.array(
+        z.object({
+            id: z.number(),
+            field_path: z.string(),
+            summary: z.string(),
+            material: z.boolean(),
+            state: z.enum(["needs_review", "resolved"]),
+            evidence_count: z.number(),
+            evidence_url: z.nullable(z.string()),
+            review_request: z.nullable(
+                z.object({
+                    id: z.number(),
+                    state: z.enum(["open", "resolved"]),
+                    message_id: z.number(),
+                    targets: z.array(
+                        z.object({
+                            user_id: z.number(),
+                            full_name: z.string(),
+                            reason: z.enum(["involved_teammate", "space_admin_fallback"]),
+                        }),
+                    ),
+                }),
+            ),
+            resolution: z.nullable(
+                z.object({
+                    revision_id: z.number(),
+                    reviewer: z.object({id: z.number(), full_name: z.string()}),
+                    timestamp: z.string(),
+                }),
+            ),
+        }),
+    ),
 });
 
 export type HoverGeneratedItem = z.infer<typeof hover_generated_item_schema>;
@@ -121,6 +153,17 @@ export const hover_response_schema = z.object({
 });
 
 export type HoverResponse = z.infer<typeof hover_response_schema>;
+
+export const hover_review_request_schema = z.object({
+    id: z.number(),
+    root_message_id: z.number(),
+    generated_item: hover_generated_item_schema,
+    field_path: z.string(),
+    state: z.enum(["open", "resolved"]),
+    target_user_ids: z.array(z.number()),
+});
+
+export type HoverReviewRequest = z.infer<typeof hover_review_request_schema>;
 
 export const hover_source_provenance_schema = z.object({
     captured_at: z.string(),
@@ -178,6 +221,7 @@ export const raw_message_schema = z.intersection(
             sender_id: z.number(),
             hover_generated_item: z.optional(hover_generated_item_schema),
             hover_response: z.optional(hover_response_schema),
+            hover_review_request: z.optional(hover_review_request_schema),
             hover_source_provenance: z.optional(hover_source_provenance_schema),
             // The web app doesn't use sender_realm_str; ignore.
             // sender_realm_str: z.string(),
@@ -255,6 +299,7 @@ export type Message = (
     clean_reactions: Map<string, MessageCleanReaction>;
     hover_generated_item?: HoverGeneratedItem | undefined;
     hover_response?: HoverResponse | undefined;
+    hover_review_request?: HoverReviewRequest | undefined;
     hover_source_provenance?: HoverSourceProvenance | undefined;
 
     // Local echo state cluster of fields.

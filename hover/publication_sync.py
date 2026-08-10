@@ -14,6 +14,10 @@ from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.utils import timezone
 
+from hover.actions_review_requests import (
+    ReviewRequestMaterializationError,
+    materialize_disputed_details,
+)
 from hover.clawer_sync import ClawerSync, ClawerSyncError
 from hover.models import (
     ConnectedAccount,
@@ -129,7 +133,12 @@ def _opaque_hash(value: str) -> str:
 
 
 def _publication_hash(publication: ClawerPublication) -> str:
-    canonical = orjson.dumps(publication.model_dump(mode="json"), option=orjson.OPT_SORT_KEYS)
+    publication_data = publication.model_dump(mode="json")
+    # Preserve the exact pre-H15 v1.0 canonical envelope. A defaulted empty
+    # dispute list must not turn a legitimate old replay into an identity conflict.
+    if publication.schema_version == "1.0":
+        publication_data.pop("disputed_details", None)
+    canonical = orjson.dumps(publication_data, option=orjson.OPT_SORT_KEYS)
     return hashlib.sha256(canonical).hexdigest()
 
 
@@ -299,20 +308,24 @@ def _create_generated_item(
         parent_publication_id=publication.parent_publication_id,
         material_change=publication.material_change,
     )
-    EvidenceLink.objects.bulk_create(
-        [
-            EvidenceLink(
-                generated_item=generated_item,
-                realm=attachment.realm,
-                source=attachment.source,
-                evidence_ref=evidence_ref,
-                position=position,
-                provider_key=attachment.source.provider_key,
-                provider_name=attachment.source.account.provider_name,
-                display_name=attachment.source.display_name,
-            )
-            for position, evidence_ref in enumerate(publication.evidence_refs)
-        ]
+    evidence_links = [
+        EvidenceLink(
+            generated_item=generated_item,
+            realm=attachment.realm,
+            source=attachment.source,
+            evidence_ref=evidence_ref,
+            position=position,
+            provider_key=attachment.source.provider_key,
+            provider_name=attachment.source.account.provider_name,
+            display_name=attachment.source.display_name,
+        )
+        for position, evidence_ref in enumerate(publication.evidence_refs)
+    ]
+    EvidenceLink.objects.bulk_create(evidence_links)
+    materialize_disputed_details(
+        generated_item=generated_item,
+        details=publication.disputed_details,
+        evidence_by_ref={link.evidence_ref: link for link in evidence_links},
     )
     return generated_item
 
@@ -345,6 +358,7 @@ def _matches_legacy_publication(
         and existing.material_change == publication.material_change
         and [link.evidence_ref for link in evidence_links] == publication.evidence_refs
         and all(link.source_id == attachment.source_id for link in evidence_links)
+        and not publication.disputed_details
     )
 
 
@@ -501,6 +515,18 @@ def sync_space_attachment(
             publication_count=len(page.publications),
         )
         raise
+    except ReviewRequestMaterializationError as exc:
+        error = PublicationSyncError(exc.error_code, retryable=exc.retryable)
+        _record_failure(
+            attachment_id=attachment_id,
+            lease_token=lease_token,
+            error_code=error.error_code,
+            retryable=error.retryable,
+            requested_cursor=stored_cursor,
+            returned_cursor=page.next_cursor,
+            publication_count=len(page.publications),
+        )
+        raise error
     except IntegrityError:
         error = PublicationSyncError("publication_identity_conflict", retryable=False)
         _record_failure(

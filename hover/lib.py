@@ -4,7 +4,7 @@ from typing import Any
 
 from django.db.models import Q
 
-from hover.models import GeneratedItem, IntegrationMessageProvenance, Response, Space
+from hover.models import GeneratedItem, IntegrationMessageProvenance, Response, ReviewRequest, Space
 
 PROVIDER_ICON_CLASSES = {
     "whatsapp": "fa fa-whatsapp",
@@ -24,14 +24,33 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
         ).select_related("generated_item__message")
     )
     response_item_ids = [response.generated_item_id for response in responses]
+    review_requests = list(
+        ReviewRequest.objects.filter(
+            realm_id=realm_id,
+            message_id__in=message_ids,
+            message__realm_id=realm_id,
+        )
+        .select_related("disputed_detail__generated_item__message")
+        .prefetch_related("targets")
+    )
+    request_item_ids = [request.disputed_detail.generated_item_id for request in review_requests]
     items = list(
         GeneratedItem.objects.filter(
-            Q(message_id__in=message_ids) | Q(id__in=response_item_ids),
+            Q(message_id__in=message_ids)
+            | Q(id__in=response_item_ids)
+            | Q(id__in=request_item_ids),
             realm_id=realm_id,
             message__realm_id=realm_id,
         )
         .select_related("attachment", "message")
-        .prefetch_related("evidence_links", "revisions__actor", "revisions__response")
+        .prefetch_related(
+            "evidence_links",
+            "revisions__actor",
+            "revisions__response",
+            "disputed_details__conflicting_evidence",
+            "disputed_details__resolved_by_revision__actor",
+            "disputed_details__review_request__targets__user",
+        )
         .order_by("id")
     )
     recipient_ids = {item.message.recipient_id for item in items}
@@ -152,6 +171,56 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
                     }
                 )
 
+        disputed_details: list[dict[str, Any]] = []
+        for detail in item.disputed_details.all():
+            review_request = getattr(detail, "review_request", None)
+            revision = detail.resolved_by_revision
+            disputed_details.append(
+                {
+                    "id": detail.id,
+                    "field_path": detail.field_path,
+                    "summary": detail.summary,
+                    "material": detail.material,
+                    "state": detail.state,
+                    "evidence_count": len(detail.conflicting_evidence.all()),
+                    "evidence_url": (
+                        f"/json/hover/spaces/{attachment_space_id}/generated-items/{item.id}"
+                        f"/disputed-details/{detail.id}/evidence"
+                        if attachment_space_id is not None
+                        else None
+                    ),
+                    "review_request": (
+                        {
+                            "id": review_request.id,
+                            "state": review_request.state,
+                            "message_id": review_request.message_id,
+                            "targets": [
+                                {
+                                    "user_id": target.user_id,
+                                    "full_name": target.user.full_name,
+                                    "reason": target.reason,
+                                }
+                                for target in review_request.targets.all()
+                            ],
+                        }
+                        if review_request is not None
+                        else None
+                    ),
+                    "resolution": (
+                        {
+                            "revision_id": revision.id,
+                            "reviewer": {
+                                "id": revision.actor_id,
+                                "full_name": revision.actor.full_name,
+                            },
+                            "timestamp": revision.date_created.isoformat(),
+                        }
+                        if revision is not None
+                        else None
+                    ),
+                }
+            )
+
         metadata_by_message_id[item.message_id] = {
             "id": item.id,
             "output_type": item.output_type,
@@ -199,6 +268,7 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
                 }
                 for revision in item.revisions.all()
             ],
+            "disputed_details": disputed_details,
         }
 
     for message in message_dicts:
@@ -216,6 +286,21 @@ def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) ->
                     "clarification_required": response.clarification_required,
                     "root_message_id": item.message_id,
                     "generated_item": root_metadata,
+                }
+                break
+
+    for review_request in review_requests:
+        item = items_by_id[review_request.disputed_detail.generated_item_id]
+        root_metadata = metadata_by_message_id[item.message_id]
+        for message in message_dicts:
+            if message["id"] == review_request.message_id:
+                message["hover_review_request"] = {
+                    "id": review_request.id,
+                    "root_message_id": item.message_id,
+                    "generated_item": root_metadata,
+                    "field_path": review_request.disputed_detail.field_path,
+                    "state": review_request.state,
+                    "target_user_ids": [target.user_id for target in review_request.targets.all()],
                 }
                 break
 

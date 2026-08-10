@@ -1993,6 +1993,115 @@ a {
     margin-bottom: 8px;
 }
 
+.hover-review-request-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-block-end: 8px;
+    color: hsl(30deg 58% 31%);
+
+    & span {
+        padding: 1px 7px;
+        border: 1px solid hsl(33deg 45% 71%);
+        border-radius: 999px;
+        font-size: 0.78rem;
+        text-transform: capitalize;
+    }
+}
+
+.hover-disputed-details {
+    display: grid;
+    gap: 8px;
+    margin-block-start: 14px;
+}
+
+.hover-disputed-detail {
+    min-inline-size: 0;
+    padding: 10px 12px;
+    border-inline-start: 3px solid hsl(212deg 15% 61%);
+    border-radius: 4px;
+    background: hsl(210deg 20% 97%);
+
+    & p {
+        margin: 5px 0 0;
+        overflow-wrap: anywhere;
+    }
+}
+
+.hover-disputed-detail--needs-review {
+    border-inline-start-color: hsl(34deg 78% 43%);
+    background: hsl(38deg 75% 96%);
+}
+
+.hover-disputed-detail--reviewed {
+    border-inline-start-color: hsl(150deg 38% 39%);
+    background: hsl(145deg 32% 96%);
+}
+
+.hover-disputed-detail__heading,
+.hover-disputed-detail__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+}
+
+.hover-disputed-detail__state {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+}
+
+.hover-disputed-detail__field {
+    overflow-wrap: anywhere;
+    text-transform: capitalize;
+}
+
+.hover-disputed-detail__target,
+.hover-disputed-detail__resolution {
+    color: var(--color-text-default);
+    font-size: 0.88rem;
+}
+
+.hover-disputed-detail__actions {
+    margin-block-start: 8px;
+
+    & button {
+        min-block-size: 30px;
+        padding: 4px 9px;
+        border: 1px solid var(--color-border-default);
+        border-radius: 4px;
+        background: var(--color-background);
+        color: var(--color-text-default);
+        font-weight: 600;
+    }
+
+    & button:hover,
+    & button:focus-visible {
+        border-color: var(--color-border-focus);
+    }
+}
+
+@media (width <= 500px) {
+    .hover-disputed-detail__actions {
+        align-items: stretch;
+        flex-direction: column;
+
+        & button {
+            inline-size: 100%;
+            white-space: normal;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hover-disputed-detail,
+    .hover-review-request-label {
+        transition: none;
+    }
+}
+
 .hover-message-reactions {
     display: flex;
     grid-area: reactions;

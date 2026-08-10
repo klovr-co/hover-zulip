@@ -75,6 +75,24 @@ limited to Space Administrators; at launch, confirmed memberships become the
 exact native subscription cohort.
 _Avoid_: Connected Account grant, Source participant, channel guest
 
+**Disputed Detail**:
+An immutable, field-scoped record that credible Evidence Links conflict about
+one existing field in a generated item. It remains visible whether ordinary
+uncertainty or materially consequential ambiguity is later resolved.
+_Avoid_: Whole-post warning, unsupported content
+
+**Review Request**:
+An interrupting, native assistant message created only for a material Disputed
+Detail. Its targets direct attention but do not grant or restrict the ability of
+confirmed Space members to submit a Review.
+_Avoid_: Assignment, approval gate, Review
+
+**Review Request Target**:
+An active confirmed Space member notified by a Review Request, selected from
+verified Source participant bindings or a deterministic Space Administrator
+fallback.
+_Avoid_: Reviewer permission, exclusive assignee
+
 **AIMTO Events**:
 The first Hover Space, used to prove the product through a real mixed feed of
 human activity and source-backed AI updates.

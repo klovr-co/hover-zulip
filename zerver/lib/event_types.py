@@ -390,6 +390,37 @@ class HoverGeneratedLineage(BaseModel):
     history: list[HoverGeneratedHistoryEntry]
 
 
+class HoverReviewRequestTarget(BaseModel):
+    user_id: int
+    full_name: str
+    reason: Literal["involved_teammate", "space_admin_fallback"]
+
+
+class HoverDisputeReviewRequest(BaseModel):
+    id: int
+    state: Literal["open", "resolved"]
+    message_id: int
+    targets: list[HoverReviewRequestTarget]
+
+
+class HoverDisputeResolution(BaseModel):
+    revision_id: int
+    reviewer: dict[str, object]
+    timestamp: str
+
+
+class HoverDisputedDetail(BaseModel):
+    id: int
+    field_path: str
+    summary: str
+    material: bool
+    state: Literal["needs_review", "resolved"]
+    evidence_count: int
+    evidence_url: str | None
+    review_request: HoverDisputeReviewRequest | None
+    resolution: HoverDisputeResolution | None
+
+
 class HoverGeneratedItem(BaseModel):
     id: int
     output_type: str
@@ -402,6 +433,7 @@ class HoverGeneratedItem(BaseModel):
     lineage: HoverGeneratedLineage
     reviewed_payload: dict[str, object]
     revisions: list[dict[str, object]]
+    disputed_details: list[HoverDisputedDetail]
 
 
 class HoverResponse(BaseModel):
@@ -409,6 +441,15 @@ class HoverResponse(BaseModel):
     clarification_required: bool
     root_message_id: int
     generated_item: HoverGeneratedItem
+
+
+class HoverReviewRequest(BaseModel):
+    id: int
+    root_message_id: int
+    generated_item: HoverGeneratedItem
+    field_path: str
+    state: Literal["open", "resolved"]
+    target_user_ids: list[int]
 
 
 class HoverProvenanceSource(BaseModel):
@@ -453,6 +494,7 @@ class MessageFieldForDirectMessageEvent(BaseModel):
     display_recipient: list[DirectMessageDisplayRecipient]
     hover_generated_item: HoverGeneratedItem | None = None
     hover_response: HoverResponse | None = None
+    hover_review_request: HoverReviewRequest | None = None
     hover_source_provenance: HoverSourceProvenance | None = None
 
 
@@ -533,6 +575,7 @@ class MessageFieldForMessageEvent(BaseModel):
     stream_id: int
     hover_generated_item: HoverGeneratedItem | None = None
     hover_response: HoverResponse | None = None
+    hover_review_request: HoverReviewRequest | None = None
     hover_source_provenance: HoverSourceProvenance | None = None
 
 

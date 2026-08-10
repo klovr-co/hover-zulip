@@ -27674,6 +27674,51 @@ paths:
                         "result": "success",
                       }
 
+  /hover/spaces/{space_id}/generated-items/{generated_item_id}/disputed-details/{disputed_detail_id}/evidence:
+    get:
+      operationId: resolve-hover-disputed-detail-evidence
+      summary: Resolve exact conflicting evidence for a Hover Disputed Detail
+      tags: ["messages"]
+      description: |
+        Resolves the ordered evidence subset stored for one field-scoped conflict.
+        The client cannot submit evidence or provider references. Authorization
+        follows the generated root message and its launched Space.
+      parameters:
+        - name: space_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: generated_item_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: disputed_detail_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - type: object
+                    additionalProperties: false
+                    required: [evidence]
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      evidence:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverResolvedEvidence"
+
 components:
   #######################
   # Security definitions
@@ -29701,6 +29746,87 @@ components:
                   - timestamp
                   - reason
                   - review_message_id
+            disputed_details:
+              type: array
+              description: Immutable field-scoped evidence conflicts and Review request state.
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  id:
+                    type: integer
+                  field_path:
+                    type: string
+                  summary:
+                    type: string
+                  material:
+                    type: boolean
+                  state:
+                    type: string
+                    enum: [needs_review, resolved]
+                  evidence_count:
+                    type: integer
+                    minimum: 2
+                  evidence_url:
+                    type: string
+                    nullable: true
+                  review_request:
+                    type: object
+                    nullable: true
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: integer
+                      state:
+                        type: string
+                        enum: [open, resolved]
+                      message_id:
+                        type: integer
+                      targets:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                            user_id:
+                              type: integer
+                            full_name:
+                              type: string
+                            reason:
+                              type: string
+                              enum: [involved_teammate, space_admin_fallback]
+                          required: [user_id, full_name, reason]
+                    required: [id, state, message_id, targets]
+                  resolution:
+                    type: object
+                    nullable: true
+                    additionalProperties: false
+                    properties:
+                      revision_id:
+                        type: integer
+                      reviewer:
+                        type: object
+                        additionalProperties: false
+                        properties:
+                          id:
+                            type: integer
+                          full_name:
+                            type: string
+                        required: [id, full_name]
+                      timestamp:
+                        type: string
+                        format: date-time
+                    required: [revision_id, reviewer, timestamp]
+                required:
+                  - id
+                  - field_path
+                  - summary
+                  - material
+                  - state
+                  - evidence_count
+                  - evidence_url
+                  - review_request
+                  - resolution
           required:
             - id
             - output_type
@@ -29713,6 +29839,7 @@ components:
             - lineage
             - reviewed_payload
             - revisions
+            - disputed_details
         hover_response:
           type: object
           additionalProperties: false
@@ -29734,6 +29861,33 @@ components:
             - clarification_required
             - root_message_id
             - generated_item
+        hover_review_request:
+          type: object
+          additionalProperties: false
+          description: Structured metadata for the native assistant-authored Review request.
+          properties:
+            id:
+              type: integer
+            root_message_id:
+              type: integer
+            generated_item:
+              $ref: "#/components/schemas/MessagesBase/properties/hover_generated_item"
+            field_path:
+              type: string
+            state:
+              type: string
+              enum: [open, resolved]
+            target_user_ids:
+              type: array
+              items:
+                type: integer
+          required:
+            - id
+            - root_message_id
+            - generated_item
+            - field_path
+            - state
+            - target_user_ids
         hover_source_provenance:
           type: object
           additionalProperties: false

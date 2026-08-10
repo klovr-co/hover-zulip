@@ -14,7 +14,13 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 UNSAFE_DISPLAY_NAME_PATTERN = re.compile(r"(?:\d[\s()+-]*){8,}|@(?:g\.us|lid)$", re.IGNORECASE)
+UNSAFE_SUMMARY_PATTERN = re.compile(
+    r"(?:\d[\s()+-]*){8,}|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|"
+    r"(?:src|person|evidence)_[0-9a-f]{32}",
+    re.IGNORECASE,
+)
 EVIDENCE_REF_PATTERN = re.compile(r"^evidence_[0-9a-f]{32}$")
+PERSON_REF_PATTERN = re.compile(r"^person_[0-9a-f]{32}$")
 
 
 def _validated_display_name(value: str) -> str:
@@ -56,7 +62,7 @@ class DigestPayload(_ContractModel):
 
 class FeedUpdatePayload(_ContractModel):
     contract: Literal["feed_update"]
-    schema_version: Literal["1.0"]
+    schema_version: Literal["1.0", "1.1"]
     title: str = Field(min_length=1, max_length=300)
     update_type: Literal["development", "milestone", "blocker"]
     developments: list[str] = Field(min_length=1, max_length=50)
@@ -64,7 +70,7 @@ class FeedUpdatePayload(_ContractModel):
 
 class ProgressUpdatePayload(_ContractModel):
     contract: Literal["progress_update"]
-    schema_version: Literal["1.0"]
+    schema_version: Literal["1.0", "1.1"]
     title: str = Field(min_length=1, max_length=300)
     status: Literal["not_started", "in_progress", "blocked", "completed"]
     updates: list[str] = Field(min_length=1, max_length=50)
@@ -74,7 +80,7 @@ class ProgressUpdatePayload(_ContractModel):
 
 class DecisionPayload(_ContractModel):
     contract: Literal["decision"]
-    schema_version: Literal["1.0"]
+    schema_version: Literal["1.0", "1.1"]
     title: str = Field(min_length=1, max_length=300)
     decision: str = Field(min_length=1, max_length=50_000)
     rationale: str = Field(min_length=1, max_length=50_000)
@@ -161,6 +167,42 @@ class CoveredPeriod(_ContractModel):
         return self
 
 
+class PublicationDisputedDetail(_ContractModel):
+    """A source-produced, field-scoped conflict with no provider identity data."""
+
+    ambiguity_key: str = Field(pattern=r"^ambiguity_[0-9a-f]{32}$")
+    field_path: str = Field(pattern=r"^[a-z][a-z0-9_]{0,63}$")
+    summary: str = Field(min_length=1, max_length=500)
+    evidence_refs: list[str] = Field(min_length=2, max_length=20)
+    involved_person_refs: list[str] = Field(default_factory=list, max_length=20)
+    material: bool
+
+    @field_validator("summary")
+    @classmethod
+    def safe_summary(cls, value: str) -> str:
+        if " ".join(value.strip().split()) != value or UNSAFE_SUMMARY_PATTERN.search(value):
+            raise ValueError("summary must be normalized and cannot expose a provider identifier")
+        return value
+
+    @field_validator("evidence_refs")
+    @classmethod
+    def unique_conflicting_evidence(cls, value: list[str]) -> list[str]:
+        if any(EVIDENCE_REF_PATTERN.fullmatch(ref) is None for ref in value) or len(value) != len(
+            set(value)
+        ):
+            raise ValueError("conflicting evidence references must be unique and bounded")
+        return value
+
+    @field_validator("involved_person_refs")
+    @classmethod
+    def unique_participants(cls, value: list[str]) -> list[str]:
+        if any(PERSON_REF_PATTERN.fullmatch(ref) is None for ref in value) or len(value) != len(
+            set(value)
+        ):
+            raise ValueError("involved participant references must be unique and bounded")
+        return value
+
+
 class ClawerPublication(_ContractModel):
     publication_id: str = Field(min_length=1, max_length=500)
     idempotency_key: str = Field(min_length=1, max_length=1000)
@@ -173,7 +215,7 @@ class ClawerPublication(_ContractModel):
         "suggested_action",
         "analysis",
     ]
-    schema_version: Literal["1.0"]
+    schema_version: Literal["1.0", "1.1"]
     producer_key: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]{0,199}$")
     producer_name: str = Field(min_length=1, max_length=200)
     producing_version: str = Field(min_length=1, max_length=1000)
@@ -182,6 +224,7 @@ class ClawerPublication(_ContractModel):
     covered_period: CoveredPeriod
     payload: PublicationPayload
     evidence_refs: list[str] = Field(max_length=100)
+    disputed_details: list[PublicationDisputedDetail] = Field(default_factory=list, max_length=20)
     importance: Literal["low", "normal", "high", "urgent"]
     occurred_at: datetime
     generated_at: datetime
@@ -215,6 +258,34 @@ class ClawerPublication(_ContractModel):
     def matching_contract(self) -> ClawerPublication:
         if self.payload.contract != self.contract:
             raise ValueError("publication payload contract does not match envelope")
+        if self.payload.schema_version != self.schema_version:
+            raise ValueError("publication payload schema version does not match envelope")
+        if self.schema_version == "1.0" and self.disputed_details:
+            raise ValueError("publication schema 1.0 cannot carry disputed details")
+        if self.schema_version == "1.1" and self.contract not in {
+            "feed_update",
+            "progress_update",
+            "decision",
+        }:
+            raise ValueError("publication schema 1.1 is not supported for this contract")
+        payload_fields = set(self.payload.model_fields)
+        ambiguity_keys: set[str] = set()
+        field_paths: set[str] = set()
+        envelope_evidence = set(self.evidence_refs)
+        for detail in self.disputed_details:
+            if detail.ambiguity_key in ambiguity_keys:
+                raise ValueError("publication ambiguity keys must be unique")
+            if detail.field_path in field_paths:
+                raise ValueError("publication disputed fields must be unique")
+            if detail.field_path not in payload_fields or detail.field_path in {
+                "contract",
+                "schema_version",
+            }:
+                raise ValueError("publication disputed field must name an existing payload field")
+            if not set(detail.evidence_refs).issubset(envelope_evidence):
+                raise ValueError("conflicting evidence must belong to the publication")
+            ambiguity_keys.add(detail.ambiguity_key)
+            field_paths.add(detail.field_path)
         return self
 
 

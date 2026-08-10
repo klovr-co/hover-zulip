@@ -61,6 +61,7 @@ import * as hover_connected_accounts from "./hover_connected_accounts.ts";
 import * as hover_evidence from "./hover_evidence.ts";
 import * as hover_generated_details from "./hover_generated_details.ts";
 import * as hover_response from "./hover_response.ts";
+import * as hover_review_request from "./hover_review_request.ts";
 import * as hover_source_view from "./hover_source_view.ts";
 import * as hover_spaces from "./hover_spaces.ts";
 import * as i18n from "./i18n.ts";
@@ -547,6 +548,7 @@ export async function initialize_everything(state_data) {
     hover_evidence.initialize();
     hover_generated_details.initialize();
     hover_response.initialize();
+    hover_review_request.initialize();
     hover_spaces.initialize(state_data.hover_spaces);
     hover_all_view.initialize();
     hover_source_view.initialize();

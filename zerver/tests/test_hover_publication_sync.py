@@ -19,9 +19,14 @@ from hover.clawer_sync import ClawerSource, ClawerSyncError, InMemoryClawerSync
 from hover.lib import add_hover_metadata
 from hover.models import (
     ConnectedAccount,
+    DisputedDetail,
+    DisputedEvidenceLink,
     EvidenceLink,
     GeneratedItem,
     PublicationSyncAttempt,
+    ReviewRequest,
+    ReviewRequestTarget,
+    SourceParticipantBinding,
     Space,
     SpaceAttachment,
     SpaceMembership,
@@ -36,12 +41,13 @@ from hover.publication_contracts import (
 from hover.publication_sync import (
     MAX_PUBLICATION_SYNC_BATCH,
     PublicationSyncError,
+    _publication_hash,
     sync_space_attachment,
 )
 from zerver.actions.channel_folders import check_add_channel_folder
 from zerver.lib.test_classes import ZulipTestCase
 from zerver.lib.user_groups import get_system_user_group_by_name
-from zerver.models import Message, Subscription
+from zerver.models import Message, Subscription, UserMessage
 from zerver.models.groups import SystemGroups
 
 
@@ -281,6 +287,48 @@ class HoverPublicationSyncTest(ZulipTestCase):
                     "media": None,
                 }
             )
+
+    def test_v10_publication_hash_remains_frozen_without_default_disputes(self) -> None:
+        legacy = ClawerPublication.model_validate(
+            {
+                "publication_id": "publication-legacy",
+                "idempotency_key": "identity-legacy",
+                "business_identity": "business-legacy",
+                "contract": "progress_update",
+                "schema_version": "1.0",
+                "producer_key": "progress",
+                "producer_name": "Progress",
+                "producing_version": "v1",
+                "run_reference": "run-legacy",
+                "source_ref": self.SOURCE_REF,
+                "covered_period": {
+                    "start": "2026-08-11T09:00:00Z",
+                    "end": "2026-08-11T10:00:00Z",
+                },
+                "payload": {
+                    "contract": "progress_update",
+                    "schema_version": "1.0",
+                    "title": "Readiness",
+                    "status": "in_progress",
+                    "updates": ["Work continues."],
+                    "resolved_items": [],
+                    "blockers": [],
+                },
+                "evidence_refs": [],
+                "importance": "normal",
+                "occurred_at": "2026-08-11T10:00:00Z",
+                "generated_at": "2026-08-11T10:00:00Z",
+                "published_at": "2026-08-11T10:00:00Z",
+                "lineage_key": None,
+                "parent_publication_id": None,
+                "material_change": False,
+            }
+        )
+        self.assertEqual(legacy.disputed_details, [])
+        self.assertEqual(
+            _publication_hash(legacy),
+            "8be2243ab0e08f1c3919b77fa4e3d340469629c41a58a69c3d569aad3228a22f",
+        )
 
     def test_all_six_outputs_materialize_once_and_replay_advances_cursor(self) -> None:
         publications = self.six_publications()
@@ -570,6 +618,212 @@ class HoverPublicationSyncTest(ZulipTestCase):
             self.attachment.publication_sync_state,
             SpaceAttachment.PublicationSyncState.BLOCKED,
         )
+
+    def test_material_dispute_creates_one_native_targeted_request_and_resolves(self) -> None:
+        raw = self.six_publications()[1].model_dump(mode="json")
+        raw["schema_version"] = "1.1"
+        raw["payload"]["schema_version"] = "1.1"
+        raw["disputed_details"] = [
+            {
+                "ambiguity_key": f"ambiguity_{'a' * 32}",
+                "field_path": "status",
+                "summary": "Credible updates disagree about completion status.",
+                "evidence_refs": raw["evidence_refs"],
+                "involved_person_refs": [],
+                "material": True,
+            }
+        ]
+        publication = ClawerPublication.model_validate(raw)
+        self.set_page(cursor=None, next_cursor="cursor:review", publications=[publication])
+
+        sync_space_attachment(
+            attachment_id=self.attachment.id,
+            assistant=self.assistant,
+            clawer_sync=self.adapter,
+        )
+
+        item = GeneratedItem.objects.get(publication_id=publication.publication_id)
+        detail = DisputedDetail.objects.get(generated_item=item)
+        request = ReviewRequest.objects.get(disputed_detail=detail)
+        target = ReviewRequestTarget.objects.get(review_request=request)
+        self.assertEqual(target.user, self.actor)
+        self.assertEqual(target.reason, ReviewRequestTarget.Reason.SPACE_ADMIN_FALLBACK)
+        self.assertEqual(
+            list(
+                DisputedEvidenceLink.objects.filter(disputed_detail=detail)
+                .order_by("position")
+                .values_list("evidence_link__evidence_ref", flat=True)
+            ),
+            publication.disputed_details[0].evidence_refs,
+        )
+        self.assertTrue(
+            UserMessage.objects.get(
+                user_profile=self.actor, message=request.message
+            ).flags.mentioned
+        )
+        self.assertEqual(Message.objects.filter(sender=self.assistant).count(), 2)
+
+        root_metadata: dict[str, Any] = {"id": item.message_id}
+        request_metadata: dict[str, Any] = {"id": request.message_id}
+        add_hover_metadata([root_metadata, request_metadata], realm_id=self.realm.id)
+        serialized = root_metadata["hover_generated_item"]["disputed_details"][0]
+        self.assertEqual(serialized["state"], "needs_review")
+        self.assertEqual(serialized["review_request"]["message_id"], request.message_id)
+        self.assertEqual(
+            request_metadata["hover_review_request"]["root_message_id"], item.message_id
+        )
+
+        for index, evidence_ref in enumerate(publication.disputed_details[0].evidence_refs):
+            self.adapter.evidence[(str(self.realm.uuid), self.SOURCE_REF, evidence_ref)] = (
+                ResolvedEvidence.model_validate(
+                    {
+                        "evidence_ref": evidence_ref,
+                        "source_ref": self.SOURCE_REF,
+                        "sender": {
+                            "ref": f"person_{index + 1:032x}",
+                            "display_name": f"Participant {index + 1}",
+                        },
+                        "timestamp": "2026-08-11T10:00:00Z",
+                        "content": {
+                            "text": f"Conflicting evidence {index + 1}",
+                            "voice_transcript": None,
+                            "media_description": None,
+                        },
+                        "media": None,
+                    }
+                )
+            )
+        self.login_user(self.actor)
+        with patch("hover.views_publications.get_clawer_sync", return_value=self.adapter):
+            evidence_result = self.client_get(
+                f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/"
+                f"disputed-details/{detail.id}/evidence"
+            )
+        evidence_payload = self.assert_json_success(evidence_result)
+        self.assertEqual(
+            [entry["evidence_ref"] for entry in evidence_payload["evidence"]],
+            publication.disputed_details[0].evidence_refs,
+        )
+        self.assertEqual(
+            self.adapter.evidence_calls[-1]["refs"],
+            publication.disputed_details[0].evidence_refs,
+        )
+
+        response = self.client_post(
+            "/json/messages",
+            {
+                "type": "channel",
+                "to": orjson.dumps(self.space.stream_id).decode(),
+                "topic": item.message.topic_name(),
+                "content": "Confirmed from the latest source update.",
+                "hover_generated_item_id": item.id,
+                "hover_response_type": "review",
+                "hover_review_field": "status",
+                "hover_review_value": '"completed"',
+            },
+        )
+        response_data = self.assert_json_success(response)
+        detail.refresh_from_db()
+        request.refresh_from_db()
+        self.assertEqual(detail.state, DisputedDetail.State.RESOLVED)
+        self.assertEqual(request.state, ReviewRequest.State.RESOLVED)
+        self.assertEqual(detail.resolved_by_revision_id, request.resolved_by_revision_id)
+        response_metadata: dict[str, Any] = {"id": response_data["id"]}
+        add_hover_metadata([response_metadata], realm_id=self.realm.id)
+        self.assertEqual(
+            response_metadata["hover_response"]["generated_item"]["disputed_details"][0]["state"],
+            "resolved",
+        )
+
+    def test_non_material_dispute_is_visible_without_request_or_notification(self) -> None:
+        raw = self.six_publications()[3].model_dump(mode="json")
+        raw["schema_version"] = "1.1"
+        raw["payload"]["schema_version"] = "1.1"
+        raw["disputed_details"] = [
+            {
+                "ambiguity_key": f"ambiguity_{'b' * 32}",
+                "field_path": "rationale",
+                "summary": "Two credible explanations remain plausible.",
+                "evidence_refs": raw["evidence_refs"],
+                "involved_person_refs": [],
+                "material": False,
+            }
+        ]
+        publication = ClawerPublication.model_validate(raw)
+        self.set_page(cursor=None, next_cursor="cursor:uncertain", publications=[publication])
+        sync_space_attachment(
+            attachment_id=self.attachment.id,
+            assistant=self.assistant,
+            clawer_sync=self.adapter,
+        )
+        detail = DisputedDetail.objects.get()
+        self.assertFalse(detail.material)
+        self.assertFalse(ReviewRequest.objects.exists())
+        self.assertEqual(Message.objects.filter(sender=self.assistant).count(), 1)
+
+    def test_material_dispute_targets_verified_involved_space_member(self) -> None:
+        participant_ref = f"person_{'d' * 32}"
+        SourceParticipantBinding.objects.create(
+            realm=self.realm,
+            source=self.attachment.source,
+            participant_ref=participant_ref,
+            user=self.actor,
+            match_basis=SourceParticipantBinding.MatchBasis.VERIFIED_EMAIL,
+            observation_basis=f"obs_{'e' * 32}",
+        )
+        raw = self.six_publications()[1].model_dump(mode="json")
+        raw["schema_version"] = "1.1"
+        raw["payload"]["schema_version"] = "1.1"
+        raw["disputed_details"] = [
+            {
+                "ambiguity_key": f"ambiguity_{'d' * 32}",
+                "field_path": "status",
+                "summary": "Credible updates disagree about completion status.",
+                "evidence_refs": raw["evidence_refs"],
+                "involved_person_refs": [participant_ref],
+                "material": True,
+            }
+        ]
+        publication = ClawerPublication.model_validate(raw)
+        self.set_page(cursor=None, next_cursor="cursor:involved", publications=[publication])
+        sync_space_attachment(
+            attachment_id=self.attachment.id,
+            assistant=self.assistant,
+            clawer_sync=self.adapter,
+        )
+        target = ReviewRequestTarget.objects.get()
+        self.assertEqual(target.user, self.actor)
+        self.assertEqual(target.reason, ReviewRequestTarget.Reason.INVOLVED_TEAMMATE)
+
+    def test_v11_dispute_contract_rejects_unsafe_or_non_referential_fields(self) -> None:
+        raw = self.six_publications()[1].model_dump(mode="json")
+        raw["schema_version"] = "1.1"
+        raw["payload"]["schema_version"] = "1.1"
+        raw["disputed_details"] = [
+            {
+                "ambiguity_key": f"ambiguity_{'c' * 32}",
+                "field_path": "status.value",
+                "summary": "Status differs.",
+                "evidence_refs": raw["evidence_refs"],
+                "involved_person_refs": [],
+                "material": True,
+            }
+        ]
+        with self.assertRaisesRegex(ValueError, "field_path"):
+            ClawerPublication.model_validate(raw)
+
+        raw["disputed_details"][0]["field_path"] = "status"
+        raw["disputed_details"][0]["evidence_refs"] = [
+            raw["evidence_refs"][0],
+            f"evidence_{'f' * 32}",
+        ]
+        with self.assertRaisesRegex(ValueError, "belong to the publication"):
+            ClawerPublication.model_validate(raw)
+
+        raw["disputed_details"][0]["evidence_refs"] = raw["evidence_refs"]
+        raw["disputed_details"][0]["summary"] = "Ask lead@example.com to decide."
+        with self.assertRaisesRegex(ValueError, "provider identifier"):
+            ClawerPublication.model_validate(raw)
 
     def test_publication_identity_is_scoped_to_each_space_attachment(self) -> None:
         second_space = do_create_space(

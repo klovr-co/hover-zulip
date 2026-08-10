@@ -53,6 +53,12 @@ export function select_response_type(selected: ResponseType): void {
     render_type();
 }
 
+export function preselect_review_field(field_path: string): void {
+    select_response_type("review");
+    $("#hover-review-field").val(field_path);
+    $("#hover-review-value").trigger("focus");
+}
+
 export function get_request_data(): Record<string, number | string> {
     if (generated_item_id === undefined) {
         return {};
@@ -96,6 +102,19 @@ export function apply_realtime_responses(messages: Message[]): void {
         }
         root.hover_generated_item = response.generated_item;
         root_message_ids.add(root.id);
+        for (const detail of response.generated_item.disputed_details ?? []) {
+            const request_metadata = detail.review_request;
+            if (request_metadata === null) {
+                continue;
+            }
+            const request_message = message_store.get(request_metadata.message_id);
+            if (request_message?.hover_review_request === undefined) {
+                continue;
+            }
+            request_message.hover_review_request.generated_item = response.generated_item;
+            request_message.hover_review_request.state = request_metadata.state;
+            root_message_ids.add(request_message.id);
+        }
     }
     message_live_update.rerender_messages_view_by_message_ids([...root_message_ids]);
 }

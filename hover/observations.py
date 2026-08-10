@@ -15,3 +15,5 @@ class ResolvedIdentityObservation:
     match_basis: Literal["verified_email", "verified_phone"]
     observation_basis: str
     suggested_role: Literal["contributor", "subscriber"] = "subscriber"
+    source_ref: str | None = None
+    participant_ref: str | None = None

@@ -67,6 +67,12 @@
             {{t "Choose the field and exact new value before Hover changes its interpretation."}}
         </div>
         {{/if}}
+        {{#if is_hover_review_request}}
+        <div class="hover-review-request-label">
+            <strong>{{t "Review request"}}</strong>
+            <span>{{hover_review_request_state}}</span>
+        </div>
+        {{/if}}
         {{/if}}
         {{#if is_hover_generated_update}}
         <div class="hover-generated-update-label">
@@ -83,6 +89,9 @@
         {{/if}}
         {{#if has_hover_revisions}}
             {{> hover_revision_history revisions=hover_revisions}}
+        {{/if}}
+        {{#if has_hover_disputed_details}}
+            {{> hover_disputed_details details=hover_disputed_details message_id=msg/id}}
         {{/if}}
     </div>
     {{else}}

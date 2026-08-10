@@ -220,6 +220,18 @@ source_ref_validator = RegexValidator(
     regex=r"^src_[0-9a-f]{32}$",
     message="Source references must be opaque Studio source IDs.",
 )
+participant_ref_validator = RegexValidator(
+    regex=r"^person_[0-9a-f]{32}$",
+    message="Participant references must be opaque participant IDs.",
+)
+ambiguity_key_validator = RegexValidator(
+    regex=r"^ambiguity_[0-9a-f]{32}$",
+    message="Ambiguity keys must be opaque ambiguity IDs.",
+)
+field_path_validator = RegexValidator(
+    regex=r"^[a-z][a-z0-9_]{0,63}$",
+    message="Disputed fields must be normalized top-level keys.",
+)
 
 
 class ConnectedAccount(models.Model):
@@ -435,6 +447,41 @@ class Source(models.Model):
             raise ValidationError(
                 {"supports_live_capture": "Live capture requires a native integration account."}
             )
+
+
+class SourceParticipantBinding(models.Model):
+    """A durable result from verified identity resolution, never raw identity data."""
+
+    class MatchBasis(models.TextChoices):
+        VERIFIED_EMAIL = "verified_email", "Verified email"
+        VERIFIED_PHONE = "verified_phone", "Verified phone"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    source = models.ForeignKey(Source, on_delete=CASCADE, related_name="participant_bindings")
+    participant_ref = models.CharField(max_length=39, validators=[participant_ref_validator])
+    user = models.ForeignKey(
+        UserProfile, on_delete=CASCADE, related_name="hover_source_participant_bindings"
+    )
+    match_basis = models.TextField(choices=MatchBasis.choices)
+    observation_basis = models.CharField(max_length=36, validators=[observation_basis_validator])
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source", "participant_ref"],
+                name="hover_source_participant_unique_ref",
+            )
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.realm_id != self.source.realm_id or self.realm_id != self.user.realm_id:
+            raise ValidationError("Participant bindings must share one organization.")
+        if not self.user.is_active or self.user.is_bot or self.user.is_guest:
+            raise ValidationError({"user": "Participant bindings require an active teammate."})
 
 
 class SpaceAttachment(models.Model):
@@ -1181,3 +1228,184 @@ class Revision(models.Model):
             raise ValidationError("A revision must belong to its originating Review.")
         if self.response.response_type != Response.ResponseType.REVIEW:
             raise ValidationError("Only a Review can originate a revision.")
+
+
+class DisputedDetail(models.Model):
+    class State(models.TextChoices):
+        NEEDS_REVIEW = "needs_review", "Needs review"
+        RESOLVED = "resolved", "Resolved"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    generated_item = models.ForeignKey(
+        GeneratedItem, on_delete=CASCADE, related_name="disputed_details"
+    )
+    ambiguity_key = models.CharField(max_length=42, validators=[ambiguity_key_validator])
+    field_path = models.CharField(max_length=64, validators=[field_path_validator])
+    summary = models.CharField(max_length=500)
+    material = models.BooleanField()
+    state = models.TextField(choices=State.choices, default=State.NEEDS_REVIEW)
+    resolved_by_revision = models.ForeignKey(
+        Revision,
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="resolved_disputed_details",
+    )
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["generated_item", "ambiguity_key"],
+                name="hover_disputed_detail_unique_ambiguity",
+            ),
+            models.UniqueConstraint(
+                fields=["generated_item", "field_path"],
+                name="hover_disputed_detail_unique_field",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(state="needs_review", resolved_by_revision__isnull=True)
+                    | Q(state="resolved", resolved_by_revision__isnull=False)
+                ),
+                name="hover_disputed_detail_resolution_matches_state",
+            ),
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.realm_id != self.generated_item.realm_id:
+            raise ValidationError("Disputed details must share the generated item organization.")
+        revision = self.resolved_by_revision
+        if revision is not None and (
+            revision.realm_id != self.realm_id
+            or revision.generated_item_id != self.generated_item_id
+            or revision.field_path != self.field_path
+        ):
+            raise ValidationError(
+                {"resolved_by_revision": "Use a matching field Revision from this generated item."}
+            )
+
+
+class DisputedEvidenceLink(models.Model):
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    disputed_detail = models.ForeignKey(
+        DisputedDetail, on_delete=CASCADE, related_name="conflicting_evidence"
+    )
+    evidence_link = models.ForeignKey(
+        EvidenceLink, on_delete=RESTRICT, related_name="dispute_links"
+    )
+    position = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ["position"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["disputed_detail", "evidence_link"],
+                name="hover_disputed_evidence_unique_link",
+            ),
+            models.UniqueConstraint(
+                fields=["disputed_detail", "position"],
+                name="hover_disputed_evidence_unique_position",
+            ),
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if (
+            self.realm_id != self.disputed_detail.realm_id
+            or self.realm_id != self.evidence_link.realm_id
+            or self.disputed_detail.generated_item_id != self.evidence_link.generated_item_id
+        ):
+            raise ValidationError("Conflicting evidence must belong to its generated item.")
+
+
+class ReviewRequest(models.Model):
+    class State(models.TextChoices):
+        OPEN = "open", "Open"
+        RESOLVED = "resolved", "Resolved"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    disputed_detail = models.OneToOneField(
+        DisputedDetail, on_delete=CASCADE, related_name="review_request"
+    )
+    message = models.OneToOneField(Message, on_delete=RESTRICT, related_name="hover_review_request")
+    state = models.TextField(choices=State.choices, default=State.OPEN)
+    resolved_by_revision = models.ForeignKey(
+        Revision,
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="resolved_review_requests",
+    )
+    date_created = models.DateTimeField(default=timezone_now)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(state="open", resolved_by_revision__isnull=True, resolved_at__isnull=True)
+                    | Q(
+                        state="resolved",
+                        resolved_by_revision__isnull=False,
+                        resolved_at__isnull=False,
+                    )
+                ),
+                name="hover_review_request_resolution_matches_state",
+            )
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        detail = self.disputed_detail
+        if (
+            not detail.material
+            or self.realm_id != detail.realm_id
+            or self.realm_id != self.message.realm_id
+            or detail.generated_item.message.recipient_id != self.message.recipient_id
+            or detail.generated_item.message.topic_name() != self.message.topic_name()
+        ):
+            raise ValidationError("Review requests must belong beneath a material dispute root.")
+        if self.resolved_by_revision_id != detail.resolved_by_revision_id:
+            raise ValidationError("Review request and disputed detail resolution must match.")
+
+
+class ReviewRequestTarget(models.Model):
+    class Reason(models.TextChoices):
+        INVOLVED_TEAMMATE = "involved_teammate", "Involved teammate"
+        SPACE_ADMIN_FALLBACK = "space_admin_fallback", "Space administrator fallback"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    review_request = models.ForeignKey(ReviewRequest, on_delete=CASCADE, related_name="targets")
+    user = models.ForeignKey(UserProfile, on_delete=CASCADE)
+    reason = models.TextField(choices=Reason.choices)
+    date_created = models.DateTimeField(default=timezone_now)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["review_request", "user"],
+                name="hover_review_request_unique_target",
+            )
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        detail = self.review_request.disputed_detail
+        attachment = detail.generated_item.attachment
+        if (
+            self.realm_id != self.review_request.realm_id
+            or self.realm_id != self.user.realm_id
+            or attachment is None
+            or not self.user.is_active
+            or self.user.is_bot
+            or self.user.is_guest
+            or not SpaceMembership.objects.filter(space=attachment.space, user=self.user).exists()
+        ):
+            raise ValidationError("Review request targets must be confirmed active Space members.")

@@ -3,7 +3,7 @@ from django.utils.translation import gettext as _
 
 from hover.clawer_sync import get_clawer_sync
 from hover.lib_spaces import access_space_by_id
-from hover.models import ConnectedAccount, GeneratedItem
+from hover.models import ConnectedAccount, DisputedDetail, GeneratedItem
 from zerver.decorator import require_non_guest_user
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.message import access_message
@@ -59,6 +59,67 @@ def resolve_generated_item_evidence(
         link.evidence_ref for link in links if link.evidence_ref and link.source_id == source.id
     ]
     if not links or len(evidence_refs) != len(links):
+        raise EvidenceResolutionError
+    evidence = get_clawer_sync().resolve_evidence(
+        realm_uuid=user_profile.realm.uuid,
+        account_external_id=source.account.external_account_id,
+        source_ref=source.external_ref,
+        refs=evidence_refs,
+    )
+    return json_success(
+        request,
+        data={"evidence": [item.model_dump(mode="json") for item in evidence]},
+    )
+
+
+@require_non_guest_user
+@typed_endpoint
+def resolve_disputed_detail_evidence(
+    request: HttpRequest,
+    user_profile: UserProfile,
+    *,
+    space_id: PathOnly[int],
+    generated_item_id: PathOnly[int],
+    disputed_detail_id: PathOnly[int],
+) -> HttpResponse:
+    """Resolve only the ordered, server-owned evidence subset for one dispute."""
+    space = access_space_by_id(user_profile, space_id)
+    if space.state != space.State.LAUNCHED or space.stream is None:
+        raise JsonableError(_("Invalid disputed detail ID"))
+    try:
+        detail = (
+            DisputedDetail.objects.select_related(
+                "generated_item__attachment__source__account",
+                "generated_item__message",
+            )
+            .prefetch_related("conflicting_evidence__evidence_link")
+            .get(
+                id=disputed_detail_id,
+                realm=user_profile.realm,
+                generated_item_id=generated_item_id,
+                generated_item__attachment__space=space,
+                generated_item__message__recipient=space.stream.recipient,
+            )
+        )
+    except DisputedDetail.DoesNotExist:
+        raise JsonableError(_("Invalid disputed detail ID"))
+
+    generated_item = detail.generated_item
+    attachment = generated_item.attachment
+    assert attachment is not None
+    source = attachment.source
+    access_message(user_profile, generated_item.message_id, is_modifying_message=False)
+    if source.account.approval_state != ConnectedAccount.ApprovalState.APPROVED:
+        raise EvidenceResolutionError
+    conflict_links = list(detail.conflicting_evidence.all())
+    evidence_refs = [
+        conflict.evidence_link.evidence_ref
+        for conflict in conflict_links
+        if conflict.evidence_link.evidence_ref
+        and conflict.evidence_link.source_id == source.id
+        and conflict.evidence_link.generated_item_id == generated_item.id
+    ]
+    if len(evidence_refs) < 2 or len(evidence_refs) != len(conflict_links):
         raise EvidenceResolutionError
     evidence = get_clawer_sync().resolve_evidence(
         realm_uuid=user_profile.realm.uuid,

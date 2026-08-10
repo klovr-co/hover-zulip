@@ -4,6 +4,7 @@ from typing import Any, Literal
 import orjson
 from django.utils.translation import gettext as _
 
+from hover.actions_review_requests import resolve_matching_dispute
 from hover.models import GeneratedItem, Response, Revision, SpaceMembership
 from zerver.lib.exceptions import JsonableError
 from zerver.models import Message, UserProfile
@@ -108,7 +109,7 @@ def create_response(
         current_payload[prepared.field_path] = prepared.new_value
         generated_item.reviewed_payload = current_payload
         generated_item.save(update_fields=["reviewed_payload"])
-        Revision.objects.create(
+        revision = Revision.objects.create(
             realm=actor.realm,
             generated_item=generated_item,
             response=response,
@@ -118,5 +119,6 @@ def create_response(
             new_value=prepared.new_value,
             reason=message.content,
         )
+        resolve_matching_dispute(revision)
 
     return response

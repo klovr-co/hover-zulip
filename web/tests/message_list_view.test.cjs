@@ -534,6 +534,31 @@ test("hover_generated_update_vars", () => {
                         review_message_id: 99,
                     },
                 ],
+                disputed_details: [
+                    {
+                        id: 4,
+                        field_path: "summary",
+                        summary: "Credible updates disagree about launch readiness.",
+                        material: true,
+                        state: "needs_review",
+                        evidence_count: 2,
+                        evidence_url:
+                            "/json/hover/spaces/7/generated-items/1/disputed-details/4/evidence",
+                        review_request: {
+                            id: 5,
+                            state: "open",
+                            message_id: 100,
+                            targets: [
+                                {
+                                    user_id: 81,
+                                    full_name: "Project lead",
+                                    reason: "involved_teammate",
+                                },
+                            ],
+                        },
+                        resolution: null,
+                    },
+                ],
                 sources: [
                     {
                         id: null,
@@ -598,6 +623,9 @@ test("hover_generated_update_vars", () => {
     assert.equal(hover_update.hover_is_latest, true);
     assert.equal(hover_update.hover_source_context, "Across 3 sources");
     assert.equal(hover_update.has_hover_revisions, true);
+    assert.equal(hover_update.has_hover_disputed_details, true);
+    assert.equal(hover_update.hover_disputed_details[0].state_label, "Needs review");
+    assert.equal(hover_update.hover_disputed_details[0].show_review_action, true);
     assert.equal(hover_update.hover_revisions[0].previous_value_display, '"Launch likely"');
     assert.equal(human_post.is_hover_generated_update, false);
     assert.equal(human_post.has_hover_source_integrations, false);

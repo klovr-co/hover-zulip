@@ -61,6 +61,21 @@ export type MessageContainer = {
     include_sender: boolean;
     is_hidden: boolean;
     is_hover_generated_update: boolean;
+    is_hover_review_request: boolean;
+    hover_review_request_state?: string;
+    has_hover_disputed_details: boolean;
+    hover_disputed_details: Array<{
+        field_path: string;
+        field_label: string;
+        summary: string;
+        state_label: string;
+        state_class: string;
+        evidence_url: string | null;
+        evidence_count: number;
+        show_review_action: boolean;
+        target_label?: string | undefined;
+        resolution_label?: string | undefined;
+    }>;
     has_hover_source_integrations: boolean;
     hover_module_key?: string;
     hover_module_name?: string;
@@ -618,6 +633,21 @@ export class MessageListView {
         should_add_guest_indicator_for_sender: boolean;
         is_hidden: boolean;
         is_hover_generated_update: boolean;
+        is_hover_review_request: boolean;
+        hover_review_request_state?: string;
+        has_hover_disputed_details: boolean;
+        hover_disputed_details: Array<{
+            field_path: string;
+            field_label: string;
+            summary: string;
+            state_label: string;
+            state_class: string;
+            evidence_url: string | null;
+            evidence_count: number;
+            show_review_action: boolean;
+            target_label?: string | undefined;
+            resolution_label?: string | undefined;
+        }>;
         is_hover_response: boolean;
         is_hover_review: boolean;
         hover_response_clarification_required: boolean;
@@ -774,11 +804,58 @@ export class MessageListView {
             .filter((value) => value !== undefined)
             .join(" ");
         const hover_response = message.hover_response;
+        const hover_review_request = message.hover_review_request;
         const hover_revisions = (hover_generated_item?.revisions ?? []).map((revision) => ({
             ...revision,
             previous_value_display: JSON.stringify(revision.previous_value),
             new_value_display: JSON.stringify(revision.new_value),
         }));
+        const hover_disputed_details = (hover_generated_item?.disputed_details ?? []).map(
+            (detail) => {
+                const targets = detail.review_request?.targets ?? [];
+                const is_targeted = targets.some((target) =>
+                    people.is_my_user_id(target.user_id),
+                );
+                let target_label: string | undefined;
+                if (detail.material && detail.state === "needs_review") {
+                    target_label = is_targeted
+                        ? $t({defaultMessage: "Review requested from you"})
+                        : $t(
+                              {defaultMessage: "Review requested from {names}"},
+                              {names: targets.map((target) => target.full_name).join(", ")},
+                          );
+                }
+                const resolution_label =
+                    detail.resolution === null
+                        ? undefined
+                        : $t(
+                              {defaultMessage: "Reviewed by {name}"},
+                              {name: detail.resolution.reviewer.full_name},
+                          );
+                return {
+                    field_path: detail.field_path,
+                    field_label: detail.field_path.replaceAll("_", " "),
+                    summary: detail.summary,
+                    state_label:
+                        detail.state === "resolved"
+                            ? $t({defaultMessage: "Reviewed"})
+                            : detail.material
+                              ? $t({defaultMessage: "Needs review"})
+                              : $t({defaultMessage: "Uncertain"}),
+                    state_class:
+                        detail.state === "resolved"
+                            ? "reviewed"
+                            : detail.material
+                              ? "needs-review"
+                              : "uncertain",
+                    evidence_url: detail.evidence_url,
+                    evidence_count: detail.evidence_count,
+                    show_review_action: detail.material && detail.state === "needs_review",
+                    target_label,
+                    resolution_label,
+                };
+            },
+        );
 
         return {
             timestr: get_timestr(message),
@@ -791,6 +868,12 @@ export class MessageListView {
             should_add_guest_indicator_for_sender,
             is_hidden,
             is_hover_generated_update,
+            is_hover_review_request: hover_review_request !== undefined,
+            ...(hover_review_request !== undefined && {
+                hover_review_request_state: hover_review_request.state,
+            }),
+            has_hover_disputed_details: hover_disputed_details.length > 0,
+            hover_disputed_details,
             hover_filter_classes,
             has_hover_source_provenance: hover_source_provenance !== undefined,
             ...(hover_source_provenance !== undefined && {
