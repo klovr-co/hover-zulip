@@ -21,6 +21,7 @@ from hover.views_connected_accounts import (
     update_connected_account,
     upsert_connected_account_grant,
 )
+from hover.views_sources import attach_source, discover_sources, preview_source
 from hover.views_spaces import (
     add_space_administrator,
     create_space,
@@ -606,6 +607,15 @@ v1_api_and_json_patterns = [
         "hover/spaces/<int:space_id>/admins/<int:user_id>",
         DELETE=remove_space_administrator,
     ),
+    rest_path(
+        "hover/spaces/<int:space_id>/sources/discover",
+        POST=discover_sources,
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/sources/preview",
+        POST=preview_source,
+    ),
+    rest_path("hover/spaces/<int:space_id>/sources", POST=attach_source),
     rest_path("hover/connected_accounts", GET=list_connected_accounts),
     rest_path(
         "hover/connected_accounts/<int:account_id>",

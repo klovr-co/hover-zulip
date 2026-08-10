@@ -147,7 +147,7 @@ class ConnectedAccount(models.Model):
     )
     approval_state = models.TextField(choices=ApprovalState.choices, default=ApprovalState.PENDING)
     health_status = models.TextField(choices=HealthStatus.choices, default=HealthStatus.UNKNOWN)
-    health_checked_at = models.DateTimeField(null=True)
+    health_checked_at = models.DateTimeField(null=True, blank=True)
     date_created = models.DateTimeField(default=timezone_now)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -237,6 +237,104 @@ class ConnectedAccountGrantSelector(models.Model):
         super().clean()
         if self.grant_id is not None and self.grant.realm_id != self.realm_id:
             raise ValidationError({"grant": "Grant selectors must share the grant organization."})
+
+
+class Source(models.Model):
+    MAX_ADAPTER_KEY_LENGTH = 32
+    MAX_PROVIDER_KEY_LENGTH = 32
+    MAX_SOURCE_TYPE_LENGTH = 64
+    MAX_DISPLAY_NAME_LENGTH = 100
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_sources")
+    account = models.ForeignKey(ConnectedAccount, on_delete=RESTRICT, related_name="sources")
+    adapter_key = models.CharField(max_length=MAX_ADAPTER_KEY_LENGTH)
+    provider_key = models.CharField(
+        max_length=MAX_PROVIDER_KEY_LENGTH, validators=[provider_key_validator]
+    )
+    source_type = models.CharField(
+        max_length=MAX_SOURCE_TYPE_LENGTH, validators=[selector_type_validator]
+    )
+    external_ref = models.CharField(
+        max_length=ConnectedAccountGrantSelector.MAX_SOURCE_REF_LENGTH,
+        validators=[source_ref_validator],
+    )
+    display_name = models.CharField(max_length=MAX_DISPLAY_NAME_LENGTH)
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["account", "external_ref"],
+                name="hover_source_unique_account_external_ref",
+            )
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        if self.account_id is not None and self.account.realm_id != self.realm_id:
+            raise ValidationError({"account": "Sources and accounts must share an organization."})
+
+
+class SpaceAttachment(models.Model):
+    MAX_TIMEZONE_LENGTH = 64
+
+    class State(models.TextChoices):
+        PENDING_SYNC = "pending_sync", "Pending sync"
+        ACTIVE = "active", "Active"
+
+    class HistoryWindow(models.TextChoices):
+        TODAY = "today", "Today"
+        LAST_30_DAYS = "last_30_days", "Last 30 days"
+        CUSTOM = "custom", "Custom start date"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_space_attachments")
+    space = models.ForeignKey(Space, on_delete=CASCADE, related_name="attachments")
+    source = models.ForeignKey(Source, on_delete=RESTRICT, related_name="space_attachments")
+    state = models.TextField(choices=State.choices, default=State.PENDING_SYNC)
+    history_window = models.TextField(choices=HistoryWindow.choices)
+    history_timezone = models.CharField(max_length=MAX_TIMEZONE_LENGTH)
+    history_start_at = models.DateTimeField()
+    custom_start_date = models.DateField(null=True)
+    attached_by = models.ForeignKey(
+        UserProfile,
+        null=True,
+        on_delete=SET_NULL,
+        related_name="hover_space_attachments_added",
+    )
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["space", "source"], name="hover_space_attachment_unique_source"
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(history_window="custom", custom_start_date__isnull=False)
+                    | Q(
+                        history_window__in=["today", "last_30_days"], custom_start_date__isnull=True
+                    )
+                ),
+                name="hover_space_attachment_custom_date_matches_window",
+            ),
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        if self.space_id is not None and self.space.realm_id != self.realm_id:
+            raise ValidationError(
+                {"space": "Space attachments and Spaces must share an organization."}
+            )
+        if self.source_id is not None and self.source.realm_id != self.realm_id:
+            raise ValidationError(
+                {"source": "Space attachments and Sources must share an organization."}
+            )
+        if self.attached_by_id is not None and self.attached_by.realm_id != self.realm_id:
+            raise ValidationError(
+                {"attached_by": "Space attachments and actors must share an organization."}
+            )
 
 
 class GeneratedItem(models.Model):

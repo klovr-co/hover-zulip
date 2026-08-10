@@ -19,7 +19,7 @@ from hover.models import Space
 from zerver.decorator import require_non_guest_user
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.response import json_success
-from zerver.lib.typed_endpoint import PathOnly, typed_endpoint
+from zerver.lib.typed_endpoint import PathOnly, typed_endpoint, typed_endpoint_without_parameters
 from zerver.models.channel_folders import ChannelFolder
 from zerver.models.users import UserProfile, get_user_profile_by_id_in_realm
 
@@ -39,14 +39,12 @@ def create_space(
     except ChannelFolder.DoesNotExist:
         raise JsonableError(_("Invalid Space category."))
 
-    space = do_create_space(
-        user_profile, name=name, description=description, category=category
-    )
+    space = do_create_space(user_profile, name=name, description=description, category=category)
     return json_success(request, data={"space": get_space_data(space)})
 
 
 @require_non_guest_user
-@typed_endpoint
+@typed_endpoint_without_parameters
 def list_spaces(request: HttpRequest, user_profile: UserProfile) -> HttpResponse:
     return json_success(
         request,

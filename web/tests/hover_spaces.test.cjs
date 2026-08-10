@@ -15,6 +15,7 @@ const setup_space = {
     category: {id: 10, name: "Programs"},
     created_by_id: 5,
     stream_id: null,
+    attachments: [],
 };
 
 const launched_space = {
@@ -25,6 +26,7 @@ const launched_space = {
     category: {id: 11, name: "Events"},
     created_by_id: 5,
     stream_id: 99,
+    attachments: [],
 };
 
 run_test("initialize and look up spaces", () => {
@@ -49,4 +51,62 @@ run_test("upsert, remove, and clear", () => {
     hover_spaces.upsert(launched_space);
     hover_spaces.clear();
     assert.deepEqual(hover_spaces.get_all(), []);
+});
+
+run_test("server-projected attachments become provider-neutral sidebar Sources", () => {
+    const attached_space = {
+        ...setup_space,
+        attachments: [
+            {
+                id: 31,
+                state: "active",
+                history_window: "today",
+                history_timezone: "America/Los_Angeles",
+                history_start_at: "2026-08-10T07:00:00+00:00",
+                custom_start_date: null,
+                source: {
+                    id: 41,
+                    provider_key: "whatsapp",
+                    source_type: "group",
+                    display_name: "Leadership group",
+                    account_id: 51,
+                    account_display_name: "Founder conversations",
+                },
+            },
+            {
+                id: 32,
+                state: "active",
+                history_window: "custom",
+                history_timezone: "UTC",
+                history_start_at: "2026-08-01T00:00:00+00:00",
+                custom_start_date: "2026-08-01",
+                source: {
+                    id: 42,
+                    provider_key: "future_provider",
+                    source_type: "workspace",
+                    display_name: "Operations workspace",
+                    account_id: 52,
+                    account_display_name: "Operations",
+                },
+            },
+        ],
+    };
+    assert.deepEqual(hover_spaces.get_sidebar_sources(attached_space), [
+        {
+            key: "whatsapp",
+            source_key: "41",
+            name: "Leadership group",
+            detail: "Founder conversations · group",
+            icon_class: "fa fa-whatsapp",
+            is_external: false,
+        },
+        {
+            key: "future_provider",
+            source_key: "42",
+            name: "Operations workspace",
+            detail: "Operations · workspace",
+            icon_class: "fa fa-plug",
+            is_external: false,
+        },
+    ]);
 });

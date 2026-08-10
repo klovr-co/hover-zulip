@@ -8977,6 +8977,7 @@ paths:
                                 content_type: {}
                                 display_recipient: {}
                                 edit_history: {}
+                                hover_generated_item: {}
                                 id: {}
                                 is_me_message: {}
                                 last_edit_timestamp: {}
@@ -10368,6 +10369,7 @@ paths:
                               content_type: {}
                               display_recipient: {}
                               edit_history: {}
+                              hover_generated_item: {}
                               id: {}
                               is_me_message: {}
                               last_edit_timestamp: {}
@@ -27227,6 +27229,7 @@ paths:
                           content_type: {}
                           display_recipient: {}
                           edit_history: {}
+                          hover_generated_item: {}
                           id: {}
                           is_me_message: {}
                           last_edit_timestamp: {}
@@ -29113,6 +29116,7 @@ components:
             content_type: {}
             display_recipient: {}
             edit_history: {}
+            hover_generated_item: {}
             id: {}
             is_me_message: {}
             last_edit_timestamp: {}
@@ -29308,6 +29312,72 @@ components:
           description: |
             The unique message ID. Messages should always be
             displayed sorted by ID.
+        hover_generated_item:
+          type: object
+          additionalProperties: false
+          description: |
+            Structured Hover metadata for a native message produced by a
+            versioned Hover Module. Omitted for ordinary messages.
+          properties:
+            id:
+              type: integer
+            output_type:
+              type: string
+              enum:
+                - feed_update
+                - digest
+                - suggested_action
+                - progress_update
+                - decision
+                - analysis
+            module:
+              type: object
+              additionalProperties: false
+              properties:
+                key:
+                  type: string
+                name:
+                  type: string
+                version:
+                  type: string
+              required:
+                - key
+                - name
+                - version
+            source_summary:
+              type: string
+            evidence_available:
+              type: boolean
+            sources:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  key:
+                    type: string
+                  name:
+                    type: string
+                  icon_class:
+                    type: string
+                  count:
+                    type: integer
+                    minimum: 1
+                  url:
+                    type: string
+                required:
+                  - key
+                  - name
+                  - icon_class
+                  - count
+                  - url
+          required:
+            - id
+            - output_type
+            - module
+            - source_summary
+            - evidence_available
+            - sources
         is_me_message:
           type: boolean
           description: |

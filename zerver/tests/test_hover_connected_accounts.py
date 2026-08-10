@@ -1,6 +1,7 @@
 from uuid import UUID
 
 import orjson
+from typing_extensions import override
 
 from hover.actions_connected_accounts import (
     ConnectedAccountSelectorSpec,
@@ -13,21 +14,25 @@ from hover.lib_connected_accounts import user_can_use_connected_account
 from hover.models import ConnectedAccount, ConnectedAccountGrant
 from zerver.lib.events import apply_events, fetch_initial_state_data
 from zerver.lib.exceptions import JsonableError
+from zerver.lib.test_classes import ZulipTestCase
 from zerver.models.realm_audit_logs import AuditLogEventType, RealmAuditLog
 from zerver.models.users import UserProfile
-from zerver.tests.helpers import ZulipTestCase
 
 
 class HoverConnectedAccountTest(ZulipTestCase):
     SOURCE_REF = "src_0123456789abcdef0123456789abcdef"
 
+    @override
     def setUp(self) -> None:
+        super().setUp()
         self.creator = self.example_user("hamlet")
-        self.admin = self.example_user("iago")
-        self.grantee = self.example_user("othello")
         self.realm = self.creator.realm
         self.realm.hover_enabled = True
         self.realm.save(update_fields=["hover_enabled"])
+        # Fetch these users after enabling Hover so their related Realm cache
+        # matches the database state used by permission helpers.
+        self.admin = self.example_user("iago")
+        self.grantee = self.example_user("othello")
 
     def create_account(self) -> ConnectedAccount:
         return do_create_connected_account(
@@ -290,7 +295,7 @@ class HoverConnectedAccountTest(ZulipTestCase):
         result = self.client_post(
             f"/json/hover/connected_accounts/{account.id}/grants", grant_payload
         )
-        self.assert_json_error(result, "Bad value for 'selectors'")
+        self.assert_json_error(result, 'selectors[0]["source_ref"] has invalid format')
 
     def test_cross_realm_account_and_grant_ids_are_indistinguishable(self) -> None:
         account = self.create_account()
@@ -302,7 +307,7 @@ class HoverConnectedAccountTest(ZulipTestCase):
             selector_specs=[],
             acting_user=self.admin,
         )
-        other_admin = self.example_user("cordelia")
+        other_admin = self.lear_user("cordelia")
         self.set_user_role(other_admin, UserProfile.ROLE_REALM_ADMINISTRATOR)
         other_admin.realm.hover_enabled = True
         other_admin.realm.save(update_fields=["hover_enabled"])

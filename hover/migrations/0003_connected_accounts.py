@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                         default="unknown",
                     ),
                 ),
-                ("health_checked_at", models.DateTimeField(null=True)),
+                ("health_checked_at", models.DateTimeField(blank=True, null=True)),
                 ("date_created", models.DateTimeField(default=django.utils.timezone.now)),
                 ("date_updated", models.DateTimeField(auto_now=True)),
                 (

@@ -52,6 +52,7 @@ import {user_settings} from "./user_settings.ts";
 
 let pending_stream_list_rerender = false;
 let zoomed_in = false;
+let last_setup_projection_signature: string | undefined;
 let update_inbox_channel_view_callback: (channel_id: number) => void;
 let show_channel_feed_callback: (stream_id: number, trigger: string) => void;
 
@@ -435,10 +436,85 @@ export function build_stream_list(force_rerender: boolean): void {
     const search_term =
         ui_util.get_left_sidebar_topic_search_term() ?? ui_util.get_left_sidebar_search_term();
     const stream_groups = stream_list_sort.sort_groups(streams, search_term);
-
-    if (stream_groups.same_as_before && !force_rerender) {
+    const setup_spaces = realm.realm_hover_enabled ? hover_spaces.get_setup_spaces() : [];
+    const normalized_search_term = search_term.toLocaleLowerCase();
+    const visible_setup_spaces = setup_spaces.filter(
+        (space) =>
+            normalized_search_term === "" ||
+            space.name.toLocaleLowerCase().includes(normalized_search_term) ||
+            space.category.name.toLocaleLowerCase().includes(normalized_search_term),
+    );
+    const setup_projection_signature = JSON.stringify({
+        hover_enabled: realm.realm_hover_enabled,
+        show_channel_folders: user_settings.web_left_sidebar_show_channel_folders,
+        search_term: normalized_search_term,
+        spaces: visible_setup_spaces,
+    });
+    if (
+        stream_groups.same_as_before &&
+        !force_rerender &&
+        setup_projection_signature === last_setup_projection_signature
+    ) {
         return;
     }
+    last_setup_projection_signature = setup_projection_signature;
+
+    const setup_folder_ids = new Set<number>();
+    if (user_settings.web_left_sidebar_show_channel_folders) {
+        for (const space of visible_setup_spaces) {
+            if (channel_folders.is_valid_folder_id(space.category.id)) {
+                setup_folder_ids.add(space.category.id);
+            }
+        }
+    }
+    const has_normal_setup_space = visible_setup_spaces.some(
+        (space) => !setup_folder_ids.has(space.category.id),
+    );
+
+    const sections = [...stream_groups.sections];
+    const rendered_folder_ids = new Set(
+        sections
+            .map((section) => section.folder_id)
+            .filter((folder_id): folder_id is number => folder_id !== null),
+    );
+    for (const folder_id of setup_folder_ids) {
+        if (rendered_folder_ids.has(folder_id) || !channel_folders.is_valid_folder_id(folder_id)) {
+            continue;
+        }
+        const folder = channel_folders.get_channel_folder_by_id(folder_id);
+        sections.push({
+            id: folder.id.toString(),
+            folder_id: folder.id,
+            section_title: folder.name.toUpperCase(),
+            default_visible_streams: [],
+            muted_streams: [],
+            inactive_streams: [],
+            order: folder.order,
+        });
+    }
+    const pinned_section = sections.find((section) => section.id === "pinned-streams")!;
+    const normal_section = sections.find((section) => section.id === "normal-streams")!;
+    const folder_sections = sections.filter((section) => section.folder_id !== null);
+    const regular_folder_sections = folder_sections
+        .filter(
+            (section) =>
+                section.default_visible_streams.length > 0 ||
+                setup_folder_ids.has(section.folder_id!),
+        )
+        .toSorted((a, b) => a.order! - b.order!);
+    const demoted_folder_sections = folder_sections
+        .filter(
+            (section) =>
+                section.default_visible_streams.length === 0 &&
+                !setup_folder_ids.has(section.folder_id!),
+        )
+        .toSorted((a, b) => a.order! - b.order!);
+    const display_sections = [
+        pinned_section,
+        ...regular_folder_sections,
+        normal_section,
+        ...demoted_folder_sections,
+    ];
 
     maybe_change_channel_folders_option_visibility();
 
@@ -457,14 +533,16 @@ export function build_stream_list(force_rerender: boolean): void {
         settings_data.user_can_create_private_streams() ||
         settings_data.user_can_create_public_streams() ||
         settings_data.user_can_create_web_public_streams();
-    for (const section of stream_groups.sections) {
+    for (const section of display_sections) {
         $("#stream_filters").append(
             $(stream_list_section_container_html(section, can_create_streams)),
         );
         const is_empty =
             section.default_visible_streams.length === 0 &&
             section.muted_streams.length === 0 &&
-            section.inactive_streams.length === 0;
+            section.inactive_streams.length === 0 &&
+            !setup_folder_ids.has(section.folder_id ?? -1) &&
+            !(section.id === "normal-streams" && has_normal_setup_space);
         $(`#stream-list-${section.id}-container`).toggleClass("no-display", is_empty);
 
         for (const stream_id of section.default_visible_streams) {
@@ -518,23 +596,28 @@ export function build_stream_list(force_rerender: boolean): void {
     }
 
     if (realm.realm_hover_enabled) {
-        const normalized_search_term = search_term.toLocaleLowerCase();
-        for (const space of hover_spaces.get_setup_spaces()) {
-            if (
-                normalized_search_term !== "" &&
-                !space.name.toLocaleLowerCase().includes(normalized_search_term) &&
-                !space.category.name.toLocaleLowerCase().includes(normalized_search_term)
-            ) {
-                continue;
-            }
-
+        const display_section_ids = new Set(display_sections.map((section) => section.id));
+        for (const space of visible_setup_spaces) {
             const section_id =
                 user_settings.web_left_sidebar_show_channel_folders &&
-                $(`#stream-list-${space.category.id}`).length > 0
+                display_section_ids.has(space.category.id.toString())
                     ? space.category.id.toString()
                     : "normal-streams";
+            const hover_attached_sources = hover_spaces
+                .get_sidebar_sources(space)
+                .map((source) => ({
+                    ...source,
+                    url: `#hover/space/${space.id}/setup`,
+                }));
             $(`#stream-list-${section_id}`).append(
-                $(render_hover_space_setup_sidebar_row({id: space.id, name: space.name})),
+                $(
+                    render_hover_space_setup_sidebar_row({
+                        id: space.id,
+                        name: space.name,
+                        hover_attached_sources,
+                        has_hover_attached_sources: hover_attached_sources.length > 0,
+                    }),
+                ),
             );
             $(`#stream-list-${section_id}-container`).removeClass("no-display");
         }
@@ -888,6 +971,15 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
         ...(hover_space && {
             is_hover_space: true,
             hover_space,
+            hover_ai_modules: hover_spaces.pilot_ai_modules.map((hover_module) => ({
+                ...hover_module,
+                url: hash_util.by_stream_topic_url(sub.stream_id, hover_module.name),
+                has_count: hover_module.key === "suggested_actions",
+                count: hover_module.key === "suggested_actions" ? 3 : 0,
+            })),
+            hover_attached_sources: hover_spaces
+                .get_sidebar_sources(hover_space)
+                .map((source) => ({...source, url: aggregate_url})),
         }),
     };
     const $list_item = $(render_stream_sidebar_row(args));
@@ -1578,25 +1670,30 @@ export function set_event_handlers({
 }: {
     show_channel_feed: (stream_id: number, trigger: string) => void;
 }): void {
-    $("#stream_filters").on("click", "li .subscription_block", (e) => {
-        // Left sidebar channel links have an `href` so that the
-        // browser will preview the URL and you can middle-click it.
-        //
-        // But we want to control what the click does to follow the
-        // user's default left sidebar click action, rather than
-        // taking you to the channel feed.
-        if (e.metaKey || e.ctrlKey || e.shiftKey) {
-            return;
-        }
+    $("#stream_filters").on(
+        "click",
+        // Setup Spaces intentionally have no stream ID and use their own click handler.
+        "li:not(.hover-space-setup-row) .subscription_block",
+        (e) => {
+            // Left sidebar channel links have an `href` so that the
+            // browser will preview the URL and you can middle-click it.
+            //
+            // But we want to control what the click does to follow the
+            // user's default left sidebar click action, rather than
+            // taking you to the channel feed.
+            if (e.metaKey || e.ctrlKey || e.shiftKey) {
+                return;
+            }
 
-        if (mouse_drag.is_drag(e)) {
-            // To avoid the click behavior if a channel name is selected.
-            e.preventDefault();
-            return;
-        }
-        const stream_id = stream_id_for_elt($(e.target).parents("li.narrow-filter"));
-        on_sidebar_channel_click(stream_id, e, show_channel_feed);
-    });
+            if (mouse_drag.is_drag(e)) {
+                // To avoid the click behavior if a channel name is selected.
+                e.preventDefault();
+                return;
+            }
+            const stream_id = stream_id_for_elt($(e.target).parents("li.narrow-filter"));
+            on_sidebar_channel_click(stream_id, e, show_channel_feed);
+        },
+    );
 
     function on_new_topic_press(
         element: HTMLElement,

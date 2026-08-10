@@ -168,14 +168,14 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
 };
 
 export function set_hover_enabled(enabled: boolean): void {
-    Object.assign(built_in_views_meta_data.inbox!, {
+    Object.assign(built_in_views_meta_data["inbox"]!, {
         name: enabled ? $t({defaultMessage: "For You"}) : $t({defaultMessage: "Inbox"}),
         tooltip_template_id: enabled ? "hover-inbox-tooltip-template" : "inbox-tooltip-template",
         menu_aria_label: enabled
             ? $t({defaultMessage: "For You options"})
             : $t({defaultMessage: "Inbox options"}),
     });
-    Object.assign(built_in_views_meta_data.recent_view!, {
+    Object.assign(built_in_views_meta_data["recent_view"]!, {
         name: enabled
             ? $t({defaultMessage: "Team Pulse"})
             : $t({defaultMessage: "Recent conversations"}),
@@ -186,7 +186,7 @@ export function set_hover_enabled(enabled: boolean): void {
             ? "hover-recent-conversations-tooltip-template"
             : "recent-conversations-tooltip-template",
     });
-    Object.assign(built_in_views_meta_data.all_messages!, {
+    Object.assign(built_in_views_meta_data["all_messages"]!, {
         name: enabled
             ? $t({defaultMessage: "All activity"})
             : $t({defaultMessage: "Combined feed"}),
@@ -197,13 +197,13 @@ export function set_hover_enabled(enabled: boolean): void {
             ? $t({defaultMessage: "All activity options"})
             : $t({defaultMessage: "Combined feed options"}),
     });
-    Object.assign(built_in_views_meta_data.mentions!, {
+    Object.assign(built_in_views_meta_data["mentions"]!, {
         name: enabled ? $t({defaultMessage: "Daily Brief"}) : $t({defaultMessage: "Mentions"}),
         icon: enabled ? "zulip-icon-sun" : "zulip-icon-at-sign",
         css_class_suffix: enabled ? "daily_brief" : "mentions",
         tooltip_template_id: enabled ? "daily-brief-tooltip-template" : "mentions-tooltip-template",
     });
-    Object.assign(built_in_views_meta_data.starred_messages!, {
+    Object.assign(built_in_views_meta_data["starred_messages"]!, {
         name: enabled ? $t({defaultMessage: "Saved"}) : $t({defaultMessage: "Starred messages"}),
         tooltip_template_id: enabled
             ? "hover-starred-message-tooltip-template"
@@ -212,7 +212,7 @@ export function set_hover_enabled(enabled: boolean): void {
             ? $t({defaultMessage: "Saved options"})
             : $t({defaultMessage: "Starred messages options"}),
     });
-    Object.assign(built_in_views_meta_data.reminders!, {
+    Object.assign(built_in_views_meta_data["reminders"]!, {
         name: enabled ? $t({defaultMessage: "Todos"}) : $t({defaultMessage: "Reminders"}),
         tooltip_template_id: enabled
             ? "hover-reminders-tooltip-template"

@@ -2628,6 +2628,7 @@ function make_archived_sub(name, stream_id) {
 
 test("navbar_helpers", ({override}) => {
     stream_data.add_sub_for_tests(foo_sub);
+    override(realm, "realm_hover_enabled", true);
 
     // make sure title has names separated with correct delimiters
     function properly_separated_names(names) {

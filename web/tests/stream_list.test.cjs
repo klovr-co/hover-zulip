@@ -41,6 +41,8 @@ mock_esm("../src/unread", {
 });
 
 const {Filter} = zrequire("../src/filter");
+const channel_folders = zrequire("channel_folders");
+const hover_spaces = zrequire("hover_spaces");
 const left_sidebar_navigation_area = zrequire("left_sidebar_navigation_area");
 const stream_data = zrequire("stream_data");
 const stream_list = zrequire("stream_list");
@@ -155,6 +157,7 @@ function create_social_sidebar_row({mock_template}) {
 
 function test_ui(label, f) {
     run_test(label, (helpers) => {
+        hover_spaces.clear();
         stream_data.clear_subscriptions();
         stream_list.stream_sidebar.rows.clear();
         f(helpers);
@@ -245,7 +248,7 @@ test_ui("create_sidebar_row", ({override, override_rewire, mock_template}) => {
     assert.ok(removed);
 });
 
-test_ui("AIMTO modules are native topic links", ({mock_template}) => {
+test_ui("AIMTO modules are native topic links", ({mock_template, override}) => {
     const aimto = make_stream({
         name: "AIMTO Events",
         stream_id: 222,
@@ -256,6 +259,38 @@ test_ui("AIMTO modules are native topic links", ({mock_template}) => {
         can_send_message_group: everyone_group.id,
     });
     stream_data.add_sub_for_tests(aimto);
+    override(realm, "realm_hover_enabled", true);
+    hover_spaces.initialize({
+        hover_spaces: [
+            {
+                id: 1,
+                name: "AIMTO Events",
+                description: "",
+                state: "launched",
+                category: {id: 10, name: "Events"},
+                created_by_id: me.user_id,
+                stream_id: aimto.stream_id,
+                attachments: [
+                    {
+                        id: 1,
+                        state: "active",
+                        history_window: "today",
+                        history_timezone: "Asia/Kuala_Lumpur",
+                        history_start_at: "2026-08-11T00:00:00Z",
+                        custom_start_date: null,
+                        source: {
+                            id: 1,
+                            provider_key: "whatsapp",
+                            source_type: "group",
+                            display_name: "Mentors & Volunteers",
+                            account_id: 1,
+                            account_display_name: "AIMTO WhatsApp",
+                        },
+                    },
+                ],
+            },
+        ],
+    });
 
     const $row = $("<aimto-sidebar-row-stub>");
     const $subscription_block = $.create("aimto-block");
@@ -292,6 +327,73 @@ test_ui("AIMTO modules are native topic links", ({mock_template}) => {
     stream_has_any_unread_mentions = false;
     stream_list.create_sidebar_row(aimto);
 });
+
+test_ui(
+    "setup Space creates its empty category section",
+    ({mock_template, override, override_rewire}) => {
+        const events_folder = {
+            id: 10,
+            name: "Events",
+            description: "",
+            rendered_description: "",
+            creator_id: me.user_id,
+            date_created: 1,
+            is_archived: false,
+            order: 0,
+        };
+        channel_folders.initialize({channel_folders: [events_folder]});
+        override(realm, "realm_hover_enabled", true);
+        override(user_settings, "web_left_sidebar_show_channel_folders", true);
+        hover_spaces.initialize({
+            hover_spaces: [
+                {
+                    id: 2,
+                    name: "AIMTO Events",
+                    description: "",
+                    state: "setup",
+                    category: {id: events_folder.id, name: events_folder.name},
+                    created_by_id: me.user_id,
+                    stream_id: null,
+                    attachments: [],
+                },
+            ],
+        });
+
+        override_rewire(stream_list, "update_stream_section_mention_indicators", noop);
+        override_rewire(stream_list, "update_dom_with_unread_counts", noop);
+        override_rewire(left_sidebar_navigation_area, "update_dom_with_unread_counts", noop);
+        override_rewire(stream_list, "set_sections_states", noop);
+
+        const appended_sections = [];
+        override_rewire(stream_list, "stream_list_section_container_html", (section) => {
+            appended_sections.push(section.id);
+            return `<stub-section-${section.id}>`;
+        });
+        const setup_rows = [];
+        $("#stream-list-10")[0].append = (...rows) => {
+            setup_rows.push(...rows);
+        };
+        mock_template("hover_space_setup_sidebar_row.hbs", false, (data) => {
+            assert.deepEqual(data, {
+                id: 2,
+                name: "AIMTO Events",
+                hover_attached_sources: [],
+                has_hover_attached_sources: false,
+            });
+            return "<aimto-setup-row-stub>";
+        });
+
+        stream_list.build_stream_list(true);
+
+        assert.deepEqual(appended_sections, ["pinned-streams", "10", "normal-streams"]);
+        assert.deepEqual(setup_rows, [$("<aimto-setup-row-stub>")[0]]);
+        assert.ok(!$("#stream-list-10-container").hasClass("no-display"));
+
+        stream_list.build_stream_list(false);
+        assert.deepEqual(appended_sections, ["pinned-streams", "10", "normal-streams"]);
+        assert.deepEqual(setup_rows, [$("<aimto-setup-row-stub>")[0]]);
+    },
+);
 
 test_ui("pinned_streams_never_inactive", ({mock_template, override_rewire}) => {
     override_rewire(stream_list, "update_stream_section_mention_indicators", noop);

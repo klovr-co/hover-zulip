@@ -3,6 +3,7 @@ from typing import Any
 from django.db.models import QuerySet
 from django.utils.translation import gettext as _
 
+from hover.lib_sources import attachment_queryset, get_space_attachment_data
 from hover.models import Space, SpaceAdministrator
 from zerver.lib.exceptions import JsonableError
 from zerver.models.users import UserProfile
@@ -16,6 +17,7 @@ def get_accessible_spaces(user_profile: UserProfile) -> QuerySet[Space]:
             administrator_assignments__user__is_active=True,
         )
         .select_related("category", "created_by", "stream")
+        .prefetch_related(attachment_queryset())
         .distinct()
         .order_by("category__order", "name", "id")
     )
@@ -58,6 +60,7 @@ def get_space_data(space: Space) -> dict[str, Any]:
         "category": {"id": space.category_id, "name": space.category.name},
         "created_by_id": space.created_by_id,
         "stream_id": space.stream_id,
+        "attachments": get_space_attachment_data(space),
     }
 
 

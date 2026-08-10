@@ -42,6 +42,7 @@ function approval_label(state: ConnectedAccount["approval_state"]): string {
         case "revoked":
             return $t({defaultMessage: "Revoked"});
     }
+    throw new Error("Unknown approval state");
 }
 
 function health_label(status: ConnectedAccount["health_status"]): string {
@@ -55,6 +56,7 @@ function health_label(status: ConnectedAccount["health_status"]): string {
         case "unavailable":
             return $t({defaultMessage: "Unavailable"});
     }
+    throw new Error("Unknown health status");
 }
 
 function scope_label(grant: ConnectedAccountGrant): string {
@@ -90,6 +92,7 @@ function card_html(account: ConnectedAccount): string {
             is_revoked: account.approval_state === "revoked",
         },
         grants,
+        has_grants: grants.length > 0,
     });
 }
 
@@ -103,16 +106,18 @@ export function rerender(): void {
     }
     const accounts = hover_connected_accounts.get_accounts();
     if (accounts.length === 0) {
-        $list.html(
-            $("<p>").addClass("hover-connected-account-empty").text($list.attr("data-empty")!),
-        );
+        $list
+            .empty()
+            .append(
+                $("<p>").addClass("hover-connected-account-empty").text($list.attr("data-empty")!),
+            );
         return;
     }
     $list.html(accounts.map((account) => card_html(account)).join(""));
 }
 
 function parse_selector_lines():
-    Array<{selector_type: string; source_ref: string; display_name: string}> | undefined {
+    {selector_type: string; source_ref: string; display_name: string}[] | undefined {
     const lines = $<HTMLTextAreaElement>("#connected_account_selectors")
         .val()!
         .split("\n")
@@ -173,9 +178,8 @@ function open_grant_modal(account: ConnectedAccount, grant?: ConnectedAccountGra
             dialog_widget.hide_dialog_spinner();
             return;
         }
-        const user_id = Number.parseInt(
-            $<HTMLSelectElement>("#connected_account_grantee").val() ?? "",
-            10,
+        const user_id = Math.trunc(
+            Number($<HTMLSelectElement>("#connected_account_grantee").val()),
         );
         dialog_widget.submit_api_request(
             channel.post,
@@ -245,9 +249,7 @@ function update_approval(account: ConnectedAccount, approval_state: "approved" |
 
 function account_from_button(button: HTMLElement): ConnectedAccount {
     const account_id = Number.parseInt(
-        $(button)
-            .closest<HTMLElement>("[data-connected-account-id]")
-            .attr("data-connected-account-id")!,
+        $(button).closest("[data-connected-account-id]").attr("data-connected-account-id")!,
         10,
     );
     return hover_connected_accounts.get_account(account_id)!;
@@ -257,7 +259,7 @@ function grant_from_button(button: HTMLElement): ConnectedAccountGrant {
     const account = account_from_button(button);
     const grant_id = Number.parseInt(
         $(button)
-            .closest<HTMLElement>("[data-connected-account-grant-id]")
+            .closest("[data-connected-account-grant-id]")
             .attr("data-connected-account-grant-id")!,
         10,
     );
@@ -274,48 +276,74 @@ export function set_up(): void {
     rerender();
     const $section = $("#connected-account-settings");
     $section.off("click.hover-connected-accounts");
-    $section.on("click.hover-connected-accounts", ".approve-connected-account", function () {
-        update_approval(account_from_button(this), "approved");
-    });
-    $section.on("click.hover-connected-accounts", ".restore-connected-account", function () {
-        update_approval(account_from_button(this), "approved");
-    });
-    $section.on("click.hover-connected-accounts", ".revoke-connected-account", function () {
-        const account = account_from_button(this);
-        confirm_dialog.launch({
-            modal_title_html: $t_html({defaultMessage: "Revoke Connected Account?"}),
-            modal_content_html: $t_html({
-                defaultMessage: "All teammate grants will stop authorizing shared Space use.",
-            }),
-            on_click: () => update_approval(account, "revoked"),
-        });
-    });
-    $section.on("click.hover-connected-accounts", ".add-connected-account-grant", function () {
-        open_grant_modal(account_from_button(this));
-    });
-    $section.on("click.hover-connected-accounts", ".edit-connected-account-grant", function () {
-        open_grant_modal(account_from_button(this), grant_from_button(this));
-    });
-    $section.on("click.hover-connected-accounts", ".revoke-connected-account-grant", function () {
-        const account = account_from_button(this);
-        const grant = grant_from_button(this);
-        confirm_dialog.launch({
-            modal_title_html: $t_html({defaultMessage: "Revoke teammate grant?"}),
-            modal_content_html: $t_html({
-                defaultMessage: "This teammate will no longer be authorized for this account.",
-            }),
-            on_click() {
-                void channel.del({
-                    url: `/json/hover/connected_accounts/${account.id}/grants/${grant.id}`,
-                    success(raw_data) {
-                        const {connected_account_grant} = grant_response_schema.parse(raw_data);
-                        hover_connected_accounts.upsert_grant(connected_account_grant);
-                        rerender();
-                    },
-                });
-            },
-        });
-    });
+    $section.on(
+        "click.hover-connected-accounts",
+        ".approve-connected-account",
+        function (this: HTMLElement) {
+            update_approval(account_from_button(this), "approved");
+        },
+    );
+    $section.on(
+        "click.hover-connected-accounts",
+        ".restore-connected-account",
+        function (this: HTMLElement) {
+            update_approval(account_from_button(this), "approved");
+        },
+    );
+    $section.on(
+        "click.hover-connected-accounts",
+        ".revoke-connected-account",
+        function (this: HTMLElement) {
+            const account = account_from_button(this);
+            confirm_dialog.launch({
+                modal_title_html: $t_html({defaultMessage: "Revoke Connected Account?"}),
+                modal_content_html: $t_html({
+                    defaultMessage: "All teammate grants will stop authorizing shared Space use.",
+                }),
+                on_click() {
+                    update_approval(account, "revoked");
+                },
+            });
+        },
+    );
+    $section.on(
+        "click.hover-connected-accounts",
+        ".add-connected-account-grant",
+        function (this: HTMLElement) {
+            open_grant_modal(account_from_button(this));
+        },
+    );
+    $section.on(
+        "click.hover-connected-accounts",
+        ".edit-connected-account-grant",
+        function (this: HTMLElement) {
+            open_grant_modal(account_from_button(this), grant_from_button(this));
+        },
+    );
+    $section.on(
+        "click.hover-connected-accounts",
+        ".revoke-connected-account-grant",
+        function (this: HTMLElement) {
+            const account = account_from_button(this);
+            const grant = grant_from_button(this);
+            confirm_dialog.launch({
+                modal_title_html: $t_html({defaultMessage: "Revoke teammate grant?"}),
+                modal_content_html: $t_html({
+                    defaultMessage: "This teammate will no longer be authorized for this account.",
+                }),
+                on_click() {
+                    void channel.del({
+                        url: `/json/hover/connected_accounts/${account.id}/grants/${grant.id}`,
+                        success(raw_data) {
+                            const {connected_account_grant} = grant_response_schema.parse(raw_data);
+                            hover_connected_accounts.upsert_grant(connected_account_grant);
+                            rerender();
+                        },
+                    });
+                },
+            });
+        },
+    );
 }
 
 export function reset(): void {

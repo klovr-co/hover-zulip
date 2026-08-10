@@ -190,7 +190,7 @@ export type Message = (
     | Omit<RawMessageWithBooleans & {type: "stream"}, "reactions" | "subject">
 ) & {
     clean_reactions: Map<string, MessageCleanReaction>;
-    hover_generated_item?: HoverGeneratedItem;
+    hover_generated_item?: HoverGeneratedItem | undefined;
 
     // Local echo state cluster of fields.
     locally_echoed?: boolean;

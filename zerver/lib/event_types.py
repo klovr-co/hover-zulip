@@ -103,6 +103,25 @@ class HoverSpaceCategory(BaseModel):
     name: str
 
 
+class HoverSource(BaseModel):
+    id: int
+    provider_key: str
+    source_type: str
+    display_name: str
+    account_id: int
+    account_display_name: str
+
+
+class HoverSpaceAttachment(BaseModel):
+    id: int
+    state: Literal["active"]
+    history_window: Literal["today", "last_30_days", "custom"]
+    history_timezone: str
+    history_start_at: str
+    custom_start_date: str | None
+    source: HoverSource
+
+
 class HoverSpace(BaseModel):
     id: int
     name: str
@@ -111,6 +130,7 @@ class HoverSpace(BaseModel):
     category: HoverSpaceCategory
     created_by_id: int | None
     stream_id: int | None
+    attachments: list[HoverSpaceAttachment]
 
 
 class HoverSpaceAddEvent(BaseEvent):

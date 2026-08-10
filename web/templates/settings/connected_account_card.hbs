@@ -57,7 +57,8 @@
         aria-label="{{t 'Teammate grants'}}"
     >
         <h5>{{t "Teammate grants"}}</h5>
-        {{#if grants.length}}
+        {{! Grant collections require an explicit boolean in Zulip templates. }}
+        {{#if has_grants}}
             <ul>
                 {{#each grants}}
                     <li data-connected-account-grant-id="{{id}}">

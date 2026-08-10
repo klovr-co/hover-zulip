@@ -102,6 +102,14 @@ class HoverSpacesTest(ZulipTestCase):
             "/json/hover/spaces",
             {"name": "Admin program", "category_id": orjson.dumps(self.category.id).decode()},
         )
+        self.assert_json_error(result, "You do not have permission to create Spaces.")
+
+        self.realm.hover_enabled = True
+        self.realm.save(update_fields=["hover_enabled"])
+        result = self.client_post(
+            "/json/hover/spaces",
+            {"name": "Admin program", "category_id": orjson.dumps(self.category.id).decode()},
+        )
         self.assert_json_success(result)
 
     def test_realm_admin_can_grant_and_revoke_space_creation_permission(self) -> None:
@@ -141,6 +149,7 @@ class HoverSpacesTest(ZulipTestCase):
             SystemGroups.ADMINISTRATORS, self.realm.id
         )
         self.realm.save(update_fields=["hover_enabled", "can_create_spaces_group"])
+        self.login_user(self.creator)
         result = self.client_post(
             "/json/hover/spaces",
             {"name": "Private program", "category_id": orjson.dumps(self.category.id).decode()},
@@ -255,7 +264,7 @@ class HoverSpacesTest(ZulipTestCase):
     def test_cross_realm_and_archived_categories_are_rejected(self) -> None:
         self.login_user(self.creator)
         other_realm_category = ChannelFolder.objects.create(
-            realm=self.example_user("cordelia").realm,
+            realm=self.lear_user("cordelia").realm,
             name="Other realm",
             description="",
             rendered_description="",

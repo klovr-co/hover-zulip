@@ -73,7 +73,7 @@ const scheduled_messages_ui = mock_esm("../src/scheduled_messages_ui");
 const scroll_bar = mock_esm("../src/scroll_bar");
 const settings_account = mock_esm("../src/settings_account");
 const settings_bots = mock_esm("../src/settings_bots");
-const settings_connected_accounts = mock_esm("../src/settings_connected_accounts", {
+mock_esm("../src/settings_connected_accounts", {
     rerender: noop,
 });
 const settings_data = mock_esm("../src/settings_data");
@@ -717,8 +717,9 @@ run_test("realm settings", ({override}) => {
         description: "",
         state: "setup",
         category: {id: 10, name: "Programs"},
-        created_by_id: current_user.user_id,
+        created_by_id: test_user.user_id,
         stream_id: null,
+        attachments: [],
     };
     const accessible_connected_account = {
         id: 2,
@@ -726,8 +727,8 @@ run_test("realm settings", ({override}) => {
         provider_name: "WhatsApp",
         external_account_id: "d38c68c4-d70f-44ec-a17e-c7c845f91c03",
         display_name: "Founder conversations",
-        created_by_id: current_user.user_id,
-        owner_id: current_user.user_id,
+        created_by_id: test_user.user_id,
+        owner_id: test_user.user_id,
         approval_state: "pending",
         health_status: "unknown",
         health_checked_at: null,
@@ -759,11 +760,11 @@ run_test("realm settings", ({override}) => {
     dispatch({type: "realm", op: "update", property: "hover_enabled", value: true});
     assert.equal(get_spaces_calls, 1);
     assert.equal(get_connected_accounts_calls, 1);
-    assert.equal(
+    assert.deepEqual(
         hover_connected_accounts.get_account(accessible_connected_account.id),
         accessible_connected_account,
     );
-    assert.equal(hover_spaces.get_by_id(accessible_space.id), accessible_space);
+    assert.deepEqual(hover_spaces.get_by_id(accessible_space.id), accessible_space);
 
     // A page loaded while Hover was disabled starts empty; enabling refetches the
     // user's authorized Spaces and converges to the enabled initial state.
@@ -776,8 +777,8 @@ run_test("realm settings", ({override}) => {
     dispatch({type: "realm", op: "update", property: "hover_enabled", value: true});
     assert.equal(get_spaces_calls, 2);
     assert.equal(get_connected_accounts_calls, 2);
-    assert.equal(hover_spaces.get_by_id(accessible_space.id), accessible_space);
-    assert.equal(
+    assert.deepEqual(hover_spaces.get_by_id(accessible_space.id), accessible_space);
+    assert.deepEqual(
         hover_connected_accounts.get_account(accessible_connected_account.id),
         accessible_connected_account,
     );

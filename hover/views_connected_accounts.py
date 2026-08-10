@@ -21,7 +21,7 @@ from hover.models import ConnectedAccountGrantSelector
 from zerver.decorator import require_non_guest_user, require_realm_admin
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.response import json_success
-from zerver.lib.typed_endpoint import PathOnly, typed_endpoint
+from zerver.lib.typed_endpoint import PathOnly, typed_endpoint, typed_endpoint_without_parameters
 from zerver.models.users import UserProfile, get_user_profile_by_id_in_realm
 
 
@@ -48,7 +48,7 @@ class ConnectedAccountSelectorInput(BaseModel):
 
 
 @require_non_guest_user
-@typed_endpoint
+@typed_endpoint_without_parameters
 def list_connected_accounts(request: HttpRequest, user_profile: UserProfile) -> HttpResponse:
     accounts, grants = get_visible_connected_account_data(user_profile)
     return json_success(

@@ -34,10 +34,12 @@ class PopulateHoverDemoTest(ZulipTestCase):
         self.assertEqual(space.state, Space.State.LAUNCHED)
         self.assertEqual(space.category, stream.folder)
         self.assertEqual(space.stream, stream)
-        self.assertEqual(space.created_by, self.example_user("iago"))
+        owner = realm.get_human_admin_users().order_by("id").first()
+        assert owner is not None
+        self.assertEqual(space.created_by, owner)
         self.assertEqual(
             set(SpaceAdministrator.objects.filter(space=space).values_list("user_id", flat=True)),
-            {self.example_user("iago").id, self.example_user("hamlet").id},
+            {owner.id, self.example_user("hamlet").id},
         )
         self.assertIn("source-backed hover updates", stream.description.lower())
         self.assertTrue(
