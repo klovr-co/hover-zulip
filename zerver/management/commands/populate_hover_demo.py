@@ -1,13 +1,41 @@
 import datetime
+import hashlib
+import uuid
 from dataclasses import dataclass
 from typing import Any, Literal
 
+import orjson
 from django.conf import settings
 from django.core.management.base import CommandError, CommandParser
 from django.db import connection, transaction
 from typing_extensions import override
 
-from hover.models import EvidenceLink, GeneratedItem, Space, SpaceAdministrator
+from hover.actions_modules import do_install_module, ensure_prebuilt_module_catalog
+from hover.models import (
+    ConnectedAccount,
+    ConnectedAccountGrant,
+    EvidenceLink,
+    GeneratedItem,
+    ModuleVersion,
+    Source,
+    SourceCapability,
+    Space,
+    SpaceAdministrator,
+    SpaceAttachment,
+    SpaceMembership,
+)
+from hover.publication_contracts import (
+    AnalysisFinding,
+    AnalysisPayload,
+    ClawerPublication,
+    CoveredPeriod,
+    DecisionPayload,
+    DigestMetrics,
+    DigestPayload,
+    ProgressUpdatePayload,
+    PublicationPayload,
+    SuggestedActionPayload,
+)
 from zerver.actions.channel_folders import check_add_channel_folder
 from zerver.actions.create_user import do_create_user
 from zerver.actions.message_delete import do_delete_messages
@@ -48,6 +76,9 @@ HoverModuleKey = Literal[
     "marketing_digest",
     "topic_analysis",
 ]
+PublicationContract = Literal[
+    "digest", "progress_update", "suggested_action", "decision", "analysis"
+]
 
 MODULE_NAMES: dict[HoverModuleKey, str] = {
     "conversation_digest": "Conversation Digest",
@@ -58,44 +89,49 @@ MODULE_NAMES: dict[HoverModuleKey, str] = {
     "topic_analysis": "Topic Analysis",
 }
 
-MODULE_OUTPUT_TYPES: dict[HoverModuleKey, str] = {
-    "conversation_digest": GeneratedItem.OutputType.DIGEST,
-    "progress_tracker": GeneratedItem.OutputType.PROGRESS_UPDATE,
-    "suggested_actions": GeneratedItem.OutputType.SUGGESTED_ACTION,
-    "decisions": GeneratedItem.OutputType.DECISION,
-    "marketing_digest": GeneratedItem.OutputType.DIGEST,
-    "topic_analysis": GeneratedItem.OutputType.ANALYSIS,
+MODULE_OUTPUT_TYPES: dict[HoverModuleKey, PublicationContract] = {
+    "conversation_digest": "digest",
+    "progress_tracker": "progress_update",
+    "suggested_actions": "suggested_action",
+    "decisions": "decision",
+    "marketing_digest": "digest",
+    "topic_analysis": "analysis",
 }
-MODULE_VERSION = "aimto-demo-v1"
+MODULE_VERSION = "1.0.0"
 
 EVIDENCE_SOURCES = {
     "mentors_volunteers": {
         "provider_key": "whatsapp",
         "provider_name": "WhatsApp",
+        "source_type": "group_chat",
         "display_name": "All Learn-a-thon Mentors & Volunteers",
         "url": "",
     },
     "resident_lounge": {
         "provider_key": "whatsapp",
         "provider_name": "WhatsApp",
+        "source_type": "group_chat",
         "display_name": "Resident Lounge",
         "url": "",
     },
     "volunteers_500": {
         "provider_key": "whatsapp",
         "provider_name": "WhatsApp",
+        "source_type": "group_chat",
         "display_name": "500 volunteers @ Learnathon",
         "url": "",
     },
     "github": {
         "provider_key": "github",
         "provider_name": "GitHub",
+        "source_type": "repository",
         "display_name": "LearnAIMTO",
         "url": "https://github.com/ashvinpraveen/learnaimto",
     },
     "instagram": {
         "provider_key": "instagram",
         "provider_name": "Instagram",
+        "source_type": "social_profile",
         "display_name": "@aimto_26",
         "url": "https://www.instagram.com/aimto_26/",
     },
@@ -139,6 +175,81 @@ def demo_post(
 
 def demo_time(day: int, hour: int, minute: int) -> datetime.datetime:
     return datetime.datetime(2026, 8, day, hour, minute, tzinfo=datetime.timezone.utc)
+
+
+def opaque_demo_id(namespace: str, value: str) -> str:
+    return hashlib.sha256(f"hover-aimto-demo:{namespace}:{value}".encode()).hexdigest()[:32]
+
+
+def demo_payload(post: DemoPost) -> PublicationPayload:
+    title = post.content.partition("\n")[0].removeprefix("## ")
+    if post.module_key in {"conversation_digest", "marketing_digest"}:
+        return DigestPayload(
+            contract="digest",
+            schema_version="1.0",
+            title=title,
+            timezone="UTC",
+            operation=post.content,
+            marketing="The native update preserves the sanitized source-backed briefing.",
+            metrics=DigestMetrics(
+                messages=len(post.evidence_keys),
+                text=len(post.evidence_keys),
+                media=0,
+                voice=0,
+            ),
+            generation_context="Sanitized AIMTO development demo",
+        )
+    if post.module_key == "progress_tracker":
+        status: Literal["blocked", "in_progress"] = (
+            "blocked" if "Status: At risk" in post.content else "in_progress"
+        )
+        return ProgressUpdatePayload(
+            contract="progress_update",
+            schema_version="1.0",
+            title=title,
+            status=status,
+            updates=[post.content],
+            resolved_items=[],
+            blockers=(
+                ["The source history does not yet confirm the required assignment."]
+                if status == "blocked"
+                else []
+            ),
+        )
+    if post.module_key == "decisions":
+        return DecisionPayload(
+            contract="decision",
+            schema_version="1.0",
+            title=title,
+            decision=post.content,
+            rationale="The native update records the sanitized supporting evidence.",
+            lifecycle="active",
+            supersedes_publication_id=None,
+            reverses_publication_id=None,
+        )
+    if post.module_key == "suggested_actions":
+        return SuggestedActionPayload(
+            contract="suggested_action",
+            schema_version="1.0",
+            wording=post.content,
+            proposed_assignee=None,
+            proposed_due_date=None,
+        )
+    return AnalysisPayload(
+        contract="analysis",
+        schema_version="1.0",
+        title=title,
+        timezone="UTC",
+        summary=post.content,
+        findings=[
+            AnalysisFinding(
+                title="Source-backed finding",
+                detail="The native update preserves the sanitized analysis and uncertainty.",
+            )
+        ],
+        generation_context="Sanitized AIMTO development demo",
+        sentiment=None,
+    )
 
 
 DEMO_POSTS = [
@@ -656,14 +767,149 @@ class Command(ZulipBaseCommand):
             do_change_full_name(hover_user, HOVER_DISPLAY_NAME, acting_user=owner, notify=True)
         return hover_user
 
+    def reconcile_live_sources(
+        self,
+        *,
+        realm: Realm,
+        space: Space,
+        owner: UserProfile,
+        viewer: UserProfile,
+    ) -> dict[str, SpaceAttachment]:
+        members_by_id = {owner.id: (owner, SpaceMembership.Role.CONTRIBUTOR)}
+        if viewer.id != owner.id:
+            members_by_id[viewer.id] = (viewer, SpaceMembership.Role.SUBSCRIBER)
+        for member, role in members_by_id.values():
+            SpaceMembership.objects.update_or_create(
+                realm=realm,
+                space=space,
+                user=member,
+                defaults={"role": role, "added_by": owner},
+            )
+
+        accounts: dict[str, ConnectedAccount] = {}
+        for source_spec in EVIDENCE_SOURCES.values():
+            provider_key = source_spec["provider_key"]
+            if provider_key in accounts:
+                continue
+            account, _created = ConnectedAccount.objects.update_or_create(
+                realm=realm,
+                provider_key=provider_key,
+                external_account_id=uuid.UUID(hex=opaque_demo_id("account", provider_key)),
+                defaults={
+                    "provider_name": source_spec["provider_name"],
+                    "display_name": f"AIMTO {source_spec['provider_name']}",
+                    "connection_kind": ConnectedAccount.ConnectionKind.REMOTE_STUDIO,
+                    "incoming_webhook_bot": None,
+                    "created_by": owner,
+                    "owner": owner,
+                    "approval_state": ConnectedAccount.ApprovalState.APPROVED,
+                    "health_status": ConnectedAccount.HealthStatus.HEALTHY,
+                    "health_checked_at": demo_time(10, 0, 0),
+                },
+            )
+            accounts[provider_key] = account
+            for member, _role in members_by_id.values():
+                ConnectedAccountGrant.objects.update_or_create(
+                    realm=realm,
+                    account=account,
+                    user=member,
+                    defaults={
+                        "created_by": owner,
+                        "state": ConnectedAccountGrant.State.ACTIVE,
+                        "all_selectors": True,
+                    },
+                )
+
+        attachments: dict[str, SpaceAttachment] = {}
+        for evidence_key, source_spec in EVIDENCE_SOURCES.items():
+            account = accounts[source_spec["provider_key"]]
+            external_ref = f"src_{opaque_demo_id('source', evidence_key)}"
+            source_record, _created = Source.objects.update_or_create(
+                account=account,
+                external_ref=external_ref,
+                defaults={
+                    "realm": realm,
+                    "adapter_key": "clawer_sync",
+                    "provider_key": source_spec["provider_key"],
+                    "source_type": source_spec["source_type"],
+                    "display_name": source_spec["display_name"],
+                    "provider_name": source_spec["provider_name"],
+                    "external_url": source_spec["url"],
+                    "supports_live_capture": False,
+                },
+            )
+            SourceCapability.objects.get_or_create(
+                source=source_record, capability="message_history"
+            )
+            attachment, _created = SpaceAttachment.objects.update_or_create(
+                realm=realm,
+                space=space,
+                source=source_record,
+                defaults={
+                    "state": SpaceAttachment.State.ACTIVE,
+                    "history_window": SpaceAttachment.HistoryWindow.LAST_30_DAYS,
+                    "history_timezone": "UTC",
+                    "history_start_at": demo_time(1, 0, 0),
+                    "custom_start_date": None,
+                    "publication_cursor": "aimto-demo-complete",
+                    "last_publication_sync_at": demo_time(10, 0, 0),
+                    "last_publication_sync_error": "",
+                    "publication_sync_failures": 0,
+                    "publication_sync_state": SpaceAttachment.PublicationSyncState.IDLE,
+                    "publication_sync_lease_token": None,
+                    "publication_sync_lease_expires_at": None,
+                    "next_publication_sync_at": None,
+                    "attached_by": owner,
+                    "detached_at": None,
+                    "detached_by": None,
+                },
+            )
+            attachments[evidence_key] = attachment
+        return attachments
+
+    def reconcile_modules(
+        self,
+        *,
+        realm: Realm,
+        space: Space,
+        owner: UserProfile,
+        attachments: dict[str, SpaceAttachment],
+    ) -> dict[HoverModuleKey, ModuleVersion]:
+        ensure_prebuilt_module_catalog(realm)
+        versions: dict[HoverModuleKey, ModuleVersion] = {}
+        for module_key in MODULE_NAMES:
+            versions[module_key] = ModuleVersion.objects.get(
+                definition__realm=realm,
+                definition__stable_key=module_key,
+                version=MODULE_VERSION,
+            )
+        all_attachment_ids = [attachments[key].id for key in EVIDENCE_SOURCES]
+        single_bindings = {
+            "marketing_digest": [attachments["resident_lounge"].id],
+            "topic_analysis": [attachments["mentors_volunteers"].id],
+        }
+        for module_key in MODULE_NAMES:
+            do_install_module(
+                acting_user=owner,
+                space=space,
+                version_id=versions[module_key].id,
+                attachment_ids=single_bindings.get(module_key, all_attachment_ids),
+                trigger_kind="manual",
+                activation_timezone="UTC",
+            )
+        return versions
+
     @transaction.atomic(savepoint=False)
     def reconcile_demo_message(
         self,
         post: DemoPost,
         *,
+        post_number: int,
         stream: Stream,
         sender: UserProfile,
         owner: UserProfile,
+        attachments: dict[str, SpaceAttachment],
+        module_version: ModuleVersion,
     ) -> Message:
         candidates = Message.objects.filter(
             realm_id=stream.realm_id,
@@ -690,22 +936,81 @@ class Command(ZulipBaseCommand):
             Message.objects.filter(id=message.id).update(date_sent=post.sent_at)
             message.date_sent = post.sent_at
 
-        evidence_sources = [EVIDENCE_SOURCES[key] for key in post.evidence_keys]
+        evidence_sources = [attachments[key].source for key in post.evidence_keys]
         source_summary = (
             f"Across {len(evidence_sources)} sources"
             if len(evidence_sources) > 1
-            else f"From {evidence_sources[0]['display_name']}"
+            else f"From {evidence_sources[0].display_name}"
         )
+        publication_id = f"aimto-demo-publication-{post_number:02}"
+        idempotency_key = f"aimto-demo-v1-{post_number:02}"
+        business_identity = f"aimto-demo:{post.module_key}:{post_number:02}"
+        covered_start_at = post.sent_at - datetime.timedelta(days=1)
+        occurred_at = post.sent_at - datetime.timedelta(minutes=5)
+        generated_at = post.sent_at - datetime.timedelta(minutes=1)
+        evidence_refs = [
+            f"evidence_{opaque_demo_id('evidence', f'{post_number}:{position}:{evidence_key}')}"
+            for position, evidence_key in enumerate(post.evidence_keys)
+        ]
+        publication = ClawerPublication(
+            publication_id=publication_id,
+            idempotency_key=idempotency_key,
+            business_identity=business_identity,
+            contract=MODULE_OUTPUT_TYPES[post.module_key],
+            schema_version="1.0",
+            producer_key=post.module_key,
+            producer_name=MODULE_NAMES[post.module_key],
+            producing_version=module_version.version,
+            run_reference="aimto-demo-run-2026-08-10",
+            source_ref=attachments[post.evidence_keys[0]].source.external_ref,
+            covered_period=CoveredPeriod(start=covered_start_at, end=post.sent_at),
+            payload=demo_payload(post),
+            evidence_refs=evidence_refs,
+            importance="high" if post.for_you else "normal",
+            occurred_at=occurred_at,
+            generated_at=generated_at,
+            published_at=post.sent_at,
+            lineage_key=business_identity,
+            parent_publication_id=None,
+            material_change=False,
+        )
+        publication_envelope_hash = hashlib.sha256(
+            orjson.dumps(publication.model_dump(mode="json"), option=orjson.OPT_SORT_KEYS)
+        ).hexdigest()
+        publication_payload = publication.payload.model_dump(mode="json")
+        generated_item_defaults: dict[str, Any] = {
+            "realm": stream.realm,
+            "attachment": attachments[post.evidence_keys[0]],
+            "publication_id": publication.publication_id,
+            "idempotency_key": publication.idempotency_key,
+            "publication_envelope_hash": publication_envelope_hash,
+            "business_identity": publication.business_identity,
+            "output_type": publication.contract,
+            "module_key": publication.producer_key,
+            "module_name": publication.producer_name,
+            "module_version": publication.producing_version,
+            "source_summary": source_summary,
+            "payload": publication_payload,
+            "importance": publication.importance,
+            "run_reference": publication.run_reference,
+            "covered_start_at": publication.covered_period.start,
+            "covered_end_at": publication.covered_period.end,
+            "occurred_at": publication.occurred_at,
+            "generated_at": publication.generated_at,
+            "published_at": publication.published_at,
+            "lineage_key": publication.lineage_key,
+            "parent_publication_id": publication.parent_publication_id,
+            "material_change": publication.material_change,
+        }
+        # H14 keeps the immutable publication payload separate from the
+        # human-reviewed projection. Populate it when that additive model
+        # field is present so this H13 fixture remains valid on either side of
+        # the independent Reply/Review integration commit.
+        if hasattr(GeneratedItem, "reviewed_payload"):
+            generated_item_defaults["reviewed_payload"] = publication_payload
         generated_item, _created = GeneratedItem.objects.update_or_create(
             message=message,
-            defaults={
-                "realm": stream.realm,
-                "output_type": MODULE_OUTPUT_TYPES[post.module_key],
-                "module_key": post.module_key,
-                "module_name": MODULE_NAMES[post.module_key],
-                "module_version": MODULE_VERSION,
-                "source_summary": source_summary,
-            },
+            defaults=generated_item_defaults,
         )
         generated_item.evidence_links.all().delete()
         EvidenceLink.objects.bulk_create(
@@ -713,8 +1018,13 @@ class Command(ZulipBaseCommand):
                 EvidenceLink(
                     generated_item=generated_item,
                     realm=stream.realm,
+                    source=source,
+                    evidence_ref=evidence_refs[position],
                     position=position,
-                    **source,
+                    provider_key=source.provider_key,
+                    provider_name=source.provider_name,
+                    display_name=source.display_name,
+                    url=source.external_url,
                 )
                 for position, source in enumerate(evidence_sources)
             ]
@@ -849,6 +1159,19 @@ class Command(ZulipBaseCommand):
                 defaults={"added_by": owner},
             )
 
+        attachments = self.reconcile_live_sources(
+            realm=realm,
+            space=space,
+            owner=owner,
+            viewer=viewer,
+        )
+        module_versions = self.reconcile_modules(
+            realm=realm,
+            space=space,
+            owner=owner,
+            attachments=attachments,
+        )
+
         hover_user = self.get_or_create_hover_user(realm=realm, owner=owner)
 
         subscribers_by_id = {hover_user.id: hover_user}
@@ -874,12 +1197,15 @@ class Command(ZulipBaseCommand):
                 post,
                 self.reconcile_demo_message(
                     post,
+                    post_number=post_number,
                     stream=stream,
                     sender=hover_user,
                     owner=owner,
+                    attachments=attachments,
+                    module_version=module_versions[post.module_key],
                 ),
             )
-            for post in DEMO_POSTS
+            for post_number, post in enumerate(DEMO_POSTS, start=1)
         ]
 
         current_message_ids = [message.id for _post, message in posts_and_messages]
@@ -897,7 +1223,8 @@ class Command(ZulipBaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 f"AIMTO Events is ready with {len(DEMO_POSTS)} native Hover posts, "
-                f"{len(MODULE_NAMES)} AI module topics, "
+                f"{len(attachments)} live Sources, "
+                f"{len(MODULE_NAMES)} enabled Modules, "
                 f"{sum(post.for_you for post in DEMO_POSTS)} For You items, "
                 f"{sum(post.saved for post in DEMO_POSTS)} Saved items, and "
                 "3 Suggested Actions awaiting confirmation "

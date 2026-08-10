@@ -5,9 +5,9 @@ from django.utils.translation import gettext as _
 
 from hover.lib_sources import attachment_queryset, get_space_attachment_data
 from hover.models import (
-    ModuleInstallation,
     EvidenceLink,
     GeneratedItem,
+    ModuleInstallation,
     Space,
     SpaceAdministrator,
     SpaceMembership,
@@ -125,13 +125,16 @@ def get_space_data(space: Space) -> dict[str, Any]:
         .values("module_key")
         .annotate(count=Count("id"))
     }
-    source_counts = {
-        row["source_id"]: row["count"]
-        for row in EvidenceLink.objects.filter(generated_item__attachment__space=space)
-        .exclude(source_id=None)
+    source_counts: dict[int, int] = {}
+    source_count_rows = (
+        EvidenceLink.objects.filter(generated_item__attachment__space=space)
         .values("source_id")
         .annotate(count=Count("generated_item_id", distinct=True))
-    }
+    )
+    for row in source_count_rows:
+        source_id = row["source_id"]
+        if source_id is not None:
+            source_counts[source_id] = row["count"]
     attachments = get_space_attachment_data(space)
     for attachment in attachments:
         attachment["generated_count"] = source_counts.get(attachment["source"]["id"], 0)
