@@ -1,6 +1,18 @@
 <div id="organization-settings" data-name="organization-settings" class="settings-section">
     <form class="admin-realm-form org-settings-form">
 
+        <div id="org-hover" class="settings-subsection-parent">
+            <div class="subsection-header">
+                <h3 class="settings-subsection-title">{{t "Hover" }}</h3>
+                {{> settings_save_discard_widget section_name="hover" show_save_discard_buttons=true }}
+            </div>
+            {{> settings_checkbox
+              setting_name="realm_hover_enabled"
+              prefix="id_"
+              is_checked=realm_hover_enabled
+              label=admin_settings_label.realm_hover_enabled}}
+        </div>
+
         <div id="org-billing" class="settings-subsection-parent">
             <div class="subsection-header">
                 <h3 class="settings-subsection-title">{{t "Billing" }}</h3>

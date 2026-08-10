@@ -14,6 +14,13 @@ from django.urls.resolvers import URLPattern, URLResolver
 from django.utils.module_loading import import_string
 from django.views.generic import RedirectView
 
+from hover.views_spaces import (
+    add_space_administrator,
+    create_space,
+    get_space,
+    list_spaces,
+    remove_space_administrator,
+)
 from zerver.forms import LoggingSetPasswordForm
 from zerver.lib.integrations import INCOMING_WEBHOOK_INTEGRATIONS
 from zerver.lib.rest import rest_path
@@ -585,6 +592,13 @@ v1_api_and_json_patterns = [
     rest_path("channel_folders/create", POST=create_channel_folder),
     rest_path("channel_folders", GET=get_channel_folders, PATCH=reorder_realm_channel_folders),
     rest_path("channel_folders/<int:channel_folder_id>", PATCH=update_channel_folder),
+    rest_path("hover/spaces", GET=list_spaces, POST=create_space),
+    rest_path("hover/spaces/<int:space_id>", GET=get_space),
+    rest_path("hover/spaces/<int:space_id>/admins", POST=add_space_administrator),
+    rest_path(
+        "hover/spaces/<int:space_id>/admins/<int:user_id>",
+        DELETE=remove_space_administrator,
+    ),
     # topic-muting -> zerver.views.user_topics
     # (deprecated and will be removed once clients are migrated to use '/user_topics')
     rest_path("users/me/subscriptions/muted_topics", PATCH=update_muted_topic),

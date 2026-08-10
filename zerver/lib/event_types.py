@@ -98,6 +98,39 @@ class ChannelFolderUpdateEvent(BaseEvent):
     data: ChannelFolderDataForUpdate
 
 
+class HoverSpaceCategory(BaseModel):
+    id: int
+    name: str
+
+
+class HoverSpace(BaseModel):
+    id: int
+    name: str
+    description: str
+    state: Literal["setup", "launched"]
+    category: HoverSpaceCategory
+    created_by_id: int | None
+    stream_id: int | None
+
+
+class HoverSpaceAddEvent(BaseEvent):
+    type: Literal["hover_space"]
+    op: Literal["add"]
+    space: HoverSpace
+
+
+class HoverSpaceUpdateEvent(BaseEvent):
+    type: Literal["hover_space"]
+    op: Literal["update"]
+    space: HoverSpace
+
+
+class HoverSpaceDeleteEvent(BaseEvent):
+    type: Literal["hover_space"]
+    op: Literal["delete"]
+    space_id: int
+
+
 class DetailedCustomProfileCore(BaseModel):
     id: int
     type: int
@@ -154,6 +187,29 @@ class TopicLink(BaseModel):
     url: str
 
 
+class HoverModule(BaseModel):
+    key: str
+    name: str
+    version: str
+
+
+class HoverSource(BaseModel):
+    key: str
+    name: str
+    icon_class: str
+    count: int
+    url: str
+
+
+class HoverGeneratedItem(BaseModel):
+    id: int
+    output_type: str
+    module: HoverModule
+    source_summary: str
+    evidence_available: bool
+    sources: list[HoverSource]
+
+
 class DirectMessageDisplayRecipient(BaseModel):
     id: int
     is_mirror_dummy: bool
@@ -180,6 +236,7 @@ class MessageFieldForDirectMessageEvent(BaseModel):
     timestamp: int
     type: str
     display_recipient: list[DirectMessageDisplayRecipient]
+    hover_generated_item: HoverGeneratedItem | None = None
 
 
 class DirectMessageEvent(BaseEvent):
@@ -257,6 +314,7 @@ class MessageFieldForMessageEvent(BaseModel):
     type: str
     display_recipient: str
     stream_id: int
+    hover_generated_item: HoverGeneratedItem | None = None
 
 
 class MessageEvent(BaseEvent):

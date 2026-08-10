@@ -1217,6 +1217,7 @@ def do_send_messages(
             type="message",
             message=send_request.message.id,
             message_dict=wide_message_dict,
+            message_realm_id=send_request.realm.id,
             presence_idle_user_ids=presence_idle_user_ids,
             online_push_user_ids=list(send_request.online_push_user_ids),
             dm_mention_push_disabled_user_ids=list(send_request.dm_mention_push_disabled_user_ids),

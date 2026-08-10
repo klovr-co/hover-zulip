@@ -23,7 +23,7 @@ export type BuiltInViewBasicMetadata = {
 export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> = {
     inbox: {
         fragment: "inbox",
-        name: $t({defaultMessage: "For You"}),
+        name: $t({defaultMessage: "Inbox"}),
         is_pinned: true,
         icon: "zulip-icon-inbox",
         css_class_suffix: "inbox",
@@ -33,13 +33,13 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         supports_masked_unread: true,
         hidden_for_spectators: true,
         menu_icon_class: "inbox-sidebar-menu-icon",
-        menu_aria_label: $t({defaultMessage: "For You options"}),
+        menu_aria_label: $t({defaultMessage: "Inbox options"}),
         home_view_code: "inbox",
         prioritize_in_condensed_view: true,
     },
     recent_view: {
         fragment: "recent",
-        name: $t({defaultMessage: "Team Pulse"}),
+        name: $t({defaultMessage: "Recent conversations"}),
         is_pinned: true,
         icon: "zulip-icon-recent",
         css_class_suffix: "recent_view",
@@ -49,13 +49,13 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         supports_masked_unread: true,
         hidden_for_spectators: false,
         menu_icon_class: "recent-view-sidebar-menu-icon",
-        menu_aria_label: $t({defaultMessage: "Team Pulse options"}),
+        menu_aria_label: $t({defaultMessage: "Recent conversations options"}),
         home_view_code: "recent",
         prioritize_in_condensed_view: true,
     },
     all_messages: {
         fragment: "feed",
-        name: $t({defaultMessage: "All activity"}),
+        name: $t({defaultMessage: "Combined feed"}),
         is_pinned: true,
         icon: "zulip-icon-all-messages",
         css_class_suffix: "all_messages",
@@ -65,17 +65,17 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         supports_masked_unread: true,
         hidden_for_spectators: false,
         menu_icon_class: "all-messages-sidebar-menu-icon",
-        menu_aria_label: $t({defaultMessage: "All activity options"}),
+        menu_aria_label: $t({defaultMessage: "Combined feed options"}),
         home_view_code: "all_messages",
         prioritize_in_condensed_view: true,
     },
     mentions: {
         fragment: "narrow/is/mentioned",
-        name: $t({defaultMessage: "Daily Brief"}),
+        name: $t({defaultMessage: "Mentions"}),
         is_pinned: true,
-        icon: "zulip-icon-sun",
-        css_class_suffix: "daily_brief",
-        tooltip_template_id: "daily-brief-tooltip-template",
+        icon: "zulip-icon-at-sign",
+        css_class_suffix: "mentions",
+        tooltip_template_id: "mentions-tooltip-template",
         has_unread_count: true,
         unread_count_type: "normal-count",
         supports_masked_unread: false,
@@ -103,7 +103,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
     },
     starred_messages: {
         fragment: "narrow/is/starred",
-        name: $t({defaultMessage: "Saved"}),
+        name: $t({defaultMessage: "Starred messages"}),
         is_pinned: true,
         icon: "zulip-icon-star",
         css_class_suffix: "starred_messages",
@@ -113,7 +113,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         supports_masked_unread: true,
         hidden_for_spectators: true,
         menu_icon_class: "starred-messages-sidebar-menu-icon",
-        menu_aria_label: $t({defaultMessage: "Saved options"}),
+        menu_aria_label: $t({defaultMessage: "Starred messages options"}),
         home_view_code: "",
         prioritize_in_condensed_view: true,
     },
@@ -151,7 +151,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
     },
     reminders: {
         fragment: "reminders",
-        name: $t({defaultMessage: "Todos"}),
+        name: $t({defaultMessage: "Reminders"}),
         is_pinned: true,
         icon: "zulip-icon-alarm-clock",
         css_class_suffix: "reminders",
@@ -166,6 +166,59 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         prioritize_in_condensed_view: false,
     },
 };
+
+export function set_hover_enabled(enabled: boolean): void {
+    Object.assign(built_in_views_meta_data.inbox!, {
+        name: enabled ? $t({defaultMessage: "For You"}) : $t({defaultMessage: "Inbox"}),
+        tooltip_template_id: enabled ? "hover-inbox-tooltip-template" : "inbox-tooltip-template",
+        menu_aria_label: enabled
+            ? $t({defaultMessage: "For You options"})
+            : $t({defaultMessage: "Inbox options"}),
+    });
+    Object.assign(built_in_views_meta_data.recent_view!, {
+        name: enabled
+            ? $t({defaultMessage: "Team Pulse"})
+            : $t({defaultMessage: "Recent conversations"}),
+        menu_aria_label: enabled
+            ? $t({defaultMessage: "Team Pulse options"})
+            : $t({defaultMessage: "Recent conversations options"}),
+        tooltip_template_id: enabled
+            ? "hover-recent-conversations-tooltip-template"
+            : "recent-conversations-tooltip-template",
+    });
+    Object.assign(built_in_views_meta_data.all_messages!, {
+        name: enabled
+            ? $t({defaultMessage: "All activity"})
+            : $t({defaultMessage: "Combined feed"}),
+        tooltip_template_id: enabled
+            ? "hover-all-message-tooltip-template"
+            : "all-message-tooltip-template",
+        menu_aria_label: enabled
+            ? $t({defaultMessage: "All activity options"})
+            : $t({defaultMessage: "Combined feed options"}),
+    });
+    Object.assign(built_in_views_meta_data.mentions!, {
+        name: enabled ? $t({defaultMessage: "Daily Brief"}) : $t({defaultMessage: "Mentions"}),
+        icon: enabled ? "zulip-icon-sun" : "zulip-icon-at-sign",
+        css_class_suffix: enabled ? "daily_brief" : "mentions",
+        tooltip_template_id: enabled ? "daily-brief-tooltip-template" : "mentions-tooltip-template",
+    });
+    Object.assign(built_in_views_meta_data.starred_messages!, {
+        name: enabled ? $t({defaultMessage: "Saved"}) : $t({defaultMessage: "Starred messages"}),
+        tooltip_template_id: enabled
+            ? "hover-starred-message-tooltip-template"
+            : "starred-message-tooltip-template",
+        menu_aria_label: enabled
+            ? $t({defaultMessage: "Saved options"})
+            : $t({defaultMessage: "Starred messages options"}),
+    });
+    Object.assign(built_in_views_meta_data.reminders!, {
+        name: enabled ? $t({defaultMessage: "Todos"}) : $t({defaultMessage: "Reminders"}),
+        tooltip_template_id: enabled
+            ? "hover-reminders-tooltip-template"
+            : "reminders-tooltip-template",
+    });
+}
 
 let navigation_views_dict: Map<string, NavigationView>;
 

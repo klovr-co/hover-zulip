@@ -22,6 +22,7 @@ import {is_browser_unsupported_old_version} from "./browser_support.ts";
 import * as channel from "./channel.ts";
 import * as channel_folders from "./channel_folders.ts";
 import * as channel_folders_popover from "./channel_folders_popover.ts";
+import * as hover_spaces from "./hover_spaces.ts";
 import * as click_handlers from "./click_handlers.ts";
 import * as color_picker_popover from "./color_picker_popover.ts";
 import * as common from "./common.ts";
@@ -461,6 +462,7 @@ export async function initialize_everything(state_data) {
 
     set_current_user(state_data.current_user);
     set_realm(state_data.realm);
+    $("body").toggleClass("hover-enabled", realm.realm_hover_enabled);
     set_realm_billing(state_data.realm_billing);
 
     if (page_params.narrow_stream !== undefined) {
@@ -493,6 +495,7 @@ export async function initialize_everything(state_data) {
     // This populates data for scheduled messages.
     scheduled_messages.initialize(state_data.scheduled_messages);
     message_reminder.initialize(state_data.reminders);
+    navigation_views.set_hover_enabled(realm.realm_hover_enabled);
     navigation_views.initialize(state_data.navigation_views);
     scheduled_messages_ui.initialize();
     reminders_overlay_ui.initialize();
@@ -534,6 +537,7 @@ export async function initialize_everything(state_data) {
 
     // Channel folders data must be initialized before left sidebar.
     channel_folders.initialize(state_data.channel_folders);
+    hover_spaces.initialize(state_data.hover_spaces);
 
     // These components must be initialized early, because other
     // modules' initialization has not been audited for whether they

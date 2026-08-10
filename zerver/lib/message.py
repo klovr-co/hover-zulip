@@ -14,6 +14,7 @@ from django_cte import CTE, with_cte
 
 from analytics.lib.counts import COUNT_STATS
 from analytics.models import RealmCount
+from hover.lib import add_hover_metadata
 from zerver.lib.cache import generic_bulk_cached_fetch, to_dict_cache_key_id
 from zerver.lib.display_recipient import get_display_recipient_by_id
 from zerver.lib.exceptions import JsonableError, MissingAuthenticationError
@@ -375,6 +376,7 @@ def messages_for_ids(
         msg_dict["can_access_sender"] = msg_dict["sender_id"] not in inaccessible_sender_ids
         message_list.append(msg_dict)
 
+    add_hover_metadata(message_list, realm_id=realm.id)
     MessageDict.post_process_dicts(
         message_list,
         apply_markdown=apply_markdown,

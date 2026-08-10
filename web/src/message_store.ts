@@ -56,6 +56,25 @@ const message_reaction_schema = z.object({
     user_id: z.number(),
 });
 
+const hover_generated_item_schema = z.object({
+    id: z.number(),
+    output_type: z.string(),
+    module: z.object({key: z.string(), name: z.string(), version: z.string()}),
+    source_summary: z.string(),
+    evidence_available: z.boolean(),
+    sources: z.array(
+        z.object({
+            key: z.string(),
+            name: z.string(),
+            icon_class: z.string(),
+            count: z.number(),
+            url: z.string(),
+        }),
+    ),
+});
+
+export type HoverGeneratedItem = z.infer<typeof hover_generated_item_schema>;
+
 export type MessageReaction = z.infer<typeof message_reaction_schema>;
 
 export const single_message_content_schema = z.object({
@@ -96,6 +115,7 @@ export const raw_message_schema = z.intersection(
             sender_email: z.string(),
             sender_full_name: z.string(),
             sender_id: z.number(),
+            hover_generated_item: z.optional(hover_generated_item_schema),
             // The web app doesn't use sender_realm_str; ignore.
             // sender_realm_str: z.string(),
             submessages: z.array(submessage_schema),
@@ -170,6 +190,7 @@ export type Message = (
     | Omit<RawMessageWithBooleans & {type: "stream"}, "reactions" | "subject">
 ) & {
     clean_reactions: Map<string, MessageCleanReaction>;
+    hover_generated_item?: HoverGeneratedItem;
 
     // Local echo state cluster of fields.
     locally_echoed?: boolean;

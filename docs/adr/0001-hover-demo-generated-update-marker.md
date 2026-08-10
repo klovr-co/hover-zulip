@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted as a temporary prototype decision.
+Superseded by [ADR 0002](0002-structured-generated-item-message-metadata.md).
 
 ## Context
 

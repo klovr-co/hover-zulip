@@ -25,6 +25,7 @@ const alert_words_ui = mock_esm("../src/alert_words_ui");
 const attachments_ui = mock_esm("../src/attachments_ui");
 const audible_notifications = mock_esm("../src/audible_notifications");
 const bot_data = mock_esm("../src/bot_data");
+const channel = mock_esm("../src/channel");
 const compose_pm_pill = mock_esm("../src/compose_pm_pill");
 const {electron_bridge} = mock_esm("../src/electron_bridge", {
     electron_bridge: {},
@@ -156,6 +157,7 @@ page_params.test_suite = false;
 const alert_words = zrequire("alert_words");
 const channel_folders = zrequire("channel_folders");
 const emoji = zrequire("emoji");
+const hover_spaces = zrequire("hover_spaces");
 const message_store = zrequire("message_store");
 const people = zrequire("people");
 const pm_conversations = zrequire("pm_conversations");
@@ -704,6 +706,42 @@ run_test("realm settings", ({override}) => {
 
     let event = event_fixtures.realm__update__invite_required;
     test_realm_boolean(event, "realm_invite_required");
+
+    const accessible_space = {
+        id: 1,
+        name: "Launch readiness",
+        description: "",
+        state: "setup",
+        category: {id: 10, name: "Programs"},
+        created_by_id: current_user.user_id,
+        stream_id: null,
+    };
+    override(navigation_views, "set_hover_enabled", noop);
+    override(stream_list, "update_streams_sidebar", noop);
+    let get_spaces_calls = 0;
+    override(channel, "get", (options) => {
+        get_spaces_calls += 1;
+        assert.equal(options.url, "/json/hover/spaces");
+        options.success({spaces: [accessible_space]});
+    });
+
+    // An already-loaded Space remains available across a disable/enable cycle.
+    hover_spaces.initialize({hover_spaces: [accessible_space]});
+    override(realm, "realm_hover_enabled", true);
+    dispatch({type: "realm", op: "update", property: "hover_enabled", value: false});
+    assert.equal(get_spaces_calls, 0);
+    assert.equal(hover_spaces.get_by_id(accessible_space.id), accessible_space);
+    dispatch({type: "realm", op: "update", property: "hover_enabled", value: true});
+    assert.equal(get_spaces_calls, 1);
+    assert.equal(hover_spaces.get_by_id(accessible_space.id), accessible_space);
+
+    // A page loaded while Hover was disabled starts empty; enabling refetches the
+    // user's authorized Spaces and converges to the enabled initial state.
+    hover_spaces.initialize({hover_spaces: []});
+    override(realm, "realm_hover_enabled", false);
+    dispatch({type: "realm", op: "update", property: "hover_enabled", value: true});
+    assert.equal(get_spaces_calls, 2);
+    assert.equal(hover_spaces.get_by_id(accessible_space.id), accessible_space);
 
     event = event_fixtures.realm__update__want_advertise_in_communities_directory;
     test_realm_boolean(event, "realm_want_advertise_in_communities_directory");

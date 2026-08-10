@@ -899,6 +899,17 @@ class UserProfile(AbstractBaseUser, PermissionsMixin, UserBaseSettings):
     def can_create_private_streams(self, realm: Optional["Realm"] = None) -> bool:
         return self.has_permission("can_create_private_channel_group", realm)
 
+    def can_create_hover_spaces(self, realm: Optional["Realm"] = None) -> bool:
+        if realm is None:
+            realm = self.realm
+        return (
+            realm.hover_enabled
+            and self.is_active
+            and not self.is_bot
+            and not self.is_guest
+            and self.has_permission("can_create_spaces_group", realm)
+        )
+
     def can_create_web_public_streams(self) -> bool:
         if not self.realm.web_public_streams_enabled():
             return False

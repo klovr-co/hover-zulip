@@ -511,12 +511,39 @@ test("hover_generated_update_vars", () => {
     };
 
     const hover_update = list.get_calculated_message_container_variables(
-        {...shared_message_fields, sender_email: "hover-ai@hover.test"},
+        {
+            ...shared_message_fields,
+            sender_email: "ordinary-bot@example.com",
+            hover_generated_item: {
+                id: 1,
+                output_type: "digest",
+                module: {key: "marketing_digest", name: "Marketing Digest", version: "v1"},
+                source_summary: "Across 3 sources",
+                evidence_available: true,
+                sources: [
+                    {
+                        key: "whatsapp",
+                        name: "WhatsApp",
+                        icon_class: "fa fa-whatsapp",
+                        count: 1,
+                        url: "",
+                    },
+                    {key: "github", name: "GitHub", icon_class: "fa fa-github", count: 1, url: ""},
+                    {
+                        key: "instagram",
+                        name: "Instagram",
+                        icon_class: "fa fa-instagram",
+                        count: 1,
+                        url: "",
+                    },
+                ],
+            },
+        },
         true,
         false,
     );
     const human_post = list.get_calculated_message_container_variables(
-        {...shared_message_fields, sender_email: "aisha@hover.test"},
+        {...shared_message_fields, sender_email: "ordinary-bot@example.com"},
         true,
         false,
     );
@@ -551,6 +578,7 @@ test("hover_generated_update_renders_native_card_chrome", () => {
                 name: "WhatsApp",
                 icon_class: "fa fa-whatsapp",
                 count: 3,
+                url: "",
             },
             {
                 key: "github",
@@ -564,12 +592,13 @@ test("hover_generated_update_renders_native_card_chrome", () => {
         timestr: "9:00 PM",
         msg: {
             content: "<p>Event readiness update</p>",
-            failed_request: true,
+            failed_request: false,
             id: 42,
             is_stream: true,
-            locally_echoed: true,
+            locally_echoed: false,
             message_reactions: [],
             reminders: [],
+            url: "/#narrow/channel/42/topic/Project-status/near/42",
         },
     });
 
@@ -582,6 +611,63 @@ test("hover_generated_update_renders_native_card_chrome", () => {
     assert.match(html, /fa-github/);
     assert.match(html, />3</);
     assert.match(html, /href="https:\/\/github.com\/ashvinpraveen\/learnaimto"/);
+});
+
+test("hover generated update visual fixture compares generated and ordinary messages", () => {
+    const list = new MessageListView({id: 1}, true, true);
+    assert.ok(list);
+    const base_context = {
+        include_sender: false,
+        message_list_id: 1,
+        timestr: "9:00 PM",
+        msg: {
+            content: "<p>Event readiness update</p>",
+            failed_request: true,
+            id: 42,
+            is_stream: true,
+            locally_echoed: true,
+            message_reactions: [],
+            reminders: [],
+            url: "/#narrow/channel/42/topic/Project-status/near/42",
+        },
+    };
+    const html = require("../templates/hover_generated_update_visual_fixture.hbs")({
+        generated: {
+            ...base_context,
+            is_hover_generated_update: true,
+            has_hover_source_integrations: true,
+            hover_module_key: "progress_tracker",
+            hover_module_name: "Progress Tracker",
+            hover_source_context: "Across 2 sources",
+            hover_source_integrations: [
+                {
+                    key: "whatsapp",
+                    name: "WhatsApp",
+                    icon_class: "fa fa-whatsapp",
+                    count: 1,
+                    url: "",
+                },
+                {
+                    key: "github",
+                    name: "GitHub",
+                    icon_class: "fa fa-github",
+                    count: 1,
+                    url: "https://github.com/example/project",
+                },
+            ],
+        },
+        ordinary: {...base_context, msg: {...base_context.msg, id: 43}},
+    });
+
+    assert.match(html, /data-visual-regression-fixture="generated-update-comparison"/);
+    assert.equal(
+        (html.match(/class="message_row[^"]*\bhover-generated-update\b[^"]*"/g) ?? []).length,
+        1,
+    );
+    assert.match(html, /Approved generated update/);
+    assert.match(html, /Ordinary native message/);
+    assert.match(html, /fa-whatsapp/);
+    assert.match(html, /fa-github/);
 });
 
 test("merge_message_groups", ({mock_template}) => {

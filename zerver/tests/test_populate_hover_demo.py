@@ -4,6 +4,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import override_settings
 
+from hover.models import EvidenceLink, GeneratedItem, Space, SpaceAdministrator
 from zerver.lib.test_classes import ZulipTestCase
 from zerver.management.commands.populate_hover_demo import DEMO_POSTS, MODULE_NAMES
 from zerver.models import Message, ScheduledMessage, Stream, Subscription, UserMessage, UserProfile
@@ -28,6 +29,16 @@ class PopulateHoverDemoTest(ZulipTestCase):
         self.assertTrue(stream.invite_only)
         self.assertFalse(stream.history_public_to_subscribers)
         self.assertFalse(stream.is_web_public)
+        self.assertTrue(realm.hover_enabled)
+        space = Space.objects.get(realm=realm, name="AIMTO Events")
+        self.assertEqual(space.state, Space.State.LAUNCHED)
+        self.assertEqual(space.category, stream.folder)
+        self.assertEqual(space.stream, stream)
+        self.assertEqual(space.created_by, self.example_user("iago"))
+        self.assertEqual(
+            set(SpaceAdministrator.objects.filter(space=space).values_list("user_id", flat=True)),
+            {self.example_user("iago").id, self.example_user("hamlet").id},
+        )
         self.assertIn("source-backed hover updates", stream.description.lower())
         self.assertTrue(
             Subscription.objects.filter(
@@ -44,6 +55,19 @@ class PopulateHoverDemoTest(ZulipTestCase):
             "id"
         )
         self.assertEqual(messages.count(), len(DEMO_POSTS))
+        generated_items = GeneratedItem.objects.filter(realm=realm, message__in=messages)
+        self.assertEqual(generated_items.count(), len(DEMO_POSTS))
+        self.assertEqual(
+            EvidenceLink.objects.filter(generated_item__in=generated_items).count(),
+            sum(len(post.evidence_keys) for post in DEMO_POSTS),
+        )
+        for post, message in zip(DEMO_POSTS, messages, strict=True):
+            generated_item = GeneratedItem.objects.get(message=message)
+            self.assertEqual(generated_item.module_key, post.module_key)
+            self.assertEqual(
+                list(generated_item.evidence_links.values_list("position", flat=True)),
+                list(range(len(post.evidence_keys))),
+            )
         self.assertFalse(messages.filter(search_tsvector__isnull=True).exists())
         self.assertEqual(
             {message.topic_name() for message in messages},

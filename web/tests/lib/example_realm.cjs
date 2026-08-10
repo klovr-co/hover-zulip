@@ -47,6 +47,7 @@ exports.make_realm = (opts = {}) => {
         realm_can_create_groups: 0,
         realm_can_create_public_channel_group: 0,
         realm_can_create_private_channel_group: 0,
+        realm_can_create_spaces_group: 0,
         realm_can_create_web_public_channel_group: 0,
         realm_can_create_write_only_bots_group: 0,
         realm_can_delete_any_message_group: {
@@ -86,6 +87,7 @@ exports.make_realm = (opts = {}) => {
         realm_enable_read_receipts: false,
         realm_enable_spectator_access: false,
         realm_gif_rating_policy: 0,
+        realm_hover_enabled: false,
         realm_icon_source: "",
         realm_icon_url: "",
         realm_incoming_webhook_bots: [],

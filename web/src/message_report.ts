@@ -69,9 +69,7 @@ function get_message_group_for_message_preview(message: Message): MessageGroup {
 
 function get_message_container_for_preview(message: Message): MessageContainer {
     const is_hover_generated_update = hover.is_generated_update(message);
-    const hover_source_integrations = is_hover_generated_update
-        ? hover.get_source_integrations(message.content)
-        : [];
+    const hover_source_integrations = message.hover_generated_item?.sources ?? [];
     const computed_variables = {
         include_sender: true,
         // Message report preview will be automatically collapsed
@@ -80,6 +78,11 @@ function get_message_container_for_preview(message: Message): MessageContainer {
         has_hover_source_integrations: hover_source_integrations.length > 0,
         ...(hover_source_integrations.length > 0 && {
             hover_source_integrations,
+        }),
+        ...(message.hover_generated_item !== undefined && {
+            hover_module_key: message.hover_generated_item.module.key,
+            hover_module_name: message.hover_generated_item.module.name,
+            hover_source_context: message.hover_generated_item.source_summary,
         }),
         msg: message,
         sender_is_bot: people.sender_is_bot(message),

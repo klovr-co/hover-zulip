@@ -1,0 +1,63 @@
+from collections import OrderedDict
+from typing import Any
+
+from hover.models import GeneratedItem
+
+PROVIDER_ICON_CLASSES = {
+    "whatsapp": "fa fa-whatsapp",
+    "github": "fa fa-github",
+    "instagram": "fa fa-instagram",
+}
+
+
+def add_hover_metadata(message_dicts: list[dict[str, Any]], *, realm_id: int) -> None:
+    """Add Hover metadata to native messages after message access has been authorized."""
+    message_ids = [message["id"] for message in message_dicts]
+    items = (
+        GeneratedItem.objects.filter(
+            realm_id=realm_id,
+            message_id__in=message_ids,
+            message__realm_id=realm_id,
+        )
+        .prefetch_related("evidence_links")
+        .order_by("id")
+    )
+    metadata_by_message_id: dict[int, dict[str, Any]] = {}
+    for item in items:
+        sources: OrderedDict[str, dict[str, Any]] = OrderedDict()
+        for evidence in item.evidence_links.all():
+            if evidence.realm_id != realm_id:
+                continue
+            source = sources.setdefault(
+                evidence.provider_key,
+                {
+                    "key": evidence.provider_key,
+                    "name": evidence.provider_name,
+                    "icon_class": PROVIDER_ICON_CLASSES.get(
+                        evidence.provider_key, "zulip-icon zulip-icon-link"
+                    ),
+                    "count": 0,
+                    "url": evidence.url,
+                },
+            )
+            source["count"] += 1
+            if evidence.url and not source["url"]:
+                source["url"] = evidence.url
+
+        metadata_by_message_id[item.message_id] = {
+            "id": item.id,
+            "output_type": item.output_type,
+            "module": {
+                "key": item.module_key,
+                "name": item.module_name,
+                "version": item.module_version,
+            },
+            "source_summary": item.source_summary,
+            "evidence_available": bool(sources),
+            "sources": list(sources.values()),
+        }
+
+    for message in message_dicts:
+        metadata = metadata_by_message_id.get(message["id"])
+        if metadata is not None:
+            message["hover_generated_item"] = metadata

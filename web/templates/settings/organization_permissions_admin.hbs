@@ -58,6 +58,16 @@
             </div>
         </div>
 
+        <div id="org-hover-permissions" class="settings-subsection-parent">
+            <div class="subsection-header">
+                <h3 class="settings-subsection-title">{{t "Hover permissions" }}</h3>
+                {{> settings_save_discard_widget section_name="hover-permissions" show_save_discard_buttons=true }}
+            </div>
+            {{> group_setting_value_pill_input
+              setting_name="realm_can_create_spaces_group"
+              label=group_setting_labels.can_create_spaces_group}}
+        </div>
+
         <div id="org-stream-permissions" class="settings-subsection-parent">
             <div class="subsection-header">
                 <h3 class="settings-subsection-title">{{t "Channel permissions" }}

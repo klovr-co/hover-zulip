@@ -1,0 +1,13 @@
+<div class="hover-space-setup-summary">
+    <div class="hover-space-setup-kicker">{{t "Private Setup"}}</div>
+    <h2>{{space.name}}</h2>
+    <div class="hover-space-setup-category"><i
+            class="zulip-icon zulip-icon-folder"
+            aria-hidden="true"
+        ></i>
+        {{space.category.name}}</div>
+    {{#if space.description}}<p>{{space.description}}</p>{{/if}}
+    <p class="settings-field-description">{{t
+            "This Space has no channel, subscribers, or notifications until it is launched."
+        }}</p>
+</div>

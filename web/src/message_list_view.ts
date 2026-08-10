@@ -62,7 +62,7 @@ export type MessageContainer = {
     is_hidden: boolean;
     is_hover_generated_update: boolean;
     has_hover_source_integrations: boolean;
-    hover_module_key?: hover.HoverModuleKey;
+    hover_module_key?: string;
     hover_module_name?: string;
     hover_source_context?: string;
     hover_source_integrations?: hover.SourceIntegration[];
@@ -607,7 +607,7 @@ export class MessageListView {
         is_hidden: boolean;
         is_hover_generated_update: boolean;
         has_hover_source_integrations: boolean;
-        hover_module_key?: hover.HoverModuleKey;
+        hover_module_key?: string;
         hover_module_name?: string;
         hover_source_context?: string;
         hover_source_integrations?: hover.SourceIntegration[];
@@ -704,13 +704,9 @@ export class MessageListView {
         }
 
         const is_hover_generated_update = hover.is_generated_update(message);
-        const hover_source_integrations = is_hover_generated_update
-            ? hover.get_source_integrations(message.content)
-            : [];
-        const hover_module =
-            is_hover_generated_update && message.type === "stream"
-                ? hover.get_module_from_topic(message.topic)
-                : undefined;
+        const hover_generated_item = message.hover_generated_item;
+        const hover_source_integrations = hover_generated_item?.sources ?? [];
+        const hover_module = hover_generated_item?.module;
 
         return {
             timestr: get_timestr(message),
@@ -728,8 +724,8 @@ export class MessageListView {
                 hover_module_key: hover_module.key,
                 hover_module_name: hover_module.name,
             }),
-            ...(is_hover_generated_update && {
-                hover_source_context: hover.get_source_context(message.content),
+            ...(hover_generated_item !== undefined && {
+                hover_source_context: hover_generated_item.source_summary,
             }),
             ...(hover_source_integrations.length > 0 && {
                 hover_source_integrations,

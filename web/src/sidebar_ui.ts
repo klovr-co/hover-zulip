@@ -12,6 +12,7 @@ import * as channel from "./channel.ts";
 import * as compose_ui from "./compose_ui.ts";
 import {$t} from "./i18n.ts";
 import * as keydown_util from "./keydown_util.ts";
+import * as hover_spaces_ui from "./hover_spaces_ui.ts";
 import * as left_sidebar_navigation_area from "./left_sidebar_navigation_area.ts";
 import {ListCursor} from "./list_cursor.ts";
 import {localstorage} from "./localstorage.ts";
@@ -28,7 +29,7 @@ import * as settings_config from "./settings_config.ts";
 import * as settings_data from "./settings_data.ts";
 import * as settings_preferences from "./settings_preferences.ts";
 import * as spectators from "./spectators.ts";
-import {current_user} from "./state_data.ts";
+import {current_user, realm} from "./state_data.ts";
 import * as stream_list from "./stream_list.ts";
 import * as ui_util from "./ui_util.ts";
 import {user_settings} from "./user_settings.ts";
@@ -382,6 +383,8 @@ export function initialize_left_sidebar(): void {
     const rendered_sidebar = render_left_sidebar({
         is_guest: current_user.is_guest,
         is_spectator: page_params.is_spectator,
+        hover_enabled: realm.realm_hover_enabled,
+        can_create_spaces: settings_data.user_can_create_spaces(),
         primary_condensed_views,
         expanded_views,
         LEFT_SIDEBAR_NAVIGATION_AREA_TITLE,
@@ -872,6 +875,13 @@ export function focus_pm_search_filter(): void {
 
 export function set_event_handlers(): void {
     const $search_input = $(".left-sidebar-search-input").expectOne();
+
+    $("#add_hover_space_button").on("click", () => hover_spaces_ui.open_create_space());
+    $("#stream_filters").on("click", ".hover-space-setup-row a", (event) => {
+        event.preventDefault();
+        const space_id = Number($(event.currentTarget).closest("li").attr("data-hover-space-id"));
+        hover_spaces_ui.open_setup_space(space_id);
+    });
 
     function keydown_enter_key(): void {
         const $row = left_sidebar_cursor.get_key();

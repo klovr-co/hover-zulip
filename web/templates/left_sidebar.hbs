@@ -2,7 +2,7 @@
     <div id="left-sidebar-search">
         <div class="input-wrapper-for-tooltip tippy-zulip-delayed-tooltip" data-tooltip-template-id="filter-left-sidebar-tooltip-template">
             {{#> components/input_wrapper input_type="filter-input" custom_classes="left-sidebar-search-section" icon="search" input_button_icon="close"}}
-                <input type="text" class="input-element left-sidebar-search-input" autocomplete="off" placeholder="{{t 'Filter Home and Spaces' }}" />
+                <input type="text" class="input-element left-sidebar-search-input" autocomplete="off" placeholder="{{#if hover_enabled}}{{t 'Filter Home and Spaces' }}{{else}}{{t 'Filter left sidebar' }}{{/if}}" />
             {{/components/input_wrapper}}
         </div>
         <span id="add_streams_button" class="add-stream-icon-container hidden-for-spectators" tabindex="0">
@@ -65,9 +65,16 @@
         <div class="direct-message-section-bottom-divider-container">
             <hr class="direct-message-section-bottom-divider"/>
         </div>
-        <div class="hover-spaces-heading">
-            <h4 class="left-sidebar-title">{{t "Spaces"}}</h4>
-        </div>
+        {{#if hover_enabled}}
+            <div class="hover-spaces-heading">
+                <h4 class="left-sidebar-title">{{t "Spaces"}}</h4>
+                {{#if can_create_spaces}}
+                    <button id="add_hover_space_button" class="button-reset-style" type="button" aria-label="{{t 'Create Space' }}" data-tippy-content="{{t 'Create Space' }}">
+                        <i class="zulip-icon zulip-icon-square-plus" aria-hidden="true"></i>
+                    </button>
+                {{/if}}
+            </div>
+        {{/if}}
         <div id="streams_list">
             <div id="stream-filters-container">
                 <ul id="stream_filters" class="filters"></ul>

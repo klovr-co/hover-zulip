@@ -1,11 +1,11 @@
 /* Cofounder application composition
    A faithful translation of the supplied 1422px desktop reference. */
 
-body {
+/* prettier-ignore */
+body.hover-enabled {
     overflow-x: hidden;
     color: var(--ds-text-primary);
     background: var(--ds-surface-canvas);
-}
 
 .column-middle,
 #main_div,
@@ -324,10 +324,69 @@ a {
 }
 
 .hover-spaces-heading {
+    position: relative;
     margin: 5px 9px 0;
     padding: 15px 1px 7px;
     border-top: 1px solid
         color-mix(in srgb, var(--ds-border-muted) 72%, transparent);
+}
+
+#add_hover_space_button {
+    position: absolute;
+    right: 1px;
+    bottom: 4px;
+    display: grid;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--ds-radius-sm);
+    color: var(--ds-text-secondary);
+    place-items: center;
+}
+
+#add_hover_space_button:is(:hover, :focus-visible) {
+    background: var(--ds-surface-hover);
+    color: var(--ds-action-accent);
+}
+
+.hover-space-setup-row .subscription_block {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+    gap: 5px;
+    align-items: center;
+}
+
+.hover-space-setup-label,
+.hover-space-setup-kicker {
+    color: var(--ds-text-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.hover-space-setup-label {
+    margin-right: 7px;
+    padding: 2px 6px;
+    border: 1px solid var(--ds-border-muted);
+    border-radius: var(--ds-radius-pill);
+    background: var(--ds-surface-paper);
+}
+
+.hover-space-setup-summary {
+    padding: 8px 2px 2px;
+}
+
+.hover-space-setup-summary h2 {
+    margin: 6px 0;
+    font-family: var(--font-headline);
+    font-weight: 600;
+}
+
+.hover-space-setup-category {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    color: var(--ds-text-secondary);
 }
 
 .filters li,
@@ -779,6 +838,18 @@ a {
     color: var(--ds-text-primary);
     font-size: 17px;
     line-height: 1.55;
+}
+
+.hover-visual-comparison-fixture {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+@media (width <= 700px) {
+    .hover-visual-comparison-fixture {
+        grid-template-columns: 1fr;
+    }
 }
 
 .message_row.hover-generated-update {
@@ -1723,4 +1794,5 @@ a {
         animation-duration: 0ms !important;
         animation-iteration-count: 1 !important;
     }
+}
 }

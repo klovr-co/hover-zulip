@@ -1,5 +1,6 @@
 import * as z from "zod/mini";
 
+import {hover_space_schema} from "./hover_spaces.ts";
 import {group_setting_value_schema, topic_link_schema} from "./types.ts";
 
 // Event types the web app requests from /register via fetch_event_types.
@@ -15,6 +16,7 @@ export const FETCH_EVENT_TYPES: string[] = [
     "device",
     "drafts",
     "giphy",
+    "hover_space",
     "klipy",
     "message",
     "muted_topics",
@@ -126,3 +128,19 @@ export const channel_folder_update_event_schema = z.object({
     }),
 });
 export type ChannelFolderUpdateEvent = z.output<typeof channel_folder_update_event_schema>;
+
+export const hover_space_event_schema = z.discriminatedUnion("op", [
+    z.object({
+        id: z.number(),
+        type: z.literal("hover_space"),
+        op: z.enum(["add", "update"]),
+        space: hover_space_schema,
+    }),
+    z.object({
+        id: z.number(),
+        type: z.literal("hover_space"),
+        op: z.literal("delete"),
+        space_id: z.number(),
+    }),
+]);
+export type HoverSpaceEvent = z.output<typeof hover_space_event_schema>;

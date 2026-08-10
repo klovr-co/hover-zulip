@@ -1,6 +1,7 @@
 import * as z from "zod/mini";
 
 import {server_add_bot_schema} from "./bot_types.ts";
+import {hover_space_schema} from "./hover_spaces.ts";
 import {realm_default_settings_schema} from "./realm_user_settings_defaults.ts";
 import {api_stream_subscription_schema, never_subscribed_stream_schema} from "./stream_types.ts";
 import {group_setting_value_schema} from "./types.ts";
@@ -492,6 +493,7 @@ export const realm_schema = z.object({
     realm_can_create_groups: group_setting_value_schema,
     realm_can_create_public_channel_group: group_setting_value_schema,
     realm_can_create_private_channel_group: group_setting_value_schema,
+    realm_can_create_spaces_group: group_setting_value_schema,
     realm_can_create_web_public_channel_group: z.number(),
     realm_can_create_write_only_bots_group: group_setting_value_schema,
     realm_can_delete_any_message_group: group_setting_value_schema,
@@ -542,6 +544,7 @@ export const realm_schema = z.object({
     realm_enable_read_receipts: z.boolean(),
     realm_enable_spectator_access: z.boolean(),
     realm_gif_rating_policy: z.number(),
+    realm_hover_enabled: z.boolean(),
     realm_icon_source: z.string(),
     realm_icon_url: z.string(),
     realm_incoming_webhook_bots: z.array(
@@ -679,6 +682,7 @@ export const split_state_data_schema = z.object({
     }),
     user_groups: z.object({realm_user_groups: z.array(raw_user_group_schema)}),
     channel_folders: z.object({channel_folders: z.array(channel_folder_schema)}),
+    hover_spaces: z.object({hover_spaces: z.array(hover_space_schema)}),
     unread: z.object({
         unread_msgs: z.object({
             pms: z.array(unread_direct_message_info_schema),

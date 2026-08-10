@@ -4,9 +4,10 @@ from typing import Any, Literal
 
 from django.conf import settings
 from django.core.management.base import CommandError, CommandParser
-from django.db import connection
+from django.db import connection, transaction
 from typing_extensions import override
 
+from hover.models import EvidenceLink, GeneratedItem, Space, SpaceAdministrator
 from zerver.actions.channel_folders import check_add_channel_folder
 from zerver.actions.create_user import do_create_user
 from zerver.actions.message_delete import do_delete_messages
@@ -57,6 +58,49 @@ MODULE_NAMES: dict[HoverModuleKey, str] = {
     "topic_analysis": "Topic Analysis",
 }
 
+MODULE_OUTPUT_TYPES: dict[HoverModuleKey, str] = {
+    "conversation_digest": GeneratedItem.OutputType.DIGEST,
+    "progress_tracker": GeneratedItem.OutputType.PROGRESS_UPDATE,
+    "suggested_actions": GeneratedItem.OutputType.SUGGESTED_ACTION,
+    "decisions": GeneratedItem.OutputType.DECISION,
+    "marketing_digest": GeneratedItem.OutputType.DIGEST,
+    "topic_analysis": GeneratedItem.OutputType.ANALYSIS,
+}
+MODULE_VERSION = "aimto-demo-v1"
+
+EVIDENCE_SOURCES = {
+    "mentors_volunteers": {
+        "provider_key": "whatsapp",
+        "provider_name": "WhatsApp",
+        "display_name": "All Learn-a-thon Mentors & Volunteers",
+        "url": "",
+    },
+    "resident_lounge": {
+        "provider_key": "whatsapp",
+        "provider_name": "WhatsApp",
+        "display_name": "Resident Lounge",
+        "url": "",
+    },
+    "volunteers_500": {
+        "provider_key": "whatsapp",
+        "provider_name": "WhatsApp",
+        "display_name": "500 volunteers @ Learnathon",
+        "url": "",
+    },
+    "github": {
+        "provider_key": "github",
+        "provider_name": "GitHub",
+        "display_name": "LearnAIMTO",
+        "url": "https://github.com/ashvinpraveen/learnaimto",
+    },
+    "instagram": {
+        "provider_key": "instagram",
+        "provider_name": "Instagram",
+        "display_name": "@aimto_26",
+        "url": "https://www.instagram.com/aimto_26/",
+    },
+}
+
 LEGACY_DEMO_TODO_NOTES = {
     "AIMTO · Publish the volunteer briefing agenda",
     "AIMTO · Assign the blue zone owner",
@@ -69,6 +113,7 @@ class DemoPost:
     module_key: HoverModuleKey
     content: str
     sent_at: datetime.datetime
+    evidence_keys: tuple[str, ...]
     for_you: bool = False
     saved: bool = False
 
@@ -77,6 +122,7 @@ def demo_post(
     module_key: HoverModuleKey,
     content: str,
     sent_at: datetime.datetime,
+    evidence_keys: tuple[str, ...],
     *,
     for_you: bool = False,
     saved: bool = False,
@@ -85,6 +131,7 @@ def demo_post(
         module_key=module_key,
         content=content,
         sent_at=sent_at,
+        evidence_keys=evidence_keys,
         for_you=for_you,
         saved=saved,
     )
@@ -121,6 +168,7 @@ Recruitment momentum is strong, but the briefing needs to turn offers into a nam
 
 - **WhatsApp · All Learn-a-thon Mentors & Volunteers** — 5–8 August 2026""",
         demo_time(8, 14, 20),
+        ("mentors_volunteers",),
     ),
     demo_post(
         "progress_tracker",
@@ -147,6 +195,7 @@ Publish named zone leads during the Monday 9:00 PM briefing.
 
 - **WhatsApp · All Learn-a-thon Mentors & Volunteers** — floor-plan thread, 5 August 2026""",
         demo_time(8, 14, 32),
+        ("mentors_volunteers",),
         for_you=True,
     ),
     demo_post(
@@ -172,6 +221,7 @@ The staffing ask is closed, but the accepted volunteers still need one concise h
 
 - **WhatsApp · 500 volunteers @ Learnathon** — 8 August 2026""",
         demo_time(8, 15, 5),
+        ("volunteers_500",),
     ),
     demo_post(
         "decisions",
@@ -195,6 +245,7 @@ Volunteers are coming from several organizers, so the main group needs to remain
 
 - **WhatsApp · 500 volunteers @ Learnathon** — subgroup welcome and scope""",
         demo_time(8, 15, 18),
+        ("volunteers_500",),
     ),
     demo_post(
         "progress_tracker",
@@ -222,6 +273,7 @@ Convert availability into named zone assignments at the volunteer briefing.
 - **WhatsApp · All Learn-a-thon Mentors & Volunteers** — recruitment and group growth
 - **WhatsApp · 500 volunteers @ Learnathon** — Day 1 call for three people""",
         demo_time(8, 15, 31),
+        ("mentors_volunteers", "volunteers_500"),
     ),
     demo_post(
         "decisions",
@@ -245,6 +297,7 @@ Their offers satisfy the stated requirement for three volunteers. Gabriel's part
 
 - **WhatsApp · 500 volunteers @ Learnathon** — Day 1 staffing thread""",
         demo_time(8, 15, 44),
+        ("volunteers_500",),
         saved=True,
     ),
     demo_post(
@@ -269,6 +322,7 @@ The floor plan is known, but detailed role allocation still needs a shared coord
 
 - **WhatsApp · All Learn-a-thon Mentors & Volunteers** — briefing announcement""",
         demo_time(8, 15, 58),
+        ("mentors_volunteers",),
         for_you=True,
     ),
     demo_post(
@@ -293,6 +347,7 @@ Monday, 10 August · 8:00 PM — one hour before the confirmed briefing.
 
 - **WhatsApp · All Learn-a-thon Mentors & Volunteers** — briefing announcement and floor-plan thread""",
         demo_time(8, 16, 12),
+        ("mentors_volunteers",),
         for_you=True,
     ),
     demo_post(
@@ -317,6 +372,7 @@ During the Monday 9:00 PM briefing, before the role roster is shared.
 
 - **WhatsApp · All Learn-a-thon Mentors & Volunteers** — floor plan and placement follow-up""",
         demo_time(8, 16, 26),
+        ("mentors_volunteers",),
         for_you=True,
     ),
     demo_post(
@@ -344,6 +400,7 @@ Share the launch as a community-built invitation: people can attend without codi
 - [GitHub · LearnAIMTO](https://github.com/ashvinpraveen/learnaimto)
 - [Instagram · @aimto_26](https://www.instagram.com/aimto_26/) — linked destination only""",
         demo_time(9, 2, 40),
+        ("resident_lounge", "github", "instagram"),
     ),
     demo_post(
         "marketing_digest",
@@ -368,6 +425,7 @@ Invite each university to move its name up the leaderboard while emphasizing tha
 - [GitHub · LearnAIMTO](https://github.com/ashvinpraveen/learnaimto)
 - [Instagram · @aimto_26](https://www.instagram.com/aimto_26/) — proposed destination, publication not confirmed""",
         demo_time(9, 9, 45),
+        ("mentors_volunteers", "resident_lounge", "github", "instagram"),
     ),
     demo_post(
         "conversation_digest",
@@ -394,6 +452,7 @@ The operational ask is now a final creative handoff: preserve consistent event d
 - [GitHub · LearnAIMTO](https://github.com/ashvinpraveen/learnaimto)
 - [Instagram · @aimto_26](https://www.instagram.com/aimto_26/) — linked for monitoring only""",
         demo_time(9, 10, 5),
+        ("resident_lounge", "github", "instagram"),
     ),
     demo_post(
         "marketing_digest",
@@ -416,6 +475,7 @@ Share the Luma link with builders who have something strong to demonstrate, and 
 - **WhatsApp · Resident Lounge** — launch announcement and public-sharing confirmation, 6–7 August 2026
 - [Luma · Supabase's first move + Malaysian.ai Show & Tell](https://luma.com/zkxj8z7b)""",
         demo_time(9, 10, 19),
+        ("resident_lounge",),
     ),
     demo_post(
         "progress_tracker",
@@ -445,6 +505,7 @@ Share the polished 16:9 and 9:16 PNG files for final copy review and placement a
 
 - **WhatsApp · Resident Lounge** — Maxine's AICB lobby artwork thread, 8–9 August 2026""",
         demo_time(9, 10, 34),
+        ("resident_lounge",),
     ),
     demo_post(
         "progress_tracker",
@@ -472,6 +533,7 @@ Confirm at least one named contact and location for each requested language duri
 - **WhatsApp · All Learn-a-thon Mentors & Volunteers** — Mandarin, Malay, and Tamil recruitment
 - **WhatsApp · Resident Lounge** — beginner flyer concept with Mandarin mentor support""",
         demo_time(9, 10, 48),
+        ("mentors_volunteers", "resident_lounge"),
         for_you=True,
     ),
     demo_post(
@@ -494,6 +556,7 @@ Confirm during the Monday 9:00 PM briefing so the promise is operational before 
 - **WhatsApp · All Learn-a-thon Mentors & Volunteers** — language recruitment on 5 August
 - **WhatsApp · Resident Lounge** — Mandarin-support outreach concept on 9 August""",
         demo_time(9, 11, 2),
+        ("mentors_volunteers", "resident_lounge"),
         for_you=True,
     ),
     demo_post(
@@ -524,6 +587,7 @@ Do not recruit blindly. Use the briefing to publish a compact coverage matrix: p
 - **WhatsApp · All Learn-a-thon Mentors & Volunteers** — staffing, floor plan, briefing
 - **WhatsApp · 500 volunteers @ Learnathon** — Day 1 role fill""",
         demo_time(9, 11, 16),
+        ("mentors_volunteers", "volunteers_500"),
         saved=True,
     ),
     demo_post(
@@ -556,6 +620,7 @@ Use one verified accessibility line everywhere: which languages are available, w
 - [GitHub · LearnAIMTO](https://github.com/ashvinpraveen/learnaimto) — public experience
 - [Instagram · @aimto_26](https://www.instagram.com/aimto_26/) — monitoring destination only""",
         demo_time(10, 0, 15),
+        ("mentors_volunteers", "resident_lounge", "github", "instagram"),
         for_you=True,
         saved=True,
     ),
@@ -591,6 +656,7 @@ class Command(ZulipBaseCommand):
             do_change_full_name(hover_user, HOVER_DISPLAY_NAME, acting_user=owner, notify=True)
         return hover_user
 
+    @transaction.atomic(savepoint=False)
     def reconcile_demo_message(
         self,
         post: DemoPost,
@@ -623,6 +689,36 @@ class Command(ZulipBaseCommand):
         elif message.date_sent != post.sent_at:
             Message.objects.filter(id=message.id).update(date_sent=post.sent_at)
             message.date_sent = post.sent_at
+
+        evidence_sources = [EVIDENCE_SOURCES[key] for key in post.evidence_keys]
+        source_summary = (
+            f"Across {len(evidence_sources)} sources"
+            if len(evidence_sources) > 1
+            else f"From {evidence_sources[0]['display_name']}"
+        )
+        generated_item, _created = GeneratedItem.objects.update_or_create(
+            message=message,
+            defaults={
+                "realm": stream.realm,
+                "output_type": MODULE_OUTPUT_TYPES[post.module_key],
+                "module_key": post.module_key,
+                "module_name": MODULE_NAMES[post.module_key],
+                "module_version": MODULE_VERSION,
+                "source_summary": source_summary,
+            },
+        )
+        generated_item.evidence_links.all().delete()
+        EvidenceLink.objects.bulk_create(
+            [
+                EvidenceLink(
+                    generated_item=generated_item,
+                    realm=stream.realm,
+                    position=position,
+                    **source,
+                )
+                for position, source in enumerate(evidence_sources)
+            ]
+        )
 
         return message
 
@@ -698,6 +794,10 @@ class Command(ZulipBaseCommand):
                     f"No user with email {options['viewer_email']} exists in {realm.string_id}."
                 )
 
+        if not realm.hover_enabled:
+            realm.hover_enabled = True
+            realm.save(update_fields=["hover_enabled"])
+
         folder = ChannelFolder.objects.filter(
             realm=realm, name__iexact="Events", is_archived=False
         ).first()
@@ -728,6 +828,25 @@ class Command(ZulipBaseCommand):
                 history_public_to_subscribers=False,
                 is_web_public=False,
                 acting_user=owner,
+            )
+
+        space, _created = Space.objects.update_or_create(
+            realm=realm,
+            name="AIMTO Events",
+            defaults={
+                "description": stream.description,
+                "state": Space.State.LAUNCHED,
+                "category": folder,
+                "created_by": owner,
+                "stream": stream,
+            },
+        )
+        for administrator in {owner, viewer}:
+            SpaceAdministrator.objects.get_or_create(
+                realm=realm,
+                space=space,
+                user=administrator,
+                defaults={"added_by": owner},
             )
 
         hover_user = self.get_or_create_hover_user(realm=realm, owner=owner)
