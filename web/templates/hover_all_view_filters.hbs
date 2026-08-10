@@ -1,51 +1,53 @@
 <section
-    class="hover-all-view-filters"
-    aria-label="{{t 'Filter Space updates'}}"
->
+  class="hover-all-view-filters"
+  aria-label="{{t 'Filter Space updates'}}"
+  >
     <div class="hover-all-view-filters__heading">
         <span class="hover-all-view-filters__eyebrow">{{space_name}}</span>
         <strong>{{t "All"}}</strong>
         <span>{{t "People and meaningful Module updates"}}</span>
     </div>
     <div
-        class="hover-all-view-filters__rail"
-        role="group"
-        aria-label="{{t 'Feed filters'}}"
-    >
+      class="hover-all-view-filters__rail"
+      role="group"
+      aria-label="{{t 'Feed filters'}}"
+      >
         <button
-            type="button"
-            class="hover-all-filter is-active"
-            data-hover-filter="all"
-            aria-pressed="true"
-        >{{t "All"}}</button>
+          type="button"
+          class="hover-all-filter is-active"
+          data-hover-filter="all"
+          aria-pressed="true"
+          >{{t "All"}}</button>
         {{#each modules}}
             <button
-                type="button"
-                class="hover-all-filter"
-                data-hover-filter="module"
-                data-hover-filter-key="{{key}}"
-                aria-pressed="false"
-            >
+              type="button"
+              class="hover-all-filter"
+              data-hover-filter="module"
+              data-hover-filter-key="{{key}}"
+              aria-pressed="false"
+              >
                 <i
-                    class="zulip-icon {{icon}}"
-                    aria-hidden="true"
-                ></i>{{name}}<span>{{count}}</span>
+                  class="zulip-icon {{icon}}"
+                  aria-hidden="true"
+                  ></i>{{name}}<span>{{count}}</span>
             </button>
         {{/each}}
         {{#each sources}}
             <button
-                type="button"
-                class="hover-all-filter"
-                data-hover-filter="source"
-                data-hover-filter-key="{{source_id}}"
-                aria-pressed="false"
-            >
+              type="button"
+              class="hover-all-filter"
+              data-hover-filter="source"
+              data-hover-filter-key="{{source_key}}"
+              aria-pressed="false"
+              >
                 <i class="{{icon_class}}" aria-hidden="true"></i>{{name}}<span
                 >{{count}}</span>
             </button>
         {{/each}}
     </div>
-    <p class="hover-all-view-filters__status" aria-live="polite">{{t
-            "Showing teammate posts and the latest meaningful state of every enabled Module."
-        }}</p>
+    <p class="hover-all-view-filters__status" aria-live="polite">
+        {{t
+          "Showing teammate posts and the latest meaningful state of every enabled Module."
+          }}
+    </p>
 </section>

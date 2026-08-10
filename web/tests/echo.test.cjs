@@ -21,6 +21,7 @@ const stream_list = mock_esm("../src/stream_list");
 let disparities = [];
 
 mock_esm("../src/message_live_update", {
+    rerender_messages_view_by_message_ids() {},
     update_message_in_all_views() {},
 });
 
@@ -147,6 +148,7 @@ run_test("process_from_server for differently rendered messages", ({override}) =
             is_me_message: new_value,
             submessages: new_value,
             topic_links: new_value,
+            hover_response: {type: "review"},
         },
     ];
     echo_state._patch_waiting_for_ack(waiting_for_ack);
@@ -161,6 +163,7 @@ run_test("process_from_server for differently rendered messages", ({override}) =
             is_me_message: new_value,
             submessages: new_value,
             topic_links: new_value,
+            hover_response: {type: "review"},
         },
     ]);
 });

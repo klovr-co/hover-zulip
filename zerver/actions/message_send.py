@@ -934,6 +934,7 @@ def do_send_messages(
     send_message_requests_maybe_none: Sequence[SendMessageRequest | None],
     *,
     mark_as_read: Sequence[int] = [],
+    post_message_persist_hook: Callable[[Sequence[Message]], None] | None = None,
 ) -> list[SentMessageResult]:
     """See
     https://zulip.readthedocs.io/en/latest/subsystems/sending-messages.html
@@ -950,10 +951,11 @@ def do_send_messages(
     # Save the message receipts in the database
     user_message_flags: dict[int, dict[int, list[str]]] = defaultdict(dict)
 
-    Message.objects.bulk_create(send_request.message for send_request in send_message_requests)
-    capture_integration_message_provenance(
-        [send_request.message for send_request in send_message_requests]
-    )
+    messages = [send_request.message for send_request in send_message_requests]
+    Message.objects.bulk_create(messages)
+    capture_integration_message_provenance(messages)
+    if post_message_persist_hook is not None:
+        post_message_persist_hook(messages)
 
     # Claim attachments in message
     for send_request in send_message_requests:
@@ -1485,6 +1487,7 @@ def check_send_message(
     skip_stream_access_check: bool = False,
     allow_hover_response: bool = False,
     read_by_sender: bool = False,
+    post_message_persist_hook: Callable[[Message], None] | None = None,
 ) -> SentMessageResult:
     addressee = Addressee.legacy_build(sender, recipient_type_name, message_to, topic_name)
     message_request = check_message(
@@ -1505,6 +1508,11 @@ def check_send_message(
     return do_send_messages(
         [message_request],
         mark_as_read=[sender.id] if read_by_sender else [],
+        post_message_persist_hook=(
+            None
+            if post_message_persist_hook is None
+            else lambda messages: post_message_persist_hook(messages[0])
+        ),
     )[0]
 
 

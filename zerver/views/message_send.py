@@ -21,7 +21,6 @@ from zerver.actions.message_send import (
 )
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.markdown import render_message_markdown
-from zerver.lib.message import access_message
 from zerver.lib.request import RequestNotes
 from zerver.lib.response import json_success
 from zerver.lib.typed_endpoint import (
@@ -243,6 +242,17 @@ def send_message_backend(
         )
 
     data: dict[str, object] = {}
+    created_response = None
+
+    def persist_hover_response(message: Message) -> None:
+        nonlocal created_response
+        assert prepared_response is not None
+        created_response = create_response(
+            prepared_response,
+            message=message,
+            actor=user_profile,
+        )
+
     sent_message_result = check_send_message(
         sender,
         client,
@@ -259,21 +269,16 @@ def send_message_backend(
         widget_content=widget_content,
         read_by_sender=read_by_sender,
         allow_hover_response=prepared_response is not None,
+        post_message_persist_hook=(
+            persist_hover_response if prepared_response is not None else None
+        ),
     )
     data["id"] = sent_message_result.message_id
     if prepared_response is not None:
-        response = create_response(
-            prepared_response,
-            message=access_message(
-                user_profile,
-                sent_message_result.message_id,
-                is_modifying_message=False,
-            ),
-            actor=user_profile,
-        )
+        assert created_response is not None
         data["hover_response"] = {
-            "type": response.response_type,
-            "clarification_required": response.clarification_required,
+            "type": created_response.response_type,
+            "clarification_required": created_response.clarification_required,
         }
     if sent_message_result.automatic_new_visibility_policy:
         data["automatic_new_visibility_policy"] = (

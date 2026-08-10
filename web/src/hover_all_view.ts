@@ -6,7 +6,7 @@ import * as hover_spaces from "./hover_spaces.ts";
 import {$t} from "./i18n.ts";
 import * as narrow_state from "./narrow_state.ts";
 
-let active_filter = "all";
+let active_filter_class: string | undefined;
 let observer: MutationObserver | undefined;
 
 function current_space(): hover_spaces.HoverSpace | undefined {
@@ -19,21 +19,27 @@ function current_space(): hover_spaces.HoverSpace | undefined {
 
 function apply_filter(): void {
     const $rows = $("#message_feed_container .message_row");
+    const filter_class = active_filter_class;
     $rows.removeClass("hover-all-filtered-out");
-    if (active_filter === "all") {
+    if (filter_class === undefined) {
         $rows
             .filter(".hover-raw-source-record, .hover-lineage-earlier")
             .addClass("hover-all-filtered-out");
         return;
     }
-    $rows.not(active_filter).addClass("hover-all-filtered-out");
+    $rows.each((_index, element) => {
+        element.classList.toggle(
+            "hover-all-filtered-out",
+            !element.classList.contains(filter_class),
+        );
+    });
 }
 
 function refresh(): void {
     const space = current_space();
     $(".hover-all-view-filters").remove();
     document.body.classList.toggle("hover-space-all-view", space !== undefined);
-    active_filter = "all";
+    active_filter_class = undefined;
     if (space === undefined) {
         return;
     }
@@ -45,7 +51,7 @@ function refresh(): void {
                 ?.generated_count ?? 0,
     }));
     $("#message_feed_container").prepend(
-        render_hover_all_view_filters({space_name: space.name, modules, sources}),
+        $(render_hover_all_view_filters({space_name: space.name, modules, sources})),
     );
     apply_filter();
 }
@@ -56,17 +62,17 @@ export function initialize(): void {
         const $button = $(event.currentTarget);
         const kind = $button.attr("data-hover-filter");
         const key = $button.attr("data-hover-filter-key");
-        active_filter =
+        active_filter_class =
             kind === "module" && key !== undefined
-                ? `.hover-module--${CSS.escape(key)}`
+                ? `hover-module--${key}`
                 : kind === "source" && key !== undefined
-                  ? `.hover-source-id--${CSS.escape(key)}`
-                  : "all";
+                  ? `hover-source-id--${key}`
+                  : undefined;
         $(".hover-all-filter").removeClass("is-active").attr("aria-pressed", "false");
         $button.addClass("is-active").attr("aria-pressed", "true");
         const label = $button.clone().children().remove().end().text().trim();
         $(".hover-all-view-filters__status").text(
-            active_filter === "all"
+            active_filter_class === undefined
                 ? $t({
                       defaultMessage:
                           "Showing teammate posts and the latest meaningful state of every enabled Module.",

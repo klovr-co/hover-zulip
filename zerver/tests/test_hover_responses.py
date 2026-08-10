@@ -1,8 +1,10 @@
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
+from unittest import mock
 from uuid import uuid4
 
 import orjson
+from django.http import HttpResponse
 from typing_extensions import override
 
 from hover.actions_memberships import do_confirm_space_member
@@ -20,9 +22,11 @@ from hover.models import (
 )
 from zerver.actions.channel_folders import check_add_channel_folder
 from zerver.lib.test_classes import ZulipTestCase
+from zerver.lib.test_helpers import HostRequestMock, dummy_handler
 from zerver.lib.user_groups import get_system_user_group_by_name
 from zerver.models import Message
 from zerver.models.groups import SystemGroups
+from zerver.tornado.views import get_events
 
 if TYPE_CHECKING:
     from django.test.client import _MonkeyPatchedWSGIResponse as TestHttpResponse
@@ -147,6 +151,10 @@ class HoverResponseTest(ZulipTestCase):
             data["hover_review_value"] = value
         return self.client_post("/json/messages", data)
 
+    def get_events(self, post_data: dict[str, Any]) -> HttpResponse:
+        request = HostRequestMock(post_data, self.reviewer, tornado_handler=dummy_handler)
+        return get_events(request, self.reviewer)
+
     def test_reply_is_native_context_without_state_change(self) -> None:
         result = self.send_response(response_type="reply", content="I will confirm access.")
         response_data = self.assert_json_success(result)
@@ -189,6 +197,66 @@ class HoverResponseTest(ZulipTestCase):
         self.assertEqual(metadata["root_message_id"], self.root_message.id)
         self.assertEqual(metadata["generated_item"]["reviewed_payload"]["venue"], "Hall B")
         self.assertEqual(metadata["generated_item"]["revisions"][0]["previous_value"], "Hall A")
+
+    def test_review_message_event_contains_committed_response_metadata(self) -> None:
+        registration = self.get_events(
+            {
+                "apply_markdown": orjson.dumps(True).decode(),
+                "client_gravatar": orjson.dumps(True).decode(),
+                "event_types": orjson.dumps(["message"]).decode(),
+                "user_client": "website",
+                "dont_block": orjson.dumps(True).decode(),
+            }
+        )
+        self.assert_json_success(registration)
+        queue_id = orjson.loads(registration.content)["queue_id"]
+
+        with self.captureOnCommitCallbacks(execute=True):
+            result = self.send_response(
+                response_type="review",
+                content="Confirmed with the venue team.",
+                field="venue",
+                value='"Hall B"',
+            )
+        response_data = self.assert_json_success(result)
+
+        fetched = self.get_events(
+            {
+                "queue_id": queue_id,
+                "user_client": "website",
+                "last_event_id": -1,
+                "dont_block": orjson.dumps(True).decode(),
+            }
+        )
+        self.assert_json_success(fetched)
+        events = orjson.loads(fetched.content)["events"]
+        self.assert_length(events, 1)
+        message = events[0]["message"]
+        self.assertEqual(message["id"], response_data["id"])
+        self.assertEqual(message["hover_response"]["type"], "review")
+        self.assertEqual(message["hover_response"]["root_message_id"], self.root_message.id)
+        self.assertEqual(
+            message["hover_response"]["generated_item"]["reviewed_payload"]["venue"],
+            "Hall B",
+        )
+
+    def test_response_exists_before_message_event_is_queued(self) -> None:
+        event_saw_response = False
+
+        def check_response_before_queue(
+            _realm: object, event: dict[str, Any], _users: object
+        ) -> None:
+            nonlocal event_saw_response
+            event_saw_response = Response.objects.filter(message_id=event["message"]).exists()
+
+        with mock.patch(
+            "zerver.actions.message_send.send_event_on_commit",
+            side_effect=check_response_before_queue,
+        ):
+            result = self.send_response(response_type="reply", content="Event ordering check.")
+
+        self.assert_json_success(result)
+        self.assertTrue(event_saw_response)
 
     def test_ambiguous_review_requests_clarification_without_mutation(self) -> None:
         result = self.send_response(

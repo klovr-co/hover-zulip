@@ -44,6 +44,7 @@ def prepare_response(
     if (
         space.state != space.State.LAUNCHED
         or space.stream_id is None
+        or space.stream is None
         or space.stream.deactivated
         or not SpaceMembership.objects.filter(
             space=space,

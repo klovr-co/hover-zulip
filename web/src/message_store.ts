@@ -56,7 +56,7 @@ const message_reaction_schema = z.object({
     user_id: z.number(),
 });
 
-const hover_generated_item_schema = z.object({
+export const hover_generated_item_schema = z.object({
     id: z.number(),
     output_type: z.string(),
     module: z.object({key: z.string(), name: z.string(), version: z.string()}),
@@ -113,7 +113,7 @@ const hover_generated_item_schema = z.object({
 export type HoverGeneratedItem = z.infer<typeof hover_generated_item_schema>;
 export type HoverRevision = HoverGeneratedItem["revisions"][number];
 
-const hover_response_schema = z.object({
+export const hover_response_schema = z.object({
     type: z.enum(["reply", "review"]),
     clarification_required: z.boolean(),
     root_message_id: z.number(),
@@ -122,7 +122,7 @@ const hover_response_schema = z.object({
 
 export type HoverResponse = z.infer<typeof hover_response_schema>;
 
-const hover_source_provenance_schema = z.object({
+export const hover_source_provenance_schema = z.object({
     captured_at: z.string(),
     source: z.object({
         id: z.number(),
