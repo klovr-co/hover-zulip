@@ -27805,9 +27805,11 @@ paths:
           in: query
           required: true
           description: The awareness ranking policy to apply.
-          schema:
-            type: string
-            enum: [for_you, team_pulse]
+          content:
+            application/json:
+              schema:
+                type: string
+                enum: [for_you, team_pulse]
       responses:
         "200":
           description: Success.
