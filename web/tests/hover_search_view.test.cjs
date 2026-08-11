@@ -7,6 +7,7 @@ const {run_test} = require("./lib/test.cjs");
 const {$} = require("./lib/zjquery.cjs");
 
 let request;
+let abort_count = 0;
 const flag_updates = [];
 const starred_adds = [];
 const starred_removes = [];
@@ -14,7 +15,11 @@ let authorized_spaces = [{id: 3, state: "launched"}];
 mock_esm("../src/channel", {
     post(options) {
         request = options;
-        return {abort() {}};
+        return {
+            abort() {
+                abort_count += 1;
+            },
+        };
     },
 });
 mock_esm("../src/inbox_ui", {hide() {}});
@@ -133,12 +138,9 @@ run_test("knowledge ranks before read-only Sources and uses native starred state
 run_test("later searches replace stale requests", () => {
     hover_search_view.test.search("first");
     const first_request = request;
-    let aborted = false;
-    first_request.abort = () => {
-        aborted = true;
-    };
+    const previous_abort_count = abort_count;
     hover_search_view.test.search("second");
-    assert.ok(aborted);
+    assert.equal(abort_count, previous_abort_count + 1);
     assert.equal(JSON.parse(request.data.query), "second");
     // An old success is ignored by the request generation guard.
     first_request.success(response());
