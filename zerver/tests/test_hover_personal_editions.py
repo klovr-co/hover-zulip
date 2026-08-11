@@ -8,8 +8,10 @@ from typing_extensions import override
 from hover.clawer_sync import ClawerSyncError, InMemoryClawerSync
 from hover.models import (
     ConnectedAccount,
+    EvidenceLink,
     GeneratedItem,
     PersonalEdition,
+    PersonalEditionSyncState,
     Source,
     SourceParticipantBinding,
     Space,
@@ -106,7 +108,7 @@ class HoverPersonalEditionsTest(ZulipTestCase):
             "Venue access was confirmed for Friday.",
             "Venue readiness",
         )
-        GeneratedItem.objects.create(
+        self.generated_item = GeneratedItem.objects.create(
             realm=self.realm,
             message=Message.objects.get(id=message_id),
             attachment=self.attachment,
@@ -118,11 +120,25 @@ class HoverPersonalEditionsTest(ZulipTestCase):
             module_version="v1",
             source_summary="From Venue team",
         )
+        EvidenceLink.objects.create(
+            generated_item=self.generated_item,
+            realm=self.realm,
+            source=self.source,
+            evidence_ref="evidence_0123456789abcdef0123456789abcdef",
+            position=0,
+            provider_key="whatsapp",
+            provider_name="WhatsApp",
+            display_name="Venue confirmation",
+        )
         self.adapter = InMemoryClawerSync()
         self.login_user(self.user)
 
     def publication(
-        self, *, edition: str = "morning", include_missing: bool = False
+        self,
+        *,
+        edition: str = "morning",
+        include_missing: bool = False,
+        sequence: int | None = None,
     ) -> ClawerPublication:
         timestamp = "2026-08-11T10:00:00Z"
         references = ["update-1", "missing-update"] if include_missing else ["update-1"]
@@ -158,17 +174,18 @@ class HoverPersonalEditionsTest(ZulipTestCase):
                 "tomorrow_preview": [],
             }
             producer_key = "personal_eod_roundup"
+        identity_suffix = "" if sequence is None else f"-{sequence}"
         return ClawerPublication.model_validate(
             {
-                "publication_id": f"personal-{edition}",
-                "idempotency_key": f"personal-identity-{edition}",
-                "business_identity": f"personal-business-{edition}",
+                "publication_id": f"personal-{edition}{identity_suffix}",
+                "idempotency_key": f"personal-identity-{edition}{identity_suffix}",
+                "business_identity": f"personal-business-{edition}{identity_suffix}",
                 "contract": "digest",
                 "schema_version": "1.0",
                 "producer_key": producer_key,
                 "producer_name": "Personal Daily Brief",
                 "producing_version": "prompt:personal:v1",
-                "run_reference": f"run-{edition}",
+                "run_reference": f"run-{edition}{identity_suffix}",
                 "source_ref": self.EDITION_SOURCE_REF,
                 "covered_period": {"start": "2026-08-11T00:00:00Z", "end": timestamp},
                 "payload": {
@@ -225,6 +242,10 @@ class HoverPersonalEditionsTest(ZulipTestCase):
         self.assertEqual(morning["title"], "A good place to start")
         self.assertEqual(morning["sections"]["urgency"][0]["update"]["space_name"], "AIMTO Events")
         self.assertIn("/near/", morning["sections"]["urgency"][0]["update"]["url"])
+        self.assertEqual(
+            morning["sections"]["urgency"][0]["update"]["evidence_url"],
+            f"/json/hover/spaces/{self.space.id}/generated-items/{self.generated_item.id}/evidence",
+        )
         self.assertNotIn("operation", morning)
         self.assertNotIn("marketing", morning)
         self.assertNotIn("confirmed_todo_refs", morning["sections"]["urgency"][0])
@@ -233,6 +254,114 @@ class HoverPersonalEditionsTest(ZulipTestCase):
         self.assertEqual(
             self.adapter.personal_edition_sync_calls[0]["teammate_ref"], self.TEAMMATE_REF
         )
+
+    def test_drains_more_than_one_bounded_page(self) -> None:
+        first_page = [self.publication(sequence=index) for index in range(50)]
+        final_page = [self.publication(sequence=50)]
+        key = (
+            str(self.realm.uuid),
+            str(self.account.external_account_id),
+            self.TEAMMATE_REF,
+        )
+        self.adapter.personal_edition_pages[(*key, None)] = ClawerPublicationPage(
+            publications=first_page,
+            next_cursor="hpe1:after-50",
+            has_more=True,
+        )
+        self.adapter.personal_edition_pages[(*key, "hpe1:after-50")] = ClawerPublicationPage(
+            publications=final_page,
+            next_cursor="hpe1:complete",
+            has_more=False,
+        )
+
+        payload = self.assert_json_success(self.get_editions())
+
+        self.assertEqual(payload["sync_status"], "current")
+        self.assertEqual(PersonalEdition.objects.count(), 51)
+        self.assertEqual(
+            [call["cursor"] for call in self.adapter.personal_edition_sync_calls],
+            [None, "hpe1:after-50"],
+        )
+        state = PersonalEditionSyncState.objects.get(user=self.user, account=self.account)
+        self.assertEqual(state.cursor, "hpe1:complete")
+
+    def test_interrupted_pagination_resumes_from_durable_cursor(self) -> None:
+        first_page = ClawerPublicationPage(
+            publications=[self.publication(sequence=index) for index in range(50)],
+            next_cursor="hpe1:after-50",
+            has_more=True,
+        )
+        final_page = ClawerPublicationPage(
+            publications=[self.publication(sequence=50)],
+            next_cursor="hpe1:complete",
+            has_more=False,
+        )
+        error = ClawerSyncError(
+            error_code="clawer_unavailable",
+            operation="personal_edition_sync",
+            http_status_code=503,
+            retryable=True,
+        )
+        with patch.object(
+            self.adapter,
+            "sync_personal_editions",
+            side_effect=[first_page, error],
+        ):
+            interrupted = self.assert_json_success(self.get_editions())
+
+        self.assertEqual(interrupted["sync_status"], "degraded")
+        self.assertEqual(PersonalEdition.objects.count(), 50)
+        state = PersonalEditionSyncState.objects.get(user=self.user, account=self.account)
+        self.assertEqual(state.cursor, "hpe1:after-50")
+
+        key = (
+            str(self.realm.uuid),
+            str(self.account.external_account_id),
+            self.TEAMMATE_REF,
+            "hpe1:after-50",
+        )
+        self.adapter.personal_edition_pages[key] = final_page
+        resumed = self.assert_json_success(self.get_editions())
+
+        self.assertEqual(resumed["sync_status"], "current")
+        self.assertEqual(PersonalEdition.objects.count(), 51)
+        self.assertEqual(self.adapter.personal_edition_sync_calls[-1]["cursor"], "hpe1:after-50")
+        state.refresh_from_db()
+        self.assertEqual(state.cursor, "hpe1:complete")
+
+    def test_rejects_a_cursor_cycle_without_looping_or_committing_the_cycle(self) -> None:
+        state = PersonalEditionSyncState.objects.create(
+            realm=self.realm,
+            user=self.user,
+            account=self.account,
+            teammate_ref=self.TEAMMATE_REF,
+            start_at=datetime(2026, 8, 1, tzinfo=timezone.utc),
+            cursor="hpe1:first",
+        )
+        key = (
+            str(self.realm.uuid),
+            str(self.account.external_account_id),
+            self.TEAMMATE_REF,
+        )
+        self.adapter.personal_edition_pages[(*key, "hpe1:first")] = ClawerPublicationPage(
+            publications=[self.publication(sequence=1)],
+            next_cursor="hpe1:second",
+            has_more=True,
+        )
+        self.adapter.personal_edition_pages[(*key, "hpe1:second")] = ClawerPublicationPage(
+            publications=[self.publication(sequence=2)],
+            next_cursor="hpe1:first",
+            has_more=True,
+        )
+
+        payload = self.assert_json_success(self.get_editions())
+
+        self.assertEqual(payload["sync_status"], "degraded")
+        self.assert_length(self.adapter.personal_edition_sync_calls, 2)
+        self.assertEqual(PersonalEdition.objects.count(), 1)
+        state.refresh_from_db()
+        self.assertEqual(state.cursor, "hpe1:second")
+        self.assertEqual(state.last_error, "invalid_personal_edition_contract")
 
     def test_omits_passage_when_any_native_update_is_not_authorized(self) -> None:
         self.set_page(self.publication(include_missing=True))

@@ -33,6 +33,7 @@ function edition_response() {
             space_name: "AIMTO Events",
             topic: "Venue readiness",
             url: "#narrow/channel/4/topic/Venue%20readiness/near/42",
+            evidence_url: "/json/hover/spaces/4/generated-items/7/evidence",
         },
     };
     const second = {
@@ -43,6 +44,7 @@ function edition_response() {
             space_name: "AIMTO Events",
             topic: "Volunteer coverage",
             url: "#narrow/channel/4/topic/Volunteer%20coverage/near/43",
+            evidence_url: null,
         },
     };
     return {
@@ -92,8 +94,10 @@ run_test("renders a prose-first full edition and a manual accessible focus view"
     assert.match(html, /A good place to start/);
     assert.match(html, /Everything else is moving well/);
     assert.match(html, /Open update/);
+    assert.match(html, /View sources/);
+    assert.match(html, /aria-haspopup="dialog"/);
+    assert.match(html, /\/json\/hover\/spaces\/4\/generated-items\/7\/evidence/);
     assert.match(html, /AIMTO Events\s+·\s+Venue readiness/);
-    assert.doesNotMatch(html, /Sources/);
     assert.doesNotMatch(html, /Add Todo|Create Todo/);
     assert.ok(
         html.indexOf("The venue handoff is ready") < html.indexOf("Volunteer coverage is settled"),
@@ -106,9 +110,11 @@ run_test("renders a prose-first full edition and a manual accessible focus view"
     assert.match(html, /View all/);
     assert.match(html, /Item 1 of 2/);
     assert.doesNotMatch(html, /Volunteer coverage is settled/);
+    assert.equal($(".hover-edition-carousel").is_focused(), true);
 
     let prevented = false;
     const key_handler = $("body").get_on_handler("keydown", ".hover-edition-carousel");
+    $(".hover-edition-carousel").trigger("blur");
     key_handler({
         key: "ArrowRight",
         preventDefault() {
@@ -119,6 +125,17 @@ run_test("renders a prose-first full edition and a manual accessible focus view"
     assert.equal(prevented, true);
     assert.match(html, /Item 2 of 2/);
     assert.match(html, /Volunteer coverage is settled/);
+    assert.equal($(".hover-edition-carousel").is_focused(), true);
+
+    $(".hover-edition-carousel").trigger("blur");
+    key_handler({
+        key: "ArrowLeft",
+        preventDefault() {},
+    });
+    html = $("#hover-editions-view").html();
+    assert.match(html, /Item 1 of 2/);
+    assert.match(html, /The venue handoff is ready/);
+    assert.equal($(".hover-edition-carousel").is_focused(), true);
 
     const all_handler = $("body").get_on_handler("click", "#hover-edition-view-all");
     all_handler();

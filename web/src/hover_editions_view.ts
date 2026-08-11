@@ -17,6 +17,7 @@ const edition_item_schema = z.object({
         space_name: z.string(),
         topic: z.string(),
         url: z.string(),
+        evidence_url: z.nullable(z.string()),
     }),
 });
 const edition_base = {
@@ -90,7 +91,7 @@ function display_date(timestamp: string): string {
     return new Intl.DateTimeFormat(undefined, {dateStyle: "long"}).format(new Date(timestamp));
 }
 
-function section_data(): Array<{key: string; label: string; items: EditionItem[]}> {
+function section_data(): {key: string; label: string; items: EditionItem[]}[] {
     const edition = response.editions[selected_edition];
     if (edition === null) {
         return [];
@@ -109,7 +110,7 @@ function section_data(): Array<{key: string; label: string; items: EditionItem[]
     }));
 }
 
-function render(): void {
+function render({focus_carousel = false}: {focus_carousel?: boolean} = {}): void {
     if (!visible) {
         return;
     }
@@ -149,6 +150,9 @@ function render(): void {
             can_go_next: slide_index + 1 < slides.length,
         }),
     );
+    if (focus_carousel && view_mode === "focus" && current_slide !== undefined) {
+        $(".hover-edition-carousel").trigger("focus");
+    }
 }
 
 function load(): void {
@@ -210,7 +214,7 @@ function move_slide(change: number): void {
             section_data().flatMap((section) => section.items).length - 1,
         ),
     );
-    render();
+    render({focus_carousel: true});
 }
 
 export function show(): void {
@@ -249,21 +253,29 @@ export function handle_access_change(): void {
 
 export function initialize(): void {
     $("body").on("click", ".hover-edition-tab", (event) => {
-        selected_edition = $(event.currentTarget).attr("data-edition") as EditionKind;
+        const edition = $(event.currentTarget).attr("data-edition");
+        if (edition !== "morning" && edition !== "end_of_day") {
+            return;
+        }
+        selected_edition = edition;
         slide_index = 0;
         render();
     });
     $("body").on("click", "#hover-edition-focus-view", () => {
         view_mode = "focus";
         slide_index = 0;
-        render();
+        render({focus_carousel: true});
     });
     $("body").on("click", "#hover-edition-view-all", () => {
         view_mode = "all";
         render();
     });
-    $("body").on("click", "#hover-edition-previous", () => move_slide(-1));
-    $("body").on("click", "#hover-edition-next", () => move_slide(1));
+    $("body").on("click", "#hover-edition-previous", () => {
+        move_slide(-1);
+    });
+    $("body").on("click", "#hover-edition-next", () => {
+        move_slide(1);
+    });
     $("body").on("keydown", ".hover-edition-carousel", (event) => {
         if (event.key === "ArrowLeft") {
             event.preventDefault();

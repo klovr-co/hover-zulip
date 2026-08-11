@@ -35,9 +35,10 @@ cross an authorization boundary.
   generated update in an active attachment and a launched Space where the
   reader still has confirmed membership. A passage with any missing or
   unauthorized update is omitted.
-- The passage's first action opens the first concise native Space update.
-  Source evidence remains the secondary disclosure on that update; the
-  personal edition does not link directly to raw Source records.
+- The passage's primary action opens the first concise native Space update.
+  When exact evidence exists, a secondary View Sources action opens that
+  generated update's existing permission-checked evidence surface; the
+  personal edition never accepts or links directly to raw Source records.
 - Morning sections preserve urgency, unresolved carryover, and guidance. The
   all-clear treatment is generic and appears only when every edition-level
   operational publication remains authorized. End-of-day sections preserve

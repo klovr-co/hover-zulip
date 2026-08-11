@@ -333,7 +333,7 @@ class InMemoryClawerSync:
                 has_more=False,
             ),
         )
-        _validate_personal_edition_page(page, teammate_ref=teammate_ref, limit=limit)
+        _validate_personal_edition_page(page, teammate_ref=teammate_ref, cursor=cursor, limit=limit)
         return page
 
     def browse_source_records(
@@ -762,7 +762,9 @@ class StudioClawerSync:
         except ValidationError:
             raise self._invalid_contract("personal_edition_sync")
         try:
-            _validate_personal_edition_page(page, teammate_ref=teammate_ref, limit=limit)
+            _validate_personal_edition_page(
+                page, teammate_ref=teammate_ref, cursor=cursor, limit=limit
+            )
         except ClawerSyncError:
             raise self._invalid_contract("personal_edition_sync")
         return page
@@ -803,9 +805,13 @@ def _validate_personal_edition_request(
 
 
 def _validate_personal_edition_page(
-    page: ClawerPublicationPage, *, teammate_ref: str, limit: int
+    page: ClawerPublicationPage, *, teammate_ref: str, cursor: str | None, limit: int
 ) -> None:
-    if len(page.publications) > limit or (page.has_more and not page.publications):
+    if (
+        len(page.publications) > limit
+        or (page.has_more and not page.publications)
+        or (page.has_more and page.next_cursor == cursor)
+    ):
         raise ClawerSyncError(
             error_code="invalid_upstream_contract",
             operation="personal_edition_sync",

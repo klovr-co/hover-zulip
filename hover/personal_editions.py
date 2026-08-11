@@ -24,6 +24,7 @@ from zerver.lib.url_encoding import stream_message_url
 from zerver.models.users import UserProfile
 
 PERSONAL_EDITION_SYNC_LIMIT = 50
+PERSONAL_EDITION_SYNC_MAX_PAGES = 100
 PERSONAL_EDITION_HISTORY_DAYS = 31
 
 
@@ -148,38 +149,52 @@ def _sync_personal_stream(
         defaults={"start_at": timezone.now() - timedelta(days=PERSONAL_EDITION_HISTORY_DAYS)},
     )
     requested_cursor = state.cursor
-    page = clawer_sync.sync_personal_editions(
-        realm_uuid=user_profile.realm.uuid,
-        account_external_id=account.external_account_id,
-        teammate_ref=teammate_ref,
-        cursor=requested_cursor or None,
-        limit=PERSONAL_EDITION_SYNC_LIMIT,
-        start_at=state.start_at.isoformat(),
-    )
-    with transaction.atomic(durable=True):
-        locked = PersonalEditionSyncState.objects.select_for_update(no_key=False).get(id=state.id)
-        if locked.cursor != requested_cursor:
-            return
-        for publication in page.publications:
-            _accept_publication(
-                user_profile=user_profile,
-                account=account,
-                teammate_ref=teammate_ref,
-                publication=publication,
-            )
-        locked.cursor = page.next_cursor
-        locked.last_sync_at = timezone.now()
-        locked.last_error = ""
-        locked.sync_failures = 0
-        locked.save(
-            update_fields=[
-                "cursor",
-                "last_sync_at",
-                "last_error",
-                "sync_failures",
-                "date_updated",
-            ]
+    seen_cursors = {requested_cursor}
+    for _page_number in range(PERSONAL_EDITION_SYNC_MAX_PAGES):
+        page = clawer_sync.sync_personal_editions(
+            realm_uuid=user_profile.realm.uuid,
+            account_external_id=account.external_account_id,
+            teammate_ref=teammate_ref,
+            cursor=requested_cursor or None,
+            limit=PERSONAL_EDITION_SYNC_LIMIT,
+            start_at=state.start_at.isoformat(),
         )
+        if page.has_more and page.next_cursor in seen_cursors:
+            raise PersonalEditionError("invalid_personal_edition_contract")
+        with transaction.atomic(durable=True):
+            locked = PersonalEditionSyncState.objects.select_for_update(no_key=False).get(
+                id=state.id
+            )
+            if locked.cursor != requested_cursor:
+                return
+            for publication in page.publications:
+                _accept_publication(
+                    user_profile=user_profile,
+                    account=account,
+                    teammate_ref=teammate_ref,
+                    publication=publication,
+                )
+            locked.cursor = page.next_cursor
+            locked.last_sync_at = timezone.now()
+            locked.last_error = ""
+            locked.sync_failures = 0
+            locked.save(
+                update_fields=[
+                    "cursor",
+                    "last_sync_at",
+                    "last_error",
+                    "sync_failures",
+                    "date_updated",
+                ]
+            )
+        if not page.has_more:
+            return
+        requested_cursor = page.next_cursor
+        seen_cursors.add(requested_cursor)
+
+    # Preserve the cursor committed for the last complete page so a later
+    # request can resume without replaying the bounded scan from the start.
+    raise PersonalEditionError("personal_edition_sync_incomplete")
 
 
 def sync_personal_editions(
@@ -239,6 +254,7 @@ def _authorized_updates(
                 SpaceMembership.Role.SUBSCRIBER,
             ],
         )
+        .prefetch_related("evidence_links")
         .distinct()
     )
     return {item.publication_id: item for item in items if item.publication_id is not None}
@@ -258,6 +274,7 @@ def _project_item(
     space = update.attachment.space
     assert space.stream is not None
     message = update.message
+    evidence_available = bool(update.evidence_links.all())
     return {
         "title": item.title,
         "detail": item.detail,
@@ -273,6 +290,11 @@ def _project_item(
                     "display_recipient": space.stream.name,
                     "subject": message.topic_name(),
                 },
+            ),
+            "evidence_url": (
+                f"/json/hover/spaces/{space.id}/generated-items/{update.id}/evidence"
+                if evidence_available
+                else None
             ),
         },
     }

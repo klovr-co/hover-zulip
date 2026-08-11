@@ -31739,21 +31739,22 @@ components:
       additionalProperties: false
       required: [title, detail, update]
       description: |
-        One editorial passage. The first and only action opens its concise
-        native Space update; Source evidence remains a secondary disclosure on
-        that generated update.
+        One editorial passage. Its primary action opens the concise native
+        Space update. When exact Source evidence is available, a secondary
+        action opens the existing permission-checked evidence surface.
       properties:
         title: {type: string}
         detail: {type: string}
         update:
           type: object
           additionalProperties: false
-          required: [message_id, space_name, topic, url]
+          required: [message_id, space_name, topic, url, evidence_url]
           properties:
             message_id: {type: integer}
             space_name: {type: string}
             topic: {type: string}
             url: {type: string}
+            evidence_url: {type: string, nullable: true}
     HoverMorningEdition:
       type: object
       additionalProperties: false
