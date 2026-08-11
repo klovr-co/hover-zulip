@@ -1,4 +1,4 @@
-# ADR 0010: Keep Suggested Action decisions and Todos in Hover
+# ADR 0011: Keep Suggested Action decisions and Todos in Hover
 
 ## Status
 
