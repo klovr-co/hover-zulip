@@ -14,7 +14,7 @@ from hover.models import (
     SpaceMembership,
 )
 from zerver.lib.exceptions import InvalidJSONError, JsonableError
-from zerver.models.users import UserProfile
+from zerver.models.users import UserProfile, get_user_profile_by_id
 from zerver.tornado.django_api import send_event_on_commit
 
 
@@ -118,14 +118,15 @@ def do_associate_integration_route(
     _assert_source_grant(acting_user=acting_user, source=source)
 
     try:
-        bot = UserProfile.objects.get(
-            id=bot_user_id,
-            realm=locked_space.realm,
-            is_active=True,
-            is_bot=True,
-            bot_type=UserProfile.INCOMING_WEBHOOK_BOT,
-        )
+        bot = get_user_profile_by_id(bot_user_id)
     except UserProfile.DoesNotExist:
+        raise JsonableError(_("Invalid integration bot ID"))
+    if (
+        bot.realm_id != locked_space.realm_id
+        or not bot.is_active
+        or not bot.is_bot
+        or bot.bot_type != UserProfile.INCOMING_WEBHOOK_BOT
+    ):
         raise JsonableError(_("Invalid integration bot ID"))
 
     existing = (

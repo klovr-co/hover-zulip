@@ -8,7 +8,7 @@ from hover.clawer_sync import get_clawer_sync
 from hover.models import Space, SpaceAttachment
 from hover.publication_sync import PublicationSyncError, sync_space_attachment
 from zerver.lib.management import ZulipBaseCommand
-from zerver.models.users import UserProfile
+from zerver.models.users import UserProfile, get_user_by_delivery_email
 
 
 class Command(ZulipBaseCommand):
@@ -61,12 +61,9 @@ class Command(ZulipBaseCommand):
         failures = 0
         for attachment in attachments.order_by("id"):
             try:
-                assistant = UserProfile.objects.get(
-                    realm=attachment.realm,
-                    delivery_email__iexact=assistant_email,
-                    is_active=True,
-                    is_bot=True,
-                )
+                assistant = get_user_by_delivery_email(assistant_email, attachment.realm)
+                if not assistant.is_active or not assistant.is_bot:
+                    raise UserProfile.DoesNotExist
                 for _page_number in range(max_pages):
                     result = sync_space_attachment(
                         attachment_id=attachment.id,

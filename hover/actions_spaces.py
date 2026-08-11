@@ -245,7 +245,7 @@ def do_launch_space(space: Space, *, acting_user: UserProfile) -> tuple[Space, b
     ).exists():
         raise JsonableError(_("Resolve all pending membership suggestions before launch."))
     if Stream.objects.filter(realm=space.realm, name__iexact=space.name).exists():
-        raise JsonableError(_("A channel already uses this Space name."))
+        raise JsonableError(_("Another Space already uses this name."))
 
     configured_installations = list(
         ModuleInstallation.objects.select_for_update(no_key=True)
@@ -311,7 +311,7 @@ def do_launch_space(space: Space, *, acting_user: UserProfile) -> tuple[Space, b
         acting_user=acting_user,
     )
     if not created:
-        raise JsonableError(_("A channel already uses this Space name."))
+        raise JsonableError(_("Another Space already uses this name."))
 
     bulk_add_subscriptions(
         space.realm,
