@@ -39,6 +39,13 @@ from hover.publication_contracts import (
     ProgressUpdatePayload,
     SuggestedActionPayload,
 )
+from hover.telemetry import (
+    HoverTelemetryEvent,
+    HoverTelemetryOutcome,
+    count_bucket,
+    emit_hover_telemetry,
+    lag_bucket,
+)
 from zerver.actions.message_send import internal_send_stream_message
 from zerver.actions.streams import bulk_add_subscriptions
 from zerver.lib.message import truncate_topic
@@ -215,11 +222,13 @@ def _record_failure(
     returned_cursor: str = "",
     publication_count: int = 0,
 ) -> None:
+    realm_id: int | None = None
     with transaction.atomic(durable=True):
         attachment = SpaceAttachment.objects.select_for_update(no_key=True).get(id=attachment_id)
         # A worker whose lease expired must not overwrite the newer worker's state.
         if attachment.publication_sync_lease_token != lease_token:
             return
+        realm_id = attachment.realm_id
         attachment.last_publication_sync_error = error_code[:64]
         attachment.publication_sync_failures += 1
         attachment.publication_sync_lease_token = None
@@ -257,6 +266,32 @@ def _record_failure(
             requested_cursor_hash=_opaque_hash(requested_cursor),
             returned_cursor_hash=_opaque_hash(returned_cursor) if returned_cursor else "",
         )
+    assert realm_id is not None
+    if error_code in {
+        "invalid_upstream_contract",
+        "publication_content_too_long",
+        "unsupported_publication_contract",
+    }:
+        outcome = HoverTelemetryOutcome.CONTRACT_REJECTED
+    elif error_code == "publication_identity_conflict":
+        outcome = HoverTelemetryOutcome.DUPLICATE_REJECTED
+    elif retryable:
+        outcome = HoverTelemetryOutcome.RETRYABLE_FAILURE
+    else:
+        outcome = HoverTelemetryOutcome.PERMANENT_FAILURE
+    emit_hover_telemetry(
+        HoverTelemetryEvent.PUBLICATION_SYNC,
+        outcome,
+        dimensions={
+            "realm_id": realm_id,
+            "attachment_id": attachment_id,
+            "lag_bucket": lag_bucket(None),
+            "publication_count_bucket": count_bucket(publication_count),
+            "created_count_bucket": count_bucket(0),
+            "replayed_count_bucket": count_bucket(0),
+            "retryable": retryable,
+        },
+    )
 
 
 def _create_generated_item(
@@ -545,6 +580,34 @@ def sync_space_attachment(
             publication_count=len(page.publications),
         )
         raise error
+
+    published_at = max(
+        (publication.published_at for publication in page.publications),
+        default=None,
+    )
+    lag_seconds = (
+        (timezone.now() - published_at).total_seconds() if published_at is not None else None
+    )
+    dimensions = {
+        "realm_id": attachment.realm_id,
+        "attachment_id": attachment_id,
+        "lag_bucket": lag_bucket(lag_seconds),
+        "publication_count_bucket": count_bucket(len(page.publications)),
+        "created_count_bucket": count_bucket(created),
+        "replayed_count_bucket": count_bucket(replayed),
+        "retryable": False,
+    }
+    emit_hover_telemetry(
+        HoverTelemetryEvent.PUBLICATION_SYNC,
+        HoverTelemetryOutcome.SUCCESS,
+        dimensions=dimensions,
+    )
+    if replayed:
+        emit_hover_telemetry(
+            HoverTelemetryEvent.PUBLICATION_SYNC,
+            HoverTelemetryOutcome.DUPLICATE_REPLAYED,
+            dimensions=dimensions,
+        )
 
     return PublicationSyncResult(
         attachment_id=attachment_id,

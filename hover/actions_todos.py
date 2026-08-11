@@ -10,12 +10,34 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from hover.models import Space, SpaceMembership, SuggestedActionTransition, Todo, TodoEvent
+from hover.telemetry import (
+    HoverTelemetryBucket,
+    HoverTelemetryEvent,
+    HoverTelemetryOutcome,
+    emit_hover_telemetry_on_commit,
+)
 from zerver.actions.message_send import internal_send_stream_message
 from zerver.lib.exceptions import JsonableError
+from zerver.lib.message import access_message
 from zerver.models import Message, UserProfile
 from zerver.tornado.django_api import send_event_on_commit
 
 TodoOperation = Literal["assign", "complete", "reopen"]
+
+TODO_TELEMETRY_OUTCOMES: dict[str, HoverTelemetryOutcome] = {
+    TodoEvent.Kind.APPROVED: HoverTelemetryOutcome.APPROVED,
+    TodoEvent.Kind.ASSIGNED: HoverTelemetryOutcome.ASSIGNED,
+    TodoEvent.Kind.REASSIGNED: HoverTelemetryOutcome.REASSIGNED,
+    TodoEvent.Kind.COMPLETED: HoverTelemetryOutcome.COMPLETED,
+    TodoEvent.Kind.REOPENED: HoverTelemetryOutcome.REOPENED,
+}
+NOTIFICATION_TELEMETRY_KINDS: dict[str, HoverTelemetryBucket] = {
+    TodoEvent.Kind.APPROVED: HoverTelemetryBucket.APPROVAL,
+    TodoEvent.Kind.ASSIGNED: HoverTelemetryBucket.ASSIGNMENT,
+    TodoEvent.Kind.REASSIGNED: HoverTelemetryBucket.REASSIGNMENT,
+    TodoEvent.Kind.COMPLETED: HoverTelemetryBucket.COMPLETION,
+    TodoEvent.Kind.REOPENED: HoverTelemetryBucket.REOPENING,
+}
 
 
 class TodoConflictError(JsonableError):
@@ -158,7 +180,7 @@ def _notification_message(
     )
     if message_id is None:
         raise JsonableError(_("The Todo notification could not be sent."))
-    return Message.objects.get(id=message_id, realm=todo.realm)
+    return access_message(actor, message_id, is_modifying_message=False)
 
 
 def send_todo_projection_event(todo: Todo) -> None:
@@ -170,6 +192,37 @@ def send_todo_projection_event(todo: Todo) -> None:
             "todo": todo_data(todo),
         },
         _active_member_ids(todo.space),
+    )
+
+
+def _record_todo_telemetry(
+    *, todo: Todo, kind: str, replay: bool, notification_emitted: bool
+) -> None:
+    emit_hover_telemetry_on_commit(
+        HoverTelemetryEvent.TODO,
+        TODO_TELEMETRY_OUTCOMES[kind],
+        dimensions={
+            "realm_id": todo.realm_id,
+            "space_id": todo.space_id,
+            "replay": replay,
+            "version": todo.version,
+            "notification_emitted": notification_emitted,
+        },
+    )
+    if replay:
+        return
+    emit_hover_telemetry_on_commit(
+        HoverTelemetryEvent.NOTIFICATION,
+        (
+            HoverTelemetryOutcome.EMITTED
+            if notification_emitted
+            else HoverTelemetryOutcome.SUPPRESSED
+        ),
+        dimensions={
+            "realm_id": todo.realm_id,
+            "space_id": todo.space_id,
+            "notification_kind": NOTIFICATION_TELEMETRY_KINDS[kind],
+        },
     )
 
 
@@ -199,6 +252,12 @@ def record_todo_approval(
         version=todo.version,
     )
     send_todo_projection_event(todo)
+    _record_todo_telemetry(
+        todo=todo,
+        kind=TodoEvent.Kind.APPROVED,
+        replay=False,
+        notification_emitted=notification is not None,
+    )
     return event
 
 
@@ -240,7 +299,14 @@ def mutate_todo(
     except Todo.DoesNotExist:
         raise JsonableError(_("Invalid Todo ID"))
 
-    if todo.events.filter(request_id=request_id).exists():
+    replay = todo.events.filter(request_id=request_id).first()
+    if replay is not None:
+        _record_todo_telemetry(
+            todo=todo,
+            kind=replay.kind,
+            replay=True,
+            notification_emitted=replay.notification_message_id is not None,
+        )
         return TodoMutationResult(changed=False, todo=todo)
     if expected_version != todo.version:
         raise TodoConflictError(todo)
@@ -282,9 +348,7 @@ def mutate_todo(
         todo.completed_at = None
 
     todo.version += 1
-    todo.save(
-        update_fields=["assignee", "state", "completed_at", "version", "date_updated"]
-    )
+    todo.save(update_fields=["assignee", "state", "completed_at", "version", "date_updated"])
     notification = None
     if notification_recipient is not None:
         notification = _notification_message(
@@ -308,4 +372,10 @@ def mutate_todo(
         version=todo.version,
     )
     send_todo_projection_event(todo)
+    _record_todo_telemetry(
+        todo=todo,
+        kind=kind,
+        replay=False,
+        notification_emitted=notification is not None,
+    )
     return TodoMutationResult(changed=True, todo=todo)

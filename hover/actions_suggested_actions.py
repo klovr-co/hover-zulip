@@ -16,11 +16,22 @@ from hover.models import (
     Todo,
 )
 from hover.publication_contracts import SuggestedActionPayload
+from hover.telemetry import (
+    HoverTelemetryEvent,
+    HoverTelemetryOutcome,
+    emit_hover_telemetry_on_commit,
+)
 from zerver.lib.exceptions import JsonableError
 from zerver.models.users import UserProfile
 from zerver.tornado.django_api import send_event_on_commit
 
 Decision = Literal["approve", "not_action", "restore"]
+
+DECISION_TELEMETRY_OUTCOMES: dict[str, HoverTelemetryOutcome] = {
+    "approve": HoverTelemetryOutcome.APPROVED,
+    "not_action": HoverTelemetryOutcome.NOT_ACTION,
+    "restore": HoverTelemetryOutcome.RESTORED,
+}
 
 
 class SuggestedActionConflictError(JsonableError):
@@ -200,6 +211,16 @@ def decide_suggested_action(
 
     replay = action.transitions.filter(request_id=request_id).first()
     if replay is not None:
+        emit_hover_telemetry_on_commit(
+            HoverTelemetryEvent.SUGGESTED_ACTION,
+            DECISION_TELEMETRY_OUTCOMES[replay.kind],
+            dimensions={
+                "realm_id": action.realm_id,
+                "space_id": action.space_id,
+                "replay": True,
+                "version": action.version,
+            },
+        )
         return SuggestedActionDecisionResult(changed=False, action=action)
     if expected_version != action.version:
         raise SuggestedActionConflictError(action)
@@ -267,4 +288,14 @@ def decide_suggested_action(
 
         record_todo_approval(todo=todo, transition=transition, actor=acting_user)
     send_suggested_action_projection_event(action)
+    emit_hover_telemetry_on_commit(
+        HoverTelemetryEvent.SUGGESTED_ACTION,
+        DECISION_TELEMETRY_OUTCOMES[decision],
+        dimensions={
+            "realm_id": action.realm_id,
+            "space_id": action.space_id,
+            "replay": False,
+            "version": action.version,
+        },
+    )
     return SuggestedActionDecisionResult(changed=True, action=action)

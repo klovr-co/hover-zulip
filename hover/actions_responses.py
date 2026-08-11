@@ -7,6 +7,12 @@ from django.utils.translation import gettext as _
 from hover.actions_review_requests import resolve_matching_dispute
 from hover.actions_suggested_actions import sync_suggested_action_from_reviewed_payload
 from hover.models import GeneratedItem, Response, Revision, SpaceMembership
+from hover.telemetry import (
+    HoverTelemetryEvent,
+    HoverTelemetryOutcome,
+    count_bucket,
+    emit_hover_telemetry_on_commit,
+)
 from zerver.lib.exceptions import JsonableError
 from zerver.models import Message, UserProfile
 
@@ -103,6 +109,7 @@ def create_response(
         clarification_required=clarification_required,
     )
 
+    resolved_detail = None
     if prepared.has_explicit_patch:
         assert prepared.field_path is not None
         current_payload = dict(generated_item.reviewed_payload or generated_item.payload)
@@ -120,7 +127,27 @@ def create_response(
             new_value=prepared.new_value,
             reason=message.content,
         )
-        resolve_matching_dispute(revision)
+        resolved_detail = resolve_matching_dispute(revision)
         sync_suggested_action_from_reviewed_payload(generated_item)
+
+    if prepared.response_type == "review":
+        assert generated_item.attachment is not None
+        target_count = (
+            resolved_detail.review_request.targets.count() if resolved_detail is not None else 0
+        )
+        emit_hover_telemetry_on_commit(
+            HoverTelemetryEvent.REVIEW,
+            (
+                HoverTelemetryOutcome.SUCCESS
+                if prepared.has_explicit_patch
+                else HoverTelemetryOutcome.CLARIFICATION_REQUIRED
+            ),
+            dimensions={
+                "realm_id": actor.realm_id,
+                "space_id": generated_item.attachment.space_id,
+                "material": resolved_detail is not None,
+                "target_count_bucket": count_bucket(target_count),
+            },
+        )
 
     return response

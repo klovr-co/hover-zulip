@@ -16,6 +16,12 @@ from hover.models import (
     SpaceAdministrator,
 )
 from hover.publication_contracts import PublicationDisputedDetail
+from hover.telemetry import (
+    HoverTelemetryEvent,
+    HoverTelemetryOutcome,
+    count_bucket,
+    emit_hover_telemetry_on_commit,
+)
 from zerver.actions.message_send import internal_send_stream_message
 from zerver.models import Message, UserProfile
 
@@ -189,13 +195,24 @@ def materialize_disputed_details(
         for target_row in target_rows:
             target_row.full_clean()
         ReviewRequestTarget.objects.bulk_create(target_rows)
+        assert generated_item.attachment is not None
+        emit_hover_telemetry_on_commit(
+            HoverTelemetryEvent.REVIEW,
+            HoverTelemetryOutcome.REQUESTED,
+            dimensions={
+                "realm_id": generated_item.realm_id,
+                "space_id": generated_item.attachment.space_id,
+                "material": True,
+                "target_count_bucket": count_bucket(len(target_rows)),
+            },
+        )
 
 
 def resolve_matching_dispute(revision: Revision) -> DisputedDetail | None:
     """Append the exact H14 Revision to the matching open material dispute."""
-    with transaction.atomic():
+    with transaction.atomic(savepoint=False):
         detail = (
-            DisputedDetail.objects.select_for_update()
+            DisputedDetail.objects.select_for_update(no_key=True)
             .filter(
                 generated_item=revision.generated_item,
                 field_path=revision.field_path,
@@ -210,9 +227,20 @@ def resolve_matching_dispute(revision: Revision) -> DisputedDetail | None:
         detail.state = DisputedDetail.State.RESOLVED
         detail.resolved_by_revision = revision
         detail.save(update_fields=["state", "resolved_by_revision", "date_updated"])
-        request = ReviewRequest.objects.select_for_update().get(disputed_detail=detail)
+        request = ReviewRequest.objects.select_for_update(no_key=True).get(disputed_detail=detail)
         request.state = ReviewRequest.State.RESOLVED
         request.resolved_by_revision = revision
         request.resolved_at = resolved_at
         request.save(update_fields=["state", "resolved_by_revision", "resolved_at"])
+        assert detail.generated_item.attachment is not None
+        emit_hover_telemetry_on_commit(
+            HoverTelemetryEvent.REVIEW,
+            HoverTelemetryOutcome.RESOLVED,
+            dimensions={
+                "realm_id": detail.realm_id,
+                "space_id": detail.generated_item.attachment.space_id,
+                "material": True,
+                "target_count_bucket": count_bucket(request.targets.count()),
+            },
+        )
         return detail

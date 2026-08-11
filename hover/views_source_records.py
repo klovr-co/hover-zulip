@@ -1,29 +1,22 @@
-import logging
 import time
 from typing import Annotated
-from uuid import uuid4
 
 from django.http import HttpRequest, HttpResponse
 from pydantic import Field, Json, StringConstraints
 
-from hover.clawer_sync import get_clawer_sync
+from hover.clawer_sync import ClawerSyncError, get_clawer_sync
 from hover.lib_source_records import browse_attachment_records
+from hover.telemetry import (
+    HoverTelemetryEvent,
+    HoverTelemetryOutcome,
+    count_bucket,
+    duration_bucket,
+    emit_hover_telemetry,
+)
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.response import json_response_from_error, json_success
 from zerver.lib.typed_endpoint import PathOnly, typed_endpoint
 from zerver.models.users import UserProfile
-
-logger = logging.getLogger("zulip.hover.source_records")
-
-
-def _duration_bucket(duration_ms: float) -> str:
-    if duration_ms < 100:
-        return "under_100ms"
-    if duration_ms < 500:
-        return "under_500ms"
-    if duration_ms < 2_000:
-        return "under_2s"
-    return "over_2s"
 
 
 @typed_endpoint
@@ -38,9 +31,8 @@ def browse_source_records(
     query: Json[Annotated[str, StringConstraints(max_length=100)]] = "",
 ) -> HttpResponse:
     started_at = time.monotonic()
-    telemetry_status = "internal_error"
+    telemetry_outcome = HoverTelemetryOutcome.PERMANENT_FAILURE
     result_count = 0
-    request_id = str(uuid4())
     try:
         data = browse_attachment_records(
             user_profile=user_profile,
@@ -51,22 +43,29 @@ def browse_source_records(
             query=query,
             clawer_sync=get_clawer_sync(),
         )
-        telemetry_status = "success"
+        telemetry_outcome = HoverTelemetryOutcome.SUCCESS
         result_count = len(data["records"])
         response = json_success(request, data=data)
+    except ClawerSyncError as error:
+        telemetry_outcome = (
+            HoverTelemetryOutcome.RETRYABLE_FAILURE
+            if error.retryable
+            else HoverTelemetryOutcome.PERMANENT_FAILURE
+        )
+        response = json_response_from_error(error)
     except JsonableError as error:
-        telemetry_status = getattr(error, "error_code", "denied")
+        telemetry_outcome = HoverTelemetryOutcome.DENIED
         response = json_response_from_error(error)
     finally:
-        logger.info(
-            "Hover Source records operation=source_records status=%s duration_bucket=%s "
-            "realm_id=%s attachment_id=%s result_count=%s request_id=%s",
-            telemetry_status,
-            _duration_bucket((time.monotonic() - started_at) * 1_000),
-            user_profile.realm_id,
-            attachment_id,
-            result_count,
-            request_id,
+        emit_hover_telemetry(
+            HoverTelemetryEvent.SOURCE_RECORDS,
+            telemetry_outcome,
+            dimensions={
+                "realm_id": user_profile.realm_id,
+                "attachment_id": attachment_id,
+                "duration_bucket": duration_bucket((time.monotonic() - started_at) * 1_000),
+                "result_count_bucket": count_bucket(result_count),
+            },
         )
     response["Cache-Control"] = "no-store"
     return response

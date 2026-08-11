@@ -1,9 +1,18 @@
+from typing import NoReturn
+
 from django.http import HttpRequest, HttpResponse
 from django.utils.translation import gettext as _
 
-from hover.clawer_sync import get_clawer_sync
+from hover.clawer_sync import ClawerSyncError, get_clawer_sync
 from hover.lib_spaces import access_space_by_id
-from hover.models import ConnectedAccount, DisputedDetail, GeneratedItem
+from hover.models import ConnectedAccount, DisputedDetail, GeneratedItem, Source
+from hover.publication_contracts import ResolvedEvidence
+from hover.telemetry import (
+    HoverTelemetryEvent,
+    HoverTelemetryOutcome,
+    count_bucket,
+    emit_hover_telemetry,
+)
 from zerver.decorator import require_non_guest_user
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.message import access_message
@@ -20,6 +29,59 @@ class EvidenceResolutionError(JsonableError):
         super().__init__(_("The exact source evidence is no longer available."))
         self.error_code = "evidence_not_resolvable"
         self.retryable = False
+
+
+def _evidence_unavailable(*, realm_id: int, space_id: int, reference_count: int) -> NoReturn:
+    emit_hover_telemetry(
+        HoverTelemetryEvent.EVIDENCE_RESOLUTION,
+        HoverTelemetryOutcome.PERMANENT_FAILURE,
+        dimensions={
+            "realm_id": realm_id,
+            "space_id": space_id,
+            "reference_count_bucket": count_bucket(reference_count),
+            "retryable": False,
+        },
+    )
+    raise EvidenceResolutionError
+
+
+def _resolve_evidence(
+    *, user_profile: UserProfile, space_id: int, source: Source, refs: list[str]
+) -> list[ResolvedEvidence]:
+    try:
+        evidence = get_clawer_sync().resolve_evidence(
+            realm_uuid=user_profile.realm.uuid,
+            account_external_id=source.account.external_account_id,
+            source_ref=source.external_ref,
+            refs=refs,
+        )
+    except ClawerSyncError as error:
+        emit_hover_telemetry(
+            HoverTelemetryEvent.EVIDENCE_RESOLUTION,
+            (
+                HoverTelemetryOutcome.RETRYABLE_FAILURE
+                if error.retryable
+                else HoverTelemetryOutcome.PERMANENT_FAILURE
+            ),
+            dimensions={
+                "realm_id": user_profile.realm_id,
+                "space_id": space_id,
+                "reference_count_bucket": count_bucket(len(refs)),
+                "retryable": error.retryable,
+            },
+        )
+        raise
+    emit_hover_telemetry(
+        HoverTelemetryEvent.EVIDENCE_RESOLUTION,
+        HoverTelemetryOutcome.SUCCESS,
+        dimensions={
+            "realm_id": user_profile.realm_id,
+            "space_id": space_id,
+            "reference_count_bucket": count_bucket(len(refs)),
+            "retryable": False,
+        },
+    )
+    return evidence
 
 
 @require_non_guest_user
@@ -53,17 +115,25 @@ def resolve_generated_item_evidence(
     source = generated_item.attachment.source
     access_message(user_profile, generated_item.message_id, is_modifying_message=False)
     if source.account.approval_state != ConnectedAccount.ApprovalState.APPROVED:
-        raise EvidenceResolutionError
+        _evidence_unavailable(
+            realm_id=user_profile.realm_id,
+            space_id=space_id,
+            reference_count=0,
+        )
     links = list(generated_item.evidence_links.all())
     evidence_refs = [
         link.evidence_ref for link in links if link.evidence_ref and link.source_id == source.id
     ]
     if not links or len(evidence_refs) != len(links):
-        raise EvidenceResolutionError
-    evidence = get_clawer_sync().resolve_evidence(
-        realm_uuid=user_profile.realm.uuid,
-        account_external_id=source.account.external_account_id,
-        source_ref=source.external_ref,
+        _evidence_unavailable(
+            realm_id=user_profile.realm_id,
+            space_id=space_id,
+            reference_count=len(evidence_refs),
+        )
+    evidence = _resolve_evidence(
+        user_profile=user_profile,
+        space_id=space_id,
+        source=source,
         refs=evidence_refs,
     )
     return json_success(
@@ -110,7 +180,11 @@ def resolve_disputed_detail_evidence(
     source = attachment.source
     access_message(user_profile, generated_item.message_id, is_modifying_message=False)
     if source.account.approval_state != ConnectedAccount.ApprovalState.APPROVED:
-        raise EvidenceResolutionError
+        _evidence_unavailable(
+            realm_id=user_profile.realm_id,
+            space_id=space_id,
+            reference_count=0,
+        )
     conflict_links = list(detail.conflicting_evidence.all())
     evidence_refs = [
         conflict.evidence_link.evidence_ref
@@ -120,11 +194,15 @@ def resolve_disputed_detail_evidence(
         and conflict.evidence_link.generated_item_id == generated_item.id
     ]
     if len(evidence_refs) < 2 or len(evidence_refs) != len(conflict_links):
-        raise EvidenceResolutionError
-    evidence = get_clawer_sync().resolve_evidence(
-        realm_uuid=user_profile.realm.uuid,
-        account_external_id=source.account.external_account_id,
-        source_ref=source.external_ref,
+        _evidence_unavailable(
+            realm_id=user_profile.realm_id,
+            space_id=space_id,
+            reference_count=len(evidence_refs),
+        )
+    evidence = _resolve_evidence(
+        user_profile=user_profile,
+        space_id=space_id,
+        source=source,
         refs=evidence_refs,
     )
     return json_success(
