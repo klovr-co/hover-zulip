@@ -8,7 +8,13 @@
         <h4>{{t "Suggested Action"}}</h4>
         <span class="hover-suggested-action__state">
             {{#if is_pending}}{{t "Awaiting confirmation"}}{{/if}}
-            {{#if is_approved}}{{t "Active Todo"}}{{/if}}
+            {{#if is_approved}}
+                {{#if todo_is_completed}}
+                    {{t "Completed Todo"}}
+                {{else}}
+                    {{t "Active Todo"}}
+                {{/if}}
+            {{/if}}
             {{#if is_not_action}}{{t "Not an action"}}{{/if}}
         </span>
     </div>
