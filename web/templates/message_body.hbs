@@ -76,15 +76,19 @@
         {{/if}}
         {{#if is_hover_generated_update}}
         <div class="hover-generated-update-label">
-            <span class="hover-generated-update-label__chip">{{#if hover_output_label}}{{hover_output_label}}{{else}}{{#if hover_module_name}}{{hover_module_name}}{{else}}{{t "AI update"}}{{/if}}{{/if}}</span>
+            {{#if is_hover_suggested_action}}
+                <span class="hover-generated-update-label__chip">{{#if hover_module_name}}{{hover_module_name}}{{else}}{{t "Suggested Actions"}}{{/if}}</span>
+            {{else}}
+                <span class="hover-generated-update-label__chip">{{#if hover_output_label}}{{hover_output_label}}{{else}}{{#if hover_module_name}}{{hover_module_name}}{{else}}{{t "AI update"}}{{/if}}{{/if}}</span>
+            {{/if}}
             <span class="hover-generated-update-label__context">{{hover_source_context}}</span>
-            {{#if hover_state}}<span class="hover-generated-update-state hover-generated-update-state--{{hover_state}}">{{hover_state}}</span>{{/if}}
-            {{#if hover_importance}}<span class="hover-generated-update-importance hover-generated-update-importance--{{hover_importance}}">{{hover_importance}}</span>{{/if}}
+            {{#unless is_hover_suggested_action}}
+                {{#if hover_state}}<span class="hover-generated-update-state hover-generated-update-state--{{hover_state}}">{{hover_state}}</span>{{/if}}
+                {{#if hover_importance}}<span class="hover-generated-update-importance hover-generated-update-importance--{{hover_importance}}">{{hover_importance}}</span>{{/if}}
+            {{/unless}}
         </div>
         {{/if}}
-        {{#if is_hover_suggested_action}}
-            {{> hover_suggested_action hover_suggested_action}}
-        {{else if use_match_properties}}
+        {{#if use_match_properties}}
             {{rendered_markdown msg/match_content}}
         {{else}}
             {{rendered_markdown msg/content}}
@@ -102,6 +106,10 @@
     </div>
     {{/unless}}
 {{/unless}}
+
+{{#if is_hover_suggested_action}}
+    {{> hover_suggested_action hover_suggested_action}}
+{{/if}}
 
 {{#if is_hover_generated_update}}
 <div class="hover-generated-update-actions" aria-label="{{t 'Update details' }}">

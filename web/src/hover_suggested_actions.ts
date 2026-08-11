@@ -114,6 +114,7 @@ export function initialize(): void {
     // Message-pane clicks stop propagating at #main_div, so handlers for
     // controls rendered inside a message must be delegated from that root.
     $("#main_div").on("click", "[data-hover-action-decision]", (event) => {
+        event.stopPropagation();
         const $button = $(event.currentTarget);
         const message_id = Number($button.attr("data-hover-message-id"));
         const decision = $button.attr("data-hover-action-decision");

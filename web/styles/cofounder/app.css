@@ -2068,6 +2068,34 @@ a {
     padding: 0;
 }
 
+.message_row.hover-generated-update
+    .messagebox-content:has(> .hover-suggested-action) {
+    grid-template-rows:
+        minmax(var(--message-box-sender-line-height), auto) repeat(5, auto);
+    grid-template-areas:
+        "edited message      controls . time"
+        ".      message      .        . .   "
+        ".      hover-action .        . .   "
+        ".      more         .        . .   "
+        ".      reactions    .        . .   "
+        ".      reminders    .        . .   ";
+}
+
+.message_row.hover-generated-update.messagebox-includes-sender
+    .messagebox-content:has(> .hover-suggested-action) {
+    grid-template-areas:
+        "avatar sender       controls . time"
+        "avatar message      .        . .   "
+        ".      hover-action .        . .   "
+        ".      more         .        . .   "
+        ".      reactions    .        . .   "
+        ".      reminders    .        . .   ";
+}
+
+.messagebox-content > .hover-suggested-action {
+    grid-area: hover-action;
+}
+
 .hover-generated-update-label {
     display: flex;
     gap: 9px;
@@ -4024,6 +4052,55 @@ a {
 }
 
 @media (width <= 760px) {
+    .message_row.hover-generated-update .messagebox {
+        padding-inline: 12px;
+    }
+
+    .message_row.hover-generated-update .messagebox-content {
+        grid-template-rows:
+            minmax(var(--message-box-sender-line-height), auto) repeat(4, auto);
+        grid-template-areas:
+            "edited .        controls .        time"
+            "message message message  message  message"
+            "more    more    more     more     more"
+            "reactions reactions reactions reactions reactions"
+            "reminders reminders reminders reminders reminders";
+    }
+
+    .message_row.hover-generated-update.messagebox-includes-sender
+        .messagebox-content {
+        grid-template-areas:
+            "avatar  sender  controls .        time"
+            "message message message  message  message"
+            "more    more    more     more     more"
+            "reactions reactions reactions reactions reactions"
+            "reminders reminders reminders reminders reminders";
+    }
+
+    .message_row.hover-generated-update
+        .messagebox-content:has(> .hover-suggested-action) {
+        grid-template-rows:
+            minmax(var(--message-box-sender-line-height), auto) repeat(5, auto);
+        grid-template-areas:
+            "edited .            controls     .            time"
+            "message message     message      message      message"
+            "hover-action hover-action hover-action hover-action hover-action"
+            "more    more        more         more         more"
+            "reactions reactions reactions    reactions    reactions"
+            "reminders reminders reminders    reminders    reminders";
+    }
+
+    .message_row.hover-generated-update.messagebox-includes-sender
+        .messagebox-content:has(> .hover-suggested-action) {
+        grid-template-areas:
+            "avatar  sender       controls     .            time"
+            "message message      message      message      message"
+            "hover-action hover-action hover-action hover-action hover-action"
+            "more    more         more         more         more"
+            "reactions reactions reactions    reactions    reactions"
+            "reminders reminders reminders    reminders    reminders";
+    }
+
     .hover-connected-account-heading,
     .hover-connected-account-card-header,
     .hover-connected-account-grants li {

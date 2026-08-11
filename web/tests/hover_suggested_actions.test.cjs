@@ -89,10 +89,20 @@ run_test("unknown messages do not create duplicate feed records", () => {
 
 run_test("delegates message actions from the message pane", () => {
     hover_suggested_actions.initialize();
-    assert.equal(
-        typeof $("#main_div").get_on_handler("click", "[data-hover-action-decision]"),
-        "function",
-    );
+    const handler = $("#main_div").get_on_handler("click", "[data-hover-action-decision]");
+    assert.equal(typeof handler, "function");
+
+    const $button = $.create("invalid action button")
+        .attr("data-hover-message-id", "not-a-number")
+        .attr("data-hover-action-decision", "approve");
+    let propagation_stopped = false;
+    handler({
+        currentTarget: $button[0],
+        stopPropagation() {
+            propagation_stopped = true;
+        },
+    });
+    assert.equal(propagation_stopped, true);
 });
 
 run_test("approval submits wording, cleared assignee, and due date refinements", ({override}) => {
