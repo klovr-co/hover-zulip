@@ -1,0 +1,260 @@
+{
+    "metadata": {
+        "schema_version": "hover-pilot/v1",
+        "pilot_key": "example-pilot",
+        "realm": "example",
+        "operator_email": "pilot-admin@example.test",
+        "private_config": false
+    },
+    "category": {
+        "name": "Pilot Programs",
+        "description": "Controlled source-backed pilots."
+    },
+    "space": {
+        "name": "Example Pilot Space",
+        "description": "A source-backed internal pilot.",
+        "launch": false
+    },
+    "accounts": [
+        {
+            "key": "whatsapp",
+            "provider_key": "whatsapp",
+            "provider_name": "WhatsApp",
+            "external_account_id": "00000000-0000-0000-0000-000000000001",
+            "display_name": "Pilot WhatsApp",
+            "connection_kind": "remote_studio",
+            "incoming_webhook_bot_email": null,
+            "approval_reviewed": true
+        },
+        {
+            "key": "github",
+            "provider_key": "github",
+            "provider_name": "GitHub",
+            "external_account_id": "00000000-0000-0000-0000-000000000002",
+            "display_name": "Pilot GitHub",
+            "connection_kind": "native_integration",
+            "incoming_webhook_bot_email": "github-pilot-bot@example.test",
+            "approval_reviewed": true
+        },
+        {
+            "key": "apify",
+            "provider_key": "apify",
+            "provider_name": "Apify",
+            "external_account_id": "00000000-0000-0000-0000-000000000003",
+            "display_name": "Pilot Apify",
+            "connection_kind": "native_integration",
+            "incoming_webhook_bot_email": "apify-pilot-bot@example.test",
+            "approval_reviewed": true
+        }
+    ],
+    "sources": [
+        {
+            "key": "whatsapp_one",
+            "account_key": "whatsapp",
+            "source_ref": "src_00000000000000000000000000000001",
+            "adapter_key": "clawer_sync",
+            "provider_key": "whatsapp",
+            "provider_name": "WhatsApp",
+            "source_type": "group_chat",
+            "display_name": "Permitted group one",
+            "external_url": "",
+            "supports_live_capture": false,
+            "capabilities": ["message_history"],
+            "history": {"timezone": "UTC", "start_at": "2026-01-01T00:00:00Z"}
+        },
+        {
+            "key": "whatsapp_two",
+            "account_key": "whatsapp",
+            "source_ref": "src_00000000000000000000000000000002",
+            "adapter_key": "clawer_sync",
+            "provider_key": "whatsapp",
+            "provider_name": "WhatsApp",
+            "source_type": "group_chat",
+            "display_name": "Permitted group two",
+            "external_url": "",
+            "supports_live_capture": false,
+            "capabilities": ["message_history"],
+            "history": {"timezone": "UTC", "start_at": "2026-01-01T00:00:00Z"}
+        },
+        {
+            "key": "whatsapp_three",
+            "account_key": "whatsapp",
+            "source_ref": "src_00000000000000000000000000000003",
+            "adapter_key": "clawer_sync",
+            "provider_key": "whatsapp",
+            "provider_name": "WhatsApp",
+            "source_type": "group_chat",
+            "display_name": "Permitted group three",
+            "external_url": "",
+            "supports_live_capture": false,
+            "capabilities": ["message_history"],
+            "history": {"timezone": "UTC", "start_at": "2026-01-01T00:00:00Z"}
+        },
+        {
+            "key": "github_repo",
+            "account_key": "github",
+            "source_ref": "src_00000000000000000000000000000004",
+            "adapter_key": "github",
+            "provider_key": "github",
+            "provider_name": "GitHub",
+            "source_type": "repository",
+            "display_name": "Permitted repository",
+            "external_url": "https://github.com/example/pilot",
+            "supports_live_capture": true,
+            "capabilities": ["message_history"],
+            "history": {"timezone": "UTC", "start_at": "2026-01-01T00:00:00Z"}
+        },
+        {
+            "key": "apify_actor",
+            "account_key": "apify",
+            "source_ref": "src_00000000000000000000000000000005",
+            "adapter_key": "apify",
+            "provider_key": "apify",
+            "provider_name": "Apify",
+            "source_type": "actor_run",
+            "display_name": "Permitted actor",
+            "external_url": "https://console.apify.com/actors/example",
+            "supports_live_capture": true,
+            "capabilities": ["message_history"],
+            "history": {"timezone": "UTC", "start_at": "2026-01-01T00:00:00Z"}
+        }
+    ],
+    "grants": [
+        {
+            "account_key": "whatsapp",
+            "user_email": "pilot-admin@example.test",
+            "source_keys": ["whatsapp_one", "whatsapp_two", "whatsapp_three"],
+            "reviewed": true
+        },
+        {
+            "account_key": "github",
+            "user_email": "pilot-admin@example.test",
+            "source_keys": ["github_repo"],
+            "reviewed": true
+        },
+        {
+            "account_key": "apify",
+            "user_email": "pilot-admin@example.test",
+            "source_keys": ["apify_actor"],
+            "reviewed": true
+        }
+    ],
+    "memberships": [
+        {
+            "user_email": "pilot-admin@example.test",
+            "role": "contributor",
+            "administrator": true,
+            "pilot_cohort": true,
+            "personal_editions": true,
+            "reviewed": true
+        }
+    ],
+    "participant_mappings": [
+        {
+            "source_key": "whatsapp_one",
+            "participant_ref": "person_00000000000000000000000000000001",
+            "user_email": "pilot-admin@example.test",
+            "match_basis": "verified_email",
+            "observation_basis": "obs_00000000000000000000000000000001",
+            "reviewed": true
+        }
+    ],
+    "provenance_routes": [
+        {
+            "source_key": "github_repo",
+            "bot_email": "github-pilot-bot@example.test",
+            "allowed_actors": ["github-app:replace-in-private-config"],
+            "repository_allowlist": ["example/pilot"],
+            "event_allowlist": ["push", "pull_request"],
+            "external_configuration_reviewed": true
+        },
+        {
+            "source_key": "apify_actor",
+            "bot_email": "apify-pilot-bot@example.test",
+            "allowed_actors": ["actor:replace-in-private-config"],
+            "repository_allowlist": [],
+            "event_allowlist": ["actor.run.succeeded"],
+            "external_configuration_reviewed": true
+        }
+    ],
+    "modules": [
+        {
+            "key": "conversation_digest",
+            "version": "1.0.0",
+            "enabled": true,
+            "source_keys": ["whatsapp_one", "whatsapp_two", "whatsapp_three"],
+            "trigger": {"kind": "manual", "timezone": "UTC"}
+        },
+        {
+            "key": "progress_tracker",
+            "version": "1.0.0",
+            "enabled": true,
+            "source_keys": ["whatsapp_one", "whatsapp_two", "whatsapp_three"],
+            "trigger": {"kind": "manual", "timezone": "UTC"}
+        },
+        {
+            "key": "suggested_actions",
+            "version": "1.0.0",
+            "enabled": true,
+            "source_keys": ["whatsapp_one", "whatsapp_two", "whatsapp_three"],
+            "trigger": {"kind": "manual", "timezone": "UTC"}
+        },
+        {
+            "key": "decisions",
+            "version": "1.0.0",
+            "enabled": true,
+            "source_keys": ["whatsapp_one", "whatsapp_two", "whatsapp_three"],
+            "trigger": {"kind": "manual", "timezone": "UTC"}
+        },
+        {
+            "key": "marketing_digest",
+            "version": "1.0.0",
+            "enabled": true,
+            "source_keys": ["whatsapp_one"],
+            "trigger": {"kind": "manual", "timezone": "UTC"}
+        },
+        {
+            "key": "topic_analysis",
+            "version": "1.0.0",
+            "enabled": true,
+            "source_keys": ["whatsapp_one"],
+            "trigger": {"kind": "manual", "timezone": "UTC"}
+        },
+        {
+            "key": "signal_monitor",
+            "version": "1.0.0",
+            "enabled": false,
+            "source_keys": [],
+            "trigger": {"kind": "manual", "timezone": "UTC"}
+        }
+    ],
+    "forbidden_modules": ["email", "weekly_roundup", "ai_slides", "topics_you_follow"],
+    "personal_editions": {"morning_daily_brief": true, "end_of_day_roundup": true},
+    "shadow_mode": {
+        "mode": "shadow",
+        "comparison_system": "monday",
+        "review_writeback": false,
+        "todo_writeback": false,
+        "allowed_external_writes": []
+    },
+    "acceptance_gates": [
+        {"key": "access", "status": "pending", "evidence": "Record reviewer and result."},
+        {"key": "duplication", "status": "pending", "evidence": "Record replay result."},
+        {"key": "evidence", "status": "pending", "evidence": "Record evidence check."},
+        {"key": "audit_history", "status": "pending", "evidence": "Record audit check."},
+        {"key": "notifications", "status": "pending", "evidence": "Record notification check."},
+        {"key": "voluntary_use", "status": "pending", "evidence": "Record pilot-owner approval."}
+    ],
+    "development_smoke": {
+        "source_key": "whatsapp_one",
+        "fixture_key": "sanitized-pilot-smoke",
+        "contains_real_source_content": false,
+        "expected_path": [
+            "generated_update",
+            "review",
+            "confirmed_todo",
+            "home_awareness",
+            "personal_edition"
+        ]
+    }
+}

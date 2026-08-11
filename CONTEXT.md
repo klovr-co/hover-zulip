@@ -131,6 +131,19 @@ The first Hover Space, used to prove the product through a real mixed feed of
 human activity and source-backed AI updates.
 _Avoid_: AIMTO app, AIMTO dashboard
 
+**Pilot Configuration**:
+A strict, versioned, private operator input that reconciles one reviewed Hover
+pilot through normal records and reports its rollout gates. Provider-side
+allowlists are validated and reported here but remain enforced by the incoming
+integration that owns them.
+_Avoid_: frontend fixture, deployment secret store, provider policy record
+
+**Shadow Mode**:
+A controlled pilot state in which Hover can be compared with an incumbent
+workflow while Hover-owned Reviews and Todos remain local and have no external
+writeback path.
+_Avoid_: dual write, Monday synchronization, production expansion
+
 **Suggested Action**:
 A Hover-owned, versioned proposal projected from one immutable Suggested Action
 publication. Its current reviewed wording and due date can be approved, marked
