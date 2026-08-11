@@ -97,7 +97,10 @@ run_test("knowledge ranks before read-only Sources and uses native starred state
     request.success(response());
 
     const html = $("#hover-search-view").html();
-    assert.ok(html.indexOf(">Knowledge<") < html.indexOf(">Sources<"));
+    assert.ok(
+        html.indexOf('id="hover-search-knowledge-heading"') <
+            html.indexOf('id="hover-search-sources-heading"'),
+    );
     assert.match(html, /Generated update/);
     assert.match(html, /Source evidence cannot be saved/);
     assert.match(html, /&lt;img/);
