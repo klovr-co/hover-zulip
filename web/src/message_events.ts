@@ -481,6 +481,18 @@ export function update_messages(events: UpdateMessageEvent[]): void {
             if (event.is_me_message !== undefined) {
                 anchor_message.is_me_message = event.is_me_message;
             }
+            if (event.hover_generated_item !== undefined) {
+                anchor_message.hover_generated_item = event.hover_generated_item;
+            }
+            if (event.hover_response !== undefined) {
+                anchor_message.hover_response = event.hover_response;
+            }
+            if (event.hover_review_request !== undefined) {
+                anchor_message.hover_review_request = event.hover_review_request;
+            }
+            if (event.hover_source_provenance !== undefined) {
+                anchor_message.hover_source_provenance = event.hover_source_provenance;
+            }
 
             // mark the current message edit attempt as complete.
             message_edit.end_message_edit(event.message_id);

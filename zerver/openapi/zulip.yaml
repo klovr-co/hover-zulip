@@ -3076,6 +3076,14 @@ paths:
                                     [/me status message][status-messages].
 
                                     [status-messages]: /help/format-your-message-using-markdown#status-messages
+                                hover_generated_item:
+                                  $ref: "#/components/schemas/MessagesBase/properties/hover_generated_item"
+                                hover_response:
+                                  $ref: "#/components/schemas/MessagesBase/properties/hover_response"
+                                hover_review_request:
+                                  $ref: "#/components/schemas/MessagesBase/properties/hover_review_request"
+                                hover_source_provenance:
+                                  $ref: "#/components/schemas/MessagesBase/properties/hover_source_provenance"
                               required:
                                 - type
                                 - id

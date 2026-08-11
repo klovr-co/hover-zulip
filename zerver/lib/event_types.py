@@ -1522,6 +1522,10 @@ class UpdateMessageEvent(UpdateMessageCoreEvent):
     new_stream_id: int | None = None
     propagate_mode: Literal["change_all", "change_later", "change_one"] | None = None
     orig_subject: str | None = None
+    hover_generated_item: HoverGeneratedItem | None = None
+    hover_response: HoverResponse | None = None
+    hover_review_request: HoverReviewRequest | None = None
+    hover_source_provenance: HoverSourceProvenance | None = None
 
 
 class UpdateMessageFlagsAddEvent(BaseEvent):

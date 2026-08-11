@@ -7,6 +7,12 @@ import {
 import {hover_space_schema} from "./hover_spaces.ts";
 import type {event_schema as HoverSuggestedActionEventSchema} from "./hover_suggested_actions.ts";
 import type {event_schema as HoverTodoEventSchema} from "./hover_todos.ts";
+import {
+    hover_generated_item_schema,
+    hover_response_schema,
+    hover_review_request_schema,
+    hover_source_provenance_schema,
+} from "./message_store.ts";
 import {group_setting_value_schema, topic_link_schema} from "./types.ts";
 
 // Event types the web app requests from /register via fetch_event_types.
@@ -101,6 +107,10 @@ export const update_message_event_schema = z.object({
     content: z.optional(z.string()),
     rendered_content: z.optional(z.string()),
     is_me_message: z.optional(z.boolean()),
+    hover_generated_item: z.optional(hover_generated_item_schema),
+    hover_response: z.optional(hover_response_schema),
+    hover_review_request: z.optional(hover_review_request_schema),
+    hover_source_provenance: z.optional(hover_source_provenance_schema),
     // The server is still using subject.
     // This will not be set until it gets fixed.
     topic: z.optional(z.string()),

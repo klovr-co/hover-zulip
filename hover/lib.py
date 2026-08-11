@@ -21,6 +21,13 @@ PROVIDER_ICON_CLASSES = {
     "instagram": "fa fa-instagram",
 }
 
+HOVER_MESSAGE_METADATA_KEYS = (
+    "hover_generated_item",
+    "hover_response",
+    "hover_review_request",
+    "hover_source_provenance",
+)
+
 
 def add_hover_metadata(
     message_dicts: list[dict[str, Any]],
@@ -374,3 +381,23 @@ def add_hover_metadata(
         provenance = provenance_by_message_id.get(message["id"])
         if provenance is not None:
             message["hover_source_provenance"] = provenance
+
+
+def add_hover_metadata_to_message_event(event: dict[str, Any], *, realm_id: int) -> None:
+    """Enrich a message event before it crosses the Django/Tornado boundary."""
+    if event.get("type") == "message":
+        message = event.get("message_dict")
+        if isinstance(message, dict):
+            add_hover_metadata([message], realm_id=realm_id)
+        return
+
+    if event.get("type") != "update_message":
+        return
+    message_id = event.get("message_id")
+    if not isinstance(message_id, int):
+        return
+    message = {"id": message_id}
+    add_hover_metadata([message], realm_id=realm_id)
+    for key in HOVER_MESSAGE_METADATA_KEYS:
+        if key in message:
+            event[key] = message[key]

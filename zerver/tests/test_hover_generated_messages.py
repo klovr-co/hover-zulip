@@ -123,6 +123,38 @@ class HoverGeneratedMessageTest(BaseAction):
             [source["key"] for source in event_metadata["sources"]], ["whatsapp", "github"]
         )
 
+    def test_message_edit_event_refreshes_generated_metadata(self) -> None:
+        hamlet = self.example_user("hamlet")
+        self.login_user(hamlet)
+        message_id = self.send_stream_message(
+            hamlet,
+            "Verona",
+            "A generated message before editing",
+            "Project status",
+        )
+        generated_item = GeneratedItem.objects.create(
+            realm=hamlet.realm,
+            message=Message.objects.get(id=message_id),
+            output_type=GeneratedItem.OutputType.PROGRESS_UPDATE,
+            module_key="project_status",
+            module_name="Project Status",
+            module_version="v3",
+            source_summary="Across 2 sources",
+        )
+
+        with self.verify_action(state_change_expected=False) as events:
+            result = self.client_patch(
+                f"/json/messages/{message_id}",
+                {"content": "A generated message after editing"},
+            )
+        self.assert_json_success(result)
+        self.assert_length(events, 1)
+        event = events[0]
+        self.assertEqual(event["type"], "update_message")
+        self.assertNotIn("message_realm_id", event)
+        self.assertEqual(event["hover_generated_item"]["id"], generated_item.id)
+        self.assertEqual(event["hover_generated_item"]["module"]["key"], "project_status")
+
     def test_lineage_projects_latest_state_and_authorized_history(self) -> None:
         hamlet = self.example_user("hamlet")
         self.login_user(hamlet)

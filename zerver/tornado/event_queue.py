@@ -21,7 +21,6 @@ from django.utils.translation import gettext as _
 from tornado import autoreload
 from typing_extensions import override
 
-from hover.lib import add_hover_metadata
 from version import API_FEATURE_LEVEL, ZULIP_MERGE_BASE, ZULIP_VERSION
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.message_cache import MessageDict
@@ -1211,9 +1210,6 @@ def process_message_event(
         push_device_registered_user_ids = set(push_device_registered_user_ids)
 
     wide_dict: dict[str, Any] = event_template["message_dict"]
-    message_realm_id = event_template.get("message_realm_id")
-    if message_realm_id is not None:
-        add_hover_metadata([wide_dict], realm_id=message_realm_id)
 
     # Temporary transitional code: Zulip servers that have message
     # events in their event queues and upgrade to the new version
