@@ -11,6 +11,7 @@ from hover.models import (
     SpaceMembership,
     SpaceMembershipSuggestion,
 )
+from hover.participant_selector_reconciliation import schedule_space_participant_reconciliations
 from zerver.actions.streams import bulk_add_subscriptions
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.streams import create_stream_if_needed
@@ -335,4 +336,5 @@ def do_launch_space(space: Space, *, acting_user: UserProfile) -> tuple[Space, b
         {"type": "hover_space", "op": "update", "space": get_space_data(space)},
         sorted(member_ids),
     )
+    schedule_space_participant_reconciliations(space.id)
     return space, True

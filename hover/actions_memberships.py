@@ -15,6 +15,10 @@ from hover.models import (
     SpaceMembershipSuggestion,
 )
 from hover.observations import ResolvedIdentityObservation
+from hover.participant_selector_reconciliation import (
+    schedule_participant_selector_reconciliation,
+    schedule_space_participant_reconciliations,
+)
 from zerver.actions.streams import bulk_add_subscriptions, bulk_remove_subscriptions
 from zerver.lib.exceptions import JsonableError
 from zerver.models.groups import UserGroupMembership
@@ -143,6 +147,7 @@ def refresh_space_membership_suggestions(
     space = _lock_setup_space(space)
     _require_space_administrator(space, acting_user)
     changed: list[SpaceMembershipSuggestion] = []
+    affected_account_ids: set[int] = set()
     observations = list(observations)
 
     eligible_observations = {
@@ -196,6 +201,7 @@ def refresh_space_membership_suggestions(
                 "observation_basis": observation.observation_basis,
             },
         )
+        affected_account_ids.add(sources[0].account_id)
     existing_member_ids = set(
         SpaceMembership.objects.filter(space=space, user_id__in=users_by_id).values_list(
             "user_id", flat=True
@@ -230,6 +236,8 @@ def refresh_space_membership_suggestions(
 
     if changed:
         _send_admin_update(space)
+    for account_id in affected_account_ids:
+        schedule_participant_selector_reconciliation(account_id)
     return changed
 
 
@@ -278,9 +286,8 @@ def do_confirm_space_member(
     if space.state == Space.State.SETUP:
         _send_admin_update(space)
     else:
-        _send_launched_membership_update(
-            space, target=target, removed=False, added=created
-        )
+        _send_launched_membership_update(space, target=target, removed=False, added=created)
+    schedule_space_participant_reconciliations(space.id)
     return membership
 
 
@@ -292,9 +299,11 @@ def do_remove_space_member(space: Space, target: UserProfile, *, acting_user: Us
     if SpaceAdministrator.objects.filter(space=space, user=target).exists():
         raise JsonableError(_("Remove Space administration before removing this member."))
 
-    membership = SpaceMembership.objects.select_for_update(no_key=True).filter(
-        space=space, user=target
-    ).first()
+    membership = (
+        SpaceMembership.objects.select_for_update(no_key=True)
+        .filter(space=space, user=target)
+        .first()
+    )
     if membership is not None:
         membership.delete()
         _set_native_launched_membership(space, target, role=None, acting_user=acting_user)
@@ -309,8 +318,7 @@ def do_remove_space_member(space: Space, target: UserProfile, *, acting_user: Us
         )
     suggestion = SpaceMembershipSuggestion.objects.filter(space=space, user=target).first()
     suggestion_changed = (
-        suggestion is not None
-        and suggestion.state != SpaceMembershipSuggestion.State.REMOVED
+        suggestion is not None and suggestion.state != SpaceMembershipSuggestion.State.REMOVED
     )
     if suggestion_changed:
         assert suggestion is not None
@@ -323,3 +331,4 @@ def do_remove_space_member(space: Space, target: UserProfile, *, acting_user: Us
         _send_admin_update(space)
     else:
         _send_launched_membership_update(space, target=target, removed=True)
+    schedule_space_participant_reconciliations(space.id)

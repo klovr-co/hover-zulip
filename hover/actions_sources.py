@@ -28,6 +28,7 @@ from hover.models import (
     SpaceAttachment,
     SpaceMembership,
 )
+from hover.participant_selector_reconciliation import schedule_participant_selector_reconciliation
 from zerver.lib.exceptions import ErrorCode, InvalidJSONError, JsonableError
 from zerver.models.realm_audit_logs import AuditLogEventType, RealmAuditLog
 from zerver.models.users import UserProfile
@@ -172,6 +173,7 @@ def _attach_canonical_source(
                         "date_updated",
                     ]
                 )
+                schedule_participant_selector_reconciliation(locked_account.id)
             return attachment, False
 
         attachment = SpaceAttachment.objects.create(
@@ -209,6 +211,7 @@ def _attach_canonical_source(
             {"type": "hover_space", "op": "update", "space": get_space_data(projected_space)},
             _space_administrator_ids(locked_space),
         )
+        schedule_participant_selector_reconciliation(locked_account.id)
         return attachment, True
 
 
@@ -370,6 +373,7 @@ def do_detach_source(
             )
         ),
     )
+    schedule_participant_selector_reconciliation(attachment.source.account_id)
     return attachment, True
 
 
@@ -411,9 +415,7 @@ def do_delete_source_evidence(
     IntegrationMessageProvenance.objects.filter(attachment=attachment).delete()
     attachment.evidence_deleted_at = timezone_now()
     attachment.evidence_deleted_by = acting_user
-    attachment.save(
-        update_fields=["evidence_deleted_at", "evidence_deleted_by", "date_updated"]
-    )
+    attachment.save(update_fields=["evidence_deleted_at", "evidence_deleted_by", "date_updated"])
     RealmAuditLog.objects.create(
         realm=attachment.realm,
         acting_user=acting_user,

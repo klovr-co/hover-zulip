@@ -1236,6 +1236,51 @@ class PersonalEditionSyncState(models.Model):
             )
 
 
+class ParticipantSelectorReconciliation(models.Model):
+    """Durable account-scoped outbox for Studio participant authorization."""
+
+    class State(models.TextChoices):
+        PENDING = "pending", "Pending"
+        LEASED = "leased", "Leased"
+        BACKOFF = "backoff", "Backoff"
+        CURRENT = "current", "Current"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    account = models.OneToOneField(
+        ConnectedAccount,
+        on_delete=CASCADE,
+        related_name="participant_selector_reconciliation",
+    )
+    state = models.TextField(choices=State.choices, default=State.PENDING)
+    generation = models.PositiveBigIntegerField(default=1)
+    attempts = models.PositiveIntegerField(default=0)
+    next_attempt_at = models.DateTimeField(default=timezone_now)
+    lease_token = models.UUIDField(null=True, blank=True)
+    lease_expires_at = models.DateTimeField(null=True, blank=True)
+    last_error_code = models.CharField(max_length=64, blank=True)
+    last_reconciled_at = models.DateTimeField(null=True, blank=True)
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=["state", "next_attempt_at"],
+                name="hover_participant_reconcile_due",
+            ),
+            models.Index(
+                fields=["state", "lease_expires_at"],
+                name="hover_participant_lease_due",
+            ),
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.realm_id != self.account.realm_id:
+            raise ValidationError("Participant reconciliation must share the account organization.")
+
+
 class PublicationSyncAttempt(models.Model):
     class Outcome(models.TextChoices):
         SUCCESS = "success", "Success"

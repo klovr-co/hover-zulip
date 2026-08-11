@@ -26,11 +26,13 @@ MAX_DISCOVERY_LIMIT = 100
 MAX_PUBLICATION_LIMIT = 100
 MAX_EVIDENCE_LIMIT = 100
 MAX_SOURCE_RECORD_LIMIT = 50
+MAX_PARTICIPANT_SELECTORS = 1_000
 MAX_RESPONSE_BYTES = 2_000_000
 STUDIO_OPERATION_PATHS = {
     "source_discovery": "sources/discover",
     "sync": "sync",
     "personal_edition_sync": "personal-editions/sync",
+    "participant_selector_reconcile": "participant-selectors/reconcile",
     "evidence_resolution": "evidence/resolve",
     "source_records": "records/browse",
 }
@@ -139,6 +141,14 @@ class ClawerSync(Protocol):
         start_at: str,
     ) -> ClawerPublicationPage: ...
 
+    def reconcile_participant_selectors(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        participant_refs: list[str],
+    ) -> None: ...
+
     def resolve_evidence(
         self,
         *,
@@ -184,6 +194,7 @@ class InMemoryClawerSync:
             tuple[str, str, str, str | None], ClawerPublicationPage
         ] = {}
         self.personal_edition_sync_calls: list[dict[str, object]] = []
+        self.participant_reconcile_calls: list[dict[str, object]] = []
         self.evidence_calls: list[dict[str, object]] = []
         self.source_record_pages: dict[
             tuple[str, str, str, str | None, str | None], ClawerSourceRecordPage
@@ -336,6 +347,22 @@ class InMemoryClawerSync:
         _validate_personal_edition_page(page, teammate_ref=teammate_ref, cursor=cursor, limit=limit)
         return page
 
+    def reconcile_participant_selectors(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        participant_refs: list[str],
+    ) -> None:
+        _validate_participant_selector_refs(participant_refs)
+        self.participant_reconcile_calls.append(
+            {
+                "realm_uuid": realm_uuid,
+                "account_external_id": account_external_id,
+                "participant_refs": participant_refs,
+            }
+        )
+
     def browse_source_records(
         self,
         *,
@@ -404,6 +431,7 @@ class StudioClawerSync:
         account_external_id: UUID,
         operation: str,
         body: dict[str, object],
+        http_method: str = "POST",
     ) -> dict[str, object]:
         credential = self.credentials.get(str(realm_uuid))
         if (
@@ -420,7 +448,8 @@ class StudioClawerSync:
         path = STUDIO_OPERATION_PATHS[operation]
         url = f"{self.base_url}/api/hover/v1/connected-accounts/{account_external_id}/{path}"
         try:
-            response = self.session.post(
+            request_method = self.session.put if http_method == "PUT" else self.session.post
+            response = request_method(
                 url,
                 json=body,
                 headers={
@@ -769,6 +798,26 @@ class StudioClawerSync:
             raise self._invalid_contract("personal_edition_sync")
         return page
 
+    def reconcile_participant_selectors(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        participant_refs: list[str],
+    ) -> None:
+        _validate_participant_selector_refs(participant_refs)
+        payload = self._request(
+            realm_uuid=realm_uuid,
+            account_external_id=account_external_id,
+            operation="participant_selector_reconcile",
+            body={"participant_refs": participant_refs},
+            http_method="PUT",
+        )
+        if set(payload) != {"participant_count"} or payload["participant_count"] != len(
+            participant_refs
+        ):
+            raise self._invalid_contract("participant_selector_reconcile")
+
 
 def get_clawer_sync() -> ClawerSync:
     return StudioClawerSync()
@@ -802,6 +851,16 @@ def _validate_personal_edition_request(
         raise ValueError("invalid personal edition boundary")
     if parsed_start.tzinfo is None or len(start_at) > 100:
         raise ValueError("invalid personal edition boundary")
+
+
+def _validate_participant_selector_refs(participant_refs: list[str]) -> None:
+    if (
+        len(participant_refs) > MAX_PARTICIPANT_SELECTORS
+        or len(participant_refs) != len(set(participant_refs))
+        or participant_refs != sorted(participant_refs)
+        or any(re.fullmatch(r"person_[0-9a-f]{32}", ref) is None for ref in participant_refs)
+    ):
+        raise ValueError("invalid participant selector reconciliation")
 
 
 def _validate_personal_edition_page(

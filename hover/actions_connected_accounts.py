@@ -13,6 +13,7 @@ from hover.lib_connected_accounts import (
     get_realm_administrator_ids,
 )
 from hover.models import ConnectedAccount, ConnectedAccountGrant, ConnectedAccountGrantSelector
+from hover.participant_selector_reconciliation import schedule_participant_selector_reconciliation
 from zerver.lib.exceptions import InvalidJSONError, JsonableError
 from zerver.models.realm_audit_logs import AuditLogEventType, RealmAuditLog
 from zerver.models.realms import Realm
@@ -176,6 +177,7 @@ def do_set_connected_account_approval_state(
         extra_data={"old_state": old_state, "new_state": approval_state},
     )
     _notify_account(account, op="account_update")
+    schedule_participant_selector_reconciliation(account.id)
 
 
 @transaction.atomic(durable=True)
