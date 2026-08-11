@@ -668,6 +668,7 @@ export class MessageListView {
             todo_is_completed?: boolean;
             todo_assignee?: string;
             todo_assignable_users?: Array<{user_id: number; full_name: string}>;
+            todo_has_assignee?: boolean;
             todo_assignee_user_id?: number;
             todo_latest_actor?: string;
             todo_latest_time?: string;
@@ -935,6 +936,7 @@ export class MessageListView {
                                 todo_assignable_users: todo.assignable_users.filter(
                                     (user) => user.user_id !== todo.assignee?.user_id,
                                 ),
+                                todo_has_assignee: todo.assignee !== null,
                                 ...(todo.assignee !== null && {
                                     todo_assignee_user_id: todo.assignee.user_id,
                                 }),

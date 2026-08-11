@@ -1,9 +1,9 @@
 <section
-    class="hover-suggested-action"
-    data-hover-suggested-action-message-id="{{message_id}}"
-    aria-label="{{t 'Suggested Action'}}"
-    tabindex="-1"
->
+  class="hover-suggested-action"
+  data-hover-suggested-action-message-id="{{message_id}}"
+  aria-label="{{t 'Suggested Action'}}"
+  tabindex="-1"
+  >
     <div class="hover-suggested-action__heading">
         <h4>{{t "Suggested Action"}}</h4>
         <span class="hover-suggested-action__state">
@@ -25,10 +25,10 @@
     {{/if}}
     {{#if is_approved}}
         <div
-            class="hover-suggested-action__todo"
-            data-hover-todo-id="{{todo_id}}"
-            tabindex="0"
-        >
+          class="hover-suggested-action__todo"
+          data-hover-todo-id="{{todo_id}}"
+          tabindex="0"
+          >
             <p>
                 {{#if todo_is_active}}{{#tr}}Todo #{{todo_id}}
                         is active{{/tr}}{{/if}}
@@ -37,101 +37,102 @@
             </p>
             <p>{{#tr}}Assigned to {{todo_assignee}}{{/tr}}</p>
             {{#if todo_latest_actor}}
-                <p>{{#tr}}Last changed by
-                        {{todo_latest_actor}}
-                        at
-                        {{todo_latest_time}}{{/tr}}</p>
+                <p>
+                    {{#tr}}
+                        Last changed by {{todo_latest_actor}} at {{todo_latest_time}}
+                    {{/tr}}
+                </p>
             {{/if}}
             <div class="hover-suggested-action__controls">
                 {{#if todo_is_active}}
                     <label>
                         <span>{{t "Assign to"}}</span>
                         <select
-                            data-hover-todo-assignee
-                            aria-label="{{t 'Assign Todo'}}"
-                        >
-                            {{#if todo_assignee_user_id}}
-                                <option
-                                    value="{{todo_assignee_user_id}}"
-                                >{{todo_assignee}}</option>
+                          data-hover-todo-assignee
+                          aria-label="{{t 'Assign Todo'}}"
+                          >
+                            {{#if todo_has_assignee}}
+                                <option value="{{todo_assignee_user_id}}">
+                                    {{todo_assignee}}
+                                </option>
                             {{else}}
-                                <option value="">{{t
-                                        "Choose a teammate"
-                                    }}</option>
+                                <option value="">
+                                    {{t "Choose a teammate"}}
+                                </option>
                             {{/if}}
                             {{#each todo_assignable_users}}
-                                <option
-                                    value="{{this.user_id}}"
-                                >{{this.full_name}}</option>
+                                <option value="{{this.user_id}}">
+                                    {{this.full_name}}
+                                </option>
                             {{/each}}
                         </select>
                     </label>
                     <button
-                        type="button"
-                        class="button rounded"
-                        data-hover-todo-operation="assign"
-                        data-hover-todo-id="{{todo_id}}"
-                    >{{t "Assign"}}</button>
+                      type="button"
+                      class="button rounded"
+                      data-hover-todo-operation="assign"
+                      data-hover-todo-id="{{todo_id}}"
+                      >{{t "Assign"}}</button>
                     <button
-                        type="button"
-                        class="button rounded sea-green"
-                        data-hover-todo-operation="complete"
-                        data-hover-todo-id="{{todo_id}}"
-                    >{{t "Complete"}}</button>
+                      type="button"
+                      class="button rounded sea-green"
+                      data-hover-todo-operation="complete"
+                      data-hover-todo-id="{{todo_id}}"
+                      >{{t "Complete"}}</button>
                 {{/if}}
                 {{#if todo_is_completed}}
                     <button
-                        type="button"
-                        class="button rounded"
-                        data-hover-todo-operation="reopen"
-                        data-hover-todo-id="{{todo_id}}"
-                    >{{t "Reopen"}}</button>
+                      type="button"
+                      class="button rounded"
+                      data-hover-todo-operation="reopen"
+                      data-hover-todo-id="{{todo_id}}"
+                      >{{t "Reopen"}}</button>
                 {{/if}}
             </div>
             <span
-                class="hover-suggested-action__status"
-                data-hover-todo-status
-                role="status"
-                aria-live="polite"
-            ></span>
+              class="hover-suggested-action__status"
+              data-hover-todo-status
+              role="status"
+              aria-live="polite"
+              ></span>
         </div>
     {{else}}
         <div class="hover-suggested-action__controls">
             {{#if is_pending}}
                 <button
-                    type="button"
-                    class="button rounded sea-green"
-                    data-hover-action-decision="approve"
-                    data-hover-message-id="{{message_id}}"
-                >{{t "Approve"}}</button>
+                  type="button"
+                  class="button rounded sea-green"
+                  data-hover-action-decision="approve"
+                  data-hover-message-id="{{message_id}}"
+                  >{{t "Approve"}}</button>
                 <input
-                    type="text"
-                    maxlength="1000"
-                    data-hover-action-reason
-                    aria-label="{{t 'Optional reason for Not an action'}}"
-                    placeholder="{{t 'Optional reason'}}"
-                />
+                  type="text"
+                  maxlength="1000"
+                  data-hover-action-reason
+                  aria-label="{{t 'Optional reason for Not an action'}}"
+                  placeholder="{{t 'Optional reason'}}"
+                  />
                 <button
-                    type="button"
-                    class="button rounded"
-                    data-hover-action-decision="not_action"
-                    data-hover-message-id="{{message_id}}"
-                >{{t "Not an action"}}</button>
+                  type="button"
+                  class="button rounded"
+                  data-hover-action-decision="not_action"
+                  data-hover-message-id="{{message_id}}"
+                  >{{t "Not an action"}}</button>
             {{/if}}
             {{#if is_not_action}}
                 <button
-                    type="button"
-                    class="button rounded"
-                    data-hover-action-decision="restore"
-                    data-hover-message-id="{{message_id}}"
-                >{{t "Restore"}}</button>
+                  type="button"
+                  class="button rounded"
+                  data-hover-action-decision="restore"
+                  data-hover-message-id="{{message_id}}"
+                  >{{t "Restore"}}</button>
             {{/if}}
         </div>
     {{/if}}
     <span
-        class="hover-suggested-action__status"
-        data-hover-action-status
-        role="status"
-        aria-live="polite"
-    ></span>
+      class="hover-suggested-action__status"
+      data-hover-action-status
+      role="status"
+      aria-live="polite"
+      ></span>
 </section>
