@@ -1109,6 +1109,100 @@ class GeneratedItem(models.Model):
             )
 
 
+class PersonalEdition(models.Model):
+    """One immutable Clawer personal-edition publication owned by one teammate."""
+
+    class Edition(models.TextChoices):
+        MORNING = "morning", "Morning Daily Brief"
+        END_OF_DAY = "end_of_day", "End-of-Day Roundup"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_personal_editions")
+    user = models.ForeignKey(
+        UserProfile, on_delete=RESTRICT, related_name="hover_personal_editions"
+    )
+    account = models.ForeignKey(
+        ConnectedAccount, on_delete=RESTRICT, related_name="personal_editions"
+    )
+    teammate_ref = models.CharField(max_length=39, validators=[participant_ref_validator])
+    publication_id = models.TextField()
+    idempotency_key = models.TextField()
+    publication_envelope_hash = models.CharField(max_length=64)
+    source_ref = models.CharField(max_length=36, validators=[source_ref_validator])
+    edition = models.TextField(choices=Edition.choices)
+    payload = models.JSONField()
+    evidence_refs = models.JSONField(default=list)
+    covered_start_at = models.DateTimeField()
+    covered_end_at = models.DateTimeField()
+    producing_version = models.TextField()
+    generated_at = models.DateTimeField()
+    published_at = models.DateTimeField()
+    date_created = models.DateTimeField(default=timezone_now)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=["user", "edition", "-covered_end_at"],
+                name="hover_edition_user_latest",
+            )
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["account", "publication_id"],
+                name="hover_edition_unique_publication",
+            ),
+            models.UniqueConstraint(
+                fields=["account", "idempotency_key"],
+                name="hover_edition_unique_idempotency",
+            ),
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.realm_id != self.user.realm_id or self.realm_id != self.account.realm_id:
+            raise ValidationError(
+                "Personal editions, users, and accounts must share an organization."
+            )
+
+
+class PersonalEditionSyncState(models.Model):
+    """Cursor state for one verified teammate stream through one Connected Account."""
+
+    realm = models.ForeignKey(
+        Realm, on_delete=CASCADE, related_name="hover_personal_edition_sync_states"
+    )
+    user = models.ForeignKey(
+        UserProfile, on_delete=CASCADE, related_name="hover_personal_edition_sync_states"
+    )
+    account = models.ForeignKey(
+        ConnectedAccount, on_delete=CASCADE, related_name="personal_edition_sync_states"
+    )
+    teammate_ref = models.CharField(max_length=39, validators=[participant_ref_validator])
+    start_at = models.DateTimeField()
+    cursor = models.TextField(default="")
+    last_sync_at = models.DateTimeField(null=True)
+    last_error = models.CharField(max_length=64, default="")
+    sync_failures = models.PositiveIntegerField(default=0)
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["account", "user", "teammate_ref"],
+                name="hover_edition_sync_unique_stream",
+            )
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.realm_id != self.user.realm_id or self.realm_id != self.account.realm_id:
+            raise ValidationError(
+                "Personal edition sync state must remain inside one organization."
+            )
+
+
 class PublicationSyncAttempt(models.Model):
     class Outcome(models.TextChoices):
         SUCCESS = "success", "Success"

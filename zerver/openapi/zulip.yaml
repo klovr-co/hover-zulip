@@ -27601,6 +27601,52 @@ paths:
                         "url": "https://example.constructor.app/groups/room/room-123",
                       }
 
+  /hover/personal-editions:
+    get:
+      operationId: get-hover-personal-editions
+      summary: Get permission-filtered personal editions
+      description: |
+        Synchronize and return the caller's latest Morning Daily Brief and
+        End-of-Day Roundup. Hover derives the upstream teammate identity from
+        verified participant bindings; the client cannot select an identity.
+        Every passage is re-authorized through its native generated update and
+        current confirmed Space membership. Suggested prose never creates a Todo.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      tags: [messages]
+      responses:
+        "200":
+          description: The latest authorized personal editions.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - additionalProperties: false
+                    required: [sync_status, editions]
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      sync_status:
+                        type: string
+                        enum: [current, degraded, empty]
+                      editions:
+                        type: object
+                        additionalProperties: false
+                        required: [morning, end_of_day]
+                        properties:
+                          morning:
+                            anyOf:
+                              - $ref: "#/components/schemas/HoverMorningEdition"
+                              - type: object
+                                nullable: true
+                          end_of_day:
+                            anyOf:
+                              - $ref: "#/components/schemas/HoverEndOfDayEdition"
+                              - type: object
+                                nullable: true
+
   /hover/search:
     post:
       operationId: hover-search
@@ -31688,6 +31734,87 @@ components:
         - saved
         - saveable
         - url
+    HoverPersonalEditionItem:
+      type: object
+      additionalProperties: false
+      required: [title, detail, update]
+      description: |
+        One editorial passage. The first and only action opens its concise
+        native Space update; Source evidence remains a secondary disclosure on
+        that generated update.
+      properties:
+        title: {type: string}
+        detail: {type: string}
+        update:
+          type: object
+          additionalProperties: false
+          required: [message_id, space_name, topic, url]
+          properties:
+            message_id: {type: integer}
+            space_name: {type: string}
+            topic: {type: string}
+            url: {type: string}
+    HoverMorningEdition:
+      type: object
+      additionalProperties: false
+      required: [edition, title, covered_end, published_at, sections, all_clear]
+      properties:
+        edition: {type: string, enum: [morning]}
+        title: {type: string}
+        covered_end: {type: string, format: date-time}
+        published_at: {type: string, format: date-time}
+        all_clear: {type: boolean}
+        sections:
+          type: object
+          additionalProperties: false
+          required: [urgency, unresolved_carryover, guidance]
+          properties:
+            urgency:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+            unresolved_carryover:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+            guidance:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+    HoverEndOfDayEdition:
+      type: object
+      additionalProperties: false
+      required: [edition, title, covered_end, published_at, sections, all_clear]
+      properties:
+        edition: {type: string, enum: [end_of_day]}
+        title: {type: string}
+        covered_end: {type: string, format: date-time}
+        published_at: {type: string, format: date-time}
+        all_clear: {type: boolean}
+        sections:
+          type: object
+          additionalProperties: false
+          required:
+            [
+              meaningful_movement,
+              completed_work,
+              carryover,
+              delegated_dependencies,
+              tomorrow_preview,
+            ]
+          properties:
+            meaningful_movement:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+            completed_work:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+            carryover:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+            delegated_dependencies:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+            tomorrow_preview:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
     HoverSourceSearchResult:
       type: object
       additionalProperties: false

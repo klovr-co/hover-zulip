@@ -14,6 +14,7 @@ from django.urls.resolvers import URLPattern, URLResolver
 from django.utils.module_loading import import_string
 from django.views.generic import RedirectView
 
+from hover.views_awareness import get_awareness
 from hover.views_connected_accounts import (
     get_connected_account,
     list_connected_accounts,
@@ -21,7 +22,6 @@ from hover.views_connected_accounts import (
     update_connected_account,
     upsert_connected_account_grant,
 )
-from hover.views_awareness import get_awareness
 from hover.views_integrations import associate_integration_route, detach_integration_route
 from hover.views_modules import (
     disable_module,
@@ -30,6 +30,7 @@ from hover.views_modules import (
     rebind_resume_module,
     upgrade_module,
 )
+from hover.views_personal_editions import personal_editions
 from hover.views_publications import (
     resolve_disputed_detail_evidence,
     resolve_generated_item_evidence,
@@ -623,6 +624,7 @@ v1_api_and_json_patterns = [
     rest_path("hover/spaces", GET=list_spaces, POST=create_space),
     rest_path("hover/awareness", GET=get_awareness),
     rest_path("hover/search", POST=hover_search),
+    rest_path("hover/personal-editions", GET=personal_editions),
     rest_path("hover/spaces/<int:space_id>", GET=get_space),
     rest_path("hover/spaces/<int:space_id>/members", POST=confirm_space_member),
     rest_path("hover/spaces/<int:space_id>/members/<int:user_id>", DELETE=remove_space_member),

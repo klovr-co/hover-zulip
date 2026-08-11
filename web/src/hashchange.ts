@@ -11,6 +11,7 @@ import {Filter} from "./filter.ts";
 import * as hash_parser from "./hash_parser.ts";
 import * as hash_util from "./hash_util.ts";
 import * as hover_awareness_view from "./hover_awareness_view.ts";
+import * as hover_editions_view from "./hover_editions_view.ts";
 import * as hover_search_view from "./hover_search_view.ts";
 import * as hover_source_view from "./hover_source_view.ts";
 import {$t_html} from "./i18n.ts";
@@ -187,6 +188,7 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
     // be #ABCD.
     const hash = window.location.hash.split("/");
     if (hash[0] !== "#hover") {
+        hover_editions_view.hide();
         hover_source_view.hide();
         hover_search_view.hide();
     }
@@ -296,6 +298,16 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
             show_all_message_view(narrow_opts);
             break;
         case "#hover": {
+            if (hash.length === 3 && hash[1] === "editions" && hash[2] === "") {
+                hash.pop();
+            }
+            if (hash.length === 2 && hash[1] === "editions" && page_params.realm_hover_enabled) {
+                hover_source_view.hide();
+                hover_search_view.hide();
+                hover_editions_view.show();
+                return true;
+            }
+            hover_editions_view.hide();
             if (hash.length === 3 && hash[1] === "search" && hash[2] === "") {
                 hash.pop();
             }

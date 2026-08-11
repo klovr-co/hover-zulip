@@ -11,7 +11,7 @@ import re
 from datetime import date, datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
 UNSAFE_DISPLAY_NAME_PATTERN = re.compile(r"(?:\d[\s()+-]*){8,}|@(?:g\.us|lid)$", re.IGNORECASE)
 UNSAFE_SUMMARY_PATTERN = re.compile(
@@ -26,6 +26,21 @@ PERSON_REF_PATTERN = re.compile(r"^person_[0-9a-f]{32}$")
 def _validated_display_name(value: str) -> str:
     if " ".join(value.strip().split()) != value or UNSAFE_DISPLAY_NAME_PATTERN.search(value):
         raise ValueError("display name must be normalized and cannot expose a provider identifier")
+    return value
+
+
+def _validated_personal_text(value: str) -> str:
+    normalized = " ".join(value.split())
+    if normalized != value or not normalized or UNSAFE_SUMMARY_PATTERN.search(normalized):
+        raise ValueError("personal edition text must be normalized")
+    return normalized
+
+
+def _validated_unique_refs(value: list[str], *, field_name: str) -> list[str]:
+    if any(not ref.strip() or ref != ref.strip() or len(ref) > 1000 for ref in value) or len(
+        value
+    ) != len(set(value)):
+        raise ValueError(f"{field_name} must contain unique normalized references")
     return value
 
 
@@ -46,6 +61,91 @@ class DigestMetrics(_ContractModel):
         return self
 
 
+class PersonalDigestItem(_ContractModel):
+    title: str = Field(min_length=1, max_length=300)
+    detail: str = Field(min_length=1, max_length=50_000)
+    operational_publication_ids: list[str] = Field(default_factory=list, max_length=50)
+    confirmed_todo_refs: list[str] = Field(default_factory=list, max_length=50)
+
+    @field_validator("title", "detail")
+    @classmethod
+    def normalized_text(cls, value: str) -> str:
+        return _validated_personal_text(value)
+
+    @field_validator("operational_publication_ids", "confirmed_todo_refs")
+    @classmethod
+    def unique_refs(cls, value: list[str], info: ValidationInfo) -> list[str]:
+        return _validated_unique_refs(value, field_name=info.field_name)
+
+
+class MorningDigestSections(_ContractModel):
+    urgency: list[PersonalDigestItem] = Field(default_factory=list, max_length=100)
+    unresolved_carryover: list[PersonalDigestItem] = Field(default_factory=list, max_length=100)
+    guidance: list[PersonalDigestItem] = Field(default_factory=list, max_length=100)
+    all_clear_context: list[str] = Field(default_factory=list, max_length=200)
+
+    @field_validator("all_clear_context")
+    @classmethod
+    def normalized_all_clear_context(cls, value: list[str]) -> list[str]:
+        normalized = [_validated_personal_text(item) for item in value]
+        if len(normalized) != len(set(normalized)):
+            raise ValueError("all-clear context must be unique")
+        return normalized
+
+
+class EndOfDayDigestSections(_ContractModel):
+    meaningful_movement: list[PersonalDigestItem] = Field(default_factory=list, max_length=100)
+    completed_work: list[PersonalDigestItem] = Field(default_factory=list, max_length=100)
+    carryover: list[PersonalDigestItem] = Field(default_factory=list, max_length=100)
+    delegated_dependencies: list[PersonalDigestItem] = Field(default_factory=list, max_length=100)
+    tomorrow_preview: list[PersonalDigestItem] = Field(default_factory=list, max_length=100)
+
+
+class PersonalDigestContent(_ContractModel):
+    edition: Literal["morning", "end_of_day"]
+    teammate_ref: str = Field(pattern=r"^person_[0-9a-f]{32}$")
+    teammate_display_name: str = Field(min_length=1, max_length=200)
+    morning: MorningDigestSections | None = None
+    end_of_day: EndOfDayDigestSections | None = None
+    operational_publication_ids: list[str] = Field(default_factory=list, max_length=500)
+    confirmed_todo_refs: list[str] = Field(default_factory=list, max_length=500)
+
+    @field_validator("teammate_display_name")
+    @classmethod
+    def safe_teammate_display_name(cls, value: str) -> str:
+        return _validated_display_name(value)
+
+    @field_validator("operational_publication_ids", "confirmed_todo_refs")
+    @classmethod
+    def unique_refs(cls, value: list[str], info: ValidationInfo) -> list[str]:
+        return _validated_unique_refs(value, field_name=info.field_name)
+
+    @model_validator(mode="after")
+    def exact_edition_shape(self) -> PersonalDigestContent:
+        if self.edition == "morning" and (self.morning is None or self.end_of_day is not None):
+            raise ValueError("morning personal digest sections are invalid")
+        if self.edition == "end_of_day" and (self.end_of_day is None or self.morning is not None):
+            raise ValueError("end-of-day personal digest sections are invalid")
+        section = self.morning if self.morning is not None else self.end_of_day
+        assert section is not None
+        items = [
+            item
+            for value in section.model_dump().values()
+            if isinstance(value, list)
+            for item in value
+            if isinstance(item, dict)
+        ]
+        item_publications = {
+            ref for item in items for ref in item.get("operational_publication_ids", [])
+        }
+        item_todos = {ref for item in items for ref in item.get("confirmed_todo_refs", [])}
+        if not item_publications.issubset(self.operational_publication_ids):
+            raise ValueError("item publications must be declared by the personal digest")
+        if not item_todos.issubset(self.confirmed_todo_refs):
+            raise ValueError("item Todos must be declared by the personal digest")
+        return self
+
+
 class DigestPayload(_ContractModel):
     contract: Literal["digest"]
     schema_version: Literal["1.0"]
@@ -55,9 +155,7 @@ class DigestPayload(_ContractModel):
     marketing: str = Field(min_length=1, max_length=100_000)
     metrics: DigestMetrics
     generation_context: str = Field(min_length=1, max_length=300)
-    # Personal editions are not one of the six Space pipelines.  Preserve the
-    # additive field at the transport boundary without interpreting it here.
-    personal: dict[str, object] | None = None
+    personal: PersonalDigestContent | None = None
 
 
 class FeedUpdatePayload(_ContractModel):

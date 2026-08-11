@@ -24,7 +24,7 @@ const ls = localstorage();
 const hover_home_view_order = new Map([
     ["inbox", 0],
     ["recent", 1],
-    ["narrow/is/mentioned", 2],
+    ["hover/editions", 2],
     ["reminders", 3],
     ["hover/search", 4],
     ["narrow/is/starred", 5],

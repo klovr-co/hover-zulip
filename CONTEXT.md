@@ -108,6 +108,24 @@ Spaces. Its rank has no personal activity or read-state inputs, so teammates
 with identical Space memberships receive the same result.
 _Avoid_: Organization-wide feed, personalized pulse, copied update
 
+**Personal Edition**:
+An immutable Morning Daily Brief or End-of-Day Roundup published for one
+verified teammate and rendered only through the concise generated updates that
+remain authorized in their confirmed Contributor and Subscriber Spaces. Its
+suggested prose is guidance, never a Todo unless separately confirmed through
+the Suggested Action workflow.
+_Avoid_: Personal feed, Source digest, automatic task list
+
+**Morning Daily Brief**:
+A warm, prose-first Personal Edition that preserves urgency, unresolved
+carryover, guidance, and a permission-safe all-clear treatment.
+_Avoid_: Notification queue, priority dashboard
+
+**End-of-Day Roundup**:
+A reflective Personal Edition organized around meaningful movement, completed
+work, carryover, safely waiting dependencies, and tomorrow's preview.
+_Avoid_: Activity log, performance report
+
 **AIMTO Events**:
 The first Hover Space, used to prove the product through a real mixed feed of
 human activity and source-backed AI updates.

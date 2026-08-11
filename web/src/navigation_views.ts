@@ -133,6 +133,22 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         home_view_code: "",
         prioritize_in_condensed_view: false,
     },
+    hover_editions: {
+        fragment: "hover/editions",
+        name: $t({defaultMessage: "Daily Brief"}),
+        is_pinned: true,
+        icon: "zulip-icon-sun",
+        css_class_suffix: "daily_brief",
+        tooltip_template_id: "daily-brief-tooltip-template",
+        has_unread_count: false,
+        unread_count_type: "",
+        supports_masked_unread: false,
+        hidden_for_spectators: true,
+        menu_icon_class: "",
+        menu_aria_label: "",
+        home_view_code: "",
+        prioritize_in_condensed_view: true,
+    },
     drafts: {
         fragment: "drafts",
         name: $t({defaultMessage: "Drafts"}),
@@ -216,12 +232,6 @@ export function set_hover_enabled(enabled: boolean): void {
             ? $t({defaultMessage: "All activity options"})
             : $t({defaultMessage: "Combined feed options"}),
     });
-    Object.assign(built_in_views_meta_data["mentions"]!, {
-        name: enabled ? $t({defaultMessage: "Daily Brief"}) : $t({defaultMessage: "Mentions"}),
-        icon: enabled ? "zulip-icon-sun" : "zulip-icon-at-sign",
-        css_class_suffix: enabled ? "daily_brief" : "mentions",
-        tooltip_template_id: enabled ? "daily-brief-tooltip-template" : "mentions-tooltip-template",
-    });
     Object.assign(built_in_views_meta_data["starred_messages"]!, {
         name: enabled ? $t({defaultMessage: "Saved"}) : $t({defaultMessage: "Starred messages"}),
         tooltip_template_id: enabled
@@ -272,7 +282,12 @@ export type BuiltInViewMetadata = BuiltInViewBasicMetadata & {
 
 export function get_built_in_views(): BuiltInViewMetadata[] {
     return Object.values(built_in_views_meta_data)
-        .filter((view) => view.fragment !== "hover/search" || hover_enabled)
+        .filter((view) => {
+            if (hover_enabled) {
+                return view.fragment !== "narrow/is/mentioned";
+            }
+            return view.fragment !== "hover/search" && view.fragment !== "hover/editions";
+        })
         .map((view) => {
             const view_current_data = get_navigation_view_by_fragment(view.fragment);
             return {

@@ -14,6 +14,7 @@ from typing_extensions import override
 from hover.models import Source
 from hover.publication_contracts import (
     ClawerPublicationPage,
+    DigestPayload,
     ResolvedEvidence,
     ResolvedEvidenceBatch,
 )
@@ -29,6 +30,7 @@ MAX_RESPONSE_BYTES = 2_000_000
 STUDIO_OPERATION_PATHS = {
     "source_discovery": "sources/discover",
     "sync": "sync",
+    "personal_edition_sync": "personal-editions/sync",
     "evidence_resolution": "evidence/resolve",
     "source_records": "records/browse",
 }
@@ -126,6 +128,17 @@ class ClawerSync(Protocol):
         start_at: str,
     ) -> ClawerPublicationPage: ...
 
+    def sync_personal_editions(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        teammate_ref: str,
+        cursor: str | None,
+        limit: int,
+        start_at: str,
+    ) -> ClawerPublicationPage: ...
+
     def resolve_evidence(
         self,
         *,
@@ -167,6 +180,10 @@ class InMemoryClawerSync:
         self.publication_pages: dict[tuple[str, str, str, str | None], ClawerPublicationPage] = {}
         self.evidence: dict[tuple[str, str, str], ResolvedEvidence] = {}
         self.sync_calls: list[dict[str, object]] = []
+        self.personal_edition_pages: dict[
+            tuple[str, str, str, str | None], ClawerPublicationPage
+        ] = {}
+        self.personal_edition_sync_calls: list[dict[str, object]] = []
         self.evidence_calls: list[dict[str, object]] = []
         self.source_record_pages: dict[
             tuple[str, str, str, str | None, str | None], ClawerSourceRecordPage
@@ -281,6 +298,43 @@ class InMemoryClawerSync:
                 http_status_code=404,
                 retryable=False,
             )
+
+    def sync_personal_editions(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        teammate_ref: str,
+        cursor: str | None,
+        limit: int,
+        start_at: str,
+    ) -> ClawerPublicationPage:
+        _validate_personal_edition_request(
+            teammate_ref=teammate_ref,
+            cursor=cursor,
+            limit=limit,
+            start_at=start_at,
+        )
+        self.personal_edition_sync_calls.append(
+            {
+                "realm_uuid": realm_uuid,
+                "account_external_id": account_external_id,
+                "teammate_ref": teammate_ref,
+                "cursor": cursor,
+                "limit": limit,
+                "start_at": start_at,
+            }
+        )
+        page = self.personal_edition_pages.get(
+            (str(realm_uuid), str(account_external_id), teammate_ref, cursor),
+            ClawerPublicationPage(
+                publications=[],
+                next_cursor=cursor or "memory:empty",
+                has_more=False,
+            ),
+        )
+        _validate_personal_edition_page(page, teammate_ref=teammate_ref, limit=limit)
+        return page
 
     def browse_source_records(
         self,
@@ -674,6 +728,45 @@ class StudioClawerSync:
             raise self._invalid_contract("source_records")
         return page
 
+    def sync_personal_editions(
+        self,
+        *,
+        realm_uuid: UUID,
+        account_external_id: UUID,
+        teammate_ref: str,
+        cursor: str | None,
+        limit: int,
+        start_at: str,
+    ) -> ClawerPublicationPage:
+        _validate_personal_edition_request(
+            teammate_ref=teammate_ref,
+            cursor=cursor,
+            limit=limit,
+            start_at=start_at,
+        )
+        body: dict[str, object] = {
+            "teammate_ref": teammate_ref,
+            "limit": limit,
+            "start_at": start_at,
+        }
+        if cursor is not None:
+            body["cursor"] = cursor
+        payload = self._request(
+            realm_uuid=realm_uuid,
+            account_external_id=account_external_id,
+            operation="personal_edition_sync",
+            body=body,
+        )
+        try:
+            page = ClawerPublicationPage.model_validate(payload)
+        except ValidationError:
+            raise self._invalid_contract("personal_edition_sync")
+        try:
+            _validate_personal_edition_page(page, teammate_ref=teammate_ref, limit=limit)
+        except ClawerSyncError:
+            raise self._invalid_contract("personal_edition_sync")
+        return page
+
 
 def get_clawer_sync() -> ClawerSync:
     return StudioClawerSync()
@@ -690,6 +783,53 @@ def _validate_publication_request(
         raise ValueError("invalid publication cursor")
     if not start_at or len(start_at) > 100:
         raise ValueError("invalid publication start boundary")
+
+
+def _validate_personal_edition_request(
+    *, teammate_ref: str, cursor: str | None, limit: int, start_at: str
+) -> None:
+    if re.fullmatch(r"person_[0-9a-f]{32}", teammate_ref) is None:
+        raise ValueError("invalid personal edition teammate")
+    if limit < 1 or limit > MAX_PUBLICATION_LIMIT:
+        raise ValueError("invalid personal edition limit")
+    if cursor is not None and not 1 <= len(cursor) <= 10_000:
+        raise ValueError("invalid personal edition cursor")
+    try:
+        parsed_start = datetime.fromisoformat(start_at.replace("Z", "+00:00"))
+    except ValueError:
+        raise ValueError("invalid personal edition boundary")
+    if parsed_start.tzinfo is None or len(start_at) > 100:
+        raise ValueError("invalid personal edition boundary")
+
+
+def _validate_personal_edition_page(
+    page: ClawerPublicationPage, *, teammate_ref: str, limit: int
+) -> None:
+    if len(page.publications) > limit or (page.has_more and not page.publications):
+        raise ClawerSyncError(
+            error_code="invalid_upstream_contract",
+            operation="personal_edition_sync",
+            http_status_code=502,
+            retryable=False,
+        )
+    for publication in page.publications:
+        payload = publication.payload
+        if not isinstance(payload, DigestPayload) or payload.personal is None:
+            break
+        personal = payload.personal
+        expected_producer = (
+            "personal_morning_brief" if personal.edition == "morning" else "personal_eod_roundup"
+        )
+        if personal.teammate_ref != teammate_ref or publication.producer_key != expected_producer:
+            break
+    else:
+        return
+    raise ClawerSyncError(
+        error_code="invalid_upstream_contract",
+        operation="personal_edition_sync",
+        http_status_code=502,
+        retryable=False,
+    )
 
 
 def _validate_evidence_request(*, source_ref: str, refs: list[str]) -> None:

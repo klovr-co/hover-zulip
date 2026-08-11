@@ -58,6 +58,7 @@ import * as hashchange from "./hashchange.ts";
 import * as hotkey from "./hotkey.ts";
 import * as hover_all_view from "./hover_all_view.ts";
 import * as hover_awareness_view from "./hover_awareness_view.ts";
+import * as hover_editions_view from "./hover_editions_view.ts";
 import * as hover_connected_accounts from "./hover_connected_accounts.ts";
 import * as hover_evidence from "./hover_evidence.ts";
 import * as hover_generated_details from "./hover_generated_details.ts";
@@ -562,6 +563,7 @@ export async function initialize_everything(state_data) {
     hover_spaces.initialize(state_data.hover_spaces);
     hover_all_view.initialize();
     hover_awareness_view.initialize();
+    hover_editions_view.initialize();
     hover_source_view.initialize();
     hover_search_view.initialize();
 
