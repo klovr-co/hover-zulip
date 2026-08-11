@@ -10,7 +10,7 @@ import * as message_reminder from "./message_reminder.ts";
 import type {Reminder} from "./message_reminder.ts";
 import * as messages_overlay_ui from "./messages_overlay_ui.ts";
 import * as overlays from "./overlays.ts";
-import * as realm from "./realm.ts";
+import {realm} from "./state_data.ts";
 import * as timerender from "./timerender.ts";
 
 type ReminderRenderContext = Reminder & {
