@@ -1,0 +1,131 @@
+<div
+    id="reminders-overlay"
+    class="overlay"
+    data-overlay="reminders"
+    data-hover-todos="true"
+    tabindex="-1"
+>
+    <div class="flex overlay-content">
+        <main
+            class="overlay-messages-container overlay-container reminders-container hover-todos-home"
+            aria-labelledby="hover-todos-heading"
+        >
+            <div class="overlay-messages-header">
+                <div>
+                    <h1 id="hover-todos-heading">{{t "Todos"}}</h1>
+                    <p>{{t "Accountable work from your Spaces"}}</p>
+                </div>
+                <button type="button" class="exit" aria-label="{{t 'Close'}}">
+                    <span class="exit-sign" aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="hover-todos-list" aria-live="polite">
+                {{#if empty}}
+                    <div class="no-overlay-messages">
+                        <strong>{{t "No Todos yet."}}</strong>
+                        <p>{{t
+                                "Approved Suggested Actions will appear here."
+                            }}</p>
+                    </div>
+                {{/if}}
+                {{#each todos}}
+                    <article
+                        class="hover-todo-card"
+                        data-hover-todo-id="{{id}}"
+                        tabindex="0"
+                        aria-label="{{wording}}"
+                    >
+                        <div class="hover-todo-card__heading">
+                            <span
+                                class="hover-todo-card__space"
+                            >{{space.name}}</span>
+                            <span class="hover-todo-card__state">
+                                {{#if is_active}}{{t "Active"}}{{/if}}
+                                {{#if is_completed}}{{t "Completed"}}{{/if}}
+                            </span>
+                        </div>
+                        <h2>{{wording}}</h2>
+                        <dl class="hover-todo-card__facts">
+                            <div><dt>{{t "Assignee"}}</dt><dd
+                                >{{assignee_label}}</dd></div>
+                            <div><dt>{{t "Due"}}</dt><dd
+                                >{{due_label}}</dd></div>
+                        </dl>
+                        {{#if latest_event}}
+                            <p class="hover-todo-card__history">
+                                {{#tr}}Last changed by
+                                    {{latest_event.actor.full_name}}
+                                    at
+                                    {{latest_event.occurred_at}}{{/tr}}
+                            </p>
+                        {{/if}}
+                        <div class="hover-todo-card__links">
+                            <a href="{{source_hash}}">{{t "Open in Space"}}</a>
+                            {{#if generated_item.evidence_url}}
+                                <button
+                                    type="button"
+                                    class="button small rounded hover-view-evidence"
+                                    data-evidence-url="{{generated_item.evidence_url}}"
+                                >
+                                    {{#tr}}View sources ({{generated_item.evidence_count}}){{/tr}}
+                                </button>
+                            {{/if}}
+                        </div>
+                        <div class="hover-todo-card__controls">
+                            {{#if is_active}}
+                                <label>
+                                    <span>{{t "Assign to"}}</span>
+                                    <select
+                                        data-hover-todo-assignee
+                                        aria-label="{{t 'Assign Todo'}}"
+                                    >
+                                        {{#if assignee}}
+                                            <option
+                                                value="{{assignee.user_id}}"
+                                            >{{assignee.full_name}}</option>
+                                        {{else}}
+                                            <option value="">{{t
+                                                    "Choose a teammate"
+                                                }}</option>
+                                        {{/if}}
+                                        {{#each assignable_options}}
+                                            <option
+                                                value="{{this.user_id}}"
+                                            >{{this.full_name}}</option>
+                                        {{/each}}
+                                    </select>
+                                </label>
+                                <button
+                                    type="button"
+                                    class="button rounded"
+                                    data-hover-todo-operation="assign"
+                                    data-hover-todo-id="{{id}}"
+                                >{{t "Assign"}}</button>
+                                <button
+                                    type="button"
+                                    class="button rounded sea-green"
+                                    data-hover-todo-operation="complete"
+                                    data-hover-todo-id="{{id}}"
+                                >{{t "Complete"}}</button>
+                            {{/if}}
+                            {{#if is_completed}}
+                                <button
+                                    type="button"
+                                    class="button rounded"
+                                    data-hover-todo-operation="reopen"
+                                    data-hover-todo-id="{{id}}"
+                                >{{t "Reopen"}}</button>
+                            {{/if}}
+                        </div>
+                        <span
+                            class="hover-todo-card__status"
+                            data-hover-todo-status
+                            role="status"
+                            aria-live="polite"
+                        ></span>
+                    </article>
+                {{/each}}
+            </div>
+        </main>
+    </div>
+</div>

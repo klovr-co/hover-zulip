@@ -3,6 +3,7 @@ import * as z from "zod/mini";
 
 import * as channel from "./channel.ts";
 import * as hover_spaces from "./hover_spaces.ts";
+import * as hover_todos from "./hover_todos.ts";
 import {$t} from "./i18n.ts";
 import * as message_live_update from "./message_live_update.ts";
 import * as message_store from "./message_store.ts";
@@ -34,6 +35,9 @@ export function apply_projection(message_id: number, generated_item: HoverGenera
         return false;
     }
     message.hover_generated_item = generated_item;
+    if (incoming.todo !== null) {
+        hover_todos.apply_projection(incoming.todo);
+    }
     request_ids.delete(message_id);
     message_live_update.rerender_messages_view_by_message_ids([message_id]);
     return true;

@@ -1554,6 +1554,7 @@ class SuggestedActionTransition(models.Model):
 class Todo(models.Model):
     class State(models.TextChoices):
         ACTIVE = "active", "Active"
+        COMPLETED = "completed", "Completed"
 
     realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_todos")
     space = models.ForeignKey(Space, on_delete=CASCADE, related_name="todos")
@@ -1571,9 +1572,20 @@ class Todo(models.Model):
     )
     version = models.PositiveIntegerField(default=1)
     date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         indexes = [models.Index(fields=["space", "state"], name="hover_todo_space_state")]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(state="active", completed_at__isnull=True)
+                    | Q(state="completed", completed_at__isnull=False)
+                ),
+                name="hover_todo_completion_matches_state",
+            )
+        ]
 
     @override
     def clean(self) -> None:
@@ -1604,19 +1616,60 @@ class Todo(models.Model):
 class TodoEvent(models.Model):
     class Kind(models.TextChoices):
         APPROVED = "approved", "Approved"
+        ASSIGNED = "assigned", "Assigned"
+        REASSIGNED = "reassigned", "Reassigned"
+        COMPLETED = "completed", "Completed"
+        REOPENED = "reopened", "Reopened"
 
     realm = models.ForeignKey(Realm, on_delete=CASCADE)
     todo = models.ForeignKey(Todo, on_delete=RESTRICT, related_name="events")
     transition = models.OneToOneField(
-        SuggestedActionTransition, on_delete=RESTRICT, related_name="todo_event"
+        SuggestedActionTransition,
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="todo_event",
     )
+    request_id = models.UUIDField()
     kind = models.TextField(choices=Kind.choices)
     actor = models.ForeignKey(UserProfile, on_delete=RESTRICT, related_name="hover_todo_events")
+    previous_state = models.TextField(blank=True)
+    new_state = models.TextField(choices=Todo.State.choices)
+    previous_assignee = models.ForeignKey(
+        UserProfile,
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="+",
+    )
+    new_assignee = models.ForeignKey(
+        UserProfile,
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="+",
+    )
+    reason = models.TextField(default="")
+    notification_message = models.OneToOneField(
+        Message,
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="hover_todo_notification",
+    )
     version = models.PositiveIntegerField(default=1)
     date_created = models.DateTimeField(default=timezone_now)
 
     class Meta:
         ordering = ["date_created", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["todo", "request_id"], name="hover_todo_event_unique_request"
+            ),
+            models.UniqueConstraint(
+                fields=["todo", "version"], name="hover_todo_event_unique_version"
+            ),
+        ]
 
     @override
     def save(self, *args: Any, **kwargs: Any) -> None:
@@ -1633,13 +1686,23 @@ class TodoEvent(models.Model):
     @override
     def clean(self) -> None:
         super().clean()
-        if (
-            self.realm_id != self.todo.realm_id
-            or self.realm_id != self.transition.realm_id
-            or self.realm_id != self.actor.realm_id
-            or self.transition.todo_id != self.todo_id
-            or self.transition.action_id != self.todo.suggested_action_id
-        ):
+        if self.realm_id != self.todo.realm_id or self.realm_id != self.actor.realm_id:
+            raise ValidationError("Todo events and actors must share one organization.")
+        transition = self.transition
+        if self.kind == self.Kind.APPROVED:
+            if (
+                transition is None
+                or self.realm_id != transition.realm_id
+                or transition.todo_id != self.todo_id
+                or transition.action_id != self.todo.suggested_action_id
+            ):
+                raise ValidationError(
+                    "Todo approval events must belong to their approval transition."
+                )
+        elif transition is not None:
             raise ValidationError(
-                "Todo events must belong to their approval transition and organization."
+                {"transition": "Only approval events link an approval transition."}
             )
+        for assignee in (self.previous_assignee, self.new_assignee):
+            if assignee is not None and assignee.realm_id != self.realm_id:
+                raise ValidationError("Todo event assignees must share one organization.")

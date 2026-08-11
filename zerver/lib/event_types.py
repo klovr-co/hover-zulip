@@ -442,11 +442,38 @@ class HoverSuggestedActionTransition(BaseModel):
     reason: str
 
 
-class HoverSuggestedActionTodo(BaseModel):
+class HoverTodoPerson(BaseModel):
+    user_id: int
+    full_name: str
+
+
+class HoverTodoEvent(BaseModel):
     id: int
-    state: Literal["active"]
-    assignee_user_id: int | None
+    kind: Literal["approved", "assigned", "reassigned", "completed", "reopened"]
+    actor: HoverTodoPerson
+    occurred_at: str
+    previous_state: str
+    new_state: Literal["active", "completed"]
+    previous_assignee: HoverTodoPerson | None
+    new_assignee: HoverTodoPerson | None
+    reason: str
+    notification_message_id: int | None
+
+
+class HoverTodo(BaseModel):
+    id: int
+    state: Literal["active", "completed"]
+    version: int
+    wording: str
     due_date: str | None
+    completed_at: str | None
+    assignee: HoverTodoPerson | None
+    space: dict[str, object]
+    generated_item: dict[str, object]
+    approval: dict[str, object] | None
+    assignable_users: list[HoverTodoPerson]
+    history_count: int
+    recent_events: list[HoverTodoEvent]
 
 
 class HoverSuggestedAction(BaseModel):
@@ -459,7 +486,7 @@ class HoverSuggestedAction(BaseModel):
     due_date: str | None
     history_count: int
     recent_transitions: list[HoverSuggestedActionTransition]
-    todo: HoverSuggestedActionTodo | None
+    todo: HoverTodo | None
 
 
 class HoverGeneratedItem(BaseModel):
@@ -482,6 +509,12 @@ class HoverSuggestedActionEvent(BaseEvent):
     type: Literal["hover_suggested_action"]
     message_id: int
     generated_item: HoverGeneratedItem
+
+
+class HoverTodoProjectionEvent(BaseEvent):
+    type: Literal["hover_todo"]
+    message_id: int
+    todo: HoverTodo
 
 
 class HoverResponse(BaseModel):

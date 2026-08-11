@@ -56,6 +56,50 @@ const message_reaction_schema = z.object({
     user_id: z.number(),
 });
 
+export const hover_todo_person_schema = z.object({user_id: z.number(), full_name: z.string()});
+
+export const hover_todo_schema = z.object({
+    id: z.number(),
+    state: z.enum(["active", "completed"]),
+    version: z.number(),
+    wording: z.string(),
+    due_date: z.nullable(z.string()),
+    completed_at: z.nullable(z.string()),
+    assignee: z.nullable(hover_todo_person_schema),
+    space: z.object({id: z.number(), name: z.string()}),
+    generated_item: z.object({
+        id: z.number(),
+        message_id: z.number(),
+        evidence_count: z.number(),
+        evidence_url: z.nullable(z.string()),
+    }),
+    approval: z.nullable(
+        z.object({
+            transition_id: z.number(),
+            actor: hover_todo_person_schema,
+            occurred_at: z.string(),
+        }),
+    ),
+    assignable_users: z.array(hover_todo_person_schema),
+    history_count: z.number(),
+    recent_events: z.array(
+        z.object({
+            id: z.number(),
+            kind: z.enum(["approved", "assigned", "reassigned", "completed", "reopened"]),
+            actor: hover_todo_person_schema,
+            occurred_at: z.string(),
+            previous_state: z.string(),
+            new_state: z.enum(["active", "completed"]),
+            previous_assignee: z.nullable(hover_todo_person_schema),
+            new_assignee: z.nullable(hover_todo_person_schema),
+            reason: z.string(),
+            notification_message_id: z.nullable(z.number()),
+        }),
+    ),
+});
+
+export type HoverTodo = z.infer<typeof hover_todo_schema>;
+
 export const hover_suggested_action_schema = z.object({
     id: z.number(),
     state: z.enum(["pending", "approved", "not_action"]),
@@ -80,14 +124,7 @@ export const hover_suggested_action_schema = z.object({
             reason: z.string(),
         }),
     ),
-    todo: z.nullable(
-        z.object({
-            id: z.number(),
-            state: z.literal("active"),
-            assignee_user_id: z.nullable(z.number()),
-            due_date: z.nullable(z.string()),
-        }),
-    ),
+    todo: z.nullable(hover_todo_schema),
 });
 
 export type HoverSuggestedAction = z.infer<typeof hover_suggested_action_schema>;

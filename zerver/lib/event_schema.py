@@ -45,6 +45,7 @@ from zerver.lib.event_types import (
     HoverSpaceDeleteEvent,
     HoverSpaceUpdateEvent,
     HoverSuggestedActionEvent,
+    HoverTodoProjectionEvent,
     IconData,
     InvitesChangedEvent,
     LegacyPresenceEvent,
@@ -197,6 +198,7 @@ check_draft_remove = make_checker(DraftsRemoveEvent)
 check_draft_update = make_checker(DraftsUpdateEvent)
 check_heartbeat = make_checker(HeartbeatEvent)
 check_hover_suggested_action = make_checker(HoverSuggestedActionEvent)
+check_hover_todo = make_checker(HoverTodoProjectionEvent)
 check_hover_space_add = make_checker(HoverSpaceAddEvent)
 check_hover_space_delete = make_checker(HoverSpaceDeleteEvent)
 check_hover_space_update = make_checker(HoverSpaceUpdateEvent)

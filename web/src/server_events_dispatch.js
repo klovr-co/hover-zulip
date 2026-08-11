@@ -28,6 +28,7 @@ import * as hover_connected_accounts from "./hover_connected_accounts.ts";
 import * as hover_source_view from "./hover_source_view.ts";
 import * as hover_spaces from "./hover_spaces.ts";
 import * as hover_suggested_actions from "./hover_suggested_actions.ts";
+import * as hover_todos from "./hover_todos.ts";
 import * as inbox_ui from "./inbox_ui.ts";
 import * as inbox_util from "./inbox_util.ts";
 import * as information_density from "./information_density.ts";
@@ -179,6 +180,10 @@ export function dispatch_normal_event(event) {
 
         case "hover_suggested_action":
             hover_suggested_actions.apply_projection(event.message_id, event.generated_item);
+            break;
+
+        case "hover_todo":
+            hover_todos.apply_projection(event.todo);
             break;
 
         case "hover_connected_account":

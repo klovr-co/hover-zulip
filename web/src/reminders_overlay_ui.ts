@@ -5,10 +5,12 @@ import render_reminder_list from "../templates/reminder_list.hbs";
 import render_reminders_overlay from "../templates/reminders_overlay.hbs";
 
 import * as browser_history from "./browser_history.ts";
+import * as hover_todos_overlay_ui from "./hover_todos_overlay_ui.ts";
 import * as message_reminder from "./message_reminder.ts";
 import type {Reminder} from "./message_reminder.ts";
 import * as messages_overlay_ui from "./messages_overlay_ui.ts";
 import * as overlays from "./overlays.ts";
+import * as realm from "./realm.ts";
 import * as timerender from "./timerender.ts";
 
 type ReminderRenderContext = Reminder & {
@@ -76,6 +78,10 @@ function format(reminders: Map<number, Reminder>): ReminderRenderContext[] {
 }
 
 export function launch(select_reminder_id?: number): void {
+    if (realm.realm_hover_enabled) {
+        hover_todos_overlay_ui.launch();
+        return;
+    }
     $("#reminders-overlay-container").html(render_reminders_overlay());
     overlays.open_overlay({
         name: "reminders",
@@ -119,6 +125,10 @@ export function launch(select_reminder_id?: number): void {
 }
 
 export function rerender(): void {
+    if (realm.realm_hover_enabled) {
+        hover_todos_overlay_ui.rerender();
+        return;
+    }
     if (!overlays.reminders_open()) {
         return;
     }

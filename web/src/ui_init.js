@@ -65,6 +65,8 @@ import * as hover_review_request from "./hover_review_request.ts";
 import * as hover_source_view from "./hover_source_view.ts";
 import * as hover_spaces from "./hover_spaces.ts";
 import * as hover_suggested_actions from "./hover_suggested_actions.ts";
+import * as hover_todos from "./hover_todos.ts";
+import * as hover_todos_overlay_ui from "./hover_todos_overlay_ui.ts";
 import * as i18n from "./i18n.ts";
 import * as inbox_ui from "./inbox_ui.ts";
 import * as information_density from "./information_density.ts";
@@ -507,6 +509,7 @@ export async function initialize_everything(state_data) {
     navigation_views.initialize(state_data.navigation_views);
     scheduled_messages_ui.initialize();
     reminders_overlay_ui.initialize();
+    hover_todos_overlay_ui.initialize();
     popover_menus.initialize();
     left_sidebar_navigation_area_popovers.initialize();
     user_topic_popover.initialize();
@@ -551,6 +554,9 @@ export async function initialize_everything(state_data) {
     hover_response.initialize();
     hover_review_request.initialize();
     hover_suggested_actions.initialize();
+    if (realm.realm_hover_enabled) {
+        hover_todos.initialize();
+    }
     hover_spaces.initialize(state_data.hover_spaces);
     hover_all_view.initialize();
     hover_source_view.initialize();

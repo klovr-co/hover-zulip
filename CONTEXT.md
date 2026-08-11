@@ -113,6 +113,12 @@ _Avoid_: Status toggle, deletion, client-only state
 
 **Todo**:
 The durable accountable-work aggregate created exactly once when a Suggested
-Action is approved. Todo Events form its append-only history and later workflow
-features extend the same record.
+Action is approved. Confirmed Space members assign, reassign, complete, and
+reopen it through request-identified Todo Events that preserve actor, time, and
+before/after state. Space and Home consume the same versioned projection.
 _Avoid_: Suggested Action, reminder, copied Home task
+
+**Todo Event**:
+An append-only assignment or lifecycle fact for one Todo. A later reassignment
+or reopen event corrects earlier work without deleting its audit history.
+_Avoid_: Mutable status row, client-only correction, deleted history

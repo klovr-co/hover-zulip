@@ -14,7 +14,6 @@ from hover.models import (
     SuggestedAction,
     SuggestedActionTransition,
     Todo,
-    TodoEvent,
 )
 from hover.publication_contracts import SuggestedActionPayload
 from zerver.lib.exceptions import JsonableError
@@ -87,12 +86,9 @@ def suggested_action_data(action: SuggestedAction) -> dict[str, object]:
     except Todo.DoesNotExist:
         todo_data = None
     else:
-        todo_data = {
-            "id": todo.id,
-            "state": todo.state,
-            "assignee_user_id": todo.assignee_id,
-            "due_date": todo.due_date.isoformat() if todo.due_date is not None else None,
-        }
+        from hover.actions_todos import todo_data as serialize_todo
+
+        todo_data = serialize_todo(todo)
     assignee = action.assignee
     return {
         "id": action.id,
@@ -267,12 +263,8 @@ def decide_suggested_action(
         todo=todo,
     )
     if todo is not None:
-        TodoEvent.objects.create(
-            realm=action.realm,
-            todo=todo,
-            transition=transition,
-            kind=TodoEvent.Kind.APPROVED,
-            actor=acting_user,
-        )
+        from hover.actions_todos import record_todo_approval
+
+        record_todo_approval(todo=todo, transition=transition, actor=acting_user)
     send_suggested_action_projection_event(action)
     return SuggestedActionDecisionResult(changed=True, action=action)

@@ -24,8 +24,77 @@
         </p>
     {{/if}}
     {{#if is_approved}}
-        <p class="hover-suggested-action__todo">{{#tr}}Todo #{{todo_id}}
-                is active{{/tr}}</p>
+        <div
+            class="hover-suggested-action__todo"
+            data-hover-todo-id="{{todo_id}}"
+            tabindex="0"
+        >
+            <p>
+                {{#if todo_is_active}}{{#tr}}Todo #{{todo_id}}
+                        is active{{/tr}}{{/if}}
+                {{#if todo_is_completed}}{{#tr}}Todo #{{todo_id}}
+                        is completed{{/tr}}{{/if}}
+            </p>
+            <p>{{#tr}}Assigned to {{todo_assignee}}{{/tr}}</p>
+            {{#if todo_latest_actor}}
+                <p>{{#tr}}Last changed by
+                        {{todo_latest_actor}}
+                        at
+                        {{todo_latest_time}}{{/tr}}</p>
+            {{/if}}
+            <div class="hover-suggested-action__controls">
+                {{#if todo_is_active}}
+                    <label>
+                        <span>{{t "Assign to"}}</span>
+                        <select
+                            data-hover-todo-assignee
+                            aria-label="{{t 'Assign Todo'}}"
+                        >
+                            {{#if todo_assignee_user_id}}
+                                <option
+                                    value="{{todo_assignee_user_id}}"
+                                >{{todo_assignee}}</option>
+                            {{else}}
+                                <option value="">{{t
+                                        "Choose a teammate"
+                                    }}</option>
+                            {{/if}}
+                            {{#each todo_assignable_users}}
+                                <option
+                                    value="{{this.user_id}}"
+                                >{{this.full_name}}</option>
+                            {{/each}}
+                        </select>
+                    </label>
+                    <button
+                        type="button"
+                        class="button rounded"
+                        data-hover-todo-operation="assign"
+                        data-hover-todo-id="{{todo_id}}"
+                    >{{t "Assign"}}</button>
+                    <button
+                        type="button"
+                        class="button rounded sea-green"
+                        data-hover-todo-operation="complete"
+                        data-hover-todo-id="{{todo_id}}"
+                    >{{t "Complete"}}</button>
+                {{/if}}
+                {{#if todo_is_completed}}
+                    <button
+                        type="button"
+                        class="button rounded"
+                        data-hover-todo-operation="reopen"
+                        data-hover-todo-id="{{todo_id}}"
+                    >{{t "Reopen"}}</button>
+                {{/if}}
+            </div>
+            <span
+                class="hover-suggested-action__status"
+                data-hover-todo-status
+                role="status"
+                aria-live="polite"
+            ></span>
+        </div>
     {{else}}
         <div class="hover-suggested-action__controls">
             {{#if is_pending}}

@@ -664,6 +664,13 @@ export class MessageListView {
             latest_time?: string;
             latest_reason?: string;
             todo_id?: number;
+            todo_is_active?: boolean;
+            todo_is_completed?: boolean;
+            todo_assignee?: string;
+            todo_assignable_users?: Array<{user_id: number; full_name: string}>;
+            todo_assignee_user_id?: number;
+            todo_latest_actor?: string;
+            todo_latest_time?: string;
         };
         has_hover_revisions: boolean;
         hover_revisions: (message_store.HoverRevision & {
@@ -821,6 +828,8 @@ export class MessageListView {
         const hover_review_request = message.hover_review_request;
         const suggested_action = hover_generated_item?.suggested_action;
         const latest_transition = suggested_action?.recent_transitions[0];
+        const todo = suggested_action?.todo;
+        const latest_todo_event = todo?.recent_events[0];
         const hover_revisions = (hover_generated_item?.revisions ?? []).map((revision) => ({
             ...revision,
             previous_value_display: JSON.stringify(revision.previous_value),
@@ -916,9 +925,24 @@ export class MessageListView {
                             latest_time: latest_transition.occurred_at,
                             latest_reason: latest_transition.reason,
                         }),
-                        ...(suggested_action.todo !== null && {
-                            todo_id: suggested_action.todo.id,
-                        }),
+                        ...(todo !== null &&
+                            todo !== undefined && {
+                                todo_id: todo.id,
+                                todo_is_active: todo.state === "active",
+                                todo_is_completed: todo.state === "completed",
+                                todo_assignee:
+                                    todo.assignee?.full_name ?? $t({defaultMessage: "Unassigned"}),
+                                todo_assignable_users: todo.assignable_users.filter(
+                                    (user) => user.user_id !== todo.assignee?.user_id,
+                                ),
+                                ...(todo.assignee !== null && {
+                                    todo_assignee_user_id: todo.assignee.user_id,
+                                }),
+                                ...(latest_todo_event !== undefined && {
+                                    todo_latest_actor: latest_todo_event.actor.full_name,
+                                    todo_latest_time: latest_todo_event.occurred_at,
+                                }),
+                            }),
                     },
                 }),
             has_hover_revisions: hover_revisions.length > 0,

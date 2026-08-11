@@ -27601,6 +27601,114 @@ paths:
                         "url": "https://example.constructor.app/groups/room/room-123",
                       }
 
+  /hover/todos:
+    get:
+      operationId: list-hover-todos
+      summary: List authorized Hover Todos
+      tags: ["messages"]
+      description: |
+        Return the canonical Todo projections from every launched Space where
+        the caller is a confirmed member. Home and Space views consume these
+        same records; no copied task state is created.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - additionalProperties: false
+                    required: [todos]
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      todos:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverTodo"
+
+  /hover/spaces/{space_id}/todos/{todo_id}/events:
+    post:
+      operationId: update-hover-todo
+      summary: Append a Hover Todo event
+      tags: ["messages"]
+      description: |
+        Assign, reassign, complete, or reopen the canonical Todo. Every change
+        appends actor/time history. Request IDs make retries idempotent and
+        expected versions reject stale clients.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      parameters:
+        - name: space_id
+          in: path
+          required: true
+          schema: {type: integer}
+        - name: todo_id
+          in: path
+          required: true
+          schema: {type: integer}
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [operation, request_id, expected_version]
+              properties:
+                operation:
+                  type: string
+                  enum: [assign, complete, reopen]
+                request_id:
+                  type: string
+                  format: uuid
+                expected_version:
+                  type: integer
+                  minimum: 1
+                assignee_user_id:
+                  type: integer
+                  minimum: 1
+                  nullable: true
+                  description: Required only for `assign`.
+                reason:
+                  type: string
+                  nullable: true
+                  maxLength: 1000
+      responses:
+        "200":
+          description: Success, including an idempotent replay.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - additionalProperties: false
+                    required: [changed, todo]
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      changed: {type: boolean}
+                      todo:
+                        $ref: "#/components/schemas/HoverTodo"
+        "409":
+          description: The expected version or requested transition is stale.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [result, msg, todo]
+                properties:
+                  result: {type: string, enum: [error]}
+                  msg: {type: string}
+                  todo:
+                    $ref: "#/components/schemas/HoverTodo"
+
   /hover/spaces/{space_id}/generated-items/{generated_item_id}/suggested-action/decisions:
     post:
       operationId: decide-hover-suggested-action
@@ -31250,22 +31358,115 @@ components:
                 format: date-time
               reason: {type: string}
         todo:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/HoverTodo"
+    HoverTodoPerson:
+      type: object
+      additionalProperties: false
+      required: [user_id, full_name]
+      properties:
+        user_id: {type: integer}
+        full_name: {type: string}
+    HoverTodo:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          state,
+          version,
+          wording,
+          due_date,
+          completed_at,
+          assignee,
+          space,
+          generated_item,
+          approval,
+          assignable_users,
+          history_count,
+          recent_events,
+        ]
+      properties:
+        id: {type: integer}
+        state: {type: string, enum: [active, completed]}
+        version: {type: integer, minimum: 1}
+        wording: {type: string}
+        due_date: {type: string, format: date, nullable: true}
+        completed_at: {type: string, format: date-time, nullable: true}
+        assignee:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/HoverTodoPerson"
+        space:
+          type: object
+          additionalProperties: false
+          required: [id, name]
+          properties:
+            id: {type: integer}
+            name: {type: string}
+        generated_item:
+          type: object
+          additionalProperties: false
+          required: [id, message_id, evidence_count, evidence_url]
+          properties:
+            id: {type: integer}
+            message_id: {type: integer}
+            evidence_count: {type: integer, minimum: 0}
+            evidence_url: {type: string, nullable: true}
+        approval:
           type: object
           nullable: true
           additionalProperties: false
-          required: [id, state, assignee_user_id, due_date]
+          required: [transition_id, actor, occurred_at]
           properties:
-            id: {type: integer}
-            state:
-              type: string
-              enum: [active]
-            assignee_user_id:
-              type: integer
-              nullable: true
-            due_date:
-              type: string
-              format: date
-              nullable: true
+            transition_id: {type: integer}
+            actor: {$ref: "#/components/schemas/HoverTodoPerson"}
+            occurred_at: {type: string, format: date-time}
+        assignable_users:
+          type: array
+          items: {$ref: "#/components/schemas/HoverTodoPerson"}
+        history_count: {type: integer, minimum: 1}
+        recent_events:
+          type: array
+          maxItems: 10
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              [
+                id,
+                kind,
+                actor,
+                occurred_at,
+                previous_state,
+                new_state,
+                previous_assignee,
+                new_assignee,
+                reason,
+                notification_message_id,
+              ]
+            properties:
+              id: {type: integer}
+              kind:
+                {
+                  type: string,
+                  enum: [approved, assigned, reassigned, completed, reopened],
+                }
+              actor: {$ref: "#/components/schemas/HoverTodoPerson"}
+              occurred_at: {type: string, format: date-time}
+              previous_state: {type: string}
+              new_state: {type: string, enum: [active, completed]}
+              previous_assignee:
+                nullable: true
+                allOf:
+                  - $ref: "#/components/schemas/HoverTodoPerson"
+              new_assignee:
+                nullable: true
+                allOf:
+                  - $ref: "#/components/schemas/HoverTodoPerson"
+              reason: {type: string}
+              notification_message_id: {type: integer, nullable: true}
     HoverResolvedEvidence:
       type: object
       additionalProperties: false
