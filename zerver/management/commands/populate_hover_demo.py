@@ -1267,10 +1267,19 @@ class Command(ZulipBaseCommand):
         ]
 
         current_message_ids = [message.id for _post, message in posts_and_messages]
+        # Reconcile only obsolete, fixture-owned bot posts. Human replies,
+        # Reviews, Todo notifications, and their append-only audit records are
+        # real collaboration history and must survive rerunning the fixture.
         stale_messages = list(
-            Message.objects.filter(realm_id=realm.id, recipient=stream.recipient).exclude(
-                id__in=current_message_ids
-            )
+            Message.objects.filter(
+                realm_id=realm.id,
+                recipient=stream.recipient,
+                sender=hover_user,
+                hover_generated_item__isnull=True,
+                hover_response__isnull=True,
+                hover_review_request__isnull=True,
+                hover_todo_notification__isnull=True,
+            ).exclude(id__in=current_message_ids)
         )
         if stale_messages:
             do_delete_messages(stream.realm, stale_messages, acting_user=owner)

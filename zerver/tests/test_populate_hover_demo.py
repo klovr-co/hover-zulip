@@ -319,17 +319,24 @@ class PopulateHoverDemoTest(ZulipTestCase):
             "Summary",
             read_by_sender=False,
         )
+        teammate_message_id = self.send_stream_message(
+            self.example_user("hamlet"),
+            "AIMTO Events",
+            "Keep this teammate follow-up when the fixture is refreshed.",
+            "Summary",
+        )
         self.assertEqual(
             Message.objects.filter(realm_id=realm.id, recipient=stream.recipient).count(),
-            len(DEMO_POSTS) + 1,
+            len(DEMO_POSTS) + 2,
         )
 
         call_command("populate_hover_demo", "--realm=zulip", "--viewer-email=hamlet@zulip.com")
         self.assertEqual(
             Message.objects.filter(realm_id=realm.id, recipient=stream.recipient).count(),
-            len(DEMO_POSTS),
+            len(DEMO_POSTS) + 1,
         )
         self.assertFalse(Message.objects.filter(id=stale_message_id).exists())
+        self.assertTrue(Message.objects.filter(id=teammate_message_id).exists())
         self.assertEqual(
             set(SpaceAttachment.objects.filter(space=space).values_list("source_id", flat=True)),
             live_record_ids["sources"],
