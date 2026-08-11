@@ -99,6 +99,42 @@
     {{else}}
         <div class="hover-suggested-action__controls">
             {{#if is_pending}}
+                <div class="hover-suggested-action__refinements">
+                    <label>
+                        <span>{{t "Action wording"}}</span>
+                        <textarea
+                          maxlength="50000"
+                          data-hover-action-wording
+                          aria-label="{{t 'Action wording'}}"
+                          >{{wording}}</textarea>
+                    </label>
+                    <label>
+                        <span>{{t "Assign to"}}</span>
+                        <select
+                          data-hover-action-assignee
+                          aria-label="{{t 'Suggested Action assignee'}}"
+                          >
+                            <option value="">{{t "Unassigned"}}</option>
+                            {{#if approval_has_assignee}}
+                                <option value="{{approval_assignee_user_id}}" selected>
+                                    {{responsibility}}
+                                </option>
+                            {{/if}}
+                            {{#each approval_assignable_users}}
+                                <option value="{{this.user_id}}">{{this.full_name}}</option>
+                            {{/each}}
+                        </select>
+                    </label>
+                    <label>
+                        <span>{{t "Due date"}}</span>
+                        <input
+                          type="date"
+                          value="{{approval_due_date}}"
+                          data-hover-action-due-date
+                          aria-label="{{t 'Suggested Action due date'}}"
+                          />
+                    </label>
+                </div>
                 <button
                   type="button"
                   class="button rounded sea-green"

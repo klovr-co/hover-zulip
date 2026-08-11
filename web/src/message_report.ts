@@ -112,6 +112,9 @@ function get_message_container_for_preview(message: Message): MessageContainer {
         message_edit_notices_in_left_col: false,
         modified: false,
         moved: false,
+        is_hover_review_request: false,
+        has_hover_disputed_details: false,
+        hover_disputed_details: [],
         widget_edited: false,
         year_changed: false,
     };

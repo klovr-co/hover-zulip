@@ -110,6 +110,7 @@ export const hover_suggested_action_schema = z.object({
         assignee_display_name: z.nullable(z.string()),
     }),
     assignee: z.nullable(z.object({user_id: z.number(), full_name: z.string()})),
+    assignable_users: z.array(z.object({user_id: z.number(), full_name: z.string()})),
     due_date: z.nullable(z.string()),
     history_count: z.number(),
     recent_transitions: z.array(

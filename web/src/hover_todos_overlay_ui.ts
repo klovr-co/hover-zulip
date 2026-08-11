@@ -3,17 +3,17 @@ import {$} from "jquery";
 import render_hover_todos_overlay from "../templates/hover_todos_overlay.hbs";
 
 import * as browser_history from "./browser_history.ts";
+import * as hover_todos from "./hover_todos.ts";
 import {$t} from "./i18n.ts";
 import type {HoverTodo} from "./message_store.ts";
 import * as overlays from "./overlays.ts";
-import * as hover_todos from "./hover_todos.ts";
 
 type TodoRenderContext = HoverTodo & {
     is_active: boolean;
     is_completed: boolean;
     due_label: string;
     assignee_label: string;
-    assignable_options: Array<{user_id: number; full_name: string}>;
+    assignable_options: {user_id: number; full_name: string}[];
     source_hash: string;
     latest_event?: HoverTodo["recent_events"][number];
 };
@@ -34,12 +34,13 @@ function format(todo: HoverTodo): TodoRenderContext {
 }
 
 function render(): string {
-    const todos = hover_todos.sorted().map(format);
+    const todos = hover_todos.sorted().map((todo) => format(todo));
     return render_hover_todos_overlay({todos, empty: todos.length === 0});
 }
 
 export function launch(): void {
-    $("#reminders-overlay-container").html(render());
+    const rendered_todos_overlay = render();
+    $("#reminders-overlay-container").html(rendered_todos_overlay);
     overlays.open_overlay({
         name: "reminders",
         $overlay: $("#reminders-overlay"),
@@ -54,10 +55,10 @@ export function rerender(): void {
     if (!overlays.reminders_open() || $("#reminders-overlay").attr("data-hover-todos") !== "true") {
         return;
     }
-    const focused_id = $(document.activeElement)
-        .closest("[data-hover-todo-id]")
-        .attr("data-hover-todo-id");
-    $("#reminders-overlay-container").html(render());
+    const $active_element = document.activeElement === null ? $() : $(document.activeElement);
+    const focused_id = $active_element.closest("[data-hover-todo-id]").attr("data-hover-todo-id");
+    const rendered_todos_overlay = render();
+    $("#reminders-overlay-container").html(rendered_todos_overlay);
     if (focused_id !== undefined) {
         $(`#reminders-overlay [data-hover-todo-id='${CSS.escape(focused_id)}']`).trigger("focus");
     }

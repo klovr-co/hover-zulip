@@ -4,8 +4,10 @@ const assert = require("node:assert/strict");
 
 const {mock_esm, zrequire} = require("./lib/namespace.cjs");
 const {run_test} = require("./lib/test.cjs");
+const {$} = require("./lib/zjquery.cjs");
 
 const messages = new Map();
+const channel = mock_esm("../src/channel");
 const message_live_update = mock_esm("../src/message_live_update");
 mock_esm("../src/message_store", {
     get(id) {
@@ -65,5 +67,20 @@ run_test("Home sorts active Todos first and counts only active work", () => {
     assert.deepEqual(
         hover_todos.sorted().map((item) => item.id),
         [3, 2, 1],
+    );
+});
+
+run_test("delegates Todo actions from both message and overlay roots", ({override}) => {
+    override(channel, "get", () => {});
+
+    hover_todos.initialize();
+
+    assert.equal(
+        typeof $("#main_div").get_on_handler("click", "[data-hover-todo-operation]"),
+        "function",
+    );
+    assert.equal(
+        typeof $("body").get_on_handler("click", "[data-hover-todo-operation]"),
+        "function",
     );
 });

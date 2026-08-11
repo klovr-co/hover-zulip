@@ -657,6 +657,10 @@ export class MessageListView {
             wording: string;
             responsibility: string;
             due_date: string;
+            approval_due_date: string;
+            approval_assignable_users: {user_id: number; full_name: string}[];
+            approval_has_assignee: boolean;
+            approval_assignee_user_id?: number;
             is_pending: boolean;
             is_approved: boolean;
             is_not_action: boolean;
@@ -667,7 +671,7 @@ export class MessageListView {
             todo_is_active?: boolean;
             todo_is_completed?: boolean;
             todo_assignee?: string;
-            todo_assignable_users?: Array<{user_id: number; full_name: string}>;
+            todo_assignable_users?: {user_id: number; full_name: string}[];
             todo_has_assignee?: boolean;
             todo_assignee_user_id?: number;
             todo_latest_actor?: string;
@@ -918,6 +922,14 @@ export class MessageListView {
                             suggested_action.source_proposal.assignee_display_name ??
                             $t({defaultMessage: "Unassigned"}),
                         due_date: suggested_action.due_date ?? $t({defaultMessage: "No due date"}),
+                        approval_due_date: suggested_action.due_date ?? "",
+                        approval_assignable_users: suggested_action.assignable_users.filter(
+                            (user) => user.user_id !== suggested_action.assignee?.user_id,
+                        ),
+                        approval_has_assignee: suggested_action.assignee !== null,
+                        ...(suggested_action.assignee !== null && {
+                            approval_assignee_user_id: suggested_action.assignee.user_id,
+                        }),
                         is_pending: suggested_action.state === "pending",
                         is_approved: suggested_action.state === "approved",
                         is_not_action: suggested_action.state === "not_action",

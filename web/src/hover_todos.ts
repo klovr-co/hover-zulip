@@ -2,6 +2,7 @@ import {$} from "jquery";
 import * as z from "zod/mini";
 
 import * as channel from "./channel.ts";
+import * as hover_request_id from "./hover_request_id.ts";
 import {$t} from "./i18n.ts";
 import * as message_live_update from "./message_live_update.ts";
 import * as message_store from "./message_store.ts";
@@ -32,6 +33,7 @@ export function apply_projection(todo: HoverTodo): boolean {
     todos.set(todo.id, todo);
     request_ids.delete(todo.id);
     if (
+        message !== undefined &&
         action !== null &&
         action !== undefined &&
         message.hover_generated_item?.id === todo.generated_item.id &&
@@ -45,16 +47,22 @@ export function apply_projection(todo: HoverTodo): boolean {
 }
 
 export function get_count(): number {
-    return [...todos.values()].filter((todo) => todo.state === "active").length;
+    return todos
+        .values()
+        .filter((todo) => todo.state === "active")
+        .toArray().length;
 }
 
 export function sorted(): HoverTodo[] {
-    return [...todos.values()].sort((left, right) => {
-        if (left.state !== right.state) {
-            return left.state === "active" ? -1 : 1;
-        }
-        return (left.due_date ?? "9999-12-31").localeCompare(right.due_date ?? "9999-12-31");
-    });
+    return todos
+        .values()
+        .toArray()
+        .toSorted((left, right) => {
+            if (left.state !== right.state) {
+                return left.state === "active" ? -1 : 1;
+            }
+            return (left.due_date ?? "9999-12-31").localeCompare(right.due_date ?? "9999-12-31");
+        });
 }
 
 export function submit(todo_id: number, operation: "assign" | "complete" | "reopen"): void {
@@ -62,7 +70,7 @@ export function submit(todo_id: number, operation: "assign" | "complete" | "reop
     if (todo === undefined) {
         return;
     }
-    const request_id = request_ids.get(todo_id) ?? crypto.randomUUID();
+    const request_id = request_ids.get(todo_id) ?? hover_request_id.generate();
     request_ids.set(todo_id, request_id);
     const $containers = $(`[data-hover-todo-id='${todo_id}']`);
     $containers.find("button, select").prop("disabled", true);
@@ -109,7 +117,11 @@ export function initialize(): void {
             announce_change();
         },
     });
-    $("body").on("click", "[data-hover-todo-operation]", (event) => {
+    // Message-pane clicks stop propagating at #main_div, while the Home
+    // overlay is mounted outside it. Delegate from both roots and stop after
+    // the first matching root so one click cannot submit twice.
+    const handle_todo_operation = (event: JQuery.ClickEvent): void => {
+        event.stopPropagation();
         const $button = $(event.currentTarget);
         const todo_id = Number($button.attr("data-hover-todo-id"));
         const operation = $button.attr("data-hover-todo-operation");
@@ -119,7 +131,9 @@ export function initialize(): void {
         ) {
             submit(todo_id, operation);
         }
-    });
+    };
+    $("#main_div").on("click", "[data-hover-todo-operation]", handle_todo_operation);
+    $("body").on("click", "[data-hover-todo-operation]", handle_todo_operation);
 }
 
 export const event_schema = z.object({

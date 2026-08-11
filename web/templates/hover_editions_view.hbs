@@ -31,240 +31,260 @@
           aria-label="{{t 'Choose an edition'}}"
           >
             <button
+              id="hover-edition-tab-morning"
               type="button"
               class="button-reset-style hover-edition-tab"
               data-edition="morning"
               role="tab"
+              aria-controls="hover-edition-panel-morning"
               aria-selected="{{morning_aria_selected}}"
+              tabindex="{{morning_tabindex}}"
               >{{t "Morning"}}</button>
             <button
+              id="hover-edition-tab-end-of-day"
               type="button"
               class="button-reset-style hover-edition-tab"
               data-edition="end_of_day"
               role="tab"
+              aria-controls="hover-edition-panel-end-of-day"
               aria-selected="{{end_of_day_aria_selected}}"
+              tabindex="{{end_of_day_tabindex}}"
               >{{t "End of day"}}</button>
         </div>
     </header>
 
-    <div class="hover-edition-status" role="status" aria-live="polite">
-        {{status}}
-        {{#if show_retry}}
-            <button
-              id="hover-edition-retry"
-              type="button"
-              class="button-reset-style"
-              >{{t "Retry"}}</button>
-        {{/if}}
-    </div>
-
-    {{#if loading}}
-        <div class="hover-edition-loading" aria-hidden="true">
-            <span></span><span></span><span></span>
-        </div>
-    {{else if edition}}
-        <div
-          class="hover-edition-view-controls"
-          aria-label="{{t 'Reading view'}}"
-          >
-            {{#if all_mode}}
+    <div
+      id="{{active_panel_id}}"
+      role="tabpanel"
+      aria-labelledby="{{active_tab_id}}"
+      tabindex="0"
+      >
+        <div class="hover-edition-status" role="status" aria-live="polite">
+            {{status}}
+            {{#if show_retry}}
                 <button
-                  id="hover-edition-focus-view"
+                  id="hover-edition-retry"
                   type="button"
                   class="button-reset-style"
-                  >
-                    <i
-                      class="zulip-icon zulip-icon-panel-right"
-                      aria-hidden="true"
-                      ></i>
-                    {{t "Focus view"}}
-                </button>
-            {{else}}
-                <button
-                  id="hover-edition-view-all"
-                  type="button"
-                  class="button-reset-style"
-                  >
-                    <i
-                      class="zulip-icon zulip-icon-list"
-                      aria-hidden="true"
-                      ></i>
-                    {{t "View all"}}
-                </button>
+                  >{{t "Retry"}}</button>
             {{/if}}
         </div>
 
-        {{#if focus_mode}}
-            {{#if current_slide}}
-                <section
-                  class="hover-edition-carousel"
-                  role="region"
-                  aria-roledescription="carousel"
-                  aria-label="{{t 'Daily Brief focus view'}}"
-                  tabindex="0"
-                  >
-                    <div
-                      class="hover-edition-carousel__progress"
-                      role="status"
-                      aria-live="polite"
+        {{#if loading}}
+            <div class="hover-edition-loading" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+        {{else if edition}}
+            <div
+              class="hover-edition-view-controls"
+              aria-label="{{t 'Reading view'}}"
+              >
+                {{#if all_mode}}
+                    <button
+                      id="hover-edition-focus-view"
+                      type="button"
+                      class="button-reset-style"
                       >
-                        {{t
-                          "Item {slide_number} of {slide_count}"
+                        <i
+                          class="zulip-icon zulip-icon-panel-right"
+                          aria-hidden="true"
+                          ></i>
+                        {{t "Focus view"}}
+                    </button>
+                {{else}}
+                    <button
+                      id="hover-edition-view-all"
+                      type="button"
+                      class="button-reset-style"
+                      >
+                        <i
+                          class="zulip-icon zulip-icon-list"
+                          aria-hidden="true"
+                          ></i>
+                        {{t "View all"}}
+                    </button>
+                {{/if}}
+            </div>
+
+            {{#if focus_mode}}
+                {{#if current_slide}}
+                    <section
+                      class="hover-edition-carousel"
+                      role="region"
+                      aria-roledescription="carousel"
+                      aria-label="{{t 'Daily Brief focus view'}}"
+                      tabindex="0"
+                      >
+                        <div
+                          class="hover-edition-carousel__progress"
+                          role="status"
+                          aria-live="polite"
+                          >
+                            {{t
+                              "Item {slide_number} of {slide_count}"
                             slide_number=slide_number
                             slide_count=slide_count
                         }}
-                    </div>
-                    <article
-                      class="hover-edition-passage hover-edition-slide"
-                      aria-roledescription="slide"
-                      aria-label="{{t
-                      'Item {slide_number} of {slide_count}'
-                      slide_number=slide_number
-                      slide_count=slide_count
-                      }}"
-                      >
-                        <span
-                          class="hover-edition-section-label"
-                          >{{current_slide.section_label}}</span>
-                        <h2>{{current_slide.title}}</h2>
-                        <p>{{current_slide.detail}}</p>
-                        <div class="hover-edition-passage__actions">
-                            <a
-                              class="hover-edition-update-link"
-                              href="{{current_slide.update.url}}"
-                              >
-                                {{t "Open update"}}
-                                <span>{{current_slide.update.space_name}}
-                                    ·
-                                    {{current_slide.update.topic}}</span>
-                            </a>
-                            {{#if current_slide.update.evidence_url}}
+                        </div>
+                        <article
+                          class="hover-edition-passage hover-edition-slide"
+                          aria-roledescription="slide"
+                          aria-label="{{t
+                          'Item {slide_number} of {slide_count}'
+                          slide_number=slide_number
+                          slide_count=slide_count
+                          }}"
+                          >
+                            <span
+                              class="hover-edition-section-label"
+                              >{{current_slide.section_label}}</span>
+                            <h2>{{current_slide.title}}</h2>
+                            <p>{{current_slide.detail}}</p>
+                            <div class="hover-edition-passage__actions">
+                                <a
+                                  class="hover-edition-update-link"
+                                  href="{{current_slide.update.url}}"
+                                  >
+                                    {{t "Open update"}}
+                                    <span>{{current_slide.update.space_name}}
+                                        ·
+                                        {{current_slide.update.topic}}</span>
+                                </a>
+                                {{#if current_slide.update.evidence_url}}
+                                    <button
+                                      type="button"
+                                      class="button-reset-style hover-edition-sources-link hover-view-evidence"
+                                      data-evidence-url="{{current_slide.update.evidence_url}}"
+                                      aria-haspopup="dialog"
+                                      >{{t "View sources"}}</button>
+                                {{/if}}
+                            </div>
+                        </article>
+                        <div class="hover-edition-carousel__controls">
+                            {{#if can_go_previous}}
                                 <button
+                                  id="hover-edition-previous"
                                   type="button"
-                                  class="button-reset-style hover-edition-sources-link hover-view-evidence"
-                                  data-evidence-url="{{current_slide.update.evidence_url}}"
-                                  aria-haspopup="dialog"
-                                  >{{t "View sources"}}</button>
+                                  class="button-reset-style"
+                                  aria-label="{{t 'Previous item'}}"
+                                  ><i
+                                    class="zulip-icon zulip-icon-arrow-left"
+                                    aria-hidden="true"
+                                ></i></button>
+                            {{else}}
+                                <button
+                                  id="hover-edition-previous"
+                                  type="button"
+                                  class="button-reset-style"
+                                  aria-label="{{t 'Previous item'}}"
+                                  disabled
+                                  ><i
+                                    class="zulip-icon zulip-icon-arrow-left"
+                                    aria-hidden="true"
+                                ></i></button>
+                            {{/if}}
+                            {{#if can_go_next}}
+                                <button
+                                  id="hover-edition-next"
+                                  type="button"
+                                  class="button-reset-style"
+                                  aria-label="{{t 'Next item'}}"
+                                  ><i
+                                    class="zulip-icon zulip-icon-arrow-right"
+                                    aria-hidden="true"
+                                ></i></button>
+                            {{else}}
+                                <button
+                                  id="hover-edition-next"
+                                  type="button"
+                                  class="button-reset-style"
+                                  aria-label="{{t 'Next item'}}"
+                                  disabled
+                                  ><i
+                                    class="zulip-icon zulip-icon-arrow-right"
+                                    aria-hidden="true"
+                                ></i></button>
                             {{/if}}
                         </div>
-                    </article>
-                    <div class="hover-edition-carousel__controls">
-                        {{#if can_go_previous}}
-                            <button
-                              id="hover-edition-previous"
-                              type="button"
-                              class="button-reset-style"
-                              aria-label="{{t 'Previous item'}}"
-                              ><i
-                                    class="zulip-icon zulip-icon-arrow-left"
-                                    aria-hidden="true"
-                                ></i></button>
-                        {{else}}
-                            <button
-                              id="hover-edition-previous"
-                              type="button"
-                              class="button-reset-style"
-                              aria-label="{{t 'Previous item'}}"
-                              disabled
-                              ><i
-                                    class="zulip-icon zulip-icon-arrow-left"
-                                    aria-hidden="true"
-                                ></i></button>
-                        {{/if}}
-                        {{#if can_go_next}}
-                            <button
-                              id="hover-edition-next"
-                              type="button"
-                              class="button-reset-style"
-                              aria-label="{{t 'Next item'}}"
-                              ><i
-                                    class="zulip-icon zulip-icon-arrow-right"
-                                    aria-hidden="true"
-                                ></i></button>
-                        {{else}}
-                            <button
-                              id="hover-edition-next"
-                              type="button"
-                              class="button-reset-style"
-                              aria-label="{{t 'Next item'}}"
-                              disabled
-                              ><i
-                                    class="zulip-icon zulip-icon-arrow-right"
-                                    aria-hidden="true"
-                                ></i></button>
-                        {{/if}}
-                    </div>
-                </section>
+                    </section>
+                {{else}}
+                    <p class="hover-edition-empty">
+                        {{t
+                          "There are no confirmed updates to feature in this edition."
+                          }}
+                    </p>
+                {{/if}}
             {{else}}
-                <p class="hover-edition-empty">
-                    {{t
-                      "There are no confirmed updates to feature in this edition."
-                      }}
-                </p>
-            {{/if}}
-        {{else}}
-            <div class="hover-edition-scroll" aria-label="{{t 'Full edition'}}">
-                {{#each sections}}
-                    {{#if has_items}}
-                        <section
-                          class="hover-edition-section"
-                          aria-labelledby="hover-edition-section-{{key}}"
-                          >
-                            <h2
-                              id="hover-edition-section-{{key}}"
+                <div class="hover-edition-scroll" aria-label="{{t 'Full edition'}}">
+                    {{#each sections}}
+                        {{#if has_items}}
+                            <section
+                              class="hover-edition-section"
+                              aria-labelledby="hover-edition-section-{{key}}"
                               >
-                                {{label}}
-                            </h2>
-                            {{#each items}}
-                                <article class="hover-edition-passage">
-                                    <h3>{{title}}</h3>
-                                    <p>{{detail}}</p>
-                                    <div class="hover-edition-passage__actions">
-                                        <a
-                                          class="hover-edition-update-link"
-                                          href="{{update.url}}"
-                                          >
-                                            {{t "Open update"}}
-                                            <span>{{update.space_name}}
-                                                ·
-                                                {{update.topic}}</span>
-                                        </a>
-                                        {{#if update.evidence_url}}
-                                            <button
-                                              type="button"
-                                              class="button-reset-style hover-edition-sources-link hover-view-evidence"
-                                              data-evidence-url="{{update.evidence_url}}"
-                                              aria-haspopup="dialog"
-                                              >{{t "View sources"}}</button>
-                                        {{/if}}
-                                    </div>
-                                </article>
-                            {{/each}}
-                        </section>
-                    {{/if}}
-                {{/each}}
-                {{#if edition.all_clear}}
-                    <aside class="hover-edition-all-clear">
-                        <span aria-hidden="true">✓</span>
-                        <div>
-                            <h2>{{t "Everything else is moving well"}}</h2>
-                            <p>
+                                <h2
+                                  id="hover-edition-section-{{key}}"
+                                  >
+                                    {{label}}
+                                </h2>
+                                {{#each items}}
+                                    <article class="hover-edition-passage">
+                                        <h3>{{title}}</h3>
+                                        <p>{{detail}}</p>
+                                        <div class="hover-edition-passage__actions">
+                                            <a
+                                              class="hover-edition-update-link"
+                                              href="{{update.url}}"
+                                              >
+                                                {{t "Open update"}}
+                                                <span>{{update.space_name}}
+                                                    ·
+                                                    {{update.topic}}</span>
+                                            </a>
+                                            {{#if update.evidence_url}}
+                                                <button
+                                                  type="button"
+                                                  class="button-reset-style hover-edition-sources-link hover-view-evidence"
+                                                  data-evidence-url="{{update.evidence_url}}"
+                                                  aria-haspopup="dialog"
+                                                  >{{t "View sources"}}</button>
+                                            {{/if}}
+                                        </div>
+                                    </article>
+                                {{/each}}
+                            </section>
+                        {{/if}}
+                    {{/each}}
+                    {{#if edition.all_clear}}
+                        <aside class="hover-edition-all-clear">
+                            <span aria-hidden="true">✓</span>
+                            <div>
+                                <h2>{{t "Everything else is moving well"}}</h2>
+                                <p>
+                                    {{t
+                                      "Nothing else in your confirmed Spaces needs your attention right now."
+                                      }}
+                                </p>
+                            </div>
+                        </aside>
+                    {{else}}
+                        {{#unless has_items}}
+                            <p class="hover-edition-empty">
                                 {{t
-                                  "Nothing else in your confirmed Spaces needs your attention right now."
+                                  "There are no confirmed updates to feature in this edition."
                                   }}
                             </p>
-                        </div>
-                    </aside>
-                {{else}}
-                    {{#unless has_items}}
-                        <p class="hover-edition-empty">
-                            {{t
-                              "There are no confirmed updates to feature in this edition."
-                              }}
-                        </p>
-                    {{/unless}}
-                {{/if}}
-            </div>
+                        {{/unless}}
+                    {{/if}}
+                </div>
+            {{/if}}
         {{/if}}
-    {{/if}}
+    </div>
+    <div
+      id="{{inactive_panel_id}}"
+      role="tabpanel"
+      aria-labelledby="{{inactive_tab_id}}"
+      hidden
+      >
+    </div>
 </main>

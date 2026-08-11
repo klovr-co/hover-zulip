@@ -88,6 +88,7 @@ class FakeElementState {
     match_results = new Map([["*", true]]);
     parents_results = new Map();
     query_results = new Map();
+    scroll_top = 0;
     selector = undefined;
     shown = false;
 }
@@ -162,6 +163,7 @@ class FakeElement extends RejectMissing {
     classList = new FakeClassList();
     dataset = new FakeDataSet(this);
     innerHTML = "never-been-set";
+    scrollHeight = 0;
     selectionEnd = undefined;
     selectionStart = undefined;
     style = new FakeStyle();
@@ -695,6 +697,17 @@ exports.FakeJQuery = class extends RejectMissing {
         class_names = split_words(class_names);
         for (const element of this) {
             element.classList.remove(...class_names);
+        }
+        return this;
+    }
+    scrollTop(...args) {
+        if (args.length === 0) {
+            return 0 in this ? fake_element_state.get(this[0]).scroll_top : undefined;
+        }
+        const [value] = args;
+        assert.equal(typeof value, "number");
+        for (const element of this) {
+            fake_element_state.get(element).scroll_top = value;
         }
         return this;
     }

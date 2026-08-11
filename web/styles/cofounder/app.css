@@ -3889,6 +3889,32 @@ a {
     align-items: center;
 }
 
+.hover-suggested-action__controls {
+    flex-wrap: wrap;
+}
+
+.hover-suggested-action__refinements {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(150px, 1fr) minmax(150px, 1fr);
+    gap: 8px;
+    width: 100%;
+}
+
+.hover-suggested-action__refinements label {
+    align-items: stretch;
+    flex-direction: column;
+}
+
+.hover-suggested-action__refinements :is(textarea, select, input) {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.hover-suggested-action__refinements textarea {
+    min-height: 64px;
+    resize: vertical;
+}
+
 .hover-todos-home .overlay-messages-header {
     align-items: flex-start;
 }
@@ -4029,6 +4055,10 @@ a {
     .hover-suggested-action__controls {
         align-items: stretch;
         flex-direction: column;
+    }
+
+    .hover-suggested-action__refinements {
+        grid-template-columns: 1fr;
     }
 
     .hover-todos-list {

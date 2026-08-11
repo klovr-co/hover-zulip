@@ -58,6 +58,15 @@ type EditionsResponse = z.infer<typeof response_schema>;
 type EditionKind = "morning" | "end_of_day";
 type ViewMode = "all" | "focus";
 
+const tab_ids: Record<EditionKind, string> = {
+    morning: "hover-edition-tab-morning",
+    end_of_day: "hover-edition-tab-end-of-day",
+};
+const panel_ids: Record<EditionKind, string> = {
+    morning: "hover-edition-panel-morning",
+    end_of_day: "hover-edition-panel-end-of-day",
+};
+
 const empty_response: EditionsResponse = {
     sync_status: "empty",
     editions: {morning: null, end_of_day: null},
@@ -110,7 +119,10 @@ function section_data(): {key: string; label: string; items: EditionItem[]}[] {
     }));
 }
 
-function render({focus_carousel = false}: {focus_carousel?: boolean} = {}): void {
+function render({
+    focus_carousel = false,
+    focus_tab,
+}: {focus_carousel?: boolean; focus_tab?: EditionKind} = {}): void {
     if (!visible) {
         return;
     }
@@ -133,6 +145,12 @@ function render({focus_carousel = false}: {focus_carousel?: boolean} = {}): void
             selected_end_of_day: selected_edition === "end_of_day",
             morning_aria_selected: selected_edition === "morning" ? "true" : "false",
             end_of_day_aria_selected: selected_edition === "end_of_day" ? "true" : "false",
+            morning_tabindex: selected_edition === "morning" ? "0" : "-1",
+            end_of_day_tabindex: selected_edition === "end_of_day" ? "0" : "-1",
+            active_tab_id: tab_ids[selected_edition],
+            active_panel_id: panel_ids[selected_edition],
+            inactive_tab_id: tab_ids[selected_edition === "morning" ? "end_of_day" : "morning"],
+            inactive_panel_id: panel_ids[selected_edition === "morning" ? "end_of_day" : "morning"],
             focus_mode: view_mode === "focus",
             all_mode: view_mode === "all",
             edition,
@@ -152,7 +170,15 @@ function render({focus_carousel = false}: {focus_carousel?: boolean} = {}): void
     );
     if (focus_carousel && view_mode === "focus" && current_slide !== undefined) {
         $(".hover-edition-carousel").trigger("focus");
+    } else if (focus_tab !== undefined) {
+        $(`#${tab_ids[focus_tab]}`).trigger("focus");
     }
+}
+
+function select_edition(edition: EditionKind, {focus_tab = false} = {}): void {
+    selected_edition = edition;
+    slide_index = 0;
+    render({...(focus_tab && {focus_tab: edition})});
 }
 
 function load(): void {
@@ -257,9 +283,34 @@ export function initialize(): void {
         if (edition !== "morning" && edition !== "end_of_day") {
             return;
         }
-        selected_edition = edition;
-        slide_index = 0;
-        render();
+        select_edition(edition, {focus_tab: true});
+    });
+    $("body").on("keydown", ".hover-edition-tab", (event) => {
+        const edition = $(event.currentTarget).attr("data-edition");
+        if (edition !== "morning" && edition !== "end_of_day") {
+            return;
+        }
+        let next_edition: EditionKind;
+        switch (event.key) {
+            case "ArrowLeft":
+            case "ArrowRight": {
+                next_edition = edition === "morning" ? "end_of_day" : "morning";
+                break;
+            }
+            case "Home": {
+                next_edition = "morning";
+                break;
+            }
+            case "End": {
+                next_edition = "end_of_day";
+                break;
+            }
+            default: {
+                return;
+            }
+        }
+        event.preventDefault();
+        select_edition(next_edition, {focus_tab: true});
     });
     $("body").on("click", "#hover-edition-focus-view", () => {
         view_mode = "focus";

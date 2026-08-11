@@ -2,6 +2,7 @@ import {$} from "jquery";
 import * as z from "zod/mini";
 
 import * as channel from "./channel.ts";
+import * as hover_request_id from "./hover_request_id.ts";
 import * as hover_spaces from "./hover_spaces.ts";
 import * as hover_todos from "./hover_todos.ts";
 import {$t} from "./i18n.ts";
@@ -59,7 +60,7 @@ function submit(message_id: number, decision: Decision): void {
     if (space === undefined) {
         return;
     }
-    const request_id = request_ids.get(message_id) ?? crypto.randomUUID();
+    const request_id = request_ids.get(message_id) ?? hover_request_id.generate();
     request_ids.set(message_id, request_id);
     const $panel = $(`[data-hover-suggested-action-message-id='${message_id}']`);
     $panel.find("button").prop("disabled", true);
@@ -68,14 +69,24 @@ function submit(message_id: number, decision: Decision): void {
         decision === "not_action"
             ? ($panel.find<HTMLInputElement>("[data-hover-action-reason]").val() ?? "").trim()
             : null;
+    const data: Record<string, number | string | null> = {
+        decision,
+        request_id,
+        expected_version: action.version,
+        reason,
+    };
+    if (decision === "approve") {
+        data["wording"] =
+            $panel.find<HTMLTextAreaElement>("[data-hover-action-wording]").val() ?? "";
+        data["assignee_user_id"] = String(
+            $panel.find<HTMLSelectElement>("[data-hover-action-assignee]").val() ?? "",
+        );
+        data["due_date"] =
+            $panel.find<HTMLInputElement>("[data-hover-action-due-date]").val() ?? "";
+    }
     void channel.post({
         url: `/json/hover/spaces/${space.id}/generated-items/${item.id}/suggested-action/decisions`,
-        data: {
-            decision,
-            request_id,
-            expected_version: action.version,
-            reason,
-        },
+        data,
         success(raw_data) {
             const response = response_schema.parse(raw_data);
             apply_projection(message_id, {...item, suggested_action: response.suggested_action});
@@ -122,4 +133,4 @@ export const event_schema = z.object({
     generated_item: hover_generated_item_schema,
 });
 
-export const _testing = {request_ids};
+export const _testing = {request_ids, submit};
