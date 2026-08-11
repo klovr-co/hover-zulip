@@ -182,8 +182,10 @@ class HoverSearchTest(ZulipTestCase):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                UPDATE zerver_message SET search_tsvector =
-                to_tsvector('zulip.english_us_search', subject || rendered_content)
+                UPDATE zerver_message SET
+                search_tsvector =
+                    to_tsvector('zulip.english_us_search', subject || rendered_content),
+                search_pgroonga = escape_html(subject) || ' ' || rendered_content
                 """
             )
 
