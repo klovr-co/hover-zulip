@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from importlib import import_module
 from typing import TYPE_CHECKING, Any
@@ -11,6 +12,7 @@ from typing_extensions import override
 from hover.actions_memberships import do_confirm_space_member
 from hover.actions_spaces import do_create_space, do_launch_space
 from hover.actions_suggested_actions import decide_suggested_action
+from hover.actions_todos import todo_data
 from hover.lib import add_hover_metadata
 from hover.models import (
     ConnectedAccount,
@@ -201,6 +203,14 @@ class HoverSuggestedActionTest(ZulipTestCase):
             data["assignee_user_id"] = assignee_user_id
         return self.client_post(f"/json/hover/spaces/{self.space.id}/todos/{todo.id}/events", data)
 
+    def assert_todo_event_matches_fresh_projection(
+        self, calls: list[Mapping[str, Any]], todo: Todo
+    ) -> None:
+        todo_events = [call["event"] for call in calls if call["event"]["type"] == "hover_todo"]
+        self.assert_length(todo_events, 1)
+        fresh_todo = Todo.objects.get(id=todo.id)
+        self.assertEqual(todo_events[0]["todo"], todo_data(fresh_todo))
+
     def test_approval_is_atomic_idempotent_and_preserves_publication(self) -> None:
         request_id = uuid4()
         original_message = self.message.content
@@ -214,6 +224,12 @@ class HoverSuggestedActionTest(ZulipTestCase):
         self.assertCountEqual(
             calls_by_type["hover_todo"]["users"], [self.creator.id, self.subscriber.id]
         )
+        fresh_message: dict[str, Any] = {"id": self.message.id}
+        add_hover_metadata([fresh_message], realm_id=self.realm.id, user_profile=self.subscriber)
+        self.assertEqual(
+            calls_by_type["hover_suggested_action"]["event"]["generated_item"],
+            fresh_message["hover_generated_item"],
+        )
         self.assertTrue(first["changed"])
         self.assertEqual(first["suggested_action"]["state"], "approved")
         self.assertEqual(first["suggested_action"]["version"], 2)
@@ -223,10 +239,12 @@ class HoverSuggestedActionTest(ZulipTestCase):
         self.assertEqual(Todo.objects.count(), 1)
         self.assertEqual(TodoEvent.objects.count(), 1)
         self.assertEqual(SuggestedActionTransition.objects.count(), 1)
+        self.assert_todo_event_matches_fresh_projection(calls, Todo.objects.get())
 
-        replay = self.assert_json_success(
-            self.decide("approve", request_id=request_id, expected_version=1)
-        )
+        with self.capture_send_event_calls(expected_num_events=0):
+            replay = self.assert_json_success(
+                self.decide("approve", request_id=request_id, expected_version=1)
+            )
         self.assertFalse(replay["changed"])
         self.assertEqual(Todo.objects.count(), 1)
         self.assertEqual(TodoEvent.objects.count(), 1)
@@ -244,14 +262,16 @@ class HoverSuggestedActionTest(ZulipTestCase):
         todo = Todo.objects.get()
 
         assign_request = uuid4()
-        assigned = self.assert_json_success(
-            self.mutate_todo(
-                todo,
-                "assign",
-                request_id=assign_request,
-                assignee_user_id=self.subscriber.id,
+        with self.capture_send_event_calls(expected_num_events=2) as assignment_calls:
+            assigned = self.assert_json_success(
+                self.mutate_todo(
+                    todo,
+                    "assign",
+                    request_id=assign_request,
+                    assignee_user_id=self.subscriber.id,
+                )
             )
-        )
+        self.assert_todo_event_matches_fresh_projection(assignment_calls, todo)
         self.assertTrue(assigned["changed"])
         self.assertEqual(assigned["todo"]["assignee"]["user_id"], self.subscriber.id)
         self.assertEqual(assigned["todo"]["version"], 2)
@@ -261,20 +281,25 @@ class HoverSuggestedActionTest(ZulipTestCase):
         assert assignment.notification_message is not None
         self.assertIn(f"|{self.subscriber.id}**", assignment.notification_message.content)
 
-        replay = self.assert_json_success(
-            self.mutate_todo(
-                todo,
-                "assign",
-                request_id=assign_request,
-                expected_version=1,
-                assignee_user_id=self.subscriber.id,
+        with self.capture_send_event_calls(expected_num_events=0):
+            replay = self.assert_json_success(
+                self.mutate_todo(
+                    todo,
+                    "assign",
+                    request_id=assign_request,
+                    expected_version=1,
+                    assignee_user_id=self.subscriber.id,
+                )
             )
-        )
         self.assertFalse(replay["changed"])
         self.assertEqual(TodoEvent.objects.filter(kind=TodoEvent.Kind.ASSIGNED).count(), 1)
 
         todo.refresh_from_db()
-        completed = self.assert_json_success(self.mutate_todo(todo, "complete", actor=self.creator))
+        with self.capture_send_event_calls(expected_num_events=2) as completion_calls:
+            completed = self.assert_json_success(
+                self.mutate_todo(todo, "complete", actor=self.creator)
+            )
+        self.assert_todo_event_matches_fresh_projection(completion_calls, todo)
         self.assertEqual(completed["todo"]["state"], "completed")
         completion = TodoEvent.objects.get(kind=TodoEvent.Kind.COMPLETED)
         self.assertEqual(completion.previous_state, Todo.State.ACTIVE)
@@ -282,7 +307,9 @@ class HoverSuggestedActionTest(ZulipTestCase):
         self.assertIsNotNone(completion.notification_message_id)
 
         todo.refresh_from_db()
-        reopened = self.assert_json_success(self.mutate_todo(todo, "reopen"))
+        with self.capture_send_event_calls(expected_num_events=1) as reopening_calls:
+            reopened = self.assert_json_success(self.mutate_todo(todo, "reopen"))
+        self.assert_todo_event_matches_fresh_projection(reopening_calls, todo)
         self.assertEqual(reopened["todo"]["state"], "active")
         self.assertEqual(reopened["todo"]["history_count"], 4)
         self.assertEqual(
@@ -377,23 +404,37 @@ class HoverSuggestedActionTest(ZulipTestCase):
         )
 
     def test_not_action_and_restore_append_history(self) -> None:
-        dismissed = self.assert_json_success(
-            self.decide("not_action", reason="Already covered by the venue team")
-        )
+        with self.capture_send_event_calls(expected_num_events=1) as dismissal_calls:
+            dismissed = self.assert_json_success(
+                self.decide("not_action", reason="Already covered by the venue team")
+            )
         self.assertEqual(dismissed["suggested_action"]["state"], "not_action")
         self.assertEqual(
             dismissed["suggested_action"]["recent_transitions"][0]["reason"],
             "Already covered by the venue team",
         )
-        self.action.refresh_from_db()
-        restored = self.assert_json_success(
-            self.decide("restore", expected_version=self.action.version)
+        fresh_message: dict[str, Any] = {"id": self.message.id}
+        add_hover_metadata([fresh_message], realm_id=self.realm.id, user_profile=self.subscriber)
+        self.assertEqual(
+            dismissal_calls[0]["event"]["generated_item"],
+            fresh_message["hover_generated_item"],
         )
+        self.action.refresh_from_db()
+        with self.capture_send_event_calls(expected_num_events=1) as restoration_calls:
+            restored = self.assert_json_success(
+                self.decide("restore", expected_version=self.action.version)
+            )
         self.assertEqual(restored["suggested_action"]["state"], "pending")
         self.assertEqual(restored["suggested_action"]["history_count"], 2)
         self.assertEqual(
             list(self.action.transitions.order_by("id").values_list("kind", flat=True)),
             ["not_action", "restore"],
+        )
+        fresh_message = {"id": self.message.id}
+        add_hover_metadata([fresh_message], realm_id=self.realm.id, user_profile=self.subscriber)
+        self.assertEqual(
+            restoration_calls[0]["event"]["generated_item"],
+            fresh_message["hover_generated_item"],
         )
         self.assertFalse(Todo.objects.exists())
 

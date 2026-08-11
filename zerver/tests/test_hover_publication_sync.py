@@ -26,6 +26,7 @@ from hover.models import (
     PublicationSyncAttempt,
     ReviewRequest,
     ReviewRequestTarget,
+    Source,
     SourceParticipantBinding,
     Space,
     SpaceAttachment,
@@ -406,6 +407,234 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.attachment.refresh_from_db()
         self.assertEqual(self.attachment.publication_cursor, "cursor:two")
 
+    def test_mixed_reordered_replay_and_lost_response_converge_once(self) -> None:
+        first, second, third = self.six_publications()[:3]
+        self.set_page(
+            cursor=None,
+            next_cursor="cursor:committed-but-response-lost",
+            publications=[first, second],
+        )
+
+        # The caller never observes this result, simulating a lost response after
+        # Hover has committed the messages and cursor.
+        sync_space_attachment(
+            attachment_id=self.attachment.id,
+            assistant=self.assistant,
+            clawer_sync=self.adapter,
+        )
+        self.set_page(
+            cursor="cursor:committed-but-response-lost",
+            next_cursor="cursor:recovered",
+            publications=[second, first, third],
+        )
+
+        with self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry:
+            recovered = sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=self.adapter,
+            )
+
+        self.assertEqual((recovered.created, recovered.replayed), (1, 2))
+        self.assertEqual(GeneratedItem.objects.count(), 3)
+        self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 3)
+        self.assertTrue(any("outcome=duplicate_replayed" in line for line in telemetry.output))
+
+    def test_interrupted_pagination_retries_from_last_committed_cursor(self) -> None:
+        first, second = self.six_publications()[:2]
+        first_page = ClawerPublicationPage(
+            publications=[first],
+            next_cursor="cursor:page-one",
+            has_more=True,
+        )
+        second_page = ClawerPublicationPage(
+            publications=[second],
+            next_cursor="cursor:page-two",
+            has_more=False,
+        )
+        interruption = ClawerSyncError(
+            error_code="clawer_timeout",
+            operation="sync",
+            http_status_code=504,
+            retryable=True,
+        )
+
+        with patch.object(
+            self.adapter,
+            "sync_publications",
+            side_effect=[first_page, interruption, second_page],
+        ):
+            first_result = sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=self.adapter,
+            )
+            with self.assertRaisesRegex(PublicationSyncError, "clawer_timeout"):
+                sync_space_attachment(
+                    attachment_id=self.attachment.id,
+                    assistant=self.assistant,
+                    clawer_sync=self.adapter,
+                )
+            self.attachment.refresh_from_db()
+            self.assertEqual(self.attachment.publication_cursor, "cursor:page-one")
+
+            recovered = sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=self.adapter,
+            )
+
+        self.assertTrue(first_result.has_more)
+        self.assertEqual((recovered.created, recovered.next_cursor), (1, "cursor:page-two"))
+        self.assertEqual(
+            list(
+                GeneratedItem.objects.order_by("publication_id").values_list(
+                    "publication_id", flat=True
+                )
+            ),
+            ["publication-1", "publication-2"],
+        )
+        self.assertEqual(
+            list(PublicationSyncAttempt.objects.order_by("id").values_list("outcome", flat=True)),
+            ["success", "error", "success"],
+        )
+
+    def test_retry_after_native_message_creation_rolls_back_then_converges(self) -> None:
+        publication = self.six_publications()[0]
+        self.set_page(
+            cursor=None,
+            next_cursor="cursor:after-interruption",
+            publications=[publication],
+        )
+        original_create = GeneratedItem.objects.create
+
+        def create_then_interrupt(**kwargs: Any) -> GeneratedItem:
+            original_create(**kwargs)
+            raise PublicationSyncError("worker_interrupted", retryable=True)
+
+        with (
+            patch(
+                "hover.publication_sync.GeneratedItem.objects.create",
+                side_effect=create_then_interrupt,
+            ),
+            self.assertRaisesRegex(PublicationSyncError, "worker_interrupted"),
+        ):
+            sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=self.adapter,
+            )
+
+        self.assertEqual(GeneratedItem.objects.count(), 0)
+        self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 0)
+        self.attachment.refresh_from_db()
+        self.assertEqual(self.attachment.publication_cursor, "")
+
+        recovered = sync_space_attachment(
+            attachment_id=self.attachment.id,
+            assistant=self.assistant,
+            clawer_sync=self.adapter,
+        )
+        self.assertEqual((recovered.created, recovered.replayed), (1, 0))
+        self.assertEqual(GeneratedItem.objects.count(), 1)
+        self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 1)
+
+    def test_lineage_history_uses_event_time_when_transport_is_reordered(self) -> None:
+        parent, child = self.six_publications()[:2]
+        parent.lineage_key = "scenario-lineage"
+        child.lineage_key = "scenario-lineage"
+        child.parent_publication_id = parent.publication_id
+        child.occurred_at = parent.occurred_at + timedelta(minutes=1)
+        child.generated_at = parent.generated_at + timedelta(minutes=1)
+        child.published_at = parent.published_at + timedelta(minutes=1)
+        self.set_page(
+            cursor=None,
+            next_cursor="cursor:lineage",
+            publications=[child, parent],
+        )
+
+        sync_space_attachment(
+            attachment_id=self.attachment.id,
+            assistant=self.assistant,
+            clawer_sync=self.adapter,
+        )
+        parent_item = GeneratedItem.objects.get(publication_id=parent.publication_id)
+        child_item = GeneratedItem.objects.get(publication_id=child.publication_id)
+        message_dicts: list[dict[str, Any]] = [
+            {"id": parent_item.message_id},
+            {"id": child_item.message_id},
+        ]
+        add_hover_metadata(message_dicts, realm_id=self.realm.id, user_profile=self.actor)
+        by_id = {message["id"]: message["hover_generated_item"] for message in message_dicts}
+
+        self.assertEqual(child_item.parent_publication_id, parent.publication_id)
+        self.assertFalse(by_id[parent_item.message_id]["lineage"]["is_latest"])
+        self.assertTrue(by_id[child_item.message_id]["lineage"]["is_latest"])
+        self.assertEqual(
+            [entry["message_id"] for entry in by_id[child_item.message_id]["lineage"]["history"]],
+            [child_item.message_id, parent_item.message_id],
+        )
+
+    def test_attachment_failure_does_not_undo_another_attachment_success(self) -> None:
+        publication = self.six_publications()[0]
+        self.set_page(cursor=None, next_cursor="cursor:healthy", publications=[publication])
+        successful = sync_space_attachment(
+            attachment_id=self.attachment.id,
+            assistant=self.assistant,
+            clawer_sync=self.adapter,
+        )
+
+        second_account = ConnectedAccount.objects.create(
+            realm=self.realm,
+            provider_key="github",
+            provider_name="GitHub",
+            external_account_id=uuid4(),
+            display_name="Recovery source",
+            created_by=self.actor,
+            owner=self.actor,
+            approval_state=ConnectedAccount.ApprovalState.APPROVED,
+        )
+        second_source = Source.objects.create(
+            realm=self.realm,
+            account=second_account,
+            adapter_key="github",
+            provider_key="github",
+            source_type="repository",
+            external_ref="src_eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            display_name="Recovery source",
+        )
+        second_attachment = SpaceAttachment.objects.create(
+            realm=self.realm,
+            space=self.space,
+            source=second_source,
+            state=SpaceAttachment.State.ACTIVE,
+            history_window=SpaceAttachment.HistoryWindow.TODAY,
+            history_timezone="UTC",
+            history_start_at=datetime(2026, 8, 11, tzinfo=timezone.utc),
+            attached_by=self.actor,
+        )
+
+        class FailingAdapter(InMemoryClawerSync):
+            @override
+            def sync_publications(self, **_kwargs: object) -> ClawerPublicationPage:
+                raise ClawerSyncError(
+                    error_code="clawer_unavailable",
+                    operation="sync",
+                    http_status_code=503,
+                    retryable=True,
+                )
+
+        with self.assertRaisesRegex(PublicationSyncError, "clawer_unavailable"):
+            sync_space_attachment(
+                attachment_id=second_attachment.id,
+                assistant=self.assistant,
+                clawer_sync=FailingAdapter(),
+            )
+
+        self.assertEqual(successful.created, 1)
+        self.assertEqual(GeneratedItem.objects.filter(attachment=self.attachment).count(), 1)
+        self.assertEqual(GeneratedItem.objects.filter(attachment=second_attachment).count(), 0)
+
     def test_batch_failure_rolls_back_message_provenance_and_cursor(self) -> None:
         publications = self.six_publications()[:2]
         progress = publications[1]
@@ -643,10 +872,17 @@ class HoverPublicationSyncTest(ZulipTestCase):
         publication = ClawerPublication.model_validate(raw)
         self.set_page(cursor=None, next_cursor="cursor:review", publications=[publication])
 
-        sync_space_attachment(
-            attachment_id=self.attachment.id,
-            assistant=self.assistant,
-            clawer_sync=self.adapter,
+        with (
+            self.assertLogs("zulip.hover.telemetry", level="INFO") as request_telemetry,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
+            sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=self.adapter,
+            )
+        self.assertTrue(
+            any("event=review outcome=requested" in line for line in request_telemetry.output)
         )
 
         item = GeneratedItem.objects.get(publication_id=publication.publication_id)
@@ -668,7 +904,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
                 user_profile=self.actor, message=request.message
             ).flags.mentioned
         )
-        self.assertEqual(Message.objects.filter(sender=self.assistant).count(), 2)
+        self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 2)
 
         root_metadata: dict[str, Any] = {"id": item.message_id}
         request_metadata: dict[str, Any] = {"id": request.message_id}
@@ -716,18 +952,25 @@ class HoverPublicationSyncTest(ZulipTestCase):
             publication.disputed_details[0].evidence_refs,
         )
 
-        response = self.client_post(
-            "/json/messages",
-            {
-                "type": "channel",
-                "to": orjson.dumps(self.space.stream_id).decode(),
-                "topic": item.message.topic_name(),
-                "content": "Confirmed from the latest source update.",
-                "hover_generated_item_id": item.id,
-                "hover_response_type": "review",
-                "hover_review_field": "status",
-                "hover_review_value": '"completed"',
-            },
+        with (
+            self.assertLogs("zulip.hover.telemetry", level="INFO") as resolution_telemetry,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
+            response = self.client_post(
+                "/json/messages",
+                {
+                    "type": "channel",
+                    "to": orjson.dumps(self.space.stream_id).decode(),
+                    "topic": item.message.topic_name(),
+                    "content": "Confirmed from the latest source update.",
+                    "hover_generated_item_id": item.id,
+                    "hover_response_type": "review",
+                    "hover_review_field": "status",
+                    "hover_review_value": '"completed"',
+                },
+            )
+        self.assertTrue(
+            any("event=review outcome=resolved" in line for line in resolution_telemetry.output)
         )
         response_data = self.assert_json_success(response)
         detail.refresh_from_db()
@@ -766,7 +1009,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
         detail = DisputedDetail.objects.get()
         self.assertFalse(detail.material)
         self.assertFalse(ReviewRequest.objects.exists())
-        self.assertEqual(Message.objects.filter(sender=self.assistant).count(), 1)
+        self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 1)
 
     def test_material_dispute_targets_verified_involved_space_member(self) -> None:
         participant_ref = f"person_{'d' * 32}"

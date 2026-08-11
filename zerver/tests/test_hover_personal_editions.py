@@ -390,10 +390,19 @@ class HoverPersonalEditionsTest(ZulipTestCase):
             http_status_code=503,
             retryable=True,
         )
-        with patch.object(self.adapter, "sync_personal_editions", side_effect=error):
+        with (
+            patch.object(self.adapter, "sync_personal_editions", side_effect=error),
+            self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
+        ):
             response = self.get_editions()
         payload = self.assert_json_success(response)
         self.assertEqual(payload["sync_status"], "degraded")
+        self.assertTrue(
+            any(
+                "outcome=degraded" in line and "edition_kind=end_of_day" in line
+                for line in telemetry.output
+            )
+        )
         self.assertEqual(
             list(payload["editions"]["end_of_day"]["sections"]),
             [

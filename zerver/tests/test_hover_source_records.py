@@ -237,6 +237,27 @@ class HoverSourceRecordsTest(ZulipTestCase):
         self.assertEqual(projected["state"], "detached")
         self.assertTrue(projected["can_browse_records"])
 
+    def test_retryable_failure_telemetry_uses_fixed_class_without_request_details(self) -> None:
+        private_request_sentinel = "PRIVATE_UPSTREAM_REQUEST_SENTINEL"
+        error = ClawerSyncError(
+            error_code="clawer_unavailable",
+            operation="source_records",
+            http_status_code=503,
+            retryable=True,
+            upstream_request_id=private_request_sentinel,
+        )
+        with (
+            patch.object(self.adapter, "browse_source_records", side_effect=error),
+            patch("hover.views_source_records.get_clawer_sync", return_value=self.adapter),
+            self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
+        ):
+            response = self.post()
+
+        self.assertEqual(response.status_code, 503)
+        joined = "\n".join(telemetry.output)
+        self.assertIn("event=source_records outcome=retryable_failure", joined)
+        self.assertNotIn(private_request_sentinel, joined)
+
     def test_permanent_evidence_deletion_is_separate_confirmed_org_admin_action(self) -> None:
         assert self.space.stream is not None
         self.subscribe(self.member, self.space.stream.name, invite_only=True)
