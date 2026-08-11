@@ -1,4 +1,4 @@
-# ADR 0011: Project durable Todos from append-only events
+# ADR 0012: Project durable Todos from append-only events
 
 ## Status
 
