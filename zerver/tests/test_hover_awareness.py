@@ -31,7 +31,9 @@ class HoverAwarenessTest(ZulipTestCase):
         self.peer = self.example_user("othello")
         self.outsider = self.example_user("cordelia")
         self.creator = self.example_user("iago")
-        self.realm = self.viewer.realm
+        # Use the same cached Realm instance that the Space creator consults
+        # when evaluating the organization permission below.
+        self.realm = self.creator.realm
         self.realm.hover_enabled = True
         self.realm.can_create_spaces_group = get_system_user_group_by_name(
             SystemGroups.MEMBERS, self.realm.id

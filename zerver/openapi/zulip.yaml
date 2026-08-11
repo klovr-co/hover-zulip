@@ -30058,7 +30058,7 @@ components:
                   - review_request
                   - resolution
             suggested_action:
-              oneOf:
+              anyOf:
                 - $ref: "#/components/schemas/HoverSuggestedAction"
                 - type: object
                   nullable: true
@@ -31402,7 +31402,7 @@ components:
                 format: date-time
               reason: {type: string}
         todo:
-          oneOf:
+          anyOf:
             - $ref: "#/components/schemas/HoverTodo"
             - type: object
               nullable: true
@@ -31440,7 +31440,7 @@ components:
         due_date: {type: string, format: date, nullable: true}
         completed_at: {type: string, format: date-time, nullable: true}
         assignee:
-          oneOf:
+          anyOf:
             - $ref: "#/components/schemas/HoverTodoPerson"
             - type: object
               nullable: true
@@ -31504,12 +31504,12 @@ components:
               previous_state: {type: string}
               new_state: {type: string, enum: [active, completed]}
               previous_assignee:
-                oneOf:
+                anyOf:
                   - $ref: "#/components/schemas/HoverTodoPerson"
                   - type: object
                     nullable: true
               new_assignee:
-                oneOf:
+                anyOf:
                   - $ref: "#/components/schemas/HoverTodoPerson"
                   - type: object
                     nullable: true
