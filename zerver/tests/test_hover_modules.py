@@ -110,12 +110,14 @@ class HoverModulesTest(ZulipTestCase):
         result = self.client_get("/json/hover/modules")
         self.assert_json_success(result)
         modules = orjson.loads(result.content)["modules"]
-        self.assert_length(modules, 6)
+        self.assert_length(modules, 7)
         marketing = next(item for item in modules if item["definition_key"] == "marketing_digest")
         self.assertEqual(marketing["supported_triggers"], ["manual", "schedule"])
         self.assertEqual(marketing["requirements"][0]["maximum_count"], 1)
         self.assertNotIn("runtime_key", marketing)
         self.assertNotIn("prompt_key", marketing)
+        signal_monitor = next(item for item in modules if item["definition_key"] == "signal_monitor")
+        self.assertEqual(signal_monitor["supported_triggers"], ["manual", "new_source", "schedule"])
 
         self.version.destination_topic = "Changed"
         with self.assertRaisesRegex(ValidationError, "immutable"):
