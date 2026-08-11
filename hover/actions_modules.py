@@ -104,6 +104,17 @@ PREBUILT_MODULES: tuple[dict[str, Any], ...] = (
         "triggers": ("manual", "schedule"),
         "maximum_count": 1,
     },
+    {
+        "key": "signal_monitor",
+        "name": "Signal Monitor",
+        "description": "Monitor configured Sources for reviewed high-signal changes.",
+        "output_type": "analysis",
+        "topic": "Signal Monitor",
+        "icon": "zulip-icon-bell",
+        "order": 70,
+        "triggers": ("manual", "new_source", "schedule"),
+        "maximum_count": 10,
+    },
 )
 
 
