@@ -8,7 +8,6 @@ from datetime import timedelta
 from datetime import timezone as datetime_timezone
 from uuid import UUID, uuid4
 
-import orjson
 from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.db.models import Q
@@ -38,6 +37,7 @@ from hover.publication_contracts import (
     FeedUpdatePayload,
     ProgressUpdatePayload,
     SuggestedActionPayload,
+    publication_envelope_hash,
 )
 from hover.telemetry import (
     HoverTelemetryEvent,
@@ -49,6 +49,7 @@ from hover.telemetry import (
 from zerver.actions.message_send import internal_send_stream_message
 from zerver.actions.streams import bulk_add_subscriptions
 from zerver.lib.message import truncate_topic
+from zerver.models.groups import UserGroupMembership
 from zerver.models.messages import Message
 from zerver.models.users import UserProfile
 
@@ -142,25 +143,14 @@ def _opaque_hash(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
 
 
-def _publication_hash(publication: ClawerPublication) -> str:
-    publication_data = publication.model_dump(mode="json")
-    # Preserve the exact pre-H15 v1.0 canonical envelope. A defaulted empty
-    # dispute list must not turn a legitimate old replay into an identity conflict.
-    if publication.schema_version == "1.0":
-        publication_data.pop("disputed_details", None)
-    canonical = orjson.dumps(publication_data, option=orjson.OPT_SORT_KEYS)
-    return hashlib.sha256(canonical).hexdigest()
-
-
 def _assistant_is_valid(assistant: UserProfile, attachment: SpaceAttachment) -> bool:
     configured_email = str(settings.HOVER_ASSISTANT_EMAIL).strip().casefold()
     return (
-        assistant.realm_id == attachment.realm_id
+        bool(configured_email)
+        and assistant.realm_id == attachment.realm_id
         and assistant.is_active
         and assistant.is_bot
-        and (
-            not configured_email or assistant.delivery_email.strip().casefold() == configured_email
-        )
+        and assistant.delivery_email.strip().casefold() == configured_email
     )
 
 
@@ -471,6 +461,10 @@ def sync_space_attachment(
             ):
                 raise PublicationSyncError("invalid_upstream_contract", retryable=False)
             assert locked.space.stream is not None
+            UserGroupMembership.objects.get_or_create(
+                user_group_id=locked.space.stream.can_send_message_group_id,
+                user_profile=assistant,
+            )
             bulk_add_subscriptions(
                 locked.realm,
                 [locked.space.stream],
@@ -478,7 +472,7 @@ def sync_space_attachment(
                 acting_user=None,
             )
             for publication in page.publications:
-                envelope_hash = _publication_hash(publication)
+                envelope_hash = publication_envelope_hash(publication)
                 existing = (
                     GeneratedItem.objects.filter(attachment=locked)
                     .filter(

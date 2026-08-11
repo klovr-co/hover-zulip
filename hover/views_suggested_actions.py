@@ -28,6 +28,11 @@ def decide_suggested_action_view(
     ],
     expected_version: Annotated[str, StringConstraints(pattern=r"^[1-9][0-9]*$")],
     reason: Annotated[str, StringConstraints(max_length=1000)] | None = None,
+    wording: Annotated[str, StringConstraints(max_length=50_000)] | None = None,
+    assignee_user_id: Annotated[str, StringConstraints(pattern=r"^(?:|[1-9][0-9]*)$")]
+    | None = None,
+    due_date: Annotated[str, StringConstraints(pattern=r"^(?:|[0-9]{4}-[0-9]{2}-[0-9]{2})$")]
+    | None = None,
 ) -> HttpResponse:
     result = decide_suggested_action(
         acting_user=user_profile,
@@ -37,6 +42,12 @@ def decide_suggested_action_view(
         request_id=UUID(request_id),
         expected_version=int(expected_version),
         reason=reason,
+        wording=wording,
+        assignee_user_id=(int(assignee_user_id) if assignee_user_id not in (None, "") else None),
+        due_date_value=due_date or None,
+        wording_supplied=wording is not None,
+        assignee_supplied=assignee_user_id is not None,
+        due_date_supplied=due_date is not None,
     )
     return json_success(
         request,

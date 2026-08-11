@@ -10,6 +10,7 @@ from uuid import UUID
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import orjson
+from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
@@ -432,8 +433,6 @@ class HoverPilotConfigV1(StrictModel):
         gates = _unique_by(self.acceptance_gates, "key", "acceptance gate")
         if set(gates) != set(ACCEPTANCE_GATE_KEYS):
             raise ValueError("The operational acceptance checklist is incomplete")
-        if self.space.launch and any(gate.status != "passed" for gate in gates.values()):
-            raise ValueError("Every acceptance gate must pass before launch")
         return self
 
 
@@ -585,6 +584,24 @@ class PilotReconciler:
         if space.state == Space.State.LAUNCHED and actual_roles != expected_roles:
             raise PilotConfigError("A launched Space's reviewed membership cohort cannot drift")
 
+        expected_personal_editions = {
+            email: member.personal_editions for email, member in expected_members.items()
+        }
+        actual_personal_editions = {
+            membership.user.delivery_email.casefold(): membership.personal_editions_enabled
+            for membership in space.memberships.select_related("user")
+        }
+        if any(
+            enabled and not expected_personal_editions.get(email, False)
+            for email, enabled in actual_personal_editions.items()
+        ):
+            raise PilotConfigError("Space contains an unreviewed Personal Edition enrollment")
+        if (
+            space.state == Space.State.LAUNCHED
+            and actual_personal_editions != expected_personal_editions
+        ):
+            raise PilotConfigError("A launched Space's Personal Edition cohort cannot drift")
+
         expected_administrators = {
             email for email, member in expected_members.items() if member.administrator
         }
@@ -599,16 +616,32 @@ class PilotReconciler:
 
         if space.state == Space.State.LAUNCHED:
             assert space.stream is not None
-            native_subscribers = {
+            subscriptions = list(
+                Subscription.objects.filter(recipient=space.stream.recipient, active=True)
+                .select_related("user_profile")
+                .order_by("user_profile_id")
+            )
+            native_members = {
                 subscription.user_profile.delivery_email.casefold(): subscription.user_profile
-                for subscription in Subscription.objects.filter(
-                    recipient=space.stream.recipient, active=True
-                ).select_related("user_profile")
+                for subscription in subscriptions
+                if not subscription.user_profile.is_bot
             }
-            if set(native_subscribers) != set(expected_members) or any(
-                user.is_guest for user in native_subscribers.values()
+            if set(native_members) != set(expected_members) or any(
+                user.is_guest for user in native_members.values()
             ):
                 raise PilotConfigError("Launched Space subscriptions contain an unreviewed user")
+            allowed_bot_emails = set(self.bots)
+            configured_assistant = str(settings.HOVER_ASSISTANT_EMAIL).strip().casefold()
+            if configured_assistant:
+                allowed_bot_emails.add(configured_assistant)
+            unexpected_bots = [
+                subscription.user_profile
+                for subscription in subscriptions
+                if subscription.user_profile.is_bot
+                and subscription.user_profile.delivery_email.casefold() not in allowed_bot_emails
+            ]
+            if unexpected_bots:
+                raise PilotConfigError("Launched Space subscriptions contain an unreviewed bot")
 
         account_specs = {spec.key: spec for spec in self.config.accounts}
         source_specs = {spec.key: spec for spec in self.config.sources}
@@ -627,6 +660,39 @@ class PilotReconciler:
         }
         if actual_attachment_keys - expected_attachment_keys:
             raise PilotConfigError("Space contains an unreviewed active Source attachment")
+
+        configured_sources = Source.objects.filter(
+            realm=self.realm,
+            external_ref__in=[source.source_ref for source in self.config.sources],
+        ).select_related("account")
+        configured_source_by_key = {
+            (source.account.external_account_id, source.external_ref): source
+            for source in configured_sources
+        }
+        expected_bindings = {
+            (
+                account_specs[source_specs[mapping.source_key].account_key].external_account_id,
+                source_specs[mapping.source_key].source_ref,
+                mapping.participant_ref,
+                mapping.user_email.casefold(),
+            )
+            for mapping in self.config.participant_mappings
+        }
+        actual_bindings = {
+            (
+                binding.source.account.external_account_id,
+                binding.source.external_ref,
+                binding.participant_ref,
+                binding.user.delivery_email.casefold(),
+            )
+            for binding in SourceParticipantBinding.objects.filter(
+                source_id__in=[source.id for source in configured_source_by_key.values()],
+            ).select_related("source__account", "user")
+        }
+        if actual_bindings - expected_bindings:
+            raise PilotConfigError("Configured Sources contain an unreviewed participant mapping")
+        if space.state == Space.State.LAUNCHED and actual_bindings != expected_bindings:
+            raise PilotConfigError("A launched Space's reviewed cohort mappings cannot drift")
 
         current_installations = list(
             ModuleInstallation.objects.filter(
@@ -666,11 +732,23 @@ class PilotReconciler:
                 raise PilotConfigError("Space contains an unreviewed active provenance route")
 
     def report(self) -> dict[str, Any]:
+        expansion_ready = self.config.space.launch and all(
+            gate.status == "passed" for gate in self.config.acceptance_gates
+        )
+        rollout_phase = (
+            "setup"
+            if not self.config.space.launch
+            else "expansion_ready"
+            if expansion_ready
+            else "shadow"
+        )
         return {
             "schema_version": self.config.metadata.schema_version,
             "pilot_key": self.config.metadata.pilot_key,
             "realm": self.realm.string_id,
             "mode": self.config.shadow_mode.mode,
+            "rollout_phase": rollout_phase,
+            "expansion_ready": expansion_ready,
             "counts": {
                 "accounts": len(self.config.accounts),
                 "sources": len(self.config.sources),
@@ -914,7 +992,11 @@ class PilotReconciler:
                 realm=self.realm,
                 space=space,
                 user=user,
-                defaults={"role": spec.role, "added_by": operator},
+                defaults={
+                    "role": spec.role,
+                    "personal_editions_enabled": spec.personal_editions,
+                    "added_by": operator,
+                },
             )
             if spec.administrator:
                 SpaceAdministrator.objects.get_or_create(

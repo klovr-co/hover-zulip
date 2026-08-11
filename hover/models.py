@@ -124,6 +124,7 @@ class SpaceMembership(models.Model):
     space = models.ForeignKey(Space, on_delete=CASCADE, related_name="memberships")
     user = models.ForeignKey(UserProfile, on_delete=CASCADE, related_name="hover_space_memberships")
     role = models.TextField(choices=Role.choices)
+    personal_editions_enabled = models.BooleanField(default=False)
     added_by = models.ForeignKey(
         UserProfile,
         null=True,
@@ -1199,7 +1200,7 @@ class PersonalEdition(models.Model):
 
 
 class PersonalEditionSyncState(models.Model):
-    """Cursor state for one verified teammate stream through one Connected Account."""
+    """Cursor state for one verified Personal Edition target and Connected Account."""
 
     realm = models.ForeignKey(
         Realm, on_delete=CASCADE, related_name="hover_personal_edition_sync_states"
@@ -1223,7 +1224,7 @@ class PersonalEditionSyncState(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["account", "user", "teammate_ref"],
-                name="hover_edition_sync_unique_stream",
+                name="hover_edition_sync_unique_target",
             )
         ]
 

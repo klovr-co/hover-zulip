@@ -7,10 +7,12 @@ malformed data before any native message is created.
 
 from __future__ import annotations
 
+import hashlib
 import re
 from datetime import date, datetime
 from typing import Annotated, Literal
 
+import orjson
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
 UNSAFE_DISPLAY_NAME_PATTERN = re.compile(r"(?:\d[\s()+-]*){8,}|@(?:g\.us|lid)$", re.IGNORECASE)
@@ -21,6 +23,17 @@ UNSAFE_SUMMARY_PATTERN = re.compile(
 )
 EVIDENCE_REF_PATTERN = re.compile(r"^evidence_[0-9a-f]{32}$")
 PERSON_REF_PATTERN = re.compile(r"^person_[0-9a-f]{32}$")
+
+
+def publication_envelope_hash(publication: ClawerPublication) -> str:
+    """Return the stable identity hash used for accepted publication replays."""
+    publication_data = publication.model_dump(mode="json")
+    # Preserve the exact pre-H15 v1.0 canonical envelope. A defaulted empty
+    # dispute list must not turn a legitimate old replay into an identity conflict.
+    if publication.schema_version == "1.0":
+        publication_data.pop("disputed_details", None)
+    canonical = orjson.dumps(publication_data, option=orjson.OPT_SORT_KEYS)
+    return hashlib.sha256(canonical).hexdigest()
 
 
 def _validated_display_name(value: str) -> str:

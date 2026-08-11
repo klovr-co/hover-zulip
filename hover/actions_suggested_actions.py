@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 from typing import Literal
 from uuid import UUID
 
@@ -9,6 +10,7 @@ from django.utils.translation import gettext as _
 
 from hover.models import (
     GeneratedItem,
+    SourceParticipantBinding,
     Space,
     SpaceMembership,
     SuggestedAction,
@@ -56,19 +58,60 @@ def _proposal(payload: object) -> SuggestedActionPayload:
         raise JsonableError(_("This Suggested Action no longer has a valid proposal."))
 
 
+def _eligible_assignee(*, space: Space, user_id: int) -> UserProfile | None:
+    return (
+        UserProfile.objects.filter(
+            id=user_id,
+            realm=space.realm,
+            is_active=True,
+            is_bot=False,
+            hover_space_memberships__space=space,
+        )
+        .exclude(role=UserProfile.ROLE_GUEST)
+        .first()
+    )
+
+
+def _resolve_proposed_assignee(
+    *, generated_item: GeneratedItem, proposed_assignee_ref: str
+) -> UserProfile | None:
+    attachment = generated_item.attachment
+    if attachment is None or not proposed_assignee_ref:
+        return None
+    binding = (
+        SourceParticipantBinding.objects.select_related("user")
+        .filter(
+            realm=generated_item.realm,
+            source=attachment.source,
+            participant_ref=proposed_assignee_ref,
+            user__is_active=True,
+            user__is_bot=False,
+            user__hover_space_memberships__space=attachment.space,
+        )
+        .exclude(user__role=UserProfile.ROLE_GUEST)
+        .first()
+    )
+    return binding.user if binding is not None else None
+
+
 def create_suggested_action_for_generated_item(
     generated_item: GeneratedItem, payload: SuggestedActionPayload
 ) -> SuggestedAction:
     if generated_item.attachment is None:
         raise ValueError("Suggested Action publications require a Space attachment")
     proposed = payload.proposed_assignee
+    proposed_ref = proposed.ref if proposed is not None else ""
     return SuggestedAction.objects.create(
         realm=generated_item.realm,
         space=generated_item.attachment.space,
         generated_item=generated_item,
         wording=payload.wording,
-        proposed_assignee_ref=proposed.ref if proposed is not None else "",
+        proposed_assignee_ref=proposed_ref,
         proposed_assignee_display_name=proposed.display_name if proposed is not None else "",
+        assignee=_resolve_proposed_assignee(
+            generated_item=generated_item,
+            proposed_assignee_ref=proposed_ref,
+        ),
         due_date=payload.proposed_due_date,
     )
 
@@ -81,11 +124,30 @@ def sync_suggested_action_from_reviewed_payload(generated_item: GeneratedItem) -
         )
     except SuggestedAction.DoesNotExist:
         return
+    if action.state != SuggestedAction.State.PENDING:
+        return
     proposal = _proposal(generated_item.reviewed_payload or generated_item.payload)
+    proposed = proposal.proposed_assignee
     action.wording = proposal.wording
+    action.proposed_assignee_ref = proposed.ref if proposed is not None else ""
+    action.proposed_assignee_display_name = proposed.display_name if proposed is not None else ""
+    action.assignee = _resolve_proposed_assignee(
+        generated_item=generated_item,
+        proposed_assignee_ref=action.proposed_assignee_ref,
+    )
     action.due_date = proposal.proposed_due_date
     action.version += 1
-    action.save(update_fields=["wording", "due_date", "version", "date_updated"])
+    action.save(
+        update_fields=[
+            "wording",
+            "proposed_assignee_ref",
+            "proposed_assignee_display_name",
+            "assignee",
+            "due_date",
+            "version",
+            "date_updated",
+        ]
+    )
 
 
 def suggested_action_data(action: SuggestedAction) -> dict[str, object]:
@@ -101,6 +163,17 @@ def suggested_action_data(action: SuggestedAction) -> dict[str, object]:
 
         todo_data = serialize_todo(todo)
     assignee = action.assignee
+    assignable_users = list(
+        UserProfile.objects.filter(
+            realm=action.realm,
+            is_active=True,
+            is_bot=False,
+            hover_space_memberships__space=action.space,
+        )
+        .exclude(role=UserProfile.ROLE_GUEST)
+        .order_by("full_name", "id")
+        .values("id", "full_name")
+    )
     return {
         "id": action.id,
         "state": action.state,
@@ -115,6 +188,9 @@ def suggested_action_data(action: SuggestedAction) -> dict[str, object]:
             if assignee is not None
             else None
         ),
+        "assignable_users": [
+            {"user_id": user["id"], "full_name": user["full_name"]} for user in assignable_users
+        ],
         "due_date": action.due_date.isoformat() if action.due_date is not None else None,
         "history_count": action.transitions.count(),
         "recent_transitions": [
@@ -175,6 +251,12 @@ def decide_suggested_action(
     request_id: UUID,
     expected_version: int,
     reason: str | None,
+    wording: str | None = None,
+    assignee_user_id: int | None = None,
+    due_date_value: str | None = None,
+    wording_supplied: bool = False,
+    assignee_supplied: bool = False,
+    due_date_supplied: bool = False,
 ) -> SuggestedActionDecisionResult:
     if (
         not acting_user.is_active
@@ -239,6 +321,9 @@ def decide_suggested_action(
         raise JsonableError(_("The reason must be 1000 characters or fewer."))
     if decision != "not_action" and normalized_reason:
         raise JsonableError(_("A reason is only accepted for Not an action."))
+    refinements_supplied = wording_supplied or assignee_supplied or due_date_supplied
+    if decision != "approve" and refinements_supplied:
+        raise JsonableError(_("Suggested Action refinements are only accepted with approval."))
 
     before_wording = action.wording
     before_assignee_id = action.assignee_id
@@ -250,8 +335,36 @@ def decide_suggested_action(
         proposal = _proposal(
             action.generated_item.reviewed_payload or action.generated_item.payload
         )
-        action.wording = proposal.wording
-        action.due_date = proposal.proposed_due_date
+        if wording_supplied:
+            normalized_wording = " ".join((wording or "").split())
+            if not normalized_wording or len(normalized_wording) > 50_000:
+                raise JsonableError(_("The action wording must be between 1 and 50000 characters."))
+            action.wording = normalized_wording
+        else:
+            action.wording = proposal.wording
+        if assignee_supplied:
+            action.assignee = (
+                _eligible_assignee(space=action.space, user_id=assignee_user_id)
+                if assignee_user_id is not None
+                else None
+            )
+            if assignee_user_id is not None and action.assignee is None:
+                raise JsonableError(_("The assignee must be a confirmed Space member."))
+        else:
+            proposed = proposal.proposed_assignee
+            action.assignee = _resolve_proposed_assignee(
+                generated_item=action.generated_item,
+                proposed_assignee_ref=proposed.ref if proposed is not None else "",
+            )
+        if due_date_supplied:
+            try:
+                action.due_date = (
+                    date.fromisoformat(due_date_value) if due_date_value is not None else None
+                )
+            except ValueError:
+                raise JsonableError(_("The due date must be a valid ISO date."))
+        else:
+            action.due_date = proposal.proposed_due_date
         todo = Todo.objects.create(
             realm=action.realm,
             space=action.space,
@@ -265,7 +378,9 @@ def decide_suggested_action(
     from_state = action.state
     action.state = to_state
     action.version += 1
-    action.save(update_fields=["state", "wording", "due_date", "version", "date_updated"])
+    action.save(
+        update_fields=["state", "wording", "assignee", "due_date", "version", "date_updated"]
+    )
     transition = SuggestedActionTransition.objects.create(
         realm=action.realm,
         action=action,

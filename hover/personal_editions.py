@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import hashlib
 from datetime import timedelta
 from typing import Any
 
-import orjson
 from django.db import transaction
 from django.db.models import F, Q
 from django.utils import timezone
@@ -19,7 +17,12 @@ from hover.models import (
     SpaceAttachment,
     SpaceMembership,
 )
-from hover.publication_contracts import ClawerPublication, DigestPayload, PersonalDigestItem
+from hover.publication_contracts import (
+    ClawerPublication,
+    DigestPayload,
+    PersonalDigestItem,
+    publication_envelope_hash,
+)
 from zerver.lib.url_encoding import stream_message_url
 from zerver.models.users import UserProfile
 
@@ -34,14 +37,7 @@ class PersonalEditionError(Exception):
         super().__init__(code)
 
 
-def _publication_hash(publication: ClawerPublication) -> str:
-    data = publication.model_dump(mode="json")
-    if publication.schema_version == "1.0":
-        data.pop("disputed_details", None)
-    return hashlib.sha256(orjson.dumps(data, option=orjson.OPT_SORT_KEYS)).hexdigest()
-
-
-def _verified_personal_streams(
+def _verified_personal_edition_targets(
     user_profile: UserProfile,
 ) -> list[tuple[ConnectedAccount, str]]:
     if (
@@ -64,17 +60,18 @@ def _verified_personal_streams(
                 SpaceMembership.Role.CONTRIBUTOR,
                 SpaceMembership.Role.SUBSCRIBER,
             ],
+            source__space_attachments__space__memberships__personal_editions_enabled=True,
         )
         .order_by("source__account_id", "participant_ref", "id")
         .distinct()
     )
-    streams: dict[tuple[int, str], tuple[ConnectedAccount, str]] = {}
+    targets: dict[tuple[int, str], tuple[ConnectedAccount, str]] = {}
     for binding in bindings:
-        streams[(binding.source.account_id, binding.participant_ref)] = (
+        targets[(binding.source.account_id, binding.participant_ref)] = (
             binding.source.account,
             binding.participant_ref,
         )
-    return list(streams.values())
+    return list(targets.values())
 
 
 def _accept_publication(
@@ -94,7 +91,7 @@ def _accept_publication(
     if personal.teammate_ref != teammate_ref or publication.producer_key != expected_producer:
         raise PersonalEditionError("invalid_personal_edition_contract")
 
-    envelope_hash = _publication_hash(publication)
+    envelope_hash = publication_envelope_hash(publication)
     existing = (
         PersonalEdition.objects.filter(account=account)
         .filter(
@@ -134,7 +131,7 @@ def _accept_publication(
     )
 
 
-def _sync_personal_stream(
+def _sync_personal_edition_target(
     *,
     user_profile: UserProfile,
     account: ConnectedAccount,
@@ -201,10 +198,10 @@ def sync_personal_editions(
     *, user_profile: UserProfile, clawer_sync: ClawerSync
 ) -> tuple[str, list[str]]:
     errors: list[str] = []
-    streams = _verified_personal_streams(user_profile)
-    for account, teammate_ref in streams:
+    targets = _verified_personal_edition_targets(user_profile)
+    for account, teammate_ref in targets:
         try:
-            _sync_personal_stream(
+            _sync_personal_edition_target(
                 user_profile=user_profile,
                 account=account,
                 teammate_ref=teammate_ref,
@@ -223,7 +220,7 @@ def sync_personal_editions(
             )
     if errors:
         return "degraded", errors
-    if not streams:
+    if not targets:
         return "empty", []
     return "current", []
 
@@ -360,20 +357,20 @@ def get_personal_editions_for_user(*, user_profile: UserProfile) -> dict[str, An
         or user_profile.is_bot
     ):
         return {"morning": None, "end_of_day": None}
-    verified_streams = {
+    verified_targets = {
         (account.id, teammate_ref)
-        for account, teammate_ref in _verified_personal_streams(user_profile)
+        for account, teammate_ref in _verified_personal_edition_targets(user_profile)
     }
-    if not verified_streams:
+    if not verified_targets:
         return {"morning": None, "end_of_day": None}
-    stream_filter = Q()
-    for account_id, teammate_ref in verified_streams:
-        stream_filter |= Q(account_id=account_id, teammate_ref=teammate_ref)
+    target_filter = Q()
+    for account_id, teammate_ref in verified_targets:
+        target_filter |= Q(account_id=account_id, teammate_ref=teammate_ref)
     editions: dict[str, Any] = {"morning": None, "end_of_day": None}
     for edition_kind in editions:
         edition = (
             PersonalEdition.objects.filter(
-                stream_filter,
+                target_filter,
                 user=user_profile,
                 edition=edition_kind,
             )

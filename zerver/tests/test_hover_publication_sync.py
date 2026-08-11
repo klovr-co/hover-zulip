@@ -39,11 +39,11 @@ from hover.publication_contracts import (
     DigestPayload,
     ProgressUpdatePayload,
     ResolvedEvidence,
+    publication_envelope_hash,
 )
 from hover.publication_sync import (
     MAX_PUBLICATION_SYNC_BATCH,
     PublicationSyncError,
-    _publication_hash,
     sync_space_attachment,
 )
 from zerver.actions.channel_folders import check_add_channel_folder
@@ -61,6 +61,9 @@ class HoverPublicationSyncTest(ZulipTestCase):
         super().setUp()
         self.actor = self.example_user("hamlet")
         self.assistant = self.example_user("default_bot")
+        self.settings_override = self.settings(HOVER_ASSISTANT_EMAIL=self.assistant.delivery_email)
+        self.settings_override.enable()
+        self.addCleanup(self.settings_override.disable)
         self.realm = self.actor.realm
         self.realm.hover_enabled = True
         self.realm.can_create_spaces_group = get_system_user_group_by_name(
@@ -328,7 +331,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
         )
         self.assertEqual(legacy.disputed_details, [])
         self.assertEqual(
-            _publication_hash(legacy),
+            publication_envelope_hash(legacy),
             "8be2243ab0e08f1c3919b77fa4e3d340469629c41a58a69c3d569aad3228a22f",
         )
 
@@ -1181,6 +1184,18 @@ class HoverPublicationSyncTest(ZulipTestCase):
             before + timedelta(seconds=60),
         )
         self.assertTrue(PublicationSyncAttempt.objects.get().retryable)
+
+    def test_sync_requires_one_explicitly_configured_assistant(self) -> None:
+        with (
+            self.settings(HOVER_ASSISTANT_EMAIL=""),
+            self.assertRaisesRegex(PublicationSyncError, "invalid_hover_assistant"),
+        ):
+            sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=self.adapter,
+            )
+        self.assertEqual(self.adapter.sync_calls, [])
 
     def test_attachment_lifecycle_is_rechecked_after_fetch(self) -> None:
         publication = self.six_publications()[0]

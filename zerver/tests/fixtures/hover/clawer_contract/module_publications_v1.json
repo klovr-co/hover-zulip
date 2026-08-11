@@ -1,0 +1,129 @@
+{
+  "source_key": "fixture-modules-group@g.us",
+  "timezone": "Asia/Kuala_Lumpur",
+  "window_start": "2026-08-09T16:00:00+00:00",
+  "window_end": "2026-08-10T16:00:00+00:00",
+  "source_policy": {
+    "policy_id": "aimto-selected-groups",
+    "policy_version": "v3"
+  },
+  "messages": [
+    {
+      "id": 83001,
+      "whatsapp_id": "fixture-module-a",
+      "sender_phone": "+15550000101",
+      "sender_name": "Jordan",
+      "timestamp": "2026-08-10T02:00:00+00:00",
+      "body": "The venue partner confirmed the community hall for Saturday."
+    },
+    {
+      "id": 83002,
+      "whatsapp_id": "fixture-module-b",
+      "sender_phone": "+15550000102",
+      "sender_name": "Morgan",
+      "timestamp": "2026-08-10T03:00:00+00:00",
+      "body": "The volunteer signup passed forty registrations."
+    },
+    {
+      "id": 83003,
+      "whatsapp_id": "fixture-module-c",
+      "sender_phone": "+15550000103",
+      "sender_name": "Riley",
+      "timestamp": "2026-08-10T04:00:00+00:00",
+      "body": "Several volunteers asked for a clearer arrival guide."
+    }
+  ],
+  "marketing_digest": {
+    "module_definition_id": "marketing_digest",
+    "module_version": "v4",
+    "prompt_version": "v7",
+    "display_label": "AIMTO Marketing Digest",
+    "business_identity": "marketing-community-events",
+    "evidence_wa_message_ids": [
+      "fixture-module-a",
+      "fixture-module-b"
+    ],
+    "output": {
+      "contract": "digest",
+      "schema_version": "1.0",
+      "title": "Community events digest",
+      "timezone": "Asia/Kuala_Lumpur",
+      "operation": "The hall is confirmed and volunteer registration is growing.",
+      "marketing": "The confirmed venue and volunteer response are suitable campaign developments.",
+      "metrics": {
+        "messages": 2,
+        "text": 2,
+        "media": 0,
+        "voice": 0
+      },
+      "generation_context": "AI · fixture-marketing-v4"
+    }
+  },
+  "topic_analysis": {
+    "module_definition_id": "topic_analysis",
+    "module_version": "v2",
+    "prompt_version": "v5",
+    "display_label": "AIMTO Topic Analysis",
+    "business_identity": "analysis-volunteer-readiness",
+    "evidence_wa_message_ids": [
+      "fixture-module-c",
+      "fixture-module-b"
+    ],
+    "output": {
+      "contract": "analysis",
+      "schema_version": "1.0",
+      "title": "Volunteer readiness",
+      "timezone": "Asia/Kuala_Lumpur",
+      "summary": "Registration is healthy, while arrival instructions need clarification.",
+      "findings": [
+        {
+          "title": "Strong registration",
+          "detail": "More than forty volunteers have signed up."
+        },
+        {
+          "title": "Arrival guidance gap",
+          "detail": "Volunteers requested a clearer arrival guide."
+        }
+      ],
+      "generation_context": "AI · fixture-topic-v2"
+    }
+  },
+  "invalid_analysis_output": {
+    "contract": "analysis",
+    "schema_version": "1.0",
+    "title": "Invalid analysis",
+    "timezone": "Asia/Kuala_Lumpur",
+    "summary": "This output contains an unsupported workflow field.",
+    "findings": [
+      {
+        "title": "Unsupported",
+        "detail": "The strict contract must reject this object."
+      }
+    ],
+    "generation_context": "fixture-invalid",
+    "approval_status": "approved"
+  },
+  "negative_sentiment_output": {
+    "contract": "analysis",
+    "schema_version": "1.0",
+    "title": "Volunteer readiness",
+    "timezone": "Asia/Kuala_Lumpur",
+    "summary": "Registration is healthy, while arrival instructions need clarification.",
+    "findings": [
+      {
+        "title": "Arrival guidance gap",
+        "detail": "Volunteers requested a clearer arrival guide."
+      }
+    ],
+    "generation_context": "AI · fixture-topic-v2",
+    "sentiment": {
+      "label": "negative",
+      "summary": "The requests show frustration with unclear guidance."
+    }
+  },
+  "sentiment_detection_module": {
+    "module_definition_id": "sentiment_detection",
+    "module_version": "v1",
+    "prompt_version": "v3"
+  }
+}

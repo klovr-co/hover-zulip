@@ -27864,6 +27864,21 @@ paths:
                   nullable: true
                   maxLength: 1000
                   description: Optional only for `not_action`.
+                wording:
+                  type: string
+                  nullable: true
+                  maxLength: 50000
+                  description: Reviewed wording to confirm with `approve`.
+                assignee_user_id:
+                  type: integer
+                  nullable: true
+                  minimum: 1
+                  description: Confirmed Space member to assign, or null to leave unassigned.
+                due_date:
+                  type: string
+                  format: date
+                  nullable: true
+                  description: Due date to confirm with `approve`, or null to clear it.
       responses:
         "200":
           description: Success, including an idempotent replay.
@@ -31439,6 +31454,7 @@ components:
         - wording
         - source_proposal
         - assignee
+        - assignable_users
         - due_date
         - history_count
         - recent_transitions
@@ -31472,6 +31488,15 @@ components:
           properties:
             user_id: {type: integer}
             full_name: {type: string}
+        assignable_users:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [user_id, full_name]
+            properties:
+              user_id: {type: integer}
+              full_name: {type: string}
         due_date:
           type: string
           format: date

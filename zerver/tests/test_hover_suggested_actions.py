@@ -11,7 +11,10 @@ from typing_extensions import override
 
 from hover.actions_memberships import do_confirm_space_member
 from hover.actions_spaces import do_create_space, do_launch_space
-from hover.actions_suggested_actions import decide_suggested_action
+from hover.actions_suggested_actions import (
+    create_suggested_action_for_generated_item,
+    decide_suggested_action,
+)
 from hover.actions_todos import todo_data
 from hover.lib import add_hover_metadata
 from hover.models import (
@@ -19,6 +22,7 @@ from hover.models import (
     EvidenceLink,
     GeneratedItem,
     Source,
+    SourceParticipantBinding,
     SpaceAttachment,
     SpaceMembership,
     SuggestedAction,
@@ -26,6 +30,7 @@ from hover.models import (
     Todo,
     TodoEvent,
 )
+from hover.publication_contracts import SuggestedActionPayload
 from zerver.actions.channel_folders import check_add_channel_folder
 from zerver.lib.event_schema import check_hover_suggested_action, check_hover_todo
 from zerver.lib.test_classes import ZulipTestCase
@@ -165,6 +170,9 @@ class HoverSuggestedActionTest(ZulipTestCase):
         request_id: UUID | None = None,
         expected_version: int | None = None,
         reason: str | None = None,
+        wording: str | None = None,
+        assignee_user_id: int | str | None = None,
+        due_date: str | None = None,
     ) -> "TestHttpResponse":
         actor = actor or self.subscriber
         self.login_user(actor)
@@ -177,6 +185,12 @@ class HoverSuggestedActionTest(ZulipTestCase):
         }
         if reason is not None:
             data["reason"] = reason
+        if wording is not None:
+            data["wording"] = wording
+        if assignee_user_id is not None:
+            data["assignee_user_id"] = assignee_user_id
+        if due_date is not None:
+            data["due_date"] = due_date
         return self.client_post(
             f"/json/hover/spaces/{self.space.id}/generated-items/{self.item.id}/suggested-action/decisions",
             data,
@@ -256,6 +270,15 @@ class HoverSuggestedActionTest(ZulipTestCase):
         self.assertEqual(self.item.publication_envelope_hash, "a" * 64)
         self.assertEqual(self.message.content, original_message)
         self.assertEqual(self.evidence.evidence_ref, "evidence_0123456789abcdef0123456789abcdef")
+
+    def test_contributor_can_approve_exactly_one_todo(self) -> None:
+        response = self.assert_json_success(self.decide("approve", actor=self.creator))
+
+        self.assertTrue(response["changed"])
+        self.assertEqual(response["suggested_action"]["state"], "approved")
+        self.assertEqual(Todo.objects.count(), 1)
+        self.assertEqual(TodoEvent.objects.count(), 1)
+        self.assertEqual(SuggestedActionTransition.objects.count(), 1)
 
     def test_todo_assignment_completion_reopen_and_realtime_history(self) -> None:
         self.assert_json_success(self.decide("approve"))
@@ -464,7 +487,7 @@ class HoverSuggestedActionTest(ZulipTestCase):
         self.assertEqual(self.action.state, SuggestedAction.State.PENDING)
         self.assertFalse(SuggestedActionTransition.objects.exists())
 
-    def test_approval_uses_reviewed_values_but_not_opaque_assignee(self) -> None:
+    def test_approval_uses_reviewed_values_but_not_unmapped_opaque_assignee(self) -> None:
         reviewed = dict(self.original_payload)
         reviewed["wording"] = "Send the final venue plan and safety notes."
         reviewed["proposed_due_date"] = None
@@ -479,6 +502,59 @@ class HoverSuggestedActionTest(ZulipTestCase):
             response["suggested_action"]["source_proposal"]["assignee_ref"],
             "person_0123456789abcdef0123456789abcdef",
         )
+
+    def test_verified_source_identity_resolves_proposed_assignee(self) -> None:
+        SourceParticipantBinding.objects.create(
+            realm=self.realm,
+            source=self.attachment.source,
+            participant_ref="person_0123456789abcdef0123456789abcdef",
+            user=self.subscriber,
+            match_basis=SourceParticipantBinding.MatchBasis.VERIFIED_EMAIL,
+            observation_basis="obs_0123456789abcdef0123456789abcdef",
+        )
+        self.action.delete()
+        proposal = create_suggested_action_for_generated_item(
+            self.item,
+            SuggestedActionPayload.model_validate(self.item.reviewed_payload),
+        )
+        self.assertEqual(proposal.assignee, self.subscriber)
+
+        response = self.assert_json_success(self.decide("approve"))
+        self.assertEqual(response["suggested_action"]["assignee"]["user_id"], self.subscriber.id)
+        self.assertEqual(Todo.objects.get().assignee, self.subscriber)
+
+    def test_approval_atomically_captures_human_refinements(self) -> None:
+        response = self.assert_json_success(
+            self.decide(
+                "approve",
+                wording="Send the final venue plan with the accessibility notes.",
+                assignee_user_id=self.subscriber.id,
+                due_date="2026-08-19",
+            )
+        )
+        self.action.refresh_from_db()
+        todo = Todo.objects.get()
+        transition = SuggestedActionTransition.objects.get()
+        self.assertEqual(
+            self.action.wording, "Send the final venue plan with the accessibility notes."
+        )
+        self.assertEqual(self.action.assignee, self.subscriber)
+        assert self.action.due_date is not None
+        self.assertEqual(self.action.due_date.isoformat(), "2026-08-19")
+        self.assertEqual(todo.wording, self.action.wording)
+        self.assertEqual(todo.assignee, self.subscriber)
+        self.assertEqual(todo.due_date, self.action.due_date)
+        self.assertEqual(transition.before_assignee_id, None)
+        self.assertEqual(transition.after_assignee_id, self.subscriber.id)
+        self.assertEqual(response["suggested_action"]["todo"]["wording"], self.action.wording)
+
+    def test_approval_rejects_assignee_outside_space_without_mutation(self) -> None:
+        response = self.decide("approve", assignee_user_id=self.outsider.id)
+        self.assert_json_error(response, "The assignee must be a confirmed Space member.")
+        self.action.refresh_from_db()
+        self.assertEqual(self.action.state, SuggestedAction.State.PENDING)
+        self.assertFalse(Todo.objects.exists())
+        self.assertFalse(SuggestedActionTransition.objects.exists())
 
     def test_failure_during_approval_rolls_back_every_workflow_row(self) -> None:
         with (

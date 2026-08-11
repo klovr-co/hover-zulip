@@ -57,6 +57,7 @@ class HoverPersonalEditionsTest(ZulipTestCase):
             space=self.space,
             user=self.user,
             role=SpaceMembership.Role.CONTRIBUTOR,
+            personal_editions_enabled=True,
             added_by=self.user,
         )
         self.account = ConnectedAccount.objects.create(

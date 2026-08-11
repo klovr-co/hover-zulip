@@ -13,6 +13,8 @@ sanitized value with a reviewed value from the deployment inventory:
 
 - organization string ID and active organization-administrator email;
 - approved Connected Account UUIDs and the incoming GitHub/Apify bot emails;
+- one active realm bot configured exactly by `HOVER_ASSISTANT_EMAIL` as Hover's
+  publication assistant;
 - the three permitted WhatsApp Source references and their exact bounded UTC
   history starts/timezones;
 - GitHub and Apify Source references, HTTPS links, allowed actors,
@@ -39,9 +41,14 @@ Dry-run is the default and performs no writes:
 
 Review the report with the pilot owner. It must show three WhatsApp Sources,
 two reviewed native provenance routes, six enabled Modules, Signal Monitor off,
-zero Monday writeback, and all six acceptance gates. The command rejects extra
-schema fields, unknown or forbidden Modules, missing mappings, external guests,
-unreviewed routes, unsafe URLs, implicit history windows, and route bot drift.
+zero Monday writeback, and all six acceptance gates. A first shadow launch may
+report `rollout_phase: shadow` with pending gates and
+`expansion_ready: false`; expansion is allowed only when all six gates are
+`passed` and the report says `rollout_phase: expansion_ready` and
+`expansion_ready: true`. The command rejects extra schema fields, unknown or
+forbidden Modules, missing mappings, external guests, unreviewed routes, unsafe
+URLs, implicit history windows, route bot drift, and channel subscriptions for
+any bot other than reviewed route bots or the configured Hover assistant.
 
 Also verify the declared actor/repository/event allowlists in the GitHub and
 Apify webhook configuration itself. Hover reports those controls but does not
@@ -68,7 +75,8 @@ Module installation, and Integration Route records. It refuses history-window
 changes, detached Sources, changed immutable Module policies, unreviewed setup
 members or administrators, extra active grants/selectors/attachments/Modules/
 routes, or launched subscription drift so those changes receive a new human
-review.
+review. It also fails closed on extra participant mappings or Personal Edition
+enrollments that are relevant to the configured Sources and teammates.
 
 Conversation Digest, Progress Tracker, Suggested Actions (the Todo-producing
 Module), Decisions (Decision Capture), Marketing Digest, and Topic Analysis are
@@ -76,7 +84,11 @@ installed. Signal Monitor is present in the reusable catalog but not installed.
 Email, Weekly Roundup, AI Slides, and Topics You Follow are denied. Morning
 Daily Brief and End-of-Day Roundup become available only to reviewed cohort
 members who have a verified `SourceParticipantBinding` and confirmed Space
-membership.
+membership with Personal Editions explicitly enabled. Reconciliation persists
+that enrollment. Removing a teammate from the cohort is fail-closed: first
+perform a separately reviewed cleanup of any globally shared participant
+bindings, then apply the revised private configuration so the enrollment can be
+disabled without silently affecting another Space.
 
 ## Shadow-mode acceptance checklist
 
@@ -103,14 +115,29 @@ adapter and sanitized test evidence:
 
 ```bash
 ./tools/test-backend \
-  zerver.tests.test_hover_publication_sync.HoverPublicationSyncTest.test_all_six_outputs_materialize_once_and_replay_advances_cursor \
-  zerver.tests.test_hover_publication_sync.HoverPublicationSyncTest.test_material_dispute_creates_one_native_targeted_request_and_resolves \
-  zerver.tests.test_hover_suggested_actions.HoverSuggestedActionTest.test_approval_is_atomic_idempotent_and_preserves_publication \
-  zerver.tests.test_hover_awareness.HoverAwarenessTest.test_linked_development_projects_latest_reviewed_state_and_native_read_state \
-  zerver.tests.test_hover_personal_editions.HoverPersonalEditionsTest.test_ingests_and_projects_only_native_update_links_without_creating_todos
+  zerver.tests.test_hover_platform_scenario.HoverPilotCausalScenarioTest.test_one_source_publication_traverses_review_todo_home_and_edition
 ```
 
 This proves the ordered development path from sanitized evidence to generated
 update, Review, confirmed Todo, Home awareness, and permission-filtered personal
 edition without contacting or mutating live Sources, Studio, GitHub, Apify, or
 Monday.
+
+## Private source-backed verification
+
+Before shadow launch, repeat the transport check against an isolated, migrated
+copy of the production Clawer database. Select only the three reviewed inventory
+records, let current Clawer mint `src_<opaque>` references, publish at least one
+Digest and Suggested Action with exact evidence per Source, and validate the
+literal publication page unchanged through:
+
+1. Clawer's `PublicationEnvelope` and evidence resolver;
+2. Studio's `validateHoverPublicationBatch` boundary; and
+3. Hover's `ClawerPublicationPage` boundary.
+
+Keep the payload, source identities, and source-derived text in gitignored
+`.private.json` artifacts. The shareable report may contain only counts,
+booleans, and SHA-256 hashes. A deployed Clawer version that still exposes raw
+provider identifiers instead of `src_<opaque>` references is not rollout-ready;
+deploy the current transport and regenerate the inventory before creating the
+private pilot config.

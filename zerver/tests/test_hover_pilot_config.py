@@ -322,6 +322,30 @@ class HoverPilotConfigTest(ZulipTestCase):
             ChannelFolder.objects.filter(realm=self.realm, name="Pilot Programs").exists()
         )
 
+    def test_shadow_launch_allows_pending_operational_gates_but_blocks_expansion(self) -> None:
+        payload = self.config()
+        for gate in payload["acceptance_gates"]:
+            if gate["key"] in {"notifications", "voluntary_use"}:
+                gate["status"] = "pending"
+                gate["evidence"] = "Must be observed during shadow operation."
+
+        output = self.run_command(self.write_config(payload))
+
+        self.assertIn('"rollout_phase": "shadow"', output)
+        self.assertIn('"expansion_ready": false', output)
+
+    def test_all_observed_gates_mark_pilot_expansion_ready(self) -> None:
+        output = self.run_command(self.write_config(self.config()))
+
+        self.assertIn('"rollout_phase": "expansion_ready"', output)
+        self.assertIn('"expansion_ready": true', output)
+
+    def test_setup_never_reports_pilot_expansion_ready(self) -> None:
+        output = self.run_command(self.write_config(self.config(launch=False)))
+
+        self.assertIn('"rollout_phase": "setup"', output)
+        self.assertIn('"expansion_ready": false', output)
+
     def test_apply_requires_private_config_and_exact_confirmation(self) -> None:
         public_path = self.write_config(self.config(private=False), private_name=False)
         with self.assertRaisesRegex(CommandError, "ending in .private.json"):
@@ -372,6 +396,8 @@ class HoverPilotConfigTest(ZulipTestCase):
         self.assertEqual(counts["sources"], 5)
         self.assertEqual(counts["routes"], 2)
         self.assertEqual(counts["installations"], 6)
+        membership = SpaceMembership.objects.get(realm=self.realm, user=self.operator)
+        self.assertTrue(membership.personal_editions_enabled)
         self.assertTrue(
             ModuleDefinition.objects.filter(realm=self.realm, stable_key="signal_monitor").exists()
         )
@@ -495,6 +521,47 @@ class HoverPilotConfigTest(ZulipTestCase):
         with self.assertRaisesRegex(CommandError, "unreviewed active Source attachment"):
             self.run_command(path)
 
+    def test_rejects_extra_mapping_for_non_cohort_teammate(self) -> None:
+        path = self.write_config(self.config(launch=False))
+        confirmation = f"{self.realm.string_id}:test-pilot"
+        self.run_command(path, apply=True, confirm=confirmation)
+        source = Source.objects.get(realm=self.realm, external_ref=f"src_{1:032x}")
+        SourceParticipantBinding.objects.create(
+            realm=self.realm,
+            source=source,
+            participant_ref=f"person_{99:032x}",
+            user=self.example_user("hamlet"),
+            match_basis=SourceParticipantBinding.MatchBasis.VERIFIED_EMAIL,
+            observation_basis=f"obs_{99:032x}",
+        )
+
+        with self.assertRaisesRegex(CommandError, "unreviewed participant mapping"):
+            self.run_command(path)
+
+    def test_rejects_unreviewed_personal_edition_enrollment(self) -> None:
+        payload = self.config(launch=False)
+        payload["memberships"].append(
+            {
+                "user_email": self.example_user("hamlet").delivery_email,
+                "role": "subscriber",
+                "administrator": False,
+                "pilot_cohort": False,
+                "personal_editions": False,
+                "reviewed": True,
+            }
+        )
+        path = self.write_config(payload)
+        confirmation = f"{self.realm.string_id}:test-pilot"
+        self.run_command(path, apply=True, confirm=confirmation)
+        membership = SpaceMembership.objects.get(
+            space__name="Pilot Space", user=self.example_user("hamlet")
+        )
+        membership.personal_editions_enabled = True
+        membership.save(update_fields=["personal_editions_enabled"])
+
+        with self.assertRaisesRegex(CommandError, "unreviewed Personal Edition enrollment"):
+            self.run_command(path)
+
     def test_rejects_extra_current_module(self) -> None:
         path = self.write_config(self.config(launch=False))
         confirmation = f"{self.realm.string_id}:test-pilot"
@@ -534,6 +601,25 @@ class HoverPilotConfigTest(ZulipTestCase):
         bulk_remove_subscriptions(
             self.realm, [unreviewed], [space.stream], acting_user=self.operator
         )
+
+    def test_rejects_unreviewed_non_route_bot_subscription(self) -> None:
+        path = self.write_config(self.config())
+        confirmation = f"{self.realm.string_id}:test-pilot"
+        self.run_command(path, apply=True, confirm=confirmation)
+        space = Space.objects.get(realm=self.realm, name="Pilot Space")
+        assert space.stream is not None
+        unreviewed_bot = self.create_test_bot(
+            "pilot-generic-drift",
+            self.operator,
+            full_name="Unreviewed generic bot",
+            bot_type=UserProfile.DEFAULT_BOT,
+        )
+        bulk_add_subscriptions(
+            self.realm, [space.stream], [unreviewed_bot], acting_user=self.operator
+        )
+
+        with self.assertRaisesRegex(CommandError, "unreviewed bot"):
+            self.run_command(path)
 
     def test_rejects_active_route_bot_drift(self) -> None:
         path = self.write_config(self.config())
