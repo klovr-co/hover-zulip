@@ -202,7 +202,7 @@ def record_todo_approval(
     return event
 
 
-@transaction.atomic
+@transaction.atomic(durable=True)
 def mutate_todo(
     *,
     acting_user: UserProfile,
@@ -228,7 +228,7 @@ def mutate_todo(
         raise JsonableError(_("Invalid Todo ID"))
     try:
         todo = (
-            Todo.objects.select_for_update(of=("self",))
+            Todo.objects.select_for_update(no_key=True, of=("self",))
             .select_related(
                 "realm",
                 "space__stream",
@@ -259,11 +259,13 @@ def mutate_todo(
         assignee = _eligible_members(todo.space).filter(id=assignee_user_id).first()
         if assignee is None:
             raise JsonableError(_("The assignee must be a confirmed Space member."))
-        if todo.assignee_id == assignee.id:
-            return TodoMutationResult(changed=False, todo=todo)
+        # Reconfirming the current assignee is still an auditable assignment
+        # command. Appending it reserves the request UUID, so replaying that UUID
+        # after a later correction cannot unexpectedly restore the old assignee.
         kind = TodoEvent.Kind.ASSIGNED if todo.assignee_id is None else TodoEvent.Kind.REASSIGNED
+        if todo.assignee_id != assignee.id:
+            notification_recipient = assignee
         todo.assignee = assignee
-        notification_recipient = assignee
     elif operation == "complete":
         if todo.state != Todo.State.ACTIVE or assignee_user_id is not None:
             raise TodoConflictError(todo)

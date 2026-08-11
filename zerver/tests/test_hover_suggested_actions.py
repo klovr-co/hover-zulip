@@ -300,25 +300,66 @@ class HoverSuggestedActionTest(ZulipTestCase):
             self.mutate_todo(todo, "assign", assignee_user_id=self.subscriber.id)
         )
         todo.refresh_from_db()
+        reconfirm_request = uuid4()
+        reconfirmed = self.assert_json_success(
+            self.mutate_todo(
+                todo,
+                "assign",
+                request_id=reconfirm_request,
+                assignee_user_id=self.subscriber.id,
+            )
+        )
+        self.assertTrue(reconfirmed["changed"])
+        self.assertEqual(reconfirmed["todo"]["recent_events"][0]["kind"], "reassigned")
+        self.assertIsNone(
+            TodoEvent.objects.get(request_id=reconfirm_request).notification_message_id
+        )
+        todo.refresh_from_db()
+        correction_request = uuid4()
         reassigned = self.assert_json_success(
-            self.mutate_todo(todo, "assign", assignee_user_id=self.creator.id)
+            self.mutate_todo(
+                todo,
+                "assign",
+                request_id=correction_request,
+                assignee_user_id=self.creator.id,
+            )
         )
         self.assertEqual(reassigned["todo"]["recent_events"][0]["kind"], "reassigned")
-        event = TodoEvent.objects.get(kind=TodoEvent.Kind.REASSIGNED)
+        event = TodoEvent.objects.get(request_id=correction_request)
         self.assertEqual(event.previous_assignee, self.subscriber)
         self.assertEqual(event.new_assignee, self.creator)
         with self.assertRaisesMessage(Exception, "append-only"):
             event.save()
 
+        todo.refresh_from_db()
+        replay = self.assert_json_success(
+            self.mutate_todo(
+                todo,
+                "assign",
+                request_id=reconfirm_request,
+                expected_version=2,
+                assignee_user_id=self.subscriber.id,
+            )
+        )
+        self.assertFalse(replay["changed"])
+        todo.refresh_from_db()
+        self.assertEqual(todo.assignee, self.creator)
+
         stale = self.mutate_todo(todo, "complete", expected_version=1)
         self.assert_json_error(
             stale, "This Todo has changed. Review its current state.", status_code=409
         )
-        self.assertEqual(orjson.loads(stale.content)["todo"]["version"], 3)
+        self.assertEqual(orjson.loads(stale.content)["todo"]["version"], 4)
 
     def test_home_todos_are_authorized_canonical_records(self) -> None:
         self.assert_json_success(self.decide("approve"))
         todo = Todo.objects.get()
+        denied = self.mutate_todo(todo, "complete", actor=self.outsider)
+        self.assert_json_error(denied, "Invalid Todo ID")
+        todo.refresh_from_db()
+        self.assertEqual(todo.state, Todo.State.ACTIVE)
+        self.assertEqual(todo.events.count(), 1)
+
         self.login_user(self.subscriber)
         listed = self.assert_json_success(self.client_get("/json/hover/todos"))
         self.assertEqual([entry["id"] for entry in listed["todos"]], [todo.id])
