@@ -21,6 +21,10 @@ const hover_awareness_view = mock_esm("../src/hover_awareness_view", {
     hide() {},
     show() {},
 });
+const hover_editions_view = mock_esm("../src/hover_editions_view", {
+    hide() {},
+    show() {},
+});
 const info_overlay = mock_esm("../src/info_overlay");
 let hover_search_shown = false;
 mock_esm("../src/hover_search_view", {
@@ -279,6 +283,14 @@ run_test("hash_interactions", ({override, override_rewire}) => {
     window.location.hash = "#recent";
     $window_stub.trigger("hashchange");
     assert.equal(awareness_surface, "team_pulse");
+
+    let editions_shown = false;
+    override(hover_editions_view, "show", () => {
+        editions_shown = true;
+    });
+    window.location.hash = "#hover/editions";
+    $window_stub.trigger("hashchange");
+    assert.equal(editions_shown, true);
     realm.realm_hover_enabled = false;
 
     window.location.hash = "#hover/search";

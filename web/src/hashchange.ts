@@ -301,7 +301,7 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
             if (hash.length === 3 && hash[1] === "editions" && hash[2] === "") {
                 hash.pop();
             }
-            if (hash.length === 2 && hash[1] === "editions" && page_params.realm_hover_enabled) {
+            if (hash.length === 2 && hash[1] === "editions" && realm.realm_hover_enabled) {
                 hover_source_view.hide();
                 hover_search_view.hide();
                 hover_editions_view.show();
