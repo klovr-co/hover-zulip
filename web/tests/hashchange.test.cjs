@@ -48,10 +48,6 @@ const spectators = mock_esm("../src/spectators", {
 const stream_settings_ui = mock_esm("../src/stream_settings_ui");
 const ui_util = mock_esm("../src/ui_util");
 const ui_report = mock_esm("../src/ui_report");
-const {realm} = mock_esm("../src/state_data", {
-    current_user: {is_guest: false},
-    realm: {realm_hover_enabled: false},
-});
 set_global("favicon", {});
 
 const browser_history = zrequire("browser_history");
@@ -59,9 +55,13 @@ const people = zrequire("people");
 const hash_util = zrequire("hash_util");
 const hashchange = zrequire("hashchange");
 const message_view = zrequire("../src/message_view");
+const state_data = zrequire("state_data");
 const stream_data = zrequire("stream_data");
 const {Filter} = zrequire("../src/filter");
 const {initialize_user_settings} = zrequire("user_settings");
+
+state_data.set_current_user({is_guest: false});
+state_data.set_realm({realm_hover_enabled: false});
 
 const user_settings = {};
 initialize_user_settings({user_settings});
@@ -276,7 +276,7 @@ run_test("hash_interactions", ({override, override_rewire}) => {
     override(hover_awareness_view, "show", (surface) => {
         awareness_surface = surface;
     });
-    realm.realm_hover_enabled = true;
+    state_data.realm.realm_hover_enabled = true;
     window.location.hash = "#inbox";
     $window_stub.trigger("hashchange");
     assert.equal(awareness_surface, "for_you");
@@ -291,7 +291,7 @@ run_test("hash_interactions", ({override, override_rewire}) => {
     window.location.hash = "#hover/editions";
     $window_stub.trigger("hashchange");
     assert.equal(editions_shown, true);
-    realm.realm_hover_enabled = false;
+    state_data.realm.realm_hover_enabled = false;
 
     window.location.hash = "#hover/search";
     hover_search_shown = false;
