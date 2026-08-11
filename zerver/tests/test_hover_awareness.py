@@ -78,6 +78,9 @@ class HoverAwarenessTest(ZulipTestCase):
             attached_by=self.creator,
         )
         space, _ = do_launch_space(space, acting_user=self.creator)
+        # The attachment cached the pre-launch Space instance before the
+        # launch transaction attached its native stream.
+        attachment.space = space
         return attachment, space
 
     def make_item(

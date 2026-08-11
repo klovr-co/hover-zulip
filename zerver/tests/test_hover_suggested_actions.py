@@ -445,7 +445,7 @@ class HoverSuggestedActionTest(ZulipTestCase):
     def test_failure_during_approval_rolls_back_every_workflow_row(self) -> None:
         with (
             patch(
-                "hover.actions_suggested_actions.TodoEvent.objects.create",
+                "hover.actions_todos.TodoEvent.objects.create",
                 side_effect=RuntimeError("forced Todo event failure"),
             ),
             self.assertRaisesRegex(RuntimeError, "forced Todo event failure"),
