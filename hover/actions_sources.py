@@ -17,6 +17,10 @@ from hover.lib_spaces import get_space_data, user_is_space_administrator
 from hover.models import (
     ConnectedAccount,
     ConnectedAccountGrant,
+    DisputedEvidenceLink,
+    EvidenceLink,
+    IntegrationMessageProvenance,
+    IntegrationRouteAssociation,
     Source,
     SourceCapability,
     Space,
@@ -151,11 +155,22 @@ def _attach_canonical_source(
             if not _same_semantic_window(attachment, boundary):
                 raise HistoryWindowConflictError
             if attachment.state == SpaceAttachment.State.DETACHED:
+                if attachment.evidence_deleted_at is not None:
+                    raise JsonableError(
+                        _("Permanently deleted Source evidence cannot be reattached.")
+                    )
                 attachment.state = SpaceAttachment.State.ACTIVE
                 attachment.detached_at = None
                 attachment.detached_by = None
+                attachment.next_publication_sync_at = timezone_now()
                 attachment.save(
-                    update_fields=["state", "detached_at", "detached_by", "date_updated"]
+                    update_fields=[
+                        "state",
+                        "detached_at",
+                        "detached_by",
+                        "next_publication_sync_at",
+                        "date_updated",
+                    ]
                 )
             return attachment, False
 
@@ -230,6 +245,8 @@ def do_attach_source(
             raise HistoryWindowConflictError
         if existing.state == SpaceAttachment.State.ACTIVE:
             return existing, False
+        if existing.evidence_deleted_at is not None:
+            raise JsonableError(_("Permanently deleted Source evidence cannot be reattached."))
 
     canonical_source = canonical_source_for_attachment(
         user_profile=acting_user,
@@ -266,14 +283,79 @@ def do_detach_source(
         raise JsonableError(_("Invalid Space attachment."))
     get_actor_grant(acting_user, attachment.source.account)
     if attachment.state == SpaceAttachment.State.DETACHED:
+        IntegrationRouteAssociation.objects.filter(
+            attachment=attachment,
+            state=IntegrationRouteAssociation.State.ACTIVE,
+        ).update(
+            state=IntegrationRouteAssociation.State.DETACHED,
+            detached_at=attachment.detached_at,
+            date_updated=attachment.detached_at,
+        )
+        from hover.actions_modules import pause_installations_for_attachment
+
+        pause_installations_for_attachment(attachment)
+        if (
+            attachment.publication_sync_state != SpaceAttachment.PublicationSyncState.IDLE
+            or attachment.publication_sync_lease_token is not None
+            or attachment.publication_sync_lease_expires_at is not None
+            or attachment.next_publication_sync_at is not None
+        ):
+            attachment.publication_sync_state = SpaceAttachment.PublicationSyncState.IDLE
+            attachment.publication_sync_lease_token = None
+            attachment.publication_sync_lease_expires_at = None
+            attachment.next_publication_sync_at = None
+            attachment.save(
+                update_fields=[
+                    "publication_sync_state",
+                    "publication_sync_lease_token",
+                    "publication_sync_lease_expires_at",
+                    "next_publication_sync_at",
+                    "date_updated",
+                ]
+            )
         return attachment, False
     attachment.state = SpaceAttachment.State.DETACHED
     attachment.detached_at = timezone_now()
     attachment.detached_by = acting_user
-    attachment.save(update_fields=["state", "detached_at", "detached_by", "date_updated"])
+    attachment.publication_sync_state = SpaceAttachment.PublicationSyncState.IDLE
+    attachment.publication_sync_lease_token = None
+    attachment.publication_sync_lease_expires_at = None
+    attachment.next_publication_sync_at = None
+    attachment.save(
+        update_fields=[
+            "state",
+            "detached_at",
+            "detached_by",
+            "publication_sync_state",
+            "publication_sync_lease_token",
+            "publication_sync_lease_expires_at",
+            "next_publication_sync_at",
+            "date_updated",
+        ]
+    )
+    IntegrationRouteAssociation.objects.filter(
+        attachment=attachment,
+        state=IntegrationRouteAssociation.State.ACTIVE,
+    ).update(
+        state=IntegrationRouteAssociation.State.DETACHED,
+        detached_at=attachment.detached_at,
+        date_updated=attachment.detached_at,
+    )
     from hover.actions_modules import pause_installations_for_attachment
 
     pause_installations_for_attachment(attachment)
+    RealmAuditLog.objects.create(
+        realm=attachment.realm,
+        acting_user=acting_user,
+        event_type=AuditLogEventType.HOVER_SOURCE_DETACHED,
+        event_time=attachment.detached_at,
+        extra_data={
+            "space_id": attachment.space_id,
+            "source_id": attachment.source_id,
+            "account_id": attachment.source.account_id,
+            "attachment_id": attachment.id,
+        },
+    )
     projected_space = Space.objects.get(id=locked_space.id)
     send_event_on_commit(
         locked_space.realm,
@@ -289,3 +371,70 @@ def do_detach_source(
         ),
     )
     return attachment, True
+
+
+@transaction.atomic(durable=True)
+def do_delete_source_evidence(
+    *,
+    acting_user: UserProfile,
+    space: Space,
+    attachment_id: int,
+    confirmation: str,
+) -> tuple[SpaceAttachment, bool, int]:
+    """Permanently remove retained evidence through an explicit admin-only action."""
+
+    locked_space = Space.objects.select_for_update(no_key=True).get(id=space.id)
+    if acting_user.realm_id != locked_space.realm_id or not acting_user.is_realm_admin:
+        raise JsonableError(_("Only an Organization Admin may permanently delete evidence."))
+    try:
+        attachment = (
+            SpaceAttachment.objects.select_for_update(no_key=True, of=("self",))
+            .select_related("source__account")
+            .get(id=attachment_id, space=locked_space)
+        )
+    except SpaceAttachment.DoesNotExist:
+        raise JsonableError(_("Invalid Space attachment."))
+    if attachment.state != SpaceAttachment.State.DETACHED:
+        raise JsonableError(_("Detach this Source before permanently deleting its evidence."))
+    expected_confirmation = f"DELETE {attachment.source.display_name}"
+    if confirmation != expected_confirmation:
+        raise JsonableError(_("Evidence deletion confirmation did not match."))
+    if attachment.evidence_deleted_at is not None:
+        return attachment, False, 0
+
+    evidence_links = EvidenceLink.objects.filter(generated_item__attachment=attachment)
+    evidence_link_ids = list(evidence_links.values_list("id", flat=True))
+    if evidence_link_ids:
+        DisputedEvidenceLink.objects.filter(evidence_link_id__in=evidence_link_ids).delete()
+    deleted_count = evidence_links.count()
+    evidence_links.delete()
+    IntegrationMessageProvenance.objects.filter(attachment=attachment).delete()
+    attachment.evidence_deleted_at = timezone_now()
+    attachment.evidence_deleted_by = acting_user
+    attachment.save(
+        update_fields=["evidence_deleted_at", "evidence_deleted_by", "date_updated"]
+    )
+    RealmAuditLog.objects.create(
+        realm=attachment.realm,
+        acting_user=acting_user,
+        event_type=AuditLogEventType.HOVER_SOURCE_EVIDENCE_DELETED,
+        event_time=attachment.evidence_deleted_at,
+        extra_data={
+            "space_id": attachment.space_id,
+            "source_id": attachment.source_id,
+            "account_id": attachment.source.account_id,
+            "attachment_id": attachment.id,
+            "evidence_link_count": deleted_count,
+        },
+    )
+    projected_space = Space.objects.get(id=locked_space.id)
+    send_event_on_commit(
+        locked_space.realm,
+        {"type": "hover_space", "op": "update", "space": get_space_data(projected_space)},
+        list(
+            SpaceMembership.objects.filter(space=locked_space, user__is_active=True).values_list(
+                "user_id", flat=True
+            )
+        ),
+    )
+    return attachment, True, deleted_count

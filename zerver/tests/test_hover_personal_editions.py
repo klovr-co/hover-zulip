@@ -1,8 +1,8 @@
 from datetime import date, datetime, timezone
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 from uuid import UUID
 
-from django.http import HttpResponse
 from typing_extensions import override
 
 from hover.clawer_sync import ClawerSyncError, InMemoryClawerSync
@@ -21,6 +21,9 @@ from hover.publication_contracts import ClawerPublication, ClawerPublicationPage
 from zerver.actions.channel_folders import check_add_channel_folder
 from zerver.lib.test_classes import ZulipTestCase
 from zerver.models import Message
+
+if TYPE_CHECKING:
+    from django.test.client import _MonkeyPatchedWSGIResponse as TestHttpResponse
 
 
 class HoverPersonalEditionsTest(ZulipTestCase):
@@ -205,7 +208,7 @@ class HoverPersonalEditionsTest(ZulipTestCase):
             publications=list(publications), next_cursor="hpe1:next", has_more=False
         )
 
-    def get_editions(self) -> HttpResponse:
+    def get_editions(self) -> "TestHttpResponse":
         with patch("hover.views_personal_editions.get_clawer_sync", return_value=self.adapter):
             return self.client_get("/json/hover/personal-editions")
 

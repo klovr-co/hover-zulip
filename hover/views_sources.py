@@ -5,7 +5,7 @@ from django.http import HttpRequest, HttpResponse
 from django.utils.translation import gettext as _
 from pydantic import Field, Json, StringConstraints
 
-from hover.actions_sources import do_attach_source, do_detach_source
+from hover.actions_sources import do_attach_source, do_delete_source_evidence, do_detach_source
 from hover.clawer_sync import get_clawer_sync
 from hover.lib_connected_accounts import access_connected_account
 from hover.lib_sources import (
@@ -16,6 +16,7 @@ from hover.lib_sources import (
 )
 from hover.lib_spaces import (
     access_space_by_id,
+    access_space_for_administration,
     get_space_data,
     space_projection_queryset,
     user_is_space_administrator,
@@ -165,5 +166,33 @@ def detach_source(
             "space": get_space_data(space_projection_queryset().get(id=space.id)),
             "attachment_id": attachment.id,
             "changed": changed,
+        },
+    )
+
+
+@require_non_guest_user
+@typed_endpoint
+def delete_source_evidence(
+    request: HttpRequest,
+    user_profile: UserProfile,
+    *,
+    space_id: PathOnly[int],
+    attachment_id: PathOnly[int],
+    confirmation: Json[Annotated[str, StringConstraints(max_length=200)]],
+) -> HttpResponse:
+    space = access_space_for_administration(user_profile, space_id)
+    attachment, changed, deleted_count = do_delete_source_evidence(
+        acting_user=user_profile,
+        space=space,
+        attachment_id=attachment_id,
+        confirmation=confirmation,
+    )
+    return json_success(
+        request,
+        data={
+            "space": get_space_data(space_projection_queryset().get(id=space.id)),
+            "attachment_id": attachment.id,
+            "changed": changed,
+            "deleted_evidence_link_count": deleted_count,
         },
     )

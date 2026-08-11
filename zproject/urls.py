@@ -37,7 +37,13 @@ from hover.views_publications import (
 )
 from hover.views_search import hover_search
 from hover.views_source_records import browse_source_records
-from hover.views_sources import attach_source, detach_source, discover_sources, preview_source
+from hover.views_sources import (
+    attach_source,
+    delete_source_evidence,
+    detach_source,
+    discover_sources,
+    preview_source,
+)
 from hover.views_spaces import (
     add_space_administrator,
     confirm_space_member,
@@ -652,6 +658,10 @@ v1_api_and_json_patterns = [
     ),
     rest_path("hover/spaces/<int:space_id>/sources", POST=attach_source),
     rest_path("hover/spaces/<int:space_id>/sources/<int:attachment_id>", DELETE=detach_source),
+    rest_path(
+        "hover/spaces/<int:space_id>/sources/<int:attachment_id>/evidence",
+        DELETE=delete_source_evidence,
+    ),
     rest_path("hover/spaces/<int:space_id>/integration-routes", POST=associate_integration_route),
     rest_path(
         "hover/spaces/<int:space_id>/integration-routes/<int:route_id>",

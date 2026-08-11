@@ -88,9 +88,7 @@ def _accept_publication(
         raise PersonalEditionError("invalid_personal_edition_contract")
     personal = payload.personal
     expected_producer = (
-        "personal_morning_brief"
-        if personal.edition == PersonalEdition.Edition.MORNING
-        else "personal_eod_roundup"
+        "personal_morning_brief" if personal.edition == "morning" else "personal_eod_roundup"
     )
     if personal.teammate_ref != teammate_ref or publication.producer_key != expected_producer:
         raise PersonalEditionError("invalid_personal_edition_contract")
@@ -159,7 +157,7 @@ def _sync_personal_stream(
         start_at=state.start_at.isoformat(),
     )
     with transaction.atomic(durable=True):
-        locked = PersonalEditionSyncState.objects.select_for_update().get(id=state.id)
+        locked = PersonalEditionSyncState.objects.select_for_update(no_key=False).get(id=state.id)
         if locked.cursor != requested_cursor:
             return
         for publication in page.publications:
@@ -288,7 +286,7 @@ def _project_personal_edition(
     assert personal is not None
     authorized = _authorized_updates(user_profile=user_profile, edition=edition)
     section_items: dict[str, list[PersonalDigestItem]]
-    if personal.edition == PersonalEdition.Edition.MORNING:
+    if personal.edition == "morning":
         assert personal.morning is not None
         section_items = {
             "urgency": personal.morning.urgency,
@@ -316,7 +314,7 @@ def _project_personal_edition(
             if projected is not None:
                 sections[key].append(projected)
     all_clear = (
-        personal.edition == PersonalEdition.Edition.MORNING
+        personal.edition == "morning"
         and personal.morning is not None
         and bool(personal.morning.all_clear_context)
         and bool(personal.operational_publication_ids)

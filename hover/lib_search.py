@@ -10,7 +10,7 @@ from hover.models import GeneratedItem, Space, SpaceAttachment, SpaceMembership
 from zerver.lib.exceptions import ResourceNotFoundError
 from zerver.lib.narrow import NarrowParameter, add_narrow_conditions, get_base_query_for_search
 from zerver.lib.url_encoding import stream_message_url
-from zerver.models import Message, UserMessage
+from zerver.models import UserMessage
 from zerver.models.recipients import Recipient
 from zerver.models.users import UserProfile
 
@@ -48,8 +48,10 @@ def _native_knowledge_results(
 ) -> list[dict[str, Any]]:
     if not spaces:
         return []
-    spaces_by_stream_id = {space.stream_id: space for space in spaces}
-    assert None not in spaces_by_stream_id
+    spaces_by_stream_id: dict[int, Space] = {}
+    for space in spaces:
+        assert space.stream_id is not None
+        spaces_by_stream_id[space.stream_id] = space
     query = get_base_query_for_search(
         user_profile.realm_id, user_profile, need_user_message=True
     ).filter(
@@ -139,6 +141,7 @@ def _source_results(
         .filter(
             space_id__in=space_ids,
             state__in=[SpaceAttachment.State.ACTIVE, SpaceAttachment.State.DETACHED],
+            evidence_deleted_at__isnull=True,
         )
         .order_by("space_id", "source__display_name", "id")
     )
@@ -161,16 +164,16 @@ def _source_results(
         except ClawerSyncError:
             unavailable_space_ids.append(attachment.space_id)
             continue
-        for record in data["records"]:
-            results.append(
-                {
-                    "kind": "source",
-                    "space": {"id": attachment.space_id, "name": attachment.space.name},
-                    "source": data["source"],
-                    "record": record,
-                    "saveable": False,
-                }
-            )
+        results.extend(
+            {
+                "kind": "source",
+                "space": {"id": attachment.space_id, "name": attachment.space.name},
+                "source": data["source"],
+                "record": record,
+                "saveable": False,
+            }
+            for record in data["records"]
+        )
     return results, unavailable_space_ids
 
 

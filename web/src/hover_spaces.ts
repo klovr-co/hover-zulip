@@ -20,6 +20,7 @@ export const hover_space_attachment_schema = z.object({
     history_start_at: z.string(),
     custom_start_date: z.nullable(z.string()),
     can_browse_records: z.boolean(),
+    evidence_deleted: z._default(z.boolean(), false),
     source: hover_source_schema,
     integration_routes: z.array(
         z.object({

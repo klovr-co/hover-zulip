@@ -1,9 +1,11 @@
 from datetime import date, datetime, timezone
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 from uuid import UUID
 
 import orjson
 from django.db import connection
+from psycopg2.sql import SQL, Identifier
 from typing_extensions import override
 
 from hover.clawer_sync import ClawerSyncError, InMemoryClawerSync
@@ -20,9 +22,14 @@ from hover.models import (
 from hover.source_record_contracts import ClawerSourceRecordPage
 from zerver.actions.channel_folders import check_add_channel_folder
 from zerver.actions.message_flags import do_update_message_flags
+from zerver.actions.users import change_user_is_active
 from zerver.lib.test_classes import ZulipTestCase
+from zerver.lib.topic import DB_TOPIC_NAME
 from zerver.models import Message
 from zerver.models.users import UserProfile
+
+if TYPE_CHECKING:
+    from django.test.client import _MonkeyPatchedWSGIResponse as TestHttpResponse
 
 SOURCE_REF = "src_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
@@ -181,12 +188,14 @@ class HoverSearchTest(ZulipTestCase):
         )
         with connection.cursor() as cursor:
             cursor.execute(
-                """
+                SQL(
+                    """
                 UPDATE zerver_message SET
-                search_tsvector =
-                    to_tsvector('zulip.english_us_search', subject || rendered_content),
-                search_pgroonga = escape_html(subject) || ' ' || rendered_content
+                    search_tsvector =
+                        to_tsvector('zulip.english_us_search', {topic} || rendered_content),
+                    search_pgroonga = escape_html({topic}) || ' ' || rendered_content
                 """
+                ).format(topic=Identifier("zerver_message", DB_TOPIC_NAME))
             )
 
         self.adapter = InMemoryClawerSync()
@@ -201,7 +210,7 @@ class HoverSearchTest(ZulipTestCase):
         ] = search_page()
         self.login_user(self.member)
 
-    def search(self, query: str = "venue handoff"):
+    def search(self, query: str = "venue handoff") -> "TestHttpResponse":
         return self.client_post("/json/hover/search", {"query": orjson.dumps(query).decode()})
 
     def test_search_prioritizes_native_knowledge_and_labels_source_evidence(self) -> None:
@@ -292,8 +301,7 @@ class HoverSearchTest(ZulipTestCase):
         self.assertEqual(guest_payload["sources"], [])
         self.assertEqual(self.adapter.source_record_calls, [])
 
-        self.member.is_active = False
-        self.member.save(update_fields=["is_active"])
+        change_user_is_active(self.member, False)
         # The library check is also used by event-driven callers after login
         # state has been established, so exercise it without a second login.
         from hover.lib_search import search_hover_knowledge

@@ -10,7 +10,16 @@ from typing_extensions import override
 
 from hover.clawer_sync import ClawerSyncError, InMemoryClawerSync, StudioClawerSync
 from hover.lib_spaces import get_space_data
-from hover.models import ConnectedAccount, Source, Space, SpaceAttachment, SpaceMembership
+from hover.models import (
+    ConnectedAccount,
+    EvidenceLink,
+    GeneratedItem,
+    Source,
+    Space,
+    SpaceAdministrator,
+    SpaceAttachment,
+    SpaceMembership,
+)
 from hover.source_record_contracts import ClawerSourceRecordPage
 from zerver.actions.channel_folders import check_add_channel_folder
 from zerver.lib.streams import create_stream_if_needed
@@ -180,6 +189,18 @@ class HoverSourceRecordsTest(ZulipTestCase):
         self.assert_json_error(denied, "Source not found.", status_code=404)
         self.assertEqual(self.adapter.source_record_calls, [])
 
+        outsider = self.lear_user("cordelia")
+        self.login_user(outsider)
+        with patch("hover.views_source_records.get_clawer_sync", return_value=self.adapter):
+            cross_organization = self.client_post(
+                self.url,
+                {"limit": orjson.dumps(20).decode(), "query": orjson.dumps("").decode()},
+                subdomain="lear",
+            )
+        self.assertEqual(cross_organization.status_code, 404)
+        self.assert_json_error(cross_organization, "Source not found.", status_code=404)
+        self.assertEqual(self.adapter.source_record_calls, [])
+
         guest = self.example_user("polonius")
         SpaceMembership.objects.create(
             realm=self.realm,
@@ -215,6 +236,87 @@ class HoverSourceRecordsTest(ZulipTestCase):
         projected = get_space_data(self.space)["attachments"][0]
         self.assertEqual(projected["state"], "detached")
         self.assertTrue(projected["can_browse_records"])
+
+    def test_permanent_evidence_deletion_is_separate_confirmed_org_admin_action(self) -> None:
+        assert self.space.stream is not None
+        self.subscribe(self.member, self.space.stream.name, invite_only=True)
+        message_id = self.send_stream_message(
+            self.member,
+            self.space.stream.name,
+            "Generated post retained after evidence deletion.",
+            "Evidence",
+        )
+        item = GeneratedItem.objects.create(
+            realm=self.realm,
+            message=Message.objects.get(id=message_id),
+            attachment=self.attachment,
+            output_type=GeneratedItem.OutputType.FEED_UPDATE,
+            module_key="activity_digest",
+            module_name="Activity Digest",
+            module_version="v1",
+            source_summary="Leadership group",
+        )
+        EvidenceLink.objects.create(
+            generated_item=item,
+            realm=self.realm,
+            source=self.source,
+            evidence_ref="record_11111111111111111111111111111111",
+            position=0,
+            provider_key=self.source.provider_key,
+            provider_name=self.source.provider_name,
+            display_name=self.source.display_name,
+        )
+        self.attachment.state = SpaceAttachment.State.DETACHED
+        self.attachment.detached_at = datetime(2026, 8, 11, tzinfo=timezone.utc)
+        self.attachment.detached_by = self.member
+        self.attachment.save(update_fields=["state", "detached_at", "detached_by"])
+        SpaceAdministrator.objects.create(
+            realm=self.realm,
+            space=self.space,
+            user=self.member,
+            added_by=self.member,
+        )
+        delete_url = f"/json/hover/spaces/{self.space.id}/sources/{self.attachment.id}/evidence"
+        confirmation = f"DELETE {self.source.display_name}"
+
+        denied = self.client_delete(
+            delete_url, {"confirmation": orjson.dumps(confirmation).decode()}
+        )
+        self.assert_json_error(
+            denied, "Only an Organization Admin may permanently delete evidence."
+        )
+        self.assertTrue(EvidenceLink.objects.filter(generated_item=item).exists())
+
+        realm_admin = self.example_user("iago")
+        self.login_user(realm_admin)
+        wrong = self.client_delete(
+            delete_url, {"confirmation": orjson.dumps("DELETE wrong").decode()}
+        )
+        self.assert_json_error(wrong, "Evidence deletion confirmation did not match.")
+        deleted = self.assert_json_success(
+            self.client_delete(delete_url, {"confirmation": orjson.dumps(confirmation).decode()})
+        )
+        self.assertTrue(deleted["changed"])
+        self.assertEqual(deleted["deleted_evidence_link_count"], 1)
+        self.assertFalse(EvidenceLink.objects.filter(generated_item=item).exists())
+        self.assertTrue(GeneratedItem.objects.filter(id=item.id).exists())
+        self.assertTrue(Message.objects.filter(id=message_id, sender=self.member).exists())
+        self.attachment.refresh_from_db()
+        self.assertIsNotNone(self.attachment.evidence_deleted_at)
+        projected = get_space_data(self.space)["attachments"][0]
+        self.assertEqual(projected["state"], "detached")
+        self.assertTrue(projected["evidence_deleted"])
+        self.assertFalse(projected["can_browse_records"])
+
+        replay = self.assert_json_success(
+            self.client_delete(delete_url, {"confirmation": orjson.dumps(confirmation).decode()})
+        )
+        self.assertFalse(replay["changed"])
+        self.login_user(self.member)
+        with patch("hover.views_source_records.get_clawer_sync", return_value=self.adapter):
+            denied_browse = self.post()
+        self.assertEqual(denied_browse.status_code, 404)
+        self.assert_json_error(denied_browse, "Source not found.", status_code=404)
 
     def test_membership_revocation_during_remote_call_fails_closed(self) -> None:
         adapter = self.adapter

@@ -11,6 +11,7 @@ from hover.actions_memberships import (
     refresh_space_membership_suggestions,
 )
 from hover.actions_spaces import do_add_space_administrator, do_create_space, do_launch_space
+from hover.clawer_sync import InMemoryClawerSync
 from hover.lib_spaces import get_accessible_spaces, get_space_data
 from hover.models import (
     ConnectedAccount,
@@ -24,12 +25,15 @@ from hover.models import (
 )
 from hover.observations import ResolvedIdentityObservation
 from zerver.actions.channel_folders import check_add_channel_folder
+from zerver.actions.message_flags import do_update_message_flags
+from zerver.lib.events import fetch_initial_state_data
 from zerver.lib.exceptions import JsonableError
+from zerver.lib.message import access_message
 from zerver.lib.streams import create_stream_if_needed
 from zerver.lib.test_classes import ZulipTestCase
 from zerver.lib.user_groups import get_system_user_group_by_name
-from zerver.models import Message, Recipient, Stream, Subscription, UserProfile
-from zerver.models.groups import SystemGroups, UserGroup
+from zerver.models import Message, Recipient, Stream, Subscription, UserMessage, UserProfile
+from zerver.models.groups import SystemGroups, UserGroup, UserGroupMembership
 from zerver.models.realm_audit_logs import RealmAuditLog
 
 
@@ -294,6 +298,156 @@ class HoverMembershipsTest(ZulipTestCase):
         self.assertEqual(
             Subscription.objects.filter(recipient=launched.stream.recipient, active=True).count(), 2
         )
+
+    def test_launched_removal_revokes_every_projection_and_readd_is_idempotent(self) -> None:
+        self.add_ready_attachment()
+        self.confirm_member(self.member, SpaceMembership.Role.CONTRIBUTOR)
+        self.space, _created = do_launch_space(self.space, acting_user=self.creator)
+        assert self.space.stream is not None
+        historic_message_id = self.send_stream_message(
+            self.member,
+            self.space.stream.name,
+            "Authored before membership removal.",
+            "Audit history",
+        )
+        do_update_message_flags(self.member, "add", "starred", [historic_message_id])
+
+        do_remove_space_member(self.space, self.member, acting_user=self.creator)
+
+        self.assertFalse(
+            SpaceMembership.objects.filter(space=self.space, user=self.member).exists()
+        )
+        self.assertFalse(
+            Subscription.objects.get(
+                recipient=self.space.stream.recipient, user_profile=self.member
+            ).active
+        )
+        self.assertFalse(
+            UserGroupMembership.objects.filter(
+                user_group_id=self.space.stream.can_send_message_group_id,
+                user_profile=self.member,
+            ).exists()
+        )
+        self.assertEqual(Message.objects.get(id=historic_message_id).sender, self.member)
+        historic_user_message = UserMessage.objects.get(
+            user_profile=self.member, message_id=historic_message_id
+        )
+        self.assertTrue(historic_user_message.flags & UserMessage.flags.starred.mask)
+        with self.assertRaisesRegex(JsonableError, "Invalid message"):
+            access_message(
+                self.member,
+                historic_message_id,
+                is_modifying_message=False,
+            )
+
+        self.login_user(self.member)
+        self.assertEqual(
+            self.assert_json_success(self.client_get("/json/hover/spaces"))["spaces"], []
+        )
+        self.assert_json_error(
+            self.client_get(f"/json/hover/spaces/{self.space.id}"), "Invalid Space ID"
+        )
+        self.assertEqual(
+            fetch_initial_state_data(self.member, realm=self.realm, event_types={"hover_space"})[
+                "hover_spaces"
+            ],
+            [],
+        )
+        self.assertEqual(
+            self.assert_json_success(self.client_get('/json/hover/awareness?surface="for_you"'))[
+                "items"
+            ],
+            [],
+        )
+        with patch("hover.views_search.get_clawer_sync", return_value=InMemoryClawerSync()):
+            search = self.assert_json_success(
+                self.client_post("/json/hover/search", {"query": orjson.dumps("Authored").decode()})
+            )
+        self.assertEqual(search["knowledge"], [])
+        self.assertEqual(search["sources"], [])
+        self.assertEqual(
+            self.assert_json_success(self.client_get("/json/hover/todos"))["todos"], []
+        )
+        personal_editions = self.assert_json_success(
+            self.client_get("/json/hover/personal-editions")
+        )
+        self.assertEqual(personal_editions["sync_status"], "empty")
+        self.assertIsNone(personal_editions["editions"]["morning"])
+        self.assertIsNone(personal_editions["editions"]["end_of_day"])
+
+        self.login_user(self.creator)
+        for _attempt in range(2):
+            result = self.client_post(
+                f"/json/hover/spaces/{self.space.id}/members",
+                {
+                    "user_id": orjson.dumps(self.member.id).decode(),
+                    "role": orjson.dumps(SpaceMembership.Role.CONTRIBUTOR).decode(),
+                },
+            )
+            self.assert_json_success(result)
+        self.assertEqual(
+            SpaceMembership.objects.filter(space=self.space, user=self.member).count(), 1
+        )
+        self.assertEqual(
+            Subscription.objects.filter(
+                recipient=self.space.stream.recipient, user_profile=self.member
+            ).count(),
+            1,
+        )
+        self.assertTrue(
+            Subscription.objects.get(
+                recipient=self.space.stream.recipient, user_profile=self.member
+            ).active
+        )
+        self.assertEqual(
+            UserGroupMembership.objects.filter(
+                user_group_id=self.space.stream.can_send_message_group_id,
+                user_profile=self.member,
+            ).count(),
+            1,
+        )
+        self.assertEqual(Message.objects.get(id=historic_message_id).sender, self.member)
+        self.assertEqual(
+            access_message(
+                self.member,
+                historic_message_id,
+                is_modifying_message=False,
+            ).id,
+            historic_message_id,
+        )
+
+        changed_role = self.client_post(
+            f"/json/hover/spaces/{self.space.id}/members",
+            {
+                "user_id": orjson.dumps(self.member.id).decode(),
+                "role": orjson.dumps(SpaceMembership.Role.SUBSCRIBER).decode(),
+            },
+        )
+        self.assert_json_success(changed_role)
+        self.assertFalse(
+            UserGroupMembership.objects.filter(
+                user_group_id=self.space.stream.can_send_message_group_id,
+                user_profile=self.member,
+            ).exists()
+        )
+        self.assertTrue(
+            Subscription.objects.get(
+                recipient=self.space.stream.recipient, user_profile=self.member
+            ).active
+        )
+
+    def test_cross_organization_cannot_mutate_launched_membership(self) -> None:
+        self.add_ready_attachment()
+        self.confirm_member(self.member)
+        self.space, _created = do_launch_space(self.space, acting_user=self.creator)
+        outsider = self.lear_user("cordelia")
+        self.login_user(outsider)
+        result = self.client_delete(
+            f"/json/hover/spaces/{self.space.id}/members/{self.member.id}",
+            subdomain="lear",
+        )
+        self.assert_json_error(result, "Invalid Space ID")
+        self.assertTrue(SpaceMembership.objects.filter(space=self.space, user=self.member).exists())
 
     def test_launch_validation_and_failure_roll_back_every_native_object(self) -> None:
         with self.assertRaisesRegex(JsonableError, "Attach at least one active Source"):

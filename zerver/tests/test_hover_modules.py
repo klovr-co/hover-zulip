@@ -26,6 +26,7 @@ from zerver.lib.events import apply_events, fetch_initial_state_data
 from zerver.lib.test_classes import ZulipTestCase
 from zerver.lib.user_groups import get_system_user_group_by_name
 from zerver.models.groups import SystemGroups
+from zerver.models.realm_audit_logs import AuditLogEventType, RealmAuditLog
 
 
 class HoverModulesTest(ZulipTestCase):
@@ -282,8 +283,22 @@ class HoverModulesTest(ZulipTestCase):
         self.assertTrue(detached_space["attachments"][0]["can_browse_records"])
         self.assertEqual(detached_space["module_installations"][0]["state"], "paused_detached")
         installation.refresh_from_db()
+        self.attachment.refresh_from_db()
         self.assertEqual(installation.state, ModuleInstallation.State.PAUSED_DETACHED)
+        self.assertEqual(
+            self.attachment.publication_sync_state,
+            SpaceAttachment.PublicationSyncState.IDLE,
+        )
+        self.assertIsNone(self.attachment.publication_sync_lease_token)
+        self.assertIsNone(self.attachment.publication_sync_lease_expires_at)
+        self.assertIsNone(self.attachment.next_publication_sync_at)
         self.assertTrue(installation.bindings.filter(attachment=self.attachment).exists())
+        self.assertTrue(
+            RealmAuditLog.objects.filter(
+                event_type=AuditLogEventType.HOVER_SOURCE_DETACHED,
+                extra_data__attachment_id=self.attachment.id,
+            ).exists()
+        )
 
         rebound = self.client_post(
             f"/json/hover/module-installations/{installation.id}/rebind-resume",

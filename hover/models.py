@@ -536,6 +536,14 @@ class SpaceAttachment(models.Model):
         on_delete=SET_NULL,
         related_name="hover_space_attachments_detached",
     )
+    evidence_deleted_at = models.DateTimeField(blank=True, null=True)
+    evidence_deleted_by = models.ForeignKey(
+        UserProfile,
+        blank=True,
+        null=True,
+        on_delete=SET_NULL,
+        related_name="hover_space_attachment_evidence_deleted",
+    )
     date_created = models.DateTimeField(default=timezone_now)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -560,6 +568,13 @@ class SpaceAttachment(models.Model):
                 ),
                 name="hover_space_attachment_detachment_matches_state",
             ),
+            models.CheckConstraint(
+                condition=(
+                    Q(evidence_deleted_at__isnull=True, evidence_deleted_by__isnull=True)
+                    | Q(state="detached", evidence_deleted_at__isnull=False)
+                ),
+                name="hover_attachment_evidence_deletion_requires_detachment",
+            ),
         ]
 
     @override
@@ -583,6 +598,24 @@ class SpaceAttachment(models.Model):
             raise ValidationError(
                 {
                     "detached_by": "Space attachments and detaching actors must share an organization."
+                }
+            )
+        evidence_deleted_by = self.evidence_deleted_by
+        if self.evidence_deleted_at is None and evidence_deleted_by is not None:
+            raise ValidationError(
+                {"evidence_deleted_by": "Evidence deletion requires a deletion time."}
+            )
+        if self.evidence_deleted_at is not None and self.state != self.State.DETACHED:
+            raise ValidationError(
+                {"evidence_deleted_at": "Evidence may only be deleted after Source detachment."}
+            )
+        if evidence_deleted_by is not None and evidence_deleted_by.realm_id != self.realm_id:
+            raise ValidationError(
+                {
+                    "evidence_deleted_by": (
+                        "Space attachments and evidence-deleting actors must share one "
+                        "organization."
+                    )
                 }
             )
 

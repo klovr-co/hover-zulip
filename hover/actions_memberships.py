@@ -2,6 +2,7 @@ import re
 from collections.abc import Iterable
 
 from django.db import transaction
+from django.utils.timezone import now as timezone_now
 from django.utils.translation import gettext as _
 
 from hover.lib_spaces import get_space_data, user_is_space_administrator
@@ -14,7 +15,10 @@ from hover.models import (
     SpaceMembershipSuggestion,
 )
 from hover.observations import ResolvedIdentityObservation
+from zerver.actions.streams import bulk_add_subscriptions, bulk_remove_subscriptions
 from zerver.lib.exceptions import JsonableError
+from zerver.models.groups import UserGroupMembership
+from zerver.models.realm_audit_logs import AuditLogEventType, RealmAuditLog
 from zerver.models.users import UserProfile, base_bulk_get_user_queryset
 from zerver.tornado.django_api import send_event_on_commit
 
@@ -24,6 +28,14 @@ def _lock_setup_space(space: Space) -> Space:
     if locked.state != Space.State.SETUP:
         raise JsonableError(_("This Space has already launched."))
     return locked
+
+
+def _lock_membership_space(space: Space) -> Space:
+    return (
+        Space.objects.select_for_update(no_key=True, of=("self",))
+        .select_related("stream")
+        .get(id=space.id)
+    )
 
 
 def _require_space_administrator(space: Space, acting_user: UserProfile) -> None:
@@ -59,6 +71,66 @@ def _send_admin_update(space: Space) -> None:
         {"type": "hover_space", "op": "update", "space": get_space_data(space)},
         administrator_ids,
     )
+
+
+def _send_launched_membership_update(
+    space: Space, *, target: UserProfile, removed: bool, added: bool = False
+) -> None:
+    member_ids = list(
+        SpaceMembership.objects.filter(space=space, user__is_active=True).values_list(
+            "user_id", flat=True
+        )
+    )
+    other_member_ids = [user_id for user_id in member_ids if user_id != target.id]
+    update_ids = other_member_ids if removed or added else member_ids
+    if update_ids:
+        send_event_on_commit(
+            space.realm,
+            {"type": "hover_space", "op": "update", "space": get_space_data(space)},
+            update_ids,
+        )
+    if removed or added:
+        send_event_on_commit(
+            space.realm,
+            (
+                {"type": "hover_space", "op": "delete", "space_id": space.id}
+                if removed
+                else {"type": "hover_space", "op": "add", "space": get_space_data(space)}
+            ),
+            [target.id],
+        )
+
+
+def _set_native_launched_membership(
+    space: Space,
+    target: UserProfile,
+    *,
+    role: str | None,
+    acting_user: UserProfile,
+) -> None:
+    stream = space.stream
+    if space.state != Space.State.LAUNCHED or stream is None:
+        return
+
+    may_contribute = (
+        role == SpaceMembership.Role.CONTRIBUTOR
+        or SpaceAdministrator.objects.filter(space=space, user=target).exists()
+    )
+    if may_contribute:
+        UserGroupMembership.objects.get_or_create(
+            user_group_id=stream.can_send_message_group_id,
+            user_profile=target,
+        )
+    else:
+        UserGroupMembership.objects.filter(
+            user_group_id=stream.can_send_message_group_id,
+            user_profile=target,
+        ).delete()
+
+    if role is None:
+        bulk_remove_subscriptions(space.realm, [target], [stream], acting_user=acting_user)
+    else:
+        bulk_add_subscriptions(space.realm, [stream], [target], acting_user=acting_user)
 
 
 @transaction.atomic(durable=True)
@@ -171,38 +243,83 @@ def do_confirm_space_member(
 ) -> SpaceMembership:
     """Confirm an observation or directly add an unobserved internal teammate."""
 
-    space = _lock_setup_space(space)
+    space = _lock_membership_space(space)
     _require_space_administrator(space, acting_user)
     _validate_target(space, target)
     _validate_role(role)
 
-    membership, _created = SpaceMembership.objects.update_or_create(
+    membership, created = SpaceMembership.objects.update_or_create(
         space=space,
         user=target,
         defaults={"realm": space.realm, "role": role, "added_by": acting_user},
     )
     suggestion = SpaceMembershipSuggestion.objects.filter(space=space, user=target).first()
-    if suggestion is not None:
+    if suggestion is not None and space.state == Space.State.SETUP:
         suggestion.suggested_role = role
         suggestion.state = SpaceMembershipSuggestion.State.CONFIRMED
         suggestion.updated_by = acting_user
         suggestion.save(update_fields=["suggested_role", "state", "updated_by", "date_updated"])
-    _send_admin_update(space)
+    _set_native_launched_membership(
+        space,
+        target,
+        role=role,
+        acting_user=acting_user,
+    )
+    if created:
+        RealmAuditLog.objects.create(
+            realm=space.realm,
+            acting_user=acting_user,
+            modified_user=target,
+            modified_stream=space.stream,
+            event_type=AuditLogEventType.HOVER_SPACE_MEMBERSHIP_ADDED,
+            event_time=membership.date_updated,
+            extra_data={"space_id": space.id, "role": role},
+        )
+    if space.state == Space.State.SETUP:
+        _send_admin_update(space)
+    else:
+        _send_launched_membership_update(
+            space, target=target, removed=False, added=created
+        )
     return membership
 
 
 @transaction.atomic(durable=True)
 def do_remove_space_member(space: Space, target: UserProfile, *, acting_user: UserProfile) -> None:
-    space = _lock_setup_space(space)
+    space = _lock_membership_space(space)
     _require_space_administrator(space, acting_user)
     _validate_target(space, target)
     if SpaceAdministrator.objects.filter(space=space, user=target).exists():
         raise JsonableError(_("Remove Space administration before removing this member."))
 
-    SpaceMembership.objects.filter(space=space, user=target).delete()
+    membership = SpaceMembership.objects.select_for_update(no_key=True).filter(
+        space=space, user=target
+    ).first()
+    if membership is not None:
+        membership.delete()
+        _set_native_launched_membership(space, target, role=None, acting_user=acting_user)
+        RealmAuditLog.objects.create(
+            realm=space.realm,
+            acting_user=acting_user,
+            modified_user=target,
+            modified_stream=space.stream,
+            event_type=AuditLogEventType.HOVER_SPACE_MEMBERSHIP_REMOVED,
+            event_time=timezone_now(),
+            extra_data={"space_id": space.id, "role": membership.role},
+        )
     suggestion = SpaceMembershipSuggestion.objects.filter(space=space, user=target).first()
-    if suggestion is not None:
+    suggestion_changed = (
+        suggestion is not None
+        and suggestion.state != SpaceMembershipSuggestion.State.REMOVED
+    )
+    if suggestion_changed:
+        assert suggestion is not None
         suggestion.state = SpaceMembershipSuggestion.State.REMOVED
         suggestion.updated_by = acting_user
         suggestion.save(update_fields=["state", "updated_by", "date_updated"])
-    _send_admin_update(space)
+    if membership is None and not suggestion_changed:
+        return
+    if space.state == Space.State.SETUP:
+        _send_admin_update(space)
+    else:
+        _send_launched_membership_update(space, target=target, removed=True)

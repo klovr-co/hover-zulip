@@ -75,6 +75,7 @@ class PersonalDigestItem(_ContractModel):
     @field_validator("operational_publication_ids", "confirmed_todo_refs")
     @classmethod
     def unique_refs(cls, value: list[str], info: ValidationInfo) -> list[str]:
+        assert info.field_name is not None
         return _validated_unique_refs(value, field_name=info.field_name)
 
 
@@ -118,6 +119,7 @@ class PersonalDigestContent(_ContractModel):
     @field_validator("operational_publication_ids", "confirmed_todo_refs")
     @classmethod
     def unique_refs(cls, value: list[str], info: ValidationInfo) -> list[str]:
+        assert info.field_name is not None
         return _validated_unique_refs(value, field_name=info.field_name)
 
     @model_validator(mode="after")

@@ -199,9 +199,7 @@ class HoverSuggestedActionTest(ZulipTestCase):
         }
         if assignee_user_id is not None:
             data["assignee_user_id"] = assignee_user_id
-        return self.client_post(
-            f"/json/hover/spaces/{self.space.id}/todos/{todo.id}/events", data
-        )
+        return self.client_post(f"/json/hover/spaces/{self.space.id}/todos/{todo.id}/events", data)
 
     def test_approval_is_atomic_idempotent_and_preserves_publication(self) -> None:
         request_id = uuid4()
@@ -260,6 +258,7 @@ class HoverSuggestedActionTest(ZulipTestCase):
         assignment = TodoEvent.objects.get(kind=TodoEvent.Kind.ASSIGNED)
         self.assertEqual(assignment.actor, self.subscriber)
         self.assertIsNotNone(assignment.notification_message_id)
+        assert assignment.notification_message is not None
         self.assertIn(f"|{self.subscriber.id}**", assignment.notification_message.content)
 
         replay = self.assert_json_success(
@@ -275,9 +274,7 @@ class HoverSuggestedActionTest(ZulipTestCase):
         self.assertEqual(TodoEvent.objects.filter(kind=TodoEvent.Kind.ASSIGNED).count(), 1)
 
         todo.refresh_from_db()
-        completed = self.assert_json_success(
-            self.mutate_todo(todo, "complete", actor=self.creator)
-        )
+        completed = self.assert_json_success(self.mutate_todo(todo, "complete", actor=self.creator))
         self.assertEqual(completed["todo"]["state"], "completed")
         completion = TodoEvent.objects.get(kind=TodoEvent.Kind.COMPLETED)
         self.assertEqual(completion.previous_state, Todo.State.ACTIVE)

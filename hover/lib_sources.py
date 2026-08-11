@@ -94,7 +94,9 @@ def get_attachment_data(attachment: SpaceAttachment) -> dict[str, Any]:
         "can_browse_records": (
             attachment.space.state == Space.State.LAUNCHED
             and attachment.state in [SpaceAttachment.State.ACTIVE, SpaceAttachment.State.DETACHED]
+            and attachment.evidence_deleted_at is None
         ),
+        "evidence_deleted": attachment.evidence_deleted_at is not None,
         "source": get_source_data(attachment.source),
         "integration_routes": routes,
     }

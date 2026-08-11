@@ -36,6 +36,7 @@ def _authorized_attachments(user_profile: UserProfile) -> QuerySet[SpaceAttachme
         realm=user_profile.realm,
         space__state=Space.State.LAUNCHED,
         state__in=BROWSEABLE_ATTACHMENT_STATES,
+        evidence_deleted_at__isnull=True,
         space__memberships__user=user_profile,
         space__memberships__user__is_active=True,
     )

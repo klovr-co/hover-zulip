@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
-from typing import Any, Literal, TypedDict
+from datetime import datetime
+from typing import Any, Literal, TypedDict, cast
 
 from hover.lib import add_hover_metadata
 from hover.models import (
@@ -56,13 +56,7 @@ TEAM_PULSE_WEIGHTS = {
 
 
 def _meaningful_time(item: GeneratedItem) -> datetime:
-    return (
-        item.occurred_at
-        or item.generated_at
-        or item.published_at
-        or item.message.date_sent
-        or datetime.min.replace(tzinfo=timezone.utc)
-    )
+    return item.occurred_at or item.generated_at or item.published_at or item.message.date_sent
 
 
 def _latest_meaningful_items(items: list[GeneratedItem]) -> list[GeneratedItem]:
@@ -182,8 +176,8 @@ def get_awareness_projection(
         realm_id=user_profile.realm_id,
         user_profile=user_profile,
     )
-    metadata_by_message_id = {
-        message["id"]: message["hover_generated_item"]
+    metadata_by_message_id: dict[int, dict[str, Any]] = {
+        message["id"]: cast(dict[str, Any], message["hover_generated_item"])
         for message in metadata_messages
         if "hover_generated_item" in message
     }
@@ -244,6 +238,8 @@ def get_awareness_projection(
 
         space = membership.space
         assert space.stream is not None
+        assert space.stream_id is not None
+        assert item.message.rendered_content is not None
         metadata = metadata_by_message_id.get(item.message_id)
         if metadata is None:
             continue
