@@ -1,0 +1,33 @@
+<section
+    class="hover-module-view-filters"
+    aria-label="{{t 'Filter Module updates'}}"
+>
+    <div class="hover-all-view-filters__heading">
+        <span class="hover-all-view-filters__eyebrow">{{space_name}}</span>
+        <strong>{{module_name}}</strong>
+        <span>{{t "Current insights with history on demand"}}</span>
+    </div>
+    <div
+        class="hover-module-view-filters__controls"
+        role="group"
+        aria-label="{{t 'Module history display'}}"
+    >
+        <button
+            type="button"
+            class="hover-module-history-filter is-active"
+            data-hover-history="latest"
+            aria-pressed="true"
+        >{{t "Latest insights"}}</button>
+        <button
+            type="button"
+            class="hover-module-history-filter"
+            data-hover-history="all"
+            aria-pressed="false"
+        >{{t "Full history"}}</button>
+    </div>
+    <p class="hover-module-view-filters__status" aria-live="polite">
+        {{t
+            "Showing the latest state of each insight. Earlier updates remain in Full history."
+        }}
+    </p>
+</section>
