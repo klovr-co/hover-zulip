@@ -77,7 +77,7 @@ def schedule_participant_selector_reconciliation(account_id: int) -> None:
     if account is None:
         return
     now = timezone.now()
-    with transaction.atomic():
+    with transaction.atomic(savepoint=False):
         row, created = ParticipantSelectorReconciliation.objects.get_or_create(
             account=account,
             defaults={
@@ -88,7 +88,9 @@ def schedule_participant_selector_reconciliation(account_id: int) -> None:
         )
         if created:
             return
-        row = ParticipantSelectorReconciliation.objects.select_for_update().get(id=row.id)
+        row = ParticipantSelectorReconciliation.objects.select_for_update(no_key=False).get(
+            id=row.id
+        )
         row.generation += 1
         row.attempts = 0
         row.next_attempt_at = now
@@ -164,16 +166,33 @@ def due_participant_reconciliation_ids(*, limit: int, account_id: int | None = N
 
 def _claim_participant_selector_reconciliation(
     reconciliation_id: int,
-) -> ClaimedParticipantReconciliation:
+) -> ClaimedParticipantReconciliation | None:
     with transaction.atomic(durable=True):
         row = (
-            ParticipantSelectorReconciliation.objects.select_for_update()
+            ParticipantSelectorReconciliation.objects.select_for_update(no_key=False)
             .select_related("account", "realm")
             .get(id=reconciliation_id)
         )
+        now = timezone.now()
+        is_due = (
+            row.state
+            in {
+                ParticipantSelectorReconciliation.State.PENDING,
+                ParticipantSelectorReconciliation.State.BACKOFF,
+            }
+            and row.next_attempt_at <= now
+        ) or (
+            row.state == ParticipantSelectorReconciliation.State.LEASED
+            and row.lease_expires_at is not None
+            and row.lease_expires_at <= now
+        )
+        # Multiple workers can observe the same due row before either acquires
+        # its lock. Recheck eligibility under that lock so a live lease cannot
+        # be replaced by a second concurrent Studio request.
+        if not is_due:
+            return None
         participant_refs = desired_participant_refs(row.account)
         lease_token = uuid4()
-        now = timezone.now()
         row.state = ParticipantSelectorReconciliation.State.LEASED
         row.lease_token = lease_token
         row.lease_expires_at = now + timedelta(seconds=PARTICIPANT_RECONCILIATION_LEASE_SECONDS)
@@ -205,7 +224,7 @@ def _finish_participant_selector_reconciliation(
     """Return whether this claim became the current account projection."""
 
     with transaction.atomic(durable=True):
-        row = ParticipantSelectorReconciliation.objects.select_for_update().get(
+        row = ParticipantSelectorReconciliation.objects.select_for_update(no_key=False).get(
             id=claim.reconciliation_id
         )
         if row.lease_token != claim.lease_token:
@@ -270,6 +289,15 @@ def reconcile_participant_selector_row(
     *, reconciliation_id: int, clawer_sync: ClawerSync
 ) -> ParticipantReconciliationResult:
     claim = _claim_participant_selector_reconciliation(reconciliation_id)
+    if claim is None:
+        account_id = ParticipantSelectorReconciliation.objects.values_list(
+            "account_id", flat=True
+        ).get(id=reconciliation_id)
+        return ParticipantReconciliationResult(
+            account_id=account_id,
+            participant_count=0,
+            success=True,
+        )
     if len(claim.participant_refs) > MAX_PARTICIPANT_SELECTORS:
         error_code = "participant_selector_limit_exceeded"
         _finish_participant_selector_reconciliation(claim, error_code=error_code)

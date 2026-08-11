@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from io import StringIO
 from unittest.mock import MagicMock, patch
 from uuid import UUID, uuid4
@@ -283,6 +283,29 @@ class HoverParticipantSelectorReconciliationTest(ZulipTestCase):
         row.save(update_fields=["state", "lease_token", "lease_expires_at"])
         self.assertIn(row.id, due_participant_reconciliation_ids(limit=100))
 
+    def test_concurrent_worker_does_not_replace_an_active_lease(self) -> None:
+        self.create_launched_space(name="Leased selector launch")
+        schedule_participant_selector_reconciliation(self.account.id)
+        row = ParticipantSelectorReconciliation.objects.get(account=self.account)
+        lease_token = uuid4()
+        row.state = ParticipantSelectorReconciliation.State.LEASED
+        row.lease_token = lease_token
+        row.lease_expires_at = django_timezone.now() + timedelta(minutes=1)
+        row.save(update_fields=["state", "lease_token", "lease_expires_at"])
+        adapter = InMemoryClawerSync()
+
+        result = reconcile_participant_selector_row(
+            reconciliation_id=row.id,
+            clawer_sync=adapter,
+        )
+
+        self.assertTrue(result.success)
+        self.assertFalse(result.current)
+        self.assertEqual(adapter.participant_reconcile_calls, [])
+        row.refresh_from_db()
+        self.assertEqual(row.state, ParticipantSelectorReconciliation.State.LEASED)
+        self.assertEqual(row.lease_token, lease_token)
+
     def test_repair_command_logs_only_internal_ids_and_counts(self) -> None:
         self.create_launched_space(name="Content free selector launch")
         adapter = InMemoryClawerSync()
@@ -307,17 +330,16 @@ class HoverParticipantSelectorReconciliationTest(ZulipTestCase):
     def test_repair_command_keeps_failures_content_free(self) -> None:
         self.create_launched_space(name="Failed selector launch")
         adapter = InMemoryClawerSync()
-        adapter.reconcile_participant_selectors = MagicMock(
-            side_effect=ClawerSyncError(
-                error_code="clawer_timeout",
-                operation="participant_selector_reconcile",
-                http_status_code=504,
-                retryable=True,
-            )
+        outage = ClawerSyncError(
+            error_code="clawer_timeout",
+            operation="participant_selector_reconcile",
+            http_status_code=504,
+            retryable=True,
         )
         stdout = StringIO()
         stderr = StringIO()
         with (
+            patch.object(adapter, "reconcile_participant_selectors", side_effect=outage),
             patch(
                 "zerver.management.commands.reconcile_hover_participant_selectors.get_clawer_sync",
                 return_value=adapter,
