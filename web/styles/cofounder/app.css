@@ -13,6 +13,234 @@ body.hover-enabled {
     background: var(--ds-surface-paper);
 }
 
+/* Hover permission-filtered search */
+.hover-search-view {
+    height: 100%;
+    overflow-y: auto;
+    background: var(--ds-surface-paper);
+}
+
+.hover-search-shell {
+    width: min(880px, calc(100% - 48px));
+    margin: 0 auto;
+    padding: 44px 0 72px;
+    color: var(--ds-text-primary);
+}
+
+.hover-search-header {
+    padding: 0 0 30px;
+    border-bottom: 1px solid color-mix(in srgb, currentcolor 14%, transparent);
+}
+
+.hover-search-header h1,
+.hover-search-section h2 {
+    margin: 0;
+    letter-spacing: -0.025em;
+}
+
+.hover-search-header > p:not(.hover-search-eyebrow) {
+    max-width: 650px;
+    margin: 10px 0 24px;
+    color: var(--ds-text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.55;
+}
+
+.hover-search-eyebrow {
+    margin: 0 0 6px;
+    color: var(--ds-text-secondary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+
+#hover-global-search-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 650;
+}
+
+.hover-global-search-controls {
+    display: flex;
+    gap: 10px;
+}
+
+#hover-global-search-input {
+    min-width: 0;
+    flex: 1;
+    padding: 11px 14px;
+    border: 1px solid color-mix(in srgb, currentcolor 20%, transparent);
+    border-radius: 8px;
+    background: var(--color-background);
+    color: inherit;
+    font: inherit;
+}
+
+#hover-global-search-input:focus-visible,
+.hover-search-view button:focus-visible,
+.hover-search-result-link:focus-visible {
+    outline: 2px solid var(--ds-focus);
+    outline-offset: 2px;
+}
+
+.hover-search-scope-note {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    margin-top: 12px;
+    color: var(--ds-text-secondary);
+    font-size: 0.82rem;
+}
+
+.hover-search-status {
+    min-height: 22px;
+    padding: 14px 0 2px;
+    color: var(--ds-text-secondary);
+}
+
+.hover-search-section {
+    padding-top: 32px;
+}
+
+.hover-search-sources-section {
+    margin-top: 12px;
+    padding-top: 36px;
+    border-top: 1px solid color-mix(in srgb, currentcolor 14%, transparent);
+}
+
+.hover-search-section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.hover-search-section-heading > span {
+    color: var(--ds-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.hover-search-section-description,
+.hover-search-empty {
+    margin: -4px 0 16px;
+    color: var(--ds-text-secondary);
+    line-height: 1.5;
+}
+
+.hover-search-result-list {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hover-search-result {
+    position: relative;
+    padding: 18px 20px;
+    border: 1px solid color-mix(in srgb, currentcolor 13%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--ds-surface-paper) 96%, currentcolor 4%);
+}
+
+.hover-search-result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 10px;
+    color: var(--ds-text-secondary);
+    font-size: 0.76rem;
+}
+
+.hover-search-result-meta time {
+    margin-left: auto;
+}
+
+.hover-search-kind-badge,
+.hover-search-readonly-label {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: color-mix(in srgb, currentcolor 9%, transparent);
+    color: var(--ds-text-primary);
+    font-size: 0.7rem;
+    font-weight: 650;
+}
+
+.hover-search-result-link {
+    display: inline-block;
+    margin-top: 12px;
+    color: var(--ds-action-accent);
+    font-size: 0.82rem;
+    font-weight: 650;
+}
+
+.hover-search-result-byline {
+    display: block;
+    margin-bottom: 7px;
+    font-weight: 700;
+}
+
+.hover-search-result-content,
+.hover-search-source-content {
+    max-height: 10.5rem;
+    overflow: hidden;
+    line-height: 1.52;
+}
+
+.hover-search-result-content > :first-child,
+.hover-search-source-content > :first-child {
+    margin-top: 0;
+}
+
+.hover-search-result-content > :last-child,
+.hover-search-source-content > :last-child {
+    margin-bottom: 0;
+}
+
+.hover-search-save-button {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 14px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    color: var(--ds-text-secondary);
+    font-size: 0.8rem;
+    font-weight: 650;
+}
+
+.hover-search-readonly-label {
+    margin-top: 14px;
+    color: var(--ds-text-secondary);
+    font-weight: 500;
+}
+
+@media (max-width: 600px) {
+    .hover-search-shell {
+        width: calc(100% - 28px);
+        padding-top: 26px;
+    }
+
+    .hover-global-search-controls {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .hover-search-result {
+        padding: 15px;
+    }
+
+    .hover-search-result-meta time {
+        width: 100%;
+        margin: 2px 0 0;
+    }
+}
+
 /* Hover Source record browsing is a deliberately separate, read-only surface. */
 .hover-source-view {
     box-sizing: border-box;

@@ -22,6 +22,13 @@ const hover_awareness_view = mock_esm("../src/hover_awareness_view", {
     show() {},
 });
 const info_overlay = mock_esm("../src/info_overlay");
+let hover_search_shown = false;
+mock_esm("../src/hover_search_view", {
+    show() {
+        hover_search_shown = true;
+    },
+    hide() {},
+});
 const message_viewport = mock_esm("../src/message_viewport");
 const overlays = mock_esm("../src/overlays");
 const popovers = mock_esm("../src/popovers");
@@ -269,6 +276,16 @@ run_test("hash_interactions", ({override, override_rewire}) => {
     $window_stub.trigger("hashchange");
     assert.equal(awareness_surface, "team_pulse");
     page_params.realm_hover_enabled = false;
+
+    window.location.hash = "#hover/search";
+    hover_search_shown = false;
+    helper.clear_events();
+    $window_stub.trigger("hashchange");
+    assert.equal(hover_search_shown, true);
+    helper.assert_events([
+        [overlays, "close_for_hash_change"],
+        [message_viewport, "stop_auto_scrolling"],
+    ]);
 
     const denmark_id = 1;
     stream_data.add_sub_for_tests(

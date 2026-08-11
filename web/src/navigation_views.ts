@@ -117,6 +117,22 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         home_view_code: "",
         prioritize_in_condensed_view: true,
     },
+    hover_search: {
+        fragment: "hover/search",
+        name: $t({defaultMessage: "Search"}),
+        is_pinned: true,
+        icon: "zulip-icon-search",
+        css_class_suffix: "hover_search",
+        tooltip_template_id: "hover-search-tooltip-template",
+        has_unread_count: false,
+        unread_count_type: "",
+        supports_masked_unread: false,
+        hidden_for_spectators: true,
+        menu_icon_class: "",
+        menu_aria_label: "",
+        home_view_code: "",
+        prioritize_in_condensed_view: false,
+    },
     drafts: {
         fragment: "drafts",
         name: $t({defaultMessage: "Drafts"}),
@@ -167,7 +183,10 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
     },
 };
 
+let hover_enabled = false;
+
 export function set_hover_enabled(enabled: boolean): void {
+    hover_enabled = enabled;
     Object.assign(built_in_views_meta_data["inbox"]!, {
         name: enabled ? $t({defaultMessage: "For You"}) : $t({defaultMessage: "Inbox"}),
         tooltip_template_id: enabled ? "hover-inbox-tooltip-template" : "inbox-tooltip-template",
@@ -252,14 +271,16 @@ export type BuiltInViewMetadata = BuiltInViewBasicMetadata & {
 };
 
 export function get_built_in_views(): BuiltInViewMetadata[] {
-    return Object.values(built_in_views_meta_data).map((view) => {
-        const view_current_data = get_navigation_view_by_fragment(view.fragment);
-        return {
-            ...view,
-            is_pinned: view_current_data?.is_pinned ?? view.is_pinned,
-            is_home_view: view.home_view_code === user_settings.web_home_view,
-        };
-    });
+    return Object.values(built_in_views_meta_data)
+        .filter((view) => view.fragment !== "hover/search" || hover_enabled)
+        .map((view) => {
+            const view_current_data = get_navigation_view_by_fragment(view.fragment);
+            return {
+                ...view,
+                is_pinned: view_current_data?.is_pinned ?? view.is_pinned,
+                is_home_view: view.home_view_code === user_settings.web_home_view,
+            };
+        });
 }
 
 export function get_all_navigation_views(): NavigationView[] {

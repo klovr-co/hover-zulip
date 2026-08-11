@@ -137,3 +137,17 @@ _Avoid_: Suggested Action, reminder, copied Home task
 An append-only assignment or lifecycle fact for one Todo. A later reassignment
 or reopen event corrects earlier work without deleting its audit history.
 _Avoid_: Mutable status row, client-only correction, deleted history
+
+**Hover Search**:
+A permission-filtered result surface spanning native human posts, generated
+updates, and transient Source Records in every launched Space where the
+teammate has a confirmed membership. Native knowledge is ranked before clearly
+labelled Source evidence, and authorization is checked again after remote
+Source search.
+_Avoid_: Ask Hover, copied Source index, public search
+
+**Saved**:
+A teammate's private live collection of native human and generated messages,
+implemented with Zulip starred-message state. Source Records are read-only and
+cannot be saved in the pilot.
+_Avoid_: Bookmark snapshot, Saved Source, shared collection

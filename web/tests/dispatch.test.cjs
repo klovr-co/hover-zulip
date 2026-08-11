@@ -39,6 +39,7 @@ mock_esm("../src/inbox_ui", {
     complete_rerender: noop,
 });
 const information_density = mock_esm("../src/information_density");
+mock_esm("../src/hover_search_view", {handle_space_event: noop});
 const linkifiers = mock_esm("../src/linkifiers");
 const compose_recipient = mock_esm("../src/compose_recipient");
 mock_esm("../src/compose_validate", {

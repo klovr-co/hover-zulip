@@ -34,6 +34,7 @@ from hover.views_publications import (
     resolve_disputed_detail_evidence,
     resolve_generated_item_evidence,
 )
+from hover.views_search import hover_search
 from hover.views_source_records import browse_source_records
 from hover.views_sources import attach_source, detach_source, discover_sources, preview_source
 from hover.views_spaces import (
@@ -621,6 +622,7 @@ v1_api_and_json_patterns = [
     rest_path("channel_folders/<int:channel_folder_id>", PATCH=update_channel_folder),
     rest_path("hover/spaces", GET=list_spaces, POST=create_space),
     rest_path("hover/awareness", GET=get_awareness),
+    rest_path("hover/search", POST=hover_search),
     rest_path("hover/spaces/<int:space_id>", GET=get_space),
     rest_path("hover/spaces/<int:space_id>/members", POST=confirm_space_member),
     rest_path("hover/spaces/<int:space_id>/members/<int:user_id>", DELETE=remove_space_member),

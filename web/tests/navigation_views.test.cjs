@@ -133,12 +133,18 @@ run_test("set_hover_enabled", () => {
     assert.equal(built_in_views_meta_data.mentions.icon, "zulip-icon-sun");
     assert.equal(built_in_views_meta_data.reminders.name, "translated: Todos");
     assert.equal(built_in_views_meta_data.starred_messages.name, "translated: Saved");
+    assert.ok(
+        navigation_views.get_built_in_views().some((view) => view.fragment === "hover/search"),
+    );
 
     navigation_views.set_hover_enabled(false);
     assert.equal(built_in_views_meta_data.inbox.name, "translated: Inbox");
     assert.equal(built_in_views_meta_data.inbox.tooltip_template_id, "inbox-tooltip-template");
     assert.equal(built_in_views_meta_data.mentions.name, "translated: Mentions");
     assert.equal(built_in_views_meta_data.mentions.icon, "zulip-icon-at-sign");
+    assert.ok(
+        !navigation_views.get_built_in_views().some((view) => view.fragment === "hover/search"),
+    );
 });
 
 run_test("get_all_navigation_views", () => {

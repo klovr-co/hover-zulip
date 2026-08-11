@@ -26,6 +26,7 @@ import * as gear_menu from "./gear_menu.ts";
 import * as gif_state from "./gif_state.ts";
 import * as hover_awareness_view from "./hover_awareness_view.ts";
 import * as hover_connected_accounts from "./hover_connected_accounts.ts";
+import * as hover_search_view from "./hover_search_view.ts";
 import * as hover_source_view from "./hover_source_view.ts";
 import * as hover_spaces from "./hover_spaces.ts";
 import * as hover_suggested_actions from "./hover_suggested_actions.ts";
@@ -178,6 +179,7 @@ export function dispatch_normal_event(event) {
             stream_list.update_streams_sidebar(true);
             hover_source_view.handle_space_event();
             hover_awareness_view.handle_realtime_change();
+            hover_search_view.handle_space_event();
             break;
 
         case "hover_suggested_action":

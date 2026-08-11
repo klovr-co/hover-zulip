@@ -27601,6 +27601,62 @@ paths:
                         "url": "https://example.constructor.app/groups/room/room-123",
                       }
 
+  /hover/search:
+    post:
+      operationId: hover-search
+      summary: Search authorized Hover knowledge
+      description: |
+        Search native human posts and generated updates in launched Spaces where
+        the caller has a confirmed membership. Attached Source records are
+        queried through their permission-filtered remote search seam and returned
+        in a secondary, read-only Sources tier. Authorization is checked again
+        after remote search so an in-flight membership revocation removes every
+        result from that Space.
+      tags: [messages]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                query:
+                  description: Search text, normalized to single spaces.
+                  type: string
+                  maxLength: 100
+              required: [query]
+      responses:
+        "200":
+          description: Authorized Hover search results.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - additionalProperties: false
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      query:
+                        type: string
+                      knowledge:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverKnowledgeSearchResult"
+                      sources:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverSourceSearchResult"
+                      source_unavailable_count:
+                        type: integer
+                        minimum: 0
+                    required:
+                      - query
+                      - knowledge
+                      - sources
+                      - source_unavailable_count
+
   /hover/todos:
     get:
       operationId: list-hover-todos
@@ -31589,6 +31645,74 @@ components:
             Canonical Hover generated-item metadata, including reviewed state,
             revisions, disputes, evidence, lineage, and Todo when present.
           additionalProperties: true
+    HoverKnowledgeSearchResult:
+      type: object
+      additionalProperties: false
+      description: A live native human or generated message returned by Hover Search.
+      properties:
+        kind:
+          type: string
+          enum: [human, generated]
+        message_id:
+          type: integer
+        space:
+          type: object
+          additionalProperties: false
+          properties:
+            id: {type: integer}
+            name: {type: string}
+          required: [id, name]
+        topic: {type: string}
+        sender_name: {type: string}
+        timestamp:
+          type: string
+          format: date-time
+        rendered_content: {type: string}
+        module_name: {type: string}
+        output_type: {type: string}
+        saved: {type: boolean}
+        saveable:
+          type: boolean
+          enum: [true]
+        url: {type: string}
+      required:
+        - kind
+        - message_id
+        - space
+        - topic
+        - sender_name
+        - timestamp
+        - rendered_content
+        - module_name
+        - output_type
+        - saved
+        - saveable
+        - url
+    HoverSourceSearchResult:
+      type: object
+      additionalProperties: false
+      description: A transient read-only Source record; it cannot be saved.
+      properties:
+        kind:
+          type: string
+          enum: [source]
+        space:
+          type: object
+          additionalProperties: false
+          properties:
+            id: {type: integer}
+            name: {type: string}
+          required: [id, name]
+        source:
+          type: object
+          additionalProperties: true
+        record:
+          type: object
+          additionalProperties: true
+        saveable:
+          type: boolean
+          enum: [false]
+      required: [kind, space, source, record, saveable]
     HoverResolvedEvidence:
       type: object
       additionalProperties: false
