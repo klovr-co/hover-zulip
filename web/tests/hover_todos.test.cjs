@@ -41,7 +41,7 @@ function todo(id, version, state = "active", due_date = null) {
 run_test("Todo projections cannot rewind Space or Home state", ({override}) => {
     hover_todos.todos.clear();
     const action = {todo: todo(5, 2)};
-    messages.set(42, {id: 42, hover_generated_item: {suggested_action: action}});
+    messages.set(42, {id: 42, hover_generated_item: {id: 7, suggested_action: action}});
     const rerenders = [];
     override(message_live_update, "rerender_messages_view_by_message_ids", (ids) => {
         rerenders.push(ids);
