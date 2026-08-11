@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from importlib import import_module
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from unittest.mock import patch
 from uuid import UUID, uuid4
 
@@ -108,7 +108,7 @@ class HoverSuggestedActionTest(ZulipTestCase):
             "Suggested Actions",
         )
         self.message = Message.objects.get(id=message_id)
-        self.original_payload = {
+        self.original_payload: dict[str, object] = {
             "contract": "suggested_action",
             "schema_version": "1.0",
             "wording": "Send the venue plan.",
@@ -335,11 +335,11 @@ class HoverSuggestedActionTest(ZulipTestCase):
         self.assertFalse(SuggestedAction.objects.filter(generated_item=self.item).exists())
 
     def test_action_projection_is_limited_to_exact_space_members(self) -> None:
-        outsider_message = {"id": self.message.id}
+        outsider_message: dict[str, Any] = {"id": self.message.id}
         add_hover_metadata([outsider_message], realm_id=self.realm.id, user_profile=self.outsider)
         self.assertIsNone(outsider_message["hover_generated_item"]["suggested_action"])
 
-        member_message = {"id": self.message.id}
+        member_message: dict[str, Any] = {"id": self.message.id}
         add_hover_metadata([member_message], realm_id=self.realm.id, user_profile=self.subscriber)
         self.assertEqual(
             member_message["hover_generated_item"]["suggested_action"]["state"],

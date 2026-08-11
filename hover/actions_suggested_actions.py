@@ -66,7 +66,9 @@ def create_suggested_action_for_generated_item(
 def sync_suggested_action_from_reviewed_payload(generated_item: GeneratedItem) -> None:
     """Keep promoted current values aligned with an applied H14 Review."""
     try:
-        action = SuggestedAction.objects.select_for_update().get(generated_item=generated_item)
+        action = SuggestedAction.objects.select_for_update(no_key=True).get(
+            generated_item=generated_item
+        )
     except SuggestedAction.DoesNotExist:
         return
     proposal = _proposal(generated_item.reviewed_payload or generated_item.payload)
@@ -91,6 +93,7 @@ def suggested_action_data(action: SuggestedAction) -> dict[str, object]:
             "assignee_user_id": todo.assignee_id,
             "due_date": todo.due_date.isoformat() if todo.due_date is not None else None,
         }
+    assignee = action.assignee
     return {
         "id": action.id,
         "state": action.state,
@@ -101,8 +104,8 @@ def suggested_action_data(action: SuggestedAction) -> dict[str, object]:
             "assignee_display_name": action.proposed_assignee_display_name or None,
         },
         "assignee": (
-            {"user_id": action.assignee_id, "full_name": action.assignee.full_name}
-            if action.assignee_id is not None
+            {"user_id": assignee.id, "full_name": assignee.full_name}
+            if assignee is not None
             else None
         ),
         "due_date": action.due_date.isoformat() if action.due_date is not None else None,
@@ -155,7 +158,7 @@ def send_suggested_action_projection_event(action: SuggestedAction) -> None:
     )
 
 
-@transaction.atomic
+@transaction.atomic(durable=True)
 def decide_suggested_action(
     *,
     acting_user: UserProfile,
@@ -180,7 +183,7 @@ def decide_suggested_action(
         raise JsonableError(_("Invalid generated item ID"))
     try:
         action = (
-            SuggestedAction.objects.select_for_update(of=("self",))
+            SuggestedAction.objects.select_for_update(no_key=True, of=("self",))
             .select_related(
                 "realm",
                 "space__stream",
@@ -205,7 +208,7 @@ def decide_suggested_action(
     if expected_version != action.version:
         raise SuggestedActionConflictError(action)
 
-    legal = {
+    legal: dict[tuple[str, str], str] = {
         (SuggestedAction.State.PENDING, "approve"): SuggestedAction.State.APPROVED,
         (SuggestedAction.State.PENDING, "not_action"): SuggestedAction.State.NOT_ACTION,
         (SuggestedAction.State.NOT_ACTION, "restore"): SuggestedAction.State.PENDING,

@@ -149,7 +149,7 @@ class HoverSourcesTest(ZulipTestCase):
         self.assertEqual(
             [source["source_ref"] for source in payload["sources"]], [self.ALLOWED_REF]
         )
-        self.assertEqual(len(adapter.discovery_calls), 2)
+        self.assert_length(adapter.discovery_calls, 2)
         serialized = orjson.dumps(payload).decode()
         for forbidden in [self.DENIED_REF, "@g.us", "phone", "credential", "member"]:
             self.assertNotIn(forbidden, serialized)
@@ -324,7 +324,7 @@ class HoverSourcesTest(ZulipTestCase):
         self.assertEqual(
             attachment.history_start_at.isoformat(), payload["attachment"]["history_start_at"]
         )
-        self.assertFalse(hasattr(adapter, "sync_calls"))
+        self.assertEqual(adapter.sync_calls, [])
         self.assertEqual(events[0]["users"], [self.actor.id])
         event_space = events[0]["event"]["space"]
         self.assertEqual(

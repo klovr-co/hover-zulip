@@ -1453,25 +1453,28 @@ class SuggestedAction(models.Model):
     def clean(self) -> None:
         super().clean()
         item = self.generated_item
+        attachment = item.attachment
+        stream = self.space.stream
         if (
             self.realm_id != self.space.realm_id
             or self.realm_id != item.realm_id
             or self.space.state != Space.State.LAUNCHED
             or item.output_type != GeneratedItem.OutputType.SUGGESTED_ACTION
-            or item.attachment_id is None
-            or item.attachment.space_id != self.space_id
-            or self.space.stream_id is None
-            or item.message.recipient_id != self.space.stream.recipient_id
+            or attachment is None
+            or attachment.space_id != self.space_id
+            or stream is None
+            or item.message.recipient_id != stream.recipient_id
         ):
             raise ValidationError(
                 "Suggested Actions must belong to their launched Space publication."
             )
-        if self.assignee_id is not None and (
-            self.assignee.realm_id != self.realm_id
-            or not self.assignee.is_active
-            or self.assignee.is_guest
-            or self.assignee.is_bot
-            or not SpaceMembership.objects.filter(space=self.space, user=self.assignee).exists()
+        assignee = self.assignee
+        if assignee is not None and (
+            assignee.realm_id != self.realm_id
+            or not assignee.is_active
+            or assignee.is_guest
+            or assignee.is_bot
+            or not SpaceMembership.objects.filter(space=self.space, user=assignee).exists()
         ):
             raise ValidationError({"assignee": "Assignees must be active confirmed Space members."})
 
@@ -1585,12 +1588,13 @@ class Todo(models.Model):
             raise ValidationError(
                 "Todos must belong to their Suggested Action organization and Space."
             )
-        if self.assignee_id is not None and (
-            self.assignee.realm_id != self.realm_id
-            or not self.assignee.is_active
-            or self.assignee.is_guest
-            or self.assignee.is_bot
-            or not SpaceMembership.objects.filter(space=self.space, user=self.assignee).exists()
+        assignee = self.assignee
+        if assignee is not None and (
+            assignee.realm_id != self.realm_id
+            or not assignee.is_active
+            or assignee.is_guest
+            or assignee.is_bot
+            or not SpaceMembership.objects.filter(space=self.space, user=assignee).exists()
         ):
             raise ValidationError(
                 {"assignee": "Todo assignees must be active confirmed Space members."}

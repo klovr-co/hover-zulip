@@ -268,7 +268,7 @@ class ClawerPublication(_ContractModel):
             "decision",
         }:
             raise ValueError("publication schema 1.1 is not supported for this contract")
-        payload_fields = set(self.payload.model_fields)
+        payload_fields = set(type(self.payload).model_fields)
         ambiguity_keys: set[str] = set()
         field_paths: set[str] = set()
         envelope_evidence = set(self.evidence_refs)

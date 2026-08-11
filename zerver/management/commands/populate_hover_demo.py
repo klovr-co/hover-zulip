@@ -1054,11 +1054,12 @@ class Command(ZulipBaseCommand):
             generated_item.payload = proposal.model_dump(mode="json")
             generated_item.reviewed_payload = proposal.model_dump(mode="json")
             generated_item.save(update_fields=["payload", "reviewed_payload"])
-        if proposal is not None and generated_item.attachment_id is not None:
+        attachment = generated_item.attachment
+        if proposal is not None and attachment is not None:
             assignee = proposal.proposed_assignee
             SuggestedAction.objects.get_or_create(
                 realm=stream.realm,
-                space=generated_item.attachment.space,
+                space=attachment.space,
                 generated_item=generated_item,
                 defaults={
                     "wording": proposal.wording,
