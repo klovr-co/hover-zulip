@@ -44,6 +44,10 @@ const spectators = mock_esm("../src/spectators", {
 const stream_settings_ui = mock_esm("../src/stream_settings_ui");
 const ui_util = mock_esm("../src/ui_util");
 const ui_report = mock_esm("../src/ui_report");
+const {realm} = mock_esm("../src/state_data", {
+    current_user: {is_guest: false},
+    realm: {realm_hover_enabled: false},
+});
 set_global("favicon", {});
 
 const browser_history = zrequire("browser_history");
@@ -268,14 +272,14 @@ run_test("hash_interactions", ({override, override_rewire}) => {
     override(hover_awareness_view, "show", (surface) => {
         awareness_surface = surface;
     });
-    page_params.realm_hover_enabled = true;
+    realm.realm_hover_enabled = true;
     window.location.hash = "#inbox";
     $window_stub.trigger("hashchange");
     assert.equal(awareness_surface, "for_you");
     window.location.hash = "#recent";
     $window_stub.trigger("hashchange");
     assert.equal(awareness_surface, "team_pulse");
-    page_params.realm_hover_enabled = false;
+    realm.realm_hover_enabled = false;
 
     window.location.hash = "#hover/search";
     hover_search_shown = false;

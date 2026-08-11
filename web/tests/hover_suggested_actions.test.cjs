@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 
 const {mock_esm, zrequire} = require("./lib/namespace.cjs");
 const {run_test} = require("./lib/test.cjs");
+const {$} = require("./lib/zjquery.cjs");
 
 const messages = new Map();
 const message_live_update = mock_esm("../src/message_live_update");
@@ -81,4 +82,12 @@ run_test("versioned projections cannot rewind a live Suggested Action", ({overri
 run_test("unknown messages do not create duplicate feed records", () => {
     assert.equal(hover_suggested_actions.apply_projection(999, generated_item(1)), false);
     assert.equal(messages.has(999), false);
+});
+
+run_test("delegates message actions from the message pane", () => {
+    hover_suggested_actions.initialize();
+    assert.equal(
+        typeof $("#main_div").get_on_handler("click", "[data-hover-action-decision]"),
+        "function",
+    );
 });

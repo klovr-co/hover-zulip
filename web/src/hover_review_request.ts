@@ -5,7 +5,8 @@ import * as hover_response from "./hover_response.ts";
 import * as message_store from "./message_store.ts";
 
 export function initialize(): void {
-    $("body").on("click", ".hover-dispute-review-button", (event) => {
+    // Message-pane clicks stop propagating at #main_div.
+    $("#main_div").on("click", ".hover-dispute-review-button", (event) => {
         event.preventDefault();
         const $button = $(event.currentTarget);
         const message_id = Number($button.attr("data-hover-message-id"));

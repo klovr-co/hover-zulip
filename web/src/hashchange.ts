@@ -32,7 +32,7 @@ import * as settings_panel_menu from "./settings_panel_menu.ts";
 import * as settings_toggle from "./settings_toggle.ts";
 import * as sidebar_ui from "./sidebar_ui.ts";
 import * as spectators from "./spectators.ts";
-import {current_user} from "./state_data.ts";
+import {current_user, realm} from "./state_data.ts";
 import * as stream_settings_ui from "./stream_settings_ui.ts";
 import * as ui_report from "./ui_report.ts";
 import * as user_group_edit from "./user_group_edit.ts";
@@ -146,7 +146,7 @@ function show_home_view(narrow_opts?: message_view.ShowMessageViewOpts): void {
     // rendered without a hash.
     switch (user_settings.web_home_view) {
         case "recent": {
-            if (page_params.realm_hover_enabled) {
+            if (realm.realm_hover_enabled) {
                 hover_awareness_view.show("team_pulse");
             } else {
                 recent_view_ui.show();
@@ -159,7 +159,7 @@ function show_home_view(narrow_opts?: message_view.ShowMessageViewOpts): void {
             break;
         }
         case "inbox": {
-            if (page_params.realm_hover_enabled) {
+            if (realm.realm_hover_enabled) {
                 hover_awareness_view.show("for_you");
             } else {
                 inbox_ui.show();
@@ -263,7 +263,7 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
             // for #recent permanently. We show the view and then
             // replace the current URL hash in a way designed to hide
             // this detail in the browser's forward/back session history.
-            if (page_params.realm_hover_enabled) {
+            if (realm.realm_hover_enabled) {
                 hover_awareness_view.show("team_pulse");
             } else {
                 recent_view_ui.show();
@@ -271,14 +271,14 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
             window.location.replace("#recent");
             break;
         case "#recent":
-            if (page_params.realm_hover_enabled) {
+            if (realm.realm_hover_enabled) {
                 hover_awareness_view.show("team_pulse");
             } else {
                 recent_view_ui.show();
             }
             break;
         case "#inbox":
-            if (page_params.realm_hover_enabled) {
+            if (realm.realm_hover_enabled) {
                 hover_awareness_view.show("for_you");
             } else {
                 inbox_ui.show();

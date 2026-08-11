@@ -30,7 +30,7 @@ run_test("Review action opens the native composer and preselects its field", ({o
     const $button = $(".hover-dispute-review-button")
         .attr("data-hover-message-id", "42")
         .attr("data-hover-field-path", "status");
-    const handler = $("body").get_on_handler("click", ".hover-dispute-review-button");
+    const handler = $("#main_div").get_on_handler("click", ".hover-dispute-review-button");
     handler({preventDefault() {}, currentTarget: $button[0]});
 
     assert.deepEqual(reply_options, {
