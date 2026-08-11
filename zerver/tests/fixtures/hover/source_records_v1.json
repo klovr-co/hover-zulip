@@ -1,0 +1,150 @@
+{
+  "request": {
+    "source_ref": "src_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "start_at": "2026-08-10T00:00:00Z",
+    "limit": 5
+  },
+  "response": {
+    "schema_version": "1.0",
+    "records": [
+      {
+        "record_ref": "record_11111111111111111111111111111111",
+        "source_ref": "src_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sender": {
+          "ref": "person_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "display_name": "Alex"
+        },
+        "timestamp": "2026-08-10T00:00:00Z",
+        "content": {
+          "text": "History begins at this confirmed boundary.",
+          "voice_transcript": null,
+          "media_description": null
+        },
+        "media": null,
+        "reply_context": null
+      },
+      {
+        "record_ref": "record_22222222222222222222222222222222",
+        "source_ref": "src_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sender": {
+          "ref": "person_cccccccccccccccccccccccccccccccc",
+          "display_name": "Sam"
+        },
+        "timestamp": "2026-08-10T08:30:00Z",
+        "content": {
+          "text": "The venue handoff is confirmed.",
+          "voice_transcript": null,
+          "media_description": null
+        },
+        "media": null,
+        "reply_context": null
+      },
+      {
+        "record_ref": "record_33333333333333333333333333333333",
+        "source_ref": "src_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sender": {
+          "ref": "person_dddddddddddddddddddddddddddddddd",
+          "display_name": "Taylor"
+        },
+        "timestamp": "2026-08-10T08:30:00Z",
+        "content": {
+          "text": "<img src=x onerror=alert(1)> must remain escaped plain text.",
+          "voice_transcript": null,
+          "media_description": "Photo of the sealed fixture crate."
+        },
+        "media": {
+          "type": "image",
+          "mime_type": "image/jpeg",
+          "byte_size": 4096,
+          "available": true
+        },
+        "reply_context": null
+      },
+      {
+        "record_ref": "record_44444444444444444444444444444444",
+        "source_ref": "src_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sender": {
+          "ref": "person_eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "display_name": "Morgan"
+        },
+        "timestamp": "2026-08-10T09:00:00Z",
+        "content": {
+          "text": null,
+          "voice_transcript": "The delivery checklist is complete.",
+          "media_description": "Voice note"
+        },
+        "media": {
+          "type": "audio",
+          "mime_type": "audio/ogg",
+          "byte_size": 2048,
+          "available": false
+        },
+        "reply_context": null
+      },
+      {
+        "record_ref": "record_55555555555555555555555555555555",
+        "source_ref": "src_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sender": {
+          "ref": "person_ffffffffffffffffffffffffffffffff",
+          "display_name": "Jordan"
+        },
+        "timestamp": "2026-08-10T10:00:00Z",
+        "content": {
+          "text": "Confirmed, thank you.",
+          "voice_transcript": null,
+          "media_description": null
+        },
+        "media": null,
+        "reply_context": {
+          "record_ref": "record_22222222222222222222222222222222",
+          "sender_display_name": "Sam",
+          "timestamp": "2026-08-10T08:30:00Z",
+          "excerpt": "The venue handoff is confirmed."
+        }
+      }
+    ],
+    "next_cursor": "hr1.fixture-older-page",
+    "has_more": true
+  },
+  "search": {
+    "query": "venue handoff",
+    "response": {
+      "schema_version": "1.0",
+      "records": [
+        {
+          "record_ref": "record_22222222222222222222222222222222",
+          "source_ref": "src_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "sender": {
+            "ref": "person_cccccccccccccccccccccccccccccccc",
+            "display_name": "Sam"
+          },
+          "timestamp": "2026-08-10T08:30:00Z",
+          "content": {
+            "text": "The venue handoff is confirmed.",
+            "voice_transcript": null,
+            "media_description": null
+          },
+          "media": null,
+          "reply_context": null
+        }
+      ],
+      "next_cursor": "",
+      "has_more": false
+    }
+  },
+  "malformed": {
+    "private_fields": {
+      "group_jid": "fixture-private-group@g.us",
+      "sender_phone": "+60000000000",
+      "whatsapp_id": "fixture-private-message-id",
+      "database_id": 83001,
+      "media_url": "https://private.invalid/media/fixture"
+    },
+    "out_of_window_reply_context": {
+      "record_ref": "record_00000000000000000000000000000000",
+      "sender_display_name": "Earlier Sender",
+      "timestamp": "2026-08-09T23:59:59Z",
+      "excerpt": "This excerpt predates the confirmed boundary."
+    }
+  }
+}

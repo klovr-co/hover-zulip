@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "sources": [
+    {
+      "source_ref": "src_0123456789abcdef0123456789abcdef",
+      "provider": "whatsapp",
+      "source_type": "group",
+      "display_name": "Leadership group"
+    }
+  ],
+  "next_cursor": "cursor_sanitized_fixture",
+  "has_more": false
+}

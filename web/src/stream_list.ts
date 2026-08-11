@@ -6,6 +6,7 @@ import * as z from "zod/mini";
 import render_filter_topics from "../templates/filter_topics.hbs";
 import render_go_to_channel_feed_tooltip from "../templates/go_to_channel_feed_tooltip.hbs";
 import render_go_to_channel_list_of_topics_tooltip from "../templates/go_to_channel_list_of_topics_tooltip.hbs";
+import render_hover_space_setup_sidebar_row from "../templates/hover_space_setup_sidebar_row.hbs";
 import render_show_inactive_or_muted_channels from "../templates/show_inactive_or_muted_channels.hbs";
 import render_stream_list_section_container from "../templates/stream_list_section_container.hbs";
 import render_stream_privacy from "../templates/stream_privacy.hbs";
@@ -18,7 +19,7 @@ import * as channel_folders from "./channel_folders.ts";
 import * as compose_actions from "./compose_actions.ts";
 import type {Filter} from "./filter.ts";
 import * as hash_util from "./hash_util.ts";
-import * as hover from "./hover.ts";
+import * as hover_spaces from "./hover_spaces.ts";
 import {$t} from "./i18n.ts";
 import * as keydown_util from "./keydown_util.ts";
 import * as left_sidebar_navigation_area from "./left_sidebar_navigation_area.ts";
@@ -51,6 +52,7 @@ import {user_settings} from "./user_settings.ts";
 
 let pending_stream_list_rerender = false;
 let zoomed_in = false;
+let last_setup_projection_signature: string | undefined;
 let update_inbox_channel_view_callback: (channel_id: number) => void;
 let show_channel_feed_callback: (stream_id: number, trigger: string) => void;
 
@@ -434,10 +436,85 @@ export function build_stream_list(force_rerender: boolean): void {
     const search_term =
         ui_util.get_left_sidebar_topic_search_term() ?? ui_util.get_left_sidebar_search_term();
     const stream_groups = stream_list_sort.sort_groups(streams, search_term);
-
-    if (stream_groups.same_as_before && !force_rerender) {
+    const setup_spaces = realm.realm_hover_enabled ? hover_spaces.get_setup_spaces() : [];
+    const normalized_search_term = search_term.toLocaleLowerCase();
+    const visible_setup_spaces = setup_spaces.filter(
+        (space) =>
+            normalized_search_term === "" ||
+            space.name.toLocaleLowerCase().includes(normalized_search_term) ||
+            space.category.name.toLocaleLowerCase().includes(normalized_search_term),
+    );
+    const setup_projection_signature = JSON.stringify({
+        hover_enabled: realm.realm_hover_enabled,
+        show_channel_folders: user_settings.web_left_sidebar_show_channel_folders,
+        search_term: normalized_search_term,
+        spaces: visible_setup_spaces,
+    });
+    if (
+        stream_groups.same_as_before &&
+        !force_rerender &&
+        setup_projection_signature === last_setup_projection_signature
+    ) {
         return;
     }
+    last_setup_projection_signature = setup_projection_signature;
+
+    const setup_folder_ids = new Set<number>();
+    if (user_settings.web_left_sidebar_show_channel_folders) {
+        for (const space of visible_setup_spaces) {
+            if (channel_folders.is_valid_folder_id(space.category.id)) {
+                setup_folder_ids.add(space.category.id);
+            }
+        }
+    }
+    const has_normal_setup_space = visible_setup_spaces.some(
+        (space) => !setup_folder_ids.has(space.category.id),
+    );
+
+    const sections = [...stream_groups.sections];
+    const rendered_folder_ids = new Set(
+        sections
+            .map((section) => section.folder_id)
+            .filter((folder_id): folder_id is number => folder_id !== null),
+    );
+    for (const folder_id of setup_folder_ids) {
+        if (rendered_folder_ids.has(folder_id) || !channel_folders.is_valid_folder_id(folder_id)) {
+            continue;
+        }
+        const folder = channel_folders.get_channel_folder_by_id(folder_id);
+        sections.push({
+            id: folder.id.toString(),
+            folder_id: folder.id,
+            section_title: folder.name.toUpperCase(),
+            default_visible_streams: [],
+            muted_streams: [],
+            inactive_streams: [],
+            order: folder.order,
+        });
+    }
+    const pinned_section = sections.find((section) => section.id === "pinned-streams")!;
+    const normal_section = sections.find((section) => section.id === "normal-streams")!;
+    const folder_sections = sections.filter((section) => section.folder_id !== null);
+    const regular_folder_sections = folder_sections
+        .filter(
+            (section) =>
+                section.default_visible_streams.length > 0 ||
+                setup_folder_ids.has(section.folder_id!),
+        )
+        .toSorted((a, b) => a.order! - b.order!);
+    const demoted_folder_sections = folder_sections
+        .filter(
+            (section) =>
+                section.default_visible_streams.length === 0 &&
+                !setup_folder_ids.has(section.folder_id!),
+        )
+        .toSorted((a, b) => a.order! - b.order!);
+    const display_sections = [
+        pinned_section,
+        ...regular_folder_sections,
+        normal_section,
+        ...demoted_folder_sections,
+    ];
 
     maybe_change_channel_folders_option_visibility();
 
@@ -456,14 +533,16 @@ export function build_stream_list(force_rerender: boolean): void {
         settings_data.user_can_create_private_streams() ||
         settings_data.user_can_create_public_streams() ||
         settings_data.user_can_create_web_public_streams();
-    for (const section of stream_groups.sections) {
+    for (const section of display_sections) {
         $("#stream_filters").append(
             $(stream_list_section_container_html(section, can_create_streams)),
         );
         const is_empty =
             section.default_visible_streams.length === 0 &&
             section.muted_streams.length === 0 &&
-            section.inactive_streams.length === 0;
+            section.inactive_streams.length === 0 &&
+            !setup_folder_ids.has(section.folder_id ?? -1) &&
+            !(section.id === "normal-streams" && has_normal_setup_space);
         $(`#stream-list-${section.id}-container`).toggleClass("no-display", is_empty);
 
         for (const stream_id of section.default_visible_streams) {
@@ -513,6 +592,34 @@ export function build_stream_list(force_rerender: boolean): void {
             } else {
                 sections_with_only_inactive_or_muted.delete(section.id);
             }
+        }
+    }
+
+    if (realm.realm_hover_enabled) {
+        const display_section_ids = new Set(display_sections.map((section) => section.id));
+        for (const space of visible_setup_spaces) {
+            const section_id =
+                user_settings.web_left_sidebar_show_channel_folders &&
+                display_section_ids.has(space.category.id.toString())
+                    ? space.category.id.toString()
+                    : "normal-streams";
+            const hover_attached_sources = hover_spaces
+                .get_sidebar_sources(space)
+                .map((source) => ({
+                    ...source,
+                    url: `#hover/space/${space.id}/setup`,
+                }));
+            $(`#stream-list-${section_id}`).append(
+                $(
+                    render_hover_space_setup_sidebar_row({
+                        id: space.id,
+                        name: space.name,
+                        hover_attached_sources,
+                        has_hover_attached_sources: hover_attached_sources.length > 0,
+                    }),
+                ),
+            );
+            $(`#stream-list-${section_id}-container`).removeClass("no-display");
         }
     }
 
@@ -841,18 +948,12 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
     const name = sub.name;
     const is_muted = stream_data.is_muted(sub.stream_id);
     const can_post_messages = stream_data.can_post_messages_in_stream(sub);
-    const is_hover_aimto_space = name === hover.AIMTO_SPACE_NAME;
+    const hover_space = realm.realm_hover_enabled
+        ? hover_spaces.get_by_stream_id(sub.stream_id)
+        : undefined;
+    const hover_ai_modules = hover_space ? hover_spaces.get_sidebar_modules(hover_space) : [];
     const aggregate_url = hash_util.by_stream_url(sub.stream_id);
-    const url = is_hover_aimto_space
-        ? aggregate_url
-        : hash_util.channel_url_by_user_setting(sub.stream_id);
-    // These are canonical filter terms, so source operands are raw text rather
-    // than the quoted syntax a user would enter in the search box.
-    const filtered_channel_url = (search_operand: string): string =>
-        hash_util.search_terms_to_hash([
-            {operator: "channel", operand: sub.stream_id.toString()},
-            {operator: "search", operand: search_operand},
-        ]);
+    const url = hover_space ? aggregate_url : hash_util.channel_url_by_user_setting(sub.stream_id);
     const args = {
         name,
         id: sub.stream_id,
@@ -868,25 +969,21 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
         ),
         is_empty_topic_only_channel: stream_data.is_empty_topic_only_channel(sub.stream_id),
         for_modal,
-        ...(is_hover_aimto_space && {
-            is_hover_aimto_space,
-            hover_ai_modules: hover.AIMTO_AI_MODULES.map((hover_module) => ({
+        ...(hover_space && {
+            is_hover_space: true,
+            hover_space,
+            has_hover_ai_modules: hover_ai_modules.length > 0,
+            hover_ai_modules: hover_ai_modules.map((hover_module) => ({
                 ...hover_module,
-                url: hash_util.by_stream_topic_url(sub.stream_id, hover_module.name),
-                has_count: hover_module.key === "suggested_actions",
-                count: hover_module.key === "suggested_actions" ? 3 : 0,
+                has_count: true,
+                url: hash_util.by_stream_topic_url(sub.stream_id, hover_module.topic),
             })),
-            hover_attached_sources: hover.get_aimto_attached_sources(aggregate_url, {
-                mentors_volunteers: filtered_channel_url(
-                    hover.get_source_search_operand("mentors_volunteers"),
-                ),
-                resident_lounge: filtered_channel_url(
-                    hover.get_source_search_operand("resident_lounge"),
-                ),
-                volunteers_500: filtered_channel_url(
-                    hover.get_source_search_operand("volunteers_500"),
-                ),
-            }),
+            hover_attached_sources: hover_spaces.get_sidebar_sources(hover_space).map((source) => ({
+                ...source,
+                url: source.can_browse_records
+                    ? hash_util.hover_source_url(hover_space.id, source.attachment_id)
+                    : (source.url ?? aggregate_url),
+            })),
         }),
     };
     const $list_item = $(render_stream_sidebar_row(args));
@@ -1222,30 +1319,6 @@ function deselect_stream_items(): void {
     $("ul#stream_filters li").removeClass("active-filter stream-expanded");
 }
 
-function update_hover_sidebar_filter_selection($stream_li: JQuery, filter: Filter): void {
-    const search_operand = filter.terms_with_operator("search")[0]?.operand;
-    const topic_operand = filter.terms_with_operator("topic")[0]?.operand;
-    const active_module =
-        topic_operand === undefined ? undefined : hover.get_module_from_topic(topic_operand);
-
-    $stream_li.find(".hover-ai-modules__item").each(function () {
-        $(this).toggleClass(
-            "is-active",
-            $(this).attr("data-hover-module-key") === active_module?.key,
-        );
-    });
-    $stream_li.find(".hover-source-ledger__item").each(function () {
-        const source_key = $(this).attr("data-hover-source-key");
-        const is_active_source =
-            source_key === "mentors_volunteers" ||
-            source_key === "resident_lounge" ||
-            source_key === "volunteers_500"
-                ? search_operand === hover.get_source_search_operand(source_key)
-                : false;
-        $(this).toggleClass("is-active", is_active_source);
-    });
-}
-
 export function update_stream_sidebar_for_topic_search(): void {
     // In "topic:" search mode the sidebar renders only the channels
     // whose topics matched the search. get_stream_ids() returns the
@@ -1307,10 +1380,6 @@ export function update_stream_sidebar_for_narrow(filter: Filter): JQuery | undef
     // topic is selected or not. This is required for proper styling
     // masked unread counts.
     $stream_li.addClass("stream-expanded");
-    if (stream_data.get_sub_by_id(stream_id)?.name === hover.AIMTO_SPACE_NAME) {
-        update_hover_sidebar_filter_selection($stream_li, filter);
-    }
-
     if (stream_id !== topic_list.active_stream_id()) {
         clear_topics_if_not_searching();
     }
@@ -1605,25 +1674,30 @@ export function set_event_handlers({
 }: {
     show_channel_feed: (stream_id: number, trigger: string) => void;
 }): void {
-    $("#stream_filters").on("click", "li .subscription_block", (e) => {
-        // Left sidebar channel links have an `href` so that the
-        // browser will preview the URL and you can middle-click it.
-        //
-        // But we want to control what the click does to follow the
-        // user's default left sidebar click action, rather than
-        // taking you to the channel feed.
-        if (e.metaKey || e.ctrlKey || e.shiftKey) {
-            return;
-        }
+    $("#stream_filters").on(
+        "click",
+        // Setup Spaces intentionally have no stream ID and use their own click handler.
+        "li:not(.hover-space-setup-row) .subscription_block",
+        (e) => {
+            // Left sidebar channel links have an `href` so that the
+            // browser will preview the URL and you can middle-click it.
+            //
+            // But we want to control what the click does to follow the
+            // user's default left sidebar click action, rather than
+            // taking you to the channel feed.
+            if (e.metaKey || e.ctrlKey || e.shiftKey) {
+                return;
+            }
 
-        if (mouse_drag.is_drag(e)) {
-            // To avoid the click behavior if a channel name is selected.
-            e.preventDefault();
-            return;
-        }
-        const stream_id = stream_id_for_elt($(e.target).parents("li.narrow-filter"));
-        on_sidebar_channel_click(stream_id, e, show_channel_feed);
-    });
+            if (mouse_drag.is_drag(e)) {
+                // To avoid the click behavior if a channel name is selected.
+                e.preventDefault();
+                return;
+            }
+            const stream_id = stream_id_for_elt($(e.target).parents("li.narrow-filter"));
+            on_sidebar_channel_click(stream_id, e, show_channel_feed);
+        },
+    );
 
     function on_new_topic_press(
         element: HTMLElement,

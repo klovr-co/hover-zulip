@@ -277,6 +277,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "confirmation",
     "zerver",
+    "hover",
     "social_django",
     "django_scim",
     # 2FA related apps.

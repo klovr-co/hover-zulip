@@ -21,6 +21,7 @@ const stream_list = mock_esm("../src/stream_list");
 let disparities = [];
 
 mock_esm("../src/message_live_update", {
+    rerender_messages_view_by_message_ids() {},
     update_message_in_all_views() {},
 });
 
@@ -127,6 +128,11 @@ run_test("process_from_server for differently rendered messages", ({override}) =
     // in local echo.
     const old_value = "old_value";
     const new_value = "new_value";
+    const hover_response = {
+        type: "review",
+        root_message_id: 42,
+        generated_item: {disputed_details: []},
+    };
     const waiting_for_ack = new Map([
         [
             "100.1",
@@ -147,6 +153,7 @@ run_test("process_from_server for differently rendered messages", ({override}) =
             is_me_message: new_value,
             submessages: new_value,
             topic_links: new_value,
+            hover_response,
         },
     ];
     echo_state._patch_waiting_for_ack(waiting_for_ack);
@@ -161,6 +168,7 @@ run_test("process_from_server for differently rendered messages", ({override}) =
             is_me_message: new_value,
             submessages: new_value,
             topic_links: new_value,
+            hover_response,
         },
     ]);
 });

@@ -210,6 +210,7 @@ export function initialize(): void {
         is_admin: current_user.is_admin,
         is_guest: current_user.is_guest,
         show_uploaded_files_section: realm.max_file_upload_size_mib > 0,
+        realm_hover_enabled: realm.realm_hover_enabled,
         show_emoji_settings_lock: !settings_data.user_can_add_custom_emoji(),
         can_create_new_bots: settings_bots.can_create_incoming_webhooks(),
         can_manage_bot:

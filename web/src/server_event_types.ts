@@ -1,5 +1,18 @@
 import * as z from "zod/mini";
 
+import {
+    connected_account_grant_schema,
+    connected_account_schema,
+} from "./hover_connected_accounts.ts";
+import {hover_space_schema} from "./hover_spaces.ts";
+import type {event_schema as HoverSuggestedActionEventSchema} from "./hover_suggested_actions.ts";
+import type {event_schema as HoverTodoEventSchema} from "./hover_todos.ts";
+import {
+    hover_generated_item_schema,
+    hover_response_schema,
+    hover_review_request_schema,
+    hover_source_provenance_schema,
+} from "./message_store.ts";
 import {group_setting_value_schema, topic_link_schema} from "./types.ts";
 
 // Event types the web app requests from /register via fetch_event_types.
@@ -15,6 +28,10 @@ export const FETCH_EVENT_TYPES: string[] = [
     "device",
     "drafts",
     "giphy",
+    "hover_connected_account",
+    "hover_space",
+    "hover_suggested_action",
+    "hover_todo",
     "klipy",
     "message",
     "muted_topics",
@@ -90,6 +107,10 @@ export const update_message_event_schema = z.object({
     content: z.optional(z.string()),
     rendered_content: z.optional(z.string()),
     is_me_message: z.optional(z.boolean()),
+    hover_generated_item: z.optional(hover_generated_item_schema),
+    hover_response: z.optional(hover_response_schema),
+    hover_review_request: z.optional(hover_review_request_schema),
+    hover_source_provenance: z.optional(hover_source_provenance_schema),
     // The server is still using subject.
     // This will not be set until it gets fixed.
     topic: z.optional(z.string()),
@@ -126,3 +147,40 @@ export const channel_folder_update_event_schema = z.object({
     }),
 });
 export type ChannelFolderUpdateEvent = z.output<typeof channel_folder_update_event_schema>;
+
+export const hover_space_event_schema = z.discriminatedUnion("op", [
+    z.object({
+        id: z.number(),
+        type: z.literal("hover_space"),
+        op: z.enum(["add", "update"]),
+        space: hover_space_schema,
+    }),
+    z.object({
+        id: z.number(),
+        type: z.literal("hover_space"),
+        op: z.literal("delete"),
+        space_id: z.number(),
+    }),
+]);
+export type HoverSpaceEvent = z.output<typeof hover_space_event_schema>;
+
+export {event_schema as hover_suggested_action_event_schema} from "./hover_suggested_actions.ts";
+export type HoverSuggestedActionEvent = z.output<typeof HoverSuggestedActionEventSchema>;
+export {event_schema as hover_todo_event_schema} from "./hover_todos.ts";
+export type HoverTodoEvent = z.output<typeof HoverTodoEventSchema>;
+
+export const hover_connected_account_event_schema = z.discriminatedUnion("op", [
+    z.object({
+        id: z.number(),
+        type: z.literal("hover_connected_account"),
+        op: z.enum(["account_add", "account_update"]),
+        account: connected_account_schema,
+    }),
+    z.object({
+        id: z.number(),
+        type: z.literal("hover_connected_account"),
+        op: z.literal("grant_upsert"),
+        grant: connected_account_grant_schema,
+    }),
+]);
+export type HoverConnectedAccountEvent = z.output<typeof hover_connected_account_event_schema>;

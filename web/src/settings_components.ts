@@ -886,6 +886,7 @@ export function check_realm_settings_property_changed(elem: HTMLElement): boolea
         case "realm_can_create_groups":
         case "realm_can_create_public_channel_group":
         case "realm_can_create_private_channel_group":
+        case "realm_can_create_spaces_group":
         case "realm_can_create_write_only_bots_group":
         case "realm_can_delete_any_message_group":
         case "realm_can_delete_own_message_group":
@@ -1142,6 +1143,7 @@ export function populate_data_for_realm_settings_request(
                     "can_create_bots_group",
                     "can_create_groups",
                     "can_create_private_channel_group",
+                    "can_create_spaces_group",
                     "can_create_public_channel_group",
                     "can_create_web_public_channel_group",
                     "can_create_write_only_bots_group",
@@ -1673,6 +1675,7 @@ export const group_setting_widget_map = new Map<string, GroupSettingPillContaine
     ["realm_can_create_groups", null],
     ["realm_can_create_public_channel_group", null],
     ["realm_can_create_private_channel_group", null],
+    ["realm_can_create_spaces_group", null],
     ["realm_can_create_write_only_bots_group", null],
     ["realm_can_delete_any_message_group", null],
     ["realm_can_delete_own_message_group", null],

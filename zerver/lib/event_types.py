@@ -98,6 +98,203 @@ class ChannelFolderUpdateEvent(BaseEvent):
     data: ChannelFolderDataForUpdate
 
 
+class HoverSpaceCategory(BaseModel):
+    id: int
+    name: str
+
+
+class HoverSpaceSource(BaseModel):
+    id: int
+    provider_key: str
+    provider_name: str
+    source_type: str
+    display_name: str
+    external_url: str
+    supports_live_capture: bool
+    account_id: int
+    account_display_name: str
+
+
+class HoverIntegrationRoute(BaseModel):
+    id: int
+    state: Literal["active"]
+    bot_user_id: int
+    bot_name: str
+    stream_id: int
+    live_since: str
+
+
+class HoverSpaceAttachment(BaseModel):
+    id: int
+    state: Literal["active", "detached"]
+    history_window: Literal["today", "last_30_days", "custom"]
+    history_timezone: str
+    history_start_at: str
+    custom_start_date: str | None
+    can_browse_records: bool
+    source: HoverSpaceSource
+    integration_routes: list[HoverIntegrationRoute]
+    generated_count: int
+
+
+class HoverSpaceAdministrator(BaseModel):
+    user_id: int
+    full_name: str
+
+
+class HoverSpaceMembership(BaseModel):
+    id: int
+    user_id: int
+    full_name: str
+    role: Literal["contributor", "subscriber"]
+    is_administrator: bool
+
+
+class HoverSpaceMembershipSuggestion(BaseModel):
+    id: int
+    user_id: int
+    full_name: str
+    suggested_role: Literal["contributor", "subscriber"]
+    state: Literal["pending"]
+    match_basis: Literal["verified_email", "verified_phone"]
+
+
+class HoverModuleRequirement(BaseModel):
+    id: int
+    key: str
+    capability: str
+    minimum_count: int
+    maximum_count: int
+
+
+class HoverModuleVersion(BaseModel):
+    id: int
+    definition_key: str
+    name: str
+    description: str
+    version: str
+    output_type: str
+    destination_topic: str
+    navigation_icon: str
+    navigation_order: int
+    content_hash: str
+    published_at: str
+    requirements: list[HoverModuleRequirement]
+    supported_triggers: list[Literal["manual", "new_source", "schedule"]]
+
+
+class HoverModuleBinding(BaseModel):
+    requirement_key: str
+    attachment_id: int
+
+
+class HoverModuleTrigger(BaseModel):
+    kind: Literal["manual", "new_source", "schedule"]
+    cadence: Literal["daily", "weekly"] | None
+    local_time: str | None
+    timezone: str | None
+    debounce_seconds: int | None
+
+
+class HoverModuleInstallation(BaseModel):
+    id: int
+    state: Literal["configured", "enabled", "disabled", "paused_detached"]
+    version_id: int
+    definition_key: str
+    name: str
+    version: str
+    output_type: str
+    destination_topic: str
+    navigation_icon: str
+    navigation_order: int
+    content_hash: str
+    activated_at: str | None
+    processing_start_at: str | None
+    activation_timezone: str
+    policy_revision: int
+    policy_hash: str
+    predecessor_id: int | None
+    bindings: list[HoverModuleBinding]
+    triggers: list[HoverModuleTrigger]
+    generated_count: int
+
+
+class HoverSpace(BaseModel):
+    id: int
+    name: str
+    description: str
+    state: Literal["setup", "launched"]
+    category: HoverSpaceCategory
+    created_by_id: int | None
+    stream_id: int | None
+    attachments: list[HoverSpaceAttachment]
+    administrators: list[HoverSpaceAdministrator]
+    memberships: list[HoverSpaceMembership]
+    membership_suggestions: list[HoverSpaceMembershipSuggestion]
+    module_installations: list[HoverModuleInstallation]
+    module_catalog: list[HoverModuleVersion]
+
+
+class HoverSpaceAddEvent(BaseEvent):
+    type: Literal["hover_space"]
+    op: Literal["add"]
+    space: HoverSpace
+
+
+class HoverSpaceUpdateEvent(BaseEvent):
+    type: Literal["hover_space"]
+    op: Literal["update"]
+    space: HoverSpace
+
+
+class HoverSpaceDeleteEvent(BaseEvent):
+    type: Literal["hover_space"]
+    op: Literal["delete"]
+    space_id: int
+
+
+class HoverConnectedAccount(BaseModel):
+    id: int
+    provider_key: str
+    provider_name: str
+    external_account_id: str
+    display_name: str
+    connection_kind: Literal["remote_studio", "native_integration"]
+    incoming_webhook_bot_id: int | None
+    created_by_id: int | None
+    owner_id: int | None
+    approval_state: Literal["pending", "approved", "revoked"]
+    health_status: Literal["unknown", "healthy", "degraded", "unavailable"]
+    health_checked_at: str | None
+
+
+class HoverConnectedAccountSelector(BaseModel):
+    selector_type: str
+    source_ref: str
+    display_name: str
+
+
+class HoverConnectedAccountGrant(BaseModel):
+    id: int
+    account_id: int
+    user_id: int
+    state: Literal["active", "revoked"]
+    all_selectors: bool
+    selectors: list[HoverConnectedAccountSelector]
+
+
+class HoverConnectedAccountAccountEvent(BaseEvent):
+    type: Literal["hover_connected_account"]
+    op: Literal["account_add", "account_update"]
+    account: HoverConnectedAccount
+
+
+class HoverConnectedAccountGrantEvent(BaseEvent):
+    type: Literal["hover_connected_account"]
+    op: Literal["grant_upsert"]
+    grant: HoverConnectedAccountGrant
+
+
 class DetailedCustomProfileCore(BaseModel):
     id: int
     type: int
@@ -154,6 +351,202 @@ class TopicLink(BaseModel):
     url: str
 
 
+class HoverModule(BaseModel):
+    key: str
+    name: str
+    version: str
+
+
+class HoverGeneratedSource(BaseModel):
+    id: int | None
+    key: str
+    name: str
+    icon_class: str
+    count: int
+    url: str
+
+
+class HoverGeneratedPresentation(BaseModel):
+    label: str
+    importance: str
+    state: str | None
+    occurred_at: str | None
+    generated_at: str | None
+    published_at: str | None
+    run_reference: str
+
+
+class HoverGeneratedHistoryEntry(BaseModel):
+    message_id: int
+    title: str
+    state: str | None
+    occurred_at: str | None
+    is_current: bool
+
+
+class HoverGeneratedLineage(BaseModel):
+    is_latest: bool
+    history_count: int
+    history: list[HoverGeneratedHistoryEntry]
+
+
+class HoverReviewRequestTarget(BaseModel):
+    user_id: int
+    full_name: str
+    reason: Literal["involved_teammate", "space_admin_fallback"]
+
+
+class HoverDisputeReviewRequest(BaseModel):
+    id: int
+    state: Literal["open", "resolved"]
+    message_id: int
+    targets: list[HoverReviewRequestTarget]
+
+
+class HoverDisputeResolution(BaseModel):
+    revision_id: int
+    reviewer: dict[str, object]
+    timestamp: str
+
+
+class HoverDisputedDetail(BaseModel):
+    id: int
+    field_path: str
+    summary: str
+    material: bool
+    state: Literal["needs_review", "resolved"]
+    evidence_count: int
+    evidence_url: str | None
+    review_request: HoverDisputeReviewRequest | None
+    resolution: HoverDisputeResolution | None
+
+
+class HoverSuggestedActionSourceProposal(BaseModel):
+    assignee_ref: str | None
+    assignee_display_name: str | None
+
+
+class HoverSuggestedActionAssignee(BaseModel):
+    user_id: int
+    full_name: str
+
+
+class HoverSuggestedActionTransition(BaseModel):
+    id: int
+    kind: Literal["approve", "not_action", "restore"]
+    from_state: Literal["pending", "approved", "not_action"]
+    to_state: Literal["pending", "approved", "not_action"]
+    actor_id: int
+    actor_name: str
+    occurred_at: str
+    reason: str
+
+
+class HoverTodoPerson(BaseModel):
+    user_id: int
+    full_name: str
+
+
+class HoverTodoEvent(BaseModel):
+    id: int
+    kind: Literal["approved", "assigned", "reassigned", "completed", "reopened"]
+    actor: HoverTodoPerson
+    occurred_at: str
+    previous_state: str
+    new_state: Literal["active", "completed"]
+    previous_assignee: HoverTodoPerson | None
+    new_assignee: HoverTodoPerson | None
+    reason: str
+    notification_message_id: int | None
+
+
+class HoverTodo(BaseModel):
+    id: int
+    state: Literal["active", "completed"]
+    version: int
+    wording: str
+    due_date: str | None
+    completed_at: str | None
+    assignee: HoverTodoPerson | None
+    space: dict[str, object]
+    generated_item: dict[str, object]
+    approval: dict[str, object] | None
+    assignable_users: list[HoverTodoPerson]
+    history_count: int
+    recent_events: list[HoverTodoEvent]
+
+
+class HoverSuggestedAction(BaseModel):
+    id: int
+    state: Literal["pending", "approved", "not_action"]
+    version: int
+    wording: str
+    source_proposal: HoverSuggestedActionSourceProposal
+    assignee: HoverSuggestedActionAssignee | None
+    due_date: str | None
+    history_count: int
+    recent_transitions: list[HoverSuggestedActionTransition]
+    todo: HoverTodo | None
+
+
+class HoverGeneratedItem(BaseModel):
+    id: int
+    output_type: str
+    module: HoverModule
+    source_summary: str
+    evidence_available: bool
+    evidence_url: str | None
+    sources: list[HoverGeneratedSource]
+    presentation: HoverGeneratedPresentation
+    lineage: HoverGeneratedLineage
+    reviewed_payload: dict[str, object]
+    revisions: list[dict[str, object]]
+    disputed_details: list[HoverDisputedDetail]
+    suggested_action: HoverSuggestedAction | None
+
+
+class HoverSuggestedActionEvent(BaseEvent):
+    type: Literal["hover_suggested_action"]
+    message_id: int
+    generated_item: HoverGeneratedItem
+
+
+class HoverTodoProjectionEvent(BaseEvent):
+    type: Literal["hover_todo"]
+    message_id: int
+    todo: HoverTodo
+
+
+class HoverResponse(BaseModel):
+    type: Literal["reply", "review"]
+    clarification_required: bool
+    root_message_id: int
+    generated_item: HoverGeneratedItem
+
+
+class HoverReviewRequest(BaseModel):
+    id: int
+    root_message_id: int
+    generated_item: HoverGeneratedItem
+    field_path: str
+    state: Literal["open", "resolved"]
+    target_user_ids: list[int]
+
+
+class HoverProvenanceSource(BaseModel):
+    id: int
+    provider_key: str
+    provider_name: str
+    source_type: str
+    display_name: str
+    external_url: str
+
+
+class HoverSourceProvenance(BaseModel):
+    captured_at: str
+    source: HoverProvenanceSource
+
+
 class DirectMessageDisplayRecipient(BaseModel):
     id: int
     is_mirror_dummy: bool
@@ -180,6 +573,10 @@ class MessageFieldForDirectMessageEvent(BaseModel):
     timestamp: int
     type: str
     display_recipient: list[DirectMessageDisplayRecipient]
+    hover_generated_item: HoverGeneratedItem | None = None
+    hover_response: HoverResponse | None = None
+    hover_review_request: HoverReviewRequest | None = None
+    hover_source_provenance: HoverSourceProvenance | None = None
 
 
 class DirectMessageEvent(BaseEvent):
@@ -257,6 +654,10 @@ class MessageFieldForMessageEvent(BaseModel):
     type: str
     display_recipient: str
     stream_id: int
+    hover_generated_item: HoverGeneratedItem | None = None
+    hover_response: HoverResponse | None = None
+    hover_review_request: HoverReviewRequest | None = None
+    hover_source_provenance: HoverSourceProvenance | None = None
 
 
 class MessageEvent(BaseEvent):
@@ -1121,6 +1522,10 @@ class UpdateMessageEvent(UpdateMessageCoreEvent):
     new_stream_id: int | None = None
     propagate_mode: Literal["change_all", "change_later", "change_one"] | None = None
     orig_subject: str | None = None
+    hover_generated_item: HoverGeneratedItem | None = None
+    hover_response: HoverResponse | None = None
+    hover_review_request: HoverReviewRequest | None = None
+    hover_source_provenance: HoverSourceProvenance | None = None
 
 
 class UpdateMessageFlagsAddEvent(BaseEvent):

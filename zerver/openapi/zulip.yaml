@@ -3076,6 +3076,14 @@ paths:
                                     [/me status message][status-messages].
 
                                     [status-messages]: /help/format-your-message-using-markdown#status-messages
+                                hover_generated_item:
+                                  $ref: "#/components/schemas/MessagesBase/properties/hover_generated_item"
+                                hover_response:
+                                  $ref: "#/components/schemas/MessagesBase/properties/hover_response"
+                                hover_review_request:
+                                  $ref: "#/components/schemas/MessagesBase/properties/hover_review_request"
+                                hover_source_provenance:
+                                  $ref: "#/components/schemas/MessagesBase/properties/hover_source_provenance"
                               required:
                                 - type
                                 - id
@@ -6600,6 +6608,87 @@ paths:
                                 }
                             - type: object
                               additionalProperties: false
+                              required:
+                                - id
+                                - type
+                                - op
+                                - space
+                              description: |
+                                Event sent to authorized users when a Hover Space is created or
+                                its setup, membership, Source, or launch projection changes.
+
+                                **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+                              properties:
+                                id:
+                                  $ref: "#/components/schemas/EventIdSchema"
+                                type:
+                                  allOf:
+                                    - $ref: "#/components/schemas/EventTypeSchema"
+                                    - enum:
+                                        - hover_space
+                                op:
+                                  type: string
+                                  enum:
+                                    - add
+                                    - update
+                                space:
+                                  $ref: "#/components/schemas/HoverSpace"
+                              example:
+                                {
+                                  "id": 0,
+                                  "type": "hover_space",
+                                  "op": "add",
+                                  "space":
+                                    {
+                                      "id": 17,
+                                      "name": "Launch readiness",
+                                      "description": "Prepare the program before launch.",
+                                      "state": "setup",
+                                      "category": {"id": 3, "name": "Programs"},
+                                      "created_by_id": 10,
+                                      "stream_id": null,
+                                      "attachments": [],
+                                      "administrators": [],
+                                      "memberships": [],
+                                      "membership_suggestions": [],
+                                    },
+                                }
+                            - type: object
+                              additionalProperties: false
+                              required:
+                                - id
+                                - type
+                                - op
+                                - space_id
+                              description: |
+                                Event sent when a user loses access to a Hover Space.
+
+                                **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+                              properties:
+                                id:
+                                  $ref: "#/components/schemas/EventIdSchema"
+                                type:
+                                  allOf:
+                                    - $ref: "#/components/schemas/EventTypeSchema"
+                                    - enum:
+                                        - hover_space
+                                op:
+                                  type: string
+                                  enum:
+                                    - delete
+                                space_id:
+                                  type: integer
+                                  description: |
+                                    The ID of the Hover Space that is no longer accessible.
+                              example:
+                                {
+                                  "id": 0,
+                                  "type": "hover_space",
+                                  "op": "delete",
+                                  "space_id": 17,
+                                }
+                            - type: object
+                              additionalProperties: false
                               description: |
                                 Event sent to users in an organization when a channel folder is created.
 
@@ -8304,6 +8393,29 @@ paths:
 
                     **Changes**: New in Zulip 8.0 (feature level 236).
                   example: true
+                hover_generated_item_id:
+                  type: integer
+                  description: |
+                    The generated Hover root being answered. This internal
+                    extension is accepted only from a confirmed Space member
+                    posting beneath that root.
+                hover_response_type:
+                  type: string
+                  enum: [reply, review]
+                  description: |
+                    Whether the native human-authored message is discussion or
+                    a Review of Hover's interpretation.
+                hover_review_field:
+                  type: string
+                  description: |
+                    An existing top-level reviewed-payload field to revise.
+                    Used only with `hover_response_type=review`.
+                hover_review_value:
+                  type: string
+                  description: |
+                    The new field value encoded as JSON. A Review with no valid
+                    field/value pair is recorded as requiring clarification and
+                    does not mutate current state.
               required:
                 - type
                 - to
@@ -8977,6 +9089,8 @@ paths:
                                 content_type: {}
                                 display_recipient: {}
                                 edit_history: {}
+                                hover_generated_item: {}
+                                hover_source_provenance: {}
                                 id: {}
                                 is_me_message: {}
                                 last_edit_timestamp: {}
@@ -9282,6 +9396,16 @@ paths:
                           user automatically unmuting or following the topic in question.
 
                           **Changes**: New in Zulip 8.0 (feature level 218).
+                      hover_response:
+                        type: object
+                        additionalProperties: false
+                        properties:
+                          type:
+                            type: string
+                            enum: [reply, review]
+                          clarification_required:
+                            type: boolean
+                        required: [type, clarification_required]
                     example:
                       {
                         "msg": "",
@@ -10368,6 +10492,8 @@ paths:
                               content_type: {}
                               display_recipient: {}
                               edit_history: {}
+                              hover_generated_item: {}
+                              hover_source_provenance: {}
                               id: {}
                               is_me_message: {}
                               last_edit_timestamp: {}
@@ -19406,6 +19532,18 @@ paths:
                           visible to spectators.
 
                           **Changes**: New in Zulip 11.0 (feature level 389).
+                      hover_spaces:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverSpace"
+                        description: |
+                          Present if `hover_space` is present in `fetch_event_types`.
+
+                          Contains every Hover Space the user may access. Setup Spaces are
+                          visible only to their Space Administrators; launched Spaces are
+                          visible to confirmed members.
+
+                          **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
                       unread_msgs:
                         type: object
                         description: |
@@ -27227,6 +27365,8 @@ paths:
                           content_type: {}
                           display_recipient: {}
                           edit_history: {}
+                          hover_generated_item: {}
+                          hover_source_provenance: {}
                           id: {}
                           is_me_message: {}
                           last_edit_timestamp: {}
@@ -27468,6 +27608,473 @@ paths:
                         "result": "success",
                         "url": "https://example.constructor.app/groups/room/room-123",
                       }
+
+  /hover/personal-editions:
+    get:
+      operationId: get-hover-personal-editions
+      summary: Get permission-filtered personal editions
+      description: |
+        Synchronize and return the caller's latest Morning Daily Brief and
+        End-of-Day Roundup. Hover derives the upstream teammate identity from
+        verified participant bindings; the client cannot select an identity.
+        Every passage is re-authorized through its native generated update and
+        current confirmed Space membership. Suggested prose never creates a Todo.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      tags: [messages]
+      responses:
+        "200":
+          description: The latest authorized personal editions.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - additionalProperties: false
+                    required: [sync_status, editions]
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      sync_status:
+                        type: string
+                        enum: [current, degraded, empty]
+                      editions:
+                        type: object
+                        additionalProperties: false
+                        required: [morning, end_of_day]
+                        properties:
+                          morning:
+                            anyOf:
+                              - $ref: "#/components/schemas/HoverMorningEdition"
+                              - type: object
+                                nullable: true
+                          end_of_day:
+                            anyOf:
+                              - $ref: "#/components/schemas/HoverEndOfDayEdition"
+                              - type: object
+                                nullable: true
+
+  /hover/search:
+    post:
+      operationId: hover-search
+      summary: Search authorized Hover knowledge
+      description: |
+        Search native human posts and generated updates in launched Spaces where
+        the caller has a confirmed membership. Attached Source records are
+        queried through their permission-filtered remote search seam and returned
+        in a secondary, read-only Sources tier. Authorization is checked again
+        after remote search so an in-flight membership revocation removes every
+        result from that Space.
+      tags: [messages]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                query:
+                  description: Search text, normalized to single spaces.
+                  type: string
+                  maxLength: 100
+              required: [query]
+      responses:
+        "200":
+          description: Authorized Hover search results.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - additionalProperties: false
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      query:
+                        type: string
+                      knowledge:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverKnowledgeSearchResult"
+                      sources:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverSourceSearchResult"
+                      source_unavailable_count:
+                        type: integer
+                        minimum: 0
+                    required:
+                      - query
+                      - knowledge
+                      - sources
+                      - source_unavailable_count
+
+  /hover/todos:
+    get:
+      operationId: list-hover-todos
+      summary: List authorized Hover Todos
+      tags: ["messages"]
+      description: |
+        Return the canonical Todo projections from every launched Space where
+        the caller is a confirmed member. Home and Space views consume these
+        same records; no copied task state is created.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - additionalProperties: false
+                    required: [todos]
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      todos:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverTodo"
+
+  /hover/spaces/{space_id}/todos/{todo_id}/events:
+    post:
+      operationId: update-hover-todo
+      summary: Append a Hover Todo event
+      tags: ["messages"]
+      description: |
+        Assign, reassign, complete, or reopen the canonical Todo. Every change
+        appends actor/time history. Request IDs make retries idempotent and
+        expected versions reject stale clients.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      parameters:
+        - name: space_id
+          in: path
+          required: true
+          schema: {type: integer}
+        - name: todo_id
+          in: path
+          required: true
+          schema: {type: integer}
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [operation, request_id, expected_version]
+              properties:
+                operation:
+                  type: string
+                  enum: [assign, complete, reopen]
+                request_id:
+                  type: string
+                  format: uuid
+                expected_version:
+                  type: integer
+                  minimum: 1
+                assignee_user_id:
+                  type: integer
+                  minimum: 1
+                  nullable: true
+                  description: Required only for `assign`.
+                reason:
+                  type: string
+                  nullable: true
+                  maxLength: 1000
+      responses:
+        "200":
+          description: Success, including an idempotent replay.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - additionalProperties: false
+                    required: [changed, todo]
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      changed: {type: boolean}
+                      todo:
+                        $ref: "#/components/schemas/HoverTodo"
+        "409":
+          description: The expected version or requested transition is stale.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [result, msg, todo]
+                properties:
+                  result: {type: string, enum: [error]}
+                  msg: {type: string}
+                  todo:
+                    $ref: "#/components/schemas/HoverTodo"
+
+  /hover/spaces/{space_id}/generated-items/{generated_item_id}/suggested-action/decisions:
+    post:
+      operationId: decide-hover-suggested-action
+      summary: Decide a Hover Suggested Action
+      tags: ["messages"]
+      description: |
+        Atomically approve a pending Suggested Action into one active Todo,
+        mark it as Not an action, or restore a dismissed proposal. The caller
+        must be an active confirmed Contributor or Subscriber in the exact
+        launched Space. Request IDs make retries idempotent and expected
+        versions prevent reordered clients from overwriting newer decisions.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      parameters:
+        - name: space_id
+          in: path
+          required: true
+          schema: {type: integer}
+        - name: generated_item_id
+          in: path
+          required: true
+          schema: {type: integer}
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [decision, request_id, expected_version]
+              properties:
+                decision:
+                  type: string
+                  enum: [approve, not_action, restore]
+                request_id:
+                  type: string
+                  format: uuid
+                expected_version:
+                  type: integer
+                  minimum: 1
+                reason:
+                  type: string
+                  nullable: true
+                  maxLength: 1000
+                  description: Optional only for `not_action`.
+                wording:
+                  type: string
+                  nullable: true
+                  maxLength: 50000
+                  description: Reviewed wording to confirm with `approve`.
+                assignee_user_id:
+                  type: integer
+                  nullable: true
+                  minimum: 1
+                  description: Confirmed Space member to assign, or null to leave unassigned.
+                due_date:
+                  type: string
+                  format: date
+                  nullable: true
+                  description: Due date to confirm with `approve`, or null to clear it.
+      responses:
+        "200":
+          description: Success, including an idempotent replay.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - additionalProperties: false
+                    required: [changed, suggested_action]
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      changed: {type: boolean}
+                      suggested_action:
+                        $ref: "#/components/schemas/HoverSuggestedAction"
+        "409":
+          description: The expected version or transition is stale.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [result, msg, suggested_action]
+                properties:
+                  result:
+                    type: string
+                    enum: [error]
+                  msg: {type: string}
+                  suggested_action:
+                    $ref: "#/components/schemas/HoverSuggestedAction"
+
+  /hover/awareness:
+    get:
+      operationId: get-hover-awareness
+      summary: Get a ranked Hover awareness projection
+      tags: ["messages"]
+      description: |
+        Returns either For You (personal relevance) or Team Pulse (shared
+        importance) over the requesting teammate's confirmed Contributor and
+        Subscriber Spaces. Items reference canonical native messages and Hover
+        records; the projection does not copy Review, lineage, Todo, or read
+        state.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-hover-awareness).
+      parameters:
+        - name: surface
+          in: query
+          required: true
+          description: The awareness ranking policy to apply.
+          content:
+            application/json:
+              schema:
+                type: string
+                enum: [for_you, team_pulse]
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - type: object
+                    additionalProperties: false
+                    required: [surface, items]
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      surface:
+                        type: string
+                        enum: [for_you, team_pulse]
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverAwarenessItem"
+
+  /hover/spaces/{space_id}/generated-items/{generated_item_id}/evidence:
+    post:
+      operationId: resolve-hover-generated-item-evidence
+      summary: Resolve evidence for a generated Hover item
+      tags: ["messages"]
+      description: |
+        Resolve the exact evidence attached to a generated item in a launched
+        Hover Space. The server uses its stored opaque evidence references;
+        clients cannot submit provider identifiers or evidence references.
+
+        The requesting user must be a confirmed member of the Space. Evidence
+        that no longer exists returns an `evidence_not_resolvable` error, while
+        transient upstream failures indicate whether the request can be retried.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      parameters:
+        - name: space_id
+          in: path
+          required: true
+          description: The ID of the Hover Space containing the generated item.
+          schema:
+            type: integer
+        - name: generated_item_id
+          in: path
+          required: true
+          description: The ID of the generated item whose evidence should be resolved.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - additionalProperties: false
+                    required:
+                      - evidence
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      evidence:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverResolvedEvidence"
+                    example:
+                      {
+                        "evidence":
+                          [
+                            {
+                              "content":
+                                {
+                                  "media_description": null,
+                                  "text": "Venue ownership was confirmed.",
+                                  "voice_transcript": null,
+                                },
+                              "evidence_ref": "evidence_0123456789abcdef0123456789abcdef",
+                              "media": null,
+                              "sender":
+                                {
+                                  "display_name": "AIMTO volunteer",
+                                  "ref": "person_0123456789abcdef0123456789abcdef",
+                                },
+                              "source_ref": "src_0123456789abcdef0123456789abcdef",
+                              "timestamp": "2026-08-11T10:00:00Z",
+                            },
+                          ],
+                        "msg": "",
+                        "result": "success",
+                      }
+
+  /hover/spaces/{space_id}/generated-items/{generated_item_id}/disputed-details/{disputed_detail_id}/evidence:
+    get:
+      operationId: resolve-hover-disputed-detail-evidence
+      summary: Resolve exact conflicting evidence for a Hover Disputed Detail
+      tags: ["messages"]
+      description: |
+        Resolves the ordered evidence subset stored for one field-scoped conflict.
+        The client cannot submit evidence or provider references. Authorization
+        follows the generated root message and its launched Space.
+      parameters:
+        - name: space_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: generated_item_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: disputed_detail_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/JsonSuccessBase"
+                  - type: object
+                    additionalProperties: false
+                    required: [evidence]
+                    properties:
+                      result: {}
+                      msg: {}
+                      ignored_parameters_unsupported: {}
+                      evidence:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/HoverResolvedEvidence"
 
 components:
   #######################
@@ -29113,6 +29720,9 @@ components:
             content_type: {}
             display_recipient: {}
             edit_history: {}
+            hover_generated_item: {}
+            hover_response: {}
+            hover_source_provenance: {}
             id: {}
             is_me_message: {}
             last_edit_timestamp: {}
@@ -29308,6 +29918,377 @@ components:
           description: |
             The unique message ID. Messages should always be
             displayed sorted by ID.
+        hover_generated_item:
+          type: object
+          additionalProperties: false
+          description: |
+            Structured Hover metadata for a native message produced by a
+            versioned Hover Module. Omitted for ordinary messages.
+          properties:
+            id:
+              type: integer
+            output_type:
+              type: string
+              enum:
+                - feed_update
+                - digest
+                - suggested_action
+                - progress_update
+                - decision
+                - analysis
+            module:
+              type: object
+              additionalProperties: false
+              properties:
+                key:
+                  type: string
+                name:
+                  type: string
+                version:
+                  type: string
+              required:
+                - key
+                - name
+                - version
+            source_summary:
+              type: string
+            evidence_available:
+              type: boolean
+            evidence_url:
+              type: string
+              nullable: true
+              description: |
+                Authorized endpoint for resolving exact supporting evidence,
+                or `null` when no evidence is available.
+            sources:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  id:
+                    type: integer
+                    nullable: true
+                    description: The stable Source ID, when retained.
+                  key:
+                    type: string
+                  name:
+                    type: string
+                  icon_class:
+                    type: string
+                  count:
+                    type: integer
+                    minimum: 1
+                  url:
+                    type: string
+                required:
+                  - id
+                  - key
+                  - name
+                  - icon_class
+                  - count
+                  - url
+            presentation:
+              type: object
+              additionalProperties: false
+              description: Contract-aware fields used by normal feed presentation.
+              properties:
+                label:
+                  type: string
+                importance:
+                  type: string
+                  enum: [low, normal, high, urgent]
+                state:
+                  type: string
+                  nullable: true
+                occurred_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                generated_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                published_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                run_reference:
+                  type: string
+              required:
+                - label
+                - importance
+                - state
+                - occurred_at
+                - generated_at
+                - published_at
+                - run_reference
+            lineage:
+              type: object
+              additionalProperties: false
+              description: Same-Space linked material-change history for this native message.
+              properties:
+                is_latest:
+                  type: boolean
+                history_count:
+                  type: integer
+                  minimum: 0
+                history:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      message_id:
+                        type: integer
+                      title:
+                        type: string
+                      state:
+                        type: string
+                        nullable: true
+                      occurred_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                      is_current:
+                        type: boolean
+                    required:
+                      - message_id
+                      - title
+                      - state
+                      - occurred_at
+                      - is_current
+              required:
+                - is_latest
+                - history_count
+                - history
+            reviewed_payload:
+              type: object
+              additionalProperties: true
+              description: The current interpretation after applied Reviews.
+            revisions:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  id:
+                    type: integer
+                  field_path:
+                    type: string
+                  previous_value: {}
+                  new_value: {}
+                  actor:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: integer
+                      full_name:
+                        type: string
+                    required: [id, full_name]
+                  timestamp:
+                    type: string
+                    format: date-time
+                  reason:
+                    type: string
+                  review_message_id:
+                    type: integer
+                required:
+                  - id
+                  - field_path
+                  - previous_value
+                  - new_value
+                  - actor
+                  - timestamp
+                  - reason
+                  - review_message_id
+            disputed_details:
+              type: array
+              description: Immutable field-scoped evidence conflicts and Review request state.
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  id:
+                    type: integer
+                  field_path:
+                    type: string
+                  summary:
+                    type: string
+                  material:
+                    type: boolean
+                  state:
+                    type: string
+                    enum: [needs_review, resolved]
+                  evidence_count:
+                    type: integer
+                    minimum: 2
+                  evidence_url:
+                    type: string
+                    nullable: true
+                  review_request:
+                    type: object
+                    nullable: true
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: integer
+                      state:
+                        type: string
+                        enum: [open, resolved]
+                      message_id:
+                        type: integer
+                      targets:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                            user_id:
+                              type: integer
+                            full_name:
+                              type: string
+                            reason:
+                              type: string
+                              enum: [involved_teammate, space_admin_fallback]
+                          required: [user_id, full_name, reason]
+                    required: [id, state, message_id, targets]
+                  resolution:
+                    type: object
+                    nullable: true
+                    additionalProperties: false
+                    properties:
+                      revision_id:
+                        type: integer
+                      reviewer:
+                        type: object
+                        additionalProperties: false
+                        properties:
+                          id:
+                            type: integer
+                          full_name:
+                            type: string
+                        required: [id, full_name]
+                      timestamp:
+                        type: string
+                        format: date-time
+                    required: [revision_id, reviewer, timestamp]
+                required:
+                  - id
+                  - field_path
+                  - summary
+                  - material
+                  - state
+                  - evidence_count
+                  - evidence_url
+                  - review_request
+                  - resolution
+            suggested_action:
+              anyOf:
+                - $ref: "#/components/schemas/HoverSuggestedAction"
+                - type: object
+                  nullable: true
+          required:
+            - id
+            - output_type
+            - module
+            - source_summary
+            - evidence_available
+            - evidence_url
+            - sources
+            - presentation
+            - lineage
+            - reviewed_payload
+            - revisions
+            - disputed_details
+            - suggested_action
+        hover_response:
+          type: object
+          additionalProperties: false
+          description: |
+            Typed Hover metadata for a native human-authored response beneath
+            a generated update. Omitted for ordinary messages.
+          properties:
+            type:
+              type: string
+              enum: [reply, review]
+            clarification_required:
+              type: boolean
+            root_message_id:
+              type: integer
+            generated_item:
+              $ref: "#/components/schemas/MessagesBase/properties/hover_generated_item"
+          required:
+            - type
+            - clarification_required
+            - root_message_id
+            - generated_item
+        hover_review_request:
+          type: object
+          additionalProperties: false
+          description: Structured metadata for the native assistant-authored Review request.
+          properties:
+            id:
+              type: integer
+            root_message_id:
+              type: integer
+            generated_item:
+              $ref: "#/components/schemas/MessagesBase/properties/hover_generated_item"
+            field_path:
+              type: string
+            state:
+              type: string
+              enum: [open, resolved]
+            target_user_ids:
+              type: array
+              items:
+                type: integer
+          required:
+            - id
+            - root_message_id
+            - generated_item
+            - field_path
+            - state
+            - target_user_ids
+        hover_source_provenance:
+          type: object
+          additionalProperties: false
+          description: |
+            Safe, immutable Source metadata captured for a message sent through
+            an active Hover native integration route. Omitted for messages sent
+            before association, after detachment, or outside the exact route.
+          properties:
+            captured_at:
+              type: string
+              format: date-time
+            source:
+              type: object
+              additionalProperties: false
+              properties:
+                id:
+                  type: integer
+                provider_key:
+                  type: string
+                provider_name:
+                  type: string
+                source_type:
+                  type: string
+                display_name:
+                  type: string
+                external_url:
+                  type: string
+                  description: An HTTPS Source link, or an empty string.
+              required:
+                - id
+                - provider_key
+                - provider_name
+                - source_type
+                - display_name
+                - external_url
+          required:
+            - captured_at
+            - source
         is_me_message:
           type: boolean
           description: |
@@ -30279,6 +31260,699 @@ components:
           type: boolean
           description: |
             Whether the channel folder is archived or not.
+    HoverSpace:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - description
+        - state
+        - category
+        - created_by_id
+        - stream_id
+        - attachments
+        - administrators
+        - memberships
+        - membership_suggestions
+      description: |
+        The sanitized server projection of a Hover Space. It includes only Source
+        metadata and internal-user identity matches that the requesting user is
+        authorized to review.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        state:
+          type: string
+          enum:
+            - setup
+            - launched
+        category:
+          type: object
+          additionalProperties: false
+          required:
+            - id
+            - name
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+        created_by_id:
+          type: integer
+          nullable: true
+        stream_id:
+          type: integer
+          nullable: true
+        attachments:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - id
+              - state
+              - history_window
+              - history_timezone
+              - history_start_at
+              - custom_start_date
+              - can_browse_records
+              - source
+            properties:
+              id:
+                type: integer
+              state:
+                type: string
+                enum:
+                  - active
+                  - detached
+              history_window:
+                type: string
+                enum:
+                  - today
+                  - last_30_days
+                  - custom
+              history_timezone:
+                type: string
+              history_start_at:
+                type: string
+              custom_start_date:
+                type: string
+                nullable: true
+              can_browse_records:
+                type: boolean
+                description: |
+                  Whether this attachment can be opened in the read-only Source
+                  record browser. This is false during Space setup.
+              source:
+                type: object
+                additionalProperties: false
+                required:
+                  - id
+                  - provider_key
+                  - source_type
+                  - display_name
+                  - account_id
+                  - account_display_name
+                properties:
+                  id:
+                    type: integer
+                  provider_key:
+                    type: string
+                  source_type:
+                    type: string
+                  display_name:
+                    type: string
+                  account_id:
+                    type: integer
+                  account_display_name:
+                    type: string
+        administrators:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - user_id
+              - full_name
+            properties:
+              user_id:
+                type: integer
+              full_name:
+                type: string
+        memberships:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - id
+              - user_id
+              - full_name
+              - role
+              - is_administrator
+            properties:
+              id:
+                type: integer
+              user_id:
+                type: integer
+              full_name:
+                type: string
+              role:
+                type: string
+                enum:
+                  - contributor
+                  - subscriber
+              is_administrator:
+                type: boolean
+        membership_suggestions:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - id
+              - user_id
+              - full_name
+              - suggested_role
+              - state
+              - match_basis
+            properties:
+              id:
+                type: integer
+              user_id:
+                type: integer
+              full_name:
+                type: string
+              suggested_role:
+                type: string
+                enum:
+                  - contributor
+                  - subscriber
+              state:
+                type: string
+                enum:
+                  - pending
+              match_basis:
+                type: string
+                enum:
+                  - verified_email
+                  - verified_phone
+    HoverSuggestedAction:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - state
+        - version
+        - wording
+        - source_proposal
+        - assignee
+        - assignable_users
+        - due_date
+        - history_count
+        - recent_transitions
+        - todo
+      properties:
+        id: {type: integer}
+        state:
+          type: string
+          enum: [pending, approved, not_action]
+        version:
+          type: integer
+          minimum: 1
+        wording: {type: string}
+        source_proposal:
+          type: object
+          additionalProperties: false
+          required: [assignee_ref, assignee_display_name]
+          properties:
+            assignee_ref:
+              type: string
+              nullable: true
+              pattern: ^person_[0-9a-f]{32}$
+            assignee_display_name:
+              type: string
+              nullable: true
+        assignee:
+          type: object
+          nullable: true
+          additionalProperties: false
+          required: [user_id, full_name]
+          properties:
+            user_id: {type: integer}
+            full_name: {type: string}
+        assignable_users:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [user_id, full_name]
+            properties:
+              user_id: {type: integer}
+              full_name: {type: string}
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        history_count:
+          type: integer
+          minimum: 0
+        recent_transitions:
+          type: array
+          maxItems: 5
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              [
+                id,
+                kind,
+                from_state,
+                to_state,
+                actor_id,
+                actor_name,
+                occurred_at,
+                reason,
+              ]
+            properties:
+              id: {type: integer}
+              kind:
+                type: string
+                enum: [approve, not_action, restore]
+              from_state:
+                type: string
+                enum: [pending, approved, not_action]
+              to_state:
+                type: string
+                enum: [pending, approved, not_action]
+              actor_id: {type: integer}
+              actor_name: {type: string}
+              occurred_at:
+                type: string
+                format: date-time
+              reason: {type: string}
+        todo:
+          anyOf:
+            - $ref: "#/components/schemas/HoverTodo"
+            - type: object
+              nullable: true
+    HoverTodoPerson:
+      type: object
+      additionalProperties: false
+      required: [user_id, full_name]
+      properties:
+        user_id: {type: integer}
+        full_name: {type: string}
+    HoverTodo:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          state,
+          version,
+          wording,
+          due_date,
+          completed_at,
+          assignee,
+          space,
+          generated_item,
+          approval,
+          assignable_users,
+          history_count,
+          recent_events,
+        ]
+      properties:
+        id: {type: integer}
+        state: {type: string, enum: [active, completed]}
+        version: {type: integer, minimum: 1}
+        wording: {type: string}
+        due_date: {type: string, format: date, nullable: true}
+        completed_at: {type: string, format: date-time, nullable: true}
+        assignee:
+          anyOf:
+            - $ref: "#/components/schemas/HoverTodoPerson"
+            - type: object
+              nullable: true
+        space:
+          type: object
+          additionalProperties: false
+          required: [id, name]
+          properties:
+            id: {type: integer}
+            name: {type: string}
+        generated_item:
+          type: object
+          additionalProperties: false
+          required: [id, message_id, evidence_count, evidence_url]
+          properties:
+            id: {type: integer}
+            message_id: {type: integer}
+            evidence_count: {type: integer, minimum: 0}
+            evidence_url: {type: string, nullable: true}
+        approval:
+          type: object
+          nullable: true
+          additionalProperties: false
+          required: [transition_id, actor, occurred_at]
+          properties:
+            transition_id: {type: integer}
+            actor: {$ref: "#/components/schemas/HoverTodoPerson"}
+            occurred_at: {type: string, format: date-time}
+        assignable_users:
+          type: array
+          items: {$ref: "#/components/schemas/HoverTodoPerson"}
+        history_count: {type: integer, minimum: 1}
+        recent_events:
+          type: array
+          maxItems: 10
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              [
+                id,
+                kind,
+                actor,
+                occurred_at,
+                previous_state,
+                new_state,
+                previous_assignee,
+                new_assignee,
+                reason,
+                notification_message_id,
+              ]
+            properties:
+              id: {type: integer}
+              kind:
+                {
+                  type: string,
+                  enum: [approved, assigned, reassigned, completed, reopened],
+                }
+              actor: {$ref: "#/components/schemas/HoverTodoPerson"}
+              occurred_at: {type: string, format: date-time}
+              previous_state: {type: string}
+              new_state: {type: string, enum: [active, completed]}
+              previous_assignee:
+                anyOf:
+                  - $ref: "#/components/schemas/HoverTodoPerson"
+                  - type: object
+                    nullable: true
+              new_assignee:
+                anyOf:
+                  - $ref: "#/components/schemas/HoverTodoPerson"
+                  - type: object
+                    nullable: true
+              reason: {type: string}
+              notification_message_id: {type: integer, nullable: true}
+    HoverAwarenessItem:
+      type: object
+      additionalProperties: false
+      required:
+        - message_id
+        - generated_item_id
+        - space_id
+        - space_name
+        - stream_id
+        - topic
+        - rendered_content
+        - sender_id
+        - sender_name
+        - timestamp
+        - is_unread
+        - rank
+        - reasons
+        - hover_generated_item
+      description: |
+        A ranked reference to one canonical generated item and its native
+        message. The nested state is the same live serializer used by message
+        fetches and realtime events.
+      properties:
+        message_id:
+          type: integer
+        generated_item_id:
+          type: integer
+        space_id:
+          type: integer
+        space_name:
+          type: string
+        stream_id:
+          type: integer
+        topic:
+          type: string
+        rendered_content:
+          type: string
+        sender_id:
+          type: integer
+        sender_name:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        is_unread:
+          type: boolean
+        rank:
+          type: integer
+          minimum: 0
+        reasons:
+          type: array
+          items:
+            type: string
+            enum:
+              - assignment
+              - ownership
+              - mention
+              - review_request
+              - personal_activity
+              - important
+              - contributor_space
+              - urgent
+              - high_importance
+              - open_review
+              - active_todo
+              - material_change
+        hover_generated_item:
+          type: object
+          description: |
+            Canonical Hover generated-item metadata, including reviewed state,
+            revisions, disputes, evidence, lineage, and Todo when present.
+          additionalProperties: true
+    HoverKnowledgeSearchResult:
+      type: object
+      additionalProperties: false
+      description: A live native human or generated message returned by Hover Search.
+      properties:
+        kind:
+          type: string
+          enum: [human, generated]
+        message_id:
+          type: integer
+        space:
+          type: object
+          additionalProperties: false
+          properties:
+            id: {type: integer}
+            name: {type: string}
+          required: [id, name]
+        topic: {type: string}
+        sender_name: {type: string}
+        timestamp:
+          type: string
+          format: date-time
+        rendered_content: {type: string}
+        module_name: {type: string}
+        output_type: {type: string}
+        saved: {type: boolean}
+        saveable:
+          type: boolean
+          enum: [true]
+        url: {type: string}
+      required:
+        - kind
+        - message_id
+        - space
+        - topic
+        - sender_name
+        - timestamp
+        - rendered_content
+        - module_name
+        - output_type
+        - saved
+        - saveable
+        - url
+    HoverPersonalEditionItem:
+      type: object
+      additionalProperties: false
+      required: [title, detail, update]
+      description: |
+        One editorial passage. Its primary action opens the concise native
+        Space update. When exact Source evidence is available, a secondary
+        action opens the existing permission-checked evidence surface.
+      properties:
+        title: {type: string}
+        detail: {type: string}
+        update:
+          type: object
+          additionalProperties: false
+          required: [message_id, space_name, topic, url, evidence_url]
+          properties:
+            message_id: {type: integer}
+            space_name: {type: string}
+            topic: {type: string}
+            url: {type: string}
+            evidence_url: {type: string, nullable: true}
+    HoverMorningEdition:
+      type: object
+      additionalProperties: false
+      required: [edition, title, covered_end, published_at, sections, all_clear]
+      properties:
+        edition: {type: string, enum: [morning]}
+        title: {type: string}
+        covered_end: {type: string, format: date-time}
+        published_at: {type: string, format: date-time}
+        all_clear: {type: boolean}
+        sections:
+          type: object
+          additionalProperties: false
+          required: [urgency, unresolved_carryover, guidance]
+          properties:
+            urgency:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+            unresolved_carryover:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+            guidance:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+    HoverEndOfDayEdition:
+      type: object
+      additionalProperties: false
+      required: [edition, title, covered_end, published_at, sections, all_clear]
+      properties:
+        edition: {type: string, enum: [end_of_day]}
+        title: {type: string}
+        covered_end: {type: string, format: date-time}
+        published_at: {type: string, format: date-time}
+        all_clear: {type: boolean}
+        sections:
+          type: object
+          additionalProperties: false
+          required:
+            [
+              meaningful_movement,
+              completed_work,
+              carryover,
+              delegated_dependencies,
+              tomorrow_preview,
+            ]
+          properties:
+            meaningful_movement:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+            completed_work:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+            carryover:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+            delegated_dependencies:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+            tomorrow_preview:
+              type: array
+              items: {$ref: "#/components/schemas/HoverPersonalEditionItem"}
+    HoverSourceSearchResult:
+      type: object
+      additionalProperties: false
+      description: A transient read-only Source record; it cannot be saved.
+      properties:
+        kind:
+          type: string
+          enum: [source]
+        space:
+          type: object
+          additionalProperties: false
+          properties:
+            id: {type: integer}
+            name: {type: string}
+          required: [id, name]
+        source:
+          type: object
+          additionalProperties: true
+        record:
+          type: object
+          additionalProperties: true
+        saveable:
+          type: boolean
+          enum: [false]
+      required: [kind, space, source, record, saveable]
+    HoverResolvedEvidence:
+      type: object
+      additionalProperties: false
+      required:
+        - evidence_ref
+        - source_ref
+        - sender
+        - timestamp
+        - content
+        - media
+      description: |
+        Sanitized source evidence resolved from an opaque reference stored by
+        Hover when the generated item was created.
+
+        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+      properties:
+        evidence_ref:
+          type: string
+          pattern: ^evidence_[0-9a-f]{32}$
+        source_ref:
+          type: string
+          pattern: ^src_[0-9a-f]{32}$
+        sender:
+          type: object
+          additionalProperties: false
+          required:
+            - ref
+            - display_name
+          properties:
+            ref:
+              type: string
+              pattern: ^person_[0-9a-f]{32}$
+            display_name:
+              type: string
+        timestamp:
+          type: string
+          format: date-time
+        content:
+          type: object
+          additionalProperties: false
+          required:
+            - text
+            - voice_transcript
+            - media_description
+          properties:
+            text:
+              type: string
+              nullable: true
+            voice_transcript:
+              type: string
+              nullable: true
+            media_description:
+              type: string
+              nullable: true
+        media:
+          type: object
+          nullable: true
+          additionalProperties: false
+          required:
+            - type
+            - mime_type
+            - byte_size
+            - sha256
+            - available
+          properties:
+            type:
+              type: string
+            mime_type:
+              type: string
+              nullable: true
+            byte_size:
+              type: integer
+              minimum: 0
+              nullable: true
+            sha256:
+              type: string
+              nullable: true
+            available:
+              type: boolean
     JsonResponseBase:
       type: object
       properties:

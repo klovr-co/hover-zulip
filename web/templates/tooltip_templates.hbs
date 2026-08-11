@@ -126,6 +126,14 @@
 </template>
 <template id="all-message-tooltip-template">
     <div class="views-tooltip-container" data-view-code="all_messages">
+        <div>{{t 'Combined feed' }}</div>
+        <div class="tootlip-inner-content views-message-count italic hidden-for-spectators"></div>
+        <div class="tooltip-inner-content views-tooltip-home-view-note italic hide">{{t 'This is your home view.' }}</div>
+    </div>
+    {{tooltip_hotkey_hints "A"}}
+</template>
+<template id="hover-all-message-tooltip-template">
+    <div class="views-tooltip-container" data-view-code="all_messages">
         <div>{{t 'All activity' }}</div>
         <div class="tootlip-inner-content views-message-count italic hidden-for-spectators"></div>
         <div class="tooltip-inner-content views-tooltip-home-view-note italic hide">{{t 'This is your home view.' }}</div>
@@ -140,6 +148,14 @@
 </template>
 <template id="recent-conversations-tooltip-template">
     <div class="views-tooltip-container" data-view-code="recent_topics">
+        <div>{{t 'Recent conversations' }}</div>
+        <div class="tootlip-inner-content views-message-count italic hidden-for-spectators"></div>
+        <div class="tooltip-inner-content views-tooltip-home-view-note italic hide hidden-for-spectators">{{t 'This is your home view.' }}</div>
+    </div>
+    {{tooltip_hotkey_hints "T"}}
+</template>
+<template id="hover-recent-conversations-tooltip-template">
+    <div class="views-tooltip-container" data-view-code="recent_topics">
         <div>{{t 'Team Pulse' }}</div>
         <div class="tootlip-inner-content views-message-count italic hidden-for-spectators"></div>
         <div class="tooltip-inner-content views-tooltip-home-view-note italic hide hidden-for-spectators">{{t 'This is your home view.' }}</div>
@@ -147,6 +163,13 @@
     {{tooltip_hotkey_hints "T"}}
 </template>
 <template id="starred-message-tooltip-template">
+    <div class="views-tooltip-container" data-view-code="starred_message">
+        <div>{{t 'Starred messages' }}</div>
+        <div class="tootlip-inner-content views-message-count italic"></div>
+    </div>
+    {{tooltip_hotkey_hints "*"}}
+</template>
+<template id="hover-starred-message-tooltip-template">
     <div class="views-tooltip-container" data-view-code="starred_message">
         <div>{{t 'Saved' }}</div>
         <div class="tootlip-inner-content views-message-count italic"></div>
@@ -159,6 +182,14 @@
     </div>
 </template>
 <template id="inbox-tooltip-template">
+    <div class="views-tooltip-container" data-view-code="inbox">
+        <div>{{t 'Inbox' }}</div>
+        <div class="tootlip-inner-content views-message-count italic"></div>
+        <div class="tooltip-inner-content views-tooltip-home-view-note italic hide">{{t 'This is your home view.' }}</div>
+    </div>
+    {{tooltip_hotkey_hints "Shift" "I"}}
+</template>
+<template id="hover-inbox-tooltip-template">
     <div class="views-tooltip-container" data-view-code="inbox">
         <div>{{t 'For You' }}</div>
         <div class="tootlip-inner-content views-message-count italic"></div>
@@ -180,6 +211,12 @@
     </div>
 </template>
 <template id="reminders-tooltip-template">
+    <div class="views-tooltip-container" data-view-code="reminders">
+        <div>{{t 'Reminders'}}</div>
+        <div class="tootlip-inner-content views-message-count italic"></div>
+    </div>
+</template>
+<template id="hover-reminders-tooltip-template">
     <div class="views-tooltip-container" data-view-code="reminders">
         <div>{{t 'Todos'}}</div>
         <div class="tootlip-inner-content views-message-count italic"></div>
@@ -247,6 +284,9 @@
 <template id="search-query-tooltip-template">
     {{t 'Search' }}
     {{tooltip_hotkey_hints "/"}}
+</template>
+<template id="hover-search-tooltip-template">
+    {{t "Search Hover knowledge"}}
 </template>
 <template id="show-left-sidebar-tooltip-template" >
     {{t 'Show left sidebar' }}

@@ -1,0 +1,65 @@
+{
+  "teammate_internal_key": "fixture-teammate-101",
+  "timezone": "Asia/Kuala_Lumpur",
+  "covered_start": "2026-08-10T08:15:00+08:00",
+  "covered_end": "2026-08-11T08:15:00+08:00",
+  "producing_version": "prompt:digest.pic_digest_bod:v1",
+  "messages": [
+    {
+      "id": 83001,
+      "whatsapp_id": "fixture-personal-a",
+      "group_key": "fixture-personal-alpha@g.us",
+      "sender_phone": "fixture-sender-a",
+      "sender_name": "Alex",
+      "timestamp": "2026-08-10T09:00:00+00:00",
+      "body": "Venue approval is still waiting on the facilities team."
+    },
+    {
+      "id": 83002,
+      "whatsapp_id": "fixture-personal-b",
+      "group_key": "fixture-personal-beta@g.us",
+      "sender_phone": "fixture-sender-b",
+      "sender_name": "Sam",
+      "timestamp": "2026-08-10T10:00:00+00:00",
+      "body": "The delivery checklist is complete."
+    },
+    {
+      "id": 83003,
+      "whatsapp_id": "fixture-personal-c",
+      "group_key": "fixture-personal-clear@g.us",
+      "sender_phone": "fixture-sender-c",
+      "sender_name": "Taylor",
+      "timestamp": "2026-08-10T11:00:00+00:00",
+      "body": "No follow-up is needed."
+    }
+  ],
+  "groups": [
+    {
+      "group_key": "fixture-personal-alpha@g.us",
+      "group_name": "Venue Operations",
+      "status": "needs_attention",
+      "unresolved_tickets": ["Confirm facilities approval before setup."],
+      "carried_over": true,
+      "age_label": "carried over from Monday",
+      "evidence_wa_message_ids": ["fixture-personal-a"]
+    },
+    {
+      "group_key": "fixture-personal-beta@g.us",
+      "group_name": "Delivery Team",
+      "status": "resolved",
+      "unresolved_tickets": [],
+      "carried_over": false,
+      "age_label": "resolved today",
+      "evidence_wa_message_ids": ["fixture-personal-b"]
+    },
+    {
+      "group_key": "fixture-personal-clear@g.us",
+      "group_name": "Volunteer Coordination",
+      "status": "clear",
+      "unresolved_tickets": [],
+      "carried_over": false,
+      "age_label": "all clear",
+      "evidence_wa_message_ids": ["fixture-personal-c"]
+    }
+  ]
+}

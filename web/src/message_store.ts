@@ -56,6 +56,204 @@ const message_reaction_schema = z.object({
     user_id: z.number(),
 });
 
+export const hover_todo_person_schema = z.object({user_id: z.number(), full_name: z.string()});
+
+export const hover_todo_schema = z.object({
+    id: z.number(),
+    state: z.enum(["active", "completed"]),
+    version: z.number(),
+    wording: z.string(),
+    due_date: z.nullable(z.string()),
+    completed_at: z.nullable(z.string()),
+    assignee: z.nullable(hover_todo_person_schema),
+    space: z.object({id: z.number(), name: z.string()}),
+    generated_item: z.object({
+        id: z.number(),
+        message_id: z.number(),
+        evidence_count: z.number(),
+        evidence_url: z.nullable(z.string()),
+    }),
+    approval: z.nullable(
+        z.object({
+            transition_id: z.number(),
+            actor: hover_todo_person_schema,
+            occurred_at: z.string(),
+        }),
+    ),
+    assignable_users: z.array(hover_todo_person_schema),
+    history_count: z.number(),
+    recent_events: z.array(
+        z.object({
+            id: z.number(),
+            kind: z.enum(["approved", "assigned", "reassigned", "completed", "reopened"]),
+            actor: hover_todo_person_schema,
+            occurred_at: z.string(),
+            previous_state: z.string(),
+            new_state: z.enum(["active", "completed"]),
+            previous_assignee: z.nullable(hover_todo_person_schema),
+            new_assignee: z.nullable(hover_todo_person_schema),
+            reason: z.string(),
+            notification_message_id: z.nullable(z.number()),
+        }),
+    ),
+});
+
+export type HoverTodo = z.infer<typeof hover_todo_schema>;
+
+export const hover_suggested_action_schema = z.object({
+    id: z.number(),
+    state: z.enum(["pending", "approved", "not_action"]),
+    version: z.number(),
+    wording: z.string(),
+    source_proposal: z.object({
+        assignee_ref: z.nullable(z.string()),
+        assignee_display_name: z.nullable(z.string()),
+    }),
+    assignee: z.nullable(z.object({user_id: z.number(), full_name: z.string()})),
+    assignable_users: z.array(z.object({user_id: z.number(), full_name: z.string()})),
+    due_date: z.nullable(z.string()),
+    history_count: z.number(),
+    recent_transitions: z.array(
+        z.object({
+            id: z.number(),
+            kind: z.enum(["approve", "not_action", "restore"]),
+            from_state: z.enum(["pending", "approved", "not_action"]),
+            to_state: z.enum(["pending", "approved", "not_action"]),
+            actor_id: z.number(),
+            actor_name: z.string(),
+            occurred_at: z.string(),
+            reason: z.string(),
+        }),
+    ),
+    todo: z.nullable(hover_todo_schema),
+});
+
+export type HoverSuggestedAction = z.infer<typeof hover_suggested_action_schema>;
+
+export const hover_generated_item_schema = z.object({
+    id: z.number(),
+    output_type: z.string(),
+    module: z.object({key: z.string(), name: z.string(), version: z.string()}),
+    source_summary: z.string(),
+    evidence_available: z.boolean(),
+    evidence_url: z.nullable(z.string()),
+    reviewed_payload: z.record(z.string(), z.unknown()),
+    revisions: z.array(
+        z.object({
+            id: z.number(),
+            field_path: z.string(),
+            previous_value: z.unknown(),
+            new_value: z.unknown(),
+            actor: z.object({id: z.number(), full_name: z.string()}),
+            timestamp: z.string(),
+            reason: z.string(),
+            review_message_id: z.number(),
+        }),
+    ),
+    sources: z.array(
+        z.object({
+            id: z.nullable(z.number()),
+            key: z.string(),
+            name: z.string(),
+            icon_class: z.string(),
+            count: z.number(),
+            url: z.string(),
+        }),
+    ),
+    presentation: z.object({
+        label: z.string(),
+        importance: z.string(),
+        state: z.nullable(z.string()),
+        occurred_at: z.nullable(z.string()),
+        generated_at: z.nullable(z.string()),
+        published_at: z.nullable(z.string()),
+        run_reference: z.string(),
+    }),
+    lineage: z.object({
+        is_latest: z.boolean(),
+        history_count: z.number(),
+        history: z.array(
+            z.object({
+                message_id: z.number(),
+                title: z.string(),
+                state: z.nullable(z.string()),
+                occurred_at: z.nullable(z.string()),
+                is_current: z.boolean(),
+            }),
+        ),
+    }),
+    disputed_details: z.array(
+        z.object({
+            id: z.number(),
+            field_path: z.string(),
+            summary: z.string(),
+            material: z.boolean(),
+            state: z.enum(["needs_review", "resolved"]),
+            evidence_count: z.number(),
+            evidence_url: z.nullable(z.string()),
+            review_request: z.nullable(
+                z.object({
+                    id: z.number(),
+                    state: z.enum(["open", "resolved"]),
+                    message_id: z.number(),
+                    targets: z.array(
+                        z.object({
+                            user_id: z.number(),
+                            full_name: z.string(),
+                            reason: z.enum(["involved_teammate", "space_admin_fallback"]),
+                        }),
+                    ),
+                }),
+            ),
+            resolution: z.nullable(
+                z.object({
+                    revision_id: z.number(),
+                    reviewer: z.object({id: z.number(), full_name: z.string()}),
+                    timestamp: z.string(),
+                }),
+            ),
+        }),
+    ),
+    suggested_action: z.nullable(hover_suggested_action_schema),
+});
+
+export type HoverGeneratedItem = z.infer<typeof hover_generated_item_schema>;
+export type HoverRevision = HoverGeneratedItem["revisions"][number];
+
+export const hover_response_schema = z.object({
+    type: z.enum(["reply", "review"]),
+    clarification_required: z.boolean(),
+    root_message_id: z.number(),
+    generated_item: hover_generated_item_schema,
+});
+
+export type HoverResponse = z.infer<typeof hover_response_schema>;
+
+export const hover_review_request_schema = z.object({
+    id: z.number(),
+    root_message_id: z.number(),
+    generated_item: hover_generated_item_schema,
+    field_path: z.string(),
+    state: z.enum(["open", "resolved"]),
+    target_user_ids: z.array(z.number()),
+});
+
+export type HoverReviewRequest = z.infer<typeof hover_review_request_schema>;
+
+export const hover_source_provenance_schema = z.object({
+    captured_at: z.string(),
+    source: z.object({
+        id: z.number(),
+        provider_key: z.string(),
+        provider_name: z.string(),
+        source_type: z.string(),
+        display_name: z.string(),
+        external_url: z.string(),
+    }),
+});
+
+export type HoverSourceProvenance = z.infer<typeof hover_source_provenance_schema>;
+
 export type MessageReaction = z.infer<typeof message_reaction_schema>;
 
 export const single_message_content_schema = z.object({
@@ -96,6 +294,10 @@ export const raw_message_schema = z.intersection(
             sender_email: z.string(),
             sender_full_name: z.string(),
             sender_id: z.number(),
+            hover_generated_item: z.optional(hover_generated_item_schema),
+            hover_response: z.optional(hover_response_schema),
+            hover_review_request: z.optional(hover_review_request_schema),
+            hover_source_provenance: z.optional(hover_source_provenance_schema),
             // The web app doesn't use sender_realm_str; ignore.
             // sender_realm_str: z.string(),
             submessages: z.array(submessage_schema),
@@ -170,6 +372,10 @@ export type Message = (
     | Omit<RawMessageWithBooleans & {type: "stream"}, "reactions" | "subject">
 ) & {
     clean_reactions: Map<string, MessageCleanReaction>;
+    hover_generated_item?: HoverGeneratedItem | undefined;
+    hover_response?: HoverResponse | undefined;
+    hover_review_request?: HoverReviewRequest | undefined;
+    hover_source_provenance?: HoverSourceProvenance | undefined;
 
     // Local echo state cluster of fields.
     locally_echoed?: boolean;

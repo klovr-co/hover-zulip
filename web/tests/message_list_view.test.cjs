@@ -21,6 +21,7 @@ mock_esm("../src/timerender", {
 });
 
 mock_esm("../src/people", {
+    is_my_user_id: () => false,
     sender_is_bot: () => false,
     sender_is_guest: () => false,
     sender_is_deactivated: () => false,
@@ -511,17 +512,107 @@ test("hover_generated_update_vars", () => {
     };
 
     const hover_update = list.get_calculated_message_container_variables(
-        {...shared_message_fields, sender_email: "hover-ai@hover.test"},
+        {
+            ...shared_message_fields,
+            sender_email: "ordinary-bot@example.com",
+            hover_generated_item: {
+                id: 1,
+                output_type: "digest",
+                module: {key: "marketing_digest", name: "Marketing Digest", version: "v1"},
+                source_summary: "Across 3 sources",
+                evidence_available: true,
+                evidence_url: "/json/hover/spaces/7/generated-items/1/evidence",
+                reviewed_payload: {summary: "Launch confirmed"},
+                revisions: [
+                    {
+                        id: 3,
+                        field_path: "summary",
+                        previous_value: "Launch likely",
+                        new_value: "Launch confirmed",
+                        actor: {id: 9, full_name: "Reviewer"},
+                        timestamp: "2026-08-11T12:00:00+00:00",
+                        reason: "Confirmed with the team.",
+                        review_message_id: 99,
+                    },
+                ],
+                disputed_details: [
+                    {
+                        id: 4,
+                        field_path: "summary",
+                        summary: "Credible updates disagree about launch readiness.",
+                        material: true,
+                        state: "needs_review",
+                        evidence_count: 2,
+                        evidence_url:
+                            "/json/hover/spaces/7/generated-items/1/disputed-details/4/evidence",
+                        review_request: {
+                            id: 5,
+                            state: "open",
+                            message_id: 100,
+                            targets: [
+                                {
+                                    user_id: 81,
+                                    full_name: "Project lead",
+                                    reason: "involved_teammate",
+                                },
+                            ],
+                        },
+                        resolution: null,
+                    },
+                ],
+                sources: [
+                    {
+                        id: null,
+                        key: "whatsapp",
+                        name: "WhatsApp",
+                        icon_class: "fa fa-whatsapp",
+                        count: 1,
+                        url: "",
+                    },
+                    {
+                        id: null,
+                        key: "github",
+                        name: "GitHub",
+                        icon_class: "fa fa-github",
+                        count: 1,
+                        url: "",
+                    },
+                    {
+                        id: null,
+                        key: "instagram",
+                        name: "Instagram",
+                        icon_class: "fa fa-instagram",
+                        count: 1,
+                        url: "",
+                    },
+                ],
+                presentation: {
+                    label: "Digest",
+                    importance: "high",
+                    state: null,
+                    occurred_at: "2026-08-11T01:00:00+00:00",
+                    generated_at: "2026-08-11T01:01:00+00:00",
+                    published_at: "2026-08-11T01:02:00+00:00",
+                    run_reference: "run-13",
+                },
+                lineage: {is_latest: true, history_count: 1, history: []},
+                suggested_action: null,
+            },
+        },
         true,
         false,
     );
     const human_post = list.get_calculated_message_container_variables(
-        {...shared_message_fields, sender_email: "aisha@hover.test"},
+        {...shared_message_fields, sender_email: "ordinary-bot@example.com"},
         true,
         false,
     );
 
     assert.equal(hover_update.is_hover_generated_update, true);
+    assert.equal(
+        hover_update.hover_evidence_url,
+        "/json/hover/spaces/7/generated-items/1/evidence",
+    );
     assert.deepEqual(
         hover_update.hover_source_integrations.map((integration) => integration.name),
         ["WhatsApp", "GitHub", "Instagram"],
@@ -529,10 +620,62 @@ test("hover_generated_update_vars", () => {
     assert.equal(hover_update.has_hover_source_integrations, true);
     assert.equal(hover_update.hover_module_key, "marketing_digest");
     assert.equal(hover_update.hover_module_name, "Marketing Digest");
+    assert.equal(hover_update.hover_output_label, "Digest");
+    assert.equal(hover_update.hover_importance, "high");
+    assert.equal(hover_update.hover_is_latest, true);
     assert.equal(hover_update.hover_source_context, "Across 3 sources");
+    assert.equal(hover_update.has_hover_revisions, true);
+    assert.equal(hover_update.has_hover_disputed_details, true);
+    assert.equal(hover_update.hover_disputed_details[0].state_label, "translated: Needs review");
+    assert.equal(hover_update.hover_disputed_details[0].show_review_action, true);
+    assert.equal(hover_update.hover_revisions[0].previous_value_display, '"Launch likely"');
     assert.equal(human_post.is_hover_generated_update, false);
     assert.equal(human_post.has_hover_source_integrations, false);
     assert.equal(human_post.hover_source_integrations, undefined);
+});
+
+test("native integration messages keep normal chrome and show Source provenance", () => {
+    const list = new MessageListView({id: 1}, true, true);
+    const message = list.get_calculated_message_container_variables(
+        {
+            content: "<p>New Instagram mention from Apify</p>",
+            sender_email: "apify-bot@example.com",
+            sender_id: 10,
+            stream_id: 42,
+            topic: "Instagram",
+            type: "stream",
+            hover_source_provenance: {
+                captured_at: "2026-08-11T00:00:00+00:00",
+                source: {
+                    id: 81,
+                    provider_key: "instagram",
+                    provider_name: "Instagram",
+                    source_type: "profile_events",
+                    display_name: "AIMTO Instagram",
+                    external_url: "https://www.instagram.com/aimto.my/",
+                },
+            },
+        },
+        true,
+        false,
+    );
+
+    assert.equal(message.is_hover_generated_update, false);
+    assert.equal(message.has_hover_source_integrations, true);
+    assert.deepEqual(message.hover_source_integrations, [
+        {
+            id: 81,
+            key: "instagram",
+            name: "Instagram: AIMTO Instagram",
+            icon_class: "zulip-icon zulip-icon-link",
+            count: 1,
+            url: "https://www.instagram.com/aimto.my/",
+        },
+    ]);
+    assert.equal(message.hover_module_name, undefined);
+    assert.equal(message.has_hover_source_provenance, true);
+    assert.equal(message.hover_filter_classes.includes("hover-raw-source-record"), true);
+    assert.equal(message.hover_source_context, undefined);
 });
 
 test("hover_generated_update_renders_native_card_chrome", () => {
@@ -545,12 +688,14 @@ test("hover_generated_update_renders_native_card_chrome", () => {
         hover_module_key: "progress_tracker",
         hover_module_name: "Progress Tracker",
         hover_source_context: "Across 4 sources",
+        hover_evidence_url: "/json/hover/spaces/7/generated-items/42/evidence",
         hover_source_integrations: [
             {
                 key: "whatsapp",
                 name: "WhatsApp",
                 icon_class: "fa fa-whatsapp",
                 count: 3,
+                url: "",
             },
             {
                 key: "github",
@@ -564,12 +709,26 @@ test("hover_generated_update_renders_native_card_chrome", () => {
         timestr: "9:00 PM",
         msg: {
             content: "<p>Event readiness update</p>",
-            failed_request: true,
+            failed_request: false,
             id: 42,
             is_stream: true,
-            locally_echoed: true,
-            message_reactions: [],
+            locally_echoed: false,
+            message_reactions: [
+                {
+                    class: "message_reaction reacted",
+                    count: 1,
+                    emoji_alt_code: false,
+                    emoji_code: "1f44d",
+                    emoji_name: "thumbs_up",
+                    is_realm_emoji: false,
+                    label: "You reacted with thumbs up",
+                    local_id: "unicode_emoji,1f44d",
+                    reaction_type: "unicode_emoji",
+                    vote_text: "1",
+                },
+            ],
             reminders: [],
+            url: "/#narrow/channel/42/topic/Project-status/near/42",
         },
     });
 
@@ -582,6 +741,69 @@ test("hover_generated_update_renders_native_card_chrome", () => {
     assert.match(html, /fa-github/);
     assert.match(html, />3</);
     assert.match(html, /href="https:\/\/github.com\/ashvinpraveen\/learnaimto"/);
+    assert.match(html, /View sources/);
+    assert.match(html, /class="hover-source-pill hover-view-evidence"/);
+    assert.doesNotMatch(html, /class="message_reaction hover-view-evidence"/);
+    assert.match(html, /class="hover-message-reactions"/);
+    assert.match(html, /class="message_reactions"/);
+    assert.match(html, /emoji-1f44d/);
+});
+
+test("hover generated update visual fixture compares generated and ordinary messages", () => {
+    const list = new MessageListView({id: 1}, true, true);
+    assert.ok(list);
+    const base_context = {
+        include_sender: false,
+        message_list_id: 1,
+        timestr: "9:00 PM",
+        msg: {
+            content: "<p>Event readiness update</p>",
+            failed_request: true,
+            id: 42,
+            is_stream: true,
+            locally_echoed: true,
+            message_reactions: [],
+            reminders: [],
+            url: "/#narrow/channel/42/topic/Project-status/near/42",
+        },
+    };
+    const html = require("../templates/hover_generated_update_visual_fixture.hbs")({
+        generated: {
+            ...base_context,
+            is_hover_generated_update: true,
+            has_hover_source_integrations: true,
+            hover_module_key: "progress_tracker",
+            hover_module_name: "Progress Tracker",
+            hover_source_context: "Across 2 sources",
+            hover_source_integrations: [
+                {
+                    key: "whatsapp",
+                    name: "WhatsApp",
+                    icon_class: "fa fa-whatsapp",
+                    count: 1,
+                    url: "",
+                },
+                {
+                    key: "github",
+                    name: "GitHub",
+                    icon_class: "fa fa-github",
+                    count: 1,
+                    url: "https://github.com/example/project",
+                },
+            ],
+        },
+        ordinary: {...base_context, msg: {...base_context.msg, id: 43}},
+    });
+
+    assert.match(html, /data-visual-regression-fixture="generated-update-comparison"/);
+    assert.equal(
+        (html.match(/class="message_row[^"]*\bhover-generated-update\b[^"]*"/g) ?? []).length,
+        1,
+    );
+    assert.match(html, /Approved generated update/);
+    assert.match(html, /Ordinary native message/);
+    assert.match(html, /fa-whatsapp/);
+    assert.match(html, /fa-github/);
 });
 
 test("merge_message_groups", ({mock_template}) => {

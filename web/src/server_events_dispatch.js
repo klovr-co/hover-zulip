@@ -9,6 +9,7 @@ import * as blueslip from "./blueslip.ts";
 import * as bot_data from "./bot_data.ts";
 import * as browser_history from "./browser_history.ts";
 import {buddy_list} from "./buddy_list.ts";
+import * as channel from "./channel.ts";
 import * as channel_folders from "./channel_folders.ts";
 import {compose_call_session_manager} from "./compose_call_session.ts";
 import * as compose_call_ui from "./compose_call_ui.ts";
@@ -23,6 +24,14 @@ import * as emoji_frequency from "./emoji_frequency.ts";
 import * as emoji_picker from "./emoji_picker.ts";
 import * as gear_menu from "./gear_menu.ts";
 import * as gif_state from "./gif_state.ts";
+import * as hover_awareness_view from "./hover_awareness_view.ts";
+import * as hover_connected_accounts from "./hover_connected_accounts.ts";
+import * as hover_editions_view from "./hover_editions_view.ts";
+import * as hover_search_view from "./hover_search_view.ts";
+import * as hover_source_view from "./hover_source_view.ts";
+import * as hover_spaces from "./hover_spaces.ts";
+import * as hover_suggested_actions from "./hover_suggested_actions.ts";
+import * as hover_todos from "./hover_todos.ts";
 import * as inbox_ui from "./inbox_ui.ts";
 import * as inbox_util from "./inbox_util.ts";
 import * as information_density from "./information_density.ts";
@@ -65,6 +74,7 @@ import * as settings_account from "./settings_account.ts";
 import * as settings_bots from "./settings_bots.ts";
 import * as settings_components from "./settings_components.ts";
 import * as settings_config from "./settings_config.ts";
+import * as settings_connected_accounts from "./settings_connected_accounts.ts";
 import * as settings_emoji from "./settings_emoji.ts";
 import * as settings_exports from "./settings_exports.ts";
 import * as settings_folders from "./settings_folders.ts";
@@ -161,6 +171,38 @@ export function dispatch_normal_event(event) {
             }
             break;
 
+        case "hover_space":
+            if (event.op === "delete") {
+                hover_spaces.remove(event.space_id);
+            } else {
+                hover_spaces.upsert(event.space);
+            }
+            stream_list.update_streams_sidebar(true);
+            hover_source_view.handle_space_event();
+            hover_awareness_view.handle_realtime_change();
+            hover_editions_view.handle_access_change();
+            hover_search_view.handle_space_event();
+            break;
+
+        case "hover_suggested_action":
+            hover_suggested_actions.apply_projection(event.message_id, event.generated_item);
+            hover_awareness_view.handle_realtime_change();
+            break;
+
+        case "hover_todo":
+            hover_todos.apply_projection(event.todo);
+            hover_awareness_view.handle_realtime_change();
+            break;
+
+        case "hover_connected_account":
+            if (event.op === "grant_upsert") {
+                hover_connected_accounts.upsert_grant(event.grant);
+            } else {
+                hover_connected_accounts.upsert_account(event.account);
+            }
+            settings_connected_accounts.rerender();
+            break;
+
         case "custom_profile_fields":
             realm.custom_profile_fields = event.fields;
             settings_profile_fields.populate_profile_fields(realm.custom_profile_fields);
@@ -176,6 +218,7 @@ export function dispatch_normal_event(event) {
 
         case "delete_message": {
             const msg_ids = event.message_ids;
+            hover_awareness_view.handle_realtime_change();
 
             // A delete_message event for DMs doesn't identify the
             // conversation, so we derive it from a deleted message before
@@ -317,6 +360,7 @@ export function dispatch_normal_event(event) {
                 can_create_groups: user_group_edit.update_group_creation_ui,
                 can_create_private_channel_group: noop,
                 can_create_public_channel_group: noop,
+                can_create_spaces_group: noop,
                 can_create_web_public_channel_group: noop,
                 can_create_write_only_bots_group: settings_bots.update_bot_permissions_ui,
                 can_delete_any_message_group: noop,
@@ -371,6 +415,40 @@ export function dispatch_normal_event(event) {
                 video_chat_provider: compose_call_ui.update_audio_and_video_chat_button_display,
                 jitsi_server_url: compose_call_ui.update_audio_and_video_chat_button_display,
                 gif_rating_policy: gif_state.update_gif_icon_visibility,
+                hover_enabled() {
+                    $("body").toggleClass("hover-enabled", realm.realm_hover_enabled);
+                    $(".hover-connected-account-settings-entry").toggleClass(
+                        "hide",
+                        !realm.realm_hover_enabled,
+                    );
+                    navigation_views.set_hover_enabled(realm.realm_hover_enabled);
+                    stream_list.update_streams_sidebar(true);
+                    if (realm.realm_hover_enabled) {
+                        void channel.get({
+                            url: "/json/hover/spaces",
+                            success(raw_data) {
+                                // The setting may have been disabled again while this request
+                                // was in flight. In that case, retain the response for the next
+                                // enable without exposing it in the disabled UI.
+                                const {spaces} =
+                                    hover_spaces.hover_spaces_response_schema.parse(raw_data);
+                                hover_spaces.initialize({hover_spaces: spaces});
+                                if (realm.realm_hover_enabled) {
+                                    stream_list.update_streams_sidebar(true);
+                                }
+                            },
+                        });
+                        void channel.get({
+                            url: "/json/hover/connected_accounts",
+                            success(raw_data) {
+                                hover_connected_accounts.replace_from_response(raw_data);
+                                if (realm.realm_hover_enabled) {
+                                    settings_connected_accounts.rerender();
+                                }
+                            },
+                        });
+                    }
+                },
                 waiting_period_threshold: noop,
                 want_advertise_in_communities_directory: noop,
                 welcome_message_custom_text: noop,
@@ -1150,6 +1228,7 @@ export function dispatch_normal_event(event) {
         }
 
         case "update_message_flags": {
+            hover_awareness_view.handle_realtime_change();
             const new_value = event.op === "add";
             switch (event.flag) {
                 case "starred":

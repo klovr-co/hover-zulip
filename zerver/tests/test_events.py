@@ -19,6 +19,10 @@ import time_machine
 from django.utils.timezone import now as timezone_now
 from typing_extensions import override
 
+from hover.actions_memberships import refresh_space_membership_suggestions
+from hover.actions_spaces import do_create_space
+from hover.models import Space
+from hover.observations import ResolvedIdentityObservation
 from zerver.actions.alert_words import do_add_alert_words, do_remove_alert_words
 from zerver.actions.bots import (
     do_change_bot_owner,
@@ -187,6 +191,8 @@ from zerver.lib.event_schema import (
     check_has_webex_token,
     check_has_zoom_token,
     check_heartbeat,
+    check_hover_space_add,
+    check_hover_space_update,
     check_invites_changed,
     check_legacy_presence,
     check_message,
@@ -281,6 +287,7 @@ from zerver.lib.user_groups import (
     UserGroupMembershipDetails,
     get_group_setting_value_for_api,
     get_role_based_system_groups_dict,
+    get_system_user_group_by_name,
 )
 from zerver.models import (
     Attachment,
@@ -5874,3 +5881,77 @@ class ChannelFolderActionTest(BaseAction):
 
         check_channel_folder_reorder("events[0]", events[0])
         self.assertEqual(events[0]["order"], new_order)
+
+
+class HoverSpaceActionTest(BaseAction):
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        realm = self.user_profile.realm
+        realm.hover_enabled = True
+        realm.can_create_spaces_group = get_system_user_group_by_name(
+            SystemGroups.MEMBERS, realm.id
+        )
+        realm.save(update_fields=["hover_enabled", "can_create_spaces_group"])
+
+    def create_space(self) -> Space:
+        category = check_add_channel_folder(
+            self.user_profile.realm,
+            "Programs",
+            "",
+            acting_user=self.user_profile,
+        )
+        return do_create_space(
+            self.user_profile,
+            name="Launch readiness",
+            description="Prepare the program before launch.",
+            category=category,
+        )
+
+    def test_hover_space_add_event(self) -> None:
+        category = check_add_channel_folder(
+            self.user_profile.realm,
+            "Programs",
+            "",
+            acting_user=self.user_profile,
+        )
+        with self.verify_action(event_types=["hover_space"]) as events:
+            do_create_space(
+                self.user_profile,
+                name="Launch readiness",
+                description="Prepare the program before launch.",
+                category=category,
+            )
+
+        check_hover_space_add("events[0]", events[0])
+        self.assertEqual(events[0]["space"]["administrators"][0]["user_id"], self.user_profile.id)
+        self.assertEqual(events[0]["space"]["memberships"][0]["role"], "contributor")
+
+    def test_hover_space_membership_suggestion_update_event(self) -> None:
+        space = self.create_space()
+        observed_user = self.example_user("othello")
+        with self.verify_action(event_types=["hover_space"]) as events:
+            refresh_space_membership_suggestions(
+                space,
+                [
+                    ResolvedIdentityObservation(
+                        user_id=observed_user.id,
+                        match_basis="verified_phone",
+                        observation_basis="obs_0123456789abcdef0123456789abcdef",
+                    )
+                ],
+                acting_user=self.user_profile,
+            )
+
+        check_hover_space_update("events[0]", events[0])
+        self.assertEqual(
+            events[0]["space"]["membership_suggestions"][0],
+            {
+                "id": events[0]["space"]["membership_suggestions"][0]["id"],
+                "user_id": observed_user.id,
+                "full_name": observed_user.full_name,
+                "suggested_role": "subscriber",
+                "state": "pending",
+                "match_basis": "verified_phone",
+            },
+        )

@@ -112,12 +112,39 @@ run_test("get_built_in_views", () => {
     assert.ok(inbox_view);
     assert.equal(inbox_view.is_pinned, built_in_views_meta_data.inbox.is_pinned);
 
+    assert.equal(built_in_views_meta_data.inbox.name, "translated: Inbox");
+    assert.equal(built_in_views_meta_data.all_messages.name, "translated: Combined feed");
+    assert.equal(built_in_views_meta_data.recent_view.name, "translated: Recent conversations");
+    assert.equal(built_in_views_meta_data.mentions.name, "translated: Mentions");
+    assert.equal(built_in_views_meta_data.reminders.name, "translated: Reminders");
+    assert.equal(built_in_views_meta_data.starred_messages.name, "translated: Starred messages");
+});
+
+run_test("set_hover_enabled", () => {
+    navigation_views.set_hover_enabled(true);
     assert.equal(built_in_views_meta_data.inbox.name, "translated: For You");
+    assert.equal(
+        built_in_views_meta_data.inbox.tooltip_template_id,
+        "hover-inbox-tooltip-template",
+    );
     assert.equal(built_in_views_meta_data.all_messages.name, "translated: All activity");
     assert.equal(built_in_views_meta_data.recent_view.name, "translated: Team Pulse");
     assert.equal(built_in_views_meta_data.mentions.name, "translated: Daily Brief");
+    assert.equal(built_in_views_meta_data.mentions.icon, "zulip-icon-sun");
     assert.equal(built_in_views_meta_data.reminders.name, "translated: Todos");
     assert.equal(built_in_views_meta_data.starred_messages.name, "translated: Saved");
+    assert.ok(
+        navigation_views.get_built_in_views().some((view) => view.fragment === "hover/search"),
+    );
+
+    navigation_views.set_hover_enabled(false);
+    assert.equal(built_in_views_meta_data.inbox.name, "translated: Inbox");
+    assert.equal(built_in_views_meta_data.inbox.tooltip_template_id, "inbox-tooltip-template");
+    assert.equal(built_in_views_meta_data.mentions.name, "translated: Mentions");
+    assert.equal(built_in_views_meta_data.mentions.icon, "zulip-icon-at-sign");
+    assert.ok(
+        !navigation_views.get_built_in_views().some((view) => view.fragment === "hover/search"),
+    );
 });
 
 run_test("get_all_navigation_views", () => {

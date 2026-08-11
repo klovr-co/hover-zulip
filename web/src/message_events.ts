@@ -16,6 +16,8 @@ import * as drafts from "./drafts.ts";
 import * as echo from "./echo.ts";
 import type {RawLocalMessage} from "./echo.ts";
 import {Filter} from "./filter.ts";
+import * as hover_awareness_view from "./hover_awareness_view.ts";
+import * as hover_response from "./hover_response.ts";
 import * as lightbox from "./lightbox.ts";
 import * as message_edit from "./message_edit.ts";
 import * as message_edit_history from "./message_edit_history.ts";
@@ -324,6 +326,11 @@ export function insert_new_messages(opts: InsertNewMessagesOpts): Message[] {
         messages = local_messages;
     }
 
+    hover_response.apply_realtime_responses(messages);
+    if (opts.type === "server_message") {
+        hover_awareness_view.handle_realtime_change();
+    }
+
     const any_untracked_unread_messages = unread.process_loaded_messages(messages, false);
     direct_message_group_data.process_loaded_messages(messages);
 
@@ -473,6 +480,18 @@ export function update_messages(events: UpdateMessageEvent[]): void {
 
             if (event.is_me_message !== undefined) {
                 anchor_message.is_me_message = event.is_me_message;
+            }
+            if (event.hover_generated_item !== undefined) {
+                anchor_message.hover_generated_item = event.hover_generated_item;
+            }
+            if (event.hover_response !== undefined) {
+                anchor_message.hover_response = event.hover_response;
+            }
+            if (event.hover_review_request !== undefined) {
+                anchor_message.hover_review_request = event.hover_review_request;
+            }
+            if (event.hover_source_provenance !== undefined) {
+                anchor_message.hover_source_provenance = event.hover_source_provenance;
             }
 
             // mark the current message edit attempt as complete.

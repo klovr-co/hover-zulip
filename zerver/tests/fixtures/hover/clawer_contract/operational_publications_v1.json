@@ -1,0 +1,64 @@
+{
+  "source_key": "fixture-operations-group@g.us",
+  "producer_key": "group_status",
+  "producer_name": "Group Status",
+  "producing_version": "prompt:journal.group_eod_update:v2",
+  "base_time": "2026-08-10T08:00:00+00:00",
+  "messages": [
+    {
+      "id": 81001,
+      "ts_utc": "2026-08-10T07:55:00+00:00",
+      "sender_phone": "fixture-operator-a",
+      "sender_name": "Alex",
+      "message_type": "text",
+      "body": "The venue confirmed the revised loading window."
+    },
+    {
+      "id": 81002,
+      "ts_utc": "2026-08-10T08:06:00+00:00",
+      "sender_phone": "fixture-operator-b",
+      "sender_name": "Sam",
+      "message_type": "text",
+      "body": "The production checklist is now complete."
+    },
+    {
+      "id": 81003,
+      "ts_utc": "2026-08-10T08:20:00+00:00",
+      "sender_phone": "fixture-operator-c",
+      "sender_name": "Taylor",
+      "message_type": "text",
+      "body": "The team approved the alternate loading plan."
+    }
+  ],
+  "feed": {
+    "contract": "feed_update",
+    "schema_version": "1.0",
+    "title": "Venue operations",
+    "update_type": "development",
+    "developments": ["Venue confirmed the revised loading window."]
+  },
+  "feed_followup": {
+    "contract": "feed_update",
+    "schema_version": "1.0",
+    "title": "Venue operations",
+    "update_type": "milestone",
+    "developments": ["Production checklist completed."]
+  },
+  "progress_blocked": {
+    "contract": "progress_update",
+    "schema_version": "1.0",
+    "title": "Launch readiness",
+    "status": "blocked",
+    "updates": ["Final checks are paused."],
+    "resolved_items": [],
+    "blockers": ["Venue access approval is outstanding."]
+  },
+  "decision_active": {
+    "contract": "decision",
+    "schema_version": "1.0",
+    "title": "Loading plan",
+    "decision": "Use the east loading entrance.",
+    "rationale": "It preserves the confirmed setup window.",
+    "lifecycle": "active"
+  }
+}

@@ -59,6 +59,7 @@ const admin_settings_label = {
     realm_send_channel_events_messages: $t({
         defaultMessage: "Send automated messages for channel events",
     }),
+    realm_hover_enabled: $t({defaultMessage: "Enable Hover for this organization"}),
     realm_digest_emails_enabled: $t({
         defaultMessage: "Send weekly digest emails to inactive users",
     }),
@@ -232,6 +233,7 @@ export function build_page(): void {
         realm_enable_spectator_access: realm.realm_enable_spectator_access,
         settings_send_digest_emails: realm.settings_send_digest_emails,
         realm_send_channel_events_messages: realm.realm_send_channel_events_messages,
+        realm_hover_enabled: realm.realm_hover_enabled,
         realm_digest_emails_enabled: realm.realm_digest_emails_enabled,
         realm_digest_weekday: realm.realm_digest_weekday,
         development: page_params.development_environment,

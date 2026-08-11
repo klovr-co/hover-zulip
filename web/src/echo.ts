@@ -13,6 +13,7 @@ import * as compose_notifications from "./compose_notifications.ts";
 import * as compose_ui from "./compose_ui.ts";
 import * as echo_state from "./echo_state.ts";
 import * as hash_util from "./hash_util.ts";
+import * as hover_response from "./hover_response.ts";
 import * as local_message from "./local_message.ts";
 import * as markdown from "./markdown.ts";
 import type {InsertNewMessagesOpts} from "./message_events.ts";
@@ -589,12 +590,22 @@ export function process_from_server(messages: ServerMessage[]): ServerMessage[] 
         client_message.topic_links = message.topic_links ?? [];
         client_message.is_me_message = message.is_me_message;
         client_message.submessages = message.submessages;
+        if (message.hover_generated_item !== undefined) {
+            client_message.hover_generated_item = message.hover_generated_item;
+        }
+        if (message.hover_response !== undefined) {
+            client_message.hover_response = message.hover_response;
+        }
+        if (message.hover_source_provenance !== undefined) {
+            client_message.hover_source_provenance = message.hover_source_provenance;
+        }
 
         msgs_to_rerender_or_add_to_narrow.push(client_message);
         echo_state.remove_message_from_waiting_for_ack(local_id);
     }
 
     if (msgs_to_rerender_or_add_to_narrow.length > 0) {
+        hover_response.apply_realtime_responses(msgs_to_rerender_or_add_to_narrow);
         for (const msg_list of message_lists.all_rendered_message_lists()) {
             // Since we already have this message locally echoed, it is ok to
             // not scroll when this message is added to the view as user has

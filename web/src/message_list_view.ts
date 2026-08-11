@@ -61,11 +61,38 @@ export type MessageContainer = {
     include_sender: boolean;
     is_hidden: boolean;
     is_hover_generated_update: boolean;
+    is_hover_review_request: boolean;
+    hover_review_request_state?: string;
+    has_hover_disputed_details: boolean;
+    hover_disputed_details: {
+        field_path: string;
+        field_label: string;
+        summary: string;
+        state_label: string;
+        state_class: string;
+        evidence_url: string | null;
+        evidence_count: number;
+        show_review_action: boolean;
+        target_label?: string | undefined;
+        resolution_label?: string | undefined;
+    }[];
     has_hover_source_integrations: boolean;
-    hover_module_key?: hover.HoverModuleKey;
+    hover_module_key?: string;
     hover_module_name?: string;
     hover_source_context?: string;
+    hover_evidence_url?: string;
     hover_source_integrations?: hover.SourceIntegration[];
+    hover_output_label?: string;
+    hover_importance?: string;
+    hover_state?: string;
+    hover_is_latest?: boolean;
+    hover_is_earlier?: boolean;
+    hover_has_history?: boolean;
+    hover_history_count?: number;
+    has_hover_source_provenance?: boolean;
+    hover_provenance_source_id?: number;
+    hover_provenance_source_key?: string;
+    hover_filter_classes?: string;
     last_edit_timestamp: number | undefined;
     last_moved_timestamp: number | undefined;
     mention_classname: string | undefined;
@@ -606,11 +633,72 @@ export class MessageListView {
         should_add_guest_indicator_for_sender: boolean;
         is_hidden: boolean;
         is_hover_generated_update: boolean;
+        is_hover_review_request: boolean;
+        hover_review_request_state?: string;
+        has_hover_disputed_details: boolean;
+        hover_disputed_details: {
+            field_path: string;
+            field_label: string;
+            summary: string;
+            state_label: string;
+            state_class: string;
+            evidence_url: string | null;
+            evidence_count: number;
+            show_review_action: boolean;
+            target_label?: string | undefined;
+            resolution_label?: string | undefined;
+        }[];
+        is_hover_response: boolean;
+        is_hover_review: boolean;
+        hover_response_clarification_required: boolean;
+        is_hover_suggested_action: boolean;
+        hover_suggested_action?: {
+            message_id: number;
+            wording: string;
+            responsibility: string;
+            due_date: string;
+            approval_due_date: string;
+            approval_assignable_users: {user_id: number; full_name: string}[];
+            approval_has_assignee: boolean;
+            approval_assignee_user_id?: number;
+            is_pending: boolean;
+            is_approved: boolean;
+            is_not_action: boolean;
+            latest_actor?: string;
+            latest_time?: string;
+            latest_reason?: string;
+            todo_id?: number;
+            todo_is_active?: boolean;
+            todo_is_completed?: boolean;
+            todo_assignee?: string;
+            todo_assignable_users?: {user_id: number; full_name: string}[];
+            todo_has_assignee?: boolean;
+            todo_assignee_user_id?: number;
+            todo_latest_actor?: string;
+            todo_latest_time?: string;
+        };
+        has_hover_revisions: boolean;
+        hover_revisions: (message_store.HoverRevision & {
+            previous_value_display: string | undefined;
+            new_value_display: string | undefined;
+        })[];
         has_hover_source_integrations: boolean;
-        hover_module_key?: hover.HoverModuleKey;
+        hover_module_key?: string;
         hover_module_name?: string;
         hover_source_context?: string;
+        hover_evidence_url?: string;
         hover_source_integrations?: hover.SourceIntegration[];
+        hover_output_label?: string;
+        hover_importance?: string;
+        hover_state?: string;
+        hover_is_latest?: boolean;
+        hover_is_earlier?: boolean;
+        hover_has_history?: boolean;
+        hover_history_count?: number;
+        has_hover_source_provenance?: boolean;
+        hover_provenance_source_id?: number;
+        hover_provenance_source_key?: string;
+        hover_filter_classes?: string;
         mention_classname: string | undefined;
         include_sender: boolean;
         status_message: string | false;
@@ -704,13 +792,98 @@ export class MessageListView {
         }
 
         const is_hover_generated_update = hover.is_generated_update(message);
-        const hover_source_integrations = is_hover_generated_update
-            ? hover.get_source_integrations(message.content)
-            : [];
-        const hover_module =
-            is_hover_generated_update && message.type === "stream"
-                ? hover.get_module_from_topic(message.topic)
-                : undefined;
+        const hover_generated_item = message.hover_generated_item;
+        const hover_source_provenance = message.hover_source_provenance;
+        const hover_source_integrations =
+            hover_generated_item?.sources ??
+            (hover_source_provenance === undefined
+                ? []
+                : [
+                      {
+                          id: hover_source_provenance.source.id,
+                          key: hover_source_provenance.source.provider_key,
+                          name: `${hover_source_provenance.source.provider_name}: ${hover_source_provenance.source.display_name}`,
+                          icon_class: "zulip-icon zulip-icon-link",
+                          count: 1,
+                          url: hover_source_provenance.source.external_url,
+                      },
+                  ]);
+        const hover_module = hover_generated_item?.module;
+        const hover_filter_classes = [
+            is_hover_generated_update
+                ? hover_generated_item?.lineage.is_latest
+                    ? "hover-lineage-latest"
+                    : "hover-lineage-earlier"
+                : undefined,
+            hover_source_provenance === undefined ? undefined : "hover-raw-source-record",
+            hover_source_provenance === undefined
+                ? undefined
+                : `hover-source-id--${hover_source_provenance.source.id}`,
+            hover_source_provenance === undefined
+                ? undefined
+                : `hover-source-key--${hover_source_provenance.source.provider_key}`,
+            ...hover_source_integrations.flatMap((source) => [
+                `hover-source-key--${source.key}`,
+                source.id === null ? undefined : `hover-source-id--${source.id}`,
+            ]),
+        ]
+            .filter((value) => value !== undefined)
+            .join(" ");
+        const hover_response = message.hover_response;
+        const hover_review_request = message.hover_review_request;
+        const suggested_action = hover_generated_item?.suggested_action;
+        const latest_transition = suggested_action?.recent_transitions[0];
+        const todo = suggested_action?.todo;
+        const latest_todo_event = todo?.recent_events[0];
+        const hover_revisions = (hover_generated_item?.revisions ?? []).map((revision) => ({
+            ...revision,
+            previous_value_display: JSON.stringify(revision.previous_value),
+            new_value_display: JSON.stringify(revision.new_value),
+        }));
+        const hover_disputed_details = (hover_generated_item?.disputed_details ?? []).map(
+            (detail) => {
+                const targets = detail.review_request?.targets ?? [];
+                const is_targeted = targets.some((target) => people.is_my_user_id(target.user_id));
+                let target_label: string | undefined;
+                if (detail.material && detail.state === "needs_review") {
+                    target_label = is_targeted
+                        ? $t({defaultMessage: "Review requested from you"})
+                        : $t(
+                              {defaultMessage: "Review requested from {names}"},
+                              {names: targets.map((target) => target.full_name).join(", ")},
+                          );
+                }
+                const resolution_label =
+                    detail.resolution === null
+                        ? undefined
+                        : $t(
+                              {defaultMessage: "Reviewed by {name}"},
+                              {name: detail.resolution.reviewer.full_name},
+                          );
+                return {
+                    field_path: detail.field_path,
+                    field_label: detail.field_path.replaceAll("_", " "),
+                    summary: detail.summary,
+                    state_label:
+                        detail.state === "resolved"
+                            ? $t({defaultMessage: "Reviewed"})
+                            : detail.material
+                              ? $t({defaultMessage: "Needs review"})
+                              : $t({defaultMessage: "Uncertain"}),
+                    state_class:
+                        detail.state === "resolved"
+                            ? "reviewed"
+                            : detail.material
+                              ? "needs-review"
+                              : "uncertain",
+                    evidence_url: detail.evidence_url,
+                    evidence_count: detail.evidence_count,
+                    show_review_action: detail.material && detail.state === "needs_review",
+                    target_label,
+                    resolution_label,
+                };
+            },
+        );
 
         return {
             timestr: get_timestr(message),
@@ -723,13 +896,90 @@ export class MessageListView {
             should_add_guest_indicator_for_sender,
             is_hidden,
             is_hover_generated_update,
+            is_hover_review_request: hover_review_request !== undefined,
+            ...(hover_review_request !== undefined && {
+                hover_review_request_state: hover_review_request.state,
+            }),
+            has_hover_disputed_details: hover_disputed_details.length > 0,
+            hover_disputed_details,
+            hover_filter_classes,
+            has_hover_source_provenance: hover_source_provenance !== undefined,
+            ...(hover_source_provenance !== undefined && {
+                hover_provenance_source_id: hover_source_provenance.source.id,
+                hover_provenance_source_key: hover_source_provenance.source.provider_key,
+            }),
+            is_hover_response: hover_response !== undefined,
+            is_hover_review: hover_response?.type === "review",
+            hover_response_clarification_required: hover_response?.clarification_required === true,
+            is_hover_suggested_action: suggested_action !== null && suggested_action !== undefined,
+            ...(suggested_action !== null &&
+                suggested_action !== undefined && {
+                    hover_suggested_action: {
+                        message_id: message.id,
+                        wording: suggested_action.wording,
+                        responsibility:
+                            suggested_action.assignee?.full_name ??
+                            suggested_action.source_proposal.assignee_display_name ??
+                            $t({defaultMessage: "Unassigned"}),
+                        due_date: suggested_action.due_date ?? $t({defaultMessage: "No due date"}),
+                        approval_due_date: suggested_action.due_date ?? "",
+                        approval_assignable_users: suggested_action.assignable_users.filter(
+                            (user) => user.user_id !== suggested_action.assignee?.user_id,
+                        ),
+                        approval_has_assignee: suggested_action.assignee !== null,
+                        ...(suggested_action.assignee !== null && {
+                            approval_assignee_user_id: suggested_action.assignee.user_id,
+                        }),
+                        is_pending: suggested_action.state === "pending",
+                        is_approved: suggested_action.state === "approved",
+                        is_not_action: suggested_action.state === "not_action",
+                        ...(latest_transition !== undefined && {
+                            latest_actor: latest_transition.actor_name,
+                            latest_time: latest_transition.occurred_at,
+                            latest_reason: latest_transition.reason,
+                        }),
+                        ...(todo !== null &&
+                            todo !== undefined && {
+                                todo_id: todo.id,
+                                todo_is_active: todo.state === "active",
+                                todo_is_completed: todo.state === "completed",
+                                todo_assignee:
+                                    todo.assignee?.full_name ?? $t({defaultMessage: "Unassigned"}),
+                                todo_assignable_users: todo.assignable_users.filter(
+                                    (user) => user.user_id !== todo.assignee?.user_id,
+                                ),
+                                todo_has_assignee: todo.assignee !== null,
+                                ...(todo.assignee !== null && {
+                                    todo_assignee_user_id: todo.assignee.user_id,
+                                }),
+                                ...(latest_todo_event !== undefined && {
+                                    todo_latest_actor: latest_todo_event.actor.full_name,
+                                    todo_latest_time: latest_todo_event.occurred_at,
+                                }),
+                            }),
+                    },
+                }),
+            has_hover_revisions: hover_revisions.length > 0,
+            hover_revisions,
             has_hover_source_integrations: hover_source_integrations.length > 0,
             ...(hover_module !== undefined && {
                 hover_module_key: hover_module.key,
                 hover_module_name: hover_module.name,
             }),
-            ...(is_hover_generated_update && {
-                hover_source_context: hover.get_source_context(message.content),
+            ...(hover_generated_item !== undefined && {
+                hover_source_context: hover_generated_item.source_summary,
+                hover_output_label: hover_generated_item.presentation.label,
+                hover_importance: hover_generated_item.presentation.importance,
+                ...(hover_generated_item.presentation.state !== null && {
+                    hover_state: hover_generated_item.presentation.state,
+                }),
+                hover_is_latest: hover_generated_item.lineage.is_latest,
+                hover_is_earlier: !hover_generated_item.lineage.is_latest,
+                hover_has_history: hover_generated_item.lineage.history_count > 1,
+                hover_history_count: hover_generated_item.lineage.history_count,
+                ...(hover_generated_item.evidence_url !== null && {
+                    hover_evidence_url: hover_generated_item.evidence_url,
+                }),
             }),
             ...(hover_source_integrations.length > 0 && {
                 hover_source_integrations,

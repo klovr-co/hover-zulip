@@ -83,6 +83,27 @@
                             </div>
                         </div>
                     </div>
+                    <div id="hover-response-controls" class="hover-response-controls" hidden>
+                        <div class="hover-response-controls__heading">
+                            <span>{{t "Respond to Hover's update" }}</span>
+                            <div class="hover-response-type" role="radiogroup" aria-label="{{t 'Response type' }}">
+                                <button type="button" class="hover-response-type__button selected" data-hover-response-type="reply" role="radio" aria-checked="true">{{t 'Reply' }}</button>
+                                <button type="button" class="hover-response-type__button" data-hover-response-type="review" role="radio" aria-checked="false">{{t 'Review' }}</button>
+                            </div>
+                        </div>
+                        <p class="hover-response-controls__help" data-hover-reply-help>{{t 'Reply adds context without changing Hover’s current interpretation.' }}</p>
+                        <div class="hover-review-patch" hidden>
+                            <label>
+                                <span>{{t 'Field to revise' }}</span>
+                                <select id="hover-review-field"><option value="">{{t 'Choose a field' }}</option></select>
+                            </label>
+                            <label>
+                                <span>{{t 'New value (JSON)' }}</span>
+                                <input id="hover-review-value" type="text" placeholder="{{t '&quot;Confirmed&quot;' }}" autocomplete="off" />
+                            </label>
+                            <p>{{t 'Choose a field and value to apply it now. Leave either blank and Hover will ask for clarification without changing the update.' }}</p>
+                        </div>
+                    </div>
                     <div class="messagebox">
                         <div id="message-content-container" class="surround-formatting-buttons-row">
                             <textarea class="new_message_textarea message-textarea" name="content" id='compose-textarea' placeholder="{{t 'Compose your message here' }}" tabindex="0" aria-label="{{t 'Compose your message here…' }}"></textarea>

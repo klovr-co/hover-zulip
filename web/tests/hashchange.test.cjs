@@ -17,7 +17,22 @@ const history = set_global("history", {state: null});
 
 const admin = mock_esm("../src/admin");
 const drafts_overlay_ui = mock_esm("../src/drafts_overlay_ui");
+const hover_awareness_view = mock_esm("../src/hover_awareness_view", {
+    hide() {},
+    show() {},
+});
+const hover_editions_view = mock_esm("../src/hover_editions_view", {
+    hide() {},
+    show() {},
+});
 const info_overlay = mock_esm("../src/info_overlay");
+let hover_search_shown = false;
+mock_esm("../src/hover_search_view", {
+    show() {
+        hover_search_shown = true;
+    },
+    hide() {},
+});
 const message_viewport = mock_esm("../src/message_viewport");
 const overlays = mock_esm("../src/overlays");
 const popovers = mock_esm("../src/popovers");
@@ -40,9 +55,13 @@ const people = zrequire("people");
 const hash_util = zrequire("hash_util");
 const hashchange = zrequire("hashchange");
 const message_view = zrequire("../src/message_view");
+const state_data = zrequire("state_data");
 const stream_data = zrequire("stream_data");
 const {Filter} = zrequire("../src/filter");
 const {initialize_user_settings} = zrequire("user_settings");
+
+state_data.set_current_user({is_guest: false});
+state_data.set_realm({realm_hover_enabled: false});
 
 const user_settings = {};
 initialize_user_settings({user_settings});
@@ -252,6 +271,37 @@ run_test("hash_interactions", ({override, override_rewire}) => {
         [message_viewport, "stop_auto_scrolling"],
     ]);
     assert.equal(window.location.hash, "#recent");
+
+    let awareness_surface;
+    override(hover_awareness_view, "show", (surface) => {
+        awareness_surface = surface;
+    });
+    state_data.realm.realm_hover_enabled = true;
+    window.location.hash = "#inbox";
+    $window_stub.trigger("hashchange");
+    assert.equal(awareness_surface, "for_you");
+    window.location.hash = "#recent";
+    $window_stub.trigger("hashchange");
+    assert.equal(awareness_surface, "team_pulse");
+
+    let editions_shown = false;
+    override(hover_editions_view, "show", () => {
+        editions_shown = true;
+    });
+    window.location.hash = "#hover/editions";
+    $window_stub.trigger("hashchange");
+    assert.equal(editions_shown, true);
+    state_data.realm.realm_hover_enabled = false;
+
+    window.location.hash = "#hover/search";
+    hover_search_shown = false;
+    helper.clear_events();
+    $window_stub.trigger("hashchange");
+    assert.equal(hover_search_shown, true);
+    helper.assert_events([
+        [overlays, "close_for_hash_change"],
+        [message_viewport, "stop_auto_scrolling"],
+    ]);
 
     const denmark_id = 1;
     stream_data.add_sub_for_tests(

@@ -1,0 +1,67 @@
+{
+  "valid": {
+    "source_key": "fixture-operations@g.us",
+    "covered_start": "2026-08-10T10:30:00+00:00",
+    "covered_end": "2026-08-11T10:30:00+00:00",
+    "producer_key": "conversation_digest",
+    "producer_name": "Conversation Digest",
+    "producing_version": "prompt:digest.whatsapp_slack:v1",
+    "payload": {
+      "contract": "digest",
+      "schema_version": "1.0",
+      "title": "Fixture Operations",
+      "timezone": "Asia/Kuala_Lumpur",
+      "operation": "The team confirmed the venue handoff and logged one open delivery check.",
+      "marketing": "Nothing worth it.",
+      "metrics": {
+        "messages": 2,
+        "text": 1,
+        "media": 1,
+        "voice": 0
+      },
+      "generation_context": "AI · fixture-model"
+    },
+    "messages": [
+      {
+        "id": 101,
+        "sender": "fixture-alex",
+        "sender_phone": "fixture-alex",
+        "sender_name": "Alex",
+        "ts_utc": "2026-08-10T12:00:00+00:00",
+        "body": "Venue handoff is confirmed.",
+        "transcript": "",
+        "media_description": "",
+        "message_type": "text"
+      },
+      {
+        "id": 102,
+        "sender": "fixture-sam",
+        "sender_phone": "fixture-sam",
+        "sender_name": "Sam",
+        "ts_utc": "2026-08-10T13:15:00+00:00",
+        "body": "Delivery check remains open.",
+        "transcript": "",
+        "media_description": "Photo of the sealed fixture crate.",
+        "message_type": "image",
+        "media_mimetype": "image/jpeg",
+        "media_file_length": 4096,
+        "media_file_sha256": "fixture-sha",
+        "media_available": true
+      }
+    ]
+  },
+  "malformed": {
+    "model_output": "This response deliberately omits the required tags.",
+    "expected_generation_context": "deterministic fallback",
+    "expected_marketing": "Nothing worth it."
+  },
+  "duplicate_replay": {
+    "second_external_id": "fixture-retry-attempt",
+    "replacement_operation": "A retry must not replace the database winner."
+  },
+  "evidence_resolution": {
+    "expected_senders": ["Alex", "Sam"],
+    "expected_media_type": "image",
+    "expected_mime_type": "image/jpeg"
+  }
+}

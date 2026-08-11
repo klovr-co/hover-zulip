@@ -1,3 +1,4 @@
+import asyncio
 import time
 from collections.abc import Callable
 from typing import Any
@@ -1228,6 +1229,33 @@ class ClientDescriptorsTest(ZulipTestCase):
             ],
         )
 
+    def test_process_message_event_does_not_access_django_orm(self) -> None:
+        hamlet = self.example_user("hamlet")
+        message_event = {
+            "type": "message",
+            "message_realm_id": hamlet.realm_id,
+            "message_dict": {
+                "id": 999,
+                "sender_id": hamlet.id,
+                "sender_email": hamlet.email,
+                "sender_delivery_email": hamlet.delivery_email,
+                "recipient_id": 1111,
+                "type": "stream",
+                "client": "website",
+            },
+        }
+
+        async def process_in_tornado_context() -> None:
+            with mock.patch(
+                "zerver.tornado.event_queue.get_client_info_for_message_event",
+                return_value={},
+            ):
+                process_message_event(message_event, [])
+
+        # Django raises SynchronousOnlyOperation if process_message_event performs
+        # any ORM query while running in Tornado's asynchronous context.
+        asyncio.run(process_in_tornado_context())
+
 
 class ReloadWebClientsTest(ZulipTestCase):
     def test_web_reload_clients(self) -> None:
@@ -1289,6 +1317,8 @@ class FetchQueriesTest(ZulipTestCase):
             device=1,
             drafts=1,
             giphy=0,
+            hover_space=0,
+            hover_connected_account=0,
             klipy=0,
             tenor=0,
             message=1,

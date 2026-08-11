@@ -5,6 +5,7 @@ import render_message_view_header from "../templates/message_view_header.hbs";
 
 import type {Filter} from "./filter.ts";
 import * as hash_util from "./hash_util.ts";
+import * as hover_awareness_state from "./hover_awareness_state.ts";
 import {$t} from "./i18n.ts";
 import * as inbox_util from "./inbox_util.ts";
 import * as narrow_state from "./narrow_state.ts";
@@ -39,6 +40,22 @@ type MessageViewHeaderContext = {
 );
 
 function get_message_view_header_context(filter: Filter | undefined): MessageViewHeaderContext {
+    const awareness_surface = hover_awareness_state.get_surface();
+    if (awareness_surface === "for_you") {
+        return {
+            title: $t({defaultMessage: "For You"}),
+            description: $t({defaultMessage: "Updates connected to your work."}),
+            zulip_icon: "inbox",
+        };
+    }
+    if (awareness_surface === "team_pulse") {
+        return {
+            title: $t({defaultMessage: "Team Pulse"}),
+            description: $t({defaultMessage: "Important developments across your Spaces."}),
+            zulip_icon: "recent",
+        };
+    }
+
     if (recent_view_util.is_visible()) {
         return {
             title: $t({defaultMessage: "Recent conversations"}),

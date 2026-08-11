@@ -406,6 +406,7 @@ run_test("show_empty_narrow_message", ({mock_template, override, override_rewire
     );
 
     current_filter = set_filter([["is", "mentioned"]]);
+    override(realm, "realm_hover_enabled", true);
     narrow_banner.show_empty_narrow_message(current_filter);
     assert.equal(
         $(".empty_feed_notice_main").html(),

@@ -240,6 +240,8 @@ def send_event_rollback_unsafe(
 def send_event_on_commit(
     realm: Realm, event: Mapping[str, Any], users: Iterable[int] | Iterable[Mapping[str, Any]]
 ) -> None:
+    event_dict = dict(event)
+    message_realm_id = event_dict.pop("message_realm_id", None)
     if not settings.USING_RABBITMQ:
         # In tests, round-trip the event through JSON, as happens with
         # RabbitMQ.  zerver.lib.queue also enforces this, but the
@@ -247,8 +249,17 @@ def send_event_on_commit(
         # trace which event was at fault -- so we also check it
         # immediately, here.
         try:
-            event = orjson.loads(orjson.dumps(event))
+            event_dict = orjson.loads(orjson.dumps(event_dict))
         except TypeError:
-            print(event)
+            print(event_dict)
             raise
-    transaction.on_commit(lambda: send_event_rollback_unsafe(realm, event, users))
+
+    def send_event() -> None:
+        if isinstance(message_realm_id, int):
+            # Import lazily to avoid a module cycle through Hover action modules.
+            from hover.lib import add_hover_metadata_to_message_event
+
+            add_hover_metadata_to_message_event(event_dict, realm_id=message_realm_id)
+        send_event_rollback_unsafe(realm, event_dict, users)
+
+    transaction.on_commit(send_event)

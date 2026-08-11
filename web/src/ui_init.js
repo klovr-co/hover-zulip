@@ -56,6 +56,20 @@ import * as gif_state from "./gif_state.ts";
 import * as group_permission_settings from "./group_permission_settings.ts";
 import * as hashchange from "./hashchange.ts";
 import * as hotkey from "./hotkey.ts";
+import * as hover_all_view from "./hover_all_view.ts";
+import * as hover_awareness_view from "./hover_awareness_view.ts";
+import * as hover_editions_view from "./hover_editions_view.ts";
+import * as hover_connected_accounts from "./hover_connected_accounts.ts";
+import * as hover_evidence from "./hover_evidence.ts";
+import * as hover_generated_details from "./hover_generated_details.ts";
+import * as hover_response from "./hover_response.ts";
+import * as hover_review_request from "./hover_review_request.ts";
+import * as hover_search_view from "./hover_search_view.ts";
+import * as hover_source_view from "./hover_source_view.ts";
+import * as hover_spaces from "./hover_spaces.ts";
+import * as hover_suggested_actions from "./hover_suggested_actions.ts";
+import * as hover_todos from "./hover_todos.ts";
+import * as hover_todos_overlay_ui from "./hover_todos_overlay_ui.ts";
 import * as i18n from "./i18n.ts";
 import * as inbox_ui from "./inbox_ui.ts";
 import * as information_density from "./information_density.ts";
@@ -461,6 +475,7 @@ export async function initialize_everything(state_data) {
 
     set_current_user(state_data.current_user);
     set_realm(state_data.realm);
+    $("body").toggleClass("hover-enabled", realm.realm_hover_enabled);
     set_realm_billing(state_data.realm_billing);
 
     if (page_params.narrow_stream !== undefined) {
@@ -493,9 +508,11 @@ export async function initialize_everything(state_data) {
     // This populates data for scheduled messages.
     scheduled_messages.initialize(state_data.scheduled_messages);
     message_reminder.initialize(state_data.reminders);
+    navigation_views.set_hover_enabled(realm.realm_hover_enabled);
     navigation_views.initialize(state_data.navigation_views);
     scheduled_messages_ui.initialize();
     reminders_overlay_ui.initialize();
+    hover_todos_overlay_ui.initialize();
     popover_menus.initialize();
     left_sidebar_navigation_area_popovers.initialize();
     user_topic_popover.initialize();
@@ -534,6 +551,21 @@ export async function initialize_everything(state_data) {
 
     // Channel folders data must be initialized before left sidebar.
     channel_folders.initialize(state_data.channel_folders);
+    hover_connected_accounts.initialize(state_data.hover_connected_accounts);
+    hover_evidence.initialize();
+    hover_generated_details.initialize();
+    hover_response.initialize();
+    hover_review_request.initialize();
+    hover_suggested_actions.initialize();
+    if (realm.realm_hover_enabled) {
+        hover_todos.initialize();
+    }
+    hover_spaces.initialize(state_data.hover_spaces);
+    hover_all_view.initialize();
+    hover_awareness_view.initialize();
+    hover_editions_view.initialize();
+    hover_source_view.initialize();
+    hover_search_view.initialize();
 
     // These components must be initialized early, because other
     // modules' initialization has not been audited for whether they

@@ -1,5 +1,12 @@
 import * as z from "zod/mini";
 
+import {
+    hover_generated_item_schema,
+    hover_review_request_schema,
+    hover_response_schema,
+    hover_source_provenance_schema,
+} from "./message_store.ts";
+
 const display_recipient_users_schema = z.object({
     id: z.number(),
     email: z.string(),
@@ -54,6 +61,10 @@ export const server_message_schema = z.intersection(
         sender_email: z.string(),
         sender_full_name: z.string(),
         sender_id: z.number(),
+        hover_generated_item: z.optional(hover_generated_item_schema),
+        hover_response: z.optional(hover_response_schema),
+        hover_review_request: z.optional(hover_review_request_schema),
+        hover_source_provenance: z.optional(hover_source_provenance_schema),
         // The web app doesn't use sender_realm_str; ignore.
         // sender_realm_str: z.string(),
         submessages: submessage_schema,

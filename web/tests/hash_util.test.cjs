@@ -31,6 +31,7 @@ const frontend = make_stream({
 stream_data.add_sub_for_tests(frontend);
 
 run_test("hash_util", () => {
+    assert.equal(hash_util.hover_source_url(12, 34), "#hover/space/12/source/34");
     // Test encode_operand and decode_operand
     function encode_decode_operand(operator, operand, expected_val) {
         const encode_result = hash_util.encode_operand({operator, operand});

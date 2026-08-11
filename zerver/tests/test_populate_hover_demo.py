@@ -1,9 +1,24 @@
+import datetime
 from collections import Counter
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import override_settings
 
+from hover.models import (
+    ConnectedAccount,
+    ConnectedAccountGrant,
+    EvidenceLink,
+    GeneratedItem,
+    ModuleInstallation,
+    Source,
+    SourceCapability,
+    Space,
+    SpaceAdministrator,
+    SpaceAttachment,
+    SpaceMembership,
+)
+from hover.publication_contracts import SuggestedActionPayload
 from zerver.lib.test_classes import ZulipTestCase
 from zerver.management.commands.populate_hover_demo import DEMO_POSTS, MODULE_NAMES
 from zerver.models import Message, ScheduledMessage, Stream, Subscription, UserMessage, UserProfile
@@ -28,6 +43,29 @@ class PopulateHoverDemoTest(ZulipTestCase):
         self.assertTrue(stream.invite_only)
         self.assertFalse(stream.history_public_to_subscribers)
         self.assertFalse(stream.is_web_public)
+        self.assertTrue(realm.hover_enabled)
+        space = Space.objects.get(realm=realm, name="AIMTO Events")
+        self.assertEqual(space.state, Space.State.LAUNCHED)
+        self.assertEqual(space.category, stream.folder)
+        self.assertEqual(space.stream, stream)
+        owner = realm.get_human_admin_users().order_by("id").first()
+        assert owner is not None
+        self.assertEqual(space.created_by, owner)
+        self.assertEqual(
+            set(SpaceAdministrator.objects.filter(space=space).values_list("user_id", flat=True)),
+            {owner.id, self.example_user("hamlet").id},
+        )
+        self.assertEqual(
+            dict(
+                SpaceMembership.objects.filter(space=space).values_list(
+                    "user__delivery_email", "role"
+                )
+            ),
+            {
+                owner.delivery_email: SpaceMembership.Role.CONTRIBUTOR,
+                "hamlet@zulip.com": SpaceMembership.Role.SUBSCRIBER,
+            },
+        )
         self.assertIn("source-backed hover updates", stream.description.lower())
         self.assertTrue(
             Subscription.objects.filter(
@@ -44,6 +82,118 @@ class PopulateHoverDemoTest(ZulipTestCase):
             "id"
         )
         self.assertEqual(messages.count(), len(DEMO_POSTS))
+        attachments = SpaceAttachment.objects.filter(space=space).select_related("source__account")
+        self.assertEqual(attachments.count(), 5)
+        self.assertFalse(attachments.exclude(state=SpaceAttachment.State.ACTIVE).exists())
+        source_ids = set(attachments.values_list("source_id", flat=True))
+        self.assert_length(source_ids, 5)
+        self.assertEqual(SourceCapability.objects.filter(source_id__in=source_ids).count(), 5)
+        self.assertEqual(
+            set(
+                SourceCapability.objects.filter(source_id__in=source_ids).values_list(
+                    "capability", flat=True
+                )
+            ),
+            {"message_history"},
+        )
+        account_ids = set(attachments.values_list("source__account_id", flat=True))
+        self.assert_length(account_ids, 3)
+        self.assertFalse(
+            ConnectedAccount.objects.filter(id__in=account_ids)
+            .exclude(
+                approval_state=ConnectedAccount.ApprovalState.APPROVED,
+                health_status=ConnectedAccount.HealthStatus.HEALTHY,
+            )
+            .exists()
+        )
+        self.assertEqual(
+            ConnectedAccountGrant.objects.filter(
+                account_id__in=account_ids,
+                user_id__in=[owner.id, self.example_user("hamlet").id],
+                state=ConnectedAccountGrant.State.ACTIVE,
+                all_selectors=True,
+            ).count(),
+            6,
+        )
+        source_projection = "\n".join(
+            "|".join(fields)
+            for fields in Source.objects.filter(id__in=source_ids)
+            .order_by("id")
+            .values_list("external_ref", "display_name", "external_url")
+        )
+        self.assertNotIn("+60", source_projection)
+        self.assertNotIn("@g.us", source_projection)
+        self.assertNotIn("@lid", source_projection)
+        self.assertTrue(
+            all(
+                len(source_ref) == 36 and source_ref.startswith("src_")
+                for source_ref in Source.objects.filter(id__in=source_ids).values_list(
+                    "external_ref", flat=True
+                )
+            )
+        )
+
+        installations = ModuleInstallation.objects.filter(space=space).select_related(
+            "version__definition"
+        )
+        self.assertEqual(installations.count(), len(MODULE_NAMES))
+        self.assertFalse(installations.exclude(state=ModuleInstallation.State.ENABLED).exists())
+        self.assertEqual(
+            set(installations.values_list("version__definition__stable_key", flat=True)),
+            set(MODULE_NAMES),
+        )
+        self.assertEqual(
+            installations.filter(triggers__supported_trigger__kind="manual").count(), 6
+        )
+        self.assertEqual(installations.filter(bindings__isnull=False).distinct().count(), 6)
+
+        generated_items = GeneratedItem.objects.filter(
+            realm=realm, message__in=messages
+        ).select_related("attachment__source")
+        self.assertEqual(generated_items.count(), len(DEMO_POSTS))
+        self.assertEqual(
+            EvidenceLink.objects.filter(generated_item__in=generated_items).count(),
+            sum(len(post.evidence_keys) for post in DEMO_POSTS),
+        )
+        for post_number, (post, message) in enumerate(
+            zip(DEMO_POSTS, messages, strict=True), start=1
+        ):
+            generated_item = GeneratedItem.objects.get(message=message)
+            self.assertEqual(generated_item.module_key, post.module_key)
+            self.assertEqual(generated_item.module_version, "1.0.0")
+            self.assertEqual(
+                generated_item.publication_id, f"aimto-demo-publication-{post_number:02}"
+            )
+            self.assertEqual(generated_item.idempotency_key, f"aimto-demo-v1-{post_number:02}")
+            self.assertEqual(
+                generated_item.business_identity,
+                f"aimto-demo:{post.module_key}:{post_number:02}",
+            )
+            self.assertEqual(generated_item.lineage_key, generated_item.business_identity)
+            self.assert_length(generated_item.publication_envelope_hash, 64)
+            self.assertEqual(generated_item.payload["contract"], generated_item.output_type)
+            self.assertEqual(generated_item.payload["schema_version"], "1.0")
+            if hasattr(generated_item, "reviewed_payload"):
+                self.assertEqual(generated_item.reviewed_payload, generated_item.payload)
+            self.assertEqual(generated_item.covered_end_at, post.sent_at)
+            self.assertEqual(
+                generated_item.occurred_at, post.sent_at - datetime.timedelta(minutes=5)
+            )
+            self.assertEqual(
+                generated_item.generated_at, post.sent_at - datetime.timedelta(minutes=1)
+            )
+            self.assertEqual(generated_item.published_at, post.sent_at)
+            attachment = generated_item.attachment
+            assert attachment is not None
+            self.assertEqual(
+                attachment.source_id,
+                generated_item.evidence_links.get(position=0).source_id,
+            )
+            self.assertFalse(generated_item.evidence_links.filter(source__isnull=True).exists())
+            self.assertEqual(
+                list(generated_item.evidence_links.values_list("position", flat=True)),
+                list(range(len(post.evidence_keys))),
+            )
         self.assertFalse(messages.filter(search_tsvector__isnull=True).exists())
         self.assertEqual(
             {message.topic_name() for message in messages},
@@ -79,6 +229,11 @@ class PopulateHoverDemoTest(ZulipTestCase):
         self.assertTrue(
             all("Status: Awaiting confirmation" in message.content for message in suggested_actions)
         )
+        for message in suggested_actions:
+            item = GeneratedItem.objects.get(message=message)
+            proposal = SuggestedActionPayload.model_validate(item.payload)
+            self.assertEqual(proposal.contract, "suggested_action")
+            self.assertEqual(item.reviewed_payload, item.payload)
 
         marketing_posts = [
             message for message in messages if message.topic_name() == "Marketing Digest"
@@ -151,6 +306,11 @@ class PopulateHoverDemoTest(ZulipTestCase):
         ).order_by("id")
         self.assertEqual(reminders.count(), 0)
         reminder_ids = list(reminders.values_list("id", flat=True))
+        live_record_ids = {
+            "sources": set(source_ids),
+            "attachments": set(attachments.values_list("id", flat=True)),
+            "installations": set(installations.values_list("id", flat=True)),
+        }
 
         stale_message_id = self.send_stream_message(
             UserProfile.objects.get(realm=realm, delivery_email="hover-ai@hover.test"),
@@ -159,17 +319,36 @@ class PopulateHoverDemoTest(ZulipTestCase):
             "Summary",
             read_by_sender=False,
         )
+        teammate_message_id = self.send_stream_message(
+            self.example_user("hamlet"),
+            "AIMTO Events",
+            "Keep this teammate follow-up when the fixture is refreshed.",
+            "Summary",
+        )
         self.assertEqual(
             Message.objects.filter(realm_id=realm.id, recipient=stream.recipient).count(),
-            len(DEMO_POSTS) + 1,
+            len(DEMO_POSTS) + 2,
         )
 
         call_command("populate_hover_demo", "--realm=zulip", "--viewer-email=hamlet@zulip.com")
         self.assertEqual(
             Message.objects.filter(realm_id=realm.id, recipient=stream.recipient).count(),
-            len(DEMO_POSTS),
+            len(DEMO_POSTS) + 1,
         )
         self.assertFalse(Message.objects.filter(id=stale_message_id).exists())
+        self.assertTrue(Message.objects.filter(id=teammate_message_id).exists())
+        self.assertEqual(
+            set(SpaceAttachment.objects.filter(space=space).values_list("source_id", flat=True)),
+            live_record_ids["sources"],
+        )
+        self.assertEqual(
+            set(SpaceAttachment.objects.filter(space=space).values_list("id", flat=True)),
+            live_record_ids["attachments"],
+        )
+        self.assertEqual(
+            set(ModuleInstallation.objects.filter(space=space).values_list("id", flat=True)),
+            live_record_ids["installations"],
+        )
         self.assertEqual(
             list(
                 ScheduledMessage.objects.filter(

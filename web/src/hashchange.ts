@@ -10,6 +10,10 @@ import * as drafts_overlay_ui from "./drafts_overlay_ui.ts";
 import {Filter} from "./filter.ts";
 import * as hash_parser from "./hash_parser.ts";
 import * as hash_util from "./hash_util.ts";
+import * as hover_awareness_view from "./hover_awareness_view.ts";
+import * as hover_editions_view from "./hover_editions_view.ts";
+import * as hover_search_view from "./hover_search_view.ts";
+import * as hover_source_view from "./hover_source_view.ts";
 import {$t_html} from "./i18n.ts";
 import * as inbox_ui from "./inbox_ui.ts";
 import * as info_overlay from "./info_overlay.ts";
@@ -29,7 +33,7 @@ import * as settings_panel_menu from "./settings_panel_menu.ts";
 import * as settings_toggle from "./settings_toggle.ts";
 import * as sidebar_ui from "./sidebar_ui.ts";
 import * as spectators from "./spectators.ts";
-import {current_user} from "./state_data.ts";
+import {current_user, realm} from "./state_data.ts";
 import * as stream_settings_ui from "./stream_settings_ui.ts";
 import * as ui_report from "./ui_report.ts";
 import * as user_group_edit from "./user_group_edit.ts";
@@ -143,7 +147,11 @@ function show_home_view(narrow_opts?: message_view.ShowMessageViewOpts): void {
     // rendered without a hash.
     switch (user_settings.web_home_view) {
         case "recent": {
-            recent_view_ui.show();
+            if (realm.realm_hover_enabled) {
+                hover_awareness_view.show("team_pulse");
+            } else {
+                recent_view_ui.show();
+            }
             break;
         }
         case "all_messages": {
@@ -152,7 +160,11 @@ function show_home_view(narrow_opts?: message_view.ShowMessageViewOpts): void {
             break;
         }
         case "inbox": {
-            inbox_ui.show();
+            if (realm.realm_hover_enabled) {
+                hover_awareness_view.show("for_you");
+            } else {
+                inbox_ui.show();
+            }
             break;
         }
         default: {
@@ -175,6 +187,14 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
     // Even if the URL bar says #%41%42%43%44, the value here will
     // be #ABCD.
     const hash = window.location.hash.split("/");
+    if (hash[0] !== "#hover") {
+        hover_editions_view.hide();
+        hover_source_view.hide();
+        hover_search_view.hide();
+    }
+    if (hash[0] !== "#inbox" && hash[0] !== "#recent") {
+        hover_awareness_view.hide();
+    }
 
     const narrow_opts: message_view.ShowMessageViewOpts = {
         change_hash: false, // already set
@@ -245,14 +265,26 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
             // for #recent permanently. We show the view and then
             // replace the current URL hash in a way designed to hide
             // this detail in the browser's forward/back session history.
-            recent_view_ui.show();
+            if (realm.realm_hover_enabled) {
+                hover_awareness_view.show("team_pulse");
+            } else {
+                recent_view_ui.show();
+            }
             window.location.replace("#recent");
             break;
         case "#recent":
-            recent_view_ui.show();
+            if (realm.realm_hover_enabled) {
+                hover_awareness_view.show("team_pulse");
+            } else {
+                recent_view_ui.show();
+            }
             break;
         case "#inbox":
-            inbox_ui.show();
+            if (realm.realm_hover_enabled) {
+                hover_awareness_view.show("for_you");
+            } else {
+                inbox_ui.show();
+            }
             break;
         case "#all_messages":
             // "#all_messages" was renamed to "#feed" in 2024. Unlike
@@ -265,6 +297,51 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
         case "#feed":
             show_all_message_view(narrow_opts);
             break;
+        case "#hover": {
+            if (hash.length === 3 && hash[1] === "editions" && hash[2] === "") {
+                hash.pop();
+            }
+            if (hash.length === 2 && hash[1] === "editions" && realm.realm_hover_enabled) {
+                hover_source_view.hide();
+                hover_search_view.hide();
+                hover_editions_view.show();
+                return true;
+            }
+            hover_editions_view.hide();
+            if (hash.length === 3 && hash[1] === "search" && hash[2] === "") {
+                hash.pop();
+            }
+            if (hash.length === 2 && hash[1] === "search") {
+                hover_source_view.hide();
+                hover_search_view.show();
+                return true;
+            }
+            hover_search_view.hide();
+            if (
+                hash.length === 6 &&
+                hash[1] === "space" &&
+                util.is_numeric_string(hash[2]!) &&
+                hash[3] === "source" &&
+                util.is_numeric_string(hash[4]!) &&
+                hash[5] === ""
+            ) {
+                // Accept the canonical trailing-slash form below as well.
+                hash.pop();
+            }
+            if (
+                hash.length !== 5 ||
+                hash[1] !== "space" ||
+                !util.is_numeric_string(hash[2]!) ||
+                hash[3] !== "source" ||
+                !util.is_numeric_string(hash[4]!) ||
+                !hover_source_view.show(Number(hash[2]), Number(hash[4]))
+            ) {
+                hover_source_view.hide();
+                show_home_view(narrow_opts);
+                return false;
+            }
+            return true;
+        }
         case "#keyboard-shortcuts":
         case "#message-formatting":
         case "#search-operators":

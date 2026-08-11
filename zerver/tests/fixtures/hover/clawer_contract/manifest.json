@@ -1,0 +1,11 @@
+{
+  "upstream": "klovr-co/clawer#393-#397",
+  "files": {
+    "whatsapp_digest_v1.json": "50f2745fa09f06a3631ddc2109b32fbdc1bd4a22d057afbcb64ef628d3bd0540",
+    "operational_publications_v1.json": "1f66f7367cf6cea618fbeb88b7eb33bae57a925350c704b3dcec99e5196057d0",
+    "suggested_actions_v1.json": "a75ea9d12bb4bb2d055603a5d3908e53619620a9a77ad80ac2fc2e3909d24d12",
+    "module_publications_v1.json": "e8ae42d89a3426d234647b9e65da2a98a494dd8b34baf6651c57c08b923d4a4f",
+    "personal_editions_v1.json": "2bfdde15198be0d382bb90fc328b73de76dd700f07b3da3234611d09bb61641b",
+    "source_records_v1.json": "5de95923a1f6a8c5e1344cf62aaa4b8af2cd9778737736ba3f9c9732547e0668"
+  }
+}

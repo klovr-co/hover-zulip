@@ -14,6 +14,48 @@ from django.urls.resolvers import URLPattern, URLResolver
 from django.utils.module_loading import import_string
 from django.views.generic import RedirectView
 
+from hover.views_awareness import get_awareness
+from hover.views_connected_accounts import (
+    get_connected_account,
+    list_connected_accounts,
+    revoke_connected_account_grant,
+    update_connected_account,
+    upsert_connected_account_grant,
+)
+from hover.views_integrations import associate_integration_route, detach_integration_route
+from hover.views_modules import (
+    disable_module,
+    install_module,
+    list_module_catalog,
+    rebind_resume_module,
+    upgrade_module,
+)
+from hover.views_personal_editions import personal_editions
+from hover.views_publications import (
+    resolve_disputed_detail_evidence,
+    resolve_generated_item_evidence,
+)
+from hover.views_search import hover_search
+from hover.views_source_records import browse_source_records
+from hover.views_sources import (
+    attach_source,
+    delete_source_evidence,
+    detach_source,
+    discover_sources,
+    preview_source,
+)
+from hover.views_spaces import (
+    add_space_administrator,
+    confirm_space_member,
+    create_space,
+    get_space,
+    launch_space,
+    list_spaces,
+    remove_space_administrator,
+    remove_space_member,
+)
+from hover.views_suggested_actions import decide_suggested_action_view
+from hover.views_todos import list_todos, mutate_todo_view
 from zerver.forms import LoggingSetPasswordForm
 from zerver.lib.integrations import INCOMING_WEBHOOK_INTEGRATIONS
 from zerver.lib.rest import rest_path
@@ -585,6 +627,83 @@ v1_api_and_json_patterns = [
     rest_path("channel_folders/create", POST=create_channel_folder),
     rest_path("channel_folders", GET=get_channel_folders, PATCH=reorder_realm_channel_folders),
     rest_path("channel_folders/<int:channel_folder_id>", PATCH=update_channel_folder),
+    rest_path("hover/spaces", GET=list_spaces, POST=create_space),
+    rest_path("hover/awareness", GET=get_awareness),
+    rest_path("hover/search", POST=hover_search),
+    rest_path("hover/personal-editions", GET=personal_editions),
+    rest_path("hover/spaces/<int:space_id>", GET=get_space),
+    rest_path("hover/spaces/<int:space_id>/members", POST=confirm_space_member),
+    rest_path("hover/spaces/<int:space_id>/members/<int:user_id>", DELETE=remove_space_member),
+    rest_path("hover/spaces/<int:space_id>/launch", POST=launch_space),
+    rest_path("hover/modules", GET=list_module_catalog),
+    rest_path("hover/spaces/<int:space_id>/modules", POST=install_module),
+    rest_path("hover/module-installations/<int:installation_id>/disable", POST=disable_module),
+    rest_path("hover/module-installations/<int:installation_id>/upgrade", POST=upgrade_module),
+    rest_path(
+        "hover/module-installations/<int:installation_id>/rebind-resume",
+        POST=rebind_resume_module,
+    ),
+    rest_path("hover/spaces/<int:space_id>/admins", POST=add_space_administrator),
+    rest_path(
+        "hover/spaces/<int:space_id>/admins/<int:user_id>",
+        DELETE=remove_space_administrator,
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/sources/discover",
+        POST=discover_sources,
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/sources/preview",
+        POST=preview_source,
+    ),
+    rest_path("hover/spaces/<int:space_id>/sources", POST=attach_source),
+    rest_path("hover/spaces/<int:space_id>/sources/<int:attachment_id>", DELETE=detach_source),
+    rest_path(
+        "hover/spaces/<int:space_id>/sources/<int:attachment_id>/evidence",
+        DELETE=delete_source_evidence,
+    ),
+    rest_path("hover/spaces/<int:space_id>/integration-routes", POST=associate_integration_route),
+    rest_path(
+        "hover/spaces/<int:space_id>/integration-routes/<int:route_id>",
+        DELETE=detach_integration_route,
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/sources/<int:attachment_id>/records/browse",
+        POST=browse_source_records,
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/generated-items/<int:generated_item_id>/evidence",
+        POST=resolve_generated_item_evidence,
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/generated-items/<int:generated_item_id>/disputed-details/"
+        "<int:disputed_detail_id>/evidence",
+        GET=resolve_disputed_detail_evidence,
+        POST=resolve_disputed_detail_evidence,
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/generated-items/<int:generated_item_id>/suggested-action/decisions",
+        POST=decide_suggested_action_view,
+    ),
+    rest_path("hover/todos", GET=list_todos),
+    rest_path(
+        "hover/spaces/<int:space_id>/todos/<int:todo_id>/events",
+        POST=mutate_todo_view,
+    ),
+    rest_path("hover/connected_accounts", GET=list_connected_accounts),
+    rest_path(
+        "hover/connected_accounts/<int:account_id>",
+        GET=get_connected_account,
+        PATCH=update_connected_account,
+    ),
+    rest_path(
+        "hover/connected_accounts/<int:account_id>/grants",
+        POST=upsert_connected_account_grant,
+    ),
+    rest_path(
+        "hover/connected_accounts/<int:account_id>/grants/<int:grant_id>",
+        DELETE=revoke_connected_account_grant,
+    ),
     # topic-muting -> zerver.views.user_topics
     # (deprecated and will be removed once clients are migrated to use '/user_topics')
     rest_path("users/me/subscriptions/muted_topics", PATCH=update_muted_topic),

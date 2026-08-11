@@ -169,6 +169,7 @@ export let respond_to_message = (opts: {
         opts.trigger === "message click" && compose_state.composing();
     compose_actions.start({
         message_type: msg_type,
+        message,
         stream_id,
         topic,
         ...(private_message_recipient_ids !== undefined && {private_message_recipient_ids}),

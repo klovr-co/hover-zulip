@@ -111,6 +111,10 @@ export function by_stream_url(stream_id: number): string {
     return internal_url.by_stream_url(stream_id, sub_store.maybe_get_stream_name);
 }
 
+export function hover_source_url(space_id: number, attachment_id: number): string {
+    return `#hover/space/${space_id}/source/${attachment_id}`;
+}
+
 export function channel_url_by_user_setting(channel_id: number): string {
     if (
         user_settings.web_channel_default_view ===

@@ -15,7 +15,12 @@ import * as muted_users from "./muted_users.ts";
 import {page_params} from "./page_params.ts";
 import * as people from "./people.ts";
 import * as resolved_topic from "./resolved_topic.ts";
-import {current_user, narrow_canonical_term_schema, narrow_operator_schema} from "./state_data.ts";
+import {
+    current_user,
+    narrow_canonical_term_schema,
+    narrow_operator_schema,
+    realm,
+} from "./state_data.ts";
 import type {NarrowCanonicalTerm, NarrowTerm, NarrowTermSuggestion} from "./state_data.ts";
 import * as stream_data from "./stream_data.ts";
 import type {StreamSubscription} from "./sub_store.ts";
@@ -1687,7 +1692,9 @@ export class Filter {
                 case "is-starred":
                     return $t({defaultMessage: "Starred messages"});
                 case "is-mentioned":
-                    return $t({defaultMessage: "Daily Brief"});
+                    return realm.realm_hover_enabled
+                        ? $t({defaultMessage: "Daily Brief"})
+                        : $t({defaultMessage: "Mentions"});
                 case "is-dm":
                     return $t({defaultMessage: "Direct message feed"});
                 case "not-is-dm":

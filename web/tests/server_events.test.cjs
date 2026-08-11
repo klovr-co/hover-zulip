@@ -103,6 +103,63 @@ run_test("message_event", ({override}) => {
     assert.ok(inserted);
 });
 
+run_test("message_event preserves Hover workflow metadata", ({override}) => {
+    const generated_item = {
+        id: 7,
+        output_type: "digest",
+        module: {key: "conversation_digest", name: "Conversation Digest", version: "v1"},
+        source_summary: "From Review source",
+        evidence_available: true,
+        evidence_url: "/hover/evidence/7",
+        reviewed_payload: {title: "Reviewed title"},
+        revisions: [],
+        disputed_details: [],
+        suggested_action: null,
+        sources: [],
+        presentation: {
+            label: "Digest",
+            importance: "normal",
+            state: null,
+            occurred_at: null,
+            generated_at: "2026-08-11T00:00:00Z",
+            published_at: "2026-08-11T00:00:00Z",
+            run_reference: "run_0123456789abcdef0123456789abcdef",
+        },
+        lineage: {is_latest: true, history_count: 1, history: []},
+    };
+    const hover_response = {
+        type: "review",
+        clarification_required: false,
+        root_message_id: 42,
+        generated_item,
+    };
+    const hover_review_request = {
+        id: 9,
+        root_message_id: 42,
+        generated_item,
+        field_path: "title",
+        state: "open",
+        target_user_ids: [2],
+    };
+    const event = {
+        type: "message",
+        message: {...message, id: 2, hover_response, hover_review_request},
+        flags: [],
+        local_message_id: "local-hover-review",
+    };
+
+    let inserted;
+    override(message_events, "insert_new_messages", (message_data) => {
+        assert.deepEqual(message_data.raw_messages[0].hover_response, hover_response);
+        assert.deepEqual(message_data.raw_messages[0].hover_review_request, hover_review_request);
+        inserted = true;
+        return message_data.raw_messages;
+    });
+
+    server_events._get_events_success([event]);
+    assert.ok(inserted);
+});
+
 // Start blueslip tests here
 
 const setup = () => {

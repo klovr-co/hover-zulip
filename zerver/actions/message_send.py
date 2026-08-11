@@ -18,6 +18,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import override as override_language
 from django_stubs_ext import WithAnnotations
 
+from hover.integration_capture import capture_integration_message_provenance
 from zerver.actions.uploads import do_claim_attachments
 from zerver.actions.user_topics import (
     bulk_do_set_user_topic_visibility_policy,
@@ -933,6 +934,7 @@ def do_send_messages(
     send_message_requests_maybe_none: Sequence[SendMessageRequest | None],
     *,
     mark_as_read: Sequence[int] = [],
+    post_message_persist_hook: Callable[[Sequence[Message]], None] | None = None,
 ) -> list[SentMessageResult]:
     """See
     https://zulip.readthedocs.io/en/latest/subsystems/sending-messages.html
@@ -949,7 +951,11 @@ def do_send_messages(
     # Save the message receipts in the database
     user_message_flags: dict[int, dict[int, list[str]]] = defaultdict(dict)
 
-    Message.objects.bulk_create(send_request.message for send_request in send_message_requests)
+    messages = [send_request.message for send_request in send_message_requests]
+    Message.objects.bulk_create(messages)
+    capture_integration_message_provenance(messages)
+    if post_message_persist_hook is not None:
+        post_message_persist_hook(messages)
 
     # Claim attachments in message
     for send_request in send_message_requests:
@@ -1217,6 +1223,7 @@ def do_send_messages(
             type="message",
             message=send_request.message.id,
             message_dict=wide_message_dict,
+            message_realm_id=send_request.realm.id,
             presence_idle_user_ids=presence_idle_user_ids,
             online_push_user_ids=list(send_request.online_push_user_ids),
             dm_mention_push_disabled_user_ids=list(send_request.dm_mention_push_disabled_user_ids),
@@ -1478,7 +1485,9 @@ def check_send_message(
     widget_content: str | None = None,
     *,
     skip_stream_access_check: bool = False,
+    allow_hover_response: bool = False,
     read_by_sender: bool = False,
+    post_message_persist_hook: Callable[[Message], None] | None = None,
 ) -> SentMessageResult:
     addressee = Addressee.legacy_build(sender, recipient_type_name, message_to, topic_name)
     message_request = check_message(
@@ -1494,10 +1503,16 @@ def check_send_message(
         sender_queue_id,
         widget_content,
         skip_stream_access_check=skip_stream_access_check,
+        allow_hover_response=allow_hover_response,
     )
     return do_send_messages(
         [message_request],
         mark_as_read=[sender.id] if read_by_sender else [],
+        post_message_persist_hook=(
+            None
+            if post_message_persist_hook is None
+            else lambda messages: post_message_persist_hook(messages[0])
+        ),
     )[0]
 
 
@@ -1763,6 +1778,7 @@ def check_message(
     email_gateway: bool = False,
     *,
     skip_stream_access_check: bool = False,
+    allow_hover_response: bool = False,
     message_type: int = Message.MessageType.NORMAL,
     mention_backend: MentionBackend | None = None,
     limit_unread_user_ids: set[int] | None = None,
@@ -1815,7 +1831,7 @@ def check_message(
 
         user_group_membership_details = UserGroupMembershipDetails(user_recursive_group_ids=None)
         system_groups_name_dict = get_realm_system_groups_name_dict(stream.realm_id)
-        if not skip_stream_access_check:
+        if not skip_stream_access_check and not allow_hover_response:
             access_stream_for_send_message(
                 sender=sender,
                 stream=stream,
@@ -1824,7 +1840,7 @@ def check_message(
                 user_group_membership_details=user_group_membership_details,
                 system_groups_name_dict=system_groups_name_dict,
             )
-        else:
+        elif skip_stream_access_check:
             # Defensive assertion - the only currently supported use case
             # for this option is for outgoing webhook bots and since this
             # is security-sensitive code, it's beneficial to ensure nothing

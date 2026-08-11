@@ -17,6 +17,7 @@ import * as compose_validate from "./compose_validate.ts";
 import * as drafts from "./drafts.ts";
 import * as echo from "./echo.ts";
 import type {PostMessageAPIData} from "./echo.ts";
+import * as hover_response from "./hover_response.ts";
 import * as message_events from "./message_events.ts";
 import type {LocalMessage} from "./message_helper.ts";
 import * as message_viewport from "./message_viewport.ts";
@@ -44,6 +45,10 @@ export type SendMessageData = {
     resend?: boolean;
     locally_echoed?: boolean;
     draft_id: string;
+    hover_generated_item_id?: number;
+    hover_response_type?: "reply" | "review";
+    hover_review_field?: string;
+    hover_review_value?: string;
 } & (
     | {
           type: "stream";
@@ -119,6 +124,7 @@ export function clear_compose_box(): void {
     compose_banner.clear_uploads();
     compose_ui.hide_compose_spinner();
     scheduled_messages.reset_selected_schedule_timestamp();
+    hover_response.clear();
     $(".needs-empty-compose").removeClass("disabled-on-hover");
 }
 
@@ -214,6 +220,7 @@ export let send_message = (): void => {
             stream_id,
             to: JSON.stringify([stream_id]),
             draft_id,
+            ...hover_response.get_request_data(),
         };
     }
 

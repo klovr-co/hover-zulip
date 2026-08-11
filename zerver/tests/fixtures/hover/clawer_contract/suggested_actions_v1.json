@@ -1,0 +1,39 @@
+{
+  "source_key": "fixture-actions-group@g.us",
+  "local_date": "2026-08-10",
+  "timezone": "UTC",
+  "producer_key": "suggested_actions",
+  "producer_name": "Suggested Actions",
+  "producing_version": "prompt:journal.group_summary:v2",
+  "messages": [
+    {
+      "id": 82001,
+      "whatsapp_id": "fixture-action-a",
+      "sender_phone": "+15550000001",
+      "sender_name": "Alex",
+      "timestamp": "2026-08-10T08:00:00+00:00",
+      "body": "I will send the venue plan by 2026-08-12."
+    },
+    {
+      "id": 82002,
+      "whatsapp_id": "fixture-action-b",
+      "sender_phone": "+15550000002",
+      "sender_name": "Sam",
+      "timestamp": "2026-08-10T08:03:00+00:00",
+      "body": "Please attach the safety notes too."
+    },
+    {
+      "id": 82003,
+      "whatsapp_id": "fixture-action-c",
+      "sender_phone": "+15550000003",
+      "sender_name": "Taylor",
+      "timestamp": "2026-08-10T08:06:00+00:00",
+      "body": "Someone should confirm the loading entrance."
+    }
+  ],
+  "complete": "<what_happened>Venue preparation continued.</what_happened><news></news><todos><suggested_action><wording>Send the venue plan with the safety notes</wording><proposed_assignee_phone>+15550000001</proposed_assignee_phone><proposed_due_date>2026-08-12</proposed_due_date><source_quote>I will send the venue plan by 2026-08-12.</source_quote><source wa_message_id=\"fixture-action-a\"/><source wa_message_id=\"fixture-action-b\"/></suggested_action></todos>",
+  "unassigned": "<what_happened>Access needs confirmation.</what_happened><news></news><todos><suggested_action><wording>Confirm the loading entrance</wording><proposed_due_date>2026-08-13</proposed_due_date><source_quote>Someone should confirm the loading entrance.</source_quote><source wa_message_id=\"fixture-action-c\"/></suggested_action></todos>",
+  "undated": "<what_happened>Safety notes remain.</what_happened><news></news><todos><suggested_action><wording>Attach the safety notes</wording><proposed_assignee_phone>+15550000002</proposed_assignee_phone><source_quote>Please attach the safety notes too.</source_quote><source wa_message_id=\"fixture-action-b\"/></suggested_action></todos>",
+  "malformed": "<what_happened>A malformed candidate follows.</what_happened><news></news><todos><suggested_action><wording>Guess an unsupported deadline</wording><proposed_due_date>next week</proposed_due_date><source_quote>We can do it next week.</source_quote><source wa_message_id=\"fixture-action-c\"/></suggested_action></todos>",
+  "duplicate": "<what_happened>The same proposal was repeated.</what_happened><news></news><todos><suggested_action><wording>Attach the safety notes</wording><proposed_assignee_phone>+15550000002</proposed_assignee_phone><source_quote>Please attach the safety notes too.</source_quote><source wa_message_id=\"fixture-action-b\"/></suggested_action><suggested_action><wording>Attach the safety notes</wording><proposed_assignee_phone>+15550000002</proposed_assignee_phone><source_quote>Please attach the safety notes too.</source_quote><source wa_message_id=\"fixture-action-b\"/></suggested_action></todos>"
+}

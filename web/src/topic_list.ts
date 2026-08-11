@@ -422,9 +422,9 @@ export class TopicListWidget {
     }
 
     build(spinner = false, formatter: (conversation: TopicInfo) => ListInfoNode): void {
-        // AIMTO's six AI modules are native topics presented in their own
-        // purpose-built topic navigator, so avoid rendering a duplicate
-        // standard topic list immediately above it.
+        // Installed Hover modules are native topics presented in their own
+        // navigator, so avoid rendering a duplicate standard topic list
+        // immediately above it.
         if (!this.for_modal && this.$stream_li.find(".hover-ai-modules").length > 0) {
             this.remove();
             this.prior_dom = undefined;

@@ -775,6 +775,7 @@ export const all_group_setting_labels = {
             defaultMessage: "Who can create web-public channels",
         }),
         can_create_private_channel_group: $t({defaultMessage: "Who can create private channels"}),
+        can_create_spaces_group: $t({defaultMessage: "Who can create Spaces"}),
         can_add_subscribers_group: $t({defaultMessage: "Who can subscribe others to channels"}),
         direct_message_permission_group: $t({
             defaultMessage: "Who can authorize a direct message conversation",
@@ -866,6 +867,11 @@ export const realm_group_permission_settings: {
         subsection_heading: $t({defaultMessage: "Joining the organization"}),
         subsection_key: "org-join-settings",
         settings: ["can_invite_users_group", "create_multiuse_invite_group"],
+    },
+    {
+        subsection_heading: $t({defaultMessage: "Hover permissions"}),
+        subsection_key: "org-hover-permissions",
+        settings: ["can_create_spaces_group"],
     },
     {
         subsection_heading: $t({defaultMessage: "Channel permissions"}),

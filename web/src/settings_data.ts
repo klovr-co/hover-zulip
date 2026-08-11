@@ -129,6 +129,17 @@ export function user_can_create_private_streams(): boolean {
     );
 }
 
+export function user_can_create_spaces(): boolean {
+    return (
+        realm.realm_hover_enabled &&
+        user_has_permission_for_group_setting(
+            realm.realm_can_create_spaces_group,
+            "can_create_spaces_group",
+            "realm",
+        )
+    );
+}
+
 export function user_can_create_public_streams(): boolean {
     return user_has_permission_for_group_setting(
         realm.realm_can_create_public_channel_group,

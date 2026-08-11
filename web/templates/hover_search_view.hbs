@@ -1,0 +1,112 @@
+<div class="hover-search-shell">
+    <header class="hover-search-header">
+        <p class="hover-search-eyebrow">{{t "Home"}}</p>
+        <h1>{{t "Search"}}</h1>
+        <p>{{t
+                "Find posts and generated updates first, with authorized Source evidence available below."
+            }}</p>
+        <form id="hover-global-search-form" role="search">
+            <label for="hover-global-search-input">{{t "Search Hover knowledge"}}</label>
+            <div class="hover-global-search-controls">
+                <input
+                    id="hover-global-search-input"
+                    type="search"
+                    value="{{query}}"
+                    maxlength="100"
+                    autocomplete="off"
+                    placeholder="{{t 'Search your Spaces'}}"
+                />
+                <button type="submit" class="button rounded">{{t "Search"}}</button>
+            </div>
+        </form>
+        <div class="hover-search-scope-note">
+            <i class="zulip-icon zulip-icon-lock" aria-hidden="true"></i>
+            {{t "Only confirmed Spaces you can access are searched."}}
+        </div>
+    </header>
+
+    <div class="hover-search-status" role="status" aria-live="polite">{{status}}</div>
+
+    {{#if has_query}}
+        <section class="hover-search-section" aria-labelledby="hover-search-knowledge-heading">
+            <div class="hover-search-section-heading">
+                <div>
+                    <p class="hover-search-eyebrow">{{t "Priority results"}}</p>
+                    <h2 id="hover-search-knowledge-heading">{{t "Knowledge"}}</h2>
+                </div>
+                <span>{{knowledge_count}}</span>
+            </div>
+            {{#if has_knowledge}}
+                <ol class="hover-search-result-list">
+                    {{#each knowledge}}
+                        <li class="hover-search-result hover-search-knowledge-result">
+                            <div class="hover-search-result-meta">
+                                <span class="hover-search-kind-badge">{{kind_label}}</span>
+                                <span>{{space.name}}</span>
+                                <span aria-hidden="true">&middot;</span>
+                                <span>{{topic}}</span>
+                                <time datetime="{{timestamp}}">{{display_time}}</time>
+                            </div>
+                            <span class="hover-search-result-byline">{{byline}}</span>
+                            <div class="hover-search-result-content">{{{rendered_content}}}</div>
+                            <a class="hover-search-result-link" href="{{url}}">{{t
+                                    "Open live post"
+                                }}</a>
+                            <button
+                                type="button"
+                                class="button-reset-style hover-search-save-button"
+                                data-message-id="{{message_id}}"
+                                aria-pressed="{{#if saved}}true{{else}}false{{/if}}"
+                            >
+                                <i class="zulip-icon {{#if saved}}zulip-icon-star-filled{{else}}zulip-icon-star{{/if}}" aria-hidden="true"></i>
+                                {{#if saved}}{{t "Remove from Saved"}}{{else}}{{t "Save"}}{{/if}}
+                            </button>
+                        </li>
+                    {{/each}}
+                </ol>
+            {{else}}
+                <p class="hover-search-empty">{{t "No human or generated posts match."}}</p>
+            {{/if}}
+        </section>
+
+        <section class="hover-search-section hover-search-sources-section" aria-labelledby="hover-search-sources-heading">
+            <div class="hover-search-section-heading">
+                <div>
+                    <p class="hover-search-eyebrow">{{t "Exact evidence"}}</p>
+                    <h2 id="hover-search-sources-heading">{{t "Sources"}}</h2>
+                </div>
+                <span>{{source_count}}</span>
+            </div>
+            <p class="hover-search-section-description">{{t
+                    "Read-only records from attached Sources. Source evidence cannot be saved in this pilot."
+                }}</p>
+            {{#if has_sources}}
+                <ol class="hover-search-result-list">
+                    {{#each sources}}
+                        <li class="hover-search-result hover-search-source-result">
+                            <div class="hover-search-result-meta">
+                                <span class="hover-search-kind-badge">{{t "Source"}}</span>
+                                <span>{{space.name}}</span>
+                                <span aria-hidden="true">&middot;</span>
+                                <span>{{source.display_name}}</span>
+                                <time datetime="{{record.timestamp}}">{{display_time}}</time>
+                            </div>
+                            <span class="hover-search-result-byline">{{record.sender_display_name}}</span>
+                            <div class="hover-search-source-content">
+                                {{#if record.content.text}}<p>{{record.content.text}}</p>{{/if}}
+                                {{#if record.content.voice_transcript}}<p>{{record.content.voice_transcript}}</p>{{/if}}
+                                {{#if record.content.media_description}}<p>{{record.content.media_description}}</p>{{/if}}
+                            </div>
+                            <span class="hover-search-readonly-label">
+                                <i class="zulip-icon zulip-icon-lock" aria-hidden="true"></i>
+                                {{t "Read-only evidence"}}
+                            </span>
+                        </li>
+                    {{/each}}
+                </ol>
+            {{else}}
+                <p class="hover-search-empty">{{t "No Source records match."}}</p>
+            {{/if}}
+        </section>
+    {{/if}}
+</div>

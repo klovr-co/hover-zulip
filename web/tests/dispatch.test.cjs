@@ -25,6 +25,7 @@ const alert_words_ui = mock_esm("../src/alert_words_ui");
 const attachments_ui = mock_esm("../src/attachments_ui");
 const audible_notifications = mock_esm("../src/audible_notifications");
 const bot_data = mock_esm("../src/bot_data");
+const channel = mock_esm("../src/channel");
 const compose_pm_pill = mock_esm("../src/compose_pm_pill");
 const {electron_bridge} = mock_esm("../src/electron_bridge", {
     electron_bridge: {},
@@ -33,10 +34,12 @@ const theme = mock_esm("../src/theme");
 const emoji_frequency = mock_esm("../src/emoji_frequency");
 const emoji_picker = mock_esm("../src/emoji_picker");
 const gear_menu = mock_esm("../src/gear_menu");
+mock_esm("../src/hover_awareness_view", {handle_realtime_change: noop});
 mock_esm("../src/inbox_ui", {
     complete_rerender: noop,
 });
 const information_density = mock_esm("../src/information_density");
+mock_esm("../src/hover_search_view", {handle_space_event: noop});
 const linkifiers = mock_esm("../src/linkifiers");
 const compose_recipient = mock_esm("../src/compose_recipient");
 mock_esm("../src/compose_validate", {
@@ -72,6 +75,9 @@ const scheduled_messages_ui = mock_esm("../src/scheduled_messages_ui");
 const scroll_bar = mock_esm("../src/scroll_bar");
 const settings_account = mock_esm("../src/settings_account");
 const settings_bots = mock_esm("../src/settings_bots");
+mock_esm("../src/settings_connected_accounts", {
+    rerender: noop,
+});
 const settings_data = mock_esm("../src/settings_data");
 const settings_emoji = mock_esm("../src/settings_emoji");
 const settings_exports = mock_esm("../src/settings_exports");
@@ -156,6 +162,8 @@ page_params.test_suite = false;
 const alert_words = zrequire("alert_words");
 const channel_folders = zrequire("channel_folders");
 const emoji = zrequire("emoji");
+const hover_connected_accounts = zrequire("hover_connected_accounts");
+const hover_spaces = zrequire("hover_spaces");
 const message_store = zrequire("message_store");
 const people = zrequire("people");
 const pm_conversations = zrequire("pm_conversations");
@@ -704,6 +712,102 @@ run_test("realm settings", ({override}) => {
 
     let event = event_fixtures.realm__update__invite_required;
     test_realm_boolean(event, "realm_invite_required");
+
+    const accessible_space = {
+        id: 1,
+        name: "Launch readiness",
+        description: "",
+        state: "setup",
+        category: {id: 10, name: "Programs"},
+        created_by_id: test_user.user_id,
+        stream_id: null,
+        attachments: [],
+        module_installations: [],
+        module_catalog: [],
+        administrators: [{user_id: test_user.user_id, full_name: test_user.full_name}],
+        memberships: [
+            {
+                id: 2,
+                user_id: test_user.user_id,
+                full_name: test_user.full_name,
+                role: "contributor",
+                is_administrator: true,
+            },
+        ],
+        membership_suggestions: [
+            {
+                id: 3,
+                user_id: 99,
+                full_name: "Observed teammate",
+                suggested_role: "subscriber",
+                state: "pending",
+                match_basis: "verified_email",
+            },
+        ],
+    };
+    const accessible_connected_account = {
+        id: 2,
+        provider_key: "whatsapp",
+        provider_name: "WhatsApp",
+        external_account_id: "d38c68c4-d70f-44ec-a17e-c7c845f91c03",
+        display_name: "Founder conversations",
+        connection_kind: "remote_studio",
+        incoming_webhook_bot_id: null,
+        created_by_id: test_user.user_id,
+        owner_id: test_user.user_id,
+        approval_state: "pending",
+        health_status: "unknown",
+        health_checked_at: null,
+    };
+    override(navigation_views, "set_hover_enabled", noop);
+    override(stream_list, "update_streams_sidebar", noop);
+    let get_spaces_calls = 0;
+    let get_connected_accounts_calls = 0;
+    override(channel, "get", (options) => {
+        if (options.url === "/json/hover/spaces") {
+            get_spaces_calls += 1;
+            options.success({spaces: [accessible_space]});
+            return;
+        }
+        assert.equal(options.url, "/json/hover/connected_accounts");
+        get_connected_accounts_calls += 1;
+        options.success({
+            connected_accounts: [accessible_connected_account],
+            connected_account_grants: [],
+        });
+    });
+
+    // An already-loaded Space remains available across a disable/enable cycle.
+    hover_spaces.initialize({hover_spaces: [accessible_space]});
+    override(realm, "realm_hover_enabled", true);
+    dispatch({type: "realm", op: "update", property: "hover_enabled", value: false});
+    assert.equal(get_spaces_calls, 0);
+    assert.equal(hover_spaces.get_by_id(accessible_space.id), accessible_space);
+    dispatch({type: "realm", op: "update", property: "hover_enabled", value: true});
+    assert.equal(get_spaces_calls, 1);
+    assert.equal(get_connected_accounts_calls, 1);
+    assert.deepEqual(
+        hover_connected_accounts.get_account(accessible_connected_account.id),
+        accessible_connected_account,
+    );
+    assert.deepEqual(hover_spaces.get_by_id(accessible_space.id), accessible_space);
+
+    // A page loaded while Hover was disabled starts empty; enabling refetches the
+    // user's authorized Spaces and converges to the enabled initial state.
+    hover_spaces.initialize({hover_spaces: []});
+    hover_connected_accounts.initialize({
+        hover_connected_accounts: [],
+        hover_connected_account_grants: [],
+    });
+    override(realm, "realm_hover_enabled", false);
+    dispatch({type: "realm", op: "update", property: "hover_enabled", value: true});
+    assert.equal(get_spaces_calls, 2);
+    assert.equal(get_connected_accounts_calls, 2);
+    assert.deepEqual(hover_spaces.get_by_id(accessible_space.id), accessible_space);
+    assert.deepEqual(
+        hover_connected_accounts.get_account(accessible_connected_account.id),
+        accessible_connected_account,
+    );
 
     event = event_fixtures.realm__update__want_advertise_in_communities_directory;
     test_realm_boolean(event, "realm_want_advertise_in_communities_directory");
@@ -1673,6 +1777,45 @@ run_test("user_status", ({override}) => {
         const status_text = user_status.get_status_text(test_user.user_id);
         assert.equal(status_text, "out to lunch");
     }
+});
+
+run_test("hover connected account events", () => {
+    const account = {
+        id: 81,
+        provider_key: "whatsapp",
+        provider_name: "WhatsApp",
+        external_account_id: "d38c68c4-d70f-44ec-a17e-c7c845f91c03",
+        display_name: "Founder conversations",
+        connection_kind: "remote_studio",
+        incoming_webhook_bot_id: null,
+        created_by_id: 10,
+        owner_id: 10,
+        approval_state: "approved",
+        health_status: "healthy",
+        health_checked_at: null,
+    };
+    const grant = {
+        id: 91,
+        account_id: account.id,
+        user_id: 20,
+        state: "active",
+        all_selectors: false,
+        selectors: [
+            {
+                selector_type: "whatsapp_group",
+                source_ref: "src_0123456789abcdef0123456789abcdef",
+                display_name: "Leadership group",
+            },
+        ],
+    };
+    hover_connected_accounts.initialize({
+        hover_connected_accounts: [],
+        hover_connected_account_grants: [],
+    });
+    dispatch({type: "hover_connected_account", op: "account_add", account});
+    dispatch({type: "hover_connected_account", op: "grant_upsert", grant});
+    assert.equal(hover_connected_accounts.get_account(account.id), account);
+    assert.deepEqual(hover_connected_accounts.get_grants_for_account(account.id), [grant]);
 });
 
 run_test("realm_export", ({override}) => {

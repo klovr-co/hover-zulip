@@ -481,6 +481,7 @@ def do_update_embedded_data(
     update_message_cache([message])
     event: dict[str, Any] = {
         "type": "update_message",
+        "message_realm_id": user_profile.realm_id,
         "user_id": None,
         "edit_timestamp": datetime_to_timestamp(timezone_now()),
         "message_id": message.id,
@@ -864,6 +865,7 @@ def do_update_message(
 
     event: dict[str, Any] = {
         "type": "update_message",
+        "message_realm_id": user_profile.realm_id,
         "user_id": user_profile.id,
         "edit_timestamp": datetime_to_timestamp(timestamp),
         "message_id": target_message.id,
