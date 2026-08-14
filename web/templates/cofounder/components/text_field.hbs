@@ -1,0 +1,13 @@
+<div class="cf-field{{#if error}} cf-field--error{{/if}}{{#if custom_classes}} {{custom_classes}}{{/if}}">
+    <label class="cf-field__label" for="{{id}}">
+        {{label}}{{#if required}} <span class="cf-field__required" aria-hidden="true">*</span>{{/if}}
+    </label>
+    <input class="cf-field__control" id="{{id}}"{{#if name}} name="{{name}}"{{/if}} type="{{#if type}}{{type}}{{else}}text{{/if}}"{{#if value}} value="{{value}}"{{/if}}{{#if placeholder}} placeholder="{{placeholder}}"{{/if}}{{#if autocomplete}} autocomplete="{{autocomplete}}"{{/if}}{{#if required}} required aria-required="true"{{/if}}{{#if disabled}} disabled{{/if}}{{#if error}} aria-invalid="true" aria-describedby="{{id}}-error"{{else}}{{#if hint}} aria-describedby="{{id}}-hint"{{/if}}{{/if}}>
+    {{#if error}}
+    <p class="cf-field__error" id="{{id}}-error">{{error}}</p>
+    {{else}}
+        {{#if hint}}
+    <p class="cf-field__hint" id="{{id}}-hint">{{hint}}</p>
+        {{/if}}
+    {{/if}}
+</div>

@@ -116,7 +116,7 @@ export function toggle_color_picker_popover(
     stream_id: number,
 ): void {
     popover_menus.toggle_popover_menu(target, {
-        theme: "popover-menu",
+        theme: "cofounder-menu",
         placement: "right",
         popperOptions: {
             modifiers: [

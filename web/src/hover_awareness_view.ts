@@ -8,9 +8,9 @@ import * as channel from "./channel.ts";
 import * as hover_awareness_state from "./hover_awareness_state.ts";
 import {$t} from "./i18n.ts";
 import * as inbox_ui from "./inbox_ui.ts";
+import {hover_generated_item_schema} from "./message_store.ts";
 import * as message_view_header from "./message_view_header.ts";
 import * as people from "./people.ts";
-import {hover_generated_item_schema} from "./message_store.ts";
 import * as recent_view_ui from "./recent_view_ui.ts";
 
 const surface_schema = z.enum(["for_you", "team_pulse"]);
@@ -85,13 +85,12 @@ function render(): void {
             oldest_history_message_id === undefined
                 ? message_url
                 : `#narrow/channel/${item.stream_id}/topic/${encodeURIComponent(item.topic)}/near/${oldest_history_message_id}`;
-        const safe_module_key = generated.module.key.replaceAll(/[^a-zA-Z0-9_-]/g, "-");
         const todo = generated.suggested_action?.todo;
         return {
             ...item,
             card_class: item.is_unread
-                ? `hover-awareness-card hover-generated-update hover-awareness-card--unread hover-module--${safe_module_key}`
-                : `hover-awareness-card hover-generated-update hover-module--${safe_module_key}`,
+                ? "cf-awareness-card cf-awareness-card--generated cf-awareness-card--unread"
+                : "cf-awareness-card cf-awareness-card--generated",
             avatar_url: people.small_avatar_url_for_user_id(item.sender_id),
             display_time: new Intl.DateTimeFormat(undefined, {
                 dateStyle: "medium",
@@ -101,6 +100,11 @@ function render(): void {
             history_url,
             output_label: generated.presentation.label,
             importance: generated.presentation.importance,
+            importance_tone:
+                generated.presentation.importance === "high" ||
+                generated.presentation.importance === "urgent"
+                    ? "danger"
+                    : undefined,
             source_summary: generated.source_summary,
             sources: generated.sources,
             reason_labels: item.reasons
@@ -123,7 +127,7 @@ function render(): void {
             todo_due_date: todo?.due_date,
         };
     });
-    $("#hover-awareness-view").html(
+    $("#cf-awareness-view").html(
         render_hover_awareness_view({
             title: for_you ? $t({defaultMessage: "For You"}) : $t({defaultMessage: "Team Pulse"}),
             status,
@@ -189,8 +193,8 @@ export function show(surface: AwarenessSurface): void {
     hover_awareness_state.set_surface(surface);
     inbox_ui.hide();
     recent_view_ui.hide();
-    $("#hover-source-view, #message_feed_container, #compose").hide();
-    $("#hover-awareness-view").show();
+    $("#cf-source-view, #message_feed_container, #compose").hide();
+    $("#cf-awareness-view").show();
     message_view_header.render_title_area();
     if (surface !== current_surface) {
         current_surface = surface;
@@ -213,13 +217,13 @@ export function hide(): void {
     items = [];
     status = "";
     show_retry = false;
-    $("#hover-awareness-view").hide().empty();
+    $("#cf-awareness-view").hide().empty();
     $("#message_feed_container, #compose").show();
     message_view_header.render_title_area();
 }
 
 export function initialize(): void {
-    $("body").on("click", "#hover-awareness-retry", () => {
+    $("body").on("click", "#cf-awareness-retry", () => {
         load();
     });
 }

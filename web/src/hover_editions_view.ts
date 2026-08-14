@@ -59,12 +59,12 @@ type EditionKind = "morning" | "end_of_day";
 type ViewMode = "all" | "focus";
 
 const tab_ids: Record<EditionKind, string> = {
-    morning: "hover-edition-tab-morning",
-    end_of_day: "hover-edition-tab-end-of-day",
+    morning: "cf-edition-tab-morning",
+    end_of_day: "cf-edition-tab-end-of-day",
 };
 const panel_ids: Record<EditionKind, string> = {
-    morning: "hover-edition-panel-morning",
-    end_of_day: "hover-edition-panel-end-of-day",
+    morning: "cf-edition-panel-morning",
+    end_of_day: "cf-edition-panel-end-of-day",
 };
 
 const empty_response: EditionsResponse = {
@@ -136,7 +136,7 @@ function render({
     );
     slide_index = Math.min(slide_index, Math.max(slides.length - 1, 0));
     const current_slide = slides[slide_index];
-    $("#hover-editions-view").html(
+    $("#cf-editions-view").html(
         render_hover_editions_view({
             status,
             show_retry,
@@ -169,7 +169,7 @@ function render({
         }),
     );
     if (focus_carousel && view_mode === "focus" && current_slide !== undefined) {
-        $(".hover-edition-carousel").trigger("focus");
+        $(".cf-edition-carousel").trigger("focus");
     } else if (focus_tab !== undefined) {
         $(`#${tab_ids[focus_tab]}`).trigger("focus");
     }
@@ -248,9 +248,9 @@ export function show(): void {
     inbox_ui.hide();
     recent_view_ui.hide();
     $(
-        "#hover-source-view, #hover-awareness-view, #hover-search-view, #message_feed_container, #compose",
+        "#cf-source-view, #cf-awareness-view, #cf-global-search-view, #message_feed_container, #compose",
     ).hide();
-    $("#hover-editions-view").show();
+    $("#cf-editions-view").show();
     left_sidebar_navigation_area.select_top_left_corner_item(".top_left_daily_brief");
     if (!loaded) {
         load();
@@ -266,7 +266,7 @@ export function hide(): void {
     visible = false;
     request?.abort();
     request_generation += 1;
-    $("#hover-editions-view").hide();
+    $("#cf-editions-view").hide();
     $("#message_feed_container, #compose").show();
 }
 
@@ -278,14 +278,14 @@ export function handle_access_change(): void {
 }
 
 export function initialize(): void {
-    $("body").on("click", ".hover-edition-tab", (event) => {
+    $("body").on("click", ".cf-edition-tab", (event) => {
         const edition = $(event.currentTarget).attr("data-edition");
         if (edition !== "morning" && edition !== "end_of_day") {
             return;
         }
         select_edition(edition, {focus_tab: true});
     });
-    $("body").on("keydown", ".hover-edition-tab", (event) => {
+    $("body").on("keydown", ".cf-edition-tab", (event) => {
         const edition = $(event.currentTarget).attr("data-edition");
         if (edition !== "morning" && edition !== "end_of_day") {
             return;
@@ -312,22 +312,22 @@ export function initialize(): void {
         event.preventDefault();
         select_edition(next_edition, {focus_tab: true});
     });
-    $("body").on("click", "#hover-edition-focus-view", () => {
+    $("body").on("click", "#cf-edition-focus-view", () => {
         view_mode = "focus";
         slide_index = 0;
         render({focus_carousel: true});
     });
-    $("body").on("click", "#hover-edition-view-all", () => {
+    $("body").on("click", "#cf-edition-view-all", () => {
         view_mode = "all";
         render();
     });
-    $("body").on("click", "#hover-edition-previous", () => {
+    $("body").on("click", "#cf-edition-previous", () => {
         move_slide(-1);
     });
-    $("body").on("click", "#hover-edition-next", () => {
+    $("body").on("click", "#cf-edition-next", () => {
         move_slide(1);
     });
-    $("body").on("keydown", ".hover-edition-carousel", (event) => {
+    $("body").on("keydown", ".cf-edition-carousel", (event) => {
         if (event.key === "ArrowLeft") {
             event.preventDefault();
             move_slide(-1);
@@ -336,7 +336,7 @@ export function initialize(): void {
             move_slide(1);
         }
     });
-    $("body").on("click", "#hover-edition-retry", load);
+    $("body").on("click", "#cf-edition-retry", load);
 }
 
 export const test = {

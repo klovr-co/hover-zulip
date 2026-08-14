@@ -106,12 +106,12 @@ stream_data.add_sub_for_tests(stream);
 function set_message_for_message_content($content, value) {
     // no message row found
     if (value === undefined) {
-        $content.set_closest_results(".message_row", []);
+        $content.set_closest_results(".cf-message-item", []);
         return;
     }
     // message row found
     const $message_row = $.create(".message-row");
-    $content.set_closest_results(".message_row", $message_row);
+    $content.set_closest_results(".cf-message-item", $message_row);
     $message_row.set_closest_results(".overlay-message-row", []);
     const message_id = 100;
     rows.id = ($message_row_) => {

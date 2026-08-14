@@ -78,7 +78,7 @@ export function toggle_user_group_info_popover(
     popover_menus.toggle_popover_menu(
         element,
         {
-            theme: "popover-menu",
+            theme: "cofounder-menu",
             placement: "right",
             popperOptions: {
                 modifiers: [
@@ -153,7 +153,7 @@ export function register_click_handlers(): void {
         }
 
         const $elt = $(this);
-        const $row = $elt.closest(".message_row");
+        const $row = $elt.closest(".cf-message-item");
         const message_id = rows.id($row);
 
         assert(message_lists.current !== undefined);
@@ -189,13 +189,17 @@ export function register_click_handlers(): void {
     );
     // Note: Message feeds and drafts have their own direct event listeners
     // that run before this one and call stopPropagation.
-    $("body").on("click", ".messagebox .user-group-mention", function (this: HTMLElement, e) {
-        e.stopPropagation();
-        if (mouse_drag.is_drag(e)) {
-            return;
-        }
-        toggle_user_group_info_popover(this, undefined);
-    });
+    $("body").on(
+        "click",
+        ".cf-message-item__frame .user-group-mention",
+        function (this: HTMLElement, e) {
+            e.stopPropagation();
+            if (mouse_drag.is_drag(e)) {
+                return;
+            }
+            toggle_user_group_info_popover(this, undefined);
+        },
+    );
 
     $("body").on("click", ".view_user_group", function (this: HTMLElement, e) {
         e.preventDefault();

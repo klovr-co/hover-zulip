@@ -1558,7 +1558,7 @@ export function rewire_format_text(value: typeof format_text): void {
 export function hide_compose_spinner(): void {
     compose_spinner_visible = false;
     $(".compose-submit-button .loader").hide();
-    $(".compose-submit-button .zulip-icon-send").show();
+    $(".compose-submit-button .cf-composer__send-icon").show();
     $(".compose-submit-button").removeClass("compose-button-disabled");
 }
 
@@ -1566,7 +1566,7 @@ export function show_compose_spinner(): void {
     compose_spinner_visible = true;
     // Always use white spinner.
     loading.show_button_spinner($(".compose-submit-button .loader"), true);
-    $(".compose-submit-button .zulip-icon-send").hide();
+    $(".compose-submit-button .cf-composer__send-icon").hide();
     $(".compose-submit-button").addClass("compose-button-disabled");
 }
 

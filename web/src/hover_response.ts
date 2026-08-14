@@ -13,9 +13,9 @@ let response_type: ResponseType = "reply";
 export function clear(): void {
     generated_item_id = undefined;
     response_type = "reply";
-    $("#hover-response-controls").prop("hidden", true);
-    $("#hover-review-field").val("");
-    $("#hover-review-value").val("");
+    $("#cf-review-composer-controls").prop("hidden", true);
+    $("#cf-review-field").val("");
+    $("#cf-review-value").val("");
 }
 
 export function configure_for_reply(message: Message | undefined): void {
@@ -26,7 +26,7 @@ export function configure_for_reply(message: Message | undefined): void {
     }
 
     generated_item_id = generated_item.id;
-    const $field = $("#hover-review-field").empty();
+    const $field = $("#cf-review-field").empty();
     $field.append(
         $("<option>")
             .val("")
@@ -35,17 +35,17 @@ export function configure_for_reply(message: Message | undefined): void {
     for (const key of Object.keys(generated_item.reviewed_payload).toSorted()) {
         $field.append($("<option>").val(key).text(key.replaceAll("_", " ")));
     }
-    $("#hover-response-controls").prop("hidden", false);
+    $("#cf-review-composer-controls").prop("hidden", false);
     render_type();
 }
 
 function render_type(): void {
-    $(".hover-response-type__button").each((_index, element) => {
-        const selected = $(element).attr("data-hover-response-type") === response_type;
-        $(element).toggleClass("selected", selected).attr("aria-checked", String(selected));
+    $(".cf-review-composer__mode").each((_index, element) => {
+        const selected = $(element).attr("data-cf-response-mode") === response_type;
+        $(element).attr("aria-checked", String(selected));
     });
-    $("[data-hover-reply-help]").prop("hidden", response_type !== "reply");
-    $(".hover-review-patch").prop("hidden", response_type !== "review");
+    $("[data-cf-reply-help]").prop("hidden", response_type !== "reply");
+    $("[data-cf-review-patch]").prop("hidden", response_type !== "review");
 }
 
 export function select_response_type(selected: ResponseType): void {
@@ -55,8 +55,8 @@ export function select_response_type(selected: ResponseType): void {
 
 export function preselect_review_field(field_path: string): void {
     select_response_type("review");
-    $("#hover-review-field").val(field_path);
-    $("#hover-review-value").trigger("focus");
+    $("#cf-review-field").val(field_path);
+    $("#cf-review-value").trigger("focus");
 }
 
 export function get_request_data(): Record<string, number | string> {
@@ -68,8 +68,8 @@ export function get_request_data(): Record<string, number | string> {
         hover_response_type: response_type,
     };
     if (response_type === "review") {
-        const field = String($("#hover-review-field").val() ?? "").trim();
-        const value = String($("#hover-review-value").val() ?? "").trim();
+        const field = String($("#cf-review-field").val() ?? "").trim();
+        const value = String($("#cf-review-value").val() ?? "").trim();
         if (field) {
             data["hover_review_field"] = field;
         }
@@ -81,8 +81,8 @@ export function get_request_data(): Record<string, number | string> {
 }
 
 export function initialize(): void {
-    $("body").on("click", ".hover-response-type__button", (event) => {
-        const selected = $(event.currentTarget).attr("data-hover-response-type");
+    $("body").on("click", ".cf-review-composer__mode", (event) => {
+        const selected = $(event.currentTarget).attr("data-cf-response-mode");
         if (selected === "reply" || selected === "review") {
             select_response_type(selected);
         }
@@ -102,7 +102,8 @@ export function apply_realtime_responses(messages: Message[]): void {
         }
         root.hover_generated_item = response.generated_item;
         root_message_ids.add(root.id);
-        for (const detail of response.generated_item.disputed_details ?? []) {
+        const disputed_details = response.generated_item.disputed_details ?? [];
+        for (const detail of disputed_details) {
             const request_metadata = detail.review_request;
             if (request_metadata === null) {
                 continue;
@@ -115,6 +116,9 @@ export function apply_realtime_responses(messages: Message[]): void {
             request_message.hover_review_request.state = request_metadata.state;
             root_message_ids.add(request_message.id);
         }
+    }
+    if (root_message_ids.size === 0) {
+        return;
     }
     message_live_update.rerender_messages_view_by_message_ids([...root_message_ids]);
 }

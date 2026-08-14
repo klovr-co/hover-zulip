@@ -38,7 +38,7 @@ export function show_message_expander(
     tooltip_template_id: string | null = "message-expander-tooltip-template",
     toggle_button_label: string = $t({defaultMessage: "Show more"}),
 ): void {
-    $row.find(".message_length_controller").html(
+    $row.find(".cf-message-item__length-controller").html(
         render_message_length_toggle({
             toggle_type: "expander",
             label_text: toggle_button_label,
@@ -52,7 +52,7 @@ export function show_message_condenser(
     tooltip_template_id: string | null = "message-condenser-tooltip-template",
     toggle_button_label: string = $t({defaultMessage: "Show less"}),
 ): void {
-    $row.find(".message_length_controller").html(
+    $row.find(".cf-message-item__length-controller").html(
         render_message_length_toggle({
             toggle_type: "condenser",
             label_text: toggle_button_label,
@@ -62,17 +62,17 @@ export function show_message_condenser(
 }
 
 export function hide_message_length_toggle($row: JQuery): void {
-    $row.find(".message_length_controller").empty();
+    $row.find(".cf-message-item__length-controller").empty();
 }
 
 function condense_row($row: JQuery): void {
-    const $content = $row.find(".message_content");
+    const $content = $row.find(".cf-message-item__content");
     $content.addClass("condensed");
     show_message_expander($row);
 }
 
 function uncondense_row($row: JQuery): void {
-    const $content = $row.find(".message_content");
+    const $content = $row.find(".cf-message-item__content");
     $content.removeClass("condensed");
     show_message_condenser($row);
 }
@@ -84,7 +84,7 @@ export function uncollapse(message: Message): void {
     message_flags.save_uncollapsed(message);
 
     const process_row = function process_row($row: JQuery): void {
-        const $content = $row.find(".message_content");
+        const $content = $row.find(".cf-message-item__content");
         $content.removeClass("collapsed");
 
         if (message.condensed === true) {
@@ -126,7 +126,7 @@ export function collapse(message: Message): void {
     message_flags.save_collapsed(message);
 
     const process_row = function process_row($row: JQuery): void {
-        $row.find(".message_content").addClass("collapsed");
+        $row.find(".cf-message-item__content").addClass("collapsed");
         show_message_expander($row);
     };
 
@@ -160,7 +160,7 @@ export function toggle_collapse(message: Message): void {
         return;
     }
 
-    const $content = $row.find(".message_content");
+    const $content = $row.find(".cf-message-item__content");
     const is_condensable = $content.hasClass("could-be-condensed");
     const is_condensed = $content.hasClass("condensed");
     if (message.collapsed) {
@@ -188,7 +188,7 @@ function get_message_height(elem: HTMLElement): number {
     // This needs to be very fast. This function runs hundreds of times
     // when displaying a message feed view that has hundreds of message
     // history, which ideally should render in <100ms.
-    return util.the($(elem).find(".message_content")).scrollHeight;
+    return util.the($(elem).find(".cf-message-item__content")).scrollHeight;
 }
 
 export function condense_and_collapse(elems: JQuery): void {
@@ -219,7 +219,7 @@ export function condense_and_collapse(elems: JQuery): void {
 
     const rows_to_resize = [];
     for (const elem of elems) {
-        const $content = $(elem).find(".message_content");
+        const $content = $(elem).find(".cf-message-item__content");
 
         if ($content.length !== 1) {
             // We could have a "/me did this" message or something
@@ -302,12 +302,12 @@ export function initialize(): void {
     $("#message_feed_container").on("click", ".message_expander", function (this: HTMLElement, e) {
         // Expanding a message can mean either uncollapsing or
         // uncondensing it.
-        const $row = $(this).closest(".message_row");
+        const $row = $(this).closest(".cf-message-item");
         const id = rows.id($row);
         assert(message_lists.current !== undefined);
         const message = message_lists.current.get(id);
         assert(message !== undefined);
-        const $content = $row.find(".message_content");
+        const $content = $row.find(".cf-message-item__content");
         if (message.collapsed) {
             // Uncollapse.
             uncollapse(message);
@@ -323,7 +323,7 @@ export function initialize(): void {
     });
 
     $("#message_feed_container").on("click", ".message_condenser", function (this: HTMLElement, e) {
-        const $row = $(this).closest(".message_row");
+        const $row = $(this).closest(".cf-message-item");
         const id = rows.id($row);
         assert(message_lists.current !== undefined);
         const message = message_lists.current.get(id);

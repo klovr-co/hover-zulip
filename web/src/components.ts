@@ -1,6 +1,8 @@
 import {$} from "jquery";
 import assert from "minimalistic-assert";
 
+import render_tabs from "../templates/cofounder/components/tabs.hbs";
+
 import * as blueslip from "./blueslip.ts";
 import * as keydown_util from "./keydown_util.ts";
 import * as ui_util from "./ui_util.ts";
@@ -38,57 +40,40 @@ export function toggle(opts: {
     child_wants_focus?: boolean;
     selected?: number;
 }): Toggle {
-    const $component = $("<div>").addClass("tab-switcher");
-    if (opts.html_class) {
-        // add a check inside passed arguments in case some extra
-        // classes need to be added for correct alignment or other purposes
-        $component.addClass(opts.html_class);
-    }
-    for (const [i, value] of opts.values.entries()) {
-        // create a tab with a tab-id so they don't have to be referenced
-        // by text value which can be inconsistent.
-        const $tab = $("<div>")
-            .addClass("ind-tab")
-            .attr({"data-tab-key": value.key, "data-tab-id": i, tabindex: 0});
-
-        /* istanbul ignore if */
-        if (value.label_html !== undefined) {
-            const html = value.label_html;
-            $tab.html(html);
-        } else if (value.label !== undefined) {
-            $tab.text(value.label);
-        }
-
-        // add proper classes for styling in CSS.
-        if (i === 0) {
-            // this should be default selected unless otherwise specified.
-            $tab.addClass("first selected");
-        } else if (i === opts.values.length - 1) {
-            $tab.addClass("last");
-        } else {
-            $tab.addClass("middle");
-        }
-        $component.append($tab);
-    }
+    const $component = $(
+        render_tabs({
+            aria_label: "",
+            custom_classes: opts.html_class ?? "",
+            tabs: opts.values.map((value, id) => ({
+                id,
+                key: value.key,
+                label: value.label ?? "",
+                label_html: value.label_html ?? "",
+                selected: id === 0,
+            })),
+        }),
+    );
 
     const meta = {
-        $ind_tab: $component.find(".ind-tab"),
+        $tabs: $component.find(".cf-tabs__tab"),
         idx: -1,
     };
 
     // Returns false if the requested tab is disabled.
     function select_tab(idx: number): boolean {
-        const $elem = meta.$ind_tab.eq(idx);
-        if ($elem.hasClass("disabled")) {
+        const $elem = meta.$tabs.eq(idx);
+        if ($elem.hasClass("cf-tabs__tab--disabled")) {
             return false;
         }
         if ($elem.css("display") === "none") {
             return false;
         }
 
-        meta.$ind_tab.removeClass("selected");
+        meta.$tabs
+            .removeClass("cf-tabs__tab--selected")
+            .attr({"aria-selected": "false", tabindex: -1});
 
-        $elem.addClass("selected");
+        $elem.addClass("cf-tabs__tab--selected").attr({"aria-selected": "true", tabindex: 0});
 
         meta.idx = idx;
         if (opts.callback) {
@@ -126,8 +111,8 @@ export function toggle(opts: {
     }
 
     function register_event_handlers(): void {
-        meta.$ind_tab.off("click");
-        meta.$ind_tab.on("click", function () {
+        meta.$tabs.off("click");
+        meta.$tabs.on("click", function () {
             const idx = Number($(this).attr("data-tab-id"));
             select_tab(idx);
         });
@@ -135,7 +120,7 @@ export function toggle(opts: {
     register_event_handlers();
 
     keydown_util.handle({
-        $elem: meta.$ind_tab,
+        $elem: meta.$tabs,
         handlers: {
             ArrowLeft: maybe_go_left,
             ArrowRight: maybe_go_right,
@@ -165,7 +150,10 @@ export function toggle(opts: {
             }
 
             const idx = opts.values.indexOf(value);
-            meta.$ind_tab.eq(idx).addClass("disabled");
+            meta.$tabs
+                .eq(idx)
+                .addClass("cf-tabs__tab--disabled")
+                .attr({"aria-disabled": "true", tabindex: -1});
         },
 
         enable_tab(name: string) {
@@ -176,7 +164,9 @@ export function toggle(opts: {
             }
 
             const idx = opts.values.indexOf(value);
-            meta.$ind_tab.eq(idx).removeClass("disabled");
+            const $tab = meta.$tabs.eq(idx).removeClass("cf-tabs__tab--disabled");
+            $tab.removeAttr("aria-disabled");
+            $tab.attr("tabindex", $tab.hasClass("cf-tabs__tab--selected") ? 0 : -1);
         },
 
         value() {

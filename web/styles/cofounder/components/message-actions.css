@@ -1,0 +1,160 @@
+/* Production-owned message action strip. Product controllers may retain
+   action-specific hooks, but all visual state belongs to this contract. */
+
+.cf-message-actions {
+    grid-area: controls;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    color: var(--cf-text-secondary);
+    font-family: var(--cf-font-ui);
+    line-height: 1;
+}
+
+.cf-message-actions__edit {
+    display: flex;
+    flex: 1 0 0;
+    align-items: center;
+    height: 100%;
+}
+
+.cf-message-actions__button {
+    box-sizing: border-box;
+    display: inline-grid;
+    flex: 1 0 0;
+    place-items: center;
+    min-width: 26px;
+    height: 100%;
+    min-height: 26px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-secondary);
+    background: transparent;
+    box-shadow: none;
+    font: inherit;
+    opacity: 0;
+    visibility: hidden;
+    cursor: pointer;
+    transition:
+        color var(--cf-duration-fast) ease,
+        background-color var(--cf-duration-fast) ease,
+        opacity var(--cf-duration-fast) ease,
+        visibility var(--cf-duration-fast) ease;
+}
+
+.cf-message-actions__edit > .cf-message-actions__button {
+    display: none;
+    width: 100%;
+}
+
+.cf-message-actions__edit--can-edit > .cf-message-actions__edit-button,
+.cf-message-actions__edit--can-move > .cf-message-actions__move-button {
+    display: inline-grid;
+}
+
+.cf-message-item__frame:hover .cf-message-actions__button,
+.cf-message-actions:focus-within .cf-message-actions__button,
+.cf-message-actions__button.cf-message-actions__failed-button,
+.has_actions_popover .cf-message-actions__more-button {
+    opacity: 1;
+    visibility: visible;
+}
+
+.cf-message-actions__button:is(:hover, :active) {
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-hover);
+}
+
+.cf-message-actions__button:focus {
+    outline: none;
+}
+
+.cf-message-actions__button:focus-visible {
+    color: var(--cf-color-accent);
+    outline: 2px solid var(--cf-focus);
+    outline-offset: -2px;
+    opacity: 1;
+    visibility: visible;
+}
+
+.cf-message-actions__button:active > .cf-icon {
+    transform: scale(0.92);
+}
+
+.cf-message-actions__button:disabled {
+    cursor: default;
+}
+
+.cf-message-actions__star-button--selected {
+    color: var(--cf-color-warning);
+    opacity: 1;
+    visibility: visible;
+}
+
+.cf-message-actions__star-button--selected > .cf-icon {
+    fill: currentcolor;
+}
+
+.cf-message-actions__button--danger:is(:hover, :focus-visible) {
+    color: var(--cf-color-danger);
+    background: var(--cf-color-danger-soft);
+}
+
+.cf-message-actions__failed-button.rotating > .cf-icon {
+    animation: cf-message-actions-rotate 1s linear infinite;
+}
+
+.cf-message-actions [data-tippy-root] {
+    width: max-content;
+    overflow-wrap: normal;
+}
+
+.cf-message-item--pending
+    .cf-message-actions__button:not(.cf-message-actions__failed-button) {
+    visibility: hidden;
+}
+
+#report-message-preview-container .cf-message-actions {
+    display: none;
+}
+
+@container message-lists (width < 500px) {
+    .cf-message-actions__edit,
+    .cf-message-actions__reaction-button {
+        display: none;
+    }
+}
+
+@media (width < 600px), ((width >= 768px) and (width < 1000px)) {
+    .without-container-query-support .cf-message-actions__edit,
+    .without-container-query-support .cf-message-actions__reaction-button {
+        display: none;
+    }
+}
+
+@media (width <= 600px) {
+    .cf-message-actions__button {
+        min-width: 40px;
+        min-height: 40px;
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cf-message-actions__button {
+        transition-duration: 0ms;
+    }
+
+    .cf-message-actions__failed-button.rotating > .cf-icon {
+        animation-duration: 2s;
+    }
+}
+
+@keyframes cf-message-actions-rotate {
+    to {
+        transform: rotate(1turn);
+    }
+}

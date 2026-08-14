@@ -217,7 +217,7 @@
     outline-offset: -1px;
 }
 
-.dialog_exit_button {
+.dialog_exit_button:not(.cf-button) {
     color: var(--color-exit-button-text);
     background: var(--color-exit-button-background);
     border: 1px solid var(--color-exit-button-border);
@@ -227,7 +227,7 @@
     }
 }
 
-.dialog_submit_button {
+.dialog_submit_button:not(.cf-button) {
     margin-left: 12px;
     background-color: hsl(240deg 96% 68%);
     color: hsl(0deg 0% 100%) !important;
@@ -264,7 +264,7 @@
         line-height: 1;
     }
 
-    .tab-switcher {
+    .cf-tabs {
         margin: 2px;
     }
 

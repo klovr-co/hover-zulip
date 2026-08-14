@@ -10,7 +10,7 @@ export class ComposeIconSession {
 
     constructor(compose_icon: HTMLElement) {
         if ($(compose_icon).parents(".message_edit_form").length === 1) {
-            this.edit_message_id = rows.id($(compose_icon).parents(".message_row"));
+            this.edit_message_id = rows.id($(compose_icon).parents(".cf-message-item"));
             this.is_editing_existing_message = true;
         } else {
             this.is_editing_existing_message = false;

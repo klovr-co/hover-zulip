@@ -116,7 +116,7 @@ function get_message_for_message_content($content: JQuery): Message | undefined 
     // marked with user-mention-me, but rows.id doesn't support
     // those elements, and we should address that quirk for
     // mentions holistically.
-    const $message_row = $content.closest(".message_row");
+    const $message_row = $content.closest(".cf-message-item");
     if ($message_row.length === 0 || $message_row.closest(".overlay-message-row").length > 0) {
         // There's no containing message when rendering a preview.
         return undefined;

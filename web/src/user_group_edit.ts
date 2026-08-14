@@ -1322,7 +1322,7 @@ function empty_right_panel(): void {
 function open_right_panel_empty(): void {
     empty_right_panel();
     const tab_key = $("#groups_overlay .two-pane-settings-container")
-        .find("div.ind-tab.selected")
+        .find(".cf-tabs__tab--selected")
         .first()
         .attr("data-tab-key");
     assert(tab_key !== undefined);
@@ -1445,7 +1445,7 @@ export function is_group_already_present(group: UserGroup): boolean {
 
 export function get_active_data(): ActiveData {
     const $active_tabs = $("#groups_overlay .two-pane-settings-container").find(
-        "div.ind-tab.selected",
+        ".cf-tabs__tab--selected",
     );
     const active_group_id = user_group_components.active_group_id;
     let $row;
@@ -2369,7 +2369,7 @@ export function initialize(): void {
 
     $("#groups_overlay_container").on("click", ".group-row", show_right_section);
 
-    $("#groups_overlay_container").on("click", ".fa-chevron-left", () => {
+    $("#groups_overlay_container").on("click", ".cf-two-pane-shell__back", () => {
         $(".right").removeClass("show");
         $("#groups_overlay_container .two-pane-settings-header").removeClass("slide-left");
         resize.resize_settings_overlay_subheader($("#groups_overlay_container"));
@@ -2476,7 +2476,7 @@ export function initialize(): void {
 
     $("#groups_overlay_container").on(
         "click",
-        ".group-reactivation-error-banner .main-view-banner-close-button",
+        ".group-reactivation-error-banner .cf-notice__close",
         () => {
             $(
                 "#user_group_settings .group-reactivation-error-banner .group-reactivation-error",

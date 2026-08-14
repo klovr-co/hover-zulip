@@ -1,29 +1,28 @@
 {{#if is_admin}}
     <div
-        id="connected-account-settings"
-        class="settings-section hover-connected-account-settings-entry {{#unless realm_hover_enabled}}hide{{/unless}}"
-        data-name="connected-account-settings"
-    >
-        <div class="hover-connected-account-heading">
+      id="connected-account-settings"
+      class="settings-section cf-connected-account-settings-entry {{#unless realm_hover_enabled}}hide{{/unless}}"
+      data-name="connected-account-settings"
+      >
+        <div class="cf-connected-accounts__heading">
             <div>
-                <p class="hover-settings-kicker">{{t
-                        "Hover access boundary"
-                    }}</p>
+                <p class="cf-connected-accounts__kicker">{{t "Hover access boundary"}}</p>
                 <h3 class="settings-table-title">{{t "Connected Accounts"}}</h3>
             </div>
-            <span class="hover-secret-safe-badge"><i
-                    class="fa fa-shield"
-                    aria-hidden="true"
-                ></i>{{t "Credentials stay private"}}</span>
+            {{> ../cofounder/components/status tone="success" icon="shield" label=(t "Credentials stay private") custom_classes="cf-connected-accounts__privacy-status"}}
         </div>
-        <p class="settings-field-description hover-connected-account-intro">{{t
-                "Approve accounts, then grant teammates either specific source selectors or explicit access to all selectors. Empty selector grants deny access. Provider tokens, routing details, and private phone identifiers never appear here."
-            }}</p>
-        <div class="alert-notification" id="connected-account-status"></div>
+        <p class="settings-field-description cf-connected-accounts__intro">
+            {{t
+              "Approve accounts, then grant teammates either specific source selectors or explicit access to all selectors. Empty selector grants deny access. Provider tokens, routing details, and private phone identifiers never appear here."
+              }}
+        </p>
+        <div class="cf-connected-accounts__status" id="connected-account-status">
+        </div>
         <div
-            id="hover-connected-accounts-list"
-            class="hover-connected-accounts-list"
-            data-empty="{{t 'No Connected Accounts are available.'}}"
-        ></div>
+          id="cf-connected-accounts-list"
+          class="cf-connected-accounts__list"
+          data-empty="{{t 'No Connected Accounts are available.'}}"
+          >
+        </div>
     </div>
 {{/if}}

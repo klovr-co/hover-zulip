@@ -52,6 +52,19 @@ const response_schema = z.object({
 });
 type SourceRecord = z.infer<typeof record_schema>;
 
+function provider_icon(provider_key: string): string {
+    if (provider_key === "whatsapp") {
+        return "phone";
+    }
+    if (provider_key === "github") {
+        return "git-pull-request";
+    }
+    if (provider_key === "instagram") {
+        return "image";
+    }
+    return "link-alt";
+}
+
 let current_space_id: number | undefined;
 let current_attachment_id: number | undefined;
 let current_query = "";
@@ -113,12 +126,11 @@ function render(): void {
             ),
         }))
         .toArray();
-    $("#hover-source-view").html(
+    $("#cf-source-view").html(
         render_hover_source_view({
             space_name: space.name,
             source: {...attachment.source, is_history_retained: attachment.state === "detached"},
-            icon_class:
-                attachment.source.provider_key === "whatsapp" ? "fa fa-whatsapp" : "fa fa-plug",
+            provider_icon: provider_icon(attachment.source.provider_key),
             query: current_query,
             status,
             show_retry,
@@ -137,8 +149,8 @@ function load(cursor?: string): void {
     const generation = request_generation;
     loading_older = cursor !== undefined;
     retry_cursor = cursor;
-    const previous_scroll_height = $("#hover-source-view").get(0)?.scrollHeight ?? 0;
-    const previous_scroll_top = $("#hover-source-view").scrollTop() ?? 0;
+    const previous_scroll_height = $("#cf-source-view").get(0)?.scrollHeight ?? 0;
+    const previous_scroll_top = $("#cf-source-view").scrollTop() ?? 0;
     show_retry = false;
     status = loading_older
         ? $t({defaultMessage: "Loading older records…"})
@@ -174,8 +186,8 @@ function load(cursor?: string): void {
                     : "";
             render();
             if (cursor !== undefined) {
-                const new_scroll_height = $("#hover-source-view").get(0)?.scrollHeight ?? 0;
-                $("#hover-source-view").scrollTop(
+                const new_scroll_height = $("#cf-source-view").get(0)?.scrollHeight ?? 0;
+                $("#cf-source-view").scrollTop(
                     previous_scroll_top + new_scroll_height - previous_scroll_height,
                 );
             }
@@ -232,7 +244,7 @@ export function show(space_id: number, attachment_id: number): boolean {
     inbox_ui.hide();
     recent_view_ui.hide();
     $("#message_feed_container, #compose").hide();
-    $("#hover-source-view").show();
+    $("#cf-source-view").show();
     restore_focus_hash = window.location.hash;
     if (current_space_id !== space_id || current_attachment_id !== attachment_id) {
         current_space_id = space_id;
@@ -252,7 +264,7 @@ export function hide(): void {
     }
     request?.abort();
     request_generation += 1;
-    $("#hover-source-view").hide();
+    $("#cf-source-view").hide();
     $("#message_feed_container, #compose").show();
     if (restore_focus_hash !== undefined) {
         $<HTMLAnchorElement>(`a[href='${restore_focus_hash}']`).trigger("focus");
@@ -272,7 +284,7 @@ export function clear(): void {
     show_retry = false;
     loading_older = false;
     retry_cursor = undefined;
-    $("#hover-source-view").empty();
+    $("#cf-source-view").empty();
 }
 
 export function handle_space_event(): void {
@@ -283,7 +295,7 @@ export function handle_space_event(): void {
 
 export function initialize(): void {
     function update_search(): void {
-        const query = $<HTMLInputElement>("#hover-source-search")
+        const query = $<HTMLInputElement>("#cf-source-search")
             .val()!
             .trim()
             .replaceAll(/\s+/g, " ");
@@ -297,18 +309,18 @@ export function initialize(): void {
         load();
     }
     const debounced_search = _.debounce(update_search, 350);
-    $("body").on("input", "#hover-source-search", () => {
+    $("body").on("input", "#cf-source-search", () => {
         debounced_search();
     });
-    $("body").on("submit", "#hover-source-search-form", (event) => {
+    $("body").on("submit", "#cf-source-search-form", (event) => {
         event.preventDefault();
         debounced_search.cancel();
         update_search();
     });
-    $("body").on("click", "#hover-source-load-older", () => {
+    $("body").on("click", "#cf-source-load-older", () => {
         load(next_cursor);
     });
-    $("body").on("click", "#hover-source-retry", () => {
+    $("body").on("click", "#cf-source-retry", () => {
         load(retry_cursor);
     });
 }

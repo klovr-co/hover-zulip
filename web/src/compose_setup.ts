@@ -186,14 +186,12 @@ export function initialize(): void {
 
     $("body").on(
         "click",
-        `.${CSS.escape(
-            compose_banner.CLASSNAMES.wildcard_warning,
-        )} .main-view-banner-action-button`,
+        `.${CSS.escape(compose_banner.CLASSNAMES.wildcard_warning)} .cf-notice__action`,
         (event) => {
             event.preventDefault();
             const {$banner_container, is_edit_input} = get_input_info(event);
             assert(event.target instanceof HTMLElement);
-            const $row = $(event.target).closest(".message_row");
+            const $row = $(event.target).closest(".cf-message-item");
             compose_validate.clear_stream_wildcard_warnings($banner_container);
             compose_validate.set_user_acknowledged_stream_wildcard_flag(true);
             if (is_edit_input) {
@@ -217,30 +215,26 @@ export function initialize(): void {
     const user_not_subscribed_selector = `.${CSS.escape(
         compose_banner.CLASSNAMES.user_not_subscribed,
     )}`;
-    $("body").on(
-        "click",
-        `${user_not_subscribed_selector} .main-view-banner-action-button`,
-        (event) => {
-            event.preventDefault();
+    $("body").on("click", `${user_not_subscribed_selector} .cf-notice__action`, (event) => {
+        event.preventDefault();
 
-            const stream_id = compose_state.stream_id();
-            if (stream_id === undefined) {
-                return;
-            }
-            const sub = stream_data.get_sub_by_id(stream_id);
-            assert(sub !== undefined);
-            stream_settings_components.sub_or_unsub(sub);
-            $(user_not_subscribed_selector).remove();
-        },
-    );
+        const stream_id = compose_state.stream_id();
+        if (stream_id === undefined) {
+            return;
+        }
+        const sub = stream_data.get_sub_by_id(stream_id);
+        assert(sub !== undefined);
+        stream_settings_components.sub_or_unsub(sub);
+        $(user_not_subscribed_selector).remove();
+    });
 
     $("body").on(
         "click",
-        `.${CSS.escape(compose_banner.CLASSNAMES.topic_resolved)} .main-view-banner-action-button`,
+        `.${CSS.escape(compose_banner.CLASSNAMES.topic_resolved)} .cf-notice__action`,
         (event) => {
             event.preventDefault();
 
-            const $target = $(event.target).parents(".main-view-banner");
+            const $target = $(event.target).parents(".cf-notice");
             const stream_id = Number.parseInt($target.attr("data-stream-id")!, 10);
             const topic_name = $target.attr("data-topic-name")!;
 
@@ -281,13 +275,11 @@ export function initialize(): void {
 
     $("body").on(
         "click",
-        `.${CSS.escape(
-            compose_banner.CLASSNAMES.unmute_topic_notification,
-        )} .main-view-banner-action-button`,
+        `.${CSS.escape(compose_banner.CLASSNAMES.unmute_topic_notification)} .cf-notice__action`,
         (event) => {
             event.preventDefault();
 
-            const $target = $(event.target).parents(".main-view-banner");
+            const $target = $(event.target).parents(".cf-notice");
             const stream_id = Number.parseInt($target.attr("data-stream-id")!, 10);
             const topic_name = $target.attr("data-topic-name")!;
 
@@ -304,7 +296,7 @@ export function initialize(): void {
     const automatic_new_visibility_policy_banner_selector = `.${CSS.escape(compose_banner.CLASSNAMES.automatic_new_visibility_policy)}`;
     $("body").on(
         "click",
-        `${automatic_new_visibility_policy_banner_selector} .main-view-banner-action-button`,
+        `${automatic_new_visibility_policy_banner_selector} .cf-notice__action`,
         (event) => {
             event.preventDefault();
             if ($(event.target).attr("data-action") === "mark-as-read") {
@@ -318,9 +310,7 @@ export function initialize(): void {
 
     $("body").on(
         "click",
-        `.${CSS.escape(
-            compose_banner.CLASSNAMES.unscheduled_message,
-        )} .main-view-banner-action-button`,
+        `.${CSS.escape(compose_banner.CLASSNAMES.unscheduled_message)} .cf-notice__action`,
         (event) => {
             event.preventDefault();
             const send_at_timestamp = scheduled_messages.get_selected_send_later_timestamp();
@@ -334,13 +324,11 @@ export function initialize(): void {
 
     $("body").on(
         "click",
-        `.${CSS.escape(
-            compose_banner.CLASSNAMES.recipient_not_subscribed,
-        )} .main-view-banner-action-button`,
+        `.${CSS.escape(compose_banner.CLASSNAMES.recipient_not_subscribed)} .cf-notice__action`,
         (event) => {
             event.preventDefault();
             const {$banner_container} = get_input_info(event);
-            const $invite_row = $(event.target).parents(".main-view-banner");
+            const $invite_row = $(event.target).parents(".cf-notice");
 
             const user_id = Number($invite_row.attr("data-user-id"));
             const stream_id = Number($invite_row.attr("data-stream-id"));
@@ -374,7 +362,7 @@ export function initialize(): void {
 
     $("body").on(
         "click",
-        `.${CSS.escape(compose_banner.CLASSNAMES.search_view)} .main-view-banner-action-button`,
+        `.${CSS.escape(compose_banner.CLASSNAMES.search_view)} .cf-notice__action`,
         (event) => {
             event.preventDefault();
             message_view.to_compose_target();
@@ -382,20 +370,16 @@ export function initialize(): void {
     );
 
     const jump_to_conversation_banner_selector = `.${CSS.escape(compose_banner.CLASSNAMES.jump_to_sent_message_conversation)}`;
-    $("body").on(
-        "click",
-        `${jump_to_conversation_banner_selector} .main-view-banner-action-button`,
-        (event) => {
-            event.preventDefault();
-            $(event.target).parents(jump_to_conversation_banner_selector).remove();
-            onboarding_steps.post_onboarding_step_as_read("jump_to_conversation_banner");
-        },
-    );
+    $("body").on("click", `${jump_to_conversation_banner_selector} .cf-notice__action`, (event) => {
+        event.preventDefault();
+        $(event.target).parents(jump_to_conversation_banner_selector).remove();
+        onboarding_steps.post_onboarding_step_as_read("jump_to_conversation_banner");
+    });
 
     const non_interleaved_view_messages_fading_banner_selector = `.${CSS.escape(compose_banner.CLASSNAMES.non_interleaved_view_messages_fading)}`;
     $("body").on(
         "click",
-        `${non_interleaved_view_messages_fading_banner_selector} .main-view-banner-action-button`,
+        `${non_interleaved_view_messages_fading_banner_selector} .cf-notice__action`,
         (event) => {
             event.preventDefault();
             $(event.target).parents(non_interleaved_view_messages_fading_banner_selector).remove();
@@ -406,7 +390,7 @@ export function initialize(): void {
     const interleaved_view_messages_fading_banner_selector = `.${CSS.escape(compose_banner.CLASSNAMES.interleaved_view_messages_fading)}`;
     $("body").on(
         "click",
-        `${interleaved_view_messages_fading_banner_selector} .main-view-banner-action-button`,
+        `${interleaved_view_messages_fading_banner_selector} .cf-notice__action`,
         (event) => {
             event.preventDefault();
             $(event.target).parents(interleaved_view_messages_fading_banner_selector).remove();
@@ -416,7 +400,7 @@ export function initialize(): void {
 
     for (const classname of Object.values(compose_banner.CLASSNAMES)) {
         const classname_selector = `.${CSS.escape(classname)}`;
-        $("body").on("click", `${classname_selector} .main-view-banner-close-button`, (event) => {
+        $("body").on("click", `${classname_selector} .cf-notice__close`, (event) => {
             event.preventDefault();
             $(event.target).parents(classname_selector).remove();
         });
@@ -493,7 +477,7 @@ export function initialize(): void {
         let $target_textarea;
         const $compose_click_target = $(this);
         if ($compose_click_target.parents(".message_edit_form").length === 1) {
-            const edit_message_id = rows.id($compose_click_target.parents(".message_row"));
+            const edit_message_id = rows.id($compose_click_target.parents(".cf-message-item"));
             $target_textarea = $<HTMLTextAreaElement>(
                 `#edit_form_${edit_message_id} textarea.message_edit_content`,
             );

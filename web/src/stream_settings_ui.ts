@@ -12,6 +12,7 @@ import render_stream_sorter_toggle_label from "../templates/stream_settings/stre
 import type {Banner} from "./banners.ts";
 import * as blueslip from "./blueslip.ts";
 import * as browser_history from "./browser_history.ts";
+import * as cofounder_icon from "./cofounder/components/icon.ts";
 import * as components from "./components.ts";
 import type {Toggle} from "./components.ts";
 import * as compose_banner from "./compose_banner.ts";
@@ -64,7 +65,7 @@ const STREAM_INFO_BANNER: Banner = {
         {
             label: $t({defaultMessage: "Learn more"}),
             custom_classes: "banner-external-link",
-            variant: "subtle",
+            variant: "secondary",
         },
     ],
     close_button: false,
@@ -698,17 +699,13 @@ function update_folder_filter_button(left_panel_params: LeftPanelParams): void {
         left_panel_params.folder_filter_value ===
         folder_filter_dropdown_widget.FOLDER_FILTERS.ANY_FOLDER_DROPDOWN_OPTION
     ) {
-        $("#folder_filter_button").addClass("icon-button-neutral");
-        $("#folder_filter_button").removeClass("icon-button-brand");
-        $("#folder_filter_button .zulip-icon")
-            .removeClass("zulip-icon-folder-search")
-            .addClass("zulip-icon-folder-chevron");
+        $("#folder_filter_button").addClass("cf-icon-button--neutral icon-button-neutral");
+        $("#folder_filter_button").removeClass("cf-icon-button--brand icon-button-brand");
+        cofounder_icon.replace_icon($("#folder_filter_button"), "folder-chevron");
     } else {
-        $("#folder_filter_button").removeClass("icon-button-neutral");
-        $("#folder_filter_button").addClass("icon-button-brand");
-        $("#folder_filter_button .zulip-icon")
-            .removeClass("zulip-icon-folder-chevron")
-            .addClass("zulip-icon-folder-search");
+        $("#folder_filter_button").removeClass("cf-icon-button--neutral icon-button-neutral");
+        $("#folder_filter_button").addClass("cf-icon-button--brand icon-button-brand");
+        cofounder_icon.replace_icon($("#folder_filter_button"), "folder-search");
     }
 }
 
@@ -953,21 +950,21 @@ function setup_page(callback: () => void): void {
             values: [
                 {
                     label_html: render_stream_sorter_toggle_label({
-                        icon_class: "fa fa-sort-alpha-asc",
+                        icon: "sort-ascending",
                         tooltip: $t({defaultMessage: "Sort by name"}),
                     }),
                     key: "by-stream-name",
                 },
                 {
                     label_html: render_stream_sorter_toggle_label({
-                        icon_class: "fa fa-user-o",
+                        icon: "users",
                         tooltip: $t({defaultMessage: "Sort by number of subscribers"}),
                     }),
                     key: "by-subscriber-count",
                 },
                 {
                     label_html: render_stream_sorter_toggle_label({
-                        icon_class: "fa fa-bar-chart",
+                        icon: "activity",
                         tooltip: $t({defaultMessage: "Sort by estimated weekly traffic"}),
                     }),
                     key: "by-weekly-traffic",
@@ -1373,7 +1370,7 @@ export function initialize(): void {
         show_right_section,
     );
 
-    $("#channels_overlay_container").on("click", ".fa-chevron-left", () => {
+    $("#channels_overlay_container").on("click", ".cf-two-pane-shell__back", () => {
         $(".right").removeClass("show");
         $("#channels_overlay_container .two-pane-settings-header").removeClass("slide-left");
         resize.resize_settings_overlay_subheader($("#channels_overlay_container"));

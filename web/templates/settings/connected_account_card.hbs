@@ -1,61 +1,50 @@
 <article
-    class="hover-connected-account-card"
-    data-connected-account-id="{{account.id}}"
->
-    <header class="hover-connected-account-card-header">
+  class="cf-connected-account"
+  data-connected-account-id="{{account.id}}"
+  >
+    <header class="cf-connected-account__header">
         <div>
-            <div
-                class="hover-connected-account-provider"
-            >{{account.provider_name}}</div>
+            <div class="cf-connected-account__provider">{{account.provider_name}}</div>
             <h4>{{account.display_name}}</h4>
-            <div class="hover-connected-account-owner">{{t "Owner"}}:
-                {{account.owner_name}}</div>
+            <div class="cf-connected-account__owner">
+                {{t "Owner"}}: {{account.owner_name}}
+            </div>
         </div>
-        <div class="hover-connected-account-badges">
-            <span
-                class="hover-account-state hover-account-state-{{account.approval_state}}"
-            >{{account.approval_label}}</span>
-            <span
-                class="hover-account-health hover-account-health-{{account.health_status}}"
-            ><span aria-hidden="true">●</span> {{account.health_label}}</span>
+        <div class="cf-connected-account__statuses">
+            {{> ../cofounder/components/status tone=account.approval_tone label=account.approval_label}}
+            {{> ../cofounder/components/status tone=account.health_tone icon=account.health_icon label=account.health_label}}
         </div>
     </header>
-    <dl class="hover-connected-account-facts">
-        <div><dt>{{t "External account ID"}}</dt><dd><code
-                >{{account.external_account_id}}</code></dd></div>
-        <div><dt>{{t "Connected by"}}</dt><dd
-            >{{account.creator_name}}</dd></div>
-        <div><dt>{{t "Health checked"}}</dt><dd
-            >{{account.health_checked_label}}</dd></div>
+    <dl class="cf-connected-account__facts">
+        <div>
+            <dt>{{t "External account ID"}}</dt>
+            <dd><code>{{account.external_account_id}}</code></dd>
+        </div>
+        <div>
+            <dt>{{t "Connected by"}}</dt>
+            <dd>{{account.creator_name}}</dd>
+        </div>
+        <div>
+            <dt>{{t "Health checked"}}</dt>
+            <dd>{{account.health_checked_label}}</dd>
+        </div>
     </dl>
-    <div class="hover-connected-account-actions">
+    <div class="cf-connected-account__actions">
         {{#if account.is_pending}}
-            <button
-                type="button"
-                class="button rounded small approve-connected-account"
-            >{{t "Approve"}}</button>
+            {{> ../cofounder/components/button variant="secondary" compact=true label=(t "Approve") custom_classes="cf-connected-account__approve"}}
         {{/if}}
         {{#if account.is_approved}}
-            <button
-                type="button"
-                class="button rounded small add-connected-account-grant"
-            >{{t "Assign teammate"}}</button>
-            <button
-                type="button"
-                class="button rounded small danger revoke-connected-account"
-            >{{t "Revoke account"}}</button>
+            {{> ../cofounder/components/button variant="secondary" compact=true label=(t "Assign teammate") custom_classes="cf-connected-account__assign"}}
+            {{> ../cofounder/components/button variant="danger" compact=true label=(t "Revoke account") custom_classes="cf-connected-account__revoke"}}
         {{/if}}
         {{#if account.is_revoked}}
-            <button
-                type="button"
-                class="button rounded small restore-connected-account"
-            >{{t "Restore approval"}}</button>
+            {{> ../cofounder/components/button variant="secondary" compact=true label=(t "Restore approval") custom_classes="cf-connected-account__restore"}}
         {{/if}}
     </div>
     <section
-        class="hover-connected-account-grants"
-        aria-label="{{t 'Teammate grants'}}"
-    >
+      class="cf-connected-account__grants"
+      aria-label="{{t 'Teammate grants'}}"
+      >
         <h5>{{t "Teammate grants"}}</h5>
         {{! Grant collections require an explicit boolean in Zulip templates. }}
         {{#if has_grants}}
@@ -64,32 +53,22 @@
                     <li data-connected-account-grant-id="{{id}}">
                         <div>
                             <strong>{{user_name}}</strong>
-                            <span
-                                class="hover-connected-account-grant-summary"
-                            >{{scope_label}}</span>
-                            {{#if is_revoked}}<span
-                                    class="hover-account-state hover-account-state-revoked"
-                                >{{t "Revoked"}}</span>{{/if}}
+                            <span class="cf-connected-account__grant-summary">{{scope_label}}</span>
+                            {{#if is_revoked}}
+                                {{> ../cofounder/components/status tone="danger" label=(t "Revoked")}}
+                            {{/if}}
                         </div>
-                        <div class="hover-connected-account-grant-actions">
-                            <button
-                                type="button"
-                                class="button small rounded edit-connected-account-grant"
-                            >{{#if is_revoked}}{{t "Restore"}}{{else}}{{t
-                                        "Restrict"
-                                    }}{{/if}}</button>
-                            {{#unless is_revoked}}<button
-                                    type="button"
-                                    class="button small rounded danger revoke-connected-account-grant"
-                                >{{t "Revoke"}}</button>{{/unless}}
+                        <div class="cf-connected-account__grant-actions">
+                            {{> ../cofounder/components/button variant="secondary" compact=true label=action_label custom_classes="cf-connected-account__edit-grant"}}
+                            {{#unless is_revoked}}
+                                {{> ../cofounder/components/button variant="danger" compact=true label=(t "Revoke") custom_classes="cf-connected-account__revoke-grant"}}
+                            {{/unless}}
                         </div>
                     </li>
                 {{/each}}
             </ul>
         {{else}}
-            <p class="hover-connected-account-empty-grants">{{t
-                    "No teammates have access."
-                }}</p>
+            <p class="cf-connected-account__empty-grants">{{t "No teammates have access."}}</p>
         {{/if}}
     </section>
 </article>

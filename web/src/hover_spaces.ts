@@ -1,5 +1,34 @@
 import * as z from "zod/mini";
 
+import type {CofounderIconName} from "./cofounder/components/icon.ts";
+
+const MODULE_NAVIGATION_ICONS: Readonly<Record<string, CofounderIconName>> = {
+    conversation_digest: "file-text",
+    decisions: "check",
+    marketing_digest: "mail",
+    progress_tracker: "bar-chart",
+    signal_monitor: "activity",
+    suggested_actions: "sparkles",
+    topic_analysis: "bar-chart",
+};
+
+export function get_module_navigation_icon(definition_key: string): CofounderIconName {
+    return MODULE_NAVIGATION_ICONS[definition_key] ?? "bot";
+}
+
+export function get_source_navigation_icon(provider_key: string): CofounderIconName {
+    if (provider_key === "whatsapp") {
+        return "phone";
+    }
+    if (provider_key === "github") {
+        return "git-pull-request";
+    }
+    if (provider_key === "instagram") {
+        return "image";
+    }
+    return "link-alt";
+}
+
 export const hover_source_schema = z.object({
     id: z.number(),
     provider_key: z.string(),
@@ -181,7 +210,7 @@ export function get_sidebar_sources(space: HoverSpace): {
     source_key: string;
     name: string;
     detail: string;
-    icon_class: string;
+    icon_name: CofounderIconName;
     is_external: boolean;
     url?: string;
     attachment_id: number;
@@ -213,8 +242,7 @@ export function get_sidebar_sources(space: HoverSpace): {
                         integration_routes.length > 0
                             ? `${source.provider_name} · Live since ${new Date(integration_routes[0]!.live_since).toLocaleDateString()}`
                             : `${source.account_display_name} · ${source.source_type}`,
-                    icon_class:
-                        source.provider_key === "whatsapp" ? "fa fa-whatsapp" : "fa fa-plug",
+                    icon_name: get_source_navigation_icon(source.provider_key),
                     is_external,
                     ...(is_external && {url: source.external_url}),
                     attachment_id,
@@ -228,7 +256,7 @@ export function get_sidebar_sources(space: HoverSpace): {
 export function get_sidebar_modules(space: HoverSpace): {
     key: string;
     name: string;
-    icon: string;
+    icon_name: CofounderIconName;
     topic: string;
     count: number;
 }[] {
@@ -238,7 +266,7 @@ export function get_sidebar_modules(space: HoverSpace): {
         .map((installation) => ({
             key: installation.definition_key,
             name: installation.name,
-            icon: installation.navigation_icon,
+            icon_name: get_module_navigation_icon(installation.definition_key),
             topic: installation.destination_topic,
             count: installation.generated_count ?? 0,
         }));

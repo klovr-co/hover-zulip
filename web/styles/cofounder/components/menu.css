@@ -1,0 +1,183 @@
+.tippy-box[data-theme="cofounder-menu"] {
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-paper);
+    box-shadow: var(--cf-shadow-overlay);
+    font-family: var(--cf-font-ui);
+    font-size: var(--cf-type-body);
+}
+
+.tippy-box[data-theme="cofounder-menu"] > .tippy-content {
+    padding: 0;
+    font-size: 1em;
+}
+
+.tippy-box[data-theme="cofounder-menu"] > .tippy-arrow {
+    color: var(--cf-surface-paper);
+}
+
+.cf-menu {
+    box-sizing: border-box;
+    max-width: min(var(--cf-menu-max-width, 360px), calc(100vw - 16px));
+    max-height: min(var(--cf-menu-max-height, 85vh), calc(100dvh - 16px));
+    overflow: hidden auto;
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-paper);
+    font-family: var(--cf-font-ui);
+    font-size: var(--cf-type-label);
+    line-height: 1.35;
+    user-select: none;
+}
+
+.cf-menu .simplebar-content {
+    width: min-content;
+    max-width: min(var(--cf-menu-max-width, 360px), calc(100vw - 16px));
+}
+
+.cf-menu__list {
+    min-width: var(--cf-menu-min-width, 200px);
+    margin: 0;
+    padding: var(--cf-space-1) 0;
+    list-style: none;
+}
+
+.cf-menu__item {
+    margin: 0;
+    padding: 0;
+}
+
+.cf-menu .cf-menu__action,
+.cf-menu .text-item {
+    appearance: none;
+    box-sizing: border-box;
+    display: flex;
+    gap: var(--cf-space-2);
+    align-items: center;
+    width: 100%;
+    min-height: var(--cf-control-height);
+    padding: 5px var(--cf-space-3);
+    border: 0;
+    border-radius: 0;
+    color: var(--cf-text-primary);
+    background: transparent;
+    font: inherit;
+    line-height: 20px;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.cf-menu .text-item {
+    color: var(--cf-text-secondary);
+    cursor: default;
+    user-select: text;
+}
+
+.cf-menu .cf-menu__action:hover {
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-hover);
+    text-decoration: none;
+}
+
+.cf-menu .cf-menu__action:active,
+.cf-menu .cf-menu__action[aria-current="page"],
+.cf-menu .cf-menu__action[aria-checked="true"] {
+    background: var(--cf-color-surface-pressed);
+}
+
+.cf-menu .cf-menu__action:focus {
+    outline: none;
+}
+
+.cf-menu .cf-menu__action:focus-visible {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: -2px;
+    background: var(--cf-surface-hover);
+}
+
+.cf-menu .cf-menu__action:disabled,
+.cf-menu .cf-menu__action[aria-disabled="true"] {
+    color: var(--cf-color-disabled-strong);
+    cursor: not-allowed;
+    opacity: 1;
+    pointer-events: none;
+}
+
+.cf-menu .cf-menu__action--danger {
+    color: var(--cf-color-danger);
+}
+
+.cf-menu .cf-menu__action--danger:hover,
+.cf-menu .cf-menu__action--danger:focus-visible {
+    color: var(--cf-color-danger);
+    background: var(--cf-color-danger-soft);
+}
+
+.cf-menu__icon {
+    position: static;
+    display: inline-flex;
+    flex: none;
+    justify-content: center;
+    align-items: center;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    color: var(--cf-text-secondary);
+    font-size: 16px;
+    line-height: 1;
+    text-align: center;
+}
+
+.cf-menu__label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.cf-menu__separator {
+    height: 0;
+    margin: var(--cf-space-1) var(--cf-space-2);
+    border: 0;
+    border-bottom: 1px solid var(--cf-border-subtle);
+}
+
+.cf-menu__shortcut,
+.cf-menu .popover-menu-hotkey-hints {
+    display: inline-flex;
+    gap: 3px;
+    align-items: center;
+    margin-left: auto;
+    padding-left: var(--cf-space-2);
+    color: var(--cf-text-secondary);
+}
+
+.cf-menu__shortcut-key,
+.cf-menu .popover-menu-hotkey-hint {
+    box-sizing: border-box;
+    min-width: 18px;
+    padding: 1px 4px;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: 4px;
+    color: var(--cf-text-secondary);
+    background: var(--cf-surface-paper);
+    font-family: var(--cf-font-mono);
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 14px;
+    text-align: center;
+}
+
+.cf-menu input[type="radio"] {
+    accent-color: var(--cf-color-ink);
+}
+
+@media (width <= 600px) {
+    .cf-menu .cf-menu__action,
+    .cf-menu .text-item {
+        min-height: var(--cf-control-height-touch);
+        padding-inline: var(--cf-space-4);
+    }
+}

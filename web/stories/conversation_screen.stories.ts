@@ -1,7 +1,8 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
+import render_composer from "../templates/cofounder/components/composer.hbs";
+import render_message from "../templates/cofounder/components/message.hbs";
 import render_left_sidebar from "../templates/left_sidebar.hbs";
-import render_reactions from "../templates/message_reactions.hbs";
 import render_navbar from "../templates/navbar.hbs";
 import render_presence_rows from "../templates/presence_rows.hbs";
 import render_recipient_row from "../templates/recipient_row.hbs";
@@ -18,11 +19,20 @@ function stream_row(name: string, count?: number): string {
 function message(
     sender: string,
     time: string,
-    content: string,
+    content_html: string,
     avatar_url: string,
-    reactions: string,
+    reactions: {count: number; emoji: string; label: string; selected?: boolean}[],
+    is_own = false,
 ): string {
-    return `<div class="message_row selectable_row" role="listitem"><div class="messagebox"><div class="messagebox-content"><div class="message-avatar"><img src="${avatar_url}" alt="" /></div><span class="message_sender"><span class="sender_name">${sender}</span></span><a class="message-time" href="#narrow/near/42">${time}</a><div class="message_controls no-select"><button class="icon-button icon-button-neutral" aria-label="Message actions"><i class="zulip-icon zulip-icon-more-vertical"></i></button></div><div class="message_content rendered_markdown">${content}</div>${reactions}</div></div></div>`;
+    return render_message({
+        avatar_url,
+        content_html,
+        has_reactions: reactions.length > 0,
+        is_own,
+        reactions,
+        sender,
+        time,
+    });
 }
 
 function presence_row(
@@ -73,32 +83,13 @@ function render_conversation(args: ConversationArgs): HTMLElement {
 
     const main = globalThis.document.createElement("main");
     main.className = "storybook-message-pane";
-    main.innerHTML = `<div class="message-view-header">${render_recipient_row({all_visibility_policies: {FOLLOWED: "FOLLOWED", MUTED: "MUTED", UNMUTED: "UNMUTED"}, date_html: "Today", date_unchanged: false, display_recipient: "design", is_archived: false, is_empty_string_topic: false, is_stream: true, is_subscribed: true, is_topic_editable: true, recipient_bar_color: "#4f8394", stream_id: 7, stream_privacy_icon_color: "#ffffff", stream_url: "#narrow/channel/design", topic: "Homepage redesign", topic_display_name: "Homepage redesign", topic_is_resolved: false, topic_links: [], topic_url: "#narrow/channel/design/topic/Homepage%20redesign", user_can_resolve_topic: true, visibility_policy: "INHERIT"})}</div><div class="message-list" role="list"></div><div class="storybook-compose"><span class="zulip-icon zulip-icon-smile"></span><span class="storybook-compose-placeholder">Compose a message</span><kbd>⌘ ↵</kbd></div>`;
+    main.innerHTML = `<div class="message-view-header">${render_recipient_row({all_visibility_policies: {FOLLOWED: "FOLLOWED", MUTED: "MUTED", UNMUTED: "UNMUTED"}, date_html: "Today", date_unchanged: false, display_recipient: "design", is_archived: false, is_empty_string_topic: false, is_stream: true, is_subscribed: true, is_topic_editable: true, recipient_bar_color: "#4f8394", stream_id: 7, stream_privacy_icon_color: "#ffffff", stream_url: "#narrow/channel/design", topic: "Homepage redesign", topic_display_name: "Homepage redesign", topic_is_resolved: false, topic_links: [], topic_url: "#narrow/channel/design/topic/Homepage%20redesign", user_can_resolve_topic: true, visibility_policy: "INHERIT"})}</div><div class="message-list" role="list"></div><div class="storybook-compose">${render_composer({channel: "design", disabled: false, placeholder: "Compose a message", recipient: "Homepage redesign", value: ""})}</div>`;
     const message_list = main.querySelector<HTMLElement>(".message-list");
     if (message_list !== null) {
-        const reactions = render_reactions({
-            is_archived: false,
-            msg: {
-                message_reactions: [
-                    {
-                        class: "reaction",
-                        emoji_code: "1f44d",
-                        emoji_name: "thumbs_up",
-                        label: "thumbs up, 4",
-                        local_id: 1,
-                        vote_text: "4",
-                    },
-                    {
-                        class: "reaction",
-                        emoji_code: "1f4a1",
-                        emoji_name: "bulb",
-                        label: "bulb, 2",
-                        local_id: 2,
-                        vote_text: "2",
-                    },
-                ],
-            },
-        });
+        const reactions = [
+            {count: 4, emoji: "👍", label: "thumbs up, 4", selected: true},
+            {count: 2, emoji: "💡", label: "bulb, 2"},
+        ];
         message_list.innerHTML =
             message(
                 "Ava Rodriguez",
@@ -112,14 +103,15 @@ function render_conversation(args: ConversationArgs): HTMLElement {
                 "10:41 AM",
                 "The grouped sections look much easier to scan. I’ll add the empty and loading states before our review.",
                 avatar("SL", "#5c9b72"),
-                "",
+                [],
             ) +
             message(
                 "Maxine",
                 "10:45 AM",
                 "Perfect — let’s use this view to compare component states as we redesign.",
                 avatar("MA", "#5d7fa3"),
-                "",
+                [],
+                true,
             );
     }
     body.append(main);
@@ -134,7 +126,7 @@ function render_conversation(args: ConversationArgs): HTMLElement {
 }
 
 const meta = {
-    title: "Screens/Conversation",
+    title: "Cofounder/Screens/Conversation",
     tags: ["autodocs"],
     args: {show_right_sidebar: true},
     render: render_conversation,
@@ -145,3 +137,4 @@ type Story = StoryObj<ConversationArgs>;
 
 export const Default: Story = {};
 export const Focused: Story = {args: {show_right_sidebar: false}};
+export const Narrow: Story = {args: {show_right_sidebar: false}};

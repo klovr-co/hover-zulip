@@ -29,10 +29,10 @@
         }
     }
 
-    .messagebox-content {
+    .cf-message-item__body {
         display: block !important;
 
-        .message_content {
+        .cf-message-item__content {
             cursor: default !important;
         }
     }

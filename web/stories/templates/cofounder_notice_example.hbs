@@ -1,0 +1,14 @@
+<div class="cf-theme" style="display: grid; gap: 12px; width: min(100%, 680px);">
+    {{#> ../../templates/cofounder/components/notice intent="warning" id="cofounder-notice-review"}}
+        <div class="cf-notice__content">A source needs review before publishing.</div>
+        <div class="cf-notice__actions">
+            {{> ../../templates/cofounder/components/button variant="secondary" label=(t "Review source") custom_classes="cf-notice__action"}}
+        </div>
+    {{/../../templates/cofounder/components/notice}}
+    {{#> ../../templates/cofounder/components/notice intent="success" hide_close_button=true}}
+        <div class="cf-notice__content">The source is ready to publish.</div>
+        <div class="cf-notice__actions">
+            {{> ../../templates/cofounder/components/button variant="success" label=(t "Publish") custom_classes="cf-notice__action"}}
+        </div>
+    {{/../../templates/cofounder/components/notice}}
+</div>

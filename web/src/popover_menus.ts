@@ -7,6 +7,7 @@ import assert from "minimalistic-assert";
 import * as tippy from "tippy.js";
 
 import * as blueslip from "./blueslip.ts";
+import * as cofounder_menu from "./cofounder/components/menu.ts";
 import * as keydown_util from "./keydown_util.ts";
 import * as message_viewport from "./message_viewport.ts";
 import * as modals from "./modals.ts";
@@ -75,49 +76,7 @@ export const NAVBAR_POPOVER_OFFSET: [number, number] = [0, 7];
 
 /* Keyboard UI functions */
 export function popover_items_handle_keyboard(key: string, $items?: JQuery): void {
-    if (!$items) {
-        return;
-    }
-
-    const index = $items.index($items.filter(":focus"));
-
-    if (key === "enter") {
-        // This is not enough for some elements which need to trigger
-        // natural click for them to work like ClipboardJS and follow
-        // the link for anchor tags. For those elements, we need to
-        // use `.navigate-link-on-enter` class on them.
-        $items.eq(index).trigger("click");
-        return;
-    }
-
-    // If the focused item doesn't have a visible focus ring (e.g., it was
-    // focused programmatically when the popover opened via mouse click rather
-    // than keyboard navigation), treat the navigation position as unset so
-    // that the first arrow key press shows the focus ring on item 1 rather
-    // than skipping to item 2. We blur first because calling .focus() on an
-    // already-focused element is a no-op and won't trigger :focus-visible.
-    const focused_item_has_focus_ring =
-        index !== -1 && document.activeElement?.matches(":focus-visible") === true;
-    if (
-        !focused_item_has_focus_ring &&
-        index !== -1 &&
-        document.activeElement instanceof HTMLElement
-    ) {
-        document.activeElement.blur();
-    }
-    const nav_index = focused_item_has_focus_ring ? index : -1;
-
-    if (key === "down_arrow" || key === "vim_down") {
-        [...$items]
-            .slice(nav_index === -1 ? 0 : nav_index + 1)
-            .find((item) => item.getClientRects().length)
-            ?.focus();
-    } else if (key === "up_arrow" || key === "vim_up") {
-        [...$items]
-            .slice(0, nav_index === -1 ? $items.length : nav_index)
-            .findLast((item) => item.getClientRects().length)
-            ?.focus();
-    }
+    cofounder_menu.menu_items_handle_keyboard(key, $items);
 }
 
 export function focus_popover(instance: tippy.Instance): void {
@@ -126,11 +85,7 @@ export function focus_popover(instance: tippy.Instance): void {
 }
 
 export function focus_first_popover_item($items: JQuery | undefined, index = 0): void {
-    if (!$items) {
-        return;
-    }
-
-    $items.eq(index).expectOne().trigger("focus");
+    cofounder_menu.focus_first_menu_item($items, index);
 }
 
 export function sidebar_menu_instance_handle_keyboard(instance: tippy.Instance, key: string): void {
@@ -211,7 +166,7 @@ export function get_popover_items_for_instance(instance: tippy.Instance): JQuery
         return undefined;
     }
 
-    return $current_elem.find("a, [tabindex='0']");
+    return cofounder_menu.get_menu_items($current_elem);
 }
 
 export function hide_current_popover_if_visible(instance: tippy.Instance | null): void {
@@ -339,7 +294,7 @@ export const default_popover_props: Partial<tippy.Props> = {
 };
 
 export const left_sidebar_tippy_options: Partial<tippy.Props> = {
-    theme: "popover-menu",
+    theme: "cofounder-menu",
     placement: "right",
     popperOptions: {
         modifiers: [

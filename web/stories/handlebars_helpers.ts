@@ -41,12 +41,27 @@ Handlebars.registerHelper({
     },
 });
 
-Handlebars.registerHelper("t", (message: string) =>
-    message
-        .trim()
-        .split("\n")
-        .map((line) => line.trim())
-        .join(" "),
+Handlebars.registerHelper(
+    "t",
+    function t(
+        this: Record<string, unknown>,
+        message: string,
+        options: {hash?: Record<string, unknown>},
+    ) {
+        const normalized_message = message
+            .trim()
+            .split("\n")
+            .map((line) => line.trim())
+            .join(" ");
+        const values = {...this, ...options.hash};
+
+        return normalized_message.replaceAll(/\{([a-z_]+)\}/g, (placeholder, key: string) => {
+            const value = values[key];
+            return typeof value === "string" || typeof value === "number"
+                ? String(value)
+                : placeholder;
+        });
+    },
 );
 
 Handlebars.registerHelper(

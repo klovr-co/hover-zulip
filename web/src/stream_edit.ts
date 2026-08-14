@@ -534,7 +534,7 @@ export function show_settings_for(node: HTMLElement): void {
 
     $("#channels_overlay_container").on(
         "click",
-        ".stream-creation-confirmation-banner .main-view-banner-close-button",
+        ".stream-creation-confirmation-banner .cf-notice__close",
         (e) => {
             e.preventDefault();
             $(e.target).parent().remove();
@@ -815,7 +815,7 @@ export function initialize(): void {
 
     $("#channels_overlay_container").on(
         "click",
-        ".stream-permissions-warning-banner .main-view-banner-close-button",
+        ".stream-permissions-warning-banner .cf-notice__close",
         (event) => {
             event.preventDefault();
             $("#stream_settings .stream-permissions-warning-banner").empty();
@@ -824,12 +824,12 @@ export function initialize(): void {
 
     $("#channels_overlay_container").on(
         "click",
-        ".stream-permissions-warning-banner .main-view-banner-action-button",
+        ".stream-permissions-warning-banner .cf-notice__action",
         (event) => {
             event.preventDefault();
             event.stopPropagation();
 
-            const $target = $(event.target).parents(".main-view-banner");
+            const $target = $(event.target).parents(".cf-notice");
             const stream_id = Number.parseInt($target.attr("data-stream-id")!, 10);
             const sub = sub_store.get(stream_id);
             assert(sub !== undefined);

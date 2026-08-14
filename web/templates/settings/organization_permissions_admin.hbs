@@ -5,7 +5,9 @@
             <div class="subsection-header">
                 <h3 class="settings-subsection-title">
                     {{t "Joining the organization" }}
-                    <i class="fa fa-info-circle settings-info-icon tippy-zulip-tooltip" aria-hidden="true" data-tippy-content="{{t 'Only owners can change these settings.' }}"></i>
+                    <span class="settings-info-icon tippy-zulip-tooltip" data-tippy-content="{{t 'Only owners can change these settings.' }}" aria-label="{{t 'Only owners can change these settings.' }}">
+                        {{> ../cofounder/components/icon name="circle-help" compact=true}}
+                    </span>
                 </h3>
                 {{> settings_save_discard_widget section_name="join-settings" show_save_discard_buttons=true }}
             </div>
@@ -89,6 +91,7 @@
               help_link="/help/public-access-option"}}
 
             {{> ../dropdown_widget_with_label
+              cofounder=true
               widget_name="realm_can_create_web_public_channel_group"
               label=group_setting_labels.can_create_web_public_channel_group
               value_type="number"}}
@@ -351,6 +354,7 @@
               label=admin_settings_label.realm_enable_guest_user_dm_warning}}
 
             {{> ../dropdown_widget_with_label
+              cofounder=true
               widget_name="realm_can_access_all_users_group"
               label=group_setting_labels.can_access_all_users_group
               value_type="number"

@@ -14,6 +14,10 @@ const scroll_util = mock_esm("../src/scroll_util", {
     get_content_element: ($element) => $element,
 });
 
+mock_esm("../src/cofounder/components/icon", {
+    replace_icon() {},
+});
+
 mock_esm("../src/hash_util", {
     channel_url_by_user_setting() {},
 });

@@ -1,0 +1,11 @@
+<li{{#if id}} id="{{id}}"{{/if}} class="cf-settings-nav__item sidebar-item{{#if custom_classes}} {{custom_classes}}{{/if}}{{#if collapsible}} collapse-org-settings{{/if}}{{#if hide_org_settings}} hide-org-settings{{/if}}{{#if hidden}} hide{{/if}}" tabindex="0"{{#if section}} data-section="{{section}}"{{/if}}>
+    <span{{#if icon_id}} id="{{icon_id}}"{{/if}} class="cf-settings-nav__icon sidebar-item-icon" aria-hidden="true">
+        {{> icon name=icon compact=true}}
+    </span>
+    <span{{#if label_id}} id="{{label_id}}"{{/if}} class="cf-settings-nav__label text">{{label}}</span>
+    {{#if lock_tooltip}}
+    <span class="cf-settings-nav__lock locked tippy-zulip-tooltip{{#unless locked}} hide{{/unless}}" data-tippy-content="{{lock_tooltip}}" aria-label="{{lock_tooltip}}">
+        {{> icon name="lock" compact=true}}
+    </span>
+    {{/if}}
+</li>

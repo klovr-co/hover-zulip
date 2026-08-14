@@ -1,0 +1,123 @@
+/* Knowledge-source actions shared by messages and awareness cards. */
+
+.cf-source-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+}
+
+.cf-message-feedback {
+    display: flex;
+    grid-area: reactions;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.cf-source-actions__label {
+    margin-inline-end: 3px;
+    color: var(--cf-text-secondary);
+    font-family: var(--cf-font-ui);
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.cf-source-action-wrap {
+    display: contents;
+}
+
+.cf-source-action {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 28px;
+    padding: 2px 7px;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-pill);
+    color: var(--cf-text-secondary);
+    background: var(--cf-surface-paper);
+    box-shadow: none;
+    font: inherit;
+    font-size: var(--cf-type-meta);
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        color var(--cf-duration-fast) ease,
+        border-color var(--cf-duration-fast) ease,
+        background-color var(--cf-duration-fast) ease,
+        transform var(--cf-duration-fast) ease;
+}
+
+.cf-source-action:is(:hover, :focus-visible) {
+    border-color: var(--cf-color-accent);
+    color: var(--cf-color-accent);
+    background: var(--cf-color-accent-soft);
+}
+
+.cf-source-action:focus {
+    outline: none;
+}
+
+.cf-source-action:focus-visible {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: 1px;
+}
+
+.cf-source-action:active {
+    transform: scale(0.96);
+}
+
+.cf-source-action--evidence {
+    padding-inline: 10px;
+    font-weight: 650;
+}
+
+.cf-source-action--integration {
+    min-width: 38px;
+    padding-inline: 6px;
+}
+
+.cf-source-action--static {
+    color: var(--cf-text-tertiary);
+    background: var(--cf-surface-subtle);
+    cursor: default;
+}
+
+.cf-source-action__icon {
+    flex: none;
+    width: 17px;
+    height: 17px;
+    margin: 1px 3px;
+}
+
+.cf-source-action--whatsapp .cf-source-action__icon {
+    color: var(--cf-color-provider-whatsapp);
+}
+
+.cf-source-action--github .cf-source-action__icon {
+    color: var(--cf-color-provider-github);
+}
+
+.cf-source-action--instagram .cf-source-action__icon {
+    color: var(--cf-color-provider-instagram);
+}
+
+@media (hover: none), (width <= 600px) {
+    .cf-source-action {
+        min-width: var(--cf-control-height-touch);
+        min-height: var(--cf-control-height-touch);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cf-source-action {
+        transition-duration: 0ms;
+    }
+}

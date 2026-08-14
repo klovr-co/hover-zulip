@@ -1,0 +1,7 @@
+<div class="cf-tabs{{#if custom_classes}} {{custom_classes}}{{/if}}" role="tablist" aria-label="{{aria_label}}">
+    {{#each tabs}}
+        <button type="button" role="tab" class="cf-tabs__tab{{#if selected}} cf-tabs__tab--selected{{/if}}{{#if disabled}} cf-tabs__tab--disabled{{/if}}" data-tab-key="{{key}}" data-tab-id="{{id}}" aria-selected="{{#if selected}}true{{else}}false{{/if}}"{{#if disabled}} aria-disabled="true"{{/if}} tabindex="{{#if selected}}0{{else}}-1{{/if}}">
+            {{#if label_html}}{{{label_html}}}{{else}}{{label}}{{/if}}
+        </button>
+    {{/each}}
+</div>

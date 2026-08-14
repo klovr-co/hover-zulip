@@ -1,44 +1,43 @@
-<li class="narrow-filter hover-space-setup-row" data-hover-space-id="{{id}}">
+<li class="cf-space-setup narrow-filter" data-cf-space-id="{{id}}">
     <a
-        href="#hover/space/{{id}}/setup"
-        class="subscription_block selectable_sidebar_block"
-        draggable="false"
-    >
-        <span class="stream-privacy"><i
-                class="zulip-icon zulip-icon-lock"
-                aria-hidden="true"
-            ></i></span>
-        <span class="stream-name">{{name}}</span>
-        <span class="hover-space-setup-label">{{t "Setup"}}</span>
+      href="#hover/space/{{id}}/setup"
+      class="cf-space-setup__main"
+      draggable="false"
+      >
+        <span class="cf-space-setup__icon">
+            {{> cofounder/components/icon name="lock" compact=true}}
+        </span>
+        <span class="cf-space-setup__name">{{name}}</span>
+        <span class="cf-space-setup__status">{{t "Setup"}}</span>
     </a>
     {{! Keep the source ledger absent until the first attachment exists. }}
     {{#if has_hover_attached_sources}}
         <section
-            class="hover-source-ledger"
-            aria-label="{{t 'Attached sources'}}"
-        >
-            <div class="hover-source-ledger__header"><span>{{t
-                        "Sources"
-                    }}</span></div>
-            <ul class="hover-source-ledger__list">
+          class="cf-source-ledger"
+          aria-label="{{t 'Attached sources'}}"
+          >
+            <div class="cf-source-ledger__header">
+                <span>{{t "Sources"}}</span>
+            </div>
+            <ul class="cf-source-ledger__list">
                 {{#each hover_attached_sources}}
                     <li>
                         <a
-                            class="hover-source-ledger__item hover-source-ledger__item--{{key}}"
-                            href="{{url}}"
-                            data-hover-source-key="{{source_key}}"
-                        >
+                          class="cf-source-ledger__item"
+                          href="{{url}}"
+                          data-cf-source-key="{{source_key}}"
+                          >
                             <span
-                                class="hover-source-ledger__icon"
-                                aria-hidden="true"
-                            ><i class="{{icon_class}}"></i></span>
-                            <span class="hover-source-ledger__copy">
+                              class="cf-source-ledger__icon"
+                              aria-hidden="true"
+                              >{{> cofounder/components/icon name=icon_name compact=true}}</span>
+                            <span class="cf-source-ledger__copy">
                                 <span
-                                    class="hover-source-ledger__name"
-                                >{{name}}</span>
+                                  class="cf-source-ledger__name"
+                                  >{{name}}</span>
                                 <span
-                                    class="hover-source-ledger__detail"
-                                >{{detail}}</span>
+                                  class="cf-source-ledger__detail"
+                                  >{{detail}}</span>
                             </span>
                         </a>
                     </li>

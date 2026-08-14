@@ -27,7 +27,7 @@ function toggle_playground_links_popover(
     }
 
     popover_menus.toggle_popover_menu(element, {
-        theme: "popover-menu",
+        theme: "cofounder-menu",
         placement: "bottom",
         popperOptions: {
             modifiers: [

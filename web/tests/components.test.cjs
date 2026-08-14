@@ -17,18 +17,26 @@ function make_tab(i) {
     assert.equal(env.tabs.length, i);
 
     $self.stub = true;
-    $self.class = [];
+    $self.class = i === 0 ? "cf-tabs__tab cf-tabs__tab--selected" : "cf-tabs__tab";
     $self.visible = true;
+    $self.attributes = {
+        "aria-selected": i === 0 ? "true" : "false",
+        "data-tab-id": i,
+        "data-tab-key": ["keyboard-shortcuts", "message-formatting", "search-operators"][i],
+        tabindex: i === 0 ? 0 : -1,
+    };
 
     $self.addClass = (c) => {
         $self.class += " " + c;
         const tokens = $self.class.trim().split(/ +/);
         $self.class = [...new Set(tokens)].join(" ");
+        return $self;
     };
 
     $self.removeClass = (c) => {
         const tokens = $self.class.trim().split(/ +/);
         $self.class = tokens.filter((token) => token !== c).join(" ");
+        return $self;
     };
 
     $self.hasClass = (c) => {
@@ -44,20 +52,21 @@ function make_tab(i) {
         return "none";
     };
 
-    $self.attr = (name) => {
-        assert.equal(name, "data-tab-id");
-        return i;
+    $self.attr = (name, value) => {
+        if (typeof name === "object") {
+            Object.assign($self.attributes, name);
+            return $self;
+        }
+        if (value !== undefined) {
+            $self.attributes[name] = value;
+            return $self;
+        }
+        return $self.attributes[name];
     };
 
-    $self.text = (text) => {
-        assert.equal(
-            text,
-            [
-                "translated: Keyboard shortcuts",
-                "translated: Message formatting",
-                "translated: Search filters",
-            ][i],
-        );
+    $self.removeAttr = (name) => {
+        $self.attributes[name] = undefined;
+        return $self;
     };
 
     $self.trigger = (type) => {
@@ -73,7 +82,7 @@ function make_tab(i) {
     return $self;
 }
 
-const ind_tab = (function () {
+const tabs = (function () {
     return {
         stub: true,
 
@@ -95,6 +104,14 @@ const ind_tab = (function () {
             for (const $tab of env.tabs) {
                 $tab.removeClass(c);
             }
+            return this;
+        },
+
+        attr(attributes) {
+            for (const $tab of env.tabs) {
+                $tab.attr(attributes);
+            }
+            return this;
         },
 
         eq: (idx) => env.tabs[idx],
@@ -107,7 +124,7 @@ function make_switcher() {
 
         children: [],
 
-        classList: new Set(),
+        classList: new Set(["cf-tabs", "stream_sorter_toggle"]),
 
         append(child) {
             this.children.push(child);
@@ -120,8 +137,8 @@ function make_switcher() {
 
         find(sel) {
             switch (sel) {
-                case ".ind-tab":
-                    return ind_tab;
+                case ".cf-tabs__tab":
+                    return tabs;
                 /* istanbul ignore next */
                 default:
                     throw new Error("unknown selector: " + sel);
@@ -136,47 +153,16 @@ mock_jquery((sel) => {
         return sel;
     }
 
-    switch (sel) {
-        case "<div>":
-            return {
-                addClass(className) {
-                    if (className === "tab-switcher") {
-                        return env.switcher;
-                    }
-
-                    assert.equal(className, "ind-tab");
-                    return {
-                        attr(attributes) {
-                            const tab_id = attributes["data-tab-id"];
-                            assert.deepEqual(
-                                attributes,
-                                [
-                                    {
-                                        "data-tab-key": "keyboard-shortcuts",
-                                        "data-tab-id": 0,
-                                        tabindex: 0,
-                                    },
-                                    {
-                                        "data-tab-key": "message-formatting",
-                                        "data-tab-id": 1,
-                                        tabindex: 0,
-                                    },
-                                    {
-                                        "data-tab-key": "search-operators",
-                                        "data-tab-id": 2,
-                                        tabindex: 0,
-                                    },
-                                ][tab_id],
-                            );
-                            return make_tab(tab_id);
-                        },
-                    };
-                },
-            };
-        /* istanbul ignore next */
-        default:
-            throw new Error("unknown selector: " + sel);
+    if (typeof sel === "string" && sel.startsWith('<div class="cf-tabs stream_sorter_toggle"')) {
+        for (let i = 0; i < 3; i += 1) {
+            make_tab(i);
+        }
+        env.switcher.children.push(...env.tabs);
+        return env.switcher;
     }
+
+    /* istanbul ignore next */
+    throw new Error("unknown selector: " + sel);
 });
 
 const components = zrequire("components");
@@ -222,12 +208,15 @@ run_test("basics", () => {
 
     assert.deepEqual(env.switcher.children, env.tabs);
 
-    assert.equal(env.switcher.addedClass, "stream_sorter_toggle");
+    assert.equal(env.switcher.classList.has("cf-tabs"), true);
+    assert.equal(env.switcher.classList.has("stream_sorter_toggle"), true);
 
     assert.equal(env.focused_tab, 0);
-    assert.equal(env.tabs[0].class, "first selected");
-    assert.equal(env.tabs[1].class, "middle");
-    assert.equal(env.tabs[2].class, "last");
+    assert.equal(env.tabs[0].class, "cf-tabs__tab cf-tabs__tab--selected");
+    assert.equal(env.tabs[0].attr("aria-selected"), "true");
+    assert.equal(env.tabs[0].attr("tabindex"), 0);
+    assert.equal(env.tabs[1].class, "cf-tabs__tab");
+    assert.equal(env.tabs[2].class, "cf-tabs__tab");
     assert.deepEqual(callback_args, ["translated: Keyboard shortcuts", "keyboard-shortcuts"]);
     assert.equal(widget.value(), "translated: Keyboard shortcuts");
     assert.equal(widget.key(), "keyboard-shortcuts");
@@ -236,9 +225,11 @@ run_test("basics", () => {
 
     widget.goto("message-formatting");
     assert.equal(env.focused_tab, 1);
-    assert.equal(env.tabs[0].class, "first");
-    assert.equal(env.tabs[1].class, "middle selected");
-    assert.equal(env.tabs[2].class, "last");
+    assert.equal(env.tabs[0].class, "cf-tabs__tab");
+    assert.equal(env.tabs[0].attr("aria-selected"), "false");
+    assert.equal(env.tabs[0].attr("tabindex"), -1);
+    assert.equal(env.tabs[1].class, "cf-tabs__tab cf-tabs__tab--selected");
+    assert.equal(env.tabs[2].class, "cf-tabs__tab");
     assert.deepEqual(callback_args, ["translated: Message formatting", "message-formatting"]);
     assert.equal(widget.value(), "translated: Message formatting");
     assert.equal(widget.key(), "message-formatting");
@@ -251,9 +242,9 @@ run_test("basics", () => {
     callback_args = undefined;
     env.keydown_f.call(env.tabs[env.focused_tab], RIGHT_KEY);
     assert.equal(env.focused_tab, 2);
-    assert.equal(env.tabs[0].class, "first");
-    assert.equal(env.tabs[1].class, "middle");
-    assert.equal(env.tabs[2].class, "last selected");
+    assert.equal(env.tabs[0].class, "cf-tabs__tab");
+    assert.equal(env.tabs[1].class, "cf-tabs__tab");
+    assert.equal(env.tabs[2].class, "cf-tabs__tab cf-tabs__tab--selected");
     assert.deepEqual(callback_args, ["translated: Search filters", "search-operators"]);
     assert.equal(widget.value(), "translated: Search filters");
     assert.equal(widget.value(), callback_value);
@@ -310,8 +301,10 @@ run_test("basics", () => {
 
     callback_args = undefined;
     widget.disable_tab("search-operators");
-    assert.equal(env.tabs[2].hasClass("disabled"), true);
-    assert.equal(env.tabs[2].class, "last disabled");
+    assert.equal(env.tabs[2].hasClass("cf-tabs__tab--disabled"), true);
+    assert.equal(env.tabs[2].class, "cf-tabs__tab cf-tabs__tab--disabled");
+    assert.equal(env.tabs[2].attr("aria-disabled"), "true");
+    assert.equal(env.tabs[2].attr("tabindex"), -1);
 
     widget.goto("keyboard-shortcuts");
     assert.equal(env.focused_tab, 0);

@@ -1,4 +1,4 @@
-<div class="popover-menu color-picker-popover no-auto-hide-left-sidebar-overlay" data-simplebar data-simplebar-tab-index="-1">
+<div class="cf-menu popover-menu color-picker-popover no-auto-hide-left-sidebar-overlay" data-simplebar data-simplebar-tab-index="-1">
     <div class="message_header message_header_stream" data-stream-id="{{stream_id}}">
         <div class="message-header-contents" style="background: {{recipient_bar_color}};">
             <div class="message_label_clickable stream_label">
@@ -13,12 +13,17 @@
                 &nbsp;
                 {{/if}}
             </div>
-            <button class="color_picker_confirm_button icon-button icon-button-square icon-button-neutral tippy-zulip-delayed-tooltip" data-tooltip-template-id="color-picker-confirm-button-tooltip-template" aria-label="{{t 'Confirm new color' }}" tabindex="0">
-                <i class="zulip-icon zulip-icon-check"></i>
-            </button>
+            {{> ../cofounder/components/icon_button
+              icon="check"
+              intent="neutral"
+              squared=true
+              custom_classes="color_picker_confirm_button tippy-zulip-delayed-tooltip"
+              data-tooltip-template-id="color-picker-confirm-button-tooltip-template"
+              aria-label=(t "Confirm new color")
+              }}
         </div>
     </div>
-    <ul role="menu" class="popover-menu-list">
+    <ul role="menu" class="cf-menu__list popover-menu-list">
         <li role="none">
             <div role="group" class="color-swatch-list" aria-label="{{t 'Stream color' }}">
                 {{#each stream_color_palette as |row|}}
@@ -29,11 +34,11 @@
                 {{/each}}
             </div>
         </li>
-        <li role="separator" class="popover-menu-separator"></li>
-        <li role="none" class="link-item popover-menu-list-item">
-            <label role="menuitem" class="custom-color-picker popover-menu-link" tabindex="0">
-                <i class="custom-color-swatch-icon popover-menu-icon" aria-hidden="true"></i>
-                <span class="popover-menu-label">{{t "Custom color"}}</span>
+        <li role="separator" class="cf-menu__separator popover-menu-separator"></li>
+        <li role="none" class="link-item cf-menu__item popover-menu-list-item">
+            <label role="menuitem" class="custom-color-picker cf-menu__action popover-menu-link" tabindex="0">
+                <span class="custom-color-swatch-icon cf-menu__icon popover-menu-icon" aria-hidden="true"></span>
+                <span class="cf-menu__label popover-menu-label">{{t "Custom color"}}</span>
                 <input type="color" class="color-picker-input" tabindex="-1" value="{{stream_color}}" />
             </label>
         </li>

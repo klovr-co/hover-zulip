@@ -1,11 +1,5 @@
-<div class="popover-menu playground-links-popover" data-simplebar data-simplebar-tab-index="-1">
-    <ul role="menu" class="popover-menu-list">
-        {{#each playground_info}}
-            <li role="none" class="link-item popover-menu-list-item">
-                <a href="{{this/playground_url}}" target="_blank" rel="noopener noreferrer" role="menuitem" class="popover_playground_link popover-menu-link" tabindex="0">
-                    <span class="popover-menu-label">{{t "View in {name}" }}</span>
-                </a>
-            </li>
-        {{/each}}
-    </ul>
-</div>
+{{#> ../cofounder/components/menu custom_classes="popover-menu playground-links-popover"}}
+    {{#each playground_info}}
+        {{> ../cofounder/components/menu_item href=this/playground_url target="_blank" rel="noopener noreferrer" label=(t "View in {name}") custom_classes="popover_playground_link popover-menu-link" item_classes="link-item popover-menu-list-item"}}
+    {{/each}}
+{{/../cofounder/components/menu}}

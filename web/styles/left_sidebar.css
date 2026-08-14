@@ -303,8 +303,8 @@
     }
 }
 
-#direct-messages-modal-section-header,
-#direct-messages-section-header {
+#direct-messages-modal-section-header:not(.cf-dm-section-header),
+#direct-messages-section-header:not(.cf-dm-section-header) {
     grid-template-columns:
         0 var(--left-sidebar-header-icon-toggle-width) 0 minmax(0, 1fr)
         minmax(0, max-content) minmax(0, max-content) var(
@@ -375,7 +375,7 @@
     }
 }
 
-#direct-messages-section-header {
+#direct-messages-section-header:not(.cf-dm-section-header) {
     display: grid;
     align-items: center;
     /* This extends the general pattern of left sidebar rows, but includes a
@@ -421,7 +421,7 @@
     }
 }
 
-#direct-messages-modal-section-header {
+#direct-messages-modal-section-header:not(.cf-dm-section-header) {
     display: grid;
     align-items: center;
     /* This is a simplified version of left sidebar rows, and includes a
@@ -761,50 +761,20 @@
                 vertical-align: -0.2em;
             }
         }
-
-        & li#show-more-direct-messages {
-            color: var(--color-text-sidebar-action-heading);
-            cursor: pointer;
-            /* The 'more conversations' line has no icons,
-               so vertically align the text with the unread
-               count, when one appears there. */
-            align-items: baseline;
-
-            .dm-name {
-                font-size: var(--font-size-sidebar-action-heading);
-                font-weight: var(--font-weight-sidebar-action-heading);
-                font-variant: var(--font-variant-sidebar-action-heading);
-                text-transform: var(--text-transform-sidebar-action-heading);
-            }
-
-            &:hover {
-                background-color: var(
-                    --color-background-sidebar-action-heading-hover
-                );
-
-                .dm-name {
-                    color: var(--color-text-sidebar-action-heading-hover);
-                }
-            }
-
-            .unread_count {
-                margin-top: 2px;
-            }
-        }
     }
 }
 
-.zulip-icon-heading-triangle-right {
+.cf-sidebar-heading-chevron {
     transition:
         opacity 140ms linear,
         rotate 140ms linear;
 }
 
-.zulip-icon-heading-triangle-right.rotate-icon-down {
+.cf-sidebar-heading-chevron.rotate-icon-down {
     rotate: 90deg;
 }
 
-.zulip-icon-heading-triangle-right.rotate-icon-right {
+.cf-sidebar-heading-chevron.rotate-icon-right {
     rotate: 0deg;
 }
 
@@ -1118,7 +1088,7 @@ ul.filters {
     line-height: var(--line-height-sidebar-row-prominent);
 
     .sidebar-topic-name,
-    .left-sidebar-navigation-label-container {
+    .left-sidebar-navigation-label-container:not(.cf-nav-item__main) {
         color: var(--color-text-sidebar-row);
 
         &:hover {
@@ -2401,7 +2371,7 @@ li.topic-list-item {
     }
 }
 
-.dm-box {
+.dm-box:not(.cf-dm-nav__main) {
     user-select: text;
     grid-template-columns:
         var(--left-sidebar-toggle-width-offset) [action-heading-start] var(
@@ -2619,7 +2589,7 @@ body:not(.spectator-view)
 }
 
 @container app (width <= $cq_ml_min) {
-    .left-sidebar-modal-close-area .zulip-icon-close {
+    .left-sidebar-modal-close-area .left-sidebar-modal-close-icon {
         margin-right: 5px;
     }
 }

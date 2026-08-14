@@ -6,11 +6,11 @@ import * as message_store from "./message_store.ts";
 
 export function initialize(): void {
     // Message-pane clicks stop propagating at #main_div.
-    $("#main_div").on("click", ".hover-dispute-review-button", (event) => {
+    $("#main_div").on("click", ".cf-review-detail__review", (event) => {
         event.preventDefault();
         const $button = $(event.currentTarget);
-        const message_id = Number($button.attr("data-hover-message-id"));
-        const field_path = $button.attr("data-hover-field-path");
+        const message_id = Number($button.attr("data-cf-review-message-id"));
+        const field_path = $button.attr("data-cf-review-field-path");
         const message = message_store.get(message_id);
         if (message === undefined || field_path === undefined) {
             return;

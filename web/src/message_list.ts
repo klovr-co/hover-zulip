@@ -608,9 +608,9 @@ export class MessageList {
         if ($row.find(".message_edit_form form").length > 0) {
             return;
         }
-        $row.find(".messagebox-content").append($form);
-        $row.find(".message_content, .status-message, .message_controls").hide();
-        $row.find(".messagebox-content").addClass("content_edit_mode");
+        $row.find(".cf-message-item__body").append($form);
+        $row.find(".cf-message-item__content, .status-message, .cf-message-actions").hide();
+        $row.find(".cf-message-item__body").addClass("content_edit_mode");
         if (do_autosize) {
             // autosize will not change the height of the textarea if the `$row` is not
             // rendered in DOM yet. So, we call `autosize.update` post render.
@@ -624,8 +624,8 @@ export class MessageList {
             return;
         }
         compose_tooltips.hide_compose_control_button_tooltips($row);
-        $row.find(".message_content, .status-message, .message_controls").show();
-        $row.find(".messagebox-content").removeClass("content_edit_mode");
+        $row.find(".cf-message-item__content, .status-message, .cf-message-actions").show();
+        $row.find(".cf-message-item__body").removeClass("content_edit_mode");
         $row.find(".message_edit").remove();
         $row.trigger("mouseleave");
     }

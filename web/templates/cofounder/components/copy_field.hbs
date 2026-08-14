@@ -1,0 +1,4 @@
+<div class="cf-copy-field{{#if custom_classes}} {{custom_classes}}{{/if}}">
+    <code class="cf-copy-field__value{{#if value_classes}} {{value_classes}}{{/if}}">{{value}}</code>
+    {{> icon_button icon="copy" intent="neutral" squared=true component_classes="cf-copy-field__button" custom_classes=button_classes aria-label=copy_label data-tippy-content=copy_label data-clipboard-text=value}}
+</div>

@@ -62,12 +62,12 @@ function submit(message_id: number, decision: Decision): void {
     }
     const request_id = request_ids.get(message_id) ?? hover_request_id.generate();
     request_ids.set(message_id, request_id);
-    const $panel = $(`[data-hover-suggested-action-message-id='${message_id}']`);
+    const $panel = $(`[data-cf-suggested-action-message-id='${message_id}']`);
     $panel.find("button").prop("disabled", true);
-    $panel.find("[data-hover-action-status]").text($t({defaultMessage: "Saving…"}));
+    $panel.find("[data-cf-action-status]").text($t({defaultMessage: "Saving…"}));
     const reason =
         decision === "not_action"
-            ? ($panel.find<HTMLInputElement>("[data-hover-action-reason]").val() ?? "").trim()
+            ? ($panel.find<HTMLInputElement>("[data-cf-action-reason]").val() ?? "").trim()
             : null;
     const data: Record<string, number | string | null> = {
         decision,
@@ -76,13 +76,11 @@ function submit(message_id: number, decision: Decision): void {
         reason,
     };
     if (decision === "approve") {
-        data["wording"] =
-            $panel.find<HTMLTextAreaElement>("[data-hover-action-wording]").val() ?? "";
+        data["wording"] = $panel.find<HTMLTextAreaElement>("[data-cf-action-wording]").val() ?? "";
         data["assignee_user_id"] = String(
-            $panel.find<HTMLSelectElement>("[data-hover-action-assignee]").val() ?? "",
+            $panel.find<HTMLSelectElement>("[data-cf-action-assignee]").val() ?? "",
         );
-        data["due_date"] =
-            $panel.find<HTMLInputElement>("[data-hover-action-due-date]").val() ?? "";
+        data["due_date"] = $panel.find<HTMLInputElement>("[data-cf-action-due-date]").val() ?? "";
     }
     void channel.post({
         url: `/json/hover/spaces/${space.id}/generated-items/${item.id}/suggested-action/decisions`,
@@ -90,7 +88,7 @@ function submit(message_id: number, decision: Decision): void {
         success(raw_data) {
             const response = response_schema.parse(raw_data);
             apply_projection(message_id, {...item, suggested_action: response.suggested_action});
-            $(`[data-hover-suggested-action-message-id='${message_id}']`).trigger("focus");
+            $(`[data-cf-suggested-action-message-id='${message_id}']`).trigger("focus");
         },
         error(xhr) {
             const conflict = conflict_schema.safeParse(xhr.responseJSON);
@@ -103,7 +101,7 @@ function submit(message_id: number, decision: Decision): void {
             } else {
                 $panel.find("button").prop("disabled", false);
                 $panel
-                    .find("[data-hover-action-status]")
+                    .find("[data-cf-action-status]")
                     .text($t({defaultMessage: "Could not save. Try again."}));
             }
         },
@@ -113,11 +111,11 @@ function submit(message_id: number, decision: Decision): void {
 export function initialize(): void {
     // Message-pane clicks stop propagating at #main_div, so handlers for
     // controls rendered inside a message must be delegated from that root.
-    $("#main_div").on("click", "[data-hover-action-decision]", (event) => {
+    $("#main_div").on("click", "[data-cf-action-decision]", (event) => {
         event.stopPropagation();
         const $button = $(event.currentTarget);
-        const message_id = Number($button.attr("data-hover-message-id"));
-        const decision = $button.attr("data-hover-action-decision");
+        const message_id = Number($button.attr("data-cf-message-id"));
+        const decision = $button.attr("data-cf-action-decision");
         if (
             Number.isSafeInteger(message_id) &&
             (decision === "approve" || decision === "not_action" || decision === "restore")

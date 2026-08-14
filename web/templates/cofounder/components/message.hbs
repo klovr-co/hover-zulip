@@ -1,0 +1,22 @@
+<article class="cf-message-item cf-message-item--preview{{#if is_own}} cf-message-item--own{{/if}}" role="listitem">
+    <img class="cf-message-item__avatar" src="{{avatar_url}}" alt="">
+    <div class="cf-message-item__body">
+        <header class="cf-message-item__header">
+            <button class="cf-message-item__sender" type="button">{{sender}}</button>
+            <time class="cf-message-item__time">{{time}}</time>
+            {{> icon_button icon="more-vertical" intent="neutral" custom_classes="cf-message-item__actions" data-tippy-content=(t "Message actions") aria-label=(t "Message actions") }}
+        </header>
+        <div class="cf-message-item__content">{{{content_html}}}</div>
+        {{#if has_reactions}}
+        <div class="cf-message-item__reactions" aria-label="{{t 'Reactions' }}">
+            {{#each reactions}}
+            <button class="cf-message-item__reaction{{#if selected}} cf-message-item__reaction--selected{{/if}}" type="button" aria-label="{{label}}">
+                <span aria-hidden="true">{{emoji}}</span>
+                <span>{{count}}</span>
+            </button>
+            {{/each}}
+            <button class="cf-message-item__add-reaction" type="button" aria-label="{{t 'Add reaction' }}">{{> icon name="plus" compact=true}}</button>
+        </div>
+        {{/if}}
+    </div>
+</article>

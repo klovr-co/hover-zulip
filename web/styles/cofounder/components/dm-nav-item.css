@@ -1,0 +1,183 @@
+li.cf-dm-nav {
+    box-sizing: border-box;
+    position: relative;
+    min-width: 0;
+    min-height: var(--cf-control-height);
+    padding: 0;
+    margin: 0;
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-primary);
+    background: transparent;
+    font-family: var(--cf-font-ui);
+    font-size: var(--cf-type-body);
+    line-height: 1.2;
+    transition:
+        color var(--cf-duration-fast) ease,
+        background-color var(--cf-duration-fast) ease;
+}
+
+li.cf-dm-nav:is(:hover, :focus-within, .highlighted_row) {
+    background: var(--cf-surface-hover);
+    box-shadow: none;
+}
+
+li.cf-dm-nav:is(.cf-dm-nav--selected, .active-sub-filter) {
+    color: var(--cf-color-accent);
+    background: var(--cf-surface-selected);
+    box-shadow: inset 3px 0 0 var(--cf-color-accent);
+}
+
+.cf-dm-nav > .cf-dm-nav__main {
+    box-sizing: border-box;
+    display: grid;
+    grid-template: auto / 16px minmax(0, 1fr) auto;
+    gap: var(--cf-space-2);
+    align-items: center;
+    min-width: 0;
+    min-height: var(--cf-control-height);
+    padding: 5px 6px 5px 8px;
+    border-radius: inherit;
+    color: inherit;
+    text-decoration: none;
+    user-select: text;
+}
+
+.cf-dm-nav > .cf-dm-nav__main:is(:hover, :focus, :active) {
+    color: inherit;
+    text-decoration: none;
+}
+
+.cf-dm-nav > .cf-dm-nav__main:focus {
+    outline: none;
+}
+
+.cf-dm-nav:has(> .cf-dm-nav__main:focus-visible) {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: -2px;
+}
+
+.cf-dm-nav__presence {
+    display: grid;
+    width: 16px;
+    height: 16px;
+    color: var(--cf-text-secondary);
+    place-items: center;
+    grid-area: auto;
+}
+
+.cf-dm-nav__presence-dot {
+    box-sizing: border-box;
+    width: 8px;
+    height: 8px;
+    border: 1px solid var(--cf-surface-paper);
+    border-radius: var(--cf-radius-pill);
+    background: var(--cf-border-strong);
+    box-shadow: 0 0 0 1px var(--cf-border-subtle);
+}
+
+.cf-dm-nav__presence-dot.user-circle-active {
+    background: var(--cf-color-success);
+}
+
+.cf-dm-nav__presence-dot.user-circle-idle {
+    background: var(--cf-color-warning);
+    -webkit-text-fill-color: initial;
+}
+
+.cf-dm-nav__presence-dot.user-circle-deactivated {
+    background: var(--cf-color-disabled);
+}
+
+.cf-dm-nav__label {
+    display: flex;
+    gap: var(--cf-space-1);
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+    color: inherit;
+    align-self: center;
+    grid-area: auto;
+}
+
+.cf-dm-nav__label > .cf-dm-nav__label-text {
+    display: block;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    font-weight: 540;
+    line-height: inherit;
+    overflow-wrap: normal;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -webkit-line-clamp: initial;
+}
+
+.cf-dm-nav__self {
+    flex: none;
+    color: var(--cf-text-secondary);
+    font-size: var(--cf-type-meta);
+}
+
+.cf-dm-nav__label > .status-emoji {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    vertical-align: 0;
+}
+
+.cf-dm-nav__bot {
+    display: grid;
+    flex: none;
+    color: var(--cf-text-secondary);
+    place-items: center;
+}
+
+.cf-dm-nav__bot > .cf-icon {
+    width: 12px;
+    height: 12px;
+}
+
+.cf-dm-nav__signals {
+    display: flex;
+    gap: var(--cf-space-1);
+    align-items: center;
+    align-self: center;
+    margin: 0;
+    grid-area: auto;
+}
+
+.cf-dm-nav__mention {
+    color: var(--cf-color-accent);
+    font-size: var(--cf-type-meta);
+    font-weight: 700;
+}
+
+.cf-dm-nav__signals > .cf-dm-nav__badge {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 20px;
+    height: 20px;
+    padding-inline: 6px;
+    margin: 0;
+    border-radius: var(--cf-radius-pill);
+    color: var(--cf-text-secondary);
+    background: color-mix(in srgb, var(--cf-border-subtle) 62%, transparent);
+    font-size: var(--cf-type-meta);
+    font-variant-numeric: tabular-nums;
+    font-weight: 650;
+    line-height: 1;
+}
+
+.cf-dm-nav__signals > .cf-dm-nav__badge.zero_count {
+    display: none;
+}
+
+@media (width <= 600px) {
+    li.cf-dm-nav,
+    .cf-dm-nav > .cf-dm-nav__main {
+        min-height: var(--cf-control-height-touch);
+    }
+}

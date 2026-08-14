@@ -1,4 +1,4 @@
-<div id="compose-content">
+<div id="compose-content" class="cf-composer cf-composer--production">
     {{!-- scroll to bottom button is not part of compose but
     helps us align it at various screens sizes with
     minimal css and no JS. We keep it `position: absolute` to prevent
@@ -12,7 +12,7 @@
             {{> components/action_button id="scroll-to-bottom-button" icon="chevron-down" variant="subtle" intent="brand" }}
         </div>
     </div>
-    <div id="closed-compose-controls">
+    <div id="closed-compose-controls" class="cf-composer__closed-controls">
         <div id="legacy-closed-compose-box">
             <div class="reply_button_container">
                 <div class="compose-reply-button-wrapper" data-reply-button-type="selected_message">
@@ -45,11 +45,11 @@
             {{/unless}}
         </div>
     </div>
-    <div class="message_comp">
+    <div class="message_comp cf-composer__open-controls">
         <div id="compose_banners" data-simplebar data-simplebar-tab-index="-1"></div>
-        <div class="composition-area">
+        <div class="composition-area cf-composer__composition-area">
             <form id="send_message_form" action="/json/messages" method="post">
-                <div class="compose_table">
+                <div class="compose_table cf-composer__table">
                     <div id="compose_top">
                         {{!-- We start with the low-attention-recipient-row class
                         on the template to avoid showing the transition
@@ -58,55 +58,59 @@
                         so, for example, opening the compose box from
                         Inbox view does not cause any flash of unwanted
                         styling. --}}
-                        <div id="compose-recipient" class="low-attention-recipient-row">
+                        <div id="compose-recipient" class="cf-composer__recipient low-attention-recipient-row">
                             {{> dropdown_widget_wrapper
-                              widget_name="compose_select_recipient"}}
+                              widget_name="compose_select_recipient"
+                              cofounder=true
+                              aria-label=(t "Message recipient")}}
                             <div class="topic-marker-container">
-                                <a role="button" class="conversation-arrow zulip-icon zulip-icon-chevron-right"></a>
+                                <a role="button" class="cf-composer__conversation-arrow conversation-arrow" aria-label="{{t 'Open conversation' }}">
+                                    {{> cofounder/components/icon name="chevron-right" compact=true}}
+                                </a>
                             </div>
                             <div id="compose-channel-recipient">
                                 <input type="text" name="stream_message_recipient_topic" id="stream_message_recipient_topic" value="" placeholder="{{t 'Topic' }}" autocomplete="off" tabindex="0" aria-label="{{t 'Topic' }}" />
                                 <span id="topic-not-mandatory-placeholder" class="placeholder">
                                     {{> topic_not_mandatory_placeholder_text empty_string_topic_display_name=empty_string_topic_display_name}}
                                 </span>
-                                <button type="button" id="recipient_box_clear_topic_button" class="compose-new-recipient-button" tabindex="-1">
-                                    <i class="zulip-icon zulip-icon-square-plus"></i>
+                                <button type="button" id="recipient_box_clear_topic_button" class="compose-new-recipient-button" aria-label="{{t 'Clear topic' }}" tabindex="-1">
+                                    {{> cofounder/components/icon name="plus" compact=true}}
                                 </button>
                             </div>
                             <div id="compose-direct-recipient" data-before="{{t 'You and' }}">
                                 <div class="pill-container">
                                     <div class="input" contenteditable="true" id="private_message_recipient" data-no-recipients-text="{{t 'Add users' }}" ></div>
-                                    <button type="button" id="compose-new-direct-recipient-button" class="compose-new-recipient-button tippy-zulip-delayed-tooltip" data-tippy-content="{{t 'Add recipient' }}" tabindex="-1">
-                                        <i class="zulip-icon zulip-icon-square-plus"></i>
+                                    <button type="button" id="compose-new-direct-recipient-button" class="compose-new-recipient-button tippy-zulip-delayed-tooltip" aria-label="{{t 'Add recipient' }}" data-tippy-content="{{t 'Add recipient' }}" tabindex="-1">
+                                        {{> cofounder/components/icon name="plus" compact=true}}
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div id="hover-response-controls" class="hover-response-controls" hidden>
-                        <div class="hover-response-controls__heading">
-                            <span>{{t "Respond to Hover's update" }}</span>
-                            <div class="hover-response-type" role="radiogroup" aria-label="{{t 'Response type' }}">
-                                <button type="button" class="hover-response-type__button selected" data-hover-response-type="reply" role="radio" aria-checked="true">{{t 'Reply' }}</button>
-                                <button type="button" class="hover-response-type__button" data-hover-response-type="review" role="radio" aria-checked="false">{{t 'Review' }}</button>
+                    <div id="cf-review-composer-controls" class="cf-review-composer" hidden>
+                        <div class="cf-review-composer__header">
+                            <strong class="cf-review-composer__title">{{t "Respond to Hover's update" }}</strong>
+                            <div class="cf-review-composer__mode-switch" role="radiogroup" aria-label="{{t 'Response type' }}">
+                                <button type="button" class="cf-review-composer__mode" data-cf-response-mode="reply" role="radio" aria-checked="true">{{t 'Reply' }}</button>
+                                <button type="button" class="cf-review-composer__mode" data-cf-response-mode="review" role="radio" aria-checked="false">{{t 'Review' }}</button>
                             </div>
                         </div>
-                        <p class="hover-response-controls__help" data-hover-reply-help>{{t 'Reply adds context without changing Hover’s current interpretation.' }}</p>
-                        <div class="hover-review-patch" hidden>
-                            <label>
-                                <span>{{t 'Field to revise' }}</span>
-                                <select id="hover-review-field"><option value="">{{t 'Choose a field' }}</option></select>
+                        <p class="cf-review-composer__help" data-cf-reply-help>{{t 'Reply adds context without changing Hover’s current interpretation.' }}</p>
+                        <div class="cf-review-composer__patch" data-cf-review-patch hidden>
+                            <label class="cf-field cf-review-composer__field">
+                                <span class="cf-field__label">{{t 'Field to revise' }}</span>
+                                <select id="cf-review-field" class="cf-field__control"><option value="">{{t 'Choose a field' }}</option></select>
                             </label>
-                            <label>
-                                <span>{{t 'New value (JSON)' }}</span>
-                                <input id="hover-review-value" type="text" placeholder="{{t '&quot;Confirmed&quot;' }}" autocomplete="off" />
+                            <label class="cf-field cf-review-composer__field">
+                                <span class="cf-field__label">{{t 'New value (JSON)' }}</span>
+                                <input id="cf-review-value" class="cf-field__control" type="text" placeholder="{{t '&quot;Confirmed&quot;' }}" autocomplete="off" />
                             </label>
-                            <p>{{t 'Choose a field and value to apply it now. Leave either blank and Hover will ask for clarification without changing the update.' }}</p>
+                            <p class="cf-review-composer__guidance">{{t 'Choose a field and value to apply it now. Leave either blank and Hover will ask for clarification without changing the update.' }}</p>
                         </div>
                     </div>
-                    <div class="messagebox">
-                        <div id="message-content-container" class="surround-formatting-buttons-row">
-                            <textarea class="new_message_textarea message-textarea" name="content" id='compose-textarea' placeholder="{{t 'Compose your message here' }}" tabindex="0" aria-label="{{t 'Compose your message here…' }}"></textarea>
+                    <div class="cf-composer__body">
+                        <div id="message-content-container" class="cf-composer__editor surround-formatting-buttons-row">
+                            <textarea class="cf-composer__textarea new_message_textarea message-textarea" name="content" id='compose-textarea' placeholder="{{t 'Compose your message here' }}" tabindex="0" aria-label="{{t 'Compose your message here…' }}"></textarea>
                             <div id="preview-message-area-container">
                                 <div class="scrolling_list preview_message_area" data-simplebar data-simplebar-tab-index="-1" id="preview_message_area" style="display:none;">
                                     <div class="markdown_preview_spinner"></div>
@@ -114,42 +118,50 @@
                                 </div>
                             </div>
                             <div class="composebox-buttons">
-                                <button type="button" class="maximize-composebox-button zulip-icon zulip-icon-maximize-diagonal" aria-label="{{t 'Maximize compose box' }}" data-tippy-content="{{t 'Maximize compose box' }}"></button>
-                                <button type="button" class="expand-composebox-button zulip-icon zulip-icon-expand-diagonal" aria-label="{{t 'Expand compose box' }}" data-tippy-content="{{t 'Expand compose box' }}"></button>
-                                <button type="button" class="collapse-composebox-button zulip-icon zulip-icon-collapse-diagonal" aria-label="{{t 'Collapse compose box' }}" data-tippy-content="{{t 'Collapse compose box' }}"></button>
+                                <button type="button" class="cf-composer__resize-button maximize-composebox-button" aria-label="{{t 'Maximize compose box' }}" data-tippy-content="{{t 'Maximize compose box' }}">
+                                    {{> cofounder/components/icon name="maximize" compact=true}}
+                                </button>
+                                <button type="button" class="cf-composer__resize-button expand-composebox-button" aria-label="{{t 'Expand compose box' }}" data-tippy-content="{{t 'Expand compose box' }}">
+                                    {{> cofounder/components/icon name="expand" compact=true}}
+                                </button>
+                                <button type="button" class="cf-composer__resize-button collapse-composebox-button" aria-label="{{t 'Collapse compose box' }}" data-tippy-content="{{t 'Collapse compose box' }}">
+                                    {{> cofounder/components/icon name="minimize" compact=true}}
+                                </button>
                             </div>
                             <div class="drag"></div>
                         </div>
 
-                        <div id="message-send-controls-container">
+                        <div id="message-send-controls-container" class="cf-composer__send-column">
                             <a id="compose-drafts-button" role="button" class="send-control-button hide-sm" tabindex=0 href="#drafts">
                                 <span class="compose-drafts-text">{{t 'Drafts' }}</span><span class="compose-drafts-count-container">(<span class="compose-drafts-count"></span>)</span>
                             </a>
                             <span id="compose-limit-indicator" class="message-limit-indicator"></span>
-                            <div class="message-send-controls">
-                                <button type="submit" id="compose-send-button" class="send_message compose-submit-button compose-send-or-save-button" aria-label="{{t 'Send' }}">
+                            <div class="message-send-controls cf-composer__send-controls">
+                                <button type="submit" id="compose-send-button" class="cf-composer__send-button send_message compose-submit-button compose-send-or-save-button" aria-label="{{t 'Send' }}">
                                     <img class="loader" alt="" src="" />
-                                    <i class="zulip-icon zulip-icon-send"></i>
+                                    {{> cofounder/components/icon name="send" compact=true custom_classes="cf-composer__send-icon"}}
                                 </button>
-                                <button class="send-control-button send-related-action-button" id="send_later" tabindex=0 type="button" data-tippy-content="{{t 'Send options' }}" aria-label="{{t 'Send options' }}">
-                                    <i class="zulip-icon zulip-icon-more-vertical"></i>
+                                <button class="cf-composer__send-options send-control-button send-related-action-button" id="send_later" tabindex=0 type="button" data-tippy-content="{{t 'Send options' }}" aria-label="{{t 'Send options' }}">
+                                    {{> cofounder/components/icon name="more-vertical" compact=true}}
                                 </button>
                             </div>
                         </div>
 
-                        <div id="message-formatting-controls-container" class="compose-scrolling-buttons-container">
+                        <div id="message-formatting-controls-container" class="cf-composer__toolbar compose-scrolling-buttons-container">
                             {{> compose_control_buttons . }}
                             <button type="button" class="formatting-control-scroller-button formatting-scroller-forward" aria-label="{{t 'Scroll forward' }}">
-                                <i class="scroller-forward-icon zulip-icon zulip-icon-compose-scroll-right"></i>
+                                {{> cofounder/components/icon name="chevron-right" compact=true custom_classes="scroller-forward-icon"}}
                             </button>
                             <button type="button" class="formatting-control-scroller-button formatting-scroller-backward" aria-label="{{t 'Scroll backward' }}">
-                                <i class="scroller-backward-icon zulip-icon zulip-icon-compose-scroll-left"></i>
+                                {{> cofounder/components/icon name="chevron-left" compact=true custom_classes="scroller-backward-icon"}}
                             </button>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
-        <button type="button" class="zulip-icon zulip-icon-close" id='compose_close' data-tooltip-template-id="compose_close_tooltip_template" aria-label="{{t 'Cancel compose' }}"></button>
+        <button type="button" class="cf-composer__close" id='compose_close' data-tooltip-template-id="compose_close_tooltip_template" aria-label="{{t 'Cancel compose' }}">
+            {{> cofounder/components/icon name="close" compact=true}}
+        </button>
     </div>
 </div>

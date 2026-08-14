@@ -70,7 +70,7 @@ test("config", () => {
     );
     assert.equal(
         upload.compose_config.upload_banner_hide_button("id_2")[0],
-        $("#compose_banners .upload_banner.file_id_2 .main-view-banner-close-button")[0],
+        $("#compose_banners .upload_banner.file_id_2 .cf-notice__close")[0],
     );
     assert.equal(upload.compose_config.file_input_identifier(), "#compose input.file_input");
     assert.equal(upload.compose_config.source(), "compose-file-input");
@@ -110,14 +110,12 @@ test("config", () => {
     );
 
     $(`#edit_form_${CSS.escape(2)} .upload_banner`).set_find_results(
-        ".main-view-banner-close-button",
-        $(".main-view-banner-close-button"),
+        ".cf-notice__close",
+        $(".cf-notice__close"),
     );
     assert.equal(
         upload.edit_config(2).upload_banner_hide_button("id_34")[0],
-        $(
-            `#edit_form_${CSS.escape(2)} .upload_banner.file_id_34 .main-view-banner-close-button`,
-        )[0],
+        $(`#edit_form_${CSS.escape(2)} .upload_banner.file_id_34 .cf-notice__close`)[0],
     );
 
     $(`#edit_form_${CSS.escape(22)} .upload_banner.file_id_234`).set_find_results(

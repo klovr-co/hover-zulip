@@ -1,8 +1,6 @@
 import {$} from "jquery";
 
 import * as banners from "./banners.ts";
-import type {Banner} from "./banners.ts";
-import type {ActionButton} from "./buttons.ts";
 import {$t} from "./i18n.ts";
 import * as settings_config from "./settings_config.ts";
 import * as settings_data from "./settings_data.ts";
@@ -18,8 +16,8 @@ export function set_up_upgrade_banners(): void {
         return;
     }
 
-    let upgrade_buttons: ActionButton[] = [];
-    let banner_intent: Banner["intent"] = "neutral";
+    let upgrade_buttons: banners.BannerAction[] = [];
+    let banner_intent: banners.Banner["intent"] = "neutral";
 
     if (has_billing_access) {
         banner_intent = "info";
@@ -27,7 +25,7 @@ export function set_up_upgrade_banners(): void {
             {
                 label: $t({defaultMessage: "Upgrade"}),
                 custom_classes: "request-upgrade",
-                variant: "subtle",
+                variant: "secondary",
             },
         ];
 
@@ -37,13 +35,13 @@ export function set_up_upgrade_banners(): void {
                 {
                     label: $t({defaultMessage: "Request sponsorship"}),
                     custom_classes: "request-sponsorship",
-                    variant: "text",
+                    variant: "ghost",
                 },
             ];
         }
     }
 
-    const upgrade_banner: Banner = {
+    const upgrade_banner: banners.Banner = {
         intent: banner_intent,
         label: $t({defaultMessage: "Available on Zulip Cloud Standard."}),
         buttons: upgrade_buttons,
@@ -54,7 +52,7 @@ export function set_up_upgrade_banners(): void {
     banners.open(upgrade_banner, $upgrade_banner_containers);
 }
 
-export function set_up_banner($container: JQuery, banner: Banner, url?: string): void {
+export function set_up_banner($container: JQuery, banner: banners.Banner, url?: string): void {
     if ($container.length === 0) {
         return;
     }

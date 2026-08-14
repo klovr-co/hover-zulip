@@ -5,23 +5,24 @@ import render_banner from "../templates/components/banner.hbs";
 import {component_story} from "./story_utils.ts";
 
 type BannerButton = {
-    intent?: BannerArgs["intent"];
     label: string;
-    variant: "solid" | "subtle" | "text";
+    variant: "primary" | "secondary" | "ghost" | "danger" | "success";
 };
 
 type BannerArgs = {
     buttons: BannerButton[];
     close_button: boolean;
+    custom_classes?: string;
     intent: "neutral" | "brand" | "info" | "success" | "warning" | "danger";
     label: string;
+    process?: string;
 };
 
 const meta = {
-    title: "Components/Banner",
+    title: "Cofounder/Components/Banner",
     tags: ["autodocs"],
     args: {
-        buttons: [{label: "Review", variant: "subtle"}],
+        buttons: [{label: "Review", variant: "secondary"}],
         close_button: true,
         intent: "info",
         label: "A new activity summary is ready to review.",
@@ -42,4 +43,20 @@ export const AllIntents: Story = {
                 .join(""),
             true,
         ),
+};
+
+export const Navbar: Story = {
+    args: {
+        custom_classes: "navbar-alert-banner",
+        label: "Your organization has a new policy update.",
+        process: "organization-policy-update",
+    },
+};
+
+export const Popup: Story = {
+    args: {
+        custom_classes: "popup-banner",
+        intent: "success",
+        label: "Your changes were saved.",
+    },
 };

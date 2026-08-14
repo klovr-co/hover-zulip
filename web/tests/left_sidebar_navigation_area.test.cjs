@@ -2,6 +2,7 @@
 
 const assert = require("node:assert/strict");
 
+const {make_realm} = require("./lib/example_realm.cjs");
 const {mock_esm, set_global, zrequire} = require("./lib/namespace.cjs");
 const {run_test} = require("./lib/test.cjs");
 const {$} = require("./lib/zjquery.cjs");
@@ -13,7 +14,27 @@ mock_esm("../src/resize", {
 const {Filter} = zrequire("../src/filter");
 const left_sidebar_navigation_area = zrequire("left_sidebar_navigation_area");
 const scheduled_messages = zrequire("scheduled_messages");
+const {set_realm} = zrequire("state_data");
+
+set_realm(make_realm());
 const message_reminder = zrequire("message_reminder");
+
+run_test("Cofounder navigation selection synchronizes aria-current", () => {
+    const $previous = $(".top-left-active-filter");
+    const $previous_link = $("<previous-link>").attr("aria-current", "page");
+    $previous.set_find_results(".cf-nav-item__main", $previous_link);
+
+    const $next = $(".top_left_inbox");
+    const $next_link = $("<next-link>");
+    $next.set_find_results(".cf-nav-item__main", $next_link);
+
+    left_sidebar_navigation_area.select_top_left_corner_item(".top_left_inbox");
+
+    assert.ok(!$previous.hasClass("top-left-active-filter"));
+    assert.equal($previous_link.attr("aria-current"), undefined);
+    assert.ok($next.hasClass("top-left-active-filter"));
+    assert.equal($next_link.attr("aria-current"), "page");
+});
 
 run_test("narrowing", ({override_rewire}) => {
     override_rewire(

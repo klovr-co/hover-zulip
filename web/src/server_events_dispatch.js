@@ -416,8 +416,8 @@ export function dispatch_normal_event(event) {
                 jitsi_server_url: compose_call_ui.update_audio_and_video_chat_button_display,
                 gif_rating_policy: gif_state.update_gif_icon_visibility,
                 hover_enabled() {
-                    $("body").toggleClass("hover-enabled", realm.realm_hover_enabled);
-                    $(".hover-connected-account-settings-entry").toggleClass(
+                    $("body").toggleClass("hover-enabled cf-theme", realm.realm_hover_enabled);
+                    $(".cf-connected-account-settings-entry").toggleClass(
                         "hide",
                         !realm.realm_hover_enabled,
                     );

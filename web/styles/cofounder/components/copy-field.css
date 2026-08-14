@@ -1,0 +1,26 @@
+.cf-copy-field {
+    box-sizing: border-box;
+    display: flex;
+    gap: var(--cf-space-2);
+    align-items: center;
+    width: 100%;
+    min-height: var(--cf-control-height-touch);
+    padding: var(--cf-space-2);
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-canvas);
+}
+
+.cf-copy-field__value {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: inherit;
+    background: transparent;
+    font: 400 var(--cf-type-meta) / 1.45 var(--cf-font-mono);
+}
+
+.cf-copy-field__button.cf-icon-button {
+    flex: none;
+}

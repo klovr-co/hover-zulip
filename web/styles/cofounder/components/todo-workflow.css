@@ -1,0 +1,350 @@
+.cf-message-item--generated-update
+    .cf-message-item__body:has(> .cf-suggested-action) {
+    grid-template-rows:
+        minmax(var(--message-box-sender-line-height), auto)
+        repeat(5, auto);
+    grid-template-areas:
+        "edited message      controls . time"
+        ".      message      .        . .   "
+        ".      hover-action .        . .   "
+        ".      more         .        . .   "
+        ".      reactions    .        . .   "
+        ".      reminders    .        . .   ";
+}
+
+.cf-message-item--generated-update.cf-message-item--with-sender
+    .cf-message-item__body:has(> .cf-suggested-action) {
+    grid-template-areas:
+        "avatar sender       controls . time"
+        "avatar message      .        . .   "
+        ".      hover-action .        . .   "
+        ".      more         .        . .   "
+        ".      reactions    .        . .   "
+        ".      reminders    .        . .   ";
+}
+
+.cf-message-item__body > .cf-suggested-action {
+    grid-area: hover-action;
+}
+
+.cf-suggested-action {
+    margin: 10px 0 4px;
+    padding: 15px 16px;
+    border: 1px solid
+        color-mix(in srgb, var(--cf-color-warning) 35%, var(--cf-border-subtle));
+    border-left: 4px solid var(--cf-color-warning);
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-primary);
+    background: color-mix(
+        in srgb,
+        var(--cf-color-warning-soft) 55%,
+        var(--cf-surface-paper)
+    );
+    font-family: var(--cf-font-ui);
+}
+
+.cf-suggested-action__heading,
+.cf-suggested-action__controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.cf-suggested-action__heading {
+    justify-content: space-between;
+}
+
+.cf-suggested-action__heading h4,
+.cf-suggested-action__wording,
+.cf-suggested-action__facts,
+.cf-suggested-action__history,
+.cf-suggested-action__todo {
+    margin: 0;
+}
+
+.cf-suggested-action__heading h4 {
+    font-size: var(--cf-type-body);
+    font-weight: 700;
+}
+
+.cf-suggested-action__wording {
+    padding: 12px 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.cf-suggested-action__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    padding-bottom: 12px;
+}
+
+.cf-suggested-action__facts div {
+    min-width: 150px;
+}
+
+.cf-suggested-action__facts dt {
+    color: var(--cf-text-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.cf-suggested-action__facts dd {
+    margin: 2px 0 0;
+}
+
+.cf-suggested-action__controls input {
+    min-width: 150px;
+    flex: 1;
+}
+
+.cf-suggested-action__history,
+.cf-suggested-action__todo {
+    padding-bottom: 10px;
+    color: var(--cf-text-secondary);
+    font-size: var(--cf-type-meta);
+}
+
+.cf-suggested-action__status {
+    display: block;
+    min-height: 1em;
+    margin-top: 6px;
+    color: var(--cf-text-secondary);
+    font-size: 11px;
+}
+
+.cf-suggested-action__todo > p {
+    margin: 0 0 6px;
+}
+
+.cf-suggested-action__controls label {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.cf-suggested-action__controls {
+    flex-wrap: wrap;
+}
+
+.cf-suggested-action__refinements {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(150px, 1fr) minmax(150px, 1fr);
+    gap: 8px;
+    width: 100%;
+}
+
+.cf-suggested-action__refinements label {
+    align-items: stretch;
+    flex-direction: column;
+}
+
+.cf-suggested-action__refinements :is(textarea, select, input) {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.cf-suggested-action__refinements textarea {
+    min-height: 64px;
+    resize: vertical;
+}
+
+.cf-todos .overlay-messages-header {
+    align-items: flex-start;
+}
+
+.cf-todos .overlay-messages-header p {
+    margin: 3px 0 0;
+    color: var(--cf-text-secondary);
+    font-size: var(--cf-type-meta);
+}
+
+.cf-todos__list {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.cf-todo-card {
+    padding: 16px;
+    border: 1px solid var(--cf-border-subtle);
+    border-left: 4px solid var(--cf-color-warning);
+    border-radius: var(--cf-radius-panel);
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-paper);
+    font-family: var(--cf-font-ui);
+}
+
+.cf-todo-card:focus-visible {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: 2px;
+}
+
+.cf-todo-card__heading,
+.cf-todo-card__controls,
+.cf-todo-card__links {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.cf-todo-card__heading {
+    justify-content: space-between;
+}
+
+.cf-todo-card__space {
+    color: var(--cf-text-secondary);
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.cf-todo-card h2 {
+    margin: 10px 0;
+    color: var(--cf-text-primary);
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.cf-todo-card__facts {
+    display: flex;
+    gap: 28px;
+    margin: 0 0 12px;
+}
+
+.cf-todo-card__facts dt {
+    color: var(--cf-text-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.cf-todo-card__facts dd {
+    margin: 2px 0 0;
+}
+
+.cf-todo-card__history {
+    color: var(--cf-text-secondary);
+    font-size: 11px;
+}
+
+.cf-todo-card__links {
+    margin: 10px 0;
+}
+
+.cf-todo-card__links > a {
+    color: var(--cf-color-accent-hover);
+    font-weight: 600;
+}
+
+.cf-todo-card__controls {
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid var(--cf-border-subtle);
+}
+
+.cf-todo-card__controls label {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.cf-todo-card__status {
+    display: block;
+    min-height: 1em;
+    margin-top: 6px;
+    color: var(--cf-text-secondary);
+    font-size: 11px;
+}
+
+@media (width <= 760px) {
+    .cf-message-item--generated-update
+        .cf-message-item__body:has(> .cf-suggested-action) {
+        grid-template-rows:
+            minmax(var(--message-box-sender-line-height), auto)
+            repeat(5, auto);
+        grid-template-areas:
+            "edited .            controls     .            time"
+            "message message     message      message      message"
+            "hover-action hover-action hover-action hover-action hover-action"
+            "more    more        more         more         more"
+            "reactions reactions reactions    reactions    reactions"
+            "reminders reminders reminders    reminders    reminders";
+    }
+
+    .cf-message-item--generated-update.cf-message-item--with-sender
+        .cf-message-item__body:has(> .cf-suggested-action) {
+        grid-template-areas:
+            "avatar  sender       controls     .            time"
+            "message message      message      message      message"
+            "hover-action hover-action hover-action hover-action hover-action"
+            "more    more         more         more         more"
+            "reactions reactions reactions    reactions    reactions"
+            "reminders reminders reminders    reminders    reminders";
+    }
+
+    .cf-suggested-action {
+        padding: 13px;
+    }
+
+    .cf-suggested-action__heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .cf-suggested-action__controls {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .cf-suggested-action__controls .cf-button,
+    .cf-suggested-action__controls .cf-field__control {
+        width: 100%;
+        min-height: var(--cf-control-height-touch);
+    }
+
+    .cf-suggested-action__refinements {
+        grid-template-columns: 1fr;
+    }
+
+    .cf-todos__list {
+        padding: 10px;
+    }
+
+    .cf-todo-card {
+        padding: 13px;
+    }
+
+    .cf-todo-card__facts,
+    .cf-todo-card__controls,
+    .cf-todo-card__links {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .cf-todo-card__links > :is(a, button),
+    .cf-todo-card__controls :is(.cf-button, .cf-field__control) {
+        width: 100%;
+        min-height: var(--cf-control-height-touch);
+    }
+
+    .cf-todo-card__links > a {
+        display: inline-flex;
+        align-items: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cf-suggested-action *,
+    .cf-suggested-action *::before,
+    .cf-suggested-action *::after,
+    .cf-todos *,
+    .cf-todos *::before,
+    .cf-todos *::after {
+        transition-duration: 0ms;
+    }
+}

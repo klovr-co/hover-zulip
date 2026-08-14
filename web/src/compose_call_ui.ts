@@ -53,7 +53,7 @@ export function generate_and_insert_audio_or_video_call_link(
     let $target_textarea: JQuery<HTMLTextAreaElement>;
     let edit_message_id: string | undefined;
     if ($target_element.parents(".message_edit_form").length === 1) {
-        edit_message_id = rows.id($target_element.parents(".message_row")).toString();
+        edit_message_id = rows.id($target_element.parents(".cf-message-item")).toString();
         $target_textarea = $(`#edit_form_${CSS.escape(edit_message_id)} .message_edit_content`);
     } else {
         $target_textarea = $<HTMLTextAreaElement>("textarea#compose-textarea");

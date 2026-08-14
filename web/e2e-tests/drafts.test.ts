@@ -44,7 +44,7 @@ async function create_stream_message_draft(page: Page): Promise<void> {
 }
 
 async function test_restore_stream_message_draft_by_opening_compose_box(page: Page): Promise<void> {
-    await page.click(".search_icon");
+    await page.click(".cf-app-header__search-icon");
     await page.waitForSelector("#search_query", {visible: true});
     await common.clear_and_type(page, "#search_query", "stream:Denmark topic:tests");
     await page.keyboard.press("Enter");
@@ -123,7 +123,7 @@ async function test_previously_created_drafts_rendered(page: Page): Promise<void
     assert.strictEqual(
         await common.get_text_from_selector(
             page,
-            "#drafts_table .overlay-message-row .private-message .rendered_markdown.restore-overlay-message",
+            "#drafts_table .overlay-message-row .cf-message-item--private .rendered_markdown.restore-overlay-message",
         ),
         "Test direct message.",
     );
@@ -137,7 +137,7 @@ async function test_previously_created_drafts_rendered(page: Page): Promise<void
     assert.strictEqual(
         await common.get_text_from_selector(
             page,
-            "#drafts_table .overlay-message-row .message_row:not(.private-message) .rendered_markdown.restore-overlay-message",
+            "#drafts_table .overlay-message-row .cf-message-item:not(.cf-message-item--private) .rendered_markdown.restore-overlay-message",
         ),
         "Test stream message.",
     );
@@ -145,7 +145,9 @@ async function test_previously_created_drafts_rendered(page: Page): Promise<void
 
 async function test_restore_message_draft_via_draft_overlay(page: Page): Promise<void> {
     console.log("Restoring stream message draft");
-    await page.click("#drafts_table .message_row:not(.private-message) .restore-overlay-message");
+    await page.click(
+        "#drafts_table .cf-message-item:not(.cf-message-item--private) .restore-overlay-message",
+    );
     await wait_for_drafts_to_disappear(page);
     await page.waitForSelector("#stream_message_recipient_topic", {visible: true});
     await page.waitForSelector("#preview_message_area", {hidden: true});
@@ -191,7 +193,7 @@ async function test_edited_draft_message(page: Page): Promise<void> {
     assert.strictEqual(
         await common.get_text_from_selector(
             page,
-            "#drafts_table .overlay-message-row .message_row:not(.private-message) .rendered_markdown.restore-overlay-message",
+            "#drafts_table .overlay-message-row .cf-message-item:not(.cf-message-item--private) .rendered_markdown.restore-overlay-message",
         ),
         "Updated stream message",
     );
@@ -199,7 +201,7 @@ async function test_edited_draft_message(page: Page): Promise<void> {
 
 async function test_restore_private_message_draft_via_draft_overlay(page: Page): Promise<void> {
     console.log("Restoring direct message draft.");
-    await page.click(".message_row.private-message .restore-overlay-message");
+    await page.click(".cf-message-item.cf-message-item--private .restore-overlay-message");
     await wait_for_drafts_to_disappear(page);
     await page.waitForSelector("#compose-direct-recipient", {visible: true});
     await common.check_compose_state(page, {
@@ -227,10 +229,14 @@ async function test_delete_draft(page: Page): Promise<void> {
     await page.waitForSelector(drafts_button, {visible: true});
     await page.click(drafts_button);
     await wait_for_drafts_to_appear(page);
-    await page.click("#drafts_table .message_row.private-message .delete-overlay-message");
+    await page.click(
+        "#drafts_table .cf-message-item.cf-message-item--private .delete-overlay-message",
+    );
     const drafts_count = await get_drafts_count(page);
     assert.strictEqual(drafts_count, 1, "Draft not deleted.");
-    await page.waitForSelector("#drafts_table .message_row.private-message", {hidden: true});
+    await page.waitForSelector("#drafts_table .cf-message-item.cf-message-item--private", {
+        hidden: true,
+    });
     await page.click(`${drafts_overlay} .exit`);
     await wait_for_drafts_to_disappear(page);
     await page.click("body");
@@ -276,7 +282,9 @@ async function test_save_draft_by_reloading(page: Page): Promise<void> {
 
 async function test_delete_draft_on_clearing_text(page: Page): Promise<void> {
     console.log("Deleting draft by clearing compose box textarea.");
-    await page.click("#drafts_table .message_row:not(.private-message) .restore-overlay-message");
+    await page.click(
+        "#drafts_table .cf-message-item:not(.cf-message-item--private) .restore-overlay-message",
+    );
     await wait_for_drafts_to_disappear(page);
     await page.waitForSelector("#send_message_form", {visible: true});
     await common.fill_form(page, "form#send_message_form", {content: ""});
@@ -293,7 +301,7 @@ async function drafts_test(page: Page): Promise<void> {
     await page.click("#left-sidebar-navigation-list .top_left_all_messages");
     const message_list_id = await common.get_current_msg_list_id(page, true);
     await page.waitForSelector(
-        `.message-list[data-message-list-id='${message_list_id}'] .message_row`,
+        `.message-list[data-message-list-id='${message_list_id}'] .cf-message-item`,
         {visible: true},
     );
 

@@ -1,0 +1,20 @@
+<div class="cf-theme" style="display: grid; width: min(100%, 520px); gap: 16px; padding: 16px;">
+    {{#> ../../templates/cofounder/components/surface padded=true aria-label=(t "Approval request")}}
+    <div style="display: grid; gap: 8px;">
+        <strong style="font-size: var(--cf-type-title);">{{t "Review launch campaign"}}</strong>
+        <span style="color: var(--cf-text-secondary);">{{t "Confirm the final brief before publishing."}}</span>
+        <div style="display: flex; gap: 8px; margin-top: 4px;">
+            {{> ../../templates/cofounder/components/button variant="primary" label=(t "Review")}}
+            {{> ../../templates/cofounder/components/button variant="secondary" label=(t "View details")}}
+        </div>
+    </div>
+    {{/../../templates/cofounder/components/surface}}
+
+    {{#> ../../templates/cofounder/components/surface padded=true raised=true aria-label=(t "Raised workspace panel")}}
+    <div style="display: grid; gap: 8px;">
+        <strong>{{t "Workspace update"}}</strong>
+        <span style="color: var(--cf-text-secondary);">{{t "Three launch tasks are ready for review."}}</span>
+        {{> ../../templates/cofounder/components/status tone="success" label=(t "Ready")}}
+    </div>
+    {{/../../templates/cofounder/components/surface}}
+</div>

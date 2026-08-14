@@ -1,0 +1,88 @@
+li.cf-dm-nav-action {
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: var(--cf-control-height);
+    padding: 0;
+    margin: 0;
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-secondary);
+    background: transparent;
+    font-family: var(--cf-font-ui);
+    line-height: 1.2;
+}
+
+li.cf-dm-nav-action:is(:hover, :focus-within, .highlighted_row) {
+    color: var(--cf-color-accent);
+    background: var(--cf-surface-hover);
+    box-shadow: none;
+}
+
+.cf-dm-nav-action > .cf-dm-nav-action__main {
+    appearance: none;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--cf-space-2);
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    min-height: var(--cf-control-height);
+    padding: 5px 6px 5px 32px;
+    border: 0;
+    border-radius: inherit;
+    color: inherit;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+}
+
+.cf-dm-nav-action > .cf-dm-nav-action__main:focus {
+    outline: none;
+}
+
+.cf-dm-nav-action:has(> .cf-dm-nav-action__main:focus-visible) {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: -2px;
+}
+
+.cf-dm-nav-action__label {
+    min-width: 0;
+    overflow: hidden;
+    font-size: var(--cf-type-meta);
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.cf-dm-nav-action > .cf-dm-nav-action__main > .cf-dm-nav-action__badge {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 20px;
+    height: 20px;
+    padding-inline: 6px;
+    margin: 0;
+    border-radius: var(--cf-radius-pill);
+    color: var(--cf-text-secondary);
+    background: color-mix(in srgb, var(--cf-border-subtle) 62%, transparent);
+    font-size: var(--cf-type-meta);
+    font-variant-numeric: tabular-nums;
+    font-weight: 650;
+    line-height: 1;
+}
+
+.cf-dm-nav-action
+    > .cf-dm-nav-action__main
+    > .cf-dm-nav-action__badge.zero_count {
+    display: none;
+}
+
+@media (width <= 600px) {
+    li.cf-dm-nav-action,
+    .cf-dm-nav-action > .cf-dm-nav-action__main {
+        min-height: var(--cf-control-height-touch);
+    }
+}

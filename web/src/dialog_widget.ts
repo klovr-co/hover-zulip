@@ -5,9 +5,10 @@ import assert from "minimalistic-assert";
 import render_dialog_widget from "../templates/dialog_widget.hbs";
 
 import type {AjaxRequestHandler} from "./channel.ts";
+import type {CofounderButtonVariant} from "./cofounder/components/button.ts";
+import {set_dialog_loading} from "./cofounder/components/dialog.ts";
 import * as custom_profile_fields_ui from "./custom_profile_fields_ui.ts";
 import {$t, $t_html} from "./i18n.ts";
-import * as loading from "./loading.ts";
 import * as modals from "./modals.ts";
 import * as ui_report from "./ui_report.ts";
 
@@ -88,6 +89,7 @@ export type DialogWidgetConfig = {
     always_visible_scrollbar?: boolean;
     footer_minor_text?: string;
     close_on_overlay_click?: boolean;
+    modal_submit_button_variant?: CofounderButtonVariant;
 };
 
 type RequestOpts = {
@@ -97,21 +99,11 @@ type RequestOpts = {
 };
 
 export function hide_dialog_spinner(): void {
-    const dialog_widget_selector = current_dialog_widget_selector();
-    const $spinner = $(`${dialog_widget_selector} .modal__spinner`);
-    $(`${dialog_widget_selector} .modal__button`).prop("disabled", false);
-
-    loading.hide_spinner($(".dialog_submit_button"), $spinner);
+    set_dialog_loading($(current_dialog_widget_selector()), false);
 }
 
 export function show_dialog_spinner(): void {
-    const dialog_widget_selector = current_dialog_widget_selector();
-    // Disable both the buttons.
-    $(`${dialog_widget_selector} .modal__button`).prop("disabled", true);
-
-    const $spinner = $(`${dialog_widget_selector} .modal__spinner`);
-
-    loading.show_spinner($(".dialog_submit_button"), $spinner);
+    set_dialog_loading($(current_dialog_widget_selector()), true);
 }
 
 // Supports a callback to be called once the modal finishes closing.
@@ -209,6 +201,7 @@ export function launch(conf: DialogWidgetConfig): string {
     const modal_submit_button_text =
         conf.modal_submit_button_text ?? $t({defaultMessage: "Save changes"});
     const modal_exit_button_text = conf.modal_exit_button_text ?? $t({defaultMessage: "Cancel"});
+    const modal_submit_button_variant = conf.modal_submit_button_variant ?? "primary";
     if (conf.is_compact) {
         conf.modal_subtitle_html = conf.modal_content_html;
     }
@@ -222,6 +215,7 @@ export function launch(conf: DialogWidgetConfig): string {
         link: conf.help_link,
         modal_submit_button_text,
         modal_exit_button_text,
+        modal_submit_button_variant,
         modal_content_html: conf.modal_content_html,
         id: conf.id,
         single_footer_button: conf.single_footer_button,
@@ -229,6 +223,9 @@ export function launch(conf: DialogWidgetConfig): string {
         footer_minor_text: conf.footer_minor_text,
         close_on_overlay_click: conf.close_on_overlay_click ?? true,
         hide_footer: conf.hide_footer,
+        single_footer_button_aria_label: conf.single_footer_button
+            ? $t({defaultMessage: "Close this dialog window"})
+            : undefined,
     });
     const $dialog = $(html);
     $("body").append($dialog);
@@ -254,10 +251,10 @@ export function launch(conf: DialogWidgetConfig): string {
         return modal_unique_id;
     }
 
-    const $submit_button = $dialog.find(".dialog_submit_button");
+    const $submit_button = $dialog.find(".cf-dialog__submit");
 
     if (conf.update_submit_disabled_state_on_change) {
-        const $inputs = $dialog.find(".modal__content").find("input,select,textarea,button");
+        const $inputs = $dialog.find(".cf-dialog__body").find("input,select,textarea,button");
 
         const original_values = get_current_values($inputs);
 

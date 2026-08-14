@@ -1,0 +1,387 @@
+.cf-composer {
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-paper);
+    font-family: var(--cf-font-ui);
+}
+
+.cf-composer--production {
+    margin-right: calc(
+        var(--right-sidebar-width) + var(--cf-layout-conversation-gutter)
+    );
+    margin-left: calc(
+        var(--left-sidebar-width) + var(--cf-layout-conversation-gutter)
+    );
+    padding: 0;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-panel);
+    background: var(--cf-surface-paper);
+    box-shadow: var(--cf-shadow-overlay);
+}
+
+#compose:has(.cf-composer--production) {
+    bottom: 17px;
+}
+
+#compose.compose-box-open:has(.cf-composer--production),
+#compose.compose-box-open:has(.cf-composer--production) #compose-container,
+#compose.compose-box-open .cf-composer--production {
+    height: 217px !important;
+}
+
+#compose.compose-box-open:has(.cf-review-composer:not([hidden])),
+#compose.compose-box-open:has(.cf-review-composer:not([hidden]))
+    #compose-container,
+#compose.compose-box-open:has(.cf-review-composer:not([hidden]))
+    .cf-composer--production {
+    height: min(520px, calc(100vh - var(--header-height) - 24px)) !important;
+}
+
+.cf-composer__open-controls {
+    padding: 0;
+}
+
+.cf-composer__recipient {
+    min-height: var(--cf-control-height-touch);
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--cf-border-subtle);
+    background: var(--cf-surface-subtle);
+}
+
+.cf-composer__body {
+    gap: 0 !important;
+}
+
+.cf-composer__editor {
+    border-width: 0 0 1px !important;
+    border-color: var(--cf-border-subtle) !important;
+    border-radius: 0 !important;
+    background: var(--cf-surface-paper) !important;
+}
+
+.cf-composer__editor:has(.cf-composer__textarea:focus) {
+    border-color: var(--cf-focus) !important;
+    box-shadow: inset 0 -1px var(--cf-focus);
+}
+
+.cf-composer__textarea {
+    color: var(--cf-text-primary) !important;
+    background: transparent !important;
+    font-family: var(--cf-font-ui) !important;
+    font-size: var(--cf-type-body) !important;
+    line-height: 1.5 !important;
+}
+
+.cf-composer__textarea::placeholder {
+    color: var(--cf-text-tertiary);
+}
+
+.cf-composer__toolbar {
+    min-height: 40px !important;
+    border-radius: 0 0 0 var(--cf-radius-panel) !important;
+    background: var(--cf-surface-subtle) !important;
+}
+
+.cf-composer__toolbar-actions {
+    box-sizing: border-box;
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    height: auto;
+    min-height: 40px;
+    padding: 4px 6px;
+    color: var(--cf-text-secondary);
+}
+
+.cf-composer__toolbar-actions .divider {
+    width: 1px;
+    height: 16px;
+    margin: 0 4px;
+    background: var(--cf-border-subtle);
+}
+
+#compose .cf-composer__toolbar-action.compose_control_button {
+    box-sizing: border-box;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: var(--cf-control-height);
+    height: var(--cf-control-height);
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-secondary);
+    line-height: 1;
+    text-decoration: none;
+    opacity: 1;
+}
+
+#compose .cf-composer__toolbar-action.compose_control_button:hover {
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-hover);
+}
+
+#compose .cf-composer__toolbar-action.compose_control_button:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--cf-focus) 24%, transparent);
+    outline-offset: 1px;
+}
+
+.cf-composer__toolbar-action .cf-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.cf-composer__resize-button {
+    color: var(--cf-text-tertiary) !important;
+}
+
+.cf-composer__resize-button:hover {
+    color: var(--cf-text-primary) !important;
+    background: var(--cf-surface-hover) !important;
+}
+
+.cf-composer__conversation-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cf-composer .compose-new-recipient-button .cf-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.cf-composer--production #compose-recipient,
+.cf-composer--production #compose-channel-recipient,
+.cf-composer--production #compose-direct-recipient .pill-container,
+.cf-composer--production #compose_select_recipient_widget {
+    border-radius: 0 !important;
+}
+
+.cf-composer--production #legacy-closed-compose-box .reply_button_container,
+.cf-composer--production #legacy-closed-compose-box .compose_mobile_button,
+.cf-composer--production #legacy-closed-compose-box #new_direct_message_button,
+.cf-composer--production
+    #legacy-closed-compose-box
+    #left_bar_compose_reply_button_big,
+.cf-composer--production #legacy-closed-compose-box #new_conversation_button {
+    min-height: var(--cf-control-height-touch);
+    border-radius: var(--cf-radius-control);
+}
+
+.cf-composer__send-column {
+    margin-left: 0 !important;
+    padding: 6px;
+    border-left: 1px solid var(--cf-border-subtle);
+    background: var(--cf-surface-subtle);
+}
+
+.cf-composer__send-controls {
+    gap: 4px;
+}
+
+.cf-composer__send-button {
+    appearance: none;
+    display: inline-flex !important;
+    justify-content: center;
+    align-items: center;
+    min-width: var(--cf-control-height-touch) !important;
+    min-height: var(--cf-control-height-touch) !important;
+    padding: 0 !important;
+    border: 1px solid var(--cf-color-ink) !important;
+    border-radius: var(--cf-radius-control) !important;
+    color: var(--cf-text-inverse) !important;
+    background: var(--cf-color-ink) !important;
+    box-shadow: none !important;
+}
+
+.cf-composer__send-button:hover {
+    border-color: var(--cf-color-ink-hover) !important;
+    background: var(--cf-color-ink-hover) !important;
+}
+
+.cf-composer__send-button:focus-visible,
+.cf-composer__action:focus-visible,
+.cf-composer__send-options:focus-visible,
+.cf-composer__close:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--cf-focus) 24%, transparent);
+    outline-offset: 1px;
+}
+
+.cf-composer__send-button:disabled,
+.cf-composer__send-button.disabled-message-send-controls {
+    border-color: var(--cf-color-line-disabled) !important;
+    color: var(--cf-color-disabled-strong) !important;
+    background: var(--cf-color-surface-disabled) !important;
+    cursor: not-allowed;
+}
+
+.cf-composer__send-options,
+.cf-composer__close,
+.cf-composer__action {
+    appearance: none;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: var(--cf-control-height);
+    height: var(--cf-control-height);
+    padding: 0;
+    border: 0;
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-secondary);
+    background: transparent;
+}
+
+.cf-composer__send-options:hover,
+.cf-composer__close:hover,
+.cf-composer__action:hover {
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-hover);
+}
+
+.cf-composer__send-options {
+    min-width: var(--cf-control-height-touch);
+    min-height: var(--cf-control-height);
+}
+
+.cf-composer__close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+}
+
+.cf-composer--standalone {
+    width: min(100%, 720px);
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-panel);
+    box-shadow: var(--cf-shadow-control);
+}
+
+.cf-composer__recipient-preview {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--cf-border-subtle);
+    color: var(--cf-text-secondary);
+    background: var(--cf-surface-subtle);
+    font-size: var(--cf-type-meta);
+}
+
+.cf-composer__recipient-channel {
+    color: var(--cf-text-primary);
+    font-weight: 600;
+}
+
+.cf-composer__recipient-separator {
+    color: var(--cf-text-tertiary);
+}
+
+.cf-composer__standalone-editor {
+    padding: 10px;
+}
+
+.cf-composer--standalone .cf-composer__textarea {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    min-height: 58px;
+    padding: 0 2px;
+    resize: none;
+    border: 0;
+    outline: 0;
+}
+
+.cf-composer__standalone-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding-top: 8px;
+}
+
+.cf-composer__shortcut {
+    margin-left: auto;
+    color: var(--cf-text-tertiary);
+    font-family: var(--cf-font-mono);
+    font-size: 11px;
+}
+
+.cf-composer__standalone-send {
+    width: var(--cf-control-height-touch);
+    height: var(--cf-control-height-touch);
+    margin-left: 4px;
+}
+
+@media (width <= 600px) {
+    #compose:has(.cf-composer--production) {
+        --compose-send-controls-width: 48px;
+
+        bottom: 0;
+    }
+
+    #compose.compose-box-open:has(.cf-review-composer:not([hidden])),
+    #compose.compose-box-open:has(.cf-review-composer:not([hidden]))
+        #compose-container,
+    #compose.compose-box-open:has(.cf-review-composer:not([hidden]))
+        .cf-composer--production {
+        height: min(
+            620px,
+            calc(100vh - var(--header-height) - 12px)
+        ) !important;
+    }
+
+    .cf-composer--production {
+        margin-right: 0;
+        margin-left: 0;
+        border-radius: var(--cf-radius-panel) var(--cf-radius-panel) 0 0;
+    }
+
+    .cf-composer__send-column {
+        box-sizing: border-box;
+        padding: 4px;
+    }
+
+    .cf-composer__send-controls {
+        flex: 0 0 auto;
+        margin-block-start: auto;
+    }
+
+    .cf-composer__send-options,
+    .cf-composer__action,
+    #compose .cf-composer__toolbar-action.compose_control_button {
+        width: var(--cf-control-height-touch) !important;
+        height: var(--cf-control-height-touch) !important;
+    }
+
+    .cf-composer__send-options {
+        flex: 0 0 var(--cf-control-height-touch) !important;
+    }
+
+    .cf-composer__close,
+    .cf-composer__resize-button,
+    #compose .cf-composer__conversation-arrow,
+    #compose #compose_select_recipient_widget,
+    #compose #stream_message_recipient_topic,
+    #compose .compose-new-recipient-button {
+        box-sizing: border-box;
+        min-width: var(--cf-control-height-touch) !important;
+        min-height: var(--cf-control-height-touch) !important;
+    }
+
+    .cf-composer__close,
+    .cf-composer__resize-button,
+    #compose .cf-composer__conversation-arrow {
+        width: var(--cf-control-height-touch) !important;
+        height: var(--cf-control-height-touch) !important;
+    }
+
+    #compose .cf-composer__conversation-arrow {
+        margin: 0;
+    }
+
+    .cf-composer--standalone {
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 0;
+        border-radius: var(--cf-radius-panel) var(--cf-radius-panel) 0 0;
+    }
+}

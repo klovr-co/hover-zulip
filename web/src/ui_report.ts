@@ -1,7 +1,11 @@
+import Handlebars from "handlebars/runtime.js";
 import {$} from "jquery";
 import * as z from "zod/mini";
 
+import render_toast from "../templates/cofounder/components/toast.hbs";
+
 import * as channel from "./channel.ts";
+import * as cofounder_toast from "./cofounder/components/toast.ts";
 import * as common from "./common.ts";
 import {$t} from "./i18n.ts";
 
@@ -56,16 +60,31 @@ export function success(response_html: string, $status_box: JQuery, remove_after
 }
 
 export function generic_embed_error(error_html: string, remove_after?: number): void {
-    const $alert = $("<div>").addClass(["alert", "home-error-bar", "show"]);
-    const $exit = $("<div>").addClass("exit");
-
-    $(".alert-box").append($alert.append($exit, $("<div>").addClass("content").html(error_html)));
+    const $toast = $(
+        render_toast({
+            intent: "danger",
+            message: new Handlebars.SafeString(error_html),
+            title: $t({defaultMessage: "Something went wrong"}),
+        }),
+    );
+    $(".cf-feedback-stack").append($toast);
 
     if (remove_after !== undefined) {
         setTimeout(() => {
-            $alert.fadeOut(400);
+            cofounder_toast.dismiss($toast);
         }, remove_after);
     }
+}
+
+export function generic_error(
+    response_html: string,
+    xhr: JQuery.jqXHR | undefined,
+    remove_after?: number,
+): void {
+    generic_embed_error(
+        xhr ? channel.xhr_error_message(response_html, xhr) : response_html,
+        remove_after,
+    );
 }
 
 export function generic_row_button_error(xhr: JQuery.jqXHR, $button: JQuery): void {

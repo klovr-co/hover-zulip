@@ -1,0 +1,53 @@
+.cf-status {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    min-height: 22px;
+    padding: 2px 7px;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-pill);
+    color: var(--cf-text-secondary);
+    background: var(--cf-surface-paper);
+    font: 600 var(--cf-type-meta) / 1.2 var(--cf-font-ui);
+    white-space: nowrap;
+}
+
+.cf-status--accent {
+    border-color: color-mix(
+        in srgb,
+        var(--cf-color-accent) 24%,
+        var(--cf-border-subtle)
+    );
+    color: var(--cf-color-accent-hover);
+    background: var(--cf-color-accent-soft);
+}
+
+.cf-status--success {
+    border-color: color-mix(
+        in srgb,
+        var(--cf-color-success) 24%,
+        var(--cf-border-subtle)
+    );
+    color: var(--cf-color-success);
+    background: var(--cf-color-success-soft);
+}
+
+.cf-status--warning {
+    border-color: color-mix(
+        in srgb,
+        var(--cf-color-warning) 24%,
+        var(--cf-border-subtle)
+    );
+    color: var(--cf-color-warning);
+    background: var(--cf-color-warning-soft);
+}
+
+.cf-status--danger {
+    border-color: color-mix(
+        in srgb,
+        var(--cf-color-danger) 24%,
+        var(--cf-border-subtle)
+    );
+    color: var(--cf-color-danger);
+    background: var(--cf-color-danger-soft);
+}

@@ -10,9 +10,9 @@ import * as blueslip from "./blueslip.ts";
 import {buddy_list} from "./buddy_list.ts";
 import * as channel from "./channel.ts";
 import * as compose_ui from "./compose_ui.ts";
+import * as hover_spaces_ui from "./hover_spaces_ui.ts";
 import {$t} from "./i18n.ts";
 import * as keydown_util from "./keydown_util.ts";
-import * as hover_spaces_ui from "./hover_spaces_ui.ts";
 import * as left_sidebar_navigation_area from "./left_sidebar_navigation_area.ts";
 import {ListCursor} from "./list_cursor.ts";
 import {localstorage} from "./localstorage.ts";
@@ -97,7 +97,7 @@ export function update_sidebar_aria_expanded(): void {
     const right_expanded = ui_util.matches_viewport_state("gte_xl_min")
         ? !$("body").hasClass("hide-right-sidebar")
         : right_sidebar_expanded_as_overlay;
-    $(".left-sidebar-toggle-button").attr("aria-expanded", String(left_expanded));
+    $(".cf-app-header__sidebar-toggle").attr("aria-expanded", String(left_expanded));
     $("#userlist-toggle-button").attr("aria-expanded", String(right_expanded));
 }
 
@@ -181,9 +181,9 @@ export function update_invite_user_option(): void {
         !settings_data.user_can_invite_users_by_email() &&
         !settings_data.user_can_create_multiuse_invite()
     ) {
-        $("#right-sidebar .invite-user-link").hide();
+        $("#right-sidebar .cf-people-sidebar__invite-action").hide();
     } else {
-        $("#right-sidebar .invite-user-link").show();
+        $("#right-sidebar .cf-people-sidebar__invite-action").show();
     }
 }
 
@@ -246,7 +246,7 @@ export function initialize(): void {
         show_userlist_sidebar();
     });
 
-    $(".left-sidebar-toggle-button").on("click", (e) => {
+    $(".cf-app-header__sidebar-toggle").on("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -290,7 +290,7 @@ export function initialize(): void {
             const $elt = $(e.target);
             // Since sidebar toggle buttons have their own click handlers, don't handle them here.
             if (
-                $elt.closest(".left-sidebar-toggle-button").length > 0 ||
+                $elt.closest(".cf-app-header__sidebar-toggle").length > 0 ||
                 $elt.closest("#userlist-toggle-button").length > 0
             ) {
                 return;
@@ -415,8 +415,8 @@ export function initialize_right_sidebar(): void {
 
     update_invite_user_option();
 
-    $("#buddy-list-users-matching-view").on("mouseenter", ".user_sidebar_entry", (e) => {
-        const $status_emoji = $(e.target).closest(".user_sidebar_entry").find("img.status-emoji");
+    $("#buddy-list-users-matching-view").on("mouseenter", ".cf-member-row", (e) => {
+        const $status_emoji = $(e.target).closest(".cf-member-row").find("img.status-emoji");
         if ($status_emoji.length > 0) {
             const animated_url = $status_emoji.attr("data-animated-url");
             if (animated_url) {
@@ -425,8 +425,8 @@ export function initialize_right_sidebar(): void {
         }
     });
 
-    $("#buddy-list-users-matching-view").on("mouseleave", ".user_sidebar_entry", (e) => {
-        const $status_emoji = $(e.target).closest(".user_sidebar_entry").find("img.status-emoji");
+    $("#buddy-list-users-matching-view").on("mouseleave", ".cf-member-row", (e) => {
+        const $status_emoji = $(e.target).closest(".cf-member-row").find("img.status-emoji");
         if ($status_emoji.length > 0) {
             const still_url = $status_emoji.attr("data-still-url");
             if (still_url) {
@@ -437,7 +437,7 @@ export function initialize_right_sidebar(): void {
 
     $("#buddy-list-users-matching-view-container").on(
         "click",
-        ".buddy-list-subsection-header",
+        ".cf-people-sidebar__section-header",
         (e) => {
             e.stopPropagation();
             buddy_list.toggle_users_matching_view_section();
@@ -446,7 +446,7 @@ export function initialize_right_sidebar(): void {
 
     $("#buddy-list-users-matching-view-container").on(
         "keydown",
-        ".buddy-list-section-toggle",
+        ".cf-people-sidebar__section-toggle",
         (e) => {
             if (keydown_util.is_enter_event(e)) {
                 e.stopPropagation();
@@ -455,29 +455,45 @@ export function initialize_right_sidebar(): void {
         },
     );
 
-    $("#buddy-list-participants-container").on("click", ".buddy-list-subsection-header", (e) => {
-        e.stopPropagation();
-        buddy_list.toggle_participants_section();
-    });
-
-    $("#buddy-list-participants-container").on("keydown", ".buddy-list-section-toggle", (e) => {
-        if (keydown_util.is_enter_event(e)) {
+    $("#buddy-list-participants-container").on(
+        "click",
+        ".cf-people-sidebar__section-header",
+        (e) => {
             e.stopPropagation();
             buddy_list.toggle_participants_section();
-        }
-    });
+        },
+    );
 
-    $("#buddy-list-other-users-container").on("click", ".buddy-list-subsection-header", (e) => {
-        e.stopPropagation();
-        buddy_list.toggle_other_users_section();
-    });
+    $("#buddy-list-participants-container").on(
+        "keydown",
+        ".cf-people-sidebar__section-toggle",
+        (e) => {
+            if (keydown_util.is_enter_event(e)) {
+                e.stopPropagation();
+                buddy_list.toggle_participants_section();
+            }
+        },
+    );
 
-    $("#buddy-list-other-users-container").on("keydown", ".buddy-list-section-toggle", (e) => {
-        if (keydown_util.is_enter_event(e)) {
+    $("#buddy-list-other-users-container").on(
+        "click",
+        ".cf-people-sidebar__section-header",
+        (e) => {
             e.stopPropagation();
             buddy_list.toggle_other_users_section();
-        }
-    });
+        },
+    );
+
+    $("#buddy-list-other-users-container").on(
+        "keydown",
+        ".cf-people-sidebar__section-toggle",
+        (e) => {
+            if (keydown_util.is_enter_event(e)) {
+                e.stopPropagation();
+                buddy_list.toggle_other_users_section();
+            }
+        },
+    );
 
     function close_buddy_list_popover(): void {
         if (popover_menus.popover_instances.buddy_list !== null) {
@@ -489,7 +505,7 @@ export function initialize_right_sidebar(): void {
     popover_menus.register_popover_menu(
         "#buddy-list-menu-icon",
         {
-            theme: "popover-menu",
+            theme: "cofounder-menu",
             placement: "right",
             onCreate(instance) {
                 popover_menus.popover_instances.buddy_list = instance;
@@ -876,10 +892,12 @@ export function focus_pm_search_filter(): void {
 export function set_event_handlers(): void {
     const $search_input = $(".left-sidebar-search-input").expectOne();
 
-    $("#add_hover_space_button").on("click", () => hover_spaces_ui.open_create_space());
-    $("#stream_filters").on("click", ".hover-space-setup-row a", (event) => {
+    $("#add_hover_space_button").on("click", () => {
+        hover_spaces_ui.open_create_space();
+    });
+    $("#stream_filters").on("click", ".cf-space-setup__main", (event) => {
         event.preventDefault();
-        const space_id = Number($(event.currentTarget).closest("li").attr("data-hover-space-id"));
+        const space_id = Number($(event.currentTarget).closest("li").attr("data-cf-space-id"));
         hover_spaces_ui.open_setup_space(space_id);
     });
 

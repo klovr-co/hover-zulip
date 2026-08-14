@@ -1,5 +1,5 @@
-<div class="cannot-deactivate-group-banner main-view-banner error">
-    <p class="banner-text">
+{{#> ../cofounder/components/notice . intent="error" custom_classes="cannot-deactivate-group-banner" hide_close_button=true}}
+    <p class="cf-notice__content banner-text">
         {{#if group_used_for_permissions}}
             {{t "To deactivate this group, you must first remove all permissions assigned to it."}}
         {{else}}
@@ -15,8 +15,8 @@
         {{/if}}
     </p>
     {{#if group_used_for_permissions}}
-    <button class="permissions-button main-view-banner-action-button">
-        {{t "View permissions"}}
-    </button>
+    <div class="cf-notice__actions">
+        {{> ../cofounder/components/button variant="secondary" label=(t "View permissions") custom_classes="cf-notice__action permissions-button"}}
+    </div>
     {{/if}}
-</div>
+{{/../cofounder/components/notice}}

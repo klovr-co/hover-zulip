@@ -15,7 +15,7 @@ import * as user_status from "./user_status.ts";
 
 export function initialize(): void {
     popover_menus.register_popover_menu("#personal-menu", {
-        theme: "popover-menu",
+        theme: "cofounder-menu",
         placement: "bottom",
         offset: popover_menus.NAVBAR_POPOVER_OFFSET,
         // The strategy: "fixed"; and eventlisteners modifier option
@@ -159,12 +159,12 @@ export function initialize(): void {
         onShow(instance) {
             const args = popover_menus_data.get_personal_menu_content_context();
             instance.setContent(parse_html(render_navbar_personal_menu_popover(args)));
-            $("#personal-menu").addClass("active-navbar-menu");
+            $("#personal-menu").addClass("cf-app-header__item--active");
         },
         onHidden(instance) {
             instance.destroy();
             popover_menus.popover_instances.personal_menu = null;
-            $("#personal-menu").removeClass("active-navbar-menu");
+            $("#personal-menu").removeClass("cf-app-header__item--active");
         },
     });
 }

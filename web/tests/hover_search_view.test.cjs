@@ -101,38 +101,39 @@ run_test("knowledge ranks before read-only Sources and uses native starred state
     assert.deepEqual(request.data, {query: JSON.stringify("venue handoff")});
     request.success(response());
 
-    const html = $("#hover-search-view").html();
+    const html = $("#cf-global-search-view").html();
     assert.ok(
-        html.indexOf('id="hover-search-knowledge-heading"') <
-            html.indexOf('id="hover-search-sources-heading"'),
+        html.indexOf('id="cf-global-search-knowledge-heading"') <
+            html.indexOf('id="cf-global-search-sources-heading"'),
     );
     assert.match(html, /Generated update/);
     assert.match(html, /Source evidence cannot be saved/);
     assert.match(html, /&lt;img/);
     assert.doesNotMatch(html, /<img src=x onerror=alert\(1\)>/);
     assert.match(html, /data-message-id="42"/);
-    assert.equal((html.match(/hover-search-save-button/g) ?? []).length, 1);
+    assert.equal((html.match(/cf-global-search__save/g) ?? []).length, 1);
+    assert.doesNotMatch(html, /zulip-icon|hover-search-/);
 
-    const $button = $(".hover-search-save-button").attr("data-message-id", "42");
-    const handler = $("body").get_on_handler("click", ".hover-search-save-button");
+    const $button = $(".cf-global-search__save").attr("data-message-id", "42");
+    const handler = $("body").get_on_handler("click", ".cf-global-search__save");
     handler({currentTarget: $button[0]});
     assert.deepEqual(flag_updates, [[[42], "starred", "add"]]);
     assert.deepEqual(starred_adds, [[42]]);
-    assert.match($("#hover-search-view").html(), /Remove from Saved/);
+    assert.match($("#cf-global-search-view").html(), /Remove from Saved/);
     handler({currentTarget: $button[0]});
     assert.deepEqual(flag_updates.at(-1), [[42], "starred", "remove"]);
     assert.deepEqual(starred_removes, [[42]]);
-    assert.match($("#hover-search-view").html(), /aria-pressed="false"/);
+    assert.match($("#cf-global-search-view").html(), /aria-pressed="false"/);
 
     authorized_spaces = [];
     hover_search_view.handle_space_event();
-    assert.doesNotMatch($("#hover-search-view").html(), /Venue handoff is ready/);
-    assert.match($("#hover-search-view").html(), /Space access changed/);
+    assert.doesNotMatch($("#cf-global-search-view").html(), /Venue handoff is ready/);
+    assert.match($("#cf-global-search-view").html(), /Space access changed/);
 
     // A response that was already in flight cannot reintroduce revoked results.
     hover_search_view.test.search("venue handoff");
     request.success(response());
-    assert.doesNotMatch($("#hover-search-view").html(), /Venue handoff is ready/);
+    assert.doesNotMatch($("#cf-global-search-view").html(), /Venue handoff is ready/);
 });
 
 run_test("later searches replace stale requests", () => {
@@ -144,5 +145,5 @@ run_test("later searches replace stale requests", () => {
     assert.equal(JSON.parse(request.data.query), "second");
     // An old success is ignored by the request generation guard.
     first_request.success(response());
-    assert.match($("#hover-search-view").html(), /value="second"/);
+    assert.match($("#cf-global-search-view").html(), /value="second"/);
 });

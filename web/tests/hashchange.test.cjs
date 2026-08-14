@@ -181,7 +181,7 @@ function test_helper({override, override_rewire, change_tab}) {
     stub(settings, "build_page");
     stub(stream_settings_ui, "launch");
     stub(ui_util, "blur_active_element");
-    stub(ui_report, "error");
+    stub(ui_report, "generic_embed_error");
     stub(spectators, "login_to_access");
 
     if (change_tab) {
@@ -365,7 +365,7 @@ run_test("hash_interactions", ({override, override_rewire}) => {
     helper.assert_events([
         [overlays, "close_for_hash_change"],
         [message_viewport, "stop_auto_scrolling"],
-        [ui_report, "error"],
+        [ui_report, "generic_embed_error"],
     ]);
 
     window.location.hash = "#channels/subscribed";
@@ -510,7 +510,7 @@ run_test("fail_incorrectly_cased_URL", ({override, override_rewire}) => {
     helper.assert_events([
         [overlays, "close_for_hash_change"],
         [message_viewport, "stop_auto_scrolling"],
-        [ui_report, "error"],
+        [ui_report, "generic_embed_error"],
     ]);
 
     window.location.hash = "#narrow/channel/4-Denmark/tOPic/PLOTS/with/99";
@@ -519,6 +519,6 @@ run_test("fail_incorrectly_cased_URL", ({override, override_rewire}) => {
     helper.assert_events([
         [overlays, "close_for_hash_change"],
         [message_viewport, "stop_auto_scrolling"],
-        [ui_report, "error"],
+        [ui_report, "generic_embed_error"],
     ]);
 });

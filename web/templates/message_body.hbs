@@ -1,10 +1,10 @@
 {{#if include_sender}}
     {{> message_avatar . ~}}
 {{/if}}
-<span class="message_sender">
+<span class="cf-message-item__sender-line">
     {{#if include_sender}}
-        <span class="sender_info_hover sender_name" role="button" tabindex="0">
-            <span class="view_user_card_tooltip sender_name_text" data-is-bot="{{#if sender_is_bot}}true{{else}}false{{/if}}">
+        <button type="button" class="cf-message-item__sender sender_info_hover">
+            <span class="cf-message-item__sender-name view_user_card_tooltip" data-is-bot="{{#if sender_is_bot}}true{{else}}false{{/if}}">
                 {{> user_full_name name=msg/sender_full_name should_add_guest_user_indicator=should_add_guest_indicator_for_sender is_hidden=is_hidden}}
             </span>
             {{#unless status_message}}
@@ -12,13 +12,13 @@
                 {{> status_emoji msg/status_emoji_info}}
                 {{/unless}}
             {{/unless}}
-        </span>
+        </button>
         {{#unless is_hidden}}
             {{#if sender_is_bot}}
-                <i class="zulip-icon zulip-icon-bot" aria-label="{{t 'Bot' }}"></i>
+                <span class="cf-message-item__bot" aria-label="{{t 'Bot' }}">{{> cofounder/components/icon name="bot" compact=true}}</span>
             {{/if}}
             {{#if status_message}}
-                <span class="message_content rendered_markdown status-message">{{rendered_markdown status_message}}</span>
+                <span class="cf-message-item__content rendered_markdown status-message">{{rendered_markdown status_message}}</span>
                 {{#if message_edit_notices_for_status_message}}
                     {{> edited_notice .}}
                 {{/if}}
@@ -30,7 +30,7 @@
     {{/if}}
 </span>
 
-<a {{#unless msg/locally_echoed}}href="{{ msg/url }}"{{/unless}} class="message-time">
+<a {{#unless msg/locally_echoed}}href="{{ msg/url }}"{{/unless}} class="cf-message-item__time">
     {{#unless include_sender}}
     <span class="copy-paste-text">&nbsp;</span>
     {{/unless}}
@@ -38,10 +38,10 @@
 </a>
 
 {{#if (and (not msg/failed_request) msg/locally_echoed)}}
-    <span data-tooltip-template-id="slow-send-spinner-tooltip-template" class="fa fa-circle-o-notch slow-send-spinner{{#unless msg/show_slow_send_spinner }} hidden{{/unless}}"></span>
+    <span data-tooltip-template-id="slow-send-spinner-tooltip-template" class="cf-message-item__pending-indicator{{#unless msg/show_slow_send_spinner }} hidden{{/unless}}">{{> cofounder/components/icon name="loader-circle" compact=true}}</span>
 {{/if}}
 
-<div class="message_controls no-select">
+<div class="cf-message-actions no-select">
     {{#if msg/locally_echoed}}
         {{#if msg/failed_request}}
             {{> message_controls_failed_msg}}
@@ -55,36 +55,36 @@
 
 {{#unless status_message}}
     {{#unless is_hidden}}
-    <div class="message_content rendered_markdown">
+    <div class="cf-message-item__content rendered_markdown">
         {{#if is_hover_response}}
-        <div class="hover-response-label {{#if is_hover_review}}hover-response-label--review{{/if}}">
+        <div class="cf-review-response{{#if is_hover_review}} cf-review-response--review{{/if}}">
             <span>{{#if is_hover_review}}{{t "Review"}}{{else}}{{t "Reply"}}{{/if}}</span>
             <small>{{t "to Hover update"}}</small>
         </div>
         {{#if hover_response_clarification_required}}
-        <div class="hover-review-clarification" role="status">
+        <div class="cf-review-clarification" role="status">
             <strong>{{t "Clarification needed"}}</strong>
             {{t "Choose the field and exact new value before Hover changes its interpretation."}}
         </div>
         {{/if}}
         {{#if is_hover_review_request}}
-        <div class="hover-review-request-label">
+        <div class="cf-review-request">
             <strong>{{t "Review request"}}</strong>
-            <span>{{hover_review_request_state}}</span>
+            {{> cofounder/components/status tone=hover_review_request_state_tone label=hover_review_request_state_label custom_classes="cf-review-request__state"}}
         </div>
         {{/if}}
         {{/if}}
         {{#if is_hover_generated_update}}
-        <div class="hover-generated-update-label">
+        <div class="cf-generated-update__label">
             {{#if is_hover_suggested_action}}
-                <span class="hover-generated-update-label__chip">{{#if hover_module_name}}{{hover_module_name}}{{else}}{{t "Suggested Actions"}}{{/if}}</span>
+                <span class="cf-generated-update__chip">{{#if hover_module_name}}{{hover_module_name}}{{else}}{{t "Suggested Actions"}}{{/if}}</span>
             {{else}}
-                <span class="hover-generated-update-label__chip">{{#if hover_output_label}}{{hover_output_label}}{{else}}{{#if hover_module_name}}{{hover_module_name}}{{else}}{{t "AI update"}}{{/if}}{{/if}}</span>
+                <span class="cf-generated-update__chip">{{#if hover_output_label}}{{hover_output_label}}{{else}}{{#if hover_module_name}}{{hover_module_name}}{{else}}{{t "AI update"}}{{/if}}{{/if}}</span>
             {{/if}}
-            <span class="hover-generated-update-label__context">{{hover_source_context}}</span>
+            <span class="cf-generated-update__context">{{hover_source_context}}</span>
             {{#unless is_hover_suggested_action}}
-                {{#if hover_state}}<span class="hover-generated-update-state hover-generated-update-state--{{hover_state}}">{{hover_state}}</span>{{/if}}
-                {{#if hover_importance}}<span class="hover-generated-update-importance hover-generated-update-importance--{{hover_importance}}">{{hover_importance}}</span>{{/if}}
+                {{#if hover_state}}{{> cofounder/components/status tone=hover_state_tone label=hover_state custom_classes="cf-generated-update__state"}}{{/if}}
+                {{#if hover_importance_tone}}{{> cofounder/components/status tone=hover_importance_tone label=hover_importance custom_classes="cf-generated-update__importance"}}{{/if}}
             {{/unless}}
         </div>
         {{/if}}
@@ -101,7 +101,7 @@
         {{/if}}
     </div>
     {{else}}
-    <div class="message_content rendered_markdown">
+    <div class="cf-message-item__content rendered_markdown">
         {{> message_hidden_dialog}}
     </div>
     {{/unless}}
@@ -112,12 +112,12 @@
 {{/if}}
 
 {{#if is_hover_generated_update}}
-<div class="hover-generated-update-actions" aria-label="{{t 'Update details' }}">
-    <button type="button" class="hover-generated-details-button" data-hover-message-id="{{msg/id}}">{{t "Details"}}</button>
+<div class="cf-generated-update__actions" aria-label="{{t 'Update details' }}">
+    <button type="button" class="cf-button cf-button--ghost cf-button--compact cf-generated-update__details" data-cf-generated-message-id="{{msg/id}}"><span class="cf-button__label">{{t "Details"}}</span></button>
     {{#if hover_has_history}}
-    <button type="button" class="hover-generated-history-button" data-hover-message-id="{{msg/id}}">{{#tr}}View history ({{hover_history_count}}){{/tr}}</button>
+    <button type="button" class="cf-button cf-button--ghost cf-button--compact cf-generated-update__history" data-cf-generated-message-id="{{msg/id}}"><span class="cf-button__label">{{#tr}}View history ({{hover_history_count}}){{/tr}}</span></button>
     {{/if}}
-    {{#if hover_is_earlier}}<span class="hover-generated-earlier-label">{{t "Earlier state"}}</span>{{/if}}
+    {{#if hover_is_earlier}}<span class="cf-generated-update__earlier">{{t "Earlier state"}}</span>{{/if}}
 </div>
 {{/if}}
 
@@ -125,11 +125,11 @@
 {{> edited_notice .}}
 {{/if}}
 
-<div class="message_length_controller"></div>
+<div class="cf-message-item__length-controller"></div>
 
 {{#if has_hover_source_integrations}}
-    <div class="hover-message-reactions">
-        {{> hover_source_reactions integrations=hover_source_integrations evidence_url=hover_evidence_url}}
+    <div class="cf-message-feedback">
+        {{> cofounder/components/source_actions integrations=hover_source_integrations evidence_url=hover_evidence_url}}
         {{#unless (or is_hidden (eq msg.message_reactions.length 0))}}
             {{> message_reactions . }}
         {{/unless}}

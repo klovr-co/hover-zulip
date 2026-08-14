@@ -687,32 +687,33 @@ export async function build_move_topic_to_stream_popover(
         const warning_banner = render_unsubscribed_participants_warning_banner(context);
         $("#move_topic_modal .simplebar-content").prepend($(warning_banner));
 
-        $(
-            "#move_topic_modal .unsubscribed-participants-warning .main-view-banner-action-button",
-        ).on("click", (event) => {
-            event.preventDefault();
+        $("#move_topic_modal .unsubscribed-participants-warning .cf-notice__action").on(
+            "click",
+            (event) => {
+                event.preventDefault();
 
-            function success(): void {
-                $(event.target).parents(".main-view-banner").remove();
-            }
+                function success(): void {
+                    $(event.target).parents(".cf-notice").remove();
+                }
 
-            function xhr_failure(xhr: JQuery.jqXHR): void {
-                $(event.target).parents(".main-view-banner").remove();
-                ui_report.error(
-                    $t_html({defaultMessage: "Failed to subscribe participants"}),
-                    xhr,
-                    $("#move_topic_modal #dialog_error"),
+                function xhr_failure(xhr: JQuery.jqXHR): void {
+                    $(event.target).parents(".cf-notice").remove();
+                    ui_report.error(
+                        $t_html({defaultMessage: "Failed to subscribe participants"}),
+                        xhr,
+                        $("#move_topic_modal #dialog_error"),
+                    );
+                }
+
+                subscriber_api.add_user_ids_to_stream(
+                    unsubscribed_participant_ids,
+                    destination_stream,
+                    true,
+                    success,
+                    xhr_failure,
                 );
-            }
-
-            subscriber_api.add_user_ids_to_stream(
-                unsubscribed_participant_ids,
-                destination_stream,
-                true,
-                success,
-                xhr_failure,
-            );
-        });
+            },
+        );
     }
 
     function move_topic(): void {

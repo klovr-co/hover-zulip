@@ -8,6 +8,24 @@ const {$} = require("./lib/zjquery.cjs");
 
 const pm_list = zrequire("pm_list");
 
+run_test("Cofounder DM keyboard activation supports links and buttons", () => {
+    let click_count = 0;
+    const action = {
+        click() {
+            click_count += 1;
+        },
+    };
+    const $row = $("<dm-row>");
+    $row.set_find_results("a, button", [action]);
+
+    assert.equal(pm_list._activate_dm_row($row), true);
+    assert.equal(click_count, 1);
+
+    const $empty_row = $("<empty-dm-row>");
+    $empty_row.set_find_results("a, button", []);
+    assert.equal(pm_list._activate_dm_row($empty_row), false);
+});
+
 run_test("update_dom_with_unread_counts", () => {
     let counts;
 

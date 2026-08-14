@@ -101,6 +101,7 @@ function render(): void {
     }
     const knowledge = response.knowledge.map((result) => ({
         ...result,
+        rendered_content_html: result.rendered_content,
         display_time: display_time(result.timestamp),
         kind_label:
             result.kind === "generated"
@@ -115,7 +116,7 @@ function render(): void {
         ...result,
         display_time: display_time(result.record.timestamp),
     }));
-    $("#hover-search-view").html(
+    $("#cf-global-search-view").html(
         render_hover_search_view({
             query: response.query,
             status,
@@ -183,8 +184,8 @@ export function show(): void {
     visible = true;
     inbox_ui.hide();
     recent_view_ui.hide();
-    $("#message_feed_container, #compose, #hover-source-view").hide();
-    $("#hover-search-view").show();
+    $("#message_feed_container, #compose, #cf-source-view").hide();
+    $("#cf-global-search-view").show();
     left_sidebar_navigation_area.select_top_left_corner_item(".top_left_hover_search");
     render();
 }
@@ -196,7 +197,7 @@ export function hide(): void {
     visible = false;
     request?.abort();
     request_generation += 1;
-    $("#hover-search-view").hide();
+    $("#cf-global-search-view").hide();
     $("#message_feed_container, #compose").show();
 }
 
@@ -210,11 +211,11 @@ export function handle_space_event(): void {
 }
 
 export function initialize(): void {
-    $("body").on("submit", "#hover-global-search-form", (event) => {
+    $("body").on("submit", "#cf-global-search-form", (event) => {
         event.preventDefault();
-        search(String($("#hover-global-search-input").val() ?? ""));
+        search(String($("#cf-global-search-input").val() ?? ""));
     });
-    $("body").on("click", ".hover-search-save-button", (event) => {
+    $("body").on("click", ".cf-global-search__save", (event) => {
         const message_id = Number($(event.currentTarget).attr("data-message-id"));
         const result = response.knowledge.find((item) => item.message_id === message_id);
         if (result === undefined) {

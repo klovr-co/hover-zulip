@@ -3,9 +3,9 @@ import _ from "lodash";
 
 import * as drafts from "./drafts.ts";
 import type {Filter} from "./filter.ts";
+import * as hover_todos from "./hover_todos.ts";
 import {localstorage} from "./localstorage.ts";
 import * as message_reminder from "./message_reminder.ts";
-import * as hover_todos from "./hover_todos.ts";
 import * as navigation_views from "./navigation_views.ts";
 import {page_params} from "./page_params.ts";
 import * as people from "./people.ts";
@@ -108,9 +108,15 @@ export function rewire_update_dom_with_unread_counts(
 }
 
 export let select_top_left_corner_item = function (narrow_to_activate: string): void {
-    $(".top-left-active-filter").removeClass("top-left-active-filter");
+    $(".top-left-active-filter")
+        .removeClass("top-left-active-filter")
+        .find(".cf-nav-item__main")
+        .removeAttr("aria-current");
     if (narrow_to_activate !== "") {
-        $(narrow_to_activate).addClass("top-left-active-filter");
+        $(narrow_to_activate)
+            .addClass("top-left-active-filter")
+            .find(".cf-nav-item__main")
+            .attr("aria-current", "page");
     }
 };
 

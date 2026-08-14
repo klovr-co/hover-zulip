@@ -56,10 +56,10 @@ export function initialize(): void {
             current_target: undefined,
         };
 
-        $("#main_div").on("touchstart", ".messagebox", function () {
+        $("#main_div").on("touchstart", ".cf-message-item__frame", function () {
             meta.touchdown = true;
             meta.invalid = false;
-            const id = rows.id($(this).closest(".message_row"));
+            const id = rows.id($(this).closest(".cf-message-item"));
             meta.current_target = id;
             if (!id) {
                 return;
@@ -80,15 +80,15 @@ export function initialize(): void {
             }, MS_DELAY);
         });
 
-        $("#main_div").on("touchend", ".messagebox", () => {
+        $("#main_div").on("touchend", ".cf-message-item__frame", () => {
             meta.touchdown = false;
         });
 
-        $("#main_div").on("touchmove", ".messagebox", () => {
+        $("#main_div").on("touchmove", ".cf-message-item__frame", () => {
             meta.invalid = true;
         });
 
-        $("#main_div").on("contextmenu", ".messagebox", (e) => {
+        $("#main_div").on("contextmenu", ".cf-message-item__frame", (e) => {
             e.preventDefault();
         });
     }
@@ -133,7 +133,7 @@ export function initialize(): void {
 
         // UI elements for triggering message editing or viewing edit history.
         if (
-            $target.is("i.edit_message_button") ||
+            $target.is(".edit_message_button") ||
             $target.is(".message_edit_notice") ||
             $target.is(".edit-notifications")
         ) {
@@ -153,7 +153,7 @@ export function initialize(): void {
         }
 
         // Don't select message on clicking message control buttons.
-        if ($target.parents(".message_controls").length > 0) {
+        if ($target.closest(".cf-message-actions").length > 0) {
             return true;
         }
 
@@ -205,7 +205,7 @@ export function initialize(): void {
             return;
         }
 
-        const $row = $(this).closest(".message_row");
+        const $row = $(this).closest(".cf-message-item");
         const id = rows.id($row);
 
         assert(message_lists.current !== undefined);
@@ -241,10 +241,10 @@ export function initialize(): void {
     // if on normal non-mobile experience, a `click` event should run the message
     // selection function which will open the compose box  and select the message.
     if (!util.is_mobile()) {
-        $("#main_div").on("click", ".messagebox", select_message_function);
+        $("#main_div").on("click", ".cf-message-item__frame", select_message_function);
     }
 
-    $("#main_div").on("click", ".star_container", function (e) {
+    $("#main_div").on("click", ".cf-message-actions__star-button", function (e) {
         e.stopPropagation();
 
         if (page_params.is_spectator) {
@@ -252,13 +252,13 @@ export function initialize(): void {
             return;
         }
 
-        const message_id = rows.id($(this).closest(".message_row"));
+        const message_id = rows.id($(this).closest(".cf-message-item"));
         const message = message_store.get(message_id);
         assert(message !== undefined);
         starred_messages_ui.toggle_starred_and_update_server(message);
     });
 
-    $("#main_div").on("click", ".message_reaction", function (this: HTMLElement, e) {
+    $("#main_div").on("click", ".cf-message-reaction", function (this: HTMLElement, e) {
         e.stopPropagation();
 
         if (page_params.is_spectator) {
@@ -274,7 +274,7 @@ export function initialize(): void {
 
     $("body").on("click", ".reveal-hidden-message", (e) => {
         assert(message_lists.current !== undefined);
-        const message_id = rows.id($(e.currentTarget).closest(".message_row"));
+        const message_id = rows.id($(e.currentTarget).closest(".cf-message-item"));
         message_lists.current.view.reveal_hidden_message(message_id);
         e.stopPropagation();
         e.preventDefault();
@@ -338,7 +338,7 @@ export function initialize(): void {
         }
     });
 
-    $("body").on("click", ".message_row", function () {
+    $("body").on("click", ".cf-message-item", function () {
         $(".selected_msg_for_touchscreen").removeClass("selected_msg_for_touchscreen");
         $(this).addClass("selected_msg_for_touchscreen");
     });
@@ -347,14 +347,14 @@ export function initialize(): void {
 
     $("body").on("click", ".edit_content_button", function (e) {
         assert(message_lists.current !== undefined);
-        const $row = message_lists.current.get_row(rows.id($(this).closest(".message_row")));
+        const $row = message_lists.current.get_row(rows.id($(this).closest(".cf-message-item")));
         message_lists.current.select_id(rows.id($row));
         message_edit.start($row);
         e.stopPropagation();
     });
     $("body").on("click", ".move_message_button", function (e) {
         assert(message_lists.current !== undefined);
-        const $row = message_lists.current.get_row(rows.id($(this).closest(".message_row")));
+        const $row = message_lists.current.get_row(rows.id($(this).closest(".cf-message-item")));
         const message_id = rows.id($row);
         const message = message_lists.current.get(message_id);
         assert(message?.type === "stream");
@@ -367,32 +367,32 @@ export function initialize(): void {
         e.stopPropagation();
     });
     $("body").on("click", ".on_hover_topic_edit", function (e) {
-        const $recipient_row = $(this).closest(".recipient_row");
+        const $recipient_row = $(this).closest(".cf-message-group");
         message_edit.start_inline_topic_edit($recipient_row);
         e.stopPropagation();
     });
     $("body").on("click", ".topic_edit_save", function (e) {
-        const $recipient_row = $(this).closest(".recipient_row");
+        const $recipient_row = $(this).closest(".cf-message-group");
         message_edit.try_save_inline_topic_edit($recipient_row);
         e.stopPropagation();
     });
     $("body").on("click", ".topic_edit_cancel", function (e) {
-        const $recipient_row = $(this).closest(".recipient_row");
+        const $recipient_row = $(this).closest(".cf-message-group");
         message_edit.end_inline_topic_edit($recipient_row);
         e.stopPropagation();
     });
     $("body").on("click", ".message_edit_save", function (e) {
-        const $row = $(this).closest(".message_row");
+        const $row = $(this).closest(".cf-message-item");
         void message_edit.save_message_row_edit($row);
         e.stopPropagation();
     });
     $("body").on("click", ".message_edit_cancel", function (e) {
-        const $row = $(this).closest(".message_row");
+        const $row = $(this).closest(".cf-message-item");
         message_edit.end_message_row_edit($row);
         e.stopPropagation();
     });
     $("body").on("click", ".message_edit_close", function (e) {
-        const $row = $(this).closest(".message_row");
+        const $row = $(this).closest(".cf-message-item");
         message_edit.end_message_row_edit($row);
         e.stopPropagation();
     });
@@ -404,7 +404,7 @@ export function initialize(): void {
     $("body").on("click", ".message_edit_form .compose_upload_file", function (e) {
         e.preventDefault();
 
-        const row_id = rows.id($(this).closest(".message_row"));
+        const row_id = rows.id($(this).closest(".cf-message-item"));
         $(`#edit_form_${CSS.escape(`${row_id}`)} .file_input`).trigger("click");
     });
     $("body").on(
@@ -430,7 +430,7 @@ export function initialize(): void {
     );
 
     $("body").on("input", ".message_edit_form textarea", function (this: HTMLElement) {
-        const $row = $(this).closest(".message_row");
+        const $row = $(this).closest(".cf-message-item");
 
         if ($row.hasClass("preview_mode")) {
             message_edit.render_preview_area($row);
@@ -468,7 +468,7 @@ export function initialize(): void {
 
     function open_scroll_to_time_popover(trigger_element: HTMLElement, message_id: number): void {
         popover_menus.toggle_popover_menu(trigger_element, {
-            theme: "popover-menu",
+            theme: "cofounder-menu",
             placement: "bottom",
             popperOptions: {
                 modifiers: [
@@ -524,12 +524,12 @@ export function initialize(): void {
 
         assert(message_lists.current !== undefined);
         if ($(this).hasClass("recipient_row_date")) {
-            const $recipient_row = $(this).closest(".recipient_row");
+            const $recipient_row = $(this).closest(".cf-message-group");
             const message_id = rows.id_for_recipient_row($recipient_row);
             open_scroll_to_time_popover(this, message_id);
             return;
         }
-        const message_id = rows.id($(this).closest(".message_row"));
+        const message_id = rows.id($(this).closest(".cf-message-item"));
         open_scroll_to_time_popover(this, message_id);
     });
 
@@ -545,7 +545,7 @@ export function initialize(): void {
     // RESOLVED TOPICS
     $("body").on("click", ".message_header .on_hover_topic_resolve", (e) => {
         e.stopPropagation();
-        const $recipient_row = $(e.target).closest(".recipient_row");
+        const $recipient_row = $(e.target).closest(".cf-message-group");
         const message_id = rows.id_for_recipient_row($recipient_row);
         const topic_name = $(e.target).closest(".message_header").attr("data-topic-name")!;
         message_edit.toggle_resolve_topic(message_id, topic_name, false, $recipient_row);
@@ -597,11 +597,11 @@ export function initialize(): void {
         });
     });
 
-    $(".buddy-list-section").on("click", ".selectable_sidebar_block", (e) => {
+    $(".cf-people-sidebar__list").on("click", ".cf-member-row__main", (e) => {
         if (e.metaKey || e.ctrlKey || e.shiftKey) {
             return;
         }
-        if ($(e.target).parents(".user-profile-picture").length === 1) {
+        if ($(e.target).parents(".cf-member-row__avatar").length === 1) {
             return;
         }
         if (mouse_drag.is_drag(e)) {
@@ -691,9 +691,9 @@ export function initialize(): void {
     }
 
     // BUDDY LIST TOOLTIPS (not displayed on touch devices)
-    $(".buddy-list-section").on(
+    $(".cf-people-sidebar__list").on(
         "mouseenter",
-        ".user_sidebar_entry",
+        ".cf-member-row",
         function (this: HTMLElement, e) {
             e.stopPropagation();
             const $elem = $(this);
@@ -701,7 +701,9 @@ export function initialize(): void {
             const is_compact_mode =
                 user_settings.user_list_style ===
                 settings_config.user_list_style_values.compact.code;
-            const status_el = is_compact_mode ? null : util.the($elem.find(".status-text"));
+            const status_el = is_compact_mode
+                ? null
+                : util.the($elem.find(".cf-member-row__status"));
             const is_truncated = status_el ? status_el.scrollWidth > status_el.clientWidth : false;
             const should_show_status = is_compact_mode || is_truncated;
 
@@ -710,7 +712,7 @@ export function initialize(): void {
 
             // `target_node` is the `ul` element since it stays in DOM even after updates.
             function get_target_node(): HTMLElement {
-                return util.the($(e.target).parents(".buddy-list-section"));
+                return util.the($(e.target).parents(".cf-people-sidebar__list"));
             }
 
             function check_reference_removed(
@@ -732,21 +734,21 @@ export function initialize(): void {
             when hovering them in the right sidebar. This requires special logic, to avoid
             conflicting with the main tooltip or showing duplicate tooltips.
             */
-            $(".user_sidebar_entry .status-emoji-name").off("mouseenter").off("mouseleave");
-            $(".user_sidebar_entry .status-emoji-name").on("mouseenter", () => {
+            $(".cf-member-row .status-emoji-name").off("mouseenter").off("mouseleave");
+            $(".cf-member-row .status-emoji-name").on("mouseenter", () => {
                 const element: tippy.ReferenceElement = util.the($elem);
                 const instance = element._tippy;
                 // We make sure instance is of buddy list since we don't want to
                 // close any other tippy instances.
                 if (
                     instance?.state.isVisible &&
-                    instance.reference.classList.contains("user_sidebar_entry") &&
+                    instance.reference.classList.contains("cf-member-row") &&
                     instance.popper.classList.contains("buddy-list-tooltip-root")
                 ) {
                     instance.destroy();
                 }
             });
-            $(".user_sidebar_entry .status-emoji-name").on("mouseleave", () => {
+            $(".cf-member-row .status-emoji-name").on("mouseleave", () => {
                 do_render_buddy_list_tooltip(
                     $elem,
                     title_data,
@@ -1145,7 +1147,7 @@ export function initialize(): void {
         e.stopPropagation();
     });
 
-    $(".settings-header.mobile .fa-chevron-left").on("click", () => {
+    $(".settings-header.mobile .cf-settings-shell__back").on("click", () => {
         settings_panel_menu.mobile_deactivate_section();
     });
 

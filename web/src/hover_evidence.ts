@@ -33,7 +33,7 @@ const error_response_schema = z.object({retryable: z.optional(z.boolean())});
 
 function present_evidence(
     response: unknown,
-): Array<z.infer<typeof evidence_schema> & {display_timestamp: string}> {
+): (z.infer<typeof evidence_schema> & {display_timestamp: string})[] {
     const {evidence} = evidence_response_schema.parse(response);
     return evidence.map((item) => ({
         ...item,
@@ -45,7 +45,7 @@ function present_evidence(
 }
 
 function focus_result($content: JQuery): void {
-    $content.find<HTMLElement>("[data-hover-evidence-result]").trigger("focus");
+    $content.find("[data-cf-evidence-result]").trigger("focus");
 }
 
 function replace_content($content: JQuery, html: string): void {
@@ -98,7 +98,9 @@ export function show_evidence(url: string): void {
         modal_submit_button_text: $t({defaultMessage: "Close"}),
         single_footer_button: true,
         close_on_submit: true,
-        on_click() {},
+        on_click() {
+            // The single footer button only closes the dialog.
+        },
     });
     const $content = $(`#${CSS.escape(modal_id)} .modal__content`);
     load_evidence($content, url);
@@ -111,11 +113,11 @@ export function initialize(): void {
             if (!(event.target instanceof Element)) {
                 return;
             }
-            const button = event.target.closest<HTMLElement>(".hover-view-evidence");
+            const button = event.target.closest<HTMLElement>("[data-cf-evidence-url]");
             if (button === null) {
                 return;
             }
-            const url = button.dataset["evidenceUrl"];
+            const url = button.dataset["cfEvidenceUrl"];
             if (url === undefined) {
                 return;
             }
@@ -125,10 +127,10 @@ export function initialize(): void {
         },
         {capture: true},
     );
-    $("body").on("click", ".hover-evidence-retry", (event) => {
+    $("body").on("click", "[data-cf-evidence-retry-url]", (event) => {
         event.preventDefault();
         const $button = $(event.currentTarget);
-        const url = $button.attr("data-evidence-url");
+        const url = $button.attr("data-cf-evidence-retry-url");
         if (url !== undefined) {
             load_evidence($button.closest(".modal__content"), url);
         }

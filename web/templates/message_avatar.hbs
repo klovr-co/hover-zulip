@@ -1,9 +1,9 @@
-<div class="u-{{msg/sender_id}} message-avatar sender_info_hover view_user_card_tooltip no-select" aria-hidden="true" data-is-bot="{{#if sender_is_bot}}true{{else}}false{{/if}}">
-    <div class="inline-profile-picture-wrapper">
-        <div class="inline_profile_picture {{#if sender_is_guest}} guest-avatar{{/if}} {{#if sender_is_deactivated}} deactivated {{/if}} {{#if is_hidden}} muted-sender-avatar {{/if}}">
-            <img loading="lazy" src="{{small_avatar_url}}" alt="" class="no-drag"/>
+<div class="cf-message-item__avatar-trigger u-{{msg/sender_id}} sender_info_hover view_user_card_tooltip no-select" aria-hidden="true" data-is-bot="{{#if sender_is_bot}}true{{else}}false{{/if}}">
+    <div class="cf-message-item__avatar-frame">
+        <div class="cf-message-item__avatar{{#if sender_is_guest}} guest-avatar{{/if}}{{#if sender_is_deactivated}} deactivated{{/if}}{{#if is_hidden}} cf-message-item__avatar--muted muted-sender-avatar{{/if}}">
+            <img loading="lazy" src="{{small_avatar_url}}" alt="" class="cf-message-item__avatar-image no-drag"/>
             {{#if sender_is_deactivated}}
-                <i class="fa fa-ban deactivated-user-icon"></i>
+                <span class="cf-message-item__avatar-state deactivated-user-icon">{{> cofounder/components/icon name="circle-off" compact=true}}</span>
             {{/if}}
         </div>
     </div>

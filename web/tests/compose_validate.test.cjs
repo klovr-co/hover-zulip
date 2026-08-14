@@ -16,6 +16,9 @@ const blueslip = require("./lib/zblueslip.cjs");
 const {$} = require("./lib/zjquery.cjs");
 
 const channel = mock_esm("../src/channel");
+mock_esm("../src/scroll_util", {
+    get_content_element: ($element) => $element,
+});
 
 const compose_banner = zrequire("compose_banner");
 const compose_pm_pill = zrequire("compose_pm_pill");
@@ -149,7 +152,7 @@ function test_ui(label, f) {
 
 function stub_message_row($textarea) {
     const $stub = $.set_results("message_row_stub", []);
-    $textarea.set_closest_results(".message_row", $stub);
+    $textarea.set_closest_results(".cf-message-item", $stub);
 }
 
 function initialize_pm_pill(mock_template) {
@@ -1000,8 +1003,8 @@ test_ui("test_warn_if_guest_in_dm_recipient", ({mock_template, override}) => {
     compose_state.set_private_message_recipient_ids([guest.user_id, new_guest.user_id]);
     $.reset_selector(`#compose_banners .${CSS.escape(classname)}`);
     const $banner = $(`#compose_banners .${CSS.escape(classname)}`);
-    const $banner_content = $(`#compose_banners .${CSS.escape(classname)} .banner_content`);
-    $banner.set_find_results(".banner_content", $banner_content);
+    const $banner_content = $(`#compose_banners .${CSS.escape(classname)} .cf-notice__content`);
+    $banner.set_find_results(".cf-notice__content", $banner_content);
     compose_validate.warn_if_guest_in_dm_recipient();
     assert.equal(
         $banner_content.text(),

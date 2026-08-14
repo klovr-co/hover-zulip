@@ -35,7 +35,7 @@ function find_boundary_tr(
     // To ensure we can't enter an infinite loop, bail out (and let the
     // browser handle the copy-paste on its own) if we don't hit what we
     // are looking for within 10 rows.
-    for (j = 0; !$tr.is(".message_row") && j < 10; j += 1) {
+    for (j = 0; !$tr.is(".cf-message-item") && j < 10; j += 1) {
         $tr = iterate_row($tr);
     }
     if (j === 10) {
@@ -62,20 +62,20 @@ function construct_recipient_header($message_row: JQuery): JQuery {
     return $(render_copied_recipient_header({recipient_text, date_text}));
 }
 
-// Returns the selected `.message_content`s in the current range.
+// Returns the selected Cofounder message-content elements in the current range.
 function get_selected_message_content_elements(): NodeListOf<HTMLElement> | undefined {
     return document
         .getSelection()
         ?.getRangeAt(0)
         .cloneContents()
-        .querySelectorAll(".message_content");
+        .querySelectorAll(".cf-message-item__content");
 }
 
-// Returns the the inner HTML of the `.message_content` element
+// Returns the inner HTML of the Cofounder message-content element
 // for the first or last message of a single range selection.
 // The caller is expected to only pass the first or last message
 // from a selection range, as the intermediate selected messages
-// anyways contain the entire `.message_content` HTML.
+// already contain the entire message-content HTML.
 function get_html_for_bookend_message_content(
     type: RangeContainer,
     original_message_content_element: Element,
@@ -95,7 +95,7 @@ function get_html_for_bookend_message_content(
         return `<div>` + selected_message_content_element.outerHTML + `</div>`;
     }
 
-    // If the selected `.message_content` HTML is same as the complete `.message_content` HTML,
+    // If the selected content HTML is the same as the complete content HTML,
     // we return early and don't append/prepend ellipsis text.
     if (
         selected_message_content_element.innerHTML.trim() ===
@@ -137,7 +137,7 @@ function is_container_within_message_row(type: RangeContainer): boolean {
     const range = window.getSelection()!.getRangeAt(target_range_idx);
     const container = type === "start" ? range.startContainer : range.endContainer;
     assert(container !== undefined);
-    return get_nearest_html_element(container)?.closest(".message_row") !== null;
+    return get_nearest_html_element(container)?.closest(".cf-message-item") !== null;
 }
 
 function maybe_expand_selection_for_first_and_last_messages(
@@ -158,14 +158,14 @@ function maybe_expand_selection_for_first_and_last_messages(
     if (is_container_within_message_row("start")) {
         const $start = copy_rows[0];
         assert($start?.[0] !== undefined);
-        const start_node = the($start.find(".message_content"));
+        const start_node = the($start.find(".cf-message-item__content"));
         window.getSelection()?.getRangeAt(0).setStartBefore(start_node);
     }
 
     if (is_container_within_message_row("end")) {
         const $end = copy_rows.at(-1);
         assert($end?.[0] !== undefined);
-        const end_node = the($end.find(".message_content"));
+        const end_node = the($end.find(".cf-message-item__content"));
         window
             .getSelection()
             ?.getRangeAt(range_count - 1)
@@ -213,9 +213,9 @@ function construct_copy_div($div: JQuery, start_id: number, end_id: number): voi
         // a single range for a multi-message selection.
         const selected_message_content_elements = get_selected_message_content_elements();
         assert(selected_message_content_elements !== undefined);
-        // Case where the last message doesn't have any highlighted `.message_content`.
+        // Case where the last message doesn't have any highlighted message content.
         // Here, end_id is set to id of the message whose username at the top
-        // was highlighted, but has no highlighted `.message_content`.
+        // was highlighted, but has no highlighted message content.
         // (See analyze_selection for details.)
         // So the actually useful/contentful last message of this selection is
         // at copy_rows[copy_rows.length - 2]
@@ -228,10 +228,10 @@ function construct_copy_div($div: JQuery, start_id: number, end_id: number): voi
         }
         assert(copy_rows[0] && copy_rows.at(-1));
         const first_selected_message_content_element = the(copy_rows[0]).querySelector(
-            ".message_content",
+            ".cf-message-item__content",
         );
         const last_selected_message_content_element = the(copy_rows.at(-1)!).querySelector(
-            ".message_content",
+            ".cf-message-item__content",
         );
         assert(first_selected_message_content_element && last_selected_message_content_element);
         $first_message_element = $(
@@ -243,8 +243,8 @@ function construct_copy_div($div: JQuery, start_id: number, end_id: number): voi
         );
 
         // We don't want to append the same content as the first message in the selection
-        // if we are trying to get the `.message_content` HTML for the last
-        // message when there is only one `.message_content` in the selected range.
+        // if we are trying to get the message-content HTML for the last
+        // message when there is only one content element in the selected range.
         if (selected_message_content_elements.length > 1) {
             const len = selected_message_content_elements.length;
             $last_message_element = $(
@@ -648,7 +648,7 @@ export function analyze_selection(selection: Selection): {
         const $startc = $(range.startContainer);
         const start_data = find_boundary_tr(
             $startc
-                .parents(".selectable_row, .message_header")
+                .parents(".cf-message-item, .message_header")
                 .not(".overlay-message-header")
                 .first(),
             ($row) => $row.next(),
@@ -705,27 +705,30 @@ function get_end_tr_from_endc($endc: JQuery<Node>): JQuery {
     // TODO: Ideally make it so that the selection cannot end there.
     // For now, we find the message row directly above wherever the
     // selection ended.
-    if ($endc.closest(".messagebox-content").length === 0) {
+    if ($endc.closest(".cf-message-item__body").length === 0) {
         // If the selection ends within the message following the selected
         // messages, go back to use the actual last message.
-        if ($endc.parents(".message_row").length > 0) {
-            const $parent_msg = $endc.parents(".message_row").first();
-            return $parent_msg.prev(".message_row");
+        if ($endc.parents(".cf-message-item").length > 0) {
+            const $parent_msg = $endc.parents(".cf-message-item").first();
+            return $parent_msg.prev(".cf-message-item");
         }
-        // If it's not in a .message_row, it's probably in a .message_header and
+        // If it's not in a .cf-message-item, it's probably in a .message_header and
         // we can use the last message from the previous recipient_row.
         // NOTE: It is possible that the selection started and ended inside the
         // message header and in that case we would be returning the message before
         // the selected header if it exists, but that is not the purpose of this
         // function to handle.
         if ($endc.parents(".message_header").length > 0) {
-            const $overflow_recipient_row = $endc.parents(".recipient_row").first();
-            return $overflow_recipient_row.prev(".recipient_row").children(".message_row").last();
+            const $overflow_recipient_row = $endc.parents(".cf-message-group").first();
+            return $overflow_recipient_row
+                .prev(".cf-message-group")
+                .children(".cf-message-item")
+                .last();
         }
         // If somehow we get here, do the default return.
     }
 
-    return $endc.parents(".selectable_row").first();
+    return $endc.parents(".cf-message-item").first();
 }
 
 export function initialize(): void {

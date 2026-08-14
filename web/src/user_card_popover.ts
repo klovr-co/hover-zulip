@@ -447,17 +447,16 @@ function show_user_card_popover(
         popover_html = render_user_card_popover(args);
     }
 
-    if ($popover_element.hasClass("inline-profile-picture-wrapper")) {
-        // The .inline-profile-picture-wrapper element has additional
-        // space around it, but we want to place the user card immediately
-        // adjacent the avatar. So we update the element here accordingly.
-        $popover_element = $popover_element.find(".inline_profile_picture");
+    if ($popover_element.hasClass("cf-message-item__avatar-frame")) {
+        // The avatar frame has additional space around it, but we want to
+        // place the user card immediately adjacent to the avatar itself.
+        $popover_element = $popover_element.find(".cf-message-item__avatar");
     }
 
     popover_menus.toggle_popover_menu(
         the($popover_element),
         {
-            theme: "popover-menu",
+            theme: "cofounder-menu",
             placement: popover_placement,
             onCreate(instance) {
                 instance.setContent(ui_util.parse_html(popover_html));
@@ -493,11 +492,11 @@ function show_user_card_popover(
             show_as_overlay_on_mobile: true,
             show_as_overlay_always: show_as_overlay,
             get_focus_return_element(reference) {
-                const $entry = $(reference).closest(".user_sidebar_entry");
+                const $entry = $(reference).closest(".cf-member-row");
                 if ($entry.length === 0) {
                     return undefined;
                 }
-                return the($entry.find(".user-presence-link"));
+                return the($entry.find(".cf-member-row__link"));
             },
         },
     );
@@ -597,7 +596,7 @@ export function unsaved_message_user_mention_event_handler(
     // We stop propagation because, if this event was fired from drafts,
     // it would otherwise trigger this handler twice: once from the
     // `.user-mention` listener for drafts and again from the
-    // `.messagebox .user-mention` listener.
+    // `.cf-message-item__frame .user-mention` listener.
     e.stopPropagation();
     if (mouse_drag.is_drag(e)) {
         return;
@@ -634,11 +633,11 @@ export function toggle_sender_info(): void {
     popovers.hide_all();
 
     const $message = $(".selected_message");
-    let $sender = $message.find(".message-avatar .inline-profile-picture-wrapper");
+    let $sender = $message.find(".cf-message-item__avatar-trigger .cf-message-item__avatar-frame");
     if ($sender.length === 0) {
         // Messages without an avatar have an invisible message_sender
         // element that's roughly in the right place.
-        $sender = $message.find(".message_sender");
+        $sender = $message.find(".cf-message-item__sender-line");
     }
 
     assert(message_lists.current !== undefined);
@@ -719,13 +718,13 @@ function toggle_sidebar_user_card_popover($target: JQuery): void {
 function register_click_handlers(): void {
     $("#main_div").on(
         "click",
-        ".sender_name, .inline-profile-picture-wrapper",
+        ".cf-message-item__sender, .cf-message-item__avatar-frame",
         function (this: HTMLElement, e) {
             e.stopPropagation();
             if (mouse_drag.is_drag(e)) {
                 return;
             }
-            const $row = $(this).closest(".message_row");
+            const $row = $(this).closest(".cf-message-item");
             assert(message_lists.current !== undefined);
             const message = message_lists.current.get(rows.id($row));
             assert(message !== undefined);
@@ -745,7 +744,7 @@ function register_click_handlers(): void {
         if (id_string === "*" || email === "*") {
             return;
         }
-        const $row = $(this).closest(".message_row");
+        const $row = $(this).closest(".cf-message-item");
         assert(message_lists.current !== undefined);
         const message = message_lists.current.get(rows.id($row));
         assert(message !== undefined);
@@ -769,7 +768,11 @@ function register_click_handlers(): void {
 
     // Note: Message feeds and drafts have their own direct event listeners
     // that run before this one and call stopPropagation.
-    $("body").on("click", ".messagebox .user-mention", unsaved_message_user_mention_event_handler);
+    $("body").on(
+        "click",
+        ".cf-message-item__frame .user-mention",
+        unsaved_message_user_mention_event_handler,
+    );
 
     $("body").on("click", ".user-card-popover-actions .narrow_to_private_messages", function (e) {
         const user_id = elem_to_user_id($(this).parents("ul"));
@@ -937,29 +940,29 @@ function register_click_handlers(): void {
     $("body").on("click", ".update_status_text", open_user_status_modal);
 
     // Clicking on one's own status emoji should open the user status modal.
-    $(".buddy-list-section").on(
+    $(".cf-people-sidebar__list").on(
         "click",
-        ".user_sidebar_entry_me .status-emoji",
+        ".cf-member-row--self .status-emoji",
         open_user_status_modal,
     );
 
-    $(".buddy-list-section").on("click", ".user-list-sidebar-menu-icon", (e) => {
+    $(".cf-people-sidebar__list").on("click", ".cf-member-row__actions", (e) => {
         e.stopPropagation();
         const $target = $(e.currentTarget).closest("li");
 
         toggle_sidebar_user_card_popover($target);
     });
 
-    $(".buddy-list-section").on("keydown", ".user-list-sidebar-menu-icon", (e) => {
+    $(".cf-people-sidebar__list").on("keydown", ".cf-member-row__actions", (e) => {
         if (keydown_util.is_enter_event(e)) {
             e.stopPropagation();
-            const $target = $(e.currentTarget).closest(".user_sidebar_entry");
+            const $target = $(e.currentTarget).closest(".cf-member-row");
 
             toggle_sidebar_user_card_popover($target);
         }
     });
 
-    $(".buddy-list-section").on("click", ".user-profile-picture", (e) => {
+    $(".cf-people-sidebar__list").on("click", ".cf-member-row__avatar", (e) => {
         e.stopPropagation();
         const $target = $(e.currentTarget).closest("li");
 

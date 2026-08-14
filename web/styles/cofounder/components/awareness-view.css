@@ -1,0 +1,210 @@
+/* For You and Team Pulse are ranked projections over live Hover records. */
+.cf-awareness-view {
+    box-sizing: border-box;
+    height: 100%;
+    overflow-y: auto;
+    background: var(--cf-surface-paper);
+}
+
+.cf-awareness-shell {
+    margin: 0 var(--cf-layout-conversation-gutter);
+    padding: 74px 0 88px;
+}
+
+.cf-awareness-status {
+    min-height: 30px;
+    color: var(--cf-text-secondary);
+    font-size: 14px;
+}
+
+#cf-awareness-retry {
+    margin-inline-start: 10px;
+}
+
+.cf-awareness-feed {
+    display: grid;
+    gap: 18px;
+}
+
+.cf-awareness-card {
+    position: relative;
+    box-sizing: border-box;
+    padding: 22px 25px 20px;
+    border: 1px solid var(--cf-border-selection);
+    border-radius: var(--cf-radius-overlay);
+    background: var(--cf-surface-paper);
+    box-shadow: var(--cf-shadow-panel);
+}
+
+.cf-awareness-card--unread {
+    box-shadow:
+        inset 4px 0 0 var(--cf-color-accent),
+        var(--cf-shadow-panel);
+}
+
+.cf-awareness-card__body {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 18px;
+}
+
+.cf-awareness-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 7px;
+    object-fit: cover;
+}
+
+.cf-awareness-card__main {
+    min-width: 0;
+}
+
+.cf-awareness-card__meta,
+.cf-awareness-card__footer,
+.cf-awareness-card__footer nav,
+.cf-awareness-card__reasons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.cf-awareness-card__meta {
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--cf-text-secondary);
+    font-family: var(--cf-font-ui);
+    font-size: 16px;
+}
+
+.cf-awareness-card__meta strong {
+    color: var(--cf-color-ink);
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.cf-awareness-unread {
+    color: var(--cf-color-accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.cf-awareness-card__reasons {
+    gap: 6px;
+    margin: -2px 0 10px;
+}
+
+.cf-awareness-reason {
+    padding: 3px 8px;
+    border: 1px solid var(--cf-border-selection);
+    border-radius: var(--cf-radius-pill);
+    color: var(--cf-color-accent-hover);
+    background: color-mix(in srgb, var(--cf-color-accent) 7%, transparent);
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.cf-awareness-card__content {
+    max-width: var(--cf-measure);
+    color: var(--cf-text-primary);
+    font-size: 17px;
+    line-height: 1.55;
+}
+
+.cf-awareness-card__content > :first-child {
+    margin-top: 0;
+}
+
+.cf-awareness-card__content > :last-child {
+    margin-bottom: 0;
+}
+
+.cf-awareness-current-state,
+.cf-awareness-todo {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 10px 12px;
+    border: 1px solid var(--cf-border-selection);
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-selected);
+    font-size: 13px;
+}
+
+.cf-awareness-card__footer {
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--cf-border-subtle);
+    color: var(--cf-text-secondary);
+    font-size: 12px;
+}
+
+.cf-awareness-card__footer nav {
+    gap: 14px;
+}
+
+.cf-awareness-card__footer a,
+.cf-awareness-card__footer button {
+    color: var(--cf-color-ink);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.cf-awareness-card__footer a:hover,
+.cf-awareness-card__footer button:hover {
+    text-decoration: underline;
+}
+
+.cf-awareness-card a:focus-visible,
+.cf-awareness-card button:focus-visible,
+#cf-awareness-retry:focus-visible {
+    border-radius: 3px;
+    outline: 2px solid var(--cf-focus);
+    outline-offset: 2px;
+}
+
+@media (width <= 560px) {
+    .cf-awareness-shell {
+        margin-inline: 12px;
+        padding-top: 56px;
+    }
+
+    .cf-awareness-card {
+        padding: 17px 16px 15px;
+    }
+
+    .cf-awareness-card__body {
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 11px;
+    }
+
+    .cf-awareness-avatar {
+        width: 38px;
+        height: 38px;
+    }
+
+    .cf-awareness-card__footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    body.cf-theme .cf-awareness-card :is(a, button) {
+        box-sizing: border-box;
+        display: inline-flex;
+        align-items: center;
+        min-height: var(--cf-control-height-touch);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cf-awareness-card,
+    .cf-awareness-view {
+        scroll-behavior: auto;
+        transition: none;
+    }
+}

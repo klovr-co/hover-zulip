@@ -5,9 +5,8 @@ import assert from "minimalistic-assert";
 import render_navbar_banners_testing_popover from "../templates/popovers/navbar_banners_testing_popover.hbs";
 
 import * as banners from "./banners.ts";
-import type {AlertBanner} from "./banners.ts";
+import type {AlertBanner, BannerAction} from "./banners.ts";
 import {is_browser_unsupported_old_version} from "./browser_support.ts";
-import type {ActionButton} from "./buttons.ts";
 import * as channel from "./channel.ts";
 import * as demo_organizations_ui from "./demo_organizations_ui.ts";
 import * as desktop_notifications from "./desktop_notifications.ts";
@@ -108,7 +107,7 @@ export function should_show_server_upgrade_banner(ls: LocalStorage): boolean {
 }
 
 export function maybe_toggle_empty_required_profile_fields_banner(): void {
-    const $banner = $("#navbar_alerts_wrapper").find(".banner");
+    const $banner = $("#navbar_alerts_wrapper").find(".cf-banner");
     const empty_required_profile_fields_exist = realm.custom_profile_fields
         .map((f) => ({
             ...f,
@@ -157,7 +156,7 @@ export function is_organization_profile_incomplete(): boolean {
 }
 
 export function toggle_organization_profile_incomplete_banner(): void {
-    const $banner = $("#navbar_alerts_wrapper").find(".banner");
+    const $banner = $("#navbar_alerts_wrapper").find(".cf-banner");
     if ($banner?.attr("data-process") === "organization-profile-incomplete") {
         close_navbar_banner_and_resize($banner);
         return;
@@ -191,17 +190,17 @@ const DESKTOP_NOTIFICATIONS_BANNER: AlertBanner = {
     }),
     buttons: [
         {
-            variant: "solid",
+            variant: "primary",
             label: $t({defaultMessage: "Enable notifications"}),
             custom_classes: "request-desktop-notifications",
         },
         {
-            variant: "subtle",
+            variant: "secondary",
             label: $t({defaultMessage: "Customize notifications"}),
             custom_classes: "customize-desktop-notifications",
         },
         {
-            variant: "text",
+            variant: "ghost",
             label: $t({defaultMessage: "Never ask on this computer"}),
             custom_classes: "reject-desktop-notifications",
         },
@@ -219,7 +218,7 @@ const CONFIGURE_OUTGOING_MAIL_BANNER: AlertBanner = {
     }),
     buttons: [
         {
-            variant: "subtle",
+            variant: "secondary",
             label: $t({defaultMessage: "Configuration instructions"}),
             custom_classes: "configure-outgoing-mail-instructions",
         },
@@ -237,7 +236,7 @@ const INSECURE_DESKTOP_APP_BANNER: AlertBanner = {
     }),
     buttons: [
         {
-            variant: "subtle",
+            variant: "secondary",
             label: $t({defaultMessage: "Download the latest version"}),
             custom_classes: "download-latest-zulip-version",
         },
@@ -255,7 +254,7 @@ const UNSUPPORTED_BROWSER_BANNER: AlertBanner = {
     }),
     buttons: [
         {
-            variant: "text",
+            variant: "ghost",
             label: $t({defaultMessage: "Learn more"}),
             custom_classes: "unsupported-browser-learn-more",
         },
@@ -270,7 +269,7 @@ const PROFILE_MISSING_REQUIRED_FIELDS_BANNER: AlertBanner = {
     label: $t({defaultMessage: "Your profile is missing required fields."}),
     buttons: [
         {
-            variant: "subtle",
+            variant: "secondary",
             label: $t({defaultMessage: "Edit your profile"}),
             custom_classes: "edit-profile-required-fields",
         },
@@ -288,7 +287,7 @@ const ORGANIZATION_PROFILE_INCOMPLETE_BANNER: AlertBanner = {
     }),
     buttons: [
         {
-            variant: "subtle",
+            variant: "secondary",
             label: $t({
                 defaultMessage: "Edit profile",
             }),
@@ -307,12 +306,12 @@ const SERVER_NEEDS_UPGRADE_BANNER: AlertBanner = {
     }),
     buttons: [
         {
-            variant: "subtle",
+            variant: "secondary",
             label: $t({defaultMessage: "Learn more"}),
             custom_classes: "server-upgrade-learn-more",
         },
         {
-            variant: "text",
+            variant: "ghost",
             label: $t({defaultMessage: "Dismiss for a week"}),
             custom_classes: "server-upgrade-nag-dismiss",
         },
@@ -352,14 +351,14 @@ const bankruptcy_banner = (): AlertBanner => {
         label,
         buttons: [
             {
-                variant: "subtle",
+                variant: "secondary",
                 label: $t({defaultMessage: "Yes, please!"}),
                 custom_classes: "accept-bankruptcy",
             },
             {
-                variant: "text",
+                variant: "ghost",
                 label: $t({defaultMessage: "No, I'll catch up."}),
-                custom_classes: "banner-close-action",
+                custom_classes: "dismiss-navbar-banner",
             },
         ],
         close_button: true,
@@ -369,9 +368,9 @@ const bankruptcy_banner = (): AlertBanner => {
 
 const demo_organization_deadline_banner = (): AlertBanner => {
     const days_remaining = demo_organizations_ui.get_demo_organization_deadline_days_remaining();
-    let buttons: ActionButton[] = [
+    let buttons: BannerAction[] = [
         {
-            variant: "text",
+            variant: "ghost",
             label: $t({defaultMessage: "Learn more"}),
             custom_classes: "demo-organizations-help",
         },
@@ -380,7 +379,7 @@ const demo_organization_deadline_banner = (): AlertBanner => {
         buttons = [
             ...buttons,
             {
-                variant: "subtle",
+                variant: "secondary",
                 label: $t({defaultMessage: "Convert"}),
                 custom_classes: "convert-demo-organization",
             },
@@ -420,12 +419,12 @@ const time_zone_update_offer_banner = (): AlertBanner => {
         ),
         buttons: [
             {
-                variant: "subtle",
+                variant: "secondary",
                 label: $t({defaultMessage: "Yes, please!"}),
                 custom_classes: "accept-update-time-zone",
             },
             {
-                variant: "text",
+                variant: "ghost",
                 label: $t({defaultMessage: "No, don't ask again."}),
                 custom_classes: "decline-time-zone-update",
             },
@@ -451,12 +450,12 @@ const majority_messages_muted_banner = (percent_muted_messages: number): AlertBa
         ),
         buttons: [
             {
-                variant: "subtle",
+                variant: "secondary",
                 label: $t({defaultMessage: "Learn more"}),
                 custom_classes: "managing-muted-channels",
             },
             {
-                variant: "text",
+                variant: "ghost",
                 label: $t({defaultMessage: "Dismiss for 3 months"}),
                 custom_classes: "dismiss-majority-messages-muted-banner",
             },
@@ -558,14 +557,14 @@ export function initialize(): void {
 
     $("#navbar_alerts_wrapper").on(
         "click",
-        ".banner-close-action",
+        ".cf-banner__close, .dismiss-navbar-banner",
         function (this: HTMLElement, e) {
             // Override the banner close event listener in web/src/banners.ts,
             // to trigger a window resize event which is necessary to
             // recalculate the navbar-fixed-container height.
             e.preventDefault();
             e.stopPropagation();
-            const $banner = $(this).closest(".banner");
+            const $banner = $(this).closest(".cf-banner");
             banners.close($banner);
             $(window).trigger("resize");
         },
@@ -576,7 +575,7 @@ export function initialize(): void {
         ".request-desktop-notifications",
         function (this: HTMLElement): void {
             void (async () => {
-                const $banner = $(this).closest(".banner");
+                const $banner = $(this).closest(".cf-banner");
                 const permission =
                     await desktop_notifications.request_desktop_notifications_permission();
                 if (permission === "granted" || permission === "denied") {
@@ -594,7 +593,7 @@ export function initialize(): void {
         "click",
         ".reject-desktop-notifications",
         function (this: HTMLElement) {
-            const $banner = $(this).closest(".banner");
+            const $banner = $(this).closest(".cf-banner");
             close_navbar_banner_and_resize($banner);
             ls.set("dontAskForNotifications", true);
         },
@@ -603,7 +602,7 @@ export function initialize(): void {
     $("#navbar_alerts_wrapper").on("click", ".accept-bankruptcy", function (this: HTMLElement) {
         const $accept_button = $(this);
         $accept_button.prop("disabled", true).css("pointer-events", "none");
-        const $banner = $(this).closest(".banner");
+        const $banner = $(this).closest(".cf-banner");
         unread_ops.mark_all_as_read();
         setTimeout(() => {
             close_navbar_banner_and_resize($banner);
@@ -666,7 +665,7 @@ export function initialize(): void {
         "click",
         ".dismiss-majority-messages-muted-banner",
         function (this: HTMLElement) {
-            const $banner = $(this).closest(".banner");
+            const $banner = $(this).closest(".cf-banner");
             close_navbar_banner_and_resize($banner);
             if (localstorage.supported()) {
                 ls.set("majority_muted_messages_banner_dismissal_date", Date.now());
@@ -678,7 +677,7 @@ export function initialize(): void {
         "click",
         ".server-upgrade-nag-dismiss",
         function (this: HTMLElement) {
-            const $banner = $(this).closest(".banner");
+            const $banner = $(this).closest(".cf-banner");
             close_navbar_banner_and_resize($banner);
             set_last_upgrade_nag_dismissal_time(ls);
         },
@@ -688,7 +687,7 @@ export function initialize(): void {
         "click",
         ".accept-update-time-zone",
         function (this: HTMLElement) {
-            const $banner = $(this).closest(".banner");
+            const $banner = $(this).closest(".cf-banner");
             void channel.patch({
                 url: "/json/settings",
                 data: {timezone: browser_time_zone},
@@ -727,7 +726,7 @@ export function initialize(): void {
         "click",
         ".decline-time-zone-update",
         function (this: HTMLElement) {
-            const $banner = $(this).closest(".banner");
+            const $banner = $(this).closest(".cf-banner");
             void channel.patch({
                 url: "/json/settings",
                 data: {web_suggest_update_timezone: false},
@@ -761,7 +760,7 @@ export function initialize(): void {
 
     $("body").on("click", ".top_left_change_navbar_banners", function (this: HTMLElement) {
         popover_menus.toggle_popover_menu(this, {
-            theme: "popover-menu",
+            theme: "cofounder-menu",
             placement: "right",
             popperOptions: {
                 modifiers: [

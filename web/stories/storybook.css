@@ -1,15 +1,27 @@
 body {
     min-width: 0;
-    padding: 24px;
+    padding: var(--cf-space-4);
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-canvas);
+}
+
+body:has(.cf-settings-shell),
+body:has(.storybook-two-pane-settings) {
+    padding: 0;
+    overflow: hidden;
+}
+
+#storybook-root {
+    min-height: calc(100vh - (2 * var(--cf-space-4)));
 }
 
 .storybook-component {
     width: min(100%, 760px);
-}
-
-.storybook-demo-email-modal {
-    max-width: 560px;
-    padding: 24px;
+    padding: var(--cf-space-4);
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-panel);
+    background: var(--cf-surface-paper);
+    box-shadow: var(--cf-shadow-panel);
 }
 
 .storybook-component-stack {
@@ -19,6 +31,19 @@ body {
     gap: 12px;
 }
 
+.storybook-component-stack > :is(button, .icon-button) {
+    min-width: 40px;
+    min-height: 40px;
+}
+
+.storybook-component-stack > .icon-button {
+    justify-content: center;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-control);
+    background: var(--cf-surface-paper);
+    font-size: 16px;
+}
+
 .storybook-component-stack-vertical {
     align-items: stretch;
     flex-direction: column;
@@ -26,23 +51,212 @@ body {
 
 .storybook-template-story {
     box-sizing: border-box;
+    width: fit-content;
+    max-width: none;
     min-height: 1px;
+}
+
+/*
+ * The application opens these surfaces through runtime controllers. A static
+ * story deliberately has no controller, so expose only a top-level surface
+ * under test. Nested hidden elements keep their production state.
+ */
+#storybook-root > .overlay,
+.storybook-template-story > .overlay {
+    position: relative;
+    inset: auto;
+    width: min(100%, 920px);
+    height: auto;
+    min-height: 1px;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+#storybook-root > .overlay .overlay-content,
+.storybook-template-story > .overlay .overlay-content {
+    transform: none;
+}
+
+.storybook-two-pane-settings.storybook-template-story {
+    width: 100vw;
+    height: 100vh;
+}
+
+.storybook-two-pane-settings > .two-pane-settings-overlay {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+}
+
+.storybook-two-pane-settings > .two-pane-settings-overlay > .overlay-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.cf-workflow-story {
+    box-sizing: border-box;
+    width: min(100%, 760px);
+    margin: 0 auto;
+}
+
+.cf-generated-details-story--narrow {
+    width: min(100%, 390px);
+}
+
+#storybook-root > .micromodal,
+.storybook-template-story > .micromodal {
+    position: relative;
+    display: block;
+}
+
+#storybook-root > .micromodal > .modal__overlay,
+.storybook-template-story > .micromodal > .modal__overlay {
+    position: relative;
+    min-height: 1px;
+}
+
+#storybook-root > .hide,
+.storybook-template-story > .hide {
+    display: block;
 }
 
 .storybook-template-story-error {
     max-width: 52rem;
     padding: 1rem;
-    color: var(--color-text-danger, hsl(0deg 65% 40%));
+    color: var(--cf-color-danger);
     border: 1px solid currentcolor;
     border-radius: 4px;
     white-space: pre-wrap;
 }
 
+.storybook-user-card.storybook-template-story {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding-block: 24px;
+}
+
+.storybook-user-profile.storybook-template-story {
+    width: 100%;
+    min-height: calc(100vh - 48px);
+}
+
+.storybook-user-profile > .micromodal,
+.storybook-user-profile > .micromodal > .modal__overlay {
+    width: 100%;
+    min-height: calc(100vh - 48px);
+}
+
+.storybook-left-sidebar-popover.storybook-template-story {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding-block: 24px;
+}
+
+.storybook-navbar-menu.storybook-template-story {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding-block: 24px;
+}
+
+.storybook-utility-popover.storybook-template-story {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding-block: 24px;
+}
+
+.storybook-send-later .cf-menu__list > li:first-child,
+.storybook-send-later .cf-menu__list > li:first-child + .cf-menu__separator {
+    display: none;
+}
+
+.storybook-utility-popover
+    ul.popover-group-menu-member-list
+    .popover-group-menu-member {
+    grid-template-areas: "group-member-icon gap group-member-name";
+    grid-template-columns:
+        max-content var(--user-group-popover-icon-text-gap)
+        minmax(0, 1fr);
+}
+
+.storybook-people-sidebar.storybook-template-story {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding-block: 24px;
+}
+
+.storybook-people-sidebar .right-sidebar.cf-people-sidebar {
+    position: relative;
+    inset: auto;
+    box-sizing: border-box;
+    width: min(100%, 300px);
+    height: auto;
+    min-height: 460px;
+    padding: 0;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-panel);
+    background: var(--cf-surface-canvas);
+    box-shadow: var(--cf-shadow-panel);
+}
+
+.storybook-people-sidebar #userlist-header.cf-people-sidebar__header {
+    position: relative;
+    inset: auto;
+    width: auto;
+    height: auto;
+    padding: 12px;
+    border: 0;
+    border-bottom: 1px solid var(--cf-border-subtle);
+    background: transparent;
+}
+
+.storybook-people-sidebar #buddy_list_wrapper {
+    max-height: none;
+    overflow: visible;
+    padding: 10px 10px 18px;
+}
+
+.storybook-recent-view#recent_view {
+    display: block;
+    width: min(100%, 980px);
+    padding: 0;
+}
+
+.storybook-recent-view .recent_view_container {
+    position: relative;
+    top: auto;
+}
+
+.storybook-recent-view #recent_view_table {
+    overflow: visible !important;
+}
+
+.storybook-recent-view #recent-view-content-table {
+    display: table;
+}
+
+.storybook-app-header {
+    min-height: 220px;
+    background: var(--cf-surface-canvas);
+}
+
+.storybook-app-header .cf-app-header {
+    position: relative;
+}
+
 .storybook-conversation-screen {
-    border: 1px solid hsl(210deg 15% 84%);
-    border-radius: 8px;
-    box-shadow: 0 8px 28px rgb(35 53 64 / 12%);
-    color: hsl(210deg 20% 20%);
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-panel);
+    box-shadow: var(--cf-shadow-panel);
+    color: var(--cf-text-primary);
     min-width: 980px;
     overflow: hidden;
 }
@@ -50,93 +264,362 @@ body {
 .storybook-conversation-screen .header {
     position: relative;
 }
+
 .storybook-conversation-screen .header-main {
     min-height: 52px;
 }
+
 .storybook-conversation-body {
-    background: white;
+    background: var(--cf-surface-paper);
     display: flex;
     min-height: 660px;
 }
+
 .storybook-conversation-body .left-sidebar {
     display: block;
     flex: 0 0 248px;
     position: relative;
 }
+
 .storybook-conversation-body .left-sidebar-navigation-area,
 .storybook-conversation-body #left_sidebar_scroll_container {
     height: auto;
 }
+
 .storybook-conversation-body .stream-list,
 .storybook-conversation-body .user-list {
     list-style: none;
     margin: 0;
     padding: 0;
 }
+
 .storybook-conversation-body .stream-list-subscription {
     align-items: center;
     display: flex;
     justify-content: space-between;
     padding: 5px 12px 5px 22px;
 }
+
 .storybook-conversation-body .stream-name {
     color: inherit;
     text-decoration: none;
 }
+
 .storybook-message-pane {
-    border-left: 1px solid hsl(210deg 15% 88%);
+    border-left: 1px solid var(--cf-border-subtle);
     flex: 1 1 auto;
     min-width: 450px;
     position: relative;
 }
+
 .storybook-message-pane .message-view-header .message_header {
     margin: 0;
 }
+
 .storybook-message-pane .message-list {
+    display: block;
     padding: 8px 18px 64px;
 }
-.storybook-message-pane .message_row {
+
+.storybook-message-pane .cf-message-item {
     min-height: 84px;
 }
-.storybook-message-pane .message-avatar img {
+
+.storybook-message-pane .cf-message-item__avatar-image {
     border-radius: 7px;
     height: 36px;
     object-fit: cover;
     width: 36px;
 }
+
 .storybook-compose {
-    align-items: center;
-    background: white;
-    border: 1px solid hsl(210deg 20% 78%);
-    border-radius: 6px;
     bottom: 14px;
-    display: flex;
-    gap: 10px;
     left: 18px;
-    padding: 12px;
     position: absolute;
     right: 18px;
 }
-.storybook-compose-placeholder {
-    color: hsl(210deg 10% 48%);
-    flex: 1;
+
+.storybook-production-compose {
+    position: relative !important;
+    bottom: auto !important;
+    width: min(100%, 960px);
+    height: 217px;
+    margin: 24px auto;
 }
-.storybook-compose kbd {
-    color: hsl(210deg 10% 48%);
-    font-size: 11px;
+
+.storybook-production-compose #compose-container,
+.storybook-production-compose .cf-composer--production {
+    width: 100%;
+    height: 100% !important;
 }
+
+.storybook-production-compose--review {
+    height: min(520px, calc(100vh - 48px));
+}
+
+.storybook-production-compose--narrow {
+    width: 390px;
+    min-height: 720px;
+}
+
+.storybook-space-navigation {
+    inline-size: min(100%, 300px);
+}
+
+.storybook-space-navigation > .filters {
+    display: grid;
+    gap: var(--cf-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#compose.storybook-production-compose .cf-composer--production {
+    margin: 0 !important;
+}
+
+.storybook-cf-message-controls {
+    box-sizing: border-box;
+    min-height: 100vh;
+    padding: 40px;
+    background: var(--cf-surface-canvas);
+}
+
+.storybook-cf-message-controls__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: min(100%, 760px);
+    margin: 0 auto 24px;
+}
+
+.storybook-cf-message-controls__header h2,
+.storybook-cf-message-controls__header p {
+    margin: 0;
+}
+
+.storybook-cf-message-controls__header h2 {
+    color: var(--cf-text-primary);
+    font-size: var(--cf-type-title);
+}
+
+.storybook-cf-message-controls__header p {
+    margin-top: 4px;
+    color: var(--cf-text-secondary);
+    font-size: var(--cf-type-body);
+}
+
+.storybook-cf-message-controls__header > span {
+    color: var(--cf-text-secondary);
+    font-size: var(--cf-type-meta);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+}
+
+.storybook-cf-message-controls__grid {
+    display: grid;
+    gap: 12px;
+    width: min(100%, 760px);
+    margin: 0 auto;
+}
+
+.storybook-cf-message-controls__message {
+    box-sizing: border-box;
+    padding: 14px 16px;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-panel);
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-paper);
+}
+
+.storybook-cf-message-controls__message:hover {
+    background: var(--cf-surface-hover);
+}
+
+.storybook-cf-message-controls__identity {
+    display: grid;
+    grid-template-columns: auto 1fr 104px;
+    align-items: center;
+    gap: 8px;
+    min-height: 28px;
+}
+
+.storybook-cf-message-controls__identity > span {
+    color: var(--cf-text-secondary);
+    font-size: var(--cf-type-meta);
+}
+
+.storybook-cf-message-controls__message p {
+    max-width: var(--cf-measure);
+    margin: 4px 0 10px;
+    line-height: var(--cf-line-body);
+}
+
+.storybook-cf-message-controls .cf-message-actions__button {
+    opacity: 1;
+    visibility: visible;
+}
+
+.storybook-cf-message-controls__message--failed {
+    border-color: var(--cf-color-danger);
+}
+
+.storybook-cf-message-controls--compact {
+    max-width: 390px;
+    min-height: 720px;
+    padding: 20px 12px;
+}
+
+.storybook-cf-message-controls--compact .storybook-cf-message-controls__header {
+    margin-bottom: 16px;
+}
+
+.storybook-cf-message-controls--compact
+    .storybook-cf-message-controls__header
+    > span {
+    display: none;
+}
+
+.storybook-cf-message-controls--compact
+    .storybook-cf-message-controls__message {
+    padding: 12px;
+}
+
+.storybook-cf-message-controls--compact
+    .storybook-cf-message-controls__identity {
+    grid-template-columns: auto 1fr 80px;
+}
+
+@media (width <= 600px) {
+    .storybook-conversation-screen {
+        width: 100%;
+        min-width: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .storybook-conversation-screen > .header,
+    .storybook-conversation-body > .left-sidebar,
+    .storybook-conversation-body > .storybook-right-sidebar {
+        display: none;
+    }
+
+    .storybook-conversation-body {
+        min-height: 100vh;
+    }
+
+    .storybook-message-pane {
+        width: 100%;
+        min-width: 0;
+        border-left: 0;
+    }
+
+    .storybook-message-pane .message-list {
+        padding: 8px 8px 190px;
+    }
+
+    .storybook-compose {
+        right: 8px;
+        bottom: 8px;
+        left: 8px;
+    }
+
+    .storybook-production-compose {
+        width: 100%;
+        height: 260px;
+        margin: 0;
+    }
+}
+
 .storybook-right-sidebar {
-    border-left: 1px solid hsl(210deg 15% 88%);
+    border-left: 1px solid var(--cf-border-subtle);
     flex: 0 0 210px;
 }
+
 .storybook-right-sidebar .right-sidebar-header {
     align-items: baseline;
-    border-bottom: 1px solid hsl(210deg 15% 88%);
+    border-bottom: 1px solid var(--cf-border-subtle);
     display: flex;
     justify-content: space-between;
     padding: 15px 12px;
 }
+
 .storybook-right-sidebar .right-sidebar-header span {
-    color: hsl(210deg 12% 48%);
+    color: var(--cf-text-secondary);
     font-size: 12px;
+}
+
+.storybook-cf-message-items {
+    box-sizing: border-box;
+    min-height: 100vh;
+    padding: 32px;
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-canvas);
+}
+
+.storybook-cf-message-items__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    width: min(100%, 780px);
+    margin: 0 auto 20px;
+}
+
+.storybook-cf-message-items__header p,
+.storybook-cf-message-items__header h2,
+.storybook-cf-message-items__header span {
+    margin: 0;
+}
+
+.storybook-cf-message-items__header p {
+    color: var(--cf-color-accent);
+    font-size: var(--cf-type-meta);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.storybook-cf-message-items__header h2 {
+    margin-top: 4px;
+    font-size: var(--cf-type-title);
+}
+
+.storybook-cf-message-items__header span,
+.storybook-cf-message-items__header > strong {
+    color: var(--cf-text-secondary);
+    font-size: var(--cf-type-meta);
+}
+
+.storybook-cf-message-items__stage {
+    width: min(100%, 780px);
+    margin: 0 auto;
+    container: message-lists / inline-size;
+}
+
+div.storybook-cf-message-items__stack.message-list {
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-panel);
+    background: var(--cf-surface-paper);
+    box-shadow: var(--cf-shadow-panel);
+}
+
+.storybook-cf-message-items__stack > .cf-message-item + .cf-message-item {
+    border-top: 1px solid var(--cf-border-subtle);
+}
+
+.storybook-cf-message-items--narrow {
+    width: 390px;
+    min-height: 844px;
+    padding: 20px 12px;
+}
+
+.storybook-cf-message-items--narrow .storybook-cf-message-items__header {
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.storybook-cf-message-items--narrow .storybook-cf-message-items__header span {
+    display: block;
+    max-width: 240px;
 }

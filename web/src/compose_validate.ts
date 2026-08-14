@@ -215,11 +215,11 @@ function get_stream_id_for_textarea($textarea: JQuery<HTMLTextAreaElement>): num
     // recipient of a message being drafted in the compose box.
     // Returns undefined if the appropriate context is a direct
     // message conversation.
-    const is_in_editing_area = $textarea.closest(".message_row").length > 0;
+    const is_in_editing_area = $textarea.closest(".cf-message-item").length > 0;
 
     if (is_in_editing_area) {
         const stream_id_str = $textarea
-            .closest(".recipient_row")
+            .closest(".cf-message-group")
             .find(".message_header")
             .attr("data-stream-id");
         if (stream_id_str === undefined) {
@@ -693,7 +693,7 @@ export function warn_if_guest_in_dm_recipient(): void {
     compose_state.set_recipient_guest_ids_for_dm_warning(guest_ids);
     // Update banner text if banner already exists.
     if ($banner.length === 1) {
-        $banner.find(".banner_content").text(banner_text);
+        $banner.find(".cf-notice__content").text(banner_text);
         return;
     }
 
@@ -1065,7 +1065,7 @@ export function check_overflow_text($container: JQuery): number {
     const max_length = realm.max_message_length;
     const remaining_characters = max_length - text.length;
     const $indicator = $container.find(".message-limit-indicator");
-    const is_edit_container = $textarea.closest(".message_row").length > 0;
+    const is_edit_container = $textarea.closest(".cf-message-item").length > 0;
 
     const old_no_message_content = no_message_content;
     const old_message_too_long = message_too_long;

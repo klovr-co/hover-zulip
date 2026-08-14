@@ -107,18 +107,12 @@ message_lists.current = {
         return 42;
     },
     selected_row() {
-        const $emoji_message_control_button_container = $.create(
-            "emoji-message-control-button-container-stub",
-        );
-        $emoji_message_control_button_container.set_closest_results(
-            ".message_control_button",
-            $.create("emoji-message-control-button-stub"),
-        );
+        const $reaction_button = $.create("cf-message-reaction-button-stub");
         const $row = $.create("selected-row-stub");
-        $row.set_find_results(".message-actions-menu-button", $.create("menu-button-stub"));
+        $row.set_find_results(".cf-message-actions__more-button", $.create("menu-button-stub"));
         $row.set_find_results(
-            ".message_controls .emoji-message-control-button-container",
-            $emoji_message_control_button_container,
+            ".cf-message-actions .cf-message-actions__reaction-button",
+            $reaction_button,
         );
         return $row;
     },
@@ -417,7 +411,7 @@ run_test("allow normal typing when editing text", ({override, override_rewire}) 
     override(overlays, "settings_open", () => settings_open);
     override(overlays, "info_overlay_open", () => info_overlay_open);
 
-    $.set_results(".navbar-item:focus", []);
+    $.set_results(".cf-app-header__item:focus", []);
 
     for (settings_open of [true, false]) {
         for (any_active of [true, false]) {
@@ -633,7 +627,7 @@ test_while_not_editing_text("narrow next unread followed topic", () => {
 });
 
 test_while_not_editing_text("motion_keys", () => {
-    $.set_results(".navbar-item:focus", []);
+    $.set_results(".cf-app-header__item:focus", []);
 
     const keys = {
         down_arrow: "ArrowDown",

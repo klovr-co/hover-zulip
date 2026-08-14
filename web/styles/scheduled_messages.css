@@ -16,7 +16,7 @@
     color: hsl(0deg 0% 53%);
 }
 
-#reminders-overlay-container .message_content {
+#reminders-overlay-container .cf-message-item__content {
     cursor: auto;
 }
 

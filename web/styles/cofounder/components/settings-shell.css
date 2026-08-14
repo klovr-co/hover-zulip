@@ -1,0 +1,600 @@
+.cf-settings-shell {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 248px minmax(0, 1fr);
+    width: min(1120px, 97vw);
+    height: min(820px, 95vh);
+    margin: 2.5vh auto;
+    overflow: hidden;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-panel);
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-paper);
+    box-shadow: var(--cf-shadow-overlay);
+    font-family: var(--cf-font-ui);
+    font-size: var(--cf-type-body);
+    line-height: var(--cf-line-body);
+}
+
+.cf-settings-shell__sidebar.sidebar-wrapper {
+    position: relative;
+    float: none;
+    width: auto;
+    height: 100%;
+    overflow: hidden;
+    border-right: 1px solid var(--cf-border-subtle);
+    background: var(--cf-surface-canvas);
+}
+
+.cf-settings-shell__sidebar > .tab-container {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding: var(--cf-space-2);
+    border-bottom: 1px solid var(--cf-border-subtle);
+    background: var(--cf-surface-canvas);
+}
+
+.cf-settings-shell__sidebar .cf-tabs {
+    width: 100%;
+}
+
+.cf-settings-shell__sidebar .cf-tabs__tab {
+    flex: 1;
+    min-width: 0;
+}
+
+.cf-settings-nav.sidebar {
+    box-sizing: border-box;
+    height: calc(100% - 56px);
+    padding: var(--cf-space-2) 0;
+    overflow-y: auto;
+    border: 0;
+    background: var(--cf-surface-canvas);
+}
+
+.cf-settings-nav__list {
+    display: grid;
+    gap: 2px;
+    padding: 0 var(--cf-space-2);
+    margin: 0;
+    list-style: none;
+}
+
+.cf-settings-nav .cf-settings-nav__item {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr) 18px;
+    gap: var(--cf-space-2);
+    align-items: center;
+    min-height: 38px;
+    padding: 5px var(--cf-space-2);
+    border: 0;
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-primary);
+    background: transparent;
+    cursor: pointer;
+    transition:
+        color var(--cf-duration-fast) ease,
+        background-color var(--cf-duration-fast) ease;
+}
+
+.cf-settings-nav .cf-settings-nav__item:is(:hover, :focus-visible) {
+    background: var(--cf-surface-hover);
+}
+
+.cf-settings-nav .cf-settings-nav__item:focus {
+    outline: none;
+}
+
+.cf-settings-nav .cf-settings-nav__item:focus-visible {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: -2px;
+}
+
+.cf-settings-nav .cf-settings-nav__item.active {
+    color: var(--cf-color-accent-hover);
+    background: var(--cf-surface-selected);
+    box-shadow: none;
+}
+
+.cf-settings-nav__icon,
+.cf-settings-nav__lock {
+    display: grid;
+    width: 18px;
+    height: 18px;
+    color: var(--cf-text-secondary);
+    place-items: center;
+}
+
+.cf-settings-nav__icon > .cf-icon,
+.cf-settings-nav__lock > .cf-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.cf-settings-nav__item.active .cf-settings-nav__icon {
+    color: var(--cf-color-accent);
+}
+
+.cf-settings-nav__label {
+    min-width: 0;
+    overflow: hidden;
+    font-size: var(--cf-type-label);
+    font-weight: 540;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cf-settings-nav__lock.hide {
+    visibility: hidden;
+}
+
+.cf-settings-nav__item.collapse-settings-button {
+    color: var(--cf-color-accent-hover);
+}
+
+.cf-settings-nav__icon > .cf-icon {
+    transition: transform var(--cf-duration-base) var(--cf-ease-out);
+}
+
+.cf-settings-nav__icon--expanded > .cf-icon {
+    transform: rotate(180deg);
+}
+
+.cf-settings-shell__content.content-wrapper {
+    position: relative;
+    left: auto;
+    width: auto;
+    height: 100%;
+    overflow: hidden;
+    background: var(--cf-surface-paper);
+}
+
+.cf-settings-shell__header.settings-header,
+.cf-settings-shell__mobile-header.settings-header {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 var(--cf-space-4);
+    border-bottom: 1px solid var(--cf-border-subtle);
+    background: var(--cf-surface-canvas);
+}
+
+.cf-settings-shell__header.settings-header {
+    justify-content: flex-start;
+}
+
+.cf-settings-shell__header h1,
+.cf-settings-shell__mobile-header h1 {
+    min-width: 0;
+    margin: 0;
+    color: var(--cf-text-primary);
+    font-family: var(--cf-font-ui);
+    font-size: var(--cf-type-body);
+    font-weight: 650;
+    line-height: 1.25;
+    text-align: left;
+    text-transform: none;
+}
+
+.cf-settings-shell__header h1 .section {
+    color: var(--cf-text-secondary);
+    font-weight: 500;
+}
+
+.cf-settings-shell .cf-settings-shell__close,
+.cf-settings-shell .cf-settings-shell__back {
+    width: var(--cf-control-height);
+    height: var(--cf-control-height);
+    padding: 0;
+}
+
+.cf-settings-shell__header .cf-settings-shell__close {
+    position: absolute;
+    right: var(--cf-space-3);
+}
+
+.cf-settings-shell__mobile-header.settings-header {
+    display: none;
+    grid-column: 1 / -1;
+}
+
+.cf-settings-shell__viewport#settings_content {
+    box-sizing: border-box;
+    position: relative;
+    float: none;
+    width: 100%;
+    height: calc(100% - 56px);
+    overflow: auto;
+    background: var(--cf-surface-paper);
+
+    --column-count: 2;
+}
+
+.cf-settings-shell .settings-section {
+    box-sizing: border-box;
+    width: min(100%, 760px);
+    padding: var(--cf-space-6) 28px 40px;
+    margin: 0;
+    color: var(--cf-text-primary);
+}
+
+.cf-settings-shell .settings-section.show {
+    display: block;
+}
+
+.cf-settings-shell
+    :is(
+        .settings-section-title,
+        .settings-subsection-title,
+        .settings-table-title
+    ) {
+    color: var(--cf-text-primary);
+    font-family: var(--cf-font-ui);
+    letter-spacing: 0;
+}
+
+.cf-settings-shell .settings-section-title {
+    margin: 0 0 var(--cf-space-1);
+    font-size: var(--cf-type-title);
+    font-weight: 680;
+    line-height: 1.25;
+}
+
+.cf-settings-shell .settings-section-description {
+    max-width: 68ch;
+    margin: 0 0 var(--cf-space-6);
+    color: var(--cf-text-secondary);
+}
+
+.cf-settings-section {
+    border-top: 1px solid var(--cf-border-subtle);
+}
+
+.cf-settings-section__header {
+    display: flex;
+    gap: var(--cf-space-3);
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--cf-space-4) 0 var(--cf-space-2);
+}
+
+.cf-settings-shell .cf-settings-section__header .settings-subsection-title {
+    margin: 0;
+    font-size: var(--cf-type-heading-sm);
+    font-weight: 650;
+    line-height: 1.3;
+}
+
+.cf-settings-field-row,
+.cf-settings-shell .general-settings > .input-group,
+.cf-settings-shell .general-settings > .settings-checkbox-wrapper {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(160px, 0.8fr) minmax(220px, 1.2fr);
+    gap: var(--cf-space-4);
+    align-items: center;
+    min-height: 52px;
+    padding: var(--cf-space-2) 0;
+    margin: 0;
+}
+
+.cf-settings-field-row__label,
+.cf-settings-shell .settings-field-label {
+    color: var(--cf-text-primary);
+    font-size: var(--cf-type-label);
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.cf-settings-field-row__control,
+.cf-settings-shell .settings_select,
+.cf-settings-shell .dropdown-widget-button {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: var(--cf-control-height);
+    max-width: none;
+    padding: 5px 30px 5px 9px;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-primary);
+    background-color: var(--cf-surface-paper);
+    font: 400 var(--cf-type-label) / 1.4 var(--cf-font-ui);
+}
+
+.cf-settings-shell .settings_select {
+    height: var(--cf-control-height);
+}
+
+.cf-settings-shell
+    :is(.settings_select, .dropdown-widget-button):is(:hover, :focus-visible) {
+    border-color: var(--cf-focus);
+    outline: none;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--cf-focus) 18%, transparent);
+}
+
+.cf-settings-shell .dropdown_widget_with_label_wrapper {
+    width: 100%;
+}
+
+.cf-settings-shell .dropdown_widget_with_label_wrapper .dropdown-widget-button {
+    display: flex;
+    justify-content: space-between;
+}
+
+.cf-settings-choice-group {
+    display: inline-grid;
+    grid-template-columns: repeat(3, var(--cf-control-height));
+    gap: 2px;
+    width: max-content;
+    padding: 2px;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-control);
+    background: var(--cf-surface-canvas);
+}
+
+.cf-settings-choice-group > input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+}
+
+.cf-settings-choice-group__option {
+    display: grid;
+    width: var(--cf-control-height);
+    height: var(--cf-control-height);
+    padding: 0;
+    border: 0;
+    border-radius: calc(var(--cf-radius-control) - 2px);
+    color: var(--cf-text-secondary);
+    background: transparent;
+    cursor: pointer;
+    place-items: center;
+}
+
+.cf-settings-choice-group__option > .cf-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.cf-settings-choice-group > input:checked + .cf-settings-choice-group__option {
+    color: var(--cf-color-accent-hover);
+    background: var(--cf-surface-selected);
+    box-shadow: var(--cf-shadow-control);
+}
+
+.cf-settings-choice-group
+    > input:focus-visible
+    + .cf-settings-choice-group__option {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: -2px;
+}
+
+.cf-settings-choice-group > .slider {
+    display: none;
+}
+
+.cf-settings-density {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--cf-space-6);
+    padding: var(--cf-space-3) 0;
+    border-top: 1px solid var(--cf-border-subtle);
+}
+
+.cf-settings-density__control {
+    display: grid;
+    gap: var(--cf-space-2);
+}
+
+.cf-settings-density__label {
+    color: var(--cf-text-primary);
+    font-size: var(--cf-type-label);
+    font-weight: 600;
+}
+
+.cf-settings-stepper {
+    display: grid;
+    grid-template-columns: var(--cf-control-height) minmax(48px, 1fr) var(
+            --cf-control-height
+        ) var(--cf-control-height);
+    gap: 2px;
+    align-items: center;
+    width: 100%;
+}
+
+.cf-settings-stepper__button {
+    appearance: none;
+    display: grid;
+    width: var(--cf-control-height);
+    height: var(--cf-control-height);
+    padding: 0;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-secondary);
+    background: var(--cf-surface-paper);
+    cursor: pointer;
+    place-items: center;
+}
+
+.cf-settings-stepper__button:is(:hover, :focus-visible) {
+    color: var(--cf-text-primary);
+    border-color: var(--cf-border-strong);
+    background: var(--cf-surface-hover);
+}
+
+.cf-settings-stepper__button:focus {
+    outline: none;
+}
+
+.cf-settings-stepper__button:focus-visible {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: 1px;
+}
+
+.cf-settings-stepper__button > .cf-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.cf-settings-stepper__value {
+    color: var(--cf-text-secondary);
+    font-size: var(--cf-type-meta);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.cf-settings-field-row--toggle {
+    grid-template-columns: minmax(160px, 1fr) auto;
+}
+
+.cf-settings-field-row--toggle > .checkbox {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.cf-settings-field-row--toggle > .cf-settings-field-row__label {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.cf-settings-field-row__help {
+    display: inline-grid;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    color: var(--cf-text-secondary);
+    vertical-align: -3px;
+    place-items: center;
+}
+
+.cf-settings-field-row__help > .cf-icon {
+    width: 13px;
+    height: 13px;
+}
+
+.cf-settings-shell .settings-section :is(th, td) {
+    border-color: var(--cf-border-subtle);
+}
+
+@media (width <= 700px) {
+    .cf-settings-shell {
+        grid-template: 56px minmax(0, 1fr) / 100%;
+        width: 100vw;
+        height: 100dvh;
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .cf-settings-shell__mobile-header.settings-header {
+        display: flex;
+        grid-row: 1;
+        padding: 0 var(--cf-space-2);
+    }
+
+    .cf-settings-shell__sidebar.sidebar-wrapper {
+        grid-row: 2;
+        width: 100%;
+        border: 0;
+    }
+
+    .cf-settings-shell__content.content-wrapper {
+        position: absolute;
+        z-index: 2;
+        top: 56px;
+        left: 100%;
+        display: block;
+        width: 100%;
+        height: calc(100dvh - 56px);
+        transition: transform var(--cf-duration-base) var(--cf-ease-out);
+    }
+
+    .cf-settings-shell__content.content-wrapper.show {
+        left: 100%;
+        transform: translateX(-100%);
+    }
+
+    .cf-settings-shell__header.settings-header {
+        display: none;
+    }
+
+    .cf-settings-shell__viewport#settings_content {
+        height: 100%;
+
+        --column-count: 1;
+    }
+
+    .cf-settings-nav.sidebar {
+        height: calc(100% - 56px);
+    }
+
+    .cf-settings-nav .cf-settings-nav__item {
+        min-height: var(--cf-control-height-touch);
+    }
+
+    .cf-settings-shell .settings-section {
+        width: 100%;
+        padding: var(--cf-space-4) var(--cf-space-4) 32px;
+    }
+
+    .cf-settings-field-row,
+    .cf-settings-shell .general-settings > .input-group,
+    .cf-settings-shell .general-settings > .settings-checkbox-wrapper {
+        grid-template-columns: 1fr;
+        gap: var(--cf-space-2);
+        align-items: stretch;
+        padding: var(--cf-space-3) 0;
+    }
+
+    .cf-settings-field-row--toggle {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+    }
+
+    .cf-settings-density {
+        grid-template-columns: 1fr;
+        gap: var(--cf-space-4);
+    }
+
+    .cf-settings-field-row__control,
+    .cf-settings-shell .settings_select,
+    .cf-settings-shell .dropdown-widget-button,
+    .cf-settings-choice-group__option,
+    .cf-settings-stepper__button {
+        min-height: var(--cf-control-height-touch);
+    }
+
+    .cf-settings-choice-group {
+        grid-template-columns: repeat(3, var(--cf-control-height-touch));
+    }
+
+    .cf-settings-choice-group__option,
+    .cf-settings-stepper__button {
+        width: var(--cf-control-height-touch);
+        height: var(--cf-control-height-touch);
+    }
+
+    .cf-settings-stepper {
+        grid-template-columns: var(--cf-control-height-touch) minmax(
+                48px,
+                1fr
+            ) var(--cf-control-height-touch) var(--cf-control-height-touch);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cf-settings-nav .cf-settings-nav__item,
+    .cf-settings-nav__icon > .cf-icon,
+    .cf-settings-shell__content.content-wrapper {
+        transition: none;
+    }
+}

@@ -1,0 +1,37 @@
+/* Exact-source states rendered inside the Cofounder dialog shell. */
+
+.cf-evidence-result .cf-notice__content {
+    flex: 1 1 240px;
+}
+
+.cf-evidence-list {
+    display: grid;
+    gap: var(--cf-space-3);
+    margin: 0;
+    padding-inline-start: 24px;
+}
+
+.cf-evidence-list > li {
+    min-width: 0;
+    padding: var(--cf-space-3) var(--cf-space-4);
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-control);
+    background: var(--cf-color-canvas);
+    overflow-wrap: anywhere;
+}
+
+.cf-evidence-list p {
+    margin: 7px 0 0;
+    white-space: pre-wrap;
+}
+
+@media (width <= 600px) {
+    .cf-evidence-result .cf-notice__content {
+        flex-basis: auto;
+    }
+
+    .cf-evidence-result .cf-notice__actions .cf-button {
+        width: 100%;
+        min-height: var(--cf-control-height-touch);
+    }
+}

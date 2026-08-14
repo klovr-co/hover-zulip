@@ -1,4 +1,4 @@
 <div class="user_profile_subscribe_widget">
-    {{> dropdown_widget widget_name="user_profile_subscribe"}}
-    {{> components/action_button label=(t "Subscribe") custom_classes="add-subscription-button" variant="subtle" intent="brand" aria-label=(t "Subscribe") }}
+    {{> dropdown_widget widget_name="user_profile_subscribe" cofounder=true custom_classes="cf-user-profile__channel-select cf-field__control"}}
+    {{> cofounder/components/button label=(t "Subscribe") custom_classes="add-subscription-button" variant="secondary" aria-label=(t "Subscribe") disabled=true}}
 </div>

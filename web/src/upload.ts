@@ -145,11 +145,7 @@ export const compose_config: Config = {
             )} .upload_banner_cancel_button`,
         ),
     upload_banner_hide_button: (file_id) =>
-        $(
-            `#compose_banners .upload_banner.file_${CSS.escape(
-                file_id,
-            )} .main-view-banner-close-button`,
-        ),
+        $(`#compose_banners .upload_banner.file_${CSS.escape(file_id)} .cf-notice__close`),
     upload_banner_message: (file_id) =>
         $(`#compose_banners .upload_banner.file_${CSS.escape(file_id)} .upload_msg`),
     file_input_identifier: () => "#compose input.file_input",
@@ -182,7 +178,7 @@ export function edit_config(row: number): Config {
             $(
                 `#edit_form_${CSS.escape(`${row}`)} .upload_banner.file_${CSS.escape(
                     file_id,
-                )} .main-view-banner-close-button`,
+                )} .cf-notice__close`,
             ),
         upload_banner_message: (file_id) =>
             $(
@@ -260,7 +256,11 @@ export function show_error_message(
 ): void {
     if (file_id) {
         $(`${config.upload_banner_identifier(file_id)} .moving_bar`).hide();
-        config.upload_banner(file_id).removeClass("info").addClass("error");
+        config
+            .upload_banner(file_id)
+            .removeClass("cf-notice--info")
+            .addClass("cf-notice--error")
+            .attr("role", "alert");
         config.upload_banner_message(file_id).text(message);
     } else {
         // We still use a "file_id" (that's not actually related to a file)
@@ -281,7 +281,7 @@ export let upload_files = (
 
     // A new upload attempt supersedes any error banner (e.g. "file too
     // large") left over from a previous attempt, so we clear those here.
-    config.banner_container().find(".upload_banner.error").remove();
+    config.banner_container().find(".upload_banner.cf-notice--error").remove();
 
     if (realm.max_file_upload_size_mib === 0) {
         show_error_message(
@@ -547,7 +547,7 @@ export function setup_upload(config: Config): Uppy<Meta, TusBody> {
     const $banner_container = config.banner_container();
     $banner_container.on(
         "click",
-        ".upload_banner.file_generic_error .main-view-banner-close-button",
+        ".upload_banner.file_generic_error .cf-notice__close",
         (event) => {
             event.preventDefault();
             $(event.target).parents(".upload_banner").remove();

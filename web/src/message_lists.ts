@@ -96,7 +96,7 @@ export function all_current_message_rows(): JQuery {
         return $();
     }
 
-    return current.view.$list.find(".message_row");
+    return current.view.$list.find(".cf-message-item");
 }
 
 export function update_recipient_bar_background_color(): void {

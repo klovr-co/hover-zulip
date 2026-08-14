@@ -1,10 +1,10 @@
 {{! Client-side Handlebars template for rendering subscriptions. }}
-<div class="stream-row" data-stream-id="{{stream_id}}" data-stream-name="{{name}}">
+<div class="stream-row cf-two-pane-shell__row" data-stream-id="{{stream_id}}" data-stream-name="{{name}}">
 
     {{#if subscribed}}
-        <div class="check checked sub_unsub_button">
+        <button type="button" class="check checked sub_unsub_button cf-two-pane-shell__membership-action" aria-label="{{t 'Unsubscribe from channel' }}">
 
-            <div class="tippy-zulip-tooltip" data-tooltip-template-id="unsubscribe-from-{{stream_id}}-stream-tooltip-template">
+            <span class="tippy-zulip-tooltip" data-tooltip-template-id="unsubscribe-from-{{stream_id}}-stream-tooltip-template">
                 <template id="unsubscribe-from-{{stream_id}}-stream-tooltip-template">
                     <span>
                         {{#tr}}
@@ -14,14 +14,14 @@
                     </span>
                 </template>
 
-                <i class="zulip-icon zulip-icon-subscriber-check sub-unsub-icon"></i>
-            </div>
-            <div class='sub_unsub_status'></div>
-        </div>
+                {{> ../cofounder/components/icon name="check" compact=true custom_classes="sub-unsub-icon" }}
+            </span>
+            <span class="sub_unsub_status"></span>
+        </button>
     {{else}}
-        <div class="check sub_unsub_button {{#unless should_display_subscription_button}}disabled{{/unless}}">
+        <button type="button" class="check sub_unsub_button cf-two-pane-shell__membership-action {{#unless should_display_subscription_button}}disabled{{/unless}}" aria-label="{{t 'Subscribe to channel' }}" {{#unless should_display_subscription_button}}disabled{{/unless}}>
 
-            <div class="tippy-zulip-tooltip"  data-tooltip-template-id="{{#if should_display_subscription_button}}subscribe-to-{{stream_id}}-stream-tooltip-template{{else}}cannot-subscribe-to-{{stream_id}}-stream-tooltip-template{{/if}}">
+            <span class="tippy-zulip-tooltip"  data-tooltip-template-id="{{#if should_display_subscription_button}}subscribe-to-{{stream_id}}-stream-tooltip-template{{else}}cannot-subscribe-to-{{stream_id}}-stream-tooltip-template{{/if}}">
                 <template id="subscribe-to-{{stream_id}}-stream-tooltip-template">
                     <span>
                         {{#tr}}
@@ -40,10 +40,10 @@
                     </span>
                 </template>
 
-                <i class="zulip-icon zulip-icon-subscriber-plus sub-unsub-icon"></i>
-            </div>
-            <div class='sub_unsub_status'></div>
-        </div>
+                {{> ../cofounder/components/icon name="plus" compact=true custom_classes="sub-unsub-icon" }}
+            </span>
+            <span class="sub_unsub_status"></span>
+        </button>
     {{/if}}
     {{> subscription_setting_icon . }}
     <div class="sub-info-box">
@@ -57,7 +57,7 @@
             <div class="description rendered_markdown" data-no-description="{{t 'No description.'}}">{{rendered_markdown rendered_description}}</div>
             {{#if is_old_stream}}
             <div class="stream-message-count tippy-zulip-tooltip" data-tippy-content="{{t 'Estimated messages per week' }}">
-                <i class="fa fa-bar-chart"></i>
+                {{> ../cofounder/components/icon name="activity" compact=true }}
                 <span class="stream-message-count-text">{{stream_weekly_traffic}}</span>
             </div>
             {{else}}

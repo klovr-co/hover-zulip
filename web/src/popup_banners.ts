@@ -3,6 +3,7 @@ import {$} from "jquery";
 import * as banners from "./banners.ts";
 import type {Banner} from "./banners.ts";
 import * as buttons from "./buttons.ts";
+import * as cofounder_icon from "./cofounder/components/icon.ts";
 import {$t} from "./i18n.ts";
 
 export type ReloadingReason = "reload" | "update";
@@ -39,7 +40,7 @@ const connection_error_popup_banner = (retry_seconds: number): Banner => ({
     label: get_connection_error_label(retry_seconds),
     buttons: [
         {
-            variant: "subtle",
+            variant: "secondary",
             label: $t({defaultMessage: "Try now"}),
             custom_classes: "retry-connection",
         },
@@ -53,7 +54,7 @@ const update_connection_error_banner = ($banner: JQuery, retry_delay_secs: numbe
     if (retry_connection_interval !== undefined) {
         clearInterval(retry_connection_interval);
     }
-    const $banner_label = $banner.find(".banner-label");
+    const $banner_label = $banner.find(".cf-banner__label");
     retry_connection_interval = setInterval(() => {
         retry_delay_secs -= 1;
         if (retry_delay_secs <= 0) {
@@ -81,7 +82,7 @@ const FOUND_MISSING_UNREADS_IN_CURRENT_NARROW: Banner = {
     }),
     buttons: [
         {
-            variant: "subtle",
+            variant: "secondary",
             label: $t({defaultMessage: "Jump"}),
             custom_classes: "found-missing-unreads-jump-to-first-unread",
         },
@@ -168,16 +169,15 @@ export function open_update_read_flags_for_narrow_banner(
     if ($banner.length > 0) {
         // If the banner is already open, update the label instead of duplicating the banner.
         const banner = update_read_flags_for_narrow_banner(operation, messages_updated, is_loaded);
-        $banner.find(".banner-label").text(banner.label.toString());
+        $banner.find(".cf-banner__label").text(banner.label.toString());
 
         if (is_loaded) {
             // When all messages have been processed, change the banner
             // intent to success to match the success message and close it
             // after a short delay.
-            $banner.removeClass("banner-info").addClass("banner-success");
-            const $banner_close_button = $banner.find(".banner-close-button");
-            buttons.modify_button_icon($banner_close_button, "check");
-            $banner_close_button.removeClass("icon-button-info").addClass("icon-button-success");
+            $banner.removeClass("cf-banner--info").addClass("cf-banner--success");
+            const $banner_close_button = $banner.find(".cf-banner__close");
+            cofounder_icon.replace_icon($banner_close_button, "check");
 
             setTimeout(() => {
                 fade_out_popup_banner($banner);
@@ -194,8 +194,8 @@ export function open_update_read_flags_for_narrow_banner(
     $banner = $("#popup_banners_wrapper").find(".update-read-flags-for-narrow-banner");
     // We repurpose the banner close button to act as the loading
     // indicator for this banner.
-    const $banner_close_button = $banner.find(".banner-close-button");
-    buttons.modify_button_icon($banner_close_button, "loader-circle");
+    const $banner_close_button = $banner.find(".cf-banner__close");
+    cofounder_icon.replace_icon($banner_close_button, "loader-circle");
 }
 
 export function close_update_read_flags_for_narrow_banner(): boolean {
@@ -218,7 +218,7 @@ export function open_found_missing_unreads_banner(on_jump_to_first_unread: () =>
             e.preventDefault();
             e.stopPropagation();
 
-            const $banner = $(this).closest(".banner");
+            const $banner = $(this).closest(".cf-banner");
             fade_out_popup_banner($banner);
             on_jump_to_first_unread();
         },
@@ -238,9 +238,9 @@ function retry_connection_click_handler(e: JQuery.ClickEvent, on_retry_callback:
     e.preventDefault();
     e.stopPropagation();
 
-    const $banner = $(e.currentTarget).closest(".banner");
+    const $banner = $(e.currentTarget).closest(".cf-banner");
     $banner
-        .find(".banner-label")
+        .find(".cf-banner__label")
         .text($t({defaultMessage: "Unable to connect to Zulip. Trying to reconnect soon…"}));
 
     const $button = $(e.currentTarget).closest(".retry-connection");
@@ -341,16 +341,12 @@ export function open_reloading_application_banner(reason: ReloadingReason): void
 }
 
 export function initialize(): void {
-    $("#popup_banners_wrapper").on(
-        "click",
-        ".banner-close-action",
-        function (this: HTMLElement, e) {
-            // Override the banner close event listener in web/src/banners.ts,
-            // to add a fade-out animation when the banner is closed.
-            e.preventDefault();
-            e.stopPropagation();
-            const $banner = $(this).closest(".banner");
-            fade_out_popup_banner($banner);
-        },
-    );
+    $("#popup_banners_wrapper").on("click", ".cf-banner__close", function (this: HTMLElement, e) {
+        // Override the banner close event listener in web/src/banners.ts,
+        // to add a fade-out animation when the banner is closed.
+        e.preventDefault();
+        e.stopPropagation();
+        const $banner = $(this).closest(".cf-banner");
+        fade_out_popup_banner($banner);
+    });
 }

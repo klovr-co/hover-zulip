@@ -1,0 +1,63 @@
+.cf-user-card {
+    width: min(300px, calc(100vw - 16px));
+    border: 1px solid var(--cf-border-subtle);
+    box-shadow: var(--cf-shadow-overlay);
+}
+
+.cf-user-card .popover-menu-user-header {
+    gap: var(--cf-space-3);
+    padding: var(--cf-space-3);
+    border-bottom: 1px solid var(--cf-border-subtle);
+}
+
+.cf-user-card .popover-menu-user-info {
+    min-width: 0;
+}
+
+.cf-user-card .custom_user_field {
+    display: flex;
+    gap: var(--cf-space-2);
+    align-items: center;
+}
+
+.cf-user-card .custom-profile-field-value {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.cf-user-card .copy-custom-profile-field-link {
+    flex: none;
+    margin-left: auto;
+}
+
+.cf-user-profile .cf-dialog {
+    width: min(560px, 100%);
+}
+
+.cf-user-profile__channel-select.cf-dropdown-trigger {
+    display: inline-flex;
+    gap: var(--cf-space-2);
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+    text-align: left;
+}
+
+.cf-user-profile__channel-select > .dropdown_widget_value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cf-user-profile__channel-select > .cf-icon {
+    flex: none;
+    width: 13px;
+    height: 13px;
+}
+
+@media (width <= 600px) {
+    .cf-user-card {
+        width: calc(100vw - 16px);
+    }
+}

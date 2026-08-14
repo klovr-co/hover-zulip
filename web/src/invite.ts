@@ -282,13 +282,13 @@ const copy_invite_link_banner = (invite_link: string): Banner => ({
             {defaultMessage: "Link: <z-link></z-link>"},
             {
                 "z-link": () =>
-                    `<a href='${invite_link}' id='multiuse_invite_link' class='banner-link'>${invite_link}</a>`,
+                    `<a href='${invite_link}' id='multiuse_invite_link' class='cf-banner__link'>${invite_link}</a>`,
             },
         ),
     ),
     buttons: [
         {
-            variant: "solid",
+            variant: "primary",
             icon: "copy",
             label: $t({defaultMessage: "Copy link"}),
             id: "copy_generated_invite_link",
@@ -548,7 +548,7 @@ function open_invite_user_modal(e: JQuery.ClickEvent<Document, undefined>): void
             dialog_widget.close();
         });
 
-        $("#invite-user-modal").on("click", ".main-view-banner-close-button", (e) => {
+        $("#invite-user-modal").on("click", ".cf-notice__close", (e) => {
             e.preventDefault();
             $(e.target).parent().remove();
         });
@@ -666,7 +666,7 @@ function open_invite_user_modal(e: JQuery.ClickEvent<Document, undefined>): void
         }
 
         const toggler = components.toggle({
-            html_class: "invite_users_option_tabs large allow-overflow",
+            html_class: "invite_users_option_tabs cf-tabs--fill cf-tabs--wrap",
             selected: 0,
             child_wants_focus: true,
             values: [
@@ -699,13 +699,13 @@ function open_invite_user_modal(e: JQuery.ClickEvent<Document, undefined>): void
         const $elem = toggler.get();
         $tab_switcher_container.append($elem);
         setTimeout(() => {
-            $(".invite_users_option_tabs .ind-tab.selected").trigger("focus");
+            $(".invite_users_option_tabs .cf-tabs__tab--selected").trigger("focus");
         }, 0);
     }
 
     function invite_users(): void {
         const is_generate_invite_link =
-            $(".invite_users_option_tabs").find(".selected").attr("data-tab-key") ===
+            $(".invite_users_option_tabs").find(".cf-tabs__tab--selected").attr("data-tab-key") ===
             "invite-link-tab";
         if (is_generate_invite_link) {
             generate_multiuse_invite();
@@ -728,5 +728,9 @@ function open_invite_user_modal(e: JQuery.ClickEvent<Document, undefined>): void
 }
 
 export function initialize(): void {
-    $(document).on("click", ".invite-user-link", open_invite_user_modal);
+    $(document).on(
+        "click",
+        ".invite-user-link, .cf-people-sidebar__invite-action",
+        open_invite_user_modal,
+    );
 }

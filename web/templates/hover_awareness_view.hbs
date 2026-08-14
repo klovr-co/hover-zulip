@@ -1,158 +1,93 @@
-<main class="hover-awareness-shell" aria-label="{{title}}">
-    <div class="hover-awareness-status" role="status" aria-live="polite">
+<main class="cf-awareness-shell" aria-label="{{title}}">
+    <div class="cf-awareness-status" role="status" aria-live="polite">
         {{status}}
         {{#if show_retry}}
-            <button
-                id="hover-awareness-retry"
-                type="button"
-                class="button rounded small"
-            >
-                {{t "Try again"}}
-            </button>
+            {{> cofounder/components/button id="cf-awareness-retry" variant="secondary" label=(t "Try again") }}
         {{/if}}
     </div>
 
     {{#if has_items}}
         <section
-            class="hover-awareness-feed"
-            role="feed"
-            aria-label="{{title}}"
-        >
+          class="cf-awareness-feed"
+          role="feed"
+          aria-label="{{title}}"
+          >
             {{#each items}}
                 <article
-                    class="{{card_class}}"
-                    role="article"
-                    aria-labelledby="hover-awareness-item-{{message_id}}"
-                    data-hover-awareness-message-id="{{message_id}}"
-                >
-                    <div class="hover-awareness-card__body">
+                  class="{{card_class}}"
+                  role="article"
+                  aria-labelledby="cf-awareness-item-{{message_id}}"
+                  data-cf-awareness-message-id="{{message_id}}"
+                  >
+                    <div class="cf-awareness-card__body">
                         <img
-                            class="hover-awareness-avatar"
-                            src="{{avatar_url}}"
-                            alt=""
-                        />
-                        <div class="hover-awareness-card__main">
-                            <header class="hover-awareness-card__meta">
+                          class="cf-awareness-avatar"
+                          src="{{avatar_url}}"
+                          alt=""
+                          />
+                        <div class="cf-awareness-card__main">
+                            <header class="cf-awareness-card__meta">
                                 <strong>{{sender_name}}</strong>
-                                <time
-                                    datetime="{{timestamp}}"
-                                >{{display_time}}</time>
+                                <time datetime="{{timestamp}}">{{display_time}}</time>
                             </header>
-                            <div class="hover-generated-update-label">
+                            <div class="cf-generated-update__label">
                                 <span
-                                    class="hover-generated-update-label__chip"
-                                >{{output_label}}</span>
+                                  class="cf-generated-update__chip"
+                                  >{{output_label}}</span>
                                 <span
-                                    class="hover-generated-update-label__context"
-                                >{{source_summary}}</span>
-                                <span
-                                    class="hover-generated-update-importance hover-generated-update-importance--{{importance}}"
-                                >{{importance}}</span>
+                                  class="cf-generated-update__context"
+                                  >{{source_summary}}</span>
+                                {{#if importance_tone}}{{> cofounder/components/status tone=importance_tone label=importance custom_classes="cf-generated-update__importance"}}{{/if}}
                                 {{#if is_unread}}
                                     <span
-                                        class="hover-awareness-unread"
-                                        aria-label="{{t 'Unread'}}"
-                                    >{{t "Unread"}}</span>
+                                      class="cf-awareness-unread"
+                                      aria-label="{{t 'Unread'}}"
+                                      >{{t "Unread"}}</span>
                                 {{/if}}
                             </div>
                             {{#if has_reasons}}
                                 <div
-                                    class="hover-awareness-card__reasons"
-                                    aria-label="{{t 'Why this is here'}}"
-                                >
+                                  class="cf-awareness-card__reasons"
+                                  aria-label="{{t 'Why this is here'}}"
+                                  >
                                     {{#each reason_labels}}
                                         <span
-                                            class="hover-awareness-reason"
-                                        >{{this}}</span>
+                                          class="cf-awareness-reason"
+                                          >{{this}}</span>
                                     {{/each}}
                                 </div>
                             {{/if}}
                             <div
-                                id="hover-awareness-item-{{message_id}}"
-                                class="hover-awareness-card__content message_content rendered_markdown"
-                            >
+                              id="cf-awareness-item-{{message_id}}"
+                              class="cf-awareness-card__content rendered_markdown"
+                              >
                                 {{rendered_markdown rendered_content}}
                             </div>
                             {{#if reviewed_summary}}
-                                <div class="hover-awareness-current-state">
+                                <div class="cf-awareness-current-state">
                                     <strong>{{t "Latest state"}}</strong>
                                     <span>{{reviewed_summary}}</span>
                                 </div>
                             {{/if}}
                             {{#if todo_status}}
-                                <div class="hover-awareness-todo">
+                                <div class="cf-awareness-todo">
                                     <strong>{{t "Todo"}}</strong>
-                                    <span>{{todo_status}}{{#if todo_due_date}}
+                                    <span>
+                                        {{todo_status}}
+                                        {{#if todo_due_date}}
                                             ·
-                                            {{#tr}}Due
-                                                {{todo_due_date}}{{/tr}}{{/if}}</span>
+                                            {{#tr}}Due {{todo_due_date}}{{/tr}}
+                                        {{/if}}
+                                    </span>
                                 </div>
                             {{/if}}
-                            <div
-                                class="hover-source-reactions"
-                                aria-label="{{t 'Knowledge sources'}}"
-                            >
-                                <span class="hover-source-reactions__label">{{t
-                                        "Sources"
-                                    }}</span>
-                                {{#if evidence_url}}
-                                    <button
-                                        type="button"
-                                        class="hover-source-pill hover-view-evidence"
-                                        data-evidence-url="{{evidence_url}}"
-                                        aria-haspopup="dialog"
-                                    >
-                                        {{t "View sources"}}
-                                    </button>
-                                {{/if}}
-                                {{#each sources}}
-                                    <div class="message_reaction_container">
-                                        {{#if url}}
-                                            <a
-                                                class="hover-source-pill hover-source-reaction hover-source-reaction--{{key}}"
-                                                href="{{url}}"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                aria-label="{{name}}"
-                                                title="{{name}}"
-                                            >
-                                                <i
-                                                    class="{{icon_class}}
-                                                        hover-source-reaction__icon"
-                                                    aria-hidden="true"
-                                                ></i>
-                                                <span
-                                                    class="message_reaction_count"
-                                                >{{count}}</span>
-                                            </a>
-                                        {{else}}
-                                            <span
-                                                class="hover-source-pill hover-source-reaction hover-source-reaction--{{key}}"
-                                                aria-label="{{name}}"
-                                                title="{{name}}"
-                                            >
-                                                <i
-                                                    class="{{icon_class}}
-                                                        hover-source-reaction__icon"
-                                                    aria-hidden="true"
-                                                ></i>
-                                                <span
-                                                    class="message_reaction_count"
-                                                >{{count}}</span>
-                                            </span>
-                                        {{/if}}
-                                    </div>
-                                {{/each}}
-                            </div>
-                            <footer class="hover-awareness-card__footer">
+                            {{> cofounder/components/source_actions integrations=sources evidence_url=evidence_url}}
+                            <footer class="cf-awareness-card__footer">
                                 <span>{{space_name}} · {{topic}}</span>
                                 <nav aria-label="{{t 'Update actions'}}">
-                                    <a href="{{message_url}}">{{t
-                                            "View update"
-                                        }}</a>
+                                    <a href="{{message_url}}">{{t "View update"}}</a>
                                     {{#if has_history}}
-                                        <a href="{{history_url}}">{{#tr}}View
-                                                history ({{history_count}}){{/tr}}</a>
+                                        <a href="{{history_url}}">{{#tr}}View history ({{history_count}}){{/tr}}</a>
                                     {{/if}}
                                 </nav>
                             </footer>

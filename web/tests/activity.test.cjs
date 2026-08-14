@@ -192,11 +192,11 @@ test("direct_message_update_dom_counts", () => {
     const pm_key = alice.user_id.toString();
     const $li = $.create("alice stub");
     buddy_list_add_user_matching_view(pm_key, $li);
-    $li.set_find_results(".unread_count", $count);
+    $li.set_find_results(".cf-member-row__unread", $count);
     $count.set_parents_result("li", $li);
 
     const counts = new Map([[pm_key, 5]]);
-    $li.addClass("user_sidebar_entry");
+    $li.addClass("cf-member-row");
 
     activity_ui.update_dom_with_unread_counts({pm_count: counts});
     assert.equal($count.text(), "5");

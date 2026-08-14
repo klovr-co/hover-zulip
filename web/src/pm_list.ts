@@ -62,6 +62,16 @@ function reset_dm_list_cursor({show_highlight}: {show_highlight: boolean}): void
     dm_list_cursor.reset();
 }
 
+export function _activate_dm_row($row: JQuery): boolean {
+    const $actions = $row.find("a, button");
+    if ($actions.length === 0) {
+        return false;
+    }
+
+    $actions[0]!.click();
+    return true;
+}
+
 function initialize_dm_list_cursor(): void {
     dm_list_cursor = new ListCursor({
         highlight_class: "highlighted_row",
@@ -466,14 +476,7 @@ export function initialize(): void {
                     // This can happen for empty searches, no need to warn.
                     return false;
                 }
-                // If the row has a link, we click it.
-                const $nearest_link = $current_row.find("a").first();
-                if ($nearest_link.length > 0) {
-                    $nearest_link[0]!.click();
-                    return true;
-                }
-                // If the row does not have a link, let the browser handle it.
-                return false;
+                return _activate_dm_row($current_row);
             },
         },
     });
