@@ -1,0 +1,37 @@
+#!/bin/sh
+set -eu
+
+exec >> /var/log/hover-bootstrap.log 2>&1
+export DEBIAN_FRONTEND=noninteractive
+
+if [ -f /var/lib/hover-bootstrap-complete ]; then
+  echo "Hover bootstrap already completed; exiting."
+  exit 0
+fi
+
+# The supported Zulip installer requires swap on hosts below 5 GiB RAM.
+if ! swapon --noheadings --show=NAME | grep -qx '/swapfile'; then
+  fallocate -l 2G /swapfile
+  chmod 600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
+fi
+grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+
+apt-get update
+apt-get install --yes ca-certificates curl
+
+install_dir="$(mktemp --directory)"
+trap 'rm -rf "$${install_dir}"' EXIT
+curl --fail --location --retry 5 --output "$${install_dir}/zulip-server.tar.gz" "${release_tarball_url}"
+tar --extract --file "$${install_dir}/zulip-server.tar.gz" --directory "$${install_dir}"
+
+installer="$(find "$${install_dir}" -path '*/scripts/setup/install' -type f -print -quit)"
+test -n "$${installer}"
+"$${installer}" \
+  --hostname="${domain_name}" \
+  --email="${administrator_email}" \
+  --certbot \
+  --no-push-notifications
+
+touch /var/lib/hover-bootstrap-complete
