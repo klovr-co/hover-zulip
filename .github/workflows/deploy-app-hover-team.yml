@@ -49,8 +49,8 @@ jobs:
             --instance-name "$INSTANCE_NAME" \
             --protocol ssh > lightsail-access.json
           jq -r '.accessDetails.privateKey' lightsail-access.json > lightsail-ssh-key
-          jq -r '.accessDetails.certKey' lightsail-access.json > lightsail-ssh-cert.pub
-          chmod 600 lightsail-ssh-key lightsail-ssh-cert.pub
+          jq -r '.accessDetails.certKey' lightsail-access.json > lightsail-ssh-key-cert.pub
+          chmod 600 lightsail-ssh-key lightsail-ssh-key-cert.pub
 
       - name: Install the source commit with Zulip's production upgrader
         env:
@@ -62,7 +62,6 @@ jobs:
             -o ConnectTimeout=30
             -o StrictHostKeyChecking=accept-new
             -i lightsail-ssh-key
-            -o CertificateFile=lightsail-ssh-cert.pub
           )
           ssh "${ssh_options[@]}" "ubuntu@$INSTANCE_IP" \
             "sudo install -d -o zulip -g zulip /srv/zulip.git && \
