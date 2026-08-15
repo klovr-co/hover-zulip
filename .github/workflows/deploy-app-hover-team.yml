@@ -70,7 +70,7 @@ jobs:
              if ! sudo -u zulip git -C /srv/zulip.git rev-parse --is-bare-repository >/dev/null 2>&1; then \
                sudo -u zulip git init --bare /srv/zulip.git; \
              fi && \
-             sudo -u zulip git -c http.version=HTTP/1.1 -C /srv/zulip.git fetch --no-tags https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git $DEPLOY_COMMIT:refs/heads/$DEPLOY_BRANCH && \
+             sudo -u zulip git -c http.version=HTTP/1.1 -C /srv/zulip.git fetch --depth=1 --no-tags https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git $DEPLOY_COMMIT:refs/heads/$DEPLOY_BRANCH && \
              sudo /home/zulip/deployments/current/scripts/upgrade-zulip-from-git --local-ref $DEPLOY_BRANCH && \
              sudo -u zulip /home/zulip/deployments/current/manage.py check"
 
