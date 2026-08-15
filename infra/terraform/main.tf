@@ -33,7 +33,7 @@ data "aws_iam_policy_document" "github_actions_deploy_assume_role" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:klovr-co/hover-zulip:ref:refs/heads/main"]
+      values   = ["repo:klovr-co@229474292/hover-zulip@1326442325:ref:refs/heads/main"]
     }
   }
 }
