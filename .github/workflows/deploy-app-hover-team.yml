@@ -50,7 +50,7 @@ jobs:
             --protocol ssh > lightsail-access.json
           jq -r '.accessDetails.privateKey' lightsail-access.json > lightsail-ssh-key
           jq -r '.accessDetails.certKey' lightsail-access.json > lightsail-ssh-cert.pub
-          chmod 600 lightsail-ssh-key
+          chmod 600 lightsail-ssh-key lightsail-ssh-cert.pub
 
       - name: Install the source commit with Zulip's production upgrader
         env:
