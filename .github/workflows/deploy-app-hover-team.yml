@@ -39,9 +39,6 @@ jobs:
           role-to-assume: ${{ env.DEPLOY_ROLE_ARN }}
           role-session-name: hover-production-deploy
 
-      - name: Package the source commit
-        run: git bundle create hover-deploy.bundle "$DEPLOY_COMMIT"
-
       - name: Temporarily open SSH and obtain an ephemeral certificate
         run: |
           set -euo pipefail
@@ -56,6 +53,8 @@ jobs:
           chmod 600 lightsail-ssh-key
 
       - name: Install the source commit with Zulip's production upgrader
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           ssh_options=(
@@ -65,15 +64,13 @@ jobs:
             -i lightsail-ssh-key
             -o CertificateFile=lightsail-ssh-cert.pub
           )
-          scp "${ssh_options[@]}" hover-deploy.bundle "ubuntu@$INSTANCE_IP:/tmp/hover-deploy-$DEPLOY_COMMIT.bundle"
           ssh "${ssh_options[@]}" "ubuntu@$INSTANCE_IP" \
             "sudo install -d -o zulip -g zulip /srv/zulip.git && \
              if ! sudo -u zulip git -C /srv/zulip.git rev-parse --is-bare-repository >/dev/null 2>&1; then \
                sudo -u zulip git init --bare /srv/zulip.git; \
              fi && \
-             sudo -u zulip git -C /srv/zulip.git fetch /tmp/hover-deploy-$DEPLOY_COMMIT.bundle $DEPLOY_COMMIT:refs/heads/$DEPLOY_BRANCH && \
+             sudo -u zulip git -C /srv/zulip.git fetch https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git $DEPLOY_COMMIT:refs/heads/$DEPLOY_BRANCH && \
              sudo /home/zulip/deployments/current/scripts/upgrade-zulip-from-git --local-ref $DEPLOY_BRANCH && \
-             sudo rm -f /tmp/hover-deploy-$DEPLOY_COMMIT.bundle && \
              sudo -u zulip /home/zulip/deployments/current/manage.py check"
 
       - name: Verify the public application
