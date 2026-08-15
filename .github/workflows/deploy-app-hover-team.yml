@@ -79,6 +79,9 @@ jobs:
              else \
                sudo -u zulip git -c http.version=HTTP/1.1 -C /srv/zulip.git fetch --no-tags https://github.com/$GITHUB_REPOSITORY.git +$DEPLOY_COMMIT:refs/heads/$DEPLOY_BRANCH; \
              fi && \
+             if [ "\$(sudo -u zulip wc -l < /home/zulip/deployments/current/zulip-git-version)" -lt 2 ]; then \
+               sudo -u zulip sh -c 'head -n 1 /home/zulip/deployments/current/zulip-git-version > /home/zulip/deployments/current/zulip-git-version.tmp && head -n 1 /home/zulip/deployments/current/zulip-git-version >> /home/zulip/deployments/current/zulip-git-version.tmp && mv /home/zulip/deployments/current/zulip-git-version.tmp /home/zulip/deployments/current/zulip-git-version'; \
+             fi && \
              sudo /home/zulip/deployments/current/scripts/upgrade-zulip-from-git --local-ref $DEPLOY_BRANCH && \
              sudo -u zulip /home/zulip/deployments/current/manage.py check"
 
