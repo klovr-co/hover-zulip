@@ -843,10 +843,10 @@ export let get_message_selection = (selection = window.getSelection()): string =
         // this entire range at least.
         if (
             range_common_ancestor instanceof Element &&
-            range_common_ancestor.classList.contains("message_content")
+            range_common_ancestor.classList.contains("cf-message-item__content")
         ) {
             html_to_convert = extract_range_html(range);
-        } else if ($(range_common_ancestor).parents(".message_content").length > 0) {
+        } else if ($(range_common_ancestor).parents(".cf-message-item__content").length > 0) {
             // We want to preserve the structure of the html with 2 levels of
             // ancestors (to retain code block / list formatting) in such a range.
             html_to_convert = extract_range_html(range, true);
@@ -854,8 +854,9 @@ export let get_message_selection = (selection = window.getSelection()): string =
             // If the common ancestor contains the message_content div, we can quote the part
             // of this range that is in the message_content div, if any.
             range_common_ancestor instanceof Element &&
-            (message_content = range_common_ancestor.querySelector(".message_content")) !== null &&
-            range.cloneContents().querySelector(".message_content")
+            (message_content = range_common_ancestor.querySelector(".cf-message-item__content")) !==
+                null &&
+            range.cloneContents().querySelector(".cf-message-item__content")
         ) {
             // Narrow down the range to the part that is in the message_content div.
             range = get_range_intersection_with_element(range, message_content);

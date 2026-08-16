@@ -9,7 +9,7 @@ import {parse_html} from "./ui_util.ts";
 
 export function initialize(): void {
     popover_menus.register_popover_menu("#help-menu", {
-        theme: "popover-menu",
+        theme: "cofounder-menu",
         placement: "bottom",
         offset: popover_menus.NAVBAR_POPOVER_OFFSET,
         // The strategy: "fixed"; and eventlisteners modifier option
@@ -39,12 +39,12 @@ export function initialize(): void {
                     }),
                 ),
             );
-            $("#help-menu").addClass("active-navbar-menu");
+            $("#help-menu").addClass("cf-app-header__item--active");
         },
         onHidden(instance) {
             instance.destroy();
             popover_menus.popover_instances.help_menu = null;
-            $("#help-menu").removeClass("active-navbar-menu");
+            $("#help-menu").removeClass("cf-app-header__item--active");
         },
     });
 }

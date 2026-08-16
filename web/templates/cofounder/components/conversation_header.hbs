@@ -1,0 +1,104 @@
+{{#if is_stream}}
+<div class="cf-conversation-header cf-conversation-header--channel message_header message_header_stream" data-stream-id="{{stream_id}}" data-topic-name="{{topic}}">
+    <div class="cf-conversation-header__surface message-header-contents" data-recipient-bar-color="{{recipient_bar_color}}">
+        <a class="cf-conversation-header__channel message_label_clickable narrows_by_recipient stream_label tippy-narrow-tooltip"
+          href="{{stream_url}}"
+          draggable="false"
+          data-tippy-content="{{t 'Go to #{display_recipient}' }}">
+            <span class="cf-conversation-header__channel-icon stream-privacy-modified-color-{{stream_id}} stream-privacy filter-icon" data-stream-privacy-icon-color="{{stream_privacy_icon_color}}">
+                {{#if is_archived}}
+                    {{> icon name="archive" compact=true}}
+                {{else if invite_only}}
+                    {{> icon name="lock" compact=true}}
+                {{else if is_web_public}}
+                    {{> icon name="globe" compact=true}}
+                {{else}}
+                    {{> icon name="hash" compact=true}}
+                {{/if}}
+            </span>
+            <span class="cf-conversation-header__channel-name message-header-stream-name">{{~display_recipient~}}</span>
+            {{#if is_archived}}
+            <span class="cf-conversation-header__archived message-header-stream-archived">({{t 'archived' }})</span>
+            {{/if}}
+        </a>
+        <span class="cf-conversation-header__separator stream_topic_separator" aria-hidden="true">{{> icon name="chevron-right" compact=true}}</span>
+        <span class="copy-paste-text">&gt;</span>
+        <span class="cf-conversation-header__topic stream_topic">
+            <a class="cf-conversation-header__topic-link message_label_clickable narrows_by_topic tippy-narrow-tooltip"
+              draggable="false"
+              href="{{topic_url}}"
+              data-tippy-content="{{t 'Go to #{display_recipient} > {topic_display_name}' }}">
+                {{#if (and use_match_properties (not is_empty_string_topic))}}
+                    <span class="stream-topic-inner">{{{match_topic_html}}}</span>
+                {{else}}
+                    <span class="stream-topic-inner {{#if is_empty_string_topic}}empty-topic-display{{/if}}">{{topic_display_name}}</span>
+                {{/if}}
+            </a>
+        </span>
+        <span class="cf-conversation-header__actions recipient_bar_controls no-select">
+            <span class="topic_edit hidden-for-spectators"></span>
+            {{#each topic_links}}
+                {{#with this}}
+                    <a href="{{url}}" target="_blank" rel="noopener noreferrer" class="cf-icon-button cf-icon-button--neutral recipient-bar-control recipient-bar-control-icon no-underline icon-button icon-button-neutral" data-tippy-content="{{t 'Open {text}' }}" aria-label="{{t 'Open {text}' }}">
+                        {{> icon name="external-link" compact=true}}
+                    </a>
+                {{/with}}
+            {{/each}}
+            {{#if is_topic_editable}}
+                {{> icon_button icon="pencil" intent="neutral" custom_classes="on_hover_topic_edit recipient-bar-control recipient-bar-control-icon hidden-for-spectators" data-tippy-content=(t "Edit topic") aria-label=(t "Edit topic") }}
+            {{/if}}
+            {{#if (and user_can_resolve_topic (not is_empty_string_topic))}}
+                {{#if topic_is_resolved}}
+                    {{> icon_button icon="placeholder" intent="neutral" custom_classes="recipient-bar-control on-hover-unresolve-loading-indicator hidden-for-spectators hide" }}
+                {{else}}
+                    {{> icon_button icon="check" intent="neutral" custom_classes="on_hover_topic_resolve recipient-bar-control recipient-bar-control-icon hidden-for-spectators" data-tippy-content=(t "Mark as resolved") aria-label=(t "Mark as resolved") }}
+                {{/if}}
+            {{/if}}
+            {{> icon_button icon="link-alt" intent="neutral" custom_classes="recipient-bar-control recipient-bar-control-icon recipient-bar-copy-link-to-topic" data-tippy-content=(t "Copy link to topic") aria-label=(t "Copy link to topic") }}
+            {{#if (and is_subscribed (not is_archived))}}
+            <span class="change_visibility_policy recipient-bar-control hidden-for-spectators" aria-haspopup="true">
+                {{#if (eq visibility_policy all_visibility_policies.FOLLOWED)}}
+                    {{> icon_button icon="follow" intent="neutral" custom_classes="recipient-bar-control-icon" data-tippy-content=(t "You follow this topic.") aria-label=(t "You follow this topic.") }}
+                {{else if (eq visibility_policy all_visibility_policies.UNMUTED)}}
+                    {{> icon_button icon="unmute" intent="neutral" custom_classes="recipient-bar-control recipient-bar-control-icon" data-tippy-content=(t "You have unmuted this topic.") aria-label=(t "You have unmuted this topic.") }}
+                {{else if (eq visibility_policy all_visibility_policies.MUTED)}}
+                    {{> icon_button icon="mute" intent="neutral" custom_classes="recipient-bar-control-icon" data-tippy-content=(t "You have muted this topic.") aria-label=(t "You have muted this topic.") }}
+                {{else}}
+                    {{> icon_button icon="inherit" intent="neutral" custom_classes="recipient-bar-control-icon" data-tippy-content=(t "Notifications are based on your configuration for this channel.") aria-label=(t "Notifications are based on your configuration for this channel.") }}
+                {{/if}}
+            </span>
+            {{/if}}
+            <span class="recipient-row-topic-menu recipient-bar-control" aria-haspopup="true">
+                {{> icon_button icon="more-vertical" intent="neutral" squared=true custom_classes="recipient-bar-control-icon" data-tippy-content=(t "Topic actions") aria-label=(t "Topic actions") }}
+            </span>
+        </span>
+        <span class="cf-conversation-header__date recipient_row_date scroll-to-time {{#if (and (not always_display_date) date_unchanged )}}recipient_row_date_unchanged{{/if}}" role="button" tabindex="0">{{{date_html}}}</span>
+    </div>
+</div>
+{{else}}
+<div class="cf-conversation-header cf-conversation-header--dm message_header message_header_private_message">
+    <div class="cf-conversation-header__surface message-header-contents">
+        <a class="cf-conversation-header__dm message_label_clickable narrows_by_recipient stream_label tippy-narrow-tooltip"
+          href="{{pm_with_url}}"
+          draggable="false"
+          data-tippy-content="{{#if is_dm_with_self}}{{t 'Go to direct messages with yourself' }}{{else}}{{t 'Go to direct messages with {display_reply_to_for_tooltip}' }}{{/if}}">
+            <span class="cf-conversation-header__dm-icon private_message_header_icon">{{> icon name="user" compact=true}}</span>
+            <span class="cf-conversation-header__dm-name private_message_header_name">
+                {{#if is_dm_with_self}}
+                    {{t 'Messages with yourself' }}
+                {{else}}
+                    {{~#tr}}You and <z-user-names></z-user-names>
+                    {{#*inline "z-user-names"}}
+                        {{#each recipient_users}}
+                            {{~full_name}}{{#if is_bot}}<span class="cf-conversation-header__bot" aria-label="{{t 'Bot' }}">{{> icon name="bot" compact=true}}</span>{{/if~}}
+                            {{#if should_add_guest_user_indicator}}&nbsp;<i>({{t 'guest'}})</i>{{/if}}{{#unless @last}}, {{/unless}}
+                        {{/each}}
+                    {{/inline}}
+                    {{/tr~}}
+                {{/if}}
+            </span>
+        </a>
+        <span class="cf-conversation-header__date recipient_row_date scroll-to-time {{#if (and (not always_display_date) date_unchanged )}}recipient_row_date_unchanged{{/if}}" role="button" tabindex="0">{{{date_html}}}</span>
+    </div>
+</div>
+{{/if}}

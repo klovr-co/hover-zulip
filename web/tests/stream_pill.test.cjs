@@ -150,7 +150,10 @@ run_test("generate_pill_html", () => {
         "<div class='pill 'data-stream-id=\"101\" tabindex=0>\n" +
             '    <span class="pill-label">\n' +
             '        <span class="pill-value">\n' +
-            '                <span class="decorated-channel-name-wrapper"><span class="channel-privacy-type-icon"><i class="zulip-icon zulip-icon-hashtag" aria-hidden="true"></i></span><span class="decorated-channel-name">Denmark</span></span>        </span></span>\n' +
+            '                <span class="decorated-channel-name-wrapper"><span class="channel-privacy-type-icon"><svg class="cf-icon cf-icon--compact" viewBox="0 0 24 24" aria-hidden="true" focusable="false">\n' +
+            '    <path d="M10 3 8 21M16 3l-2 18M4 9h17M3 15h17"></path>\n' +
+            "</svg>\n" +
+            '</span><span class="decorated-channel-name">Denmark</span></span>        </span></span>\n' +
             '    <div class="exit">\n' +
             '        <i role="button" class="zulip-icon zulip-icon-close pill-close-button" aria-label="translated: Remove"></i>\n' +
             "    </div>\n" +

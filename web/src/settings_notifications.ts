@@ -51,7 +51,7 @@ const DESKTOP_NOTIFICATIONS_BANNER: banners.Banner = {
         {
             label: $t({defaultMessage: "Enable notifications"}),
             custom_classes: "desktop-notifications-request",
-            variant: "solid",
+            variant: "primary",
         },
     ],
     close_button: true,
@@ -67,7 +67,7 @@ const MOBILE_PUSH_NOTIFICATION_BANNER: banners.Banner = {
         {
             label: $t({defaultMessage: "Learn more"}),
             custom_classes: "banner-external-link",
-            variant: "subtle",
+            variant: "secondary",
         },
     ],
     custom_classes: "mobile-push-notifications-banner",
@@ -539,7 +539,7 @@ export function set_up(settings_panel: SettingsPanel): void {
         );
     });
 
-    $("#settings_content").on("click", ".banner-close-button", (e) => {
+    $("#settings_content").on("click", ".cf-banner__close", (e) => {
         e.preventDefault();
         $(".banner-wrapper").remove();
     });

@@ -1,62 +1,52 @@
 <div id="groups_overlay" class="two-pane-settings-overlay overlay" data-overlay="group_subscriptions">
     <div class="flex overlay-content">
-        <div class="two-pane-settings-container overlay-container">
-            <div class="two-pane-settings-header">
-                <div class="fa fa-chevron-left"></div>
-                <span class="user-groups-title">{{t 'User groups' }}</span>
-                <div class="exit">
-                    <span class="exit-sign">&times;</span>
-                </div>
-            </div>
-            <div class="two-pane-settings-content">
-                <div class="left">
-                    <div class="two-pane-settings-subheader">
+        <div class="two-pane-settings-container overlay-container cf-two-pane-shell">
+            {{> ../cofounder/components/two_pane_header title=(t "User groups") title_class="user-groups-title" }}
+            <div class="two-pane-settings-content cf-two-pane-shell__content">
+                <div class="left cf-two-pane-shell__pane cf-two-pane-shell__pane--list">
+                    <div class="two-pane-settings-subheader cf-two-pane-shell__pane-header">
                         <div class="list-toggler-container">
                             <div id="add_new_user_group">
-                                <button class="create_user_group_button two-pane-settings-plus-button">
-                                    <i class="create_button_plus_sign zulip-icon zulip-icon-user-group-plus" aria-hidden="true"></i>
-                                </button>
+                                {{> ../cofounder/components/icon_button icon="user-group-plus" intent="brand" custom_classes="create_user_group_button two-pane-settings-plus-button" aria-label=(t "Create user group") }}
                                 <div class="float-clear"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="two-pane-settings-body">
-                        <div class="input-append group_name_search_section two-pane-settings-search" id="group_filter">
-                            <input type="text" name="group_name" id="search_group_name" class="filter_text_input" autocomplete="off"
-                              placeholder="{{t 'Filter' }}" value=""/>
-                            <button type="button" class="clear_search_button" id="clear_search_group_name">
-                                <i class="zulip-icon zulip-icon-close" aria-hidden="true"></i>
-                            </button>
+                    <div class="two-pane-settings-body cf-two-pane-shell__pane-body">
+                        <div class="input-append group_name_search_section two-pane-settings-search cf-two-pane-shell__filter" id="group_filter">
+                            <input type="text" name="group_name" id="search_group_name" class="filter_text_input cf-field__control cf-two-pane-shell__filter-input" autocomplete="off"
+                              placeholder="{{t 'Filter' }}" aria-label="{{t 'Filter user groups' }}" value=""/>
+                            {{> ../cofounder/components/icon_button icon="close" intent="neutral" id="clear_search_group_name" custom_classes="clear_search_button" aria-label=(t "Clear filter") }}
                             <span>
                                 <label class="checkbox" id="user-group-edit-filter-options">
-                                    {{> ../dropdown_widget widget_name="user_group_visibility_settings"}}
+                                    {{> ../dropdown_widget widget_name="user_group_visibility_settings" cofounder=true custom_classes="cf-two-pane-shell__filter-select"}}
                                 </label>
                             </span>
                         </div>
                         <div class="no-groups-to-show">
                         </div>
-                        <div class="user-groups-list-wrapper two-pane-settings-left-simplebar-container" data-simplebar data-simplebar-tab-index="-1">
+                        <div class="user-groups-list-wrapper two-pane-settings-left-simplebar-container cf-two-pane-shell__list" data-simplebar data-simplebar-tab-index="-1">
                             <div class="user-groups-list"></div>
                         </div>
                     </div>
                 </div>
-                <div class="right">
-                    <div class="two-pane-settings-subheader">
+                <div class="right cf-two-pane-shell__pane cf-two-pane-shell__pane--detail">
+                    <div class="two-pane-settings-subheader cf-two-pane-shell__pane-header">
                         <div class="display-type">
-                            <div id="user_group_settings_title" class="user-group-info-title"></div>
+                            <div id="user_group_settings_title" class="user-group-info-title cf-two-pane-shell__pane-title"></div>
                         </div>
                     </div>
-                    <div class="two-pane-settings-body">
-                        <div class="nothing-selected">
+                    <div class="two-pane-settings-body cf-two-pane-shell__pane-body">
+                        <div class="nothing-selected cf-two-pane-shell__empty">
                             <div class="create-group-button-container">
                                 {{> ../settings/upgrade_tip_widget . }}
-                                <button type="button" class="create_user_group_button animated-purple-button">{{t 'Create user group' }}</button>
+                                {{> ../cofounder/components/button variant="primary" label=(t "Create user group") custom_classes="create_user_group_button" }}
                                 <span class="settings-empty-option-text creation-permission-text">
                                     {{t 'You do not have permission to create user groups.' }}
                                 </span>
                             </div>
                         </div>
-                        <div id="user_group_settings" class="two-pane-settings-right-simplebar-container settings" data-simplebar data-simplebar-tab-index="-1" data-simplebar-auto-hide="false">
+                        <div id="user_group_settings" class="two-pane-settings-right-simplebar-container settings cf-two-pane-shell__detail" data-simplebar data-simplebar-tab-index="-1" data-simplebar-auto-hide="false">
                             {{!-- edit user group here --}}
                         </div>
                         {{> user_group_creation_form . }}

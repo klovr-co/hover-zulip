@@ -17,7 +17,7 @@ export function initialize(): void {
     popover_menus.register_popover_menu(
         ".pill[data-stream-id], .view-stream-card[data-stream-id]",
         {
-            theme: "popover-menu",
+            theme: "cofounder-menu",
             placement: "right",
             onShow(instance) {
                 popover_menus.popover_instances.stream_card_popover = instance;

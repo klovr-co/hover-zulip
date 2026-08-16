@@ -124,7 +124,10 @@ run_test("initialize", ({override, override_rewire, mock_template}) => {
             assert.equal(opts.item_html("ver")(search_suggestions[0]), expected_value);
 
             const search_string = "channel: Verona";
-            const verona_decorated = `<span class="decorated-channel-name-wrapper inline-decorated-channel-name"><span class="channel-privacy-type-icon"><i class="zulip-icon zulip-icon-hashtag" aria-hidden="true"></i></span><span class="decorated-channel-name">Verona</span></span>`;
+            const verona_decorated = `<span class="decorated-channel-name-wrapper inline-decorated-channel-name"><span class="channel-privacy-type-icon"><svg class="cf-icon cf-icon--compact" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M10 3 8 21M16 3l-2 18M4 9h17M3 15h17"></path>
+</svg>
+</span><span class="decorated-channel-name">Verona</span></span>`;
             const description_html = `Messages in ${verona_decorated}`;
             expected_value = `<div class="search_list_item">\n            <span class="pill-container"><div class='pill ' tabindex=0>\n    <span class="pill-label">\n        <span class="pill-value">\n${search_string}\n        </span></span>\n    <div class="exit">\n        <i role="button" class="zulip-icon zulip-icon-close pill-close-button" aria-label="translated: Remove"></i>\n    </div>\n</div>\n</span>\n            <div class="description">${description_html}</div>\n</div>\n`;
             assert.equal(opts.item_html("ver")(search_suggestions[1]), expected_value);
@@ -332,7 +335,7 @@ run_test("initiate_search", ({override_rewire}) => {
     override_rewire(search, "open_search_bar_and_close_narrow_description", () => {
         search_bar_opened = true;
     });
-    $.set_results(".navbar-search.expanded", []);
+    $.set_results(".cf-app-header__search--expanded", []);
     $("#search_query").text("");
     search.initiate_search();
     assert.ok(typeahead_forced_open);
@@ -342,12 +345,12 @@ run_test("initiate_search", ({override_rewire}) => {
 
 run_test("close_search", () => {
     search_typeahead.shown = true;
-    $(".navbar-search").addClass("expanded");
+    $(".cf-app-header__search").addClass("cf-app-header__search--expanded");
 
     search.close_search();
 
     assert.equal(search_typeahead.shown, false);
-    assert.ok(!$(".navbar-search").hasClass("expanded"));
+    assert.ok(!$(".cf-app-header__search").hasClass("cf-app-header__search--expanded"));
 });
 
 run_test("create_item_from_search_string with invalid string", () => {

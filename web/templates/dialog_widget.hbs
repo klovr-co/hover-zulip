@@ -1,9 +1,9 @@
-<div class="micromodal" id="{{modal_unique_id}}" aria-hidden="true">
-    <div class="modal__overlay {{#unless close_on_overlay_click}}ignore-overlay-click{{/unless}}" tabindex="-1">
-        <div {{#if id}}id="{{id}}" {{/if}}class="modal__container" role="dialog" aria-modal="true" aria-labelledby="dialog_title">
-            <header class="modal__header">
-                <div class="modal__header-content">
-                    <h1 id="dialog_title" class="modal__title dialog_heading">
+<div class="micromodal cf-theme cf-dialog-root" id="{{modal_unique_id}}" aria-hidden="true">
+    <div class="modal__overlay cf-dialog-backdrop {{#unless close_on_overlay_click}}ignore-overlay-click{{/unless}}" tabindex="-1">
+        <div {{#if id}}id="{{id}}" {{/if}}class="modal__container cf-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog_title"{{#if modal_subtitle_html}} aria-describedby="dialog_subtitle"{{/if}}>
+            <header class="modal__header cf-dialog__header">
+                <div class="modal__header-content cf-dialog__heading">
+                    <h1 id="dialog_title" class="modal__title dialog_heading cf-dialog__title">
                         {{#if modal_title_html}}
                             {{{ modal_title_html }}}
                         {{else}}
@@ -17,35 +17,32 @@
                         <div class="alert" id="dialog_error"></div>
                     {{/if}}
                     {{#if modal_subtitle_html}}
-                    <div class="modal__subtitle">
+                    <div id="dialog_subtitle" class="modal__subtitle cf-dialog__subtitle">
                         {{{ modal_subtitle_html }}}
                     </div>
                     {{/if}}
                 </div>
                 {{#if has_tab_switcher}}
-                <div class="modal__tab-switcher-container"></div>
+                <div class="modal__tab-switcher-container cf-dialog__tabs"></div>
                 {{/if}}
-                {{> components/icon_button icon="close" intent="neutral" custom_classes="modal__close" aria-label=(t 'Close modal') data-micromodal-close=true }}
+                {{> cofounder/components/button variant="ghost" compact=true icon="close" custom_classes="modal__close cf-dialog__close" aria-label=(t 'Close modal') micromodal_close=true }}
             </header>
             {{#unless is_compact}}
-            <main class="modal__content {{#if hide_footer}} footer-hidden {{/if}}" data-simplebar data-simplebar-tab-index="-1" {{#if always_visible_scrollbar}}data-simplebar-auto-hide="false"{{/if}}>
+            <main class="modal__content cf-dialog__body {{#if hide_footer}} footer-hidden {{/if}}" data-simplebar data-simplebar-tab-index="-1" {{#if always_visible_scrollbar}}data-simplebar-auto-hide="false"{{/if}}>
                 <div class="alert" id="dialog_error"></div>
                 {{{ modal_content_html }}}
             </main>
             {{/unless}}
             {{#unless hide_footer}}
-            <footer class="modal__footer">
+            <footer class="modal__footer cf-dialog__footer">
                 {{#if footer_minor_text }}
-                <div class="dialog-widget-footer-minor-text">{{footer_minor_text}}</div>
+                <div class="dialog-widget-footer-minor-text cf-dialog__footer-note">{{footer_minor_text}}</div>
                 {{/if}}
                 {{#unless single_footer_button}}
-                <button class="modal__button dialog_exit_button" aria-label="{{t 'Close this dialog window' }}" data-micromodal-close>{{ modal_exit_button_text }}</button>
+                {{> cofounder/components/button variant="secondary" label=modal_exit_button_text custom_classes="dialog_exit_button cf-dialog__button cf-dialog__exit" aria-label=(t 'Close this dialog window') micromodal_close=true disabled=modal_buttons_disabled }}
                 {{/unless}}
                 <div class="dialog_submit_button_container">
-                    <button class="modal__button dialog_submit_button"{{#if single_footer_button}} aria-label="{{t 'Close this dialog window' }}" data-micromodal-close{{/if}}>
-                        <span class="submit-button-text">{{ modal_submit_button_text }}</span>
-                        <span class="modal__spinner"></span>
-                    </button>
+                    {{> cofounder/components/button variant=modal_submit_button_variant label=modal_submit_button_text custom_classes="dialog_submit_button cf-dialog__button cf-dialog__submit" custom_label_classes="submit-button-text" spinner_class="cf-dialog__spinner" aria-label=single_footer_button_aria_label micromodal_close=single_footer_button disabled=modal_buttons_disabled aria-busy=modal_submit_button_busy }}
                 </div>
             </footer>
             {{/unless}}

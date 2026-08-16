@@ -173,13 +173,11 @@ function toggle_advanced_configurations(): void {
     if (!$advanced_configurations_view.hasClass("hide")) {
         // Toggle into the condensed state
         $advanced_configurations_view.addClass("hide");
-        $toggle_button.addClass("fa-caret-right");
-        $toggle_button.removeClass("fa-caret-down");
+        $toggle_button.removeClass("is-expanded");
     } else {
         // Toggle into the expanded state
         $advanced_configurations_view.removeClass("hide");
-        $toggle_button.addClass("fa-caret-down");
-        $toggle_button.removeClass("fa-caret-right");
+        $toggle_button.addClass("is-expanded");
     }
 }
 

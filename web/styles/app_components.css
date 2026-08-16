@@ -120,83 +120,6 @@ textarea::-webkit-resizer {
     background-image: var(--svg-resize-handle);
 }
 
-/* -- tab switcher -- */
-
-.tab-switcher {
-    font-weight: initial;
-    margin: 2px 4px;
-    display: inline-block;
-
-    .ind-tab {
-        display: inline-block;
-        width: 90px;
-        margin: 0 -0.5px;
-        text-align: center;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
-        vertical-align: bottom; /* See https://stackoverflow.com/a/43266155/ */
-        padding: 3px 10px;
-        background-color: var(--color-background-tab-switcher-ind-tab);
-        cursor: pointer;
-        justify-content: center;
-        align-items: center;
-
-        &:focus-visible {
-            outline: 1px solid var(--color-outline-focus);
-            outline-offset: -2px;
-        }
-
-        &:not(.selected) {
-            border: 1px solid var(--color-border-tab-switcher-ind-tab);
-        }
-
-        &.first {
-            border-radius: 5px 0 0 5px;
-            border-right: 1px solid transparent;
-        }
-
-        &.middle {
-            border-right: 1px solid transparent;
-        }
-
-        &.last {
-            border-radius: 0 5px 5px 0;
-        }
-
-        &.selected {
-            position: relative;
-            background-color: var(
-                --color-background-tab-switcher-ind-tab-selected
-            );
-            color: hsl(0deg 0% 100%);
-            border: 1px solid var(--color-border-tab-switcher-ind-tab-selected);
-            z-index: 2;
-        }
-
-        &.disabled {
-            cursor: default;
-            color: var(--color-text-tab-switcher-ind-tab-disabled);
-            border-color: var(--color-border-tab-switcher-ind-tab-disabled);
-        }
-    }
-
-    &.large .ind-tab {
-        width: 100%;
-    }
-
-    &.allow-overflow {
-        display: flex;
-
-        .ind-tab {
-            display: flex;
-            text-overflow: initial;
-            white-space: initial;
-            vertical-align: middle;
-        }
-    }
-}
-
 /* -- unified overlay design component -- */
 div.overlay {
     position: fixed;
@@ -394,10 +317,10 @@ input.settings_text_input {
 .mobile-push-notifications-banner,
 .desktop-setting-notifications,
 .organization-upgrade-banner {
-    .banner-content {
+    .cf-banner__content {
         flex-wrap: nowrap;
 
-        .banner-action-buttons {
+        .cf-banner__actions {
             flex-wrap: nowrap;
         }
     }
@@ -916,13 +839,13 @@ input.settings_text_input {
             border-radius: 7px;
         }
 
-        .message_row {
+        .cf-message-item {
             border-radius: 0 0 7px 7px;
             border: 1px solid var(--color-message-list-border);
             border-top: 0;
         }
 
-        .messagebox-content {
+        .cf-message-item__body {
             grid-template: auto / auto max-content;
             grid-template-areas:
                 "message controls"
@@ -931,7 +854,7 @@ input.settings_text_input {
             column-gap: 5px;
             padding: 10px;
 
-            .message_content {
+            .cf-message-item__content {
                 cursor: pointer;
                 grid-area: message;
             }
@@ -941,7 +864,7 @@ input.settings_text_input {
             }
         }
 
-        .messagebox {
+        .cf-message-item__frame {
             cursor: auto;
             box-shadow: none;
             border-radius: 0 0 7px 7px;

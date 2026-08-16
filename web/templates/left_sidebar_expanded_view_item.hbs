@@ -1,22 +1,19 @@
-<li class="top_left_{{css_class_suffix}} top_left_row {{#if hidden_for_spectators}}hidden-for-spectators{{/if}} {{#if is_home_view}}selected-home-view{{/if}}">
-    <a href="#{{fragment}}" class="left-sidebar-navigation-label-container tippy-left-sidebar-tooltip" data-tooltip-template-id="{{tooltip_template_id}}">
-        <span class="filter-icon">
-            <i class="zulip-icon {{icon}}" aria-hidden="true"></i>
-        </span>
-        {{~!-- squash whitespace --~}}
-        <span class="left-sidebar-navigation-label">{{name}}</span>
-        <span class="unread_count {{unread_count_type}}{{#if (or (eq unread_count undefined) (eq unread_count 0))}} hide{{/if}}">
-            {{#unless (or (eq unread_count undefined) (eq unread_count 0))}}
-                {{unread_count}}
-            {{/unless}}
-        </span>
-        {{#if supports_masked_unread}}
-        <span class="masked_unread_count">
-            <i class="zulip-icon zulip-icon-masked-unread"></i>
-        </span>
-        {{/if}}
-    </a>
-    {{#if menu_icon_class}}
-        <span class="arrow sidebar-menu-icon {{menu_icon_class}} hidden-for-spectators" tabindex="0"><i class="zulip-icon zulip-icon-more-vertical" aria-label="{{menu_aria_label}}"></i></span>
-    {{/if}}
-</li>
+{{> cofounder/components/nav_item
+  href=href
+  icon=cf_icon
+  label=name
+  selected=selected
+  item_classes=item_classes
+  main_classes=main_classes
+  tooltip_template_id=tooltip_template_id
+  reserve_badge=has_unread_count
+  badge=unread_count
+  badge_visible=badge_visible
+  badge_classes=badge_classes
+  badge_label=(t "Unread messages")
+  supports_masked_unread=supports_masked_unread
+  masked_classes="masked_unread_count"
+  masked_unread_label=(t "Some unread messages are hidden")
+  action_label=menu_aria_label
+  action_classes=action_classes
+  }}

@@ -66,23 +66,23 @@
         </form>
         {{/if}}
 
-        <div class="settings_panel_list_header">
+        <div class="cf-data-table__header settings_panel_list_header">
             <h3 class="settings-table-title">{{t "Code playgrounds"}}</h3>
             {{> filter_text_input placeholder=(t 'Filter') aria_label=(t 'Filter code playgrounds')}}
         </div>
 
-        <div class="progressive-table-wrapper" data-simplebar data-simplebar-tab-index="-1">
-            <table class="table table-striped wrapped-table admin_playgrounds_table">
+        <div class="cf-data-table__scroll progressive-table-wrapper" data-simplebar data-simplebar-tab-index="-1">
+            <table class="cf-data-table cf-data-table--settings table table-striped wrapped-table admin_playgrounds_table">
                 <thead class="table-sticky-headers">
                     <tr>
                         <th class="active" data-sort="alphabetic" data-sort-prop="pygments_language">{{t "Language" }}
-                            <i class="table-sortable-arrow zulip-icon zulip-icon-sort-arrow-down"></i>
+                            {{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="table-sortable-arrow"}}
                         </th>
                         <th data-sort="alphabetic" data-sort-prop="name">{{t "Name" }}
-                            <i class="table-sortable-arrow zulip-icon zulip-icon-sort-arrow-down"></i>
+                            {{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="table-sortable-arrow"}}
                         </th>
                         <th data-sort="alphabetic" data-sort-prop="url_template">{{t "URL template" }}
-                            <i class="table-sortable-arrow zulip-icon zulip-icon-sort-arrow-down"></i>
+                            {{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="table-sortable-arrow"}}
                         </th>
                         {{#if is_admin}}
                         <th class="actions">{{t "Actions" }}</th>

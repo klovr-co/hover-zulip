@@ -948,7 +948,7 @@ function get_stream_topic_data(input_element: TypeaheadInputElement): {
 } {
     let stream_id;
     let topic;
-    const $message_row = input_element.$element.closest(".message_row");
+    const $message_row = input_element.$element.closest(".cf-message-item");
     if ($message_row.length === 1) {
         // we are editing a message so we try to use its keys.
         const msg = message_store.get(rows.id($message_row));

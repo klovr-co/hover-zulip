@@ -1,0 +1,134 @@
+:root {
+    color-scheme: light;
+
+    /* Cofounder component-library primitives. Literal values belong here. */
+    /* stylelint-disable color-no-hex */
+    --cf-color-canvas: #f7f6f2;
+    --cf-color-paper: #fffefa;
+    --cf-color-ink: #20221f;
+    --cf-color-ink-hover: #363834;
+    --cf-color-ink-pressed: #10110f;
+    --cf-color-ink-soft: #696b66;
+    --cf-color-line: #d9d8d2;
+    --cf-color-line-strong: #b8b7b0;
+    --cf-color-line-disabled: #d5d5d0;
+    --cf-color-surface-hover: #efeee9;
+    --cf-color-surface-pressed: #e7e6e0;
+    --cf-color-surface-disabled: #ecebe6;
+    --cf-color-accent: #0878e8;
+    --cf-color-accent-hover: #0668ca;
+    --cf-color-accent-soft: #eaf4ff;
+    --cf-color-success: #278642;
+    --cf-color-success-strong: #267c3f;
+    --cf-color-success-soft: #edf8ef;
+    --cf-color-warning: #9a6500;
+    --cf-color-warning-soft: #fff6df;
+    --cf-color-danger: #c63b35;
+    --cf-color-danger-hover: #a92f2a;
+    --cf-color-danger-pressed: #8f2723;
+    --cf-color-danger-soft: #fff0ee;
+    --cf-color-provider-whatsapp: hsl(147deg 77% 31%);
+    --cf-color-provider-github: hsl(213deg 13% 16%);
+    --cf-color-provider-instagram: hsl(326deg 57% 48%);
+    --cf-color-inverse: #fffefa;
+    --cf-color-disabled: #a6a7a1;
+    --cf-color-disabled-strong: #858680;
+    /* stylelint-enable color-no-hex */
+
+    /* Semantic surfaces and interaction roles. */
+    --cf-surface-canvas: var(--cf-color-canvas);
+    --cf-surface-paper: var(--cf-color-paper);
+    --cf-surface-raised: var(--cf-color-paper);
+    --cf-surface-subtle: var(--cf-color-surface-hover);
+    --cf-surface-muted: var(--cf-color-surface-hover);
+    --cf-surface-hover: var(--cf-color-surface-hover);
+    --cf-surface-selected: var(--cf-color-accent-soft);
+    --cf-surface-inverse: var(--cf-color-ink);
+    --cf-text-primary: var(--cf-color-ink);
+    --cf-text-secondary: var(--cf-color-ink-soft);
+    --cf-text-tertiary: var(--cf-color-disabled-strong);
+    --cf-text-inverse: var(--cf-color-inverse);
+    --cf-border-subtle: var(--cf-color-line);
+    --cf-border-strong: var(--cf-color-line-strong);
+    --cf-border-accent: var(--cf-color-accent);
+    --cf-border-selection: color-mix(
+        in srgb,
+        var(--cf-color-accent) 28%,
+        var(--cf-color-line)
+    );
+    --cf-focus: var(--cf-color-accent);
+
+    /* Compact application rhythm from the approved light reference. */
+    --cf-space-1: 4px;
+    --cf-space-2: 8px;
+    --cf-space-3: 12px;
+    --cf-space-4: 16px;
+    --cf-space-6: 24px;
+    --cf-radius-control: 7px;
+    --cf-radius-panel: 12px;
+    --cf-radius-overlay: 14px;
+    --cf-radius-window: 20px;
+    --cf-radius-pill: 999px;
+    --cf-control-height-compact: 28px;
+    --cf-control-height: 32px;
+    --cf-control-height-touch: 40px;
+    --cf-measure: 70ch;
+    --cf-layout-container-wide: 1422px;
+    --cf-layout-content-width: 802px;
+    --cf-layout-header-height: 70px;
+    --cf-layout-sidebar-width: 310px;
+    --cf-layout-conversation-gutter: 27px;
+
+    /* Depth is reserved for controls and genuinely elevated surfaces. */
+    --cf-shadow-control: 0 1px 2px hsl(30deg 8% 15% / 8%);
+    --cf-shadow-panel: 0 8px 24px hsl(30deg 8% 15% / 7%);
+    --cf-shadow-overlay: 0 12px 30px hsl(30deg 8% 15% / 12%);
+    --cf-backdrop-overlay: hsl(30deg 8% 15% / 32%);
+
+    /* Type roles. */
+    --cf-font-ui: "Source Sans 3 VF", "Open Sans Variable", sans-serif;
+    --cf-font-display: var(--cf-font-ui);
+    --cf-font-mono: "Source Code Pro", monospace;
+    --cf-type-micro: 11px;
+    --cf-type-body: 14px;
+    --cf-type-label: 13px;
+    --cf-type-meta: 12px;
+    --cf-type-heading-sm: 16px;
+    --cf-type-title: 18px;
+    --cf-line-body: 1.45;
+
+    /* Motion roles. */
+    --cf-duration-fast: 120ms;
+    --cf-duration-base: 180ms;
+    --cf-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cf-theme {
+    accent-color: var(--cf-color-accent);
+    scrollbar-color: var(--cf-border-subtle) var(--cf-surface-canvas);
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-canvas);
+    font-family: var(--cf-font-ui);
+    font-size: var(--cf-type-body);
+    line-height: var(--cf-line-body);
+    text-rendering: optimizelegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+.cf-theme ::selection {
+    color: var(--cf-text-primary);
+    background: var(--cf-color-accent-soft);
+}
+
+@media (width <= 1100px) {
+    :root {
+        --cf-layout-header-height: 40px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --cf-duration-fast: 0ms;
+        --cf-duration-base: 0ms;
+    }
+}

@@ -1,9 +1,13 @@
 <div id="message-row-{{message_list_id}}-{{msg/id}}" data-message-id="{{msg/id}}"
-  class="message_row{{#unless msg/is_stream}} private-message{{/unless}}{{#if include_sender}} messagebox-includes-sender{{/if}}{{#if mention_classname}} {{mention_classname}}{{/if}}{{#if msg.unread}} unread{{/if}} {{#if msg.locally_echoed}}locally-echoed{{/if}} selectable_row {{#if is_hidden}}muted-message-sender{{/if}}{{#if is_hover_generated_update}} hover-generated-update{{/if}}{{#if hover_module_key}} hover-module--{{hover_module_key}}{{/if}}{{#if hover_filter_classes}} {{hover_filter_classes}}{{/if}}"
+  class="cf-message-item{{#unless msg/is_stream}} cf-message-item--private{{/unless}}{{#if include_sender}} cf-message-item--with-sender{{/if}}{{#if mention_classname}} {{mention_classname}}{{/if}}{{#if msg.unread}} cf-message-item--unread{{/if}}{{#if msg.locally_echoed}} cf-message-item--pending{{/if}}{{#if is_hidden}} cf-message-item--muted{{/if}}{{#if is_hover_generated_update}} cf-message-item--generated-update{{/if}}"
+  {{#if hover_module_key}}data-cf-module-key="{{hover_module_key}}"{{/if}}
+  {{#if cf_lineage_state}}data-cf-lineage="{{cf_lineage_state}}"{{/if}}
+  {{#if cf_is_source_record}}data-cf-source-record{{/if}}
+  {{#if cf_filter_source_ids}}data-cf-filter-source-ids="{{cf_filter_source_ids}}"{{/if}}
   role="listitem">
     {{#if (or want_subscription_status_divider want_date_divider)}}
-    <div class="unread_marker message_divider_unread_marker"><div class="unread-marker-fill"></div></div>
-    <div class="message_feed_divider no-select">
+    <div class="cf-message-item__unread-marker cf-message-item__unread-marker--divider"><div class="cf-message-item__unread-fill"></div></div>
+    <div class="cf-message-item__divider no-select">
         {{#if want_subscription_status_divider}}
         <span class="stream-status">
             {{#if msg/historical }}
@@ -28,9 +32,10 @@
         {{/if}}
     </div>
     {{/if}}
-    <div class="unread_marker message_unread_marker"><div class="unread-marker-fill"></div></div>
-    <div class="messagebox">
-        <div class="messagebox-content {{#if status_message}}is-me-message{{/if}}">
+    <div class="cf-message-item__unread-marker" aria-hidden="true"><div class="cf-message-item__unread-fill"></div></div>
+    {{#if msg.unread}}<span class="cf-message-item__unread-label">{{t "Unread message"}}</span>{{/if}}
+    <div class="cf-message-item__frame">
+        <div class="cf-message-item__body{{#if status_message}} cf-message-item__body--status is-me-message{{/if}}">
             {{> message_body .}}
             {{!-- message_edit_form.hbs is inserted here when editing a message. --}}
         </div>

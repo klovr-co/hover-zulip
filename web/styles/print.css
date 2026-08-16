@@ -15,7 +15,7 @@
     .column-left,
     .top-messages-logo,
     #userlist-toggle,
-    .message_length_controller,
+    .cf-message-item__length-controller,
     #loading_older_messages_indicator,
     #page_loading_indicator,
     #message_feed_errors_container,
@@ -66,13 +66,13 @@
     }
 
     /* Don't highlight the selected message. */
-    .selected_message .messagebox-content {
+    .selected_message .cf-message-item__body {
         outline: 0;
     }
 
-    .messagebox-content {
+    .cf-message-item__body {
         .message_edit_notice,
-        .message-time {
+        .cf-message-item__time {
             /* Firefox seems to have a bug that fuzzes out
                small text with opacity; this unsets that
                value, and replaces with a matching gray. */
@@ -85,8 +85,8 @@
        CSS Grid does not yet break very intelligently
        in all browsers, so longer messages may sometimes
        appear at the top of new pages. */
-    .message_content.collapsed,
-    .message_content.condensed {
+    .cf-message-item__content.collapsed,
+    .cf-message-item__content.condensed {
         max-height: unset !important;
         min-height: unset !important;
         overflow: auto !important;
@@ -96,7 +96,7 @@
 
     /* Print links in the same color as text, with any
        likely full URL values in parentheses. */
-    .message_content a {
+    .cf-message-item__content a {
         color: inherit;
 
         &[href^="http"]::after {

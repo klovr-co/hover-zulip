@@ -32,7 +32,7 @@ class FakeComposeBox {
         );
 
         const $message_row_stub = $.set_results("message_row_stub", []);
-        this.$content_textarea.set_closest_results(".message_row", $message_row_stub);
+        this.$content_textarea.set_closest_results(".cf-message-item", $message_row_stub);
 
         this.reset();
     }

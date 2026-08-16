@@ -1,5 +1,5 @@
 {{!-- col-index `0` is COLUMNS.FULL_ROW --}}
-<div id="{{ header_id }}" tabindex="0" class="inbox-header inbox-folder {{#unless is_header_visible}}hidden_by_filters{{/unless}} {{#if is_collapsed}}inbox-collapsed-state{{/if}}" data-col-index="0">
+<div id="{{ header_id }}" tabindex="0" class="cf-conversation-list__section-label inbox-header inbox-folder {{#unless is_header_visible}}hidden_by_filters{{/unless}} {{#if is_collapsed}}inbox-collapsed-state{{/if}}" data-col-index="0">
     <div class="inbox-focus-border">
         <div class="inbox-left-part-wrapper">
             <div class="inbox-left-part">
@@ -12,12 +12,12 @@
                         {{/if}}
                     </span>
                 </div>
-                <div class="collapsible-button"><i class="folder-row-chevron zulip-icon zulip-icon-chevron-down"></i></div>
-                <span class="unread_mention_info tippy-zulip-tooltip
+                <button type="button" class="cf-conversation-list__collapse collapsible-button" tabindex="-1" aria-label="{{t 'Toggle section'}}" aria-expanded="{{#if is_collapsed}}false{{else}}true{{/if}}">{{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="folder-row-chevron"}}</button>
+                <span class="cf-conversation-list__mention unread_mention_info tippy-zulip-tooltip
                   {{#unless has_unread_mention}}hidden{{/unless}}"
                   data-tippy-content="{{t 'You have unread mentions' }}">@</span>
                 <div class="unread-count-focus-outline">
-                    <span class="unread_count">{{unread_count}}</span>
+                    <span class="cf-conversation-list__badge unread_count">{{unread_count}}</span>
                 </div>
             </div>
         </div>

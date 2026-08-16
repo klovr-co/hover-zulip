@@ -206,10 +206,10 @@
            plus 4px of grid gap for 116px here. */
         margin-right: calc(var(--compose-send-controls-width) + 4px);
 
-        .main-view-banner {
+        .cf-notice {
             padding-right: 4px;
 
-            .main-view-banner-close-button {
+            .cf-notice__close {
                 outline-offset: 0;
                 border-radius: 4px;
             }
@@ -324,7 +324,7 @@
         box-shadow: none !important;
     }
 
-    .messagebox {
+    .cf-composer__body {
         box-shadow: none !important;
     }
 }
@@ -333,7 +333,7 @@
     margin: 0;
     height: 100%;
 
-    .messagebox {
+    .cf-composer__body {
         /* normally 5px 14px; pull in the right and bottom a bit */
         cursor: default;
         flex: 1;
@@ -353,10 +353,6 @@
             "message-content-container message-send-controls-container"
             "message-formatting-controls-container message-send-controls-container";
         gap: 0 4px;
-    }
-
-    .message_content {
-        margin-right: 0;
     }
 }
 
@@ -683,7 +679,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    /* Matched to 4px grid-gap on .messagebox grid. */
+    /* Matched to the 4px grid gap on the Cofounder composer body. */
     padding-bottom: 4px;
     /* Align to compose controls; that's 112px width,
        plus 4px of grid gap for 116px here. */
@@ -730,336 +726,6 @@
     }
 }
 
-.main-view-banner {
-    /* This is same spatial value as the 4px of padding around
-       the edge of the compose box. */
-    margin-bottom: 4px;
-    border-radius: 5px;
-    border: 1px solid;
-    display: flex;
-    align-items: center;
-    line-height: 1.2em; /* 18px at 15px/1em. */
-
-    .above_compose_banner_action_link {
-        color: var(--color-main-view-banner-action-link);
-    }
-
-    .main-view-banner-elements-wrapper {
-        display: flex;
-        align-items: center;
-        /* Allow this flex container to grow or
-           shrink to fit the outer container. */
-        flex: 1 1 auto;
-        /* Allow items to wrap; this supports an
-           intrinsic layout for banner text and
-           buttons, which will always occupy the
-           space available, without our having
-           to fiddle with tons of media queries. */
-        flex-wrap: wrap;
-    }
-
-    & .banner_content {
-        /* Override Bootstrap when .banner_content is
-           a paragraph element. */
-        margin: 0;
-        /* 5px right padding + 10px left-margin of the neighbouring button will match the left padding */
-        padding: 8px 5px 8px 15px;
-        /* The banner text uses a flex-basis of 150px,
-           which is roughly the width at which banner
-           text lines are still comfortably readable.
-           Still, it can grow and shrink as needed. */
-        flex: 1 1 150px;
-
-        & .banner_message {
-            /* Override Bootstrap when .banner_content
-               contains an inner .banner_message
-               paragraph. */
-            margin: 0;
-        }
-    }
-
-    .main-view-banner-action-button,
-    .upload_banner_cancel_button {
-        border: none;
-        border-radius: 4px;
-        padding: 5px 10px;
-        font-weight: 600;
-        margin-top: 4.5px;
-        margin-bottom: 4.5px;
-        font-family: inherit;
-        font-size: inherit;
-        /* Buttons take a minimum height for
-           when their text fits on a single
-           line. 2.1333em is 32px at 15px/1em. */
-        min-height: 2.1333em;
-        /* When we're larger than large mobile
-           scales ($ml_min), flex the button to
-           its max-content, i.e., all its text
-           on a single line. But do not grow in
-           order to avoid awkward, oversized
-           buttons within the flex group. */
-        flex: 0 1 max-content;
-        /* Use this margin-left hack to keep
-           the button to the righthand side of
-           the banner. */
-        margin-left: auto;
-
-        @media (width < $ml_min) {
-            /* When we're smaller than large mobile
-               scales, we allow the button to grow,
-               so that it can span the full width of
-               narrow, mobile-scale banners as it
-               wraps onto a second line.
-
-               We also allow the button to shrink,
-               so that, for example, the text can
-               wrap on the schedule-message button
-               that appears when undoing a scheduled
-               message. */
-            flex: 1 1 max-content;
-            /* Use a 10px left margin to keep the
-               button away from the edge of the
-               banner box to match the banner text;
-               we need this only at small scales,
-               when the button grows to the full
-               width of the flex container. */
-            margin-left: 10px;
-        }
-        /* Extra margin to ensure the layout is identical when there is no
-           close button. */
-        &.right_edge {
-            margin-right: 10px;
-        }
-    }
-
-    .main-view-banner-action-button {
-        /* Establish a uniform top and bottom
-           space around the button, which also
-           works with the space around the message
-           text. */
-        margin-top: 8px;
-        margin-bottom: 8px;
-        /* Make as tall as two lines of banner message
-           text, which have a line-height of 18px, but
-           no more. 2.4em is two 1.2em lines in the
-           banner area. */
-        max-height: 2.4em;
-        /* Keep to the top of the box, but stretch
-           taller based on how the box is flexing. */
-        min-height: 0;
-        align-self: stretch;
-    }
-
-    .main-view-banner-close-button {
-        text-decoration: none;
-        /* Set same top and bottom margin
-           as action buttons. */
-        margin: 8px 0;
-        padding: 0 8px;
-        /* Let the close button's box stretch,
-           but no larger than the height of the
-           banner box when the action button
-           achieves its full height (margin,
-           padding, and height), which keeps
-           the X vertically centered with it. */
-        align-self: stretch;
-        /* 2.4em is two 1.2em lines in the
-           banner area. */
-        max-height: 2.4em;
-        /* Display as flexbox to better control
-           the X icon's position. This creates
-           an anonymous flexbox item out of the
-           ::before content where the icon sits. */
-        display: flex;
-        align-items: center;
-    }
-
-    .banner_content + .main-view-banner-close-button {
-        /* When there's no action button, set the max
-           height for the typical height of the box
-           when it contains only banner message text.
-           This will keep the action button aligned
-           with the first or only line of text.
-           2.2667 is 34px at 15px/1em; */
-        max-height: 2.2667em;
-    }
-
-    &.success {
-        background-color: var(--color-background-success-main-view-banner);
-        border: 1px solid var(--color-border-success-main-view-banner);
-        color: var(--color-success-main-view-banner);
-
-        .main-view-banner-close-button {
-            color: var(--color-success-main-view-banner-close-button);
-
-            &:hover {
-                color: var(--color-success-main-view-banner-close-button-hover);
-            }
-
-            &:active {
-                color: var(
-                    --color-success-main-view-banner-close-button-active
-                );
-            }
-        }
-
-        .main-view-banner-action-button {
-            background-color: var(
-                --color-background-success-main-view-banner-action-button
-            );
-            color: inherit;
-
-            &:hover {
-                background-color: var(
-                    --color-background-success-main-view-banner-action-button-hover
-                );
-            }
-
-            &:active {
-                background-color: var(
-                    --color-background-success-main-view-banner-action-button-active
-                );
-            }
-        }
-    }
-
-    /* warning and warning-style classes have the same CSS; this is since
-    the warning class has some associated javascript which we do not want
-    for some of the banners, for which we use the warning-style class. */
-    &.warning,
-    &.warning-style {
-        background-color: var(--color-background-warning-main-view-banner);
-        border-color: var(--color-border-warning-main-view-banner);
-        color: var(--color-warning-main-view-banner);
-
-        .main-view-banner-close-button {
-            color: var(--color-warning-main-view-banner-close-button);
-
-            &:hover {
-                color: var(--color-warning-main-view-banner-close-button-hover);
-            }
-
-            &:active {
-                color: var(
-                    --color-warning-main-view-banner-close-button-active
-                );
-            }
-        }
-
-        .main-view-banner-action-button {
-            background-color: var(
-                --color-background-warning-main-view-banner-action-button
-            );
-            color: var(--color-warning-main-view-banner-action-button);
-
-            &:hover {
-                background-color: var(
-                    --color-background-warning-main-view-banner-action-button-hover
-                );
-            }
-
-            &:active {
-                background-color: var(
-                    --color-background-warning-main-view-banner-action-button-active
-                );
-            }
-        }
-    }
-
-    &.error {
-        background-color: var(--color-background-error-main-view-banner);
-        border-color: var(--color-border-error-main-view-banner);
-        color: var(--color-error-main-view-banner);
-
-        .main-view-banner-close-button {
-            color: var(--color-error-main-view-banner-close-button);
-
-            &:hover {
-                color: var(--color-error-main-view-banner-close-button-hover);
-            }
-
-            &:active {
-                color: var(--color-error-main-view-banner-close-button-active);
-            }
-        }
-
-        .main-view-banner-action-button {
-            background-color: var(
-                --color-background-error-main-view-banner-action-button
-            );
-            color: var(--color-error-main-view-banner-action-button);
-
-            &:hover {
-                background-color: var(
-                    --color-background-error-main-view-banner-action-button-hover
-                );
-            }
-
-            &:active {
-                background-color: var(
-                    --color-background-error-main-view-banner-action-button-active
-                );
-            }
-        }
-    }
-
-    &.info {
-        position: relative;
-        background-color: var(--color-background-info-main-view-banner);
-        border-color: var(--color-border-info-main-view-banner);
-        color: var(--color-info-main-view-banner);
-
-        .main-view-banner-close-button {
-            color: var(--color-info-main-view-banner-close-button);
-
-            &:hover {
-                color: var(--color-info-main-view-banner-close-button-hover);
-            }
-
-            &:active {
-                color: var(--color-info-main-view-banner-close-button-active);
-            }
-        }
-
-        .main-view-banner-action-button,
-        .upload_banner_cancel_button {
-            background-color: var(
-                --color-background-info-main-view-banner-action-button
-            );
-            color: var(--color-info-main-view-banner-action-button);
-
-            &:hover {
-                background-color: var(
-                    --color-background-info-main-view-banner-action-button-hover
-                );
-            }
-
-            &:active {
-                background-color: var(
-                    --color-background-info-main-view-banner-action-button-active
-                );
-            }
-        }
-    }
-
-    .secondary-button {
-        margin-left: 10px;
-    }
-}
-
-/* Show the focus outline on banner close buttons only for
-   keyboard navigation, not for mouse clicks.
-   TODO: These banners still use the legacy .main-view-banner
-   markup. We should migrate the compose and edit-form banners
-   to the modern banner and button components, which handle
-   keyboard vs. mouse focus correctly; this rule is an interim fix. */
-#compose_banners,
-.edit_form_banners {
-    .main-view-banner-close-button:focus:not(:focus-visible) {
-        outline: 0;
-    }
-}
-
 .upload_banner {
     overflow: hidden;
 
@@ -1069,22 +735,29 @@
 
     .moving_bar {
         position: absolute;
+        left: 0;
+        bottom: 0;
         width: 0;
+        height: 4px;
         /* The progress updates seem to come every second or so,
         so this is the smoothest it can probably get. */
         transition: width 1s ease-in-out; /* stylelint-disable-line plugin/no-low-performance-animation-properties */
-        background: var(--color-background-main-view-banner-moving-bar);
-        top: 0;
-        bottom: 0;
+        background: var(--cf-color-accent);
     }
 
     /* Keep these elements visible above the
        .moving_bar element on file uploads. */
     .upload_msg,
-    .main-view-banner-close-button,
+    .cf-notice__close,
     .upload_banner_cancel_button {
         z-index: 1;
         position: relative;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .upload_banner .moving_bar {
+        transition: none;
     }
 }
 
@@ -1662,7 +1335,7 @@ textarea.new_message_textarea {
     /* 30px at 15px/1em */
     height: var(--compose-formatting-buttons-row-height);
 
-    .compose_control_button {
+    .compose_control_button:not(.cf-composer__toolbar-action) {
         /* 22px at 15px/1em */
         font-size: 1.4667em;
         /* Constrain icon fonts to a perfect

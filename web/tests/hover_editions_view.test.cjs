@@ -97,7 +97,7 @@ function opening_tab_tag(html, edition) {
 }
 
 function opening_panel_tag(html, panel) {
-    const match = html.match(new RegExp(`<div[^>]*id="hover-edition-panel-${panel}"[^>]*>`));
+    const match = html.match(new RegExp(`<div[^>]*id="cf-edition-panel-${panel}"[^>]*>`));
     assert.notEqual(match, null);
     return match[0];
 }
@@ -112,7 +112,7 @@ run_test("renders a prose-first full edition and a manual accessible focus view"
     assert.equal(selected_row, ".top_left_daily_brief");
     request.success(edition_response());
 
-    let html = $("#hover-editions-view").html();
+    let html = $("#cf-editions-view").html();
     assert.match(html, /A good place to start/);
     assert.match(html, /Everything else is moving well/);
     assert.match(html, /Open update/);
@@ -125,50 +125,51 @@ run_test("renders a prose-first full edition and a manual accessible focus view"
         html.indexOf("The venue handoff is ready") < html.indexOf("Volunteer coverage is settled"),
     );
 
-    const focus_handler = $("body").get_on_handler("click", "#hover-edition-focus-view");
+    const focus_handler = $("body").get_on_handler("click", "#cf-edition-focus-view");
     focus_handler();
-    html = $("#hover-editions-view").html();
+    html = $("#cf-editions-view").html();
     assert.match(html, /aria-roledescription="carousel"/);
     assert.match(html, /View all/);
     assert.match(html, /Item 1 of 2/);
     assert.doesNotMatch(html, /Volunteer coverage is settled/);
-    assert.equal($(".hover-edition-carousel").is_focused(), true);
-    assert.match(opening_button_tag(html, "hover-edition-previous"), / disabled/);
-    assert.doesNotMatch(opening_button_tag(html, "hover-edition-next"), / disabled/);
+    assert.equal($(".cf-edition-carousel").is_focused(), true);
+    assert.match(opening_button_tag(html, "cf-edition-previous"), / disabled/);
+    assert.doesNotMatch(opening_button_tag(html, "cf-edition-next"), / disabled/);
 
     clock.tick(60_000);
-    assert.match($("#hover-editions-view").html(), /Item 1 of 2/);
+    assert.match($("#cf-editions-view").html(), /Item 1 of 2/);
 
     let prevented = false;
-    const key_handler = $("body").get_on_handler("keydown", ".hover-edition-carousel");
-    $(".hover-edition-carousel").trigger("blur");
+    const key_handler = $("body").get_on_handler("keydown", ".cf-edition-carousel");
+    $(".cf-edition-carousel").trigger("blur");
     key_handler({
         key: "ArrowRight",
         preventDefault() {
             prevented = true;
         },
     });
-    html = $("#hover-editions-view").html();
+    html = $("#cf-editions-view").html();
     assert.equal(prevented, true);
     assert.match(html, /Item 2 of 2/);
     assert.match(html, /Volunteer coverage is settled/);
-    assert.equal($(".hover-edition-carousel").is_focused(), true);
-    assert.doesNotMatch(opening_button_tag(html, "hover-edition-previous"), / disabled/);
-    assert.match(opening_button_tag(html, "hover-edition-next"), / disabled/);
+    assert.equal($(".cf-edition-carousel").is_focused(), true);
+    assert.doesNotMatch(opening_button_tag(html, "cf-edition-previous"), / disabled/);
+    assert.match(opening_button_tag(html, "cf-edition-next"), / disabled/);
 
-    $(".hover-edition-carousel").trigger("blur");
+    $(".cf-edition-carousel").trigger("blur");
     key_handler({
         key: "ArrowLeft",
         preventDefault() {},
     });
-    html = $("#hover-editions-view").html();
+    html = $("#cf-editions-view").html();
     assert.match(html, /Item 1 of 2/);
     assert.match(html, /The venue handoff is ready/);
-    assert.equal($(".hover-edition-carousel").is_focused(), true);
+    assert.equal($(".cf-edition-carousel").is_focused(), true);
 
-    const all_handler = $("body").get_on_handler("click", "#hover-edition-view-all");
+    const all_handler = $("body").get_on_handler("click", "#cf-edition-view-all");
     all_handler();
-    assert.match($("#hover-editions-view").html(), /Full edition/);
+    assert.match($("#cf-editions-view").html(), /Full edition/);
+    assert.equal($("#cf-edition-focus-view").is_focused(), true);
     clock.reset();
 });
 
@@ -177,19 +178,40 @@ run_test("renders the first-edition empty state", () => {
     hover_editions_view.initialize();
     hover_editions_view.show();
 
-    assert.match($("#hover-editions-view").html(), /Preparing your latest edition/);
-    assert.match($("#hover-editions-view").html(), /hover-edition-loading/);
+    assert.match($("#cf-editions-view").html(), /Preparing your latest edition/);
+    assert.match($("#cf-editions-view").html(), /cf-edition-loading/);
+    assert.match(opening_panel_tag($("#cf-editions-view").html(), "morning"), /aria-busy="true"/);
     request.success({
         sync_status: "empty",
         editions: {morning: null, end_of_day: null},
     });
 
-    const html = $("#hover-editions-view").html();
+    const html = $("#cf-editions-view").html();
     assert.match(html, /Your first edition will appear after confirmed Space updates arrive/);
     assert.match(html, /Your Daily Brief/);
-    assert.doesNotMatch(html, /hover-edition-loading/);
-    assert.doesNotMatch(html, /id="hover-edition-retry"/);
-    assert.doesNotMatch(html, /id="hover-edition-focus-view"/);
+    assert.doesNotMatch(html, /cf-edition-loading/);
+    assert.doesNotMatch(html, /id="cf-edition-retry"/);
+    assert.doesNotMatch(html, /id="cf-edition-focus-view"/);
+    assert.match(opening_panel_tag(html, "morning"), /aria-busy="false"/);
+});
+
+run_test("omits focus view for a published edition without items", () => {
+    hover_editions_view.test.reset();
+    hover_editions_view.initialize();
+    hover_editions_view.show();
+
+    const data = edition_response();
+    data.editions.morning.all_clear = false;
+    data.editions.morning.sections = {
+        urgency: [],
+        unresolved_carryover: [],
+        guidance: [],
+    };
+    request.success(data);
+
+    const html = $("#cf-editions-view").html();
+    assert.match(html, /There are no confirmed updates to feature in this edition/);
+    assert.doesNotMatch(html, /id="cf-edition-focus-view"/);
 });
 
 run_test("renders a hard error and retries from loading state", () => {
@@ -199,22 +221,28 @@ run_test("renders a hard error and retries from loading state", () => {
     const failed_request = request;
 
     failed_request.error({}, "error");
-    let html = $("#hover-editions-view").html();
+    let html = $("#cf-editions-view").html();
     assert.match(html, /Your edition could not be loaded/);
-    assert.match(html, /id="hover-edition-retry"/);
-    assert.doesNotMatch(html, /hover-edition-loading/);
+    assert.match(html, /id="cf-edition-retry"/);
+    assert.match(
+        html,
+        /class="cf-edition-status cf-edition-status--error"\s+role="alert"\s+aria-live="assertive"/,
+    );
+    assert.doesNotMatch(html, /cf-edition-loading/);
 
-    $("body").get_on_handler("click", "#hover-edition-retry")();
+    $("body").get_on_handler("click", "#cf-edition-retry")();
     assert.notEqual(request, failed_request);
     assert.equal(failed_request.aborted, true);
     assert.equal(request.url, "/json/hover/personal-editions");
-    html = $("#hover-editions-view").html();
+    html = $("#cf-editions-view").html();
     assert.match(html, /Preparing your latest edition/);
-    assert.match(html, /hover-edition-loading/);
-    assert.doesNotMatch(html, /id="hover-edition-retry"/);
+    assert.match(html, /cf-edition-loading/);
+    assert.doesNotMatch(html, /id="cf-edition-retry"/);
+    assert.equal($(".cf-edition-status").is_focused(), true);
 
     request.success(edition_response());
-    assert.match($("#hover-editions-view").html(), /A good place to start/);
+    assert.match($("#cf-editions-view").html(), /A good place to start/);
+    assert.equal($("#cf-edition-panel-morning").is_focused(), true);
 });
 
 run_test("switches Morning and End of day tabs with selected semantics", () => {
@@ -222,36 +250,36 @@ run_test("switches Morning and End of day tabs with selected semantics", () => {
     hover_editions_view.initialize();
     hover_editions_view.show();
     request.success(edition_response());
-    const tab_handler = $("body").get_on_handler("click", ".hover-edition-tab");
+    const tab_handler = $("body").get_on_handler("click", ".cf-edition-tab");
 
-    let html = $("#hover-editions-view").html();
+    let html = $("#cf-editions-view").html();
     let morning_tab = opening_tab_tag(html, "morning");
     let end_of_day_tab = opening_tab_tag(html, "end_of_day");
-    assert.match(morning_tab, /id="hover-edition-tab-morning"/);
-    assert.match(morning_tab, /aria-controls="hover-edition-panel-morning"/);
+    assert.match(morning_tab, /id="cf-edition-tab-morning"/);
+    assert.match(morning_tab, /aria-controls="cf-edition-panel-morning"/);
     assert.match(morning_tab, /aria-selected="true"/);
     assert.match(morning_tab, /tabindex="0"/);
-    assert.match(end_of_day_tab, /id="hover-edition-tab-end-of-day"/);
-    assert.match(end_of_day_tab, /aria-controls="hover-edition-panel-end-of-day"/);
+    assert.match(end_of_day_tab, /id="cf-edition-tab-end-of-day"/);
+    assert.match(end_of_day_tab, /aria-controls="cf-edition-panel-end-of-day"/);
     assert.match(end_of_day_tab, /aria-selected="false"/);
     assert.match(end_of_day_tab, /tabindex="-1"/);
     for (const id of [
-        "hover-edition-tab-morning",
-        "hover-edition-tab-end-of-day",
-        "hover-edition-panel-morning",
-        "hover-edition-panel-end-of-day",
+        "cf-edition-tab-morning",
+        "cf-edition-tab-end-of-day",
+        "cf-edition-panel-morning",
+        "cf-edition-panel-end-of-day",
     ]) {
         assert.equal((html.match(new RegExp(`id="${id}"`, "g")) ?? []).length, 1);
     }
     assert.match(opening_panel_tag(html, "morning"), /role="tabpanel"/);
-    assert.match(opening_panel_tag(html, "morning"), /aria-labelledby="hover-edition-tab-morning"/);
+    assert.match(opening_panel_tag(html, "morning"), /aria-labelledby="cf-edition-tab-morning"/);
     assert.doesNotMatch(opening_panel_tag(html, "morning"), / hidden/);
     assert.match(opening_panel_tag(html, "end-of-day"), / hidden/);
     assert.match(html, /A good place to start/);
 
     const $end_of_day_tab = $(".end-of-day-tab").attr("data-edition", "end_of_day");
     tab_handler({currentTarget: $end_of_day_tab[0]});
-    html = $("#hover-editions-view").html();
+    html = $("#cf-editions-view").html();
     morning_tab = opening_tab_tag(html, "morning");
     end_of_day_tab = opening_tab_tag(html, "end_of_day");
     assert.match(morning_tab, /aria-selected="false"/);
@@ -261,22 +289,22 @@ run_test("switches Morning and End of day tabs with selected semantics", () => {
     assert.match(opening_panel_tag(html, "morning"), / hidden/);
     assert.match(
         opening_panel_tag(html, "end-of-day"),
-        /aria-labelledby="hover-edition-tab-end-of-day"/,
+        /aria-labelledby="cf-edition-tab-end-of-day"/,
     );
     assert.doesNotMatch(opening_panel_tag(html, "end-of-day"), / hidden/);
-    assert.equal($("#hover-edition-tab-end-of-day").is_focused(), true);
+    assert.equal($("#cf-edition-tab-end-of-day").is_focused(), true);
     assert.match(html, /Your day in motion/);
     assert.match(html, /A thoughtful close to what moved/);
     assert.doesNotMatch(html, /Everything else is moving well/);
 
     const $morning_tab = $(".morning-tab").attr("data-edition", "morning");
     tab_handler({currentTarget: $morning_tab[0]});
-    html = $("#hover-editions-view").html();
+    html = $("#cf-editions-view").html();
     assert.match(opening_tab_tag(html, "morning"), /aria-selected="true"/);
     assert.match(opening_tab_tag(html, "end_of_day"), /aria-selected="false"/);
     assert.match(html, /A good place to start/);
     assert.match(html, /Everything else is moving well/);
-    assert.equal($("#hover-edition-tab-morning").is_focused(), true);
+    assert.equal($("#cf-edition-tab-morning").is_focused(), true);
 });
 
 run_test("supports roving keyboard navigation for edition tabs", () => {
@@ -284,7 +312,7 @@ run_test("supports roving keyboard navigation for edition tabs", () => {
     hover_editions_view.initialize();
     hover_editions_view.show();
     request.success(edition_response());
-    const key_handler = $("body").get_on_handler("keydown", ".hover-edition-tab");
+    const key_handler = $("body").get_on_handler("keydown", ".cf-edition-tab");
     let prevented = 0;
 
     function press(key, edition) {
@@ -299,25 +327,25 @@ run_test("supports roving keyboard navigation for edition tabs", () => {
     }
 
     press("ArrowRight", "morning");
-    let html = $("#hover-editions-view").html();
+    let html = $("#cf-editions-view").html();
     assert.match(opening_tab_tag(html, "end_of_day"), /aria-selected="true"/);
     assert.match(opening_tab_tag(html, "end_of_day"), /tabindex="0"/);
-    assert.equal($("#hover-edition-tab-end-of-day").is_focused(), true);
+    assert.equal($("#cf-edition-tab-end-of-day").is_focused(), true);
 
     press("ArrowLeft", "end_of_day");
-    html = $("#hover-editions-view").html();
+    html = $("#cf-editions-view").html();
     assert.match(opening_tab_tag(html, "morning"), /aria-selected="true"/);
-    assert.equal($("#hover-edition-tab-morning").is_focused(), true);
+    assert.equal($("#cf-edition-tab-morning").is_focused(), true);
 
     press("End", "morning");
-    html = $("#hover-editions-view").html();
+    html = $("#cf-editions-view").html();
     assert.match(opening_tab_tag(html, "end_of_day"), /aria-selected="true"/);
-    assert.equal($("#hover-edition-tab-end-of-day").is_focused(), true);
+    assert.equal($("#cf-edition-tab-end-of-day").is_focused(), true);
 
     press("Home", "end_of_day");
-    html = $("#hover-editions-view").html();
+    html = $("#cf-editions-view").html();
     assert.match(opening_tab_tag(html, "morning"), /aria-selected="true"/);
-    assert.equal($("#hover-edition-tab-morning").is_focused(), true);
+    assert.equal($("#cf-edition-tab-morning").is_focused(), true);
     assert.equal(prevented, 4);
 });
 
@@ -329,8 +357,8 @@ run_test("shows cached degradation and reloads when confirmed access changes", (
     degraded.sync_status = "degraded";
     request.success(degraded);
 
-    assert.match($("#hover-editions-view").html(), /latest available edition/);
-    assert.match($("#hover-editions-view").html(), /Retry/);
+    assert.match($("#cf-editions-view").html(), /latest available edition/);
+    assert.match($("#cf-editions-view").html(), /Retry/);
 
     const previous_request = request;
     hover_editions_view.handle_access_change();

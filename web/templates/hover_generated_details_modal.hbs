@@ -1,60 +1,86 @@
 <section
-    class="hover-generated-details"
-    tabindex="-1"
-    data-hover-generated-details
->
-    <header class="hover-generated-details__summary">
+  class="cf-generated-details"
+  tabindex="-1"
+  data-cf-generated-details
+  >
+    <header class="cf-generated-details__summary">
         <span
-            class="hover-generated-update-label__chip"
-        >{{presentation.label}}</span>
-        {{#if presentation.state}}<span
-                class="hover-generated-update-state hover-generated-update-state--{{presentation.state}}"
-            >{{presentation.state}}</span>{{/if}}
+          class="cf-generated-update__chip"
+          >{{presentation.label}}</span>
+        {{#if presentation.state}}{{> cofounder/components/status tone=presentation.state_tone label=presentation.state custom_classes="cf-generated-update__state"}}{{/if}}
         <strong>{{module.name}}</strong>
     </header>
     {{#if show_history}}
-        <ol class="hover-generated-history">
+        <ol class="cf-generated-history">
             {{#each history}}
-                <li class="hover-generated-history__entry">
-                    <a href="{{url}}">{{title}}</a>
-                    <span>{{#if state}}{{state}}{{else}}{{t
-                                "Published"
-                            }}{{/if}}{{#if display_time}}
+                <li class="cf-generated-history__entry">
+                    <a href="{{url}}"{{#if is_current}} aria-current="true"{{/if}}>{{title}}</a>
+                    <span class="cf-generated-history__meta">
+                        {{#if state}}
+                            <span class="cf-generated-history__state">{{state}}</span>
+                        {{else}}
+                            {{t "Published"}}
+                        {{/if}}
+                        {{#if display_time}}
                             ·
-                            {{display_time}}{{/if}}</span>
-                    {{#if is_current}}<span
-                            class="hover-generated-history__current"
-                        >{{t "This update"}}</span>{{/if}}
+                            {{display_time}}
+                        {{/if}}
+                    </span>
+                    {{#if is_current}}
+                        <span
+                          class="cf-generated-history__current"
+                          >{{t "This update"}}</span>
+                    {{/if}}
                 </li>
             {{/each}}
         </ol>
     {{else}}
-        <dl class="hover-generated-technical-details">
-            <div><dt>{{t "Producing Module"}}</dt><dd>{{module.name}}
+        <dl class="cf-generated-details__technical">
+            <div>
+                <dt>{{t "Producing Module"}}</dt>
+                <dd>
+                    {{module.name}}
                     ·
-                    {{module.version}}</dd></div>
-            <div><dt>{{t "Contract"}}</dt><dd>{{presentation.label}}</dd></div>
-            <div><dt>{{t "Importance"}}</dt><dd
-                >{{presentation.importance}}</dd></div>
-            {{#if presentation.display_occurred_at}}<div><dt>{{t
-                            "Occurred"
-                        }}</dt><dd
-                    >{{presentation.display_occurred_at}}</dd></div>{{/if}}
-            {{#if presentation.display_generated_at}}<div><dt>{{t
-                            "Generated"
-                        }}</dt><dd
-                    >{{presentation.display_generated_at}}</dd></div>{{/if}}
-            {{#if presentation.display_published_at}}<div><dt>{{t
-                            "Published"
-                        }}</dt><dd
-                    >{{presentation.display_published_at}}</dd></div>{{/if}}
-            {{#if presentation.run_reference}}<div><dt>{{t
-                            "Audit reference"
-                        }}</dt><dd><code
-                        >{{presentation.run_reference}}</code></dd></div>{{/if}}
+                    {{module.version}}
+                </dd>
+            </div>
+            <div>
+                <dt>{{t "Contract"}}</dt>
+                <dd>{{presentation.label}}</dd>
+            </div>
+            <div>
+                <dt>{{t "Importance"}}</dt>
+                <dd>{{presentation.importance}}</dd>
+            </div>
+            {{#if presentation.display_occurred_at}}
+                <div>
+                    <dt>{{t "Occurred"}}</dt>
+                    <dd>{{presentation.display_occurred_at}}</dd>
+                </div>
+            {{/if}}
+            {{#if presentation.display_generated_at}}
+                <div>
+                    <dt>{{t "Generated"}}</dt>
+                    <dd>{{presentation.display_generated_at}}</dd>
+                </div>
+            {{/if}}
+            {{#if presentation.display_published_at}}
+                <div>
+                    <dt>{{t "Published"}}</dt>
+                    <dd>{{presentation.display_published_at}}</dd>
+                </div>
+            {{/if}}
+            {{#if presentation.run_reference}}
+                <div>
+                    <dt>{{t "Audit reference"}}</dt>
+                    <dd><code>{{presentation.run_reference}}</code></dd>
+                </div>
+            {{/if}}
         </dl>
-        <p class="hover-generated-details__note">{{t
-                "This presentation references the original native Space message; it does not create a copy."
-            }}</p>
+        <p class="cf-generated-details__note">
+            {{t
+              "This presentation references the original native Space message; it does not create a copy."
+              }}
+        </p>
     {{/if}}
 </section>

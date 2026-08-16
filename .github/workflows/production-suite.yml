@@ -1,30 +1,9 @@
-name: Zulip production suite
+name: "Deprecated: Zulip production suite (manual only)"
 
+# This upstream package-install and version-upgrade matrix is not part of the
+# pinned AWS Lightsail deployment path. Run it manually only for upstream
+# packaging or upgrade-compatibility investigations.
 on:
-  push:
-    branches: ["*.x", chat.zulip.org, main]
-    tags: ["*"]
-  pull_request:
-    paths:
-      - .github/workflows/production-suite.yml
-      - "**/migrations/**"
-      - manage.py
-      - pnpm-lock.yaml
-      - puppet/**
-      - scripts/**
-      - tools/**
-      - uv.lock
-      - web/babel.config.js
-      - web/postcss.config.js
-      - web/third/**
-      - web/webpack.config.ts
-      - zerver/apps.py
-      - zerver/checks.py
-      - zerver/worker/queue_processors.py
-      - zerver/lib/push_notifications.py
-      - zerver/lib/storage.py
-      - zerver/decorator.py
-      - zproject/**
   workflow_dispatch:
 
 concurrency:

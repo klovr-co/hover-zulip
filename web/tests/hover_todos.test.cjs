@@ -76,11 +76,13 @@ run_test("delegates Todo actions from both message and overlay roots", ({overrid
     hover_todos.initialize();
 
     assert.equal(
-        typeof $("#main_div").get_on_handler("click", "[data-hover-todo-operation]"),
+        typeof $("#main_div").get_on_handler("click", "[data-cf-todo-operation]"),
         "function",
     );
+    assert.equal(typeof $("body").get_on_handler("click", "[data-cf-todo-operation]"), "function");
     assert.equal(
-        typeof $("body").get_on_handler("click", "[data-hover-todo-operation]"),
+        typeof $("#main_div").get_on_handler("change", "[data-cf-todo-assignee]"),
         "function",
     );
+    assert.equal(typeof $("body").get_on_handler("change", "[data-cf-todo-assignee]"), "function");
 });

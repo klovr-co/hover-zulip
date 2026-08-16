@@ -11,7 +11,7 @@ run_test("renders stable Module and Source filter keys", () => {
             {
                 key: "conversation_digest",
                 name: "Conversation Digest",
-                icon: "zulip-icon-align-left",
+                icon_name: "file-text",
                 count: 3,
             },
         ],
@@ -19,16 +19,19 @@ run_test("renders stable Module and Source filter keys", () => {
             {
                 source_key: "42",
                 name: "Mentors & Volunteers",
-                icon_class: "fa fa-whatsapp",
+                icon_name: "phone",
                 count: 7,
             },
         ],
     });
 
-    assert.match(html, /data-hover-filter-key="conversation_digest"/);
-    assert.match(html, /data-hover-filter-key="42"/);
-    assert.match(html, />Conversation Digest<span>3<\/span>/);
-    assert.match(html, />Mentors &amp; Volunteers<span\s*>7<\/span>/);
+    assert.match(html, /data-cf-feed-controls="all"/);
+    assert.match(html, /data-cf-feed-filter-key="conversation_digest"/);
+    assert.match(html, /data-cf-feed-filter-key="42"/);
+    assert.match(html, /cf-feed-filter__label">Conversation Digest/);
+    assert.match(html, /cf-feed-filter__count">7<\/span>/);
+    assert.match(html, /class="cf-feed-controls__status" role="status" aria-live="polite"/);
+    assert.doesNotMatch(html, /class="[^"]*hover-/);
 });
 
 run_test("renders latest and full-history controls for a Module topic", () => {
@@ -37,8 +40,11 @@ run_test("renders latest and full-history controls for a Module topic", () => {
         module_name: "Progress Tracker",
     });
 
-    assert.match(html, /data-hover-history="latest"/);
-    assert.match(html, /data-hover-history="all"/);
+    assert.match(html, /data-cf-feed-controls="module"/);
+    assert.match(html, /data-cf-feed-history="latest"/);
+    assert.match(html, /data-cf-feed-history="all"/);
     assert.match(html, />Progress Tracker<\/strong>/);
     assert.match(html, /Earlier updates remain in Full history/);
+    assert.match(html, /class="cf-feed-controls__status" role="status" aria-live="polite"/);
+    assert.doesNotMatch(html, /class="[^"]*hover-/);
 });

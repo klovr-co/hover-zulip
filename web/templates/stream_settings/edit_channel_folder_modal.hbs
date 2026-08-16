@@ -1,45 +1,39 @@
 <div id="channel_folder_banner" class="banner-wrapper"></div>
-<div class="channel-folder-name-container">
-    <label for="edit_channel_folder_name" class="modal-field-label">
+<div class="channel-folder-name-container cf-channel-folder-form__field">
+    <label for="edit_channel_folder_name" class="modal-field-label cf-field__label">
         {{t 'Channel folder name' }}
     </label>
-    <input type="text" id="edit_channel_folder_name" class="modal_text_input" name="channel_folder_name" maxlength="{{ max_channel_folder_name_length }}" value="{{name}}" {{#unless can_manage_folder}} disabled {{/unless}}/>
+    <input type="text" id="edit_channel_folder_name" class="modal_text_input cf-field__control" name="channel_folder_name" maxlength="{{ max_channel_folder_name_length }}" value="{{name}}" required {{#unless can_manage_folder}} disabled {{/unless}}/>
 </div>
-<div>
-    <label for="edit_channel_folder_description" class="modal-field-label">
+<div class="cf-channel-folder-form__field">
+    <label for="edit_channel_folder_description" class="modal-field-label cf-field__label">
         {{t 'Description' }}
     </label>
-    <textarea id="edit_channel_folder_description" class="modal-textarea" name="channel_folder_description" maxlength="{{ max_channel_folder_description_length }}" {{#unless can_manage_folder}} disabled {{/unless}}>{{~description~}}</textarea>
+    <textarea id="edit_channel_folder_description" class="modal-textarea cf-field__control" name="channel_folder_description" maxlength="{{ max_channel_folder_description_length }}" {{#unless can_manage_folder}} disabled {{/unless}}>{{~description~}}</textarea>
 </div>
-<div>
+<section class="cf-channel-folder-form__section" aria-labelledby="edit_channel_folder_channels_heading">
     <div>
-        <h3 class="folder-channels-list-header">
+        <h2 id="edit_channel_folder_channels_heading" class="folder-channels-list-header">
             {{t 'Channels' }}
-        </h3>
+        </h2>
     </div>
     <div class="stream-list-container" data-folder-id="{{folder_id}}">
-        <div class="stream-search-container filter-input has-input-icon has-input-button input-element-wrapper">
-            <i class="input-icon zulip-icon zulip-icon-search" aria-hidden="true"></i>
-            <input type="text" class="input-element stream-search" placeholder="{{t 'Filter' }}" />
-            <button type="button" class="input-button input-close-filter-button icon-button icon-button-square icon-button-neutral ">
-                <i class="zulip-icon zulip-icon-close" aria-hidden="true"></i>
-            </button>
-        </div>
+        {{> ../cofounder/components/search_field placeholder=(t "Filter") aria-label=(t "Filter channels") input_classes="stream-search" clear_button_classes="input-close-filter-button" clear_button_aria_label=(t "Clear filter") custom_classes="stream-search-container"}}
         <div class="edit-channel-folder-stream-list modal-list-scroll-container" data-simplebar data-simplebar-tab-index="-1">
-            <ul class="folder-stream-list modal-item-list" data-empty="{{t 'No channel in channel folder.' }}" data-search-results-empty="{{t 'No matching channels.' }}"></ul>
+            <ul class="folder-stream-list modal-item-list" aria-labelledby="edit_channel_folder_channels_heading" aria-live="polite" data-empty="{{t 'No channel in channel folder.' }}" data-search-results-empty="{{t 'No matching channels.' }}"></ul>
         </div>
     </div>
-</div>
+</section>
 {{#if can_manage_folder}}
-<div>
+<section class="cf-channel-folder-form__section" aria-labelledby="edit_channel_folder_add_heading">
     <div>
-        <h3 class="folder-channels-list-header">
+        <h2 id="edit_channel_folder_add_heading" class="folder-channels-list-header">
             {{t 'Add a channel' }}
-        </h3>
+        </h2>
     </div>
     <div class="add_channel_folder_widget">
-        {{> ../dropdown_widget widget_name="add_channel_folder"}}
-        {{> ../components/action_button label=(t "Add") custom_classes="add-channel-button" variant="subtle" intent="brand" aria-label=(t "Add") }}
+        {{> ../dropdown_widget widget_name="add_channel_folder" cofounder=true default_text=(t "Select a channel") aria-label=(t "Channel to add")}}
+        {{> ../cofounder/components/button label=(t "Add") custom_classes="add-channel-button" variant="secondary" aria-label=(t "Add selected channel to folder") disabled=true }}
     </div>
-</div>
+</section>
 {{/if}}

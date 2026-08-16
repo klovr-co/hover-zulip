@@ -137,7 +137,10 @@ export function calculate_timestamp_widths(): void {
         // arbitrary and only required for creating a Date object.
         stringify_time(Date.parse(`1999-07-01T${time}`)),
     );
-    const max_timestamp_width = util.max_text_content_width(candidate_strings, "message-time");
+    const max_timestamp_width = util.max_text_content_width(
+        candidate_strings,
+        "cf-message-item__time",
+    );
     $(":root").css("--message-box-timestamp-column-width", `${max_timestamp_width}px`);
 }
 

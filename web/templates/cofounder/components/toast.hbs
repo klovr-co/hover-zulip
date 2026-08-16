@@ -1,0 +1,24 @@
+<div role="{{#if (or (eq intent "danger") (eq intent "error") (eq intent "warning"))}}alert{{else}}status{{/if}}" aria-atomic="true" class="cf-toast cf-toast--{{intent}}{{#if custom_classes}} {{custom_classes}}{{/if}}">
+    <div class="cf-toast__header">
+        {{#if (or title reserve_title)}}
+        <div class="cf-toast__title">{{title}}</div>
+        {{/if}}
+        {{#if has_undo_button}}
+        <div class="cf-toast__actions">
+            <button type="button" class="cf-button cf-button--secondary cf-toast__undo">
+                <span class="cf-button__label">{{undo_button_text}}</span>
+            </button>
+        </div>
+        {{/if}}
+    </div>
+    {{#unless hide_close_button}}
+        {{> button variant="ghost" icon="close" aria-label=(t "Dismiss") custom_classes="cf-toast__close"}}
+    {{/unless}}
+    <div class="cf-toast__content">
+        {{#if message}}
+            {{message}}
+        {{else}}
+            {{> @partial-block .}}
+        {{/if}}
+    </div>
+</div>

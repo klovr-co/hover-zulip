@@ -1,5 +1,6 @@
 import {$} from "jquery";
 
+import * as cofounder_icon from "./cofounder/components/icon.ts";
 import * as loading from "./loading.ts";
 import {COMPONENT_INTENT_VALUES} from "./types.ts";
 import type {ComponentIntent} from "./types.ts";
@@ -24,8 +25,8 @@ export function show_button_loading_indicator($button: JQuery): void {
         return;
     }
     // First, we hide the current content of the button.
-    $button.find(".zulip-icon").css("visibility", "hidden");
-    $button.find(".action-button-label").css("visibility", "hidden");
+    $button.find(".zulip-icon, .cf-icon").css("visibility", "hidden");
+    $button.find(".action-button-label, .cf-button__label").css("visibility", "hidden");
     // Next, we create a loading indicator with a unique id.
     // The unique id is required for the `filter` element in the loader SVG,
     // to prevent the loading indicator from being hidden due to duplicate ids.
@@ -49,8 +50,8 @@ export function show_button_loading_indicator($button: JQuery): void {
 export function hide_button_loading_indicator($button: JQuery): void {
     $button.find(".button-loading-indicator").remove();
     $button.prop("disabled", false);
-    $button.find(".zulip-icon").css("visibility", "visible");
-    $button.find(".action-button-label").css("visibility", "visible");
+    $button.find(".zulip-icon, .cf-icon").css("visibility", "visible");
+    $button.find(".action-button-label, .cf-button__label").css("visibility", "visible");
 }
 
 export function modify_action_button_style(
@@ -81,6 +82,11 @@ export function modify_action_button_style(
 }
 
 export function modify_button_icon($button: JQuery, new_icon: string): void {
+    if ($button.find(".cf-icon").length > 0 && cofounder_icon.is_icon_name(new_icon)) {
+        cofounder_icon.replace_icon($button, new_icon);
+        return;
+    }
+
     $button
         .find(".zulip-icon")
         .attr("class", (_index, className) =>

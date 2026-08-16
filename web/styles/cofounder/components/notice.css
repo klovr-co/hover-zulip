@@ -1,0 +1,154 @@
+.cf-notice {
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    gap: var(--cf-space-2);
+    align-items: flex-start;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    margin-block-end: var(--cf-space-1);
+    border: 1px solid var(--cf-border-subtle);
+    border-left-width: 3px;
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-paper);
+    font-family: var(--cf-font-ui);
+    font-size: var(--cf-type-label);
+    line-height: 1.4;
+}
+
+.cf-notice[hidden],
+.cf-notice.hide {
+    display: none;
+}
+
+.cf-notice__body {
+    display: flex;
+    flex: 1 1 auto;
+    gap: var(--cf-space-2);
+    align-items: center;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.cf-notice__content {
+    flex: 1 1 150px;
+    min-width: 0;
+    margin: 0;
+    padding: var(--cf-space-2) var(--cf-space-1) var(--cf-space-2)
+        var(--cf-space-3);
+    overflow-wrap: anywhere;
+}
+
+.cf-notice__content > :first-child {
+    margin-block-start: 0;
+}
+
+.cf-notice__content > :last-child {
+    margin-block-end: 0;
+}
+
+.cf-notice__actions {
+    box-sizing: border-box;
+    display: flex;
+    min-width: 0;
+    max-width: 100%;
+    gap: var(--cf-space-2);
+    align-items: center;
+    flex-wrap: wrap;
+    padding-block: var(--cf-space-1);
+}
+
+.cf-notice__actions:empty {
+    display: none;
+}
+
+.cf-notice__actions .cf-button {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: normal;
+}
+
+.cf-notice__close.cf-button {
+    flex: none;
+    width: var(--cf-control-height);
+    min-height: var(--cf-control-height);
+    margin: var(--cf-space-1);
+    padding: 0;
+    color: currentcolor;
+}
+
+.cf-notice__link,
+.cf-notice a:not(.cf-button) {
+    color: var(--cf-color-accent-hover);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentcolor 35%, transparent);
+    text-underline-offset: 2px;
+}
+
+.cf-notice__link:hover,
+.cf-notice a:not(.cf-button):hover {
+    color: var(--cf-color-accent-hover);
+    text-decoration-color: currentcolor;
+}
+
+.cf-notice--neutral {
+    border-left-color: var(--cf-border-strong);
+}
+
+.cf-notice--brand,
+.cf-notice--info {
+    border-left-color: var(--cf-color-accent);
+    background: color-mix(
+        in srgb,
+        var(--cf-color-accent-soft) 58%,
+        var(--cf-surface-paper)
+    );
+}
+
+.cf-notice--success {
+    border-left-color: var(--cf-color-success);
+    background: var(--cf-color-success-soft);
+}
+
+.cf-notice--warning,
+.cf-notice--warning-style {
+    border-left-color: var(--cf-color-warning);
+    background: var(--cf-color-warning-soft);
+}
+
+.cf-notice--danger,
+.cf-notice--error {
+    border-left-color: var(--cf-color-danger);
+    background: var(--cf-color-danger-soft);
+}
+
+.cf-notice--danger .cf-notice__actions .cf-button--secondary,
+.cf-notice--error .cf-notice__actions .cf-button--secondary {
+    border-color: var(--cf-color-danger);
+}
+
+@media (width <= 600px) {
+    .cf-notice__body,
+    .cf-notice__actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .cf-notice__content {
+        flex-basis: auto;
+        padding: var(--cf-space-2);
+    }
+
+    .cf-notice__actions {
+        width: 100%;
+        padding: 0 var(--cf-space-2) var(--cf-space-2);
+    }
+
+    .cf-notice__close.cf-button {
+        width: var(--cf-control-height-touch);
+        min-height: var(--cf-control-height-touch);
+    }
+}

@@ -68,15 +68,14 @@ const animate = {
         }
 
         if (meta.$container) {
-            meta.$container.addClass("slide-out-feedback-container");
-            // Delay setting `display: none` enough that the hide animation starts.
+            meta.$container.addClass("cf-toast-host--leaving");
             setTimeout(
                 () =>
                     meta.$container?.removeClass([
-                        "show-feedback-container",
-                        "slide-out-feedback-container",
+                        "cf-toast-host--visible",
+                        "cf-toast-host--leaving",
                     ]),
-                50,
+                180,
             );
             meta.opened = false;
             meta.alert_hover_state = false;
@@ -88,7 +87,9 @@ const animate = {
         }
 
         if (meta.$container) {
-            meta.$container.addClass("show-feedback-container");
+            meta.$container
+                .removeClass("cf-toast-host--leaving")
+                .addClass("cf-toast-host--visible");
             meta.opened = true;
             setTimeout(() => {
                 animate.maybe_close();
@@ -130,11 +131,11 @@ function set_up_handlers(): void {
         meta.hide_me_time = Math.max(meta.hide_me_time ?? 0, Date.now() + 2000);
     });
 
-    meta.$container.on("click", ".exit-me", () => {
+    meta.$container.on("click", ".cf-toast__close", () => {
         animate.fadeOut();
     });
 
-    meta.$container.on("click", ".feedback_undo", () => {
+    meta.$container.on("click", ".cf-toast__undo", () => {
         if (meta.undo) {
             meta.undo();
         }
@@ -172,9 +173,9 @@ export function show(opts: FeedbackWidgetOptions): void {
     // add a four second delay before closing up.
     meta.hide_me_time = Date.now() + (opts.hide_delay ?? 4000);
 
-    meta.$container.find(".feedback_title").text(opts.title_text);
-    meta.$container.find(".feedback_undo").text(opts.undo_button_text ?? "");
-    opts.populate(meta.$container.find(".feedback_content"));
+    meta.$container.find(".cf-toast__title").text(opts.title_text);
+    meta.$container.find(".cf-toast__undo .cf-button__label").text(opts.undo_button_text ?? "");
+    opts.populate(meta.$container.find(".cf-toast__content"));
 
     animate.fadeIn();
 }

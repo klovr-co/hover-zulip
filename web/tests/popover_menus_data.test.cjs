@@ -32,7 +32,7 @@ function MessageListView() {
         clear_rendering_state: noop,
         get_row: () => ({
             find(selector) {
-                if (selector === ".message_content") {
+                if (selector === ".cf-message-item__content") {
                     return {
                         hasClass(class_name) {
                             assert.equal(class_name, "condensed");
@@ -41,7 +41,7 @@ function MessageListView() {
                     };
                 }
 
-                assert.equal(selector, ".message_controls .reaction_button");
+                assert.equal(selector, ".cf-message-actions .cf-message-actions__reaction-button");
                 return {
                     length: 1,
                     css(property) {

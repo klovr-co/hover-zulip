@@ -263,7 +263,7 @@ export function initialize(): void {
     );
 
     $("body").on("input", ".message_edit_content", function (this: HTMLElement) {
-        const $message_row = $(this).closest(".message_row");
+        const $message_row = $(this).closest(".cf-message-item");
         const message_id = rows.id($message_row);
         const new_recipient = get_message_edit_recipient(message_id);
         typing_status.update_editing_status(

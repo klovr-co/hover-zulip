@@ -245,7 +245,7 @@ export function get_reaction_title_data(message_id: number, local_id: string): s
 
 export function get_reaction_sections(message_id: number): JQuery {
     const $rows = message_lists.all_rendered_row_for_message_id(message_id);
-    return $rows.find(".message_reactions");
+    return $rows.find(".cf-message-reactions");
 }
 
 export let find_reaction = (message_id: number, local_id: string): JQuery => {
@@ -260,12 +260,12 @@ export function rewire_find_reaction(value: typeof find_reaction): void {
 
 export function get_add_reaction_button(message_id: number): JQuery {
     const $reaction_section = get_reaction_sections(message_id);
-    const $add_button = $reaction_section.find(".reaction_button");
+    const $add_button = $reaction_section.find(".cf-message-reactions__add");
     return $add_button;
 }
 
 export let set_reaction_vote_text = ($reaction: JQuery, vote_text: string): void => {
-    const $count_element = $reaction.find(".message_reaction_count");
+    const $count_element = $reaction.find(".cf-message-reaction__count");
     $count_element.text(vote_text);
 };
 
@@ -342,7 +342,7 @@ export let update_existing_reaction = (
     $reaction.attr("aria-label", new_label);
 
     if (acting_user_id === current_user.user_id) {
-        $reaction.addClass("reacted");
+        $reaction.addClass("cf-message-reaction--selected").attr("aria-pressed", "true");
     }
 
     update_vote_text_on_message(message);
@@ -370,9 +370,6 @@ export let insert_new_reaction = (
     const is_realm_emoji =
         emoji_details.reaction_type === "realm_emoji" ||
         emoji_details.reaction_type === "zulip_extra_emoji";
-    const reaction_class =
-        user_id === current_user.user_id ? "message_reaction reacted" : "message_reaction";
-
     const context = {
         message_id: message.id,
         ...emoji_details,
@@ -382,7 +379,7 @@ export let insert_new_reaction = (
         emoji_alt_code: user_settings.emojiset === "text",
         is_realm_emoji,
         vote_text: "", // Updated below
-        class: reaction_class,
+        selected: user_id === current_user.user_id,
     };
 
     // If the given reaction is the first reaction in a message, then we add
@@ -396,7 +393,7 @@ export let insert_new_reaction = (
             },
         };
         const $msg_reaction_section = $(render_message_reactions(reaction_section_context));
-        $rows.find(".messagebox-content").append($msg_reaction_section);
+        $rows.find(".cf-message-item__body").append($msg_reaction_section);
     } else {
         const $new_reaction = $(render_message_reaction(context));
         const $reaction_button_element = get_add_reaction_button(message.id);
@@ -473,7 +470,7 @@ export let remove_reaction_from_view = (
         // remove the entire `message_reaction` template outer
         // container, and then update vote text in case we now have
         // few enough reactions to display names again.
-        $reaction.parent(".message_reaction_container").remove();
+        $reaction.parent(".cf-message-reaction-wrap").remove();
         update_vote_text_on_message(message);
         return;
     }
@@ -487,7 +484,7 @@ export let remove_reaction_from_view = (
     );
     $reaction.attr("aria-label", new_label);
     if (user_id === current_user.user_id) {
-        $reaction.removeClass("reacted");
+        $reaction.removeClass("cf-message-reaction--selected").attr("aria-pressed", "false");
     }
 
     update_vote_text_on_message(message);
@@ -641,15 +638,13 @@ function build_reaction_data(
 ): {
     count: number;
     label: string;
-    class: string;
+    selected: boolean;
     vote_text: string;
 } {
     return {
         count: user_ids.length,
         label: generate_title(emoji_name, user_ids),
-        class: user_ids.includes(current_user.user_id)
-            ? "message_reaction reacted"
-            : "message_reaction",
+        selected: user_ids.includes(current_user.user_id),
         // The vote_text field set here is used directly in the Handlebars
         // template for rendering (or rerendering!) a message.
         vote_text: get_vote_text(user_ids, should_display_reactors),

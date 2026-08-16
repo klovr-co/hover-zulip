@@ -231,7 +231,7 @@ function toggle_picker_popover(target: HTMLElement): void {
     popover_menus.toggle_popover_menu(
         target,
         {
-            theme: "popover-menu",
+            theme: "cofounder-menu",
             onCreate(instance) {
                 const provider = network.get_provider();
                 instance.setContent(gif_picker_popover_content.get_gif_popover_content(provider));

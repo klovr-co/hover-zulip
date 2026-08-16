@@ -24,11 +24,11 @@
                 </div>
             </div>
             {{/if}}
-            <div class="message_row{{#unless is_stream}} private-message{{/unless}}" role="listitem">
-                <div class="messagebox">
-                    <div class="messagebox-content">
+            <div class="cf-message-item{{#unless is_stream}} cf-message-item--private{{/unless}}" role="listitem">
+                <div class="cf-message-item__frame">
+                    <div class="cf-message-item__body">
                         {{#if initial_entry_for_move_history}}
-                        <div class="message_content message_edit_history_content">
+                        <div class="cf-message-item__content message_edit_history_content">
                             <p>{{t "Channel" }}: <span class="highlight_text_inserted">{{ new_stream }}</span></p>
                             <p>{{t "Topic" }}:
                                 <span class="highlight_text_inserted {{#if is_empty_string_new_topic}}empty-topic-display{{/if}}">{{ new_topic_display_name }}</span>
@@ -36,14 +36,14 @@
                         </div>
                         {{else}}
                         {{#if stream_changed}}
-                        <div class="message_content message_edit_history_content">
+                        <div class="cf-message-item__content message_edit_history_content">
                             <p>{{t "Channel" }}: <span class="highlight_text_inserted">{{ new_stream }}</span>
                                 <span class="highlight_text_deleted">{{ prev_stream }}</span>
                             </p>
                         </div>
                         {{/if}}
                         {{#if topic_edited}}
-                        <div class="message_content message_edit_history_content">
+                        <div class="cf-message-item__content message_edit_history_content">
                             <p>{{t "Topic" }}:
                                 <span class="highlight_text_inserted {{#if is_empty_string_new_topic}}empty-topic-display{{/if}}">{{ new_topic_display_name }}</span>
                                 <span class="highlight_text_deleted {{#if is_empty_string_prev_topic}}empty-topic-display{{/if}}">{{ prev_topic_display_name }}</span>
@@ -51,7 +51,7 @@
                         </div>
                         {{/if}}
                         {{#if body_to_render}}
-                        <div class="message_content rendered_markdown message_edit_history_content">
+                        <div class="cf-message-item__content rendered_markdown message_edit_history_content">
                             {{ rendered_markdown body_to_render}}
                         </div>
                         {{/if}}
@@ -62,4 +62,3 @@
         </div>
     </div>
 {{/each}}
-

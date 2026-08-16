@@ -42,7 +42,7 @@ export function set_focused_recipient(msg_type?: "private" | "stream"): void {
 }
 
 function display_messages_normally(): void {
-    message_lists.current?.view.$list.find(".recipient_row").removeClass("message-fade");
+    message_lists.current?.view.$list.find(".cf-message-group").removeClass("message-fade");
 
     normal_display = true;
 }
@@ -83,7 +83,7 @@ function fade_messages(): void {
                 return;
             }
 
-            const $all_groups = message_lists.current.view.$list.find(".recipient_row");
+            const $all_groups = message_lists.current.view.$list.find(".cf-message-group");
             // Note: The below algorithm relies on the fact that all_elts is
             // sorted as it would be displayed in the message view
             for (const group_elt of $all_groups) {

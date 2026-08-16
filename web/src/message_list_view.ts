@@ -62,14 +62,15 @@ export type MessageContainer = {
     is_hidden: boolean;
     is_hover_generated_update: boolean;
     is_hover_review_request: boolean;
-    hover_review_request_state?: string;
+    hover_review_request_state_label?: string;
+    hover_review_request_state_tone?: "success" | "warning";
     has_hover_disputed_details: boolean;
     hover_disputed_details: {
         field_path: string;
         field_label: string;
         summary: string;
         state_label: string;
-        state_class: string;
+        state_tone: "neutral" | "success" | "warning";
         evidence_url: string | null;
         evidence_count: number;
         show_review_action: boolean;
@@ -84,7 +85,9 @@ export type MessageContainer = {
     hover_source_integrations?: hover.SourceIntegration[];
     hover_output_label?: string;
     hover_importance?: string;
+    hover_importance_tone?: "danger";
     hover_state?: string;
+    hover_state_tone?: "neutral" | "success" | "warning";
     hover_is_latest?: boolean;
     hover_is_earlier?: boolean;
     hover_has_history?: boolean;
@@ -92,7 +95,9 @@ export type MessageContainer = {
     has_hover_source_provenance?: boolean;
     hover_provenance_source_id?: number;
     hover_provenance_source_key?: string;
-    hover_filter_classes?: string;
+    cf_lineage_state?: "earlier" | "latest";
+    cf_is_source_record?: boolean;
+    cf_filter_source_ids?: string;
     last_edit_timestamp: number | undefined;
     last_moved_timestamp: number | undefined;
     mention_classname: string | undefined;
@@ -634,14 +639,15 @@ export class MessageListView {
         is_hidden: boolean;
         is_hover_generated_update: boolean;
         is_hover_review_request: boolean;
-        hover_review_request_state?: string;
+        hover_review_request_state_label?: string;
+        hover_review_request_state_tone?: "success" | "warning";
         has_hover_disputed_details: boolean;
         hover_disputed_details: {
             field_path: string;
             field_label: string;
             summary: string;
             state_label: string;
-            state_class: string;
+            state_tone: "neutral" | "success" | "warning";
             evidence_url: string | null;
             evidence_count: number;
             show_review_action: boolean;
@@ -664,6 +670,8 @@ export class MessageListView {
             is_pending: boolean;
             is_approved: boolean;
             is_not_action: boolean;
+            state_label: string;
+            state_tone: "accent" | "neutral" | "success" | "warning";
             latest_actor?: string;
             latest_time?: string;
             latest_reason?: string;
@@ -690,7 +698,9 @@ export class MessageListView {
         hover_source_integrations?: hover.SourceIntegration[];
         hover_output_label?: string;
         hover_importance?: string;
+        hover_importance_tone?: "danger";
         hover_state?: string;
+        hover_state_tone?: "neutral" | "success" | "warning";
         hover_is_latest?: boolean;
         hover_is_earlier?: boolean;
         hover_has_history?: boolean;
@@ -698,7 +708,9 @@ export class MessageListView {
         has_hover_source_provenance?: boolean;
         hover_provenance_source_id?: number;
         hover_provenance_source_key?: string;
-        hover_filter_classes?: string;
+        cf_lineage_state?: "earlier" | "latest";
+        cf_is_source_record?: boolean;
+        cf_filter_source_ids?: string;
         mention_classname: string | undefined;
         include_sender: boolean;
         status_message: string | false;
@@ -758,12 +770,12 @@ export class MessageListView {
             if (message.mentioned_me_directly && is_user_mention) {
                 // Highlight messages having personal mentions only in DMs and subscribed streams.
                 if (message.type === "private" || stream_data.is_subscribed(message.stream_id)) {
-                    mention_classname = "direct_mention";
+                    mention_classname = "cf-message-item--direct-mention";
                 } else {
                     mention_classname = undefined;
                 }
             } else {
-                mention_classname = "group_mention";
+                mention_classname = "cf-message-item--group-mention";
             }
         } else {
             mention_classname = undefined;
@@ -794,41 +806,31 @@ export class MessageListView {
         const is_hover_generated_update = hover.is_generated_update(message);
         const hover_generated_item = message.hover_generated_item;
         const hover_source_provenance = message.hover_source_provenance;
-        const hover_source_integrations =
+        const hover_source_integrations = hover.normalize_source_integrations(
             hover_generated_item?.sources ??
-            (hover_source_provenance === undefined
-                ? []
-                : [
-                      {
-                          id: hover_source_provenance.source.id,
-                          key: hover_source_provenance.source.provider_key,
-                          name: `${hover_source_provenance.source.provider_name}: ${hover_source_provenance.source.display_name}`,
-                          icon_class: "zulip-icon zulip-icon-link",
-                          count: 1,
-                          url: hover_source_provenance.source.external_url,
-                      },
-                  ]);
+                (hover_source_provenance === undefined
+                    ? []
+                    : [
+                          {
+                              id: hover_source_provenance.source.id,
+                              key: hover_source_provenance.source.provider_key,
+                              name: `${hover_source_provenance.source.provider_name}: ${hover_source_provenance.source.display_name}`,
+                              count: 1,
+                              url: hover_source_provenance.source.external_url,
+                          },
+                      ]),
+        );
         const hover_module = hover_generated_item?.module;
-        const hover_filter_classes = [
-            is_hover_generated_update
-                ? hover_generated_item?.lineage.is_latest
-                    ? "hover-lineage-latest"
-                    : "hover-lineage-earlier"
-                : undefined,
-            hover_source_provenance === undefined ? undefined : "hover-raw-source-record",
-            hover_source_provenance === undefined
-                ? undefined
-                : `hover-source-id--${hover_source_provenance.source.id}`,
-            hover_source_provenance === undefined
-                ? undefined
-                : `hover-source-key--${hover_source_provenance.source.provider_key}`,
-            ...hover_source_integrations.flatMap((source) => [
-                `hover-source-key--${source.key}`,
-                source.id === null ? undefined : `hover-source-id--${source.id}`,
-            ]),
-        ]
-            .filter((value) => value !== undefined)
-            .join(" ");
+        const cf_filter_source_ids = [
+            ...new Set(
+                [
+                    hover_source_provenance?.source.id,
+                    ...hover_source_integrations.map((source) => source.id),
+                ]
+                    .filter((source_id) => source_id !== null && source_id !== undefined)
+                    .map(String),
+            ),
+        ].join(" ");
         const hover_response = message.hover_response;
         const hover_review_request = message.hover_review_request;
         const suggested_action = hover_generated_item?.suggested_action;
@@ -870,12 +872,12 @@ export class MessageListView {
                             : detail.material
                               ? $t({defaultMessage: "Needs review"})
                               : $t({defaultMessage: "Uncertain"}),
-                    state_class:
+                    state_tone:
                         detail.state === "resolved"
-                            ? "reviewed"
+                            ? ("success" as const)
                             : detail.material
-                              ? "needs-review"
-                              : "uncertain",
+                              ? ("warning" as const)
+                              : ("neutral" as const),
                     evidence_url: detail.evidence_url,
                     evidence_count: detail.evidence_count,
                     show_review_action: detail.material && detail.state === "needs_review",
@@ -898,11 +900,22 @@ export class MessageListView {
             is_hover_generated_update,
             is_hover_review_request: hover_review_request !== undefined,
             ...(hover_review_request !== undefined && {
-                hover_review_request_state: hover_review_request.state,
+                hover_review_request_state_label:
+                    hover_review_request.state === "resolved"
+                        ? $t({defaultMessage: "Resolved"})
+                        : $t({defaultMessage: "Open"}),
+                hover_review_request_state_tone:
+                    hover_review_request.state === "resolved" ? "success" : "warning",
             }),
             has_hover_disputed_details: hover_disputed_details.length > 0,
             hover_disputed_details,
-            hover_filter_classes,
+            ...(is_hover_generated_update && {
+                cf_lineage_state: hover_generated_item?.lineage.is_latest
+                    ? ("latest" as const)
+                    : ("earlier" as const),
+            }),
+            ...(hover_source_provenance !== undefined && {cf_is_source_record: true}),
+            ...(cf_filter_source_ids !== "" && {cf_filter_source_ids}),
             has_hover_source_provenance: hover_source_provenance !== undefined,
             ...(hover_source_provenance !== undefined && {
                 hover_provenance_source_id: hover_source_provenance.source.id,
@@ -933,6 +946,22 @@ export class MessageListView {
                         is_pending: suggested_action.state === "pending",
                         is_approved: suggested_action.state === "approved",
                         is_not_action: suggested_action.state === "not_action",
+                        state_label:
+                            suggested_action.state === "pending"
+                                ? $t({defaultMessage: "Awaiting confirmation"})
+                                : suggested_action.state === "not_action"
+                                  ? $t({defaultMessage: "Not an action"})
+                                  : suggested_action.todo?.state === "completed"
+                                    ? $t({defaultMessage: "Completed Todo"})
+                                    : $t({defaultMessage: "Active Todo"}),
+                        state_tone:
+                            suggested_action.state === "pending"
+                                ? "warning"
+                                : suggested_action.state === "not_action"
+                                  ? "neutral"
+                                  : suggested_action.todo?.state === "completed"
+                                    ? "success"
+                                    : "accent",
                         ...(latest_transition !== undefined && {
                             latest_actor: latest_transition.actor_name,
                             latest_time: latest_transition.occurred_at,
@@ -970,8 +999,19 @@ export class MessageListView {
                 hover_source_context: hover_generated_item.source_summary,
                 hover_output_label: hover_generated_item.presentation.label,
                 hover_importance: hover_generated_item.presentation.importance,
+                ...((hover_generated_item.presentation.importance === "high" ||
+                    hover_generated_item.presentation.importance === "urgent") && {
+                    hover_importance_tone: "danger" as const,
+                }),
                 ...(hover_generated_item.presentation.state !== null && {
                     hover_state: hover_generated_item.presentation.state,
+                    hover_state_tone:
+                        hover_generated_item.presentation.state === "active"
+                            ? ("success" as const)
+                            : hover_generated_item.presentation.state === "reversed" ||
+                                hover_generated_item.presentation.state === "superseded"
+                              ? ("warning" as const)
+                              : ("neutral" as const),
                 }),
                 hover_is_latest: hover_generated_item.lineage.is_latest,
                 hover_is_earlier: !hover_generated_item.lineage.is_latest,
@@ -1501,7 +1541,7 @@ export class MessageListView {
 
     _put_row($row: JQuery): void {
         // $row is a jQuery object wrapping one message row
-        if ($row.hasClass("message_row")) {
+        if ($row.hasClass("cf-message-item")) {
             this._rows.set(rows.id($row), $row);
         }
     }
@@ -1543,7 +1583,7 @@ export class MessageListView {
             blueslip.error("programming error--expected single element");
         }
 
-        const $content = $row.find(".message_content");
+        const $content = $row.find(".cf-message-item__content");
 
         rendered_markdown.update_elements($content);
 
@@ -1689,14 +1729,14 @@ export class MessageListView {
                 use_match_properties: this.list.is_keyword_search(),
             });
 
-            $dom_messages = $rendered_groups.find(".message_row");
+            $dom_messages = $rendered_groups.find(".cf-message-item");
             new_dom_elements.push($rendered_groups);
 
             this._post_process($dom_messages);
 
             // The date row will be included in the message groups or will be
             // added in a rerendered in the group below
-            this.$list.find(".recipient_row").first().prev(".date_row").remove();
+            this.$list.find(".cf-message-group").first().prev(".date_row").remove();
             this.$list.prepend($rendered_groups);
             condense.condense_and_collapse($dom_messages);
         }
@@ -1715,7 +1755,7 @@ export class MessageListView {
                     use_match_properties: this.list.is_keyword_search(),
                 });
 
-                $dom_messages = $rendered_groups.find(".message_row");
+                $dom_messages = $rendered_groups.find(".cf-message-item");
                 // Not adding to new_dom_elements it is only used for autoscroll
 
                 this._post_process($dom_messages);
@@ -1726,13 +1766,13 @@ export class MessageListView {
 
         // Insert new messages in to the last message group
         if (message_actions.append_messages.length > 0) {
-            const $last_message_row = this.$list.find(".message_row").last().expectOne();
+            const $last_message_row = this.$list.find(".cf-message-item").last().expectOne();
             const $last_group_row = rows.get_message_recipient_row($last_message_row);
             $dom_messages = $(
                 message_actions.append_messages
                     .map((message_container) => this._get_message_template(message_container))
                     .join(""),
-            ).filter(".message_row");
+            ).filter(".cf-message-item");
 
             this._post_process($dom_messages);
             $last_group_row.append($dom_messages);
@@ -1751,7 +1791,7 @@ export class MessageListView {
                 use_match_properties: this.list.is_keyword_search(),
             });
 
-            $dom_messages = $rendered_groups.find(".message_row");
+            $dom_messages = $rendered_groups.find(".cf-message-item");
             new_dom_elements.push($rendered_groups);
 
             this._post_process($dom_messages);
@@ -2586,7 +2626,7 @@ export class MessageListView {
                We don't need to add `sticky_header` class here since date is already visible
                and header is not truly sticky at top of screen yet. */
             $sticky_header = $headers.first();
-            $message_row = $sticky_header.nextAll(".message_row").first();
+            $message_row = $sticky_header.nextAll(".cf-message-item").first();
         } else {
             dom_updates.add_classes.push({$element: $sticky_header, class: "sticky_header"});
             const sticky_header_props = util.the($sticky_header).getBoundingClientRect();
@@ -2601,12 +2641,12 @@ export class MessageListView {
             );
             const message_rows = elements_below_sticky_header
                 .filter((element) => element instanceof HTMLElement)
-                .filter((element) => element.classList.contains("message_row"))
+                .filter((element) => element.classList.contains("cf-message-item"))
                 .filter((element) => !rows.is_overlay_row($(element)));
             if (message_rows.length === 0) {
                 /* If there is no message row under the header, it means it is not sticky yet,
                    so we just get the message next to the header. */
-                $message_row = $sticky_header.nextAll(".message_row").first();
+                $message_row = $sticky_header.nextAll(".cf-message-item").first();
             } else {
                 $message_row = $(message_rows[0]!);
             }
@@ -2650,8 +2690,8 @@ export class MessageListView {
         // from the previous recipient row.
         if ($sticky_header.find(".recipient_row_date.recipient_row_date_unchanged").length > 0) {
             const $prev_recipient_row = $sticky_header
-                .closest(".recipient_row")
-                .prev(".recipient_row");
+                .closest(".cf-message-group")
+                .prev(".cf-message-group");
             if ($prev_recipient_row.length === 0) {
                 return;
             }
@@ -2689,18 +2729,20 @@ export class MessageListView {
     show_message_as_read(message: Message, options: {from?: "pointer" | "server"}): void {
         const $row = this.get_row(message.id);
         if (options.from === "pointer" || options.from === "server") {
-            $row.find(".unread_marker").addClass("fast_fade");
+            $row.find(".cf-message-item__unread-marker").addClass("fast_fade");
         } else {
-            $row.find(".unread_marker").addClass("slow_fade");
+            $row.find(".cf-message-item__unread-marker").addClass("slow_fade");
         }
         $row.removeClass("unread");
     }
 
     show_messages_as_unread(message_ids: number[]): void {
-        const $rows_to_show_as_unread = this.$list.find(".message_row").filter((_index, $row) => {
-            const message_id = Number.parseFloat($row.getAttribute("data-message-id")!);
-            return message_ids.includes(message_id);
-        });
+        const $rows_to_show_as_unread = this.$list
+            .find(".cf-message-item")
+            .filter((_index, $row) => {
+                const message_id = Number.parseFloat($row.getAttribute("data-message-id")!);
+                return message_ids.includes(message_id);
+            });
         $rows_to_show_as_unread.addClass("unread");
     }
 }

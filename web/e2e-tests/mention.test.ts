@@ -9,7 +9,7 @@ async function test_mention(page: Page): Promise<void> {
     await page.click("#left-sidebar-navigation-list .top_left_all_messages");
     let message_list_id = await common.get_current_msg_list_id(page, true);
     await page.waitForSelector(
-        `.message-list[data-message-list-id='${message_list_id}'] .message_row`,
+        `.message-list[data-message-list-id='${message_list_id}'] .cf-message-item`,
         {visible: true},
     );
     await page.keyboard.press("KeyC");
@@ -33,11 +33,10 @@ async function test_mention(page: Page): Promise<void> {
     assert.ok(stream_size > threshold);
     await page.click("#compose-send-button");
 
-    await page.waitForSelector(
-        "#compose_banners .wildcard_warning .main-view-banner-action-button",
-        {visible: true},
-    );
-    await page.click("#compose_banners .wildcard_warning .main-view-banner-action-button");
+    await page.waitForSelector("#compose_banners .wildcard_warning .cf-notice__action", {
+        visible: true,
+    });
+    await page.click("#compose_banners .wildcard_warning .cf-notice__action");
     await page.waitForSelector(".wildcard_warning", {hidden: true});
 
     message_list_id = await common.get_current_msg_list_id(page, true);

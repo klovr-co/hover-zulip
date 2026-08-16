@@ -1,0 +1,41 @@
+.cf-help-link {
+    display: inline-grid;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    margin-left: var(--cf-space-1);
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-secondary);
+    text-decoration: none;
+    vertical-align: -4px;
+    place-items: center;
+}
+
+.cf-help-link:is(:hover, :focus-visible) {
+    color: var(--cf-color-accent-hover);
+    background: var(--cf-surface-hover);
+    text-decoration: none;
+}
+
+.cf-help-link:focus {
+    outline: none;
+}
+
+.cf-help-link:focus-visible {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: 1px;
+}
+
+.cf-help-link > .cf-icon {
+    width: 13px;
+    height: 13px;
+}
+
+@media (width <= 600px) {
+    .cf-help-link {
+        width: var(--cf-control-height-touch);
+        height: var(--cf-control-height-touch);
+        margin-block: calc((18px - var(--cf-control-height-touch)) / 2);
+        vertical-align: middle;
+    }
+}

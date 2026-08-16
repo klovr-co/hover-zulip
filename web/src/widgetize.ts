@@ -40,7 +40,7 @@ export function get_message_ids(): number[] {
 }
 
 function set_widget_in_message($row: JQuery, $widget_elem: JQuery): void {
-    const $content_holder = $row.find(".message_content");
+    const $content_holder = $row.find(".cf-message-item__content");
     $content_holder.empty().append($widget_elem);
 }
 

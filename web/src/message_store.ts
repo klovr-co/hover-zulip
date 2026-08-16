@@ -354,7 +354,6 @@ type LocalMessageWithBooleans = (
 export type MessageWithBooleans = RawMessageWithBooleans | LocalMessageWithBooleans;
 
 export type MessageCleanReaction = {
-    class: string;
     count: number;
     emoji_alt_code: boolean;
     emoji_code: string;
@@ -363,6 +362,7 @@ export type MessageCleanReaction = {
     label: string;
     local_id: string;
     reaction_type: "zulip_extra_emoji" | "realm_emoji" | "unicode_emoji";
+    selected: boolean;
     user_ids: number[];
     vote_text: string;
 };

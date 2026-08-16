@@ -66,6 +66,21 @@ export function get_user_circle_class(user_id: number, use_deactivated_circle = 
     }
 }
 
+export function get_user_presence_label(user_id: number, use_deactivated_circle = false): string {
+    if (use_deactivated_circle) {
+        return $t({defaultMessage: "Deactivated"});
+    }
+
+    const status = presence.get_status(user_id);
+    if (status === "active") {
+        return $t({defaultMessage: "Active now"});
+    }
+    if (status === "idle") {
+        return $t({defaultMessage: "Idle"});
+    }
+    return $t({defaultMessage: "Offline"});
+}
+
 export function level(user_id: number): number {
     // Put current user at the top, unless we're in a user search view.
     if (people.is_my_user_id(user_id) && !is_searching_users) {
@@ -204,11 +219,13 @@ export function user_last_seen_time_status(
 export type BuddyUserInfo = {
     href: string;
     name: string;
+    user_actions_label: string;
     user_id: number;
     profile_picture: string;
     status_emoji_info: user_status.UserStatusEmojiInfo | undefined;
     is_current_user: boolean;
     num_unread: number;
+    presence_label: string;
     user_circle_class: string;
     status_text: string | undefined;
     has_status_text: boolean;
@@ -224,8 +241,10 @@ export type BuddyUserInfo = {
 export function info_for(user_id: number, direct_message_recipients: Set<number>): BuddyUserInfo {
     const is_deactivated = !people.is_person_active(user_id);
     const is_dm = direct_message_recipients.has(user_id);
+    const name = people.get_full_name(user_id);
 
-    const user_circle_class = get_user_circle_class(user_id, is_deactivated && is_dm);
+    const use_deactivated_circle = is_deactivated && is_dm;
+    const user_circle_class = get_user_circle_class(user_id, use_deactivated_circle);
 
     const status_emoji_info = user_status.get_status_emoji(user_id);
     const status_text = user_status.get_status_text(user_id);
@@ -238,12 +257,14 @@ export function info_for(user_id: number, direct_message_recipients: Set<number>
 
     return {
         href: hash_util.pm_with_url(user_id.toString()),
-        name: people.get_full_name(user_id),
+        name,
+        user_actions_label: $t({defaultMessage: "User actions for {name}"}, {name}),
         user_id,
         status_emoji_info,
         profile_picture: people.small_avatar_url_for_user_id(user_id),
         is_current_user: people.is_my_user_id(user_id),
         num_unread: get_num_unread(user_id),
+        presence_label: get_user_presence_label(user_id, use_deactivated_circle),
         user_circle_class,
         status_text,
         has_status_text: Boolean(status_text),

@@ -6,7 +6,7 @@
   has_unread_mention=has_unread_mention
   unread_count=unread_dms_count
   }}
-<div id="inbox-direct-messages-container" class="inbox-folder-components">
+<div id="inbox-direct-messages-container" class="cf-conversation-list__section inbox-folder-components">
     {{#each (map_entries dms_dict)}}
         {{> inbox_row this.[1]}}
     {{/each}}

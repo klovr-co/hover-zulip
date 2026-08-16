@@ -79,7 +79,7 @@
     }
 }
 
-.navbar-alert-banner {
+.navbar-alert-banner:not(.cf-banner) {
     border: unset;
     border-bottom: 1px solid;
     border-radius: 0;
@@ -225,7 +225,7 @@
     }
 }
 
-.popup-banner {
+.popup-banner:not(.cf-banner) {
     @extend .popup-banner-animations;
 
     width: 100%;

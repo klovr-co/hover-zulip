@@ -1,50 +1,50 @@
-<div class="micromodal" id="user-profile-modal" data-user-id="{{user_id}}" aria-hidden="true">
-    <div class="modal__overlay" tabindex="-1">
-        <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="user-profile-name-heading">
-            <div class="modal__header">
-                <div class="modal__header-content">
+<div class="micromodal cf-theme cf-dialog-root cf-user-profile" id="user-profile-modal" data-user-id="{{user_id}}" aria-hidden="true">
+    <div class="modal__overlay cf-dialog-backdrop" tabindex="-1">
+        <div class="modal__container cf-dialog" role="dialog" aria-modal="true" aria-labelledby="user-profile-name-heading">
+            <div class="modal__header cf-dialog__header">
+                <div class="modal__header-content cf-dialog__heading">
                     <h1 class="modal__title user-profile-name-heading" id="user-profile-name-heading">
                         {{#unless is_bot}}
                             {{#if is_active}}
                                 <span class="tippy-zulip-tooltip user-status-icon-wrapper" data-tippy-content="{{last_seen}}">
-                                    <span class="zulip-icon zulip-icon-{{user_circle_class}} {{user_circle_class}} user-circle user_profile_presence" data-presence-indicator-user-id="{{user_id}}"></span>
+                                    {{> cofounder/components/presence_dot user_circle_class=user_circle_class user_id=user_id custom_classes="user_profile_presence"}}
                                 </span>
                             {{else}}
                                 <span>
                                     {{#if is_deleted}}
-                                        <i class="fa fa-ban deactivated-user-icon tippy-zulip-tooltip" data-tippy-content="{{t 'Deleted user'}}"></i>
+                                        <span class="deactivated-user-icon tippy-zulip-tooltip" data-tippy-content="{{t 'Deleted user'}}">{{> cofounder/components/icon name="circle-off" compact=true}}</span>
                                     {{else}}
-                                        <i class="fa fa-ban deactivated-user-icon tippy-zulip-tooltip" data-tippy-content="{{t 'Deactivated user'}}"></i>
+                                        <span class="deactivated-user-icon tippy-zulip-tooltip" data-tippy-content="{{t 'Deactivated user'}}">{{> cofounder/components/icon name="circle-off" compact=true}}</span>
                                     {{/if}}
                                 </span>
                             {{/if}}
                         {{/unless}}
                         {{#if is_bot}}
-                            <i class="zulip-icon zulip-icon-bot" aria-hidden="true"></i>
+                            {{> cofounder/components/icon name="bot" compact=true}}
                         {{/if}}
                         <span class="user-profile-name">{{> user_full_name name=full_name}}</span>
                         <span class="user-profile-header-actions">
-                            {{> components/icon_button custom_classes="copy-link-to-user-profile tippy-zulip-delayed-tooltip" icon="link-alt" intent="neutral" data-tippy-content=(t "Copy link to profile") aria-label=(t "Copy link to profile") }}
+                            {{> cofounder/components/icon_button custom_classes="copy-link-to-user-profile tippy-zulip-delayed-tooltip" icon="link-alt" intent="neutral" data-tippy-content=(t "Copy link to profile") aria-label=(t "Copy link to profile") }}
                             {{#if is_me}}
                                 {{#if can_manage_profile}}
-                                    {{> components/icon_button custom_classes="user-profile-update-user-tab-button tippy-zulip-delayed-tooltip" icon="edit" intent="neutral" data-tippy-content=(t "Edit profile") aria-label=(t "Edit profile") }}
+                                    {{> cofounder/components/icon_button custom_classes="user-profile-update-user-tab-button tippy-zulip-delayed-tooltip" icon="edit" intent="neutral" data-tippy-content=(t "Edit profile") aria-label=(t "Edit profile") }}
                                 {{else}}
-                                    {{> components/icon_button custom_classes="user-profile-profile-settings-button tippy-zulip-delayed-tooltip" icon="edit" intent="neutral" data-tippy-content=(t "Edit profile") aria-label=(t "Edit profile") }}
+                                    {{> cofounder/components/icon_button custom_classes="user-profile-profile-settings-button tippy-zulip-delayed-tooltip" icon="edit" intent="neutral" data-tippy-content=(t "Edit profile") aria-label=(t "Edit profile") }}
                                 {{/if}}
                             {{else if can_manage_profile}}
                                 {{#if is_bot}}
-                                    {{> components/icon_button custom_classes="user-profile-update-user-tab-button tippy-zulip-delayed-tooltip" icon="edit" intent="neutral" data-tippy-content=(t "Manage bot") aria-label=(t "Manage bot") }}
+                                    {{> cofounder/components/icon_button custom_classes="user-profile-update-user-tab-button tippy-zulip-delayed-tooltip" icon="edit" intent="neutral" data-tippy-content=(t "Manage bot") aria-label=(t "Manage bot") }}
                                 {{else}}
-                                    {{> components/icon_button custom_classes="user-profile-update-user-tab-button tippy-zulip-delayed-tooltip" icon="edit" intent="neutral" data-tippy-content=(t "Manage user") aria-label=(t 'Manage user') }}
+                                    {{> cofounder/components/icon_button custom_classes="user-profile-update-user-tab-button tippy-zulip-delayed-tooltip" icon="edit" intent="neutral" data-tippy-content=(t "Manage user") aria-label=(t 'Manage user') }}
                                 {{/if}}
                             {{/if}}
                         </span>
                     </h1>
                 </div>
-                <div class="modal__tab-switcher-container"></div>
-                {{> components/icon_button icon="close" intent="neutral" custom_classes="modal__close" aria-label=(t 'Close modal') data-micromodal-close=true }}
+                <div class="modal__tab-switcher-container cf-dialog__tabs"></div>
+                {{> cofounder/components/icon_button icon="close" intent="neutral" custom_classes="modal__close cf-dialog__close" aria-label=(t 'Close modal') data-micromodal-close=true }}
             </div>
-            <main class="modal__content" data-simplebar data-simplebar-tab-index="-1" data-simplebar-auto-hide="false">
+            <main class="modal__content cf-dialog__body" data-simplebar data-simplebar-tab-index="-1" data-simplebar-auto-hide="false">
                 <div class="tab-data">
                     <div class="tabcontent active" id="profile-tab">
                         <div class="top">
@@ -129,13 +129,7 @@
                                 <h3 class="stream-tab-element-header">{{t 'Subscribed channels' }}</h3>
                             </div>
                             <div class="stream-list-container">
-                                <div class="stream-search-container filter-input has-input-icon has-input-button input-element-wrapper">
-                                    <i class="input-icon zulip-icon zulip-icon-search" aria-hidden="true"></i>
-                                    <input type="text" class="input-element stream-search" placeholder="{{t 'Filter' }}" />
-                                    <button type="button" class="input-button input-close-filter-button icon-button icon-button-square icon-button-neutral">
-                                        <i class="zulip-icon zulip-icon-close" aria-hidden="true"></i>
-                                    </button>
-                                </div>
+                                {{> cofounder/components/search_field placeholder=(t "Filter") aria-label=(t "Filter channels") input_classes="stream-search" clear_button_classes="input-close-filter-button" clear_button_aria_label=(t "Clear filter") custom_classes="stream-search-container"}}
                                 <div class="stream-list-loader"></div>
                                 <div class="error-message"></div>
                                 <div class="subscription-stream-list modal-list-scroll-container" data-simplebar data-simplebar-tab-index="-1">
@@ -158,13 +152,7 @@
                                 <h3 class="group-tab-element-header">{{t 'Group membership' }}</h3>
                             </div>
                             <div class="group-list-container">
-                                <div class="group-search-container filter-input has-input-icon has-input-button input-element-wrapper">
-                                    <i class="input-icon zulip-icon zulip-icon-search"></i>
-                                    <input type="text" class="input-element group-search" placeholder="{{t 'Filter' }}" />
-                                    <button type="button" class="input-button input-close-filter-button icon-button icon-button-square icon-button-neutral">
-                                        <i class="zulip-icon zulip-icon-close" aria-hidden="true"></i>
-                                    </button>
-                                </div>
+                                {{> cofounder/components/search_field placeholder=(t "Filter") aria-label=(t "Filter groups") input_classes="group-search" clear_button_classes="input-close-filter-button" clear_button_aria_label=(t "Clear filter") custom_classes="group-search-container"}}
                                 <div class="subscription-group-list modal-list-scroll-container" data-simplebar data-simplebar-tab-index="-1">
                                     <ul class="user-group-list modal-item-list" data-empty="{{t 'Not a member of any groups.' }}" data-search-results-empty="{{t 'No matching user groups' }}"></ul>
                                 </div>
@@ -185,20 +173,17 @@
                                         </div>
                                     </div>
                                 </div>
-                                {{> components/action_button label=(t "Add") custom_classes="add-groups-button" variant="subtle" intent="brand" aria-label=(t "Add") }}
+                                {{> cofounder/components/button label=(t "Add") custom_classes="add-groups-button" variant="secondary" aria-label=(t "Add") }}
                             </div>
                         </div>
                     </div>
                     <div class="tabcontent" id="manage-profile-tab"></div>
                 </div>
             </main>
-            <footer class="modal__footer manage-profile-tab-footer">
+            <footer class="modal__footer cf-dialog__footer manage-profile-tab-footer">
                 <div class="save-success"></div>
-                <button type="button" class="modal__button dialog_exit_button" aria-label="{{t 'Close this dialog window' }}" data-micromodal-close>{{t "Cancel" }}</button>
-                <button type="button" class="modal__button dialog_submit_button">
-                    <span class="submit-button-text">{{t "Save changes"}}</span>
-                    <span class="modal__spinner"></span>
-                </button>
+                {{> cofounder/components/button variant="secondary" label=(t "Cancel") custom_classes="modal__button dialog_exit_button cf-dialog__button" aria-label=(t "Close this dialog window") micromodal_close=true}}
+                {{> cofounder/components/button variant="primary" label=(t "Save changes") custom_classes="modal__button dialog_submit_button cf-dialog__button cf-dialog__submit" custom_label_classes="submit-button-text" spinner_class="cf-dialog__spinner"}}
             </footer>
         </div>
     </div>

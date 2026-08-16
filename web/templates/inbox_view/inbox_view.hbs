@@ -1,42 +1,44 @@
-<div id="inbox-main">
+<div id="inbox-main" class="cf-conversation-list">
     {{#if unknown_channel}}
-    <div id="inbox-unknown-channel-view" class="empty-list-message">
+    <div id="inbox-unknown-channel-view" class="cf-conversation-list__empty empty-list-message">
         {{t "This channel doesn't exist, or you are not allowed to view it."}}
     </div>
     {{else}}
-    <div class="search_group" id="inbox-filters" role="group">
-        {{> ../dropdown_widget widget_name="inbox-filter"}}
-        {{#> ../components/input_wrapper . input_type="filter-input" custom_classes="inbox-search-wrapper" icon="search" input_button_icon="close"}}
-            <input type="text" id="{{INBOX_SEARCH_ID}}" class="input-element" value="{{search_val}}" autocomplete="off" placeholder="{{t 'Filter' }}" />
+    <div class="cf-conversation-list__toolbar search_group" id="inbox-filters" role="group" aria-label="{{t 'Inbox filters'}}">
+        {{> ../dropdown_widget widget_name="inbox-filter" cofounder=true custom_classes="cf-conversation-list__filter-select"}}
+        {{#> ../components/input_wrapper . input_type="filter-input" custom_classes="cf-conversation-list__search inbox-search-wrapper" icon="search" input_button_icon="close" cofounder=true}}
+            <input type="text" id="{{INBOX_SEARCH_ID}}" class="input-element" value="{{search_val}}" autocomplete="off" placeholder="{{t 'Filter' }}" aria-label="{{t 'Filter inbox' }}" />
         {{/../components/input_wrapper}}
         {{#if show_channel_folder_toggle}}
-        <span class="sidebar-menu-icon channel-folders-inbox-menu-icon hidden-for-spectators"><i class="zulip-icon zulip-icon-more-vertical" aria-label="{{t 'Show channel folders'}}"></i></span>
+        <button type="button" class="cf-icon-button cf-icon-button--neutral cf-conversation-list__folder-menu sidebar-menu-icon channel-folders-inbox-menu-icon hidden-for-spectators" aria-label="{{t 'Show channel folders'}}">
+            {{> ../cofounder/components/icon name="more-vertical" compact=true}}
+        </button>
         {{/if}}
     </div>
-    <div id="inbox-empty-with-search" class="inbox-empty-text empty-list-message">
+    <div id="inbox-empty-with-search" class="cf-conversation-list__empty inbox-empty-text empty-list-message">
         {{t "No conversations match your filters."}}
     </div>
-    <div id="inbox-empty-channel-view-with-search" class="inbox-empty-text empty-list-message">
+    <div id="inbox-empty-channel-view-with-search" class="cf-conversation-list__empty inbox-empty-text empty-list-message">
         {{t "No topics match your filters."}}
     </div>
-    <div id="inbox-empty-channel-view-without-search" class="inbox-empty-text empty-list-message">
+    <div id="inbox-empty-channel-view-without-search" class="cf-conversation-list__empty inbox-empty-text empty-list-message">
         {{t "There are no topics in this view."}}
     </div>
     {{#if normal_view}}
         {{> inbox_no_unreads}}
     {{/if}}
-    <div id="inbox-list">
+    <div id="inbox-list" class="cf-conversation-list__body">
         {{#if normal_view}}
             {{> inbox_list .}}
         {{/if}}
     </div>
-    <div id="inbox-collapsed-note">
-        <div class="inbox-collapsed-note-and-button-wrapper">
-            <span class="inbox-collapsed-note-span">
+    <div id="inbox-collapsed-note" class="cf-conversation-list__notice">
+        <div class="cf-conversation-list__notice-content inbox-collapsed-note-and-button-wrapper">
+            <span class="cf-conversation-list__notice-text inbox-collapsed-note-span">
                 {{t "All unread conversations are hidden. Click on a section, folder, or channel to expand it."}}
             </span>
-            <button id="inbox-expand-all-button" class="action-button action-button-subtle-neutral" tabindex="0">
-                <span class="action-button-label">{{t "Show all"}}</span>
+            <button id="inbox-expand-all-button" class="cf-button cf-button--secondary" type="button" tabindex="0">
+                <span class="cf-button__label action-button-label">{{t "Show all"}}</span>
             </button>
         </div>
     </div>

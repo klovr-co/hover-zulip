@@ -1,0 +1,11 @@
+<button type="{{#if type}}{{type}}{{else}}button{{/if}}"{{#if id}} id="{{id}}"{{/if}} class="cf-button cf-button--{{variant}}{{#if compact}} cf-button--compact{{/if}}{{#unless label}} cf-button--icon-only{{/unless}}{{#if custom_classes}} {{custom_classes}}{{/if}}{{#if hidden}} hide{{/if}}"{{#if role}} role="{{role}}"{{/if}}{{#if aria-label}} aria-label="{{aria-label}}"{{/if}}{{#if has_checked_state}} aria-checked="{{#if checked}}true{{else}}false{{/if}}"{{/if}}{{#if data-tippy-content}} data-tippy-content="{{data-tippy-content}}"{{/if}}{{#if data-tooltip-template-id}} data-tooltip-template-id="{{data-tooltip-template-id}}"{{/if}}{{#if cf_evidence_retry_url}} data-cf-evidence-retry-url="{{cf_evidence_retry_url}}"{{/if}}{{#if disabled}} disabled{{/if}}{{#if aria-busy}} aria-busy="{{aria-busy}}"{{/if}}{{#if micromodal_close}} data-micromodal-close{{/if}}>
+    {{#if icon}}
+    {{> icon name=icon compact=compact }}
+    {{/if}}
+    {{#if label}}
+    <span class="cf-button__label{{#if custom_label_classes}} {{custom_label_classes}}{{/if}}">{{label}}</span>
+    {{/if}}
+    {{#if spinner_class}}
+    <span class="{{spinner_class}}" aria-hidden="true"></span>
+    {{/if}}
+</button>

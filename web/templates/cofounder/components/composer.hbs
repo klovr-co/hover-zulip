@@ -1,0 +1,24 @@
+<form class="cf-composer cf-composer--standalone" aria-label="{{t 'Compose message' }}">
+    {{#if recipient}}
+    <div class="cf-composer__recipient-preview">
+        <span class="cf-composer__recipient-channel">{{channel}}</span>
+        <span class="cf-composer__recipient-separator" aria-hidden="true">/</span>
+        <span class="cf-composer__recipient-topic">{{recipient}}</span>
+    </div>
+    {{/if}}
+    <div class="cf-composer__standalone-editor">
+        <textarea class="cf-composer__textarea" placeholder="{{placeholder}}" aria-label="{{placeholder}}">{{value}}</textarea>
+        <div class="cf-composer__standalone-actions">
+            <button type="button" class="cf-composer__action" aria-label="{{t 'Add emoji' }}">
+                {{> icon name="smile" compact=true}}
+            </button>
+            <button type="button" class="cf-composer__action" aria-label="{{t 'Attach file' }}">
+                {{> icon name="file" compact=true}}
+            </button>
+            <span class="cf-composer__shortcut">⌘ ↵</span>
+            <button type="submit" class="cf-composer__send-button cf-composer__standalone-send" aria-label="{{t 'Send' }}"{{#if disabled}} disabled{{/if}}>
+                {{> icon name="send" compact=true custom_classes="cf-composer__send-icon"}}
+            </button>
+        </div>
+    </div>
+</form>

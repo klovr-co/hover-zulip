@@ -1,0 +1,166 @@
+/* Production-owned reaction pill group. */
+
+.cf-message-reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-width: 0;
+    max-width: 100%;
+    color: var(--cf-text-secondary);
+    font-family: var(--cf-font-ui);
+    user-select: none;
+}
+
+.cf-message-reactions:has(.cf-message-reaction) {
+    margin-bottom: var(--message-box-markdown-aligned-vertical-space);
+}
+
+.cf-message-reaction-wrap {
+    display: contents;
+}
+
+.cf-message-reaction,
+.cf-message-reactions__add {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    max-width: 100%;
+    min-height: 28px;
+    padding: 2px 7px;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-pill);
+    color: var(--cf-text-secondary);
+    background: var(--cf-surface-paper);
+    box-shadow: none;
+    font: inherit;
+    font-size: var(--cf-type-meta);
+    line-height: 1;
+    cursor: pointer;
+    transition:
+        color var(--cf-duration-fast) ease,
+        border-color var(--cf-duration-fast) ease,
+        background-color var(--cf-duration-fast) ease,
+        transform var(--cf-duration-fast) ease;
+}
+
+.cf-message-reaction {
+    gap: 5px;
+}
+
+.cf-message-reaction:is(:hover, :focus-visible),
+.cf-message-reactions__add:is(:hover, :focus-visible),
+.cf-message-reaction--selected {
+    border-color: var(--cf-color-accent);
+    color: var(--cf-color-accent-hover);
+    background: var(--cf-color-accent-soft);
+}
+
+.cf-message-reaction:focus,
+.cf-message-reactions__add:focus {
+    outline: none;
+}
+
+.cf-message-reaction:focus-visible,
+.cf-message-reactions__add:focus-visible {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: 1px;
+}
+
+.cf-message-reaction:active,
+.cf-message-reactions__add:active {
+    transform: scale(0.96);
+}
+
+.cf-message-reaction:disabled {
+    border-color: var(--cf-border-subtle);
+    color: var(--cf-color-disabled-strong);
+    background: var(--cf-surface-subtle);
+    opacity: 0.72;
+    cursor: not-allowed;
+}
+
+.cf-message-reaction.cf-message-reaction--selected:disabled {
+    border-color: var(--cf-color-accent);
+    color: var(--cf-color-accent-hover);
+    background: var(--cf-color-accent-soft);
+    opacity: 1;
+}
+
+.cf-message-reaction__emoji {
+    position: static;
+    flex: none;
+    width: 17px;
+    height: 17px;
+    margin: 0;
+}
+
+.cf-message-reaction__emoji-code {
+    overflow: hidden;
+    max-width: 18ch;
+    font-size: 0.9em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cf-message-reaction__count {
+    overflow: hidden;
+    min-width: 1ch;
+    max-width: 12ch;
+    margin: 0;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cf-message-reactions__add {
+    gap: 2px;
+    width: 36px;
+    padding-inline: 5px;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+}
+
+.cf-message-reactions:is(:hover, :focus-within) .cf-message-reactions__add,
+.cf-message-reactions__add.active-emoji-picker-reference {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+}
+
+.cf-message-reactions__add > .cf-icon {
+    width: 13px;
+    height: 13px;
+}
+
+.cf-message-reactions__add-label {
+    font-weight: 600;
+}
+
+#report-message-preview-container .cf-message-reactions {
+    display: none;
+}
+
+@media (hover: none), (width <= 600px) {
+    .cf-message-reaction,
+    .cf-message-reactions__add {
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    .cf-message-reactions__add {
+        width: 40px;
+        opacity: 1;
+        pointer-events: auto;
+        visibility: visible;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cf-message-reaction,
+    .cf-message-reactions__add {
+        transition-duration: 0ms;
+    }
+}

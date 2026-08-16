@@ -58,8 +58,8 @@ import * as hashchange from "./hashchange.ts";
 import * as hotkey from "./hotkey.ts";
 import * as hover_all_view from "./hover_all_view.ts";
 import * as hover_awareness_view from "./hover_awareness_view.ts";
-import * as hover_editions_view from "./hover_editions_view.ts";
 import * as hover_connected_accounts from "./hover_connected_accounts.ts";
+import * as hover_editions_view from "./hover_editions_view.ts";
 import * as hover_evidence from "./hover_evidence.ts";
 import * as hover_generated_details from "./hover_generated_details.ts";
 import * as hover_response from "./hover_response.ts";
@@ -225,12 +225,13 @@ function initialize_navbar() {
         embedded: page_params.narrow_stream !== undefined,
         user_avatar: current_user.avatar_url_medium,
         realm_icon_url: realm.realm_icon_url,
+        realm_logo_url: realm.realm_logo_url,
         realm_name: realm.realm_name,
     });
 
     $("#header-container").html(rendered_navbar);
     // Track when the image is loaded to updated CSS properties.
-    $("#header-container img.header-button-avatar-image").on("load", (e) => {
+    $("#header-container img.cf-app-header__avatar-image").on("load", (e) => {
         e.currentTarget.classList.add("avatar-loaded");
     });
 }
@@ -475,7 +476,7 @@ export async function initialize_everything(state_data) {
 
     set_current_user(state_data.current_user);
     set_realm(state_data.realm);
-    $("body").toggleClass("hover-enabled", realm.realm_hover_enabled);
+    $("body").toggleClass("hover-enabled cf-theme", realm.realm_hover_enabled);
     set_realm_billing(state_data.realm_billing);
 
     if (page_params.narrow_stream !== undefined) {

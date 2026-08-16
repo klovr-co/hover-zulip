@@ -42,7 +42,7 @@ export const CLASSNAMES = {
     topic_is_moved: "topic_is_moved",
     convert_pasted_text_to_file: "convert_pasted_text_to_file",
     // unmute topic notifications are styled like warnings but have distinct behaviour
-    unmute_topic_notification: "unmute_topic_notification warning-style",
+    unmute_topic_notification: "unmute_topic_notification",
     // warnings
     topic_resolved: "topic_resolved",
     recipient_not_subscribed: "recipient_not_subscribed",
@@ -83,7 +83,7 @@ export function append_compose_banner_to_banner_list(
     $banner: JQuery,
     $list_container: JQuery,
 ): boolean {
-    if ($banner.hasClass("warning") && has_error()) {
+    if ($banner.hasClass("cf-notice--warning") && has_error()) {
         return false;
     }
     scroll_util.get_content_element($list_container).append($banner);
@@ -142,15 +142,15 @@ export function clear_errors(): void {
 }
 
 export function clear_validation_errors(): void {
-    $(`#compose_banners .${CSS.escape(ERROR)}:not(.upload_banner)`).remove();
+    $("#compose_banners .cf-notice--error:not(.upload_banner)").remove();
 }
 
 export function clear_upload_errors(): void {
-    $(`#compose_banners .upload_banner.${CSS.escape(ERROR)}`).remove();
+    $("#compose_banners .upload_banner.cf-notice--error").remove();
 }
 
 export function clear_warnings(): void {
-    $(`#compose_banners .${CSS.escape(WARNING)}`).remove();
+    $("#compose_banners .cf-notice--warning").remove();
 }
 
 export function clear_uploads(): void {
@@ -286,7 +286,7 @@ export function show_unknown_zoom_user_error(email: string): void {
 }
 
 export function has_error(): boolean {
-    return $("#compose_banners .error").length > 0;
+    return $("#compose_banners .cf-notice--error").length > 0;
 }
 
 export function show_convert_pasted_text_to_file_banner({
@@ -308,8 +308,8 @@ export function show_convert_pasted_text_to_file_banner({
             show_paste_button,
         }),
     );
-    $new_row.on("click", ".main-view-banner-action-button.convert-to-file", convert_to_file_cb);
-    $new_row.on("click", ".main-view-banner-action-button.paste-to-compose", paste_to_compose_cb);
+    $new_row.on("click", ".cf-notice__action.convert-to-file", convert_to_file_cb);
+    $new_row.on("click", ".cf-notice__action.paste-to-compose", paste_to_compose_cb);
     update_or_append_banner($new_row, CLASSNAMES.convert_pasted_text_to_file, $banner_container);
     return $new_row;
 }

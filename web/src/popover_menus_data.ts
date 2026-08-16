@@ -206,7 +206,9 @@ export function get_actions_popover_content_context(message_id: number): ActionP
     let should_display_collapse = false;
     let should_display_uncollapse = false;
     if (maybe_show_collapse_uncollapse(message)) {
-        const message_condensed = $message_row.find(".message_content").hasClass("condensed");
+        const message_condensed = $message_row
+            .find(".cf-message-item__content")
+            .hasClass("condensed");
         should_display_collapse = !message.collapsed && !message_condensed;
         should_display_uncollapse = message.collapsed || message_condensed;
     }
@@ -232,7 +234,9 @@ export function get_actions_popover_content_context(message_id: number): ActionP
     };
 
     function is_add_reaction_icon_visible($message_row: JQuery): boolean {
-        const $reaction_button = $message_row.find(".message_controls .reaction_button");
+        const $reaction_button = $message_row.find(
+            ".cf-message-actions .cf-message-actions__reaction-button",
+        );
         return $reaction_button.length === 1 && $reaction_button.css("display") !== "none";
     }
 

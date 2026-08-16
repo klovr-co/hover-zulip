@@ -1,0 +1,33 @@
+.cf-presence-dot {
+    box-sizing: border-box;
+    display: inline-block;
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--cf-surface-paper);
+    border-radius: var(--cf-radius-pill);
+    background: currentcolor;
+    box-shadow: 0 0 0 1px color-mix(in srgb, currentcolor 20%, transparent);
+}
+
+.cf-presence-dot--user-circle-active,
+.cf-presence-dot.user-circle-active {
+    color: var(--color-user-circle-active);
+}
+
+.cf-presence-dot--user-circle-idle,
+.cf-presence-dot.user-circle-idle {
+    color: var(--color-user-circle-idle);
+    background: var(--gradient-user-circle-idle);
+    -webkit-text-fill-color: currentcolor;
+}
+
+.cf-presence-dot--user-circle-offline,
+.cf-presence-dot.user-circle-offline {
+    color: var(--color-user-circle-offline);
+}
+
+.cf-presence-dot--user-circle-deactivated,
+.cf-presence-dot.user-circle-deactivated {
+    color: var(--color-user-circle-deactivated);
+}

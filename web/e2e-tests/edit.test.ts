@@ -5,7 +5,7 @@ import type {Page} from "puppeteer";
 import * as common from "./lib/common.ts";
 
 async function trigger_edit_last_message(page: Page): Promise<void> {
-    const msg = (await page.$$(".message-list .message_row")).at(-1);
+    const msg = (await page.$$(".message-list .cf-message-item")).at(-1);
     assert.ok(msg !== undefined);
     const id = await (await msg.getProperty("id")).jsonValue();
     await msg.hover();
@@ -44,7 +44,7 @@ async function test_stream_message_edit(page: Page): Promise<void> {
 
 async function test_edit_message_with_slash_me(page: Page): Promise<void> {
     const last_message_xpath = `(//*[${common.has_class_x("message-list")}]//*[${common.has_class_x(
-        "messagebox",
+        "cf-message-item__frame",
     )}])[last()]`;
 
     await common.send_message(
@@ -65,7 +65,7 @@ async function test_edit_message_with_slash_me(page: Page): Promise<void> {
     );
     await page.waitForSelector(
         `xpath/${last_message_xpath}//*[${common.has_class_x(
-            "sender_name",
+            "cf-message-item__sender",
         )} and normalize-space()="Desdemona"]`,
     );
 
@@ -78,7 +78,7 @@ async function test_edit_message_with_slash_me(page: Page): Promise<void> {
     );
     await page.waitForSelector(
         `xpath/${last_message_xpath}//*[${common.has_class_x(
-            "sender_name",
+            "cf-message-item__sender",
         )} and normalize-space()="Desdemona"]`,
     );
 }
@@ -105,7 +105,7 @@ async function edit_tests(page: Page): Promise<void> {
     await page.click("#left-sidebar-navigation-list .top_left_all_messages");
     const message_list_id = await common.get_current_msg_list_id(page, true);
     await page.waitForSelector(
-        `.message-list[data-message-list-id='${message_list_id}'] .message_row`,
+        `.message-list[data-message-list-id='${message_list_id}'] .cf-message-item`,
         {visible: true},
     );
 

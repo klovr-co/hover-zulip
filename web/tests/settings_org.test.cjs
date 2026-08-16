@@ -23,6 +23,9 @@ mock_esm("../src/buttons", {
     hide_button_loading_indicator: noop,
     modify_action_button_style: noop,
 });
+mock_esm("../src/cofounder/components/button", {
+    set_button_variant: noop,
+});
 mock_esm("../src/scroll_util", {scroll_element_into_container: noop});
 mock_esm("../src/ui_util", {
     disable_element_and_add_tooltip: noop,
@@ -73,12 +76,12 @@ function createSaveButtons(subsection) {
     const $save_button_controls = $(".save-button-controls");
     const $stub_save_button = $(".save-button");
     const $stub_discard_button = $(".discard-button");
-    const $stub_save_button_text = $(".action-button-label");
+    const $stub_save_button_text = $(".cf-button__label");
     $stub_save_button_header.set_find_results(".alert-notification", $("<failed-status-stub>"));
     $stub_save_button.set_closest_results(".settings-subsection-parent", $stub_save_button_header);
     $save_button_controls.set_parent($stub_save_button_header);
     $save_button_controls.set_find_results(".save-button", $stub_save_button);
-    $stub_save_button.set_find_results(".action-button-label", $stub_save_button_text);
+    $stub_save_button.set_find_results(".cf-button__label", $stub_save_button_text);
     $stub_save_button_header.set_find_results(".save-button-controls", $save_button_controls);
     $stub_save_button_header.set_find_results(
         ".subsection-changes-discard button",

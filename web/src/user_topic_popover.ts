@@ -26,7 +26,7 @@ const extract_visibility_policy_popover_context = (
 
 export function initialize(): void {
     popover_menus.register_popover_menu(".change_visibility_policy", {
-        theme: "popover-menu",
+        theme: "cofounder-menu",
         placement: "bottom",
         popperOptions: {
             modifiers: [

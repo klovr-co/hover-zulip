@@ -47,7 +47,7 @@ async function test_user_status(page: Page): Promise<void> {
     await page.waitForSelector("#set-user-status-modal", {hidden: true});
 
     // Check if the emoji is added in user presence list.
-    await page.waitForSelector(`.user-presence-link .status-emoji${laughing_emoji_selector}`);
+    await page.waitForSelector(`.cf-member-row__link .status-emoji${laughing_emoji_selector}`);
 }
 
 async function user_status_test(page: Page): Promise<void> {

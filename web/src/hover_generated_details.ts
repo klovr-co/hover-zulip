@@ -7,6 +7,16 @@ import * as hash_util from "./hash_util.ts";
 import {$t} from "./i18n.ts";
 import * as message_store from "./message_store.ts";
 
+function state_tone(state: string | null): "neutral" | "success" | "warning" {
+    if (state === "active") {
+        return "success";
+    }
+    if (state === "reversed" || state === "superseded") {
+        return "warning";
+    }
+    return "neutral";
+}
+
 function display_time(value: string | null): string | undefined {
     if (value === null) {
         return undefined;
@@ -24,6 +34,7 @@ export function show(message_id: number, show_history: boolean): void {
     }
     const presentation = {
         ...generated.presentation,
+        state_tone: state_tone(generated.presentation.state),
         display_occurred_at: display_time(generated.presentation.occurred_at),
         display_generated_at: display_time(generated.presentation.generated_at),
         display_published_at: display_time(generated.presentation.published_at),
@@ -53,7 +64,7 @@ export function show(message_id: number, show_history: boolean): void {
             return undefined;
         },
     });
-    $(`#${CSS.escape(modal_id)} [data-hover-generated-details]`).trigger("focus");
+    $(`#${CSS.escape(modal_id)} [data-cf-generated-details]`).trigger("focus");
 }
 
 export function initialize(): void {
@@ -64,15 +75,15 @@ export function initialize(): void {
                 return;
             }
             const button = event.target.closest<HTMLElement>(
-                ".hover-generated-details-button, .hover-generated-history-button",
+                ".cf-generated-update__details, .cf-generated-update__history",
             );
-            const message_id = Number(button?.dataset["hoverMessageId"]);
+            const message_id = Number(button?.dataset["cfGeneratedMessageId"]);
             if (button === null || !Number.isSafeInteger(message_id)) {
                 return;
             }
             event.preventDefault();
             event.stopPropagation();
-            show(message_id, button.classList.contains("hover-generated-history-button"));
+            show(message_id, button.classList.contains("cf-generated-update__history"));
         },
         {capture: true},
     );

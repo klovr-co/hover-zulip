@@ -1,5 +1,6 @@
 import {$} from "jquery";
 
+import * as cofounder_icon from "./cofounder/components/icon.ts";
 import * as components from "./components.ts";
 import type {Toggle} from "./components.ts";
 import {$t} from "./i18n.ts";
@@ -45,8 +46,8 @@ export function toggle_org_setting_collapse(): void {
             $(elem).removeClass("hide-org-settings");
         }
 
-        $("#toggle_collapse_chevron").removeClass("fa-angle-double-down");
-        $("#toggle_collapse_chevron").addClass("fa-angle-double-up");
+        cofounder_icon.replace_icon($("#toggle_collapse_chevron"), "chevron-down");
+        $("#toggle_collapse_chevron").addClass("cf-settings-nav__icon--expanded");
 
         $("#toggle_collapse").text(show_fewer_settings_text);
     } else {
@@ -54,8 +55,8 @@ export function toggle_org_setting_collapse(): void {
             $(elem).addClass("hide-org-settings");
         }
 
-        $("#toggle_collapse_chevron").removeClass("fa-angle-double-up");
-        $("#toggle_collapse_chevron").addClass("fa-angle-double-down");
+        cofounder_icon.replace_icon($("#toggle_collapse_chevron"), "chevron-down");
+        $("#toggle_collapse_chevron").removeClass("cf-settings-nav__icon--expanded");
 
         $("#toggle_collapse").text(show_more_settings_text);
     }

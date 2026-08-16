@@ -45,6 +45,18 @@ function approval_label(state: ConnectedAccount["approval_state"]): string {
     throw new Error("Unknown approval state");
 }
 
+function approval_tone(state: ConnectedAccount["approval_state"]): string {
+    switch (state) {
+        case "pending":
+            return "warning";
+        case "approved":
+            return "success";
+        case "revoked":
+            return "danger";
+    }
+    throw new Error("Unknown approval state");
+}
+
 function health_label(status: ConnectedAccount["health_status"]): string {
     switch (status) {
         case "unknown":
@@ -55,6 +67,23 @@ function health_label(status: ConnectedAccount["health_status"]): string {
             return $t({defaultMessage: "Degraded"});
         case "unavailable":
             return $t({defaultMessage: "Unavailable"});
+    }
+    throw new Error("Unknown health status");
+}
+
+function health_presentation(status: ConnectedAccount["health_status"]): {
+    tone: string;
+    icon: string;
+} {
+    switch (status) {
+        case "unknown":
+            return {tone: "neutral", icon: "info"};
+        case "healthy":
+            return {tone: "success", icon: "check"};
+        case "degraded":
+            return {tone: "warning", icon: "warning"};
+        case "unavailable":
+            return {tone: "danger", icon: "circle-x"};
     }
     throw new Error("Unknown health status");
 }
@@ -70,8 +99,13 @@ function scope_label(grant: ConnectedAccountGrant): string {
 }
 
 function card_html(account: ConnectedAccount): string {
+    const health = health_presentation(account.health_status);
     const grants = hover_connected_accounts.get_grants_for_account(account.id).map((grant) => ({
         ...grant,
+        action_label:
+            grant.state === "revoked"
+                ? $t({defaultMessage: "Restore"})
+                : $t({defaultMessage: "Restrict"}),
         user_name: user_name(grant.user_id),
         scope_label: scope_label(grant),
         is_revoked: grant.state === "revoked",
@@ -80,7 +114,10 @@ function card_html(account: ConnectedAccount): string {
         account: {
             ...account,
             approval_label: approval_label(account.approval_state),
+            approval_tone: approval_tone(account.approval_state),
             health_label: health_label(account.health_status),
+            health_tone: health.tone,
+            health_icon: health.icon,
             health_checked_label:
                 account.health_checked_at === null
                     ? $t({defaultMessage: "Not checked"})
@@ -100,7 +137,7 @@ export function rerender(): void {
     if (!loaded) {
         return;
     }
-    const $list = $("#hover-connected-accounts-list");
+    const $list = $("#cf-connected-accounts-list");
     if ($list.length === 0) {
         return;
     }
@@ -109,11 +146,12 @@ export function rerender(): void {
         $list
             .empty()
             .append(
-                $("<p>").addClass("hover-connected-account-empty").text($list.attr("data-empty")!),
+                $("<p>").addClass("cf-connected-accounts__empty").text($list.attr("data-empty")!),
             );
         return;
     }
-    $list.html(accounts.map((account) => card_html(account)).join(""));
+    const rendered_accounts_html = accounts.map((account) => card_html(account)).join("");
+    $list.html(rendered_accounts_html);
 }
 
 function parse_selector_lines():
@@ -275,24 +313,24 @@ export function set_up(): void {
     loaded = true;
     rerender();
     const $section = $("#connected-account-settings");
-    $section.off("click.hover-connected-accounts");
+    $section.off("click.cf-connected-accounts");
     $section.on(
-        "click.hover-connected-accounts",
-        ".approve-connected-account",
+        "click.cf-connected-accounts",
+        ".cf-connected-account__approve",
         function (this: HTMLElement) {
             update_approval(account_from_button(this), "approved");
         },
     );
     $section.on(
-        "click.hover-connected-accounts",
-        ".restore-connected-account",
+        "click.cf-connected-accounts",
+        ".cf-connected-account__restore",
         function (this: HTMLElement) {
             update_approval(account_from_button(this), "approved");
         },
     );
     $section.on(
-        "click.hover-connected-accounts",
-        ".revoke-connected-account",
+        "click.cf-connected-accounts",
+        ".cf-connected-account__revoke",
         function (this: HTMLElement) {
             const account = account_from_button(this);
             confirm_dialog.launch({
@@ -307,22 +345,22 @@ export function set_up(): void {
         },
     );
     $section.on(
-        "click.hover-connected-accounts",
-        ".add-connected-account-grant",
+        "click.cf-connected-accounts",
+        ".cf-connected-account__assign",
         function (this: HTMLElement) {
             open_grant_modal(account_from_button(this));
         },
     );
     $section.on(
-        "click.hover-connected-accounts",
-        ".edit-connected-account-grant",
+        "click.cf-connected-accounts",
+        ".cf-connected-account__edit-grant",
         function (this: HTMLElement) {
             open_grant_modal(account_from_button(this), grant_from_button(this));
         },
     );
     $section.on(
-        "click.hover-connected-accounts",
-        ".revoke-connected-account-grant",
+        "click.cf-connected-accounts",
+        ".cf-connected-account__revoke-grant",
         function (this: HTMLElement) {
             const account = account_from_button(this);
             const grant = grant_from_button(this);

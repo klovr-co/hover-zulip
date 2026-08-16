@@ -19,7 +19,6 @@ import * as presence from "./presence.ts";
 import type {PresenceInfoFromEvent} from "./presence.ts";
 import * as sidebar_ui from "./sidebar_ui.ts";
 import {realm} from "./state_data.ts";
-import * as ui_util from "./ui_util.ts";
 import type {FullUnreadCountsData} from "./unread.ts";
 import {UserSearch} from "./user_search.ts";
 import * as util from "./util.ts";
@@ -43,7 +42,9 @@ function get_pm_list_item(user_id: string): JQuery | undefined {
 function set_pm_count(user_ids_string: string, count: number): void {
     const $pm_li = get_pm_list_item(user_ids_string);
     if ($pm_li !== undefined) {
-        ui_util.update_unread_count_in_dom($pm_li, count);
+        const $unread_count = $pm_li.find(".cf-member-row__unread");
+        $unread_count.toggleClass("hide", count === 0);
+        $unread_count.text(count === 0 ? "" : count);
     }
 }
 
@@ -269,15 +270,15 @@ function keydown_enter_key(): void {
 }
 
 function focus_user_row($row: JQuery): void {
-    util.the($row.find("a.user-presence-link")).focus({preventScroll: true});
+    util.the($row.find("a.cf-member-row__link")).focus({preventScroll: true});
 }
 
 // Helpers that find the nearest visible user row relative to a section header
 // or link. "Visible" means not inside a collapsed section.
 
 function first_user_in_or_after($section: JQuery): JQuery {
-    if (!$section.hasClass("collapsed")) {
-        const $entry = $section.find("li.user_sidebar_entry").first();
+    if (!$section.hasClass("cf-people-sidebar__section--collapsed")) {
+        const $entry = $section.find("li.cf-member-row").first();
         if ($entry.length > 0) {
             return $entry;
         }
@@ -285,14 +286,20 @@ function first_user_in_or_after($section: JQuery): JQuery {
     return first_user_after($section);
 }
 function first_user_after($section: JQuery): JQuery {
-    return $section.nextAll(":not(.collapsed)").find("li.user_sidebar_entry").first();
+    return $section
+        .nextAll(":not(.cf-people-sidebar__section--collapsed)")
+        .find("li.cf-member-row")
+        .first();
 }
 function last_user_before($section: JQuery): JQuery {
-    return $section.prevAll(":not(.collapsed)").find("li.user_sidebar_entry").last();
+    return $section
+        .prevAll(":not(.cf-people-sidebar__section--collapsed)")
+        .find("li.cf-member-row")
+        .last();
 }
 function last_user_in_or_before($section: JQuery): JQuery {
-    if (!$section.hasClass("collapsed")) {
-        const $entry = $section.find("li.user_sidebar_entry").last();
+    if (!$section.hasClass("cf-people-sidebar__section--collapsed")) {
+        const $entry = $section.find("li.cf-member-row").last();
         if ($entry.length > 0) {
             return $entry;
         }
@@ -301,7 +308,7 @@ function last_user_in_or_before($section: JQuery): JQuery {
 }
 function last_user_in_buddy_list(): JQuery {
     return $(
-        "#buddy_list_wrapper .buddy-list-section-container:not(.collapsed) li.user_sidebar_entry",
+        "#buddy_list_wrapper .cf-people-sidebar__section:not(.cf-people-sidebar__section--collapsed) li.cf-member-row",
     ).last();
 }
 
@@ -309,7 +316,7 @@ function last_user_in_buddy_list(): JQuery {
 // row we should land on. Returns undefined to do nothing (e.g., ArrowDown from
 // the last element in the buddy list).
 function resolve_arrow_target($active: JQuery, direction: "up" | "down"): JQuery | undefined {
-    const $active_user_row = $active.closest("li.user_sidebar_entry");
+    const $active_user_row = $active.closest("li.cf-member-row");
     if ($active_user_row.length > 0) {
         // Focus is inside a user row (e.g., the user's name link or the vdot
         // menu icon). Return that row; the caller syncs the cursor to it and
@@ -318,15 +325,15 @@ function resolve_arrow_target($active: JQuery, direction: "up" | "down"): JQuery
         return $active_user_row;
     }
 
-    const $section = $active.closest(".buddy-list-section-container");
-    if ($active.closest(".buddy-list-subsection-header").length > 0) {
+    const $section = $active.closest(".cf-people-sidebar__section");
+    if ($active.closest(".cf-people-sidebar__section-header").length > 0) {
         // Focus is on a section header (the toggle triangle or the heading).
         // ArrowDown lands on the first user in this section if it's expanded,
         // or the first user in the next expanded section. ArrowUp lands on
         // the last user in the previous expanded section.
         return direction === "down" ? first_user_in_or_after($section) : last_user_before($section);
     }
-    if ($active.closest(".view-all-subscribers-link").length > 0) {
+    if ($active.closest(".cf-people-sidebar__subscribers-link").length > 0) {
         // Focus is on the "View all subscribers" link, which sits below the
         // users in the "users matching view" section. ArrowDown crosses into
         // the next section's first user; ArrowUp goes back to the last user
@@ -334,8 +341,8 @@ function resolve_arrow_target($active: JQuery, direction: "up" | "down"): JQuery
         return direction === "down" ? first_user_after($section) : last_user_in_or_before($section);
     }
     if (
-        $active.closest(".view-all-users-link").length > 0 ||
-        $active.closest(".invite-user-shortcut").length > 0
+        $active.closest(".cf-people-sidebar__all-users-link").length > 0 ||
+        $active.closest(".cf-people-sidebar__invite").length > 0
     ) {
         // Focus is on one of the two links at the very bottom of the buddy
         // list ("View all users" or "Invite to organization"). ArrowDown has
@@ -384,7 +391,7 @@ function handle_buddy_list_arrow_navigation(e: JQuery.KeyDownEvent): void {
     // If focus was inside a user row, we landed on *that* user; step the
     // cursor one further in the arrow direction.
     let $focus_row = $landing_row;
-    if ($active.closest("li.user_sidebar_entry").length > 0) {
+    if ($active.closest("li.cf-member-row").length > 0) {
         if (direction === "down") {
             user_cursor.next();
         } else {

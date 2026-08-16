@@ -1,69 +1,115 @@
-<div class="compose-scrollable-buttons compose-control-buttons-container order-1" tabindex="-1">
+<div class="cf-composer__toolbar-actions compose-scrollable-buttons compose-control-buttons-container order-1" tabindex="-1">
     <input type="file" class="file_input notvisible" multiple />
     <div class="compose_control_button_container compose_button_tooltip" data-tooltip-template-id="preview-tooltip" data-tippy-maxWidth="none">
-        <a role="button" class="markdown_preview compose_control_button zulip-icon zulip-icon-preview" aria-label="{{t 'Preview mode' }}" tabindex=0></a>
+        <a role="button" class="cf-composer__toolbar-action markdown_preview compose_control_button" aria-label="{{t 'Preview mode' }}" tabindex=0>
+            {{> cofounder/components/icon name="preview" compact=true}}
+        </a>
     </div>
     <div class="compose_control_button_container compose_button_tooltip" data-tooltip-template-id="exit-preview-tooltip" data-tippy-maxWidth="none">
-        <a role="button" class="undo_markdown_preview compose_control_button zulip-icon zulip-icon-compose-edit" aria-label="{{t 'Exit preview mode' }}" tabindex=0 style="display:none;"></a>
+        <a role="button" class="cf-composer__toolbar-action undo_markdown_preview compose_control_button" aria-label="{{t 'Exit preview mode' }}" tabindex=0 style="display:none;">
+            {{> cofounder/components/icon name="edit" compact=true}}
+        </a>
     </div>
     {{#if file_upload_enabled }}
     <div class="compose_control_button_container preview_mode_disabled disable-on-invalid-recipient compose_button_tooltip" data-tippy-content="{{t 'Upload files' }}">
-        <a role="button" class="compose_control_button compose_upload_file zulip-icon zulip-icon-attachment" aria-label="{{t 'Upload files' }}" tabindex=0></a>
+        <a role="button" class="cf-composer__toolbar-action compose_control_button compose_upload_file" aria-label="{{t 'Upload files' }}" tabindex=0>
+            {{> cofounder/components/icon name="paperclip" compact=true}}
+        </a>
     </div>
     {{/if}}
     <div class="compose_control_button_container preview_mode_disabled disable-on-invalid-recipient compose_button_tooltip" data-tippy-content="{{t 'Add video call' }}">
-        <a role="button" class="compose_control_button zulip-icon zulip-icon-video-call video_link" aria-label="{{t 'Add video call' }}" tabindex=0></a>
+        <a role="button" class="cf-composer__toolbar-action compose_control_button video_link" aria-label="{{t 'Add video call' }}" tabindex=0>
+            {{> cofounder/components/icon name="video" compact=true}}
+        </a>
     </div>
     <div class="compose_control_button_container preview_mode_disabled disable-on-invalid-recipient compose_button_tooltip" data-tippy-content="{{t 'Add voice call' }}">
-        <a role="button" class="compose_control_button zulip-icon zulip-icon-voice-call audio_link" aria-label="{{t 'Add voice call' }}" tabindex=0></a>
+        <a role="button" class="cf-composer__toolbar-action compose_control_button audio_link" aria-label="{{t 'Add voice call' }}" tabindex=0>
+            {{> cofounder/components/icon name="phone" compact=true}}
+        </a>
     </div>
     <div class="divider"></div>
     <div class="compose_control_button_container preview_mode_disabled disable-on-invalid-recipient compose_button_tooltip" data-tippy-content="{{t 'Add emoji' }}">
-        <a role="button" class="compose_control_button zulip-icon zulip-icon-smile-bigger emoji_map" aria-label="{{t 'Add emoji' }}" tabindex=0></a>
+        <a role="button" class="cf-composer__toolbar-action compose_control_button emoji_map" aria-label="{{t 'Add emoji' }}" tabindex=0>
+            {{> cofounder/components/icon name="smile" compact=true}}
+        </a>
     </div>
     <div class="compose_control_button_container preview_mode_disabled disable-on-invalid-recipient compose_button_tooltip" data-tooltip-template-id="add-global-time-tooltip" data-tippy-maxWidth="none">
-        <a role="button" class="compose_control_button zulip-icon zulip-icon-time time_pick" aria-label="{{t 'Add global time' }}" tabindex=0></a>
+        <a role="button" class="cf-composer__toolbar-action compose_control_button time_pick" aria-label="{{t 'Add global time' }}" tabindex=0>
+            {{> cofounder/components/icon name="clock" compact=true}}
+        </a>
     </div>
     {{#if (or tenor_enabled giphy_enabled klipy_enabled)}}
         {{!-- In terms of preference, Tenor > KLIPY > GIPHY. --}}
         <div class="compose_control_button_container  preview_mode_disabled disable-on-invalid-recipient compose_button_tooltip" data-tippy-content="{{t 'Add GIF' }}">
-            <a role="button" class="compose_control_button compose-gif-icon zulip-icon zulip-icon-gif" aria-label="{{t 'Add GIF' }}" tabindex=0></a>
+            <a role="button" class="cf-composer__toolbar-action compose_control_button compose-gif-icon" aria-label="{{t 'Add GIF' }}" tabindex=0>
+                {{> cofounder/components/icon name="image" compact=true}}
+            </a>
         </div>
     {{/if}}
     {{#unless (eq message_id undefined)}}
     <div class="compose_control_button_container preview_mode_disabled disable-on-invalid-recipient compose_button_tooltip" data-tooltip-template-id="add-saved-snippet-tooltip">
-        <a role="button" class="saved_snippets_widget saved-snippets-message-edit-widget compose_control_button zulip-icon zulip-icon-message-square-text" aria-label="{{t 'Add saved snippet' }}" data-message-id="{{message_id}}" tabindex=0></a>
+        <a role="button" class="cf-composer__toolbar-action saved_snippets_widget saved-snippets-message-edit-widget compose_control_button" aria-label="{{t 'Add saved snippet' }}" data-message-id="{{message_id}}" tabindex=0>
+            {{> cofounder/components/icon name="file-text" compact=true}}
+        </a>
     </div>
     {{else}}
     <div class="compose_control_button_container preview_mode_disabled disable-on-invalid-recipient compose_button_tooltip" data-tooltip-template-id="add-saved-snippet-tooltip">
-        <a role="button" class="saved_snippets_widget saved-snippets-composebox-widget compose_control_button zulip-icon zulip-icon-message-square-text" aria-label="{{t 'Add saved snippet' }}" tabindex=0></a>
+        <a role="button" class="cf-composer__toolbar-action saved_snippets_widget saved-snippets-composebox-widget compose_control_button" aria-label="{{t 'Add saved snippet' }}" tabindex=0>
+            {{> cofounder/components/icon name="file-text" compact=true}}
+        </a>
     </div>
     {{/unless}}
     <div class="divider"></div>
     <div class="compose-control-buttons-container preview_mode_disabled disable-on-invalid-recipient">
-        <a role="button" data-format-type="link" class="compose_button_tooltip compose_control_button zulip-icon zulip-icon-link formatting_button" aria-label="{{t 'Link' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tooltip-template-id="link-tooltip" data-tippy-maxWidth="none"></a>
-        <a role="button" data-format-type="bold" class="compose_button_tooltip compose_control_button zulip-icon zulip-icon-bold formatting_button" aria-label="{{t 'Bold' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tooltip-template-id="bold-tooltip" data-tippy-maxWidth="none"></a>
-        <a role="button" data-format-type="italic" class="compose_button_tooltip compose_control_button zulip-icon zulip-icon-italic formatting_button" aria-label="{{t 'Italic' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tooltip-template-id="italic-tooltip" data-tippy-maxWidth="none"></a>
-        <a role="button" data-format-type="strikethrough" class="compose_button_tooltip compose_control_button zulip-icon zulip-icon-strikethrough formatting_button" aria-label="{{t 'Strikethrough' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tippy-content="{{t 'Strikethrough' }}"></a>
+        <a role="button" data-format-type="link" class="cf-composer__toolbar-action compose_button_tooltip compose_control_button formatting_button" aria-label="{{t 'Link' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tooltip-template-id="link-tooltip" data-tippy-maxWidth="none">
+            {{> cofounder/components/icon name="link-alt" compact=true}}
+        </a>
+        <a role="button" data-format-type="bold" class="cf-composer__toolbar-action compose_button_tooltip compose_control_button formatting_button" aria-label="{{t 'Bold' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tooltip-template-id="bold-tooltip" data-tippy-maxWidth="none">
+            {{> cofounder/components/icon name="bold" compact=true}}
+        </a>
+        <a role="button" data-format-type="italic" class="cf-composer__toolbar-action compose_button_tooltip compose_control_button formatting_button" aria-label="{{t 'Italic' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tooltip-template-id="italic-tooltip" data-tippy-maxWidth="none">
+            {{> cofounder/components/icon name="italic" compact=true}}
+        </a>
+        <a role="button" data-format-type="strikethrough" class="cf-composer__toolbar-action compose_button_tooltip compose_control_button formatting_button" aria-label="{{t 'Strikethrough' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tippy-content="{{t 'Strikethrough' }}">
+            {{> cofounder/components/icon name="strikethrough" compact=true}}
+        </a>
     </div>
     <div class="divider"></div>
     <div class="compose-control-buttons-container preview_mode_disabled disable-on-invalid-recipient">
-        <a role="button" data-format-type="numbered" class="compose_button_tooltip compose_control_button zulip-icon zulip-icon-ordered-list formatting_button" aria-label="{{t 'Numbered list' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tippy-content="{{t 'Numbered list' }}"></a>
-        <a role="button" data-format-type="bulleted" class="compose_button_tooltip compose_control_button zulip-icon zulip-icon-unordered-list formatting_button" aria-label="{{t 'Bulleted list' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tippy-content="{{t 'Bulleted list' }}"></a>
+        <a role="button" data-format-type="numbered" class="cf-composer__toolbar-action compose_button_tooltip compose_control_button formatting_button" aria-label="{{t 'Numbered list' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tippy-content="{{t 'Numbered list' }}">
+            {{> cofounder/components/icon name="list-ordered" compact=true}}
+        </a>
+        <a role="button" data-format-type="bulleted" class="cf-composer__toolbar-action compose_button_tooltip compose_control_button formatting_button" aria-label="{{t 'Bulleted list' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tippy-content="{{t 'Bulleted list' }}">
+            {{> cofounder/components/icon name="list" compact=true}}
+        </a>
         <div class="divider"></div>
-        <a role="button" data-format-type="quote" class="compose_button_tooltip compose_control_button zulip-icon zulip-icon-quote formatting_button" aria-label="{{t 'Quote' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tippy-content="{{t 'Quote' }}"></a>
-        <a role="button" data-format-type="spoiler" class="compose_button_tooltip compose_control_button zulip-icon zulip-icon-spoiler formatting_button" aria-label="{{t 'Spoiler' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tippy-content="{{t 'Spoiler' }}"></a>
-        <a role="button" data-format-type="code" class="compose_button_tooltip compose_control_button zulip-icon zulip-icon-code formatting_button" aria-label="{{t 'Code' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tooltip-template-id="code-tooltip"></a>
-        <a role="button" data-format-type="latex" class="compose_button_tooltip compose_control_button zulip-icon zulip-icon-math formatting_button" aria-label="{{t 'Math (LaTeX)' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tippy-content="{{t 'Math (LaTeX)' }}"></a>
+        <a role="button" data-format-type="quote" class="cf-composer__toolbar-action compose_button_tooltip compose_control_button formatting_button" aria-label="{{t 'Quote' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tippy-content="{{t 'Quote' }}">
+            {{> cofounder/components/icon name="quote" compact=true}}
+        </a>
+        <a role="button" data-format-type="spoiler" class="cf-composer__toolbar-action compose_button_tooltip compose_control_button formatting_button" aria-label="{{t 'Spoiler' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tippy-content="{{t 'Spoiler' }}">
+            {{> cofounder/components/icon name="eye-off" compact=true}}
+        </a>
+        <a role="button" data-format-type="code" class="cf-composer__toolbar-action compose_button_tooltip compose_control_button formatting_button" aria-label="{{t 'Code' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tooltip-template-id="code-tooltip">
+            {{> cofounder/components/icon name="code" compact=true}}
+        </a>
+        <a role="button" data-format-type="latex" class="cf-composer__toolbar-action compose_button_tooltip compose_control_button formatting_button" aria-label="{{t 'Math (LaTeX)' }}" {{#unless preview_mode_on}} tabindex=0 {{/unless}} data-tippy-content="{{t 'Math (LaTeX)' }}">
+            {{> cofounder/components/icon name="sigma" compact=true}}
+        </a>
     </div>
     <div class="divider"></div>
     {{#if (eq message_id undefined)}}
     <div class="compose_control_button_container preview_mode_disabled disable-on-invalid-recipient needs-empty-compose compose_button_tooltip" data-tooltip-template-id="add-poll-tooltip" data-tippy-maxWidth="none">
-        <a role="button" class="compose_control_button zulip-icon zulip-icon-poll add-poll" aria-label="{{t 'Add poll' }}" tabindex=0></a>
+        <a role="button" class="cf-composer__toolbar-action compose_control_button add-poll" aria-label="{{t 'Add poll' }}" tabindex=0>
+            {{> cofounder/components/icon name="poll" compact=true}}
+        </a>
     </div>
     <div class="compose_control_button_container preview_mode_disabled disable-on-invalid-recipient needs-empty-compose compose_button_tooltip" data-tooltip-template-id="add-todo-tooltip" data-tippy-maxWidth="none">
-        <a role="button" class="compose_control_button zulip-icon zulip-icon-todo-list add-todo-list" aria-label="{{t 'Add to-do list' }}" tabindex=0></a>
+        <a role="button" class="cf-composer__toolbar-action compose_control_button add-todo-list" aria-label="{{t 'Add to-do list' }}" tabindex=0>
+            {{> cofounder/components/icon name="list-check" compact=true}}
+        </a>
     </div>
     {{/if}}
-    <a role="button" class="compose_control_button compose_help_button zulip-icon zulip-icon-question compose_button_tooltip" tabindex=0 data-tippy-content="{{t 'Message formatting' }}" data-overlay-trigger="message-formatting" aria-label="{{t 'Message formatting' }}"></a>
+    <a role="button" class="cf-composer__toolbar-action compose_control_button compose_help_button compose_button_tooltip" tabindex=0 data-tippy-content="{{t 'Message formatting' }}" data-overlay-trigger="message-formatting" aria-label="{{t 'Message formatting' }}">
+        {{> cofounder/components/icon name="circle-help" compact=true}}
+    </a>
 </div>

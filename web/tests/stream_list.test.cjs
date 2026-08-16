@@ -355,7 +355,7 @@ test_ui("AIMTO modules are native topic links", ({mock_template, override}) => {
         assert.deepEqual(data.hover_ai_modules[1], {
             key: "suggested_actions",
             name: "Suggested Actions",
-            icon: "zulip-icon-sparkles",
+            icon_name: "sparkles",
             topic: "Suggested Actions",
             count: 0,
             has_count: true,
@@ -585,6 +585,11 @@ test_ui("narrowing", ({override_rewire}) => {
     override_rewire(stream_list, "set_sections_states", noop);
 
     initialize_stream_data();
+    const $all_channel_mains = $("ul#stream_filters .cf-channel-nav__main");
+    const $devel_channel_main = $.create("devel-channel-main");
+    const $cars_channel_main = $.create("cars-channel-main");
+    $("<devel-sidebar-row-stub>").set_find_results(".cf-channel-nav__main", $devel_channel_main);
+    $("<cars-sidebar-row-stub>").set_find_results(".cf-channel-nav__main", $cars_channel_main);
     assert.ok(!$("<devel-sidebar-row-stub>").hasClass("active-filter"));
 
     let filter;
@@ -592,6 +597,7 @@ test_ui("narrowing", ({override_rewire}) => {
     filter = new Filter([{operator: "stream", operand: develSub.stream_id.toString()}]);
     stream_list.handle_narrow_activated(filter);
     assert.ok($("<devel-sidebar-row-stub>").hasClass("active-filter"));
+    assert.equal($devel_channel_main.attr("aria-current"), "page");
 
     filter = new Filter([
         {operator: "stream", operand: carSub.stream_id.toString()},
@@ -600,14 +606,17 @@ test_ui("narrowing", ({override_rewire}) => {
     stream_list.handle_narrow_activated(filter);
     assert.ok(!$("ul.filters li").hasClass("active-filter"));
     assert.ok(!$("<cars-sidebar-row-stub>").hasClass("active-filter")); // false because of topic
+    assert.equal($cars_channel_main.attr("aria-current"), undefined);
 
     filter = new Filter([{operator: "stream", operand: carSub.stream_id.toString()}]);
     stream_list.handle_narrow_activated(filter);
     assert.ok(!$("ul.filters li").hasClass("active-filter"));
     assert.ok($("<cars-sidebar-row-stub>").hasClass("active-filter"));
+    assert.equal($cars_channel_main.attr("aria-current"), "page");
 
     $("ul#stream_filters li").addClass("active-filter");
     $("ul#stream_filters li").addClass("stream-expanded");
+    $all_channel_mains.attr("aria-current", "page");
 
     let topics_closed;
     topic_list.close = () => {
@@ -617,6 +626,7 @@ test_ui("narrowing", ({override_rewire}) => {
     stream_list.handle_message_view_deactivated();
     assert.ok(!$("ul#stream_filters li").hasClass("active-filter"));
     assert.ok(!$("ul#stream_filters li").hasClass("stream-expanded"));
+    assert.equal($all_channel_mains.attr("aria-current"), undefined);
     assert.ok(topics_closed);
 });
 

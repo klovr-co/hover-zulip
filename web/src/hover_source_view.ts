@@ -52,6 +52,19 @@ const response_schema = z.object({
 });
 type SourceRecord = z.infer<typeof record_schema>;
 
+function provider_icon(provider_key: string): string {
+    if (provider_key === "whatsapp") {
+        return "phone";
+    }
+    if (provider_key === "github") {
+        return "git-pull-request";
+    }
+    if (provider_key === "instagram") {
+        return "image";
+    }
+    return "link-alt";
+}
+
 let current_space_id: number | undefined;
 let current_attachment_id: number | undefined;
 let current_query = "";
@@ -62,6 +75,8 @@ let request_generation = 0;
 let request: JQuery.jqXHR<unknown> | undefined;
 let status = "";
 let show_retry = false;
+let is_loading = false;
+let has_error = false;
 let loading_older = false;
 let retry_cursor: string | undefined;
 let restore_focus_hash: string | undefined;
@@ -113,14 +128,24 @@ function render(): void {
             ),
         }))
         .toArray();
-    $("#hover-source-view").html(
+    const is_empty = !is_loading && !has_error && records.size === 0 && status !== "";
+    $("#cf-source-view").html(
         render_hover_source_view({
             space_name: space.name,
             source: {...attachment.source, is_history_retained: attachment.state === "detached"},
-            icon_class:
-                attachment.source.provider_key === "whatsapp" ? "fa fa-whatsapp" : "fa fa-plug",
+            provider_icon: provider_icon(attachment.source.provider_key),
             query: current_query,
             status,
+            is_loading,
+            has_error,
+            is_empty,
+            empty_icon: current_query ? "search" : "archive",
+            empty_hint: current_query
+                ? $t({defaultMessage: "Try a different search phrase."})
+                : $t({
+                      defaultMessage:
+                          "Records will appear here after the connected Source imports confirmed history.",
+                  }),
             show_retry,
             show_load_older: has_more && !loading_older,
             date_groups,
@@ -137,9 +162,11 @@ function load(cursor?: string): void {
     const generation = request_generation;
     loading_older = cursor !== undefined;
     retry_cursor = cursor;
-    const previous_scroll_height = $("#hover-source-view").get(0)?.scrollHeight ?? 0;
-    const previous_scroll_top = $("#hover-source-view").scrollTop() ?? 0;
+    const previous_scroll_height = $("#cf-source-view").get(0)?.scrollHeight ?? 0;
+    const previous_scroll_top = $("#cf-source-view").scrollTop() ?? 0;
     show_retry = false;
+    is_loading = true;
+    has_error = false;
     status = loading_older
         ? $t({defaultMessage: "Loading older records…"})
         : $t({defaultMessage: "Loading Source records…"});
@@ -162,6 +189,8 @@ function load(cursor?: string): void {
             next_cursor = response.next_cursor;
             has_more = response.has_more;
             loading_older = false;
+            is_loading = false;
+            has_error = false;
             retry_cursor = undefined;
             status =
                 records.size === 0
@@ -174,8 +203,8 @@ function load(cursor?: string): void {
                     : "";
             render();
             if (cursor !== undefined) {
-                const new_scroll_height = $("#hover-source-view").get(0)?.scrollHeight ?? 0;
-                $("#hover-source-view").scrollTop(
+                const new_scroll_height = $("#cf-source-view").get(0)?.scrollHeight ?? 0;
+                $("#cf-source-view").scrollTop(
                     previous_scroll_top + new_scroll_height - previous_scroll_height,
                 );
             }
@@ -185,6 +214,8 @@ function load(cursor?: string): void {
                 return;
             }
             loading_older = false;
+            is_loading = false;
+            has_error = true;
             const retryable = z
                 .object({
                     retryable: z.boolean(),
@@ -232,7 +263,7 @@ export function show(space_id: number, attachment_id: number): boolean {
     inbox_ui.hide();
     recent_view_ui.hide();
     $("#message_feed_container, #compose").hide();
-    $("#hover-source-view").show();
+    $("#cf-source-view").show();
     restore_focus_hash = window.location.hash;
     if (current_space_id !== space_id || current_attachment_id !== attachment_id) {
         current_space_id = space_id;
@@ -252,7 +283,7 @@ export function hide(): void {
     }
     request?.abort();
     request_generation += 1;
-    $("#hover-source-view").hide();
+    $("#cf-source-view").hide();
     $("#message_feed_container, #compose").show();
     if (restore_focus_hash !== undefined) {
         $<HTMLAnchorElement>(`a[href='${restore_focus_hash}']`).trigger("focus");
@@ -270,9 +301,11 @@ export function clear(): void {
     records = new Map();
     status = "";
     show_retry = false;
+    is_loading = false;
+    has_error = false;
     loading_older = false;
     retry_cursor = undefined;
-    $("#hover-source-view").empty();
+    $("#cf-source-view").empty();
 }
 
 export function handle_space_event(): void {
@@ -283,7 +316,7 @@ export function handle_space_event(): void {
 
 export function initialize(): void {
     function update_search(): void {
-        const query = $<HTMLInputElement>("#hover-source-search")
+        const query = $<HTMLInputElement>("#cf-source-search")
             .val()!
             .trim()
             .replaceAll(/\s+/g, " ");
@@ -297,18 +330,18 @@ export function initialize(): void {
         load();
     }
     const debounced_search = _.debounce(update_search, 350);
-    $("body").on("input", "#hover-source-search", () => {
+    $("body").on("input", "#cf-source-search", () => {
         debounced_search();
     });
-    $("body").on("submit", "#hover-source-search-form", (event) => {
+    $("body").on("submit", "#cf-source-search-form", (event) => {
         event.preventDefault();
         debounced_search.cancel();
         update_search();
     });
-    $("body").on("click", "#hover-source-load-older", () => {
+    $("body").on("click", "#cf-source-load-older", () => {
         load(next_cursor);
     });
-    $("body").on("click", "#hover-source-retry", () => {
+    $("body").on("click", "#cf-source-retry", () => {
         load(retry_cursor);
     });
 }

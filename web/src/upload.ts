@@ -145,11 +145,7 @@ export const compose_config: Config = {
             )} .upload_banner_cancel_button`,
         ),
     upload_banner_hide_button: (file_id) =>
-        $(
-            `#compose_banners .upload_banner.file_${CSS.escape(
-                file_id,
-            )} .main-view-banner-close-button`,
-        ),
+        $(`#compose_banners .upload_banner.file_${CSS.escape(file_id)} .cf-notice__close`),
     upload_banner_message: (file_id) =>
         $(`#compose_banners .upload_banner.file_${CSS.escape(file_id)} .upload_msg`),
     file_input_identifier: () => "#compose input.file_input",
@@ -182,7 +178,7 @@ export function edit_config(row: number): Config {
             $(
                 `#edit_form_${CSS.escape(`${row}`)} .upload_banner.file_${CSS.escape(
                     file_id,
-                )} .main-view-banner-close-button`,
+                )} .cf-notice__close`,
             ),
         upload_banner_message: (file_id) =>
             $(
@@ -240,12 +236,28 @@ function add_upload_banner(
     banner_text: string,
     file_id: string,
     is_upload_process_tracker = false,
+    file_name?: string,
 ): void {
     const new_banner_html = render_upload_banner({
         banner_type,
         is_upload_process_tracker,
         banner_text,
         file_id,
+        progress_label:
+            file_name === undefined
+                ? $t({defaultMessage: "Upload progress"})
+                : $t({defaultMessage: "Upload progress for {filename}"}, {filename: file_name}),
+        cancel_button_label:
+            file_name === undefined
+                ? $t({defaultMessage: "Cancel upload"})
+                : $t({defaultMessage: "Cancel upload of {filename}"}, {filename: file_name}),
+        hide_button_label:
+            file_name === undefined
+                ? $t({defaultMessage: "Dismiss upload notice"})
+                : $t(
+                      {defaultMessage: "Hide upload progress for {filename}"},
+                      {filename: file_name},
+                  ),
     });
     compose_banner.append_compose_banner_to_banner_list(
         $(new_banner_html),
@@ -260,7 +272,11 @@ export function show_error_message(
 ): void {
     if (file_id) {
         $(`${config.upload_banner_identifier(file_id)} .moving_bar`).hide();
-        config.upload_banner(file_id).removeClass("info").addClass("error");
+        config
+            .upload_banner(file_id)
+            .removeClass("cf-notice--info")
+            .addClass("cf-notice--error")
+            .attr("role", "alert");
         config.upload_banner_message(file_id).text(message);
     } else {
         // We still use a "file_id" (that's not actually related to a file)
@@ -281,7 +297,7 @@ export let upload_files = (
 
     // A new upload attempt supersedes any error banner (e.g. "file too
     // large") left over from a previous attempt, so we clear those here.
-    config.banner_container().find(".upload_banner.error").remove();
+    config.banner_container().find(".upload_banner.cf-notice--error").remove();
 
     if (realm.max_file_upload_size_mib === 0) {
         show_error_message(
@@ -336,6 +352,7 @@ export let upload_files = (
             $t({defaultMessage: "Uploading {filename}…"}, {filename: file.name}),
             file_id,
             true,
+            file.name,
         );
         // eslint-disable-next-line @typescript-eslint/no-loop-func
         config.upload_banner_cancel_button(file_id).on("click", () => {
@@ -531,9 +548,9 @@ export function setup_upload(config: Config): Uppy<Meta, TusBody> {
         assert(file !== undefined);
         assert(progress.bytesTotal !== null);
         const percent_complete = (100 * progress.bytesUploaded) / progress.bytesTotal;
-        $(`${config.upload_banner_identifier(file.id)} .moving_bar`).css({
-            width: `${percent_complete}%`,
-        });
+        $(`${config.upload_banner_identifier(file.id)} .moving_bar`)
+            .css({width: `${percent_complete}%`})
+            .attr("aria-valuenow", Math.round(percent_complete));
     });
 
     $<HTMLInputElement>(config.file_input_identifier()).on("change", (event) => {
@@ -547,7 +564,7 @@ export function setup_upload(config: Config): Uppy<Meta, TusBody> {
     const $banner_container = config.banner_container();
     $banner_container.on(
         "click",
-        ".upload_banner.file_generic_error .main-view-banner-close-button",
+        ".upload_banner.file_generic_error .cf-notice__close",
         (event) => {
             event.preventDefault();
             $(event.target).parents(".upload_banner").remove();

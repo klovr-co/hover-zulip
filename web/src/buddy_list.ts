@@ -23,7 +23,6 @@ import {page_params} from "./page_params.ts";
 import * as peer_data from "./peer_data.ts";
 import * as people from "./people.ts";
 import * as scroll_util from "./scroll_util.ts";
-import * as settings_config from "./settings_config.ts";
 import * as sidebar_header_sticky_shadow from "./sidebar_header_sticky_shadow.ts";
 import {disconnect_toggle_class, observe_toggle_class} from "./sidebar_tooltip_helpers.ts";
 import {current_user} from "./state_data.ts";
@@ -114,7 +113,7 @@ class BuddyListConf {
     matching_view_list_selector = "#buddy-list-users-matching-view";
     other_user_list_selector = "#buddy-list-other-users";
     scroll_container_selector = "#buddy_list_wrapper";
-    item_selector = "li.user_sidebar_entry";
+    item_selector = "li.cf-member-row";
     padding_selector = "#buddy_list_wrapper_padding";
     compare_function = buddy_data.compare_function;
 
@@ -239,7 +238,7 @@ export class BuddyList extends BuddyListConf {
 
         $("#right-sidebar").on(
             "mouseenter",
-            ".buddy-list-heading",
+            ".cf-people-sidebar__section-title",
             function (this: HTMLElement, e) {
                 e.stopPropagation();
                 const $elem = $(this);
@@ -359,19 +358,19 @@ export class BuddyList extends BuddyListConf {
     // background is removed once the image finishes loading. Also
     // handles already-cached images by checking img.complete.
     //
-    // By selecting only .avatar-preload-background containers, we
+    // By selecting only loading avatar containers, we
     // skip images that have already been processed, avoiding duplicate
     // handlers when this is called repeatedly (e.g., on scroll).
     clear_avatar_preload_backgrounds(): void {
-        $("#user-list .avatar-preload-background img").each(function (this: HTMLElement) {
+        $("#user-list .cf-member-row__avatar--loading img").each(function (this: HTMLElement) {
             const $img = $(this);
-            const $picture = $img.closest(".avatar-preload-background");
+            const $picture = $img.closest(".cf-member-row__avatar--loading");
             $img.on("load", () => {
-                $picture.removeClass("avatar-preload-background");
+                $picture.removeClass("cf-member-row__avatar--loading");
             });
             // If the image is already cached, remove the preload
             // background immediately.
-            // This fixes avatar-preload-background from briefly showing
+            // This prevents the loading background from briefly showing
             // when reloading page.
             if (
                 this instanceof HTMLImageElement &&
@@ -380,7 +379,7 @@ export class BuddyList extends BuddyListConf {
                 // the preload background as a placeholder.
                 this.naturalWidth > 0
             ) {
-                $picture.removeClass("avatar-preload-background");
+                $picture.removeClass("cf-member-row__avatar--loading");
             }
         });
     }
@@ -393,12 +392,6 @@ export class BuddyList extends BuddyListConf {
         this.users_matching_view_section.user_ids = [];
         this.$other_users_list.empty();
         this.other_users_section.user_ids = [];
-        $("#user-list").toggleClass(
-            "with_avatars",
-            user_settings.user_list_style ===
-                settings_config.user_list_style_values.with_avatar.code,
-        );
-
         // Reset data to be relevant for this current view.
         this.render_data = get_render_data();
 
@@ -408,7 +401,7 @@ export class BuddyList extends BuddyListConf {
 
         if (buddy_data.get_is_searching_users()) {
             // Show all sections when searching users
-            this.set_section_collapse(".buddy-list-section-container", false);
+            this.set_section_collapse(".cf-people-sidebar__section", false);
         } else {
             this.set_section_collapse(
                 "#buddy-list-participants-container",
@@ -431,8 +424,8 @@ export class BuddyList extends BuddyListConf {
         this.fill_screen_with_content();
 
         // This must happen after `fill_screen_with_content`
-        $("#buddy-list-users-matching-view-container .view-all-subscribers-link").empty();
-        $("#buddy-list-other-users-container .view-all-users-link").empty();
+        $("#buddy-list-users-matching-view-container .cf-people-sidebar__subscribers-link").empty();
+        $("#buddy-list-other-users-container .cf-people-sidebar__all-users-link").empty();
         background_task.run_async_function_without_await(
             this.render_view_user_list_links.bind(this),
         );
@@ -513,7 +506,7 @@ export class BuddyList extends BuddyListConf {
 
         // Hide the counts until we have the data
         if (current_sub && !peer_data.has_full_subscriber_data(current_sub.stream_id)) {
-            $(".buddy-list-heading-user-count-with-parens").addClass("hide");
+            $(".cf-people-sidebar__section-count-wrap").addClass("hide");
         }
 
         const formatted_participants_count = get_formatted_user_count(all_participant_ids.size);
@@ -535,16 +528,16 @@ export class BuddyList extends BuddyListConf {
             return;
         }
 
-        $("#buddy-list-participants-container .buddy-list-heading-user-count").text(
+        $("#buddy-list-participants-container .cf-people-sidebar__section-count").text(
             formatted_participants_count,
         );
-        $("#buddy-list-users-matching-view-container .buddy-list-heading-user-count").text(
+        $("#buddy-list-users-matching-view-container .cf-people-sidebar__section-count").text(
             formatted_matching_users_count,
         );
-        $("#buddy-list-other-users-container .buddy-list-heading-user-count").text(
+        $("#buddy-list-other-users-container .cf-people-sidebar__section-count").text(
             formatted_other_users_count,
         );
-        $(".buddy-list-heading-user-count-with-parens").removeClass("hide");
+        $(".cf-people-sidebar__section-count-wrap").removeClass("hide");
 
         $("#buddy-list-participants-section-heading").attr(
             "data-user-count",
@@ -573,15 +566,16 @@ export class BuddyList extends BuddyListConf {
         this.current_filter = narrow_state.filter();
 
         const {current_sub} = this.render_data;
-        $(".buddy-list-subsection-header").empty();
-        $(".buddy-list-subsection-header").toggleClass("no-display", hide_headers);
+        $(".cf-people-sidebar__section-header").empty();
+        $(".cf-people-sidebar__section-header").toggleClass("no-display", hide_headers);
         if (hide_headers) {
             return;
         }
 
-        $("#buddy-list-participants-container .buddy-list-subsection-header").append(
+        $("#buddy-list-participants-container .cf-people-sidebar__section-header").append(
             $(
                 render_section_header({
+                    controls_id: "buddy-list-participants",
                     id: "buddy-list-participants-section-heading",
                     header_text: $t({defaultMessage: "This Conversation"}),
                     is_collapsed: this.participants_section.is_collapsed,
@@ -589,9 +583,10 @@ export class BuddyList extends BuddyListConf {
             ),
         );
 
-        $("#buddy-list-users-matching-view-container .buddy-list-subsection-header").append(
+        $("#buddy-list-users-matching-view-container .cf-people-sidebar__section-header").append(
             $(
                 render_section_header({
+                    controls_id: "buddy-list-users-matching-view",
                     id: "buddy-list-users-matching-view-section-heading",
                     header_text: current_sub
                         ? $t({defaultMessage: "This Channel"})
@@ -601,9 +596,10 @@ export class BuddyList extends BuddyListConf {
             ),
         );
 
-        $("#buddy-list-other-users-container .buddy-list-subsection-header").append(
+        $("#buddy-list-other-users-container .cf-people-sidebar__section-header").append(
             $(
                 render_section_header({
+                    controls_id: "buddy-list-other-users",
                     id: "buddy-list-other-users-section-heading",
                     header_text: $t({defaultMessage: "Others"}),
                     is_collapsed: this.other_users_section.is_collapsed,
@@ -614,14 +610,10 @@ export class BuddyList extends BuddyListConf {
     }
 
     set_section_collapse(container_selector: string, is_collapsed: boolean): void {
-        $(container_selector).toggleClass("collapsed", is_collapsed);
-        $(`${container_selector} .buddy-list-section-toggle`).toggleClass(
-            "rotate-icon-down",
-            !is_collapsed,
-        );
-        $(`${container_selector} .buddy-list-section-toggle`).toggleClass(
-            "rotate-icon-right",
-            is_collapsed,
+        $(container_selector).toggleClass("cf-people-sidebar__section--collapsed", is_collapsed);
+        $(`${container_selector} .cf-people-sidebar__section-toggle`).attr(
+            "aria-expanded",
+            String(!is_collapsed),
         );
     }
 
@@ -810,7 +802,9 @@ export class BuddyList extends BuddyListConf {
                 current_sub,
                 "subscribers",
             );
-            $("#buddy-list-users-matching-view-container .view-all-subscribers-link").html(
+            $(
+                "#buddy-list-users-matching-view-container .cf-people-sidebar__subscribers-link",
+            ).html(
                 render_view_all_subscribers({
                     stream_edit_hash,
                 }),
@@ -820,7 +814,7 @@ export class BuddyList extends BuddyListConf {
         // We give a link to view the list of all users to help reduce confusion about
         // there being hidden (inactive) "other" users.
         if (has_inactive_other_users) {
-            $("#buddy-list-other-users-container .view-all-users-link").html(
+            $("#buddy-list-other-users-container .cf-people-sidebar__all-users-link").html(
                 render_view_all_users(),
             );
         }
@@ -1205,7 +1199,10 @@ export class BuddyList extends BuddyListConf {
             this.fill_screen_with_content();
         });
 
-        sidebar_header_sticky_shadow.initialize($scroll_container, ".buddy-list-subsection-header");
+        sidebar_header_sticky_shadow.initialize(
+            $scroll_container,
+            ".cf-people-sidebar__section-header",
+        );
     }
 
     update_padding(): void {

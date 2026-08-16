@@ -89,12 +89,12 @@ run_test("unknown messages do not create duplicate feed records", () => {
 
 run_test("delegates message actions from the message pane", () => {
     hover_suggested_actions.initialize();
-    const handler = $("#main_div").get_on_handler("click", "[data-hover-action-decision]");
+    const handler = $("#main_div").get_on_handler("click", "[data-cf-action-decision]");
     assert.equal(typeof handler, "function");
 
     const $button = $.create("invalid action button")
-        .attr("data-hover-message-id", "not-a-number")
-        .attr("data-hover-action-decision", "approve");
+        .attr("data-cf-message-id", "not-a-number")
+        .attr("data-cf-action-decision", "approve");
     let propagation_stopped = false;
     handler({
         currentTarget: $button[0],
@@ -119,15 +119,15 @@ run_test("approval submits wording, cleared assignee, and due date refinements",
         request = options;
     });
 
-    const $panel = $("[data-hover-suggested-action-message-id='43']");
+    const $panel = $("[data-cf-suggested-action-message-id='43']");
     const $wording = $.create("wording").val("Publish the reviewed venue plan.");
     const $assignee = $.create("assignee").val("");
     const $due_date = $.create("due-date").val("2026-08-20");
     $panel.set_find_results("button", $.create("button"));
-    $panel.set_find_results("[data-hover-action-status]", $.create("status"));
-    $panel.set_find_results("[data-hover-action-wording]", $wording);
-    $panel.set_find_results("[data-hover-action-assignee]", $assignee);
-    $panel.set_find_results("[data-hover-action-due-date]", $due_date);
+    $panel.set_find_results("[data-cf-action-status]", $.create("status"));
+    $panel.set_find_results("[data-cf-action-wording]", $wording);
+    $panel.set_find_results("[data-cf-action-assignee]", $assignee);
+    $panel.set_find_results("[data-cf-action-due-date]", $due_date);
 
     hover_suggested_actions._testing.submit(message.id, "approve");
 

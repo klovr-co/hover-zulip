@@ -1,14 +1,12 @@
-<div class="left-sidebar" id="left-sidebar" role="navigation">
+<div class="left-sidebar" id="left-sidebar" role="navigation" aria-label="{{t 'Workspace navigation'}}">
     <div id="left-sidebar-search">
         <div class="input-wrapper-for-tooltip tippy-zulip-delayed-tooltip" data-tooltip-template-id="filter-left-sidebar-tooltip-template">
-            {{#> components/input_wrapper input_type="filter-input" custom_classes="left-sidebar-search-section" icon="search" input_button_icon="close"}}
-                <input type="text" class="input-element left-sidebar-search-input" autocomplete="off" placeholder="{{#if hover_enabled}}{{t 'Filter Home and Spaces' }}{{else}}{{t 'Filter left sidebar' }}{{/if}}" />
+            {{#> components/input_wrapper input_type="filter-input" custom_classes="left-sidebar-search-section" icon="search" input_button_icon="close" input_button_aria_label=(t "Clear navigation filter") cofounder=true}}
+                <input type="text" class="input-element left-sidebar-search-input" autocomplete="off" placeholder="{{#if hover_enabled}}{{t 'Filter Home and Spaces' }}{{else}}{{t 'Filter left sidebar' }}{{/if}}" aria-label="{{#if hover_enabled}}{{t 'Filter Home and Spaces' }}{{else}}{{t 'Filter left sidebar' }}{{/if}}" />
             {{/components/input_wrapper}}
         </div>
-        <span id="add_streams_button" class="add-stream-icon-container hidden-for-spectators" tabindex="0">
-            <i id="streams_inline_icon" class="add_stream_icon zulip-icon zulip-icon-square-plus" aria-hidden="true" ></i>
-        </span>
-        <span class="sidebar-menu-icon channel-folders-sidebar-menu-icon hidden-for-spectators" tabindex="0"><i class="zulip-icon zulip-icon-more-vertical" aria-label="{{t 'Show channel folders'}}"></i></span>
+        {{> cofounder/components/icon_button id="add_streams_button" icon="plus" intent="neutral" custom_classes="add-stream-icon-container hidden-for-spectators" aria-label=(t "Browse or create channels") omit_legacy_classes=true}}
+        {{> cofounder/components/icon_button icon="more-vertical" intent="neutral" custom_classes="sidebar-menu-icon channel-folders-sidebar-menu-icon hidden-for-spectators" aria-label=(t "Show channel folders") omit_legacy_classes=true}}
     </div>
     <ul id="left-sidebar-empty-list-message" class="hidden">
         {{> empty_list_widget_for_list
@@ -17,13 +15,13 @@
     </ul>
     <div id="left-sidebar-topic-search-hint" class="hidden">
         <a tabindex="0" role="button" class="bottom_left_row left-sidebar-topic-search-hint-link">
-            <i class="zulip-icon zulip-icon-search" aria-hidden="true"></i>
+            {{> cofounder/components/icon name="search" compact=true}}
             <span class="left-sidebar-topic-search-hint-label"></span>
         </a>
     </div>
     <div id="left-sidebar-navigation-area" class="left-sidebar-navigation-area">
         <div id="views-label-container" class="left-sidebar-section-header showing-expanded-navigation{{#if is_spectator}} remove-pointer-for-spectator{{/if}}">
-            <i id="toggle-top-left-navigation-area-icon" class="zulip-icon zulip-icon-heading-triangle-right sidebar-heading-icon rotate-icon-down views-tooltip-target hidden-for-spectators" aria-hidden="true" tabindex="0" role="button"></i>
+            {{> cofounder/components/icon_button id="toggle-top-left-navigation-area-icon" icon="chevron-right" intent="neutral" custom_classes="cf-sidebar-heading-chevron sidebar-heading-icon rotate-icon-down views-tooltip-target hidden-for-spectators" aria-label=(t "Toggle views") omit_legacy_classes=true}}
             {{~!-- squash whitespace --~}}
             <h4 class="left-sidebar-title"><span class="views-tooltip-target">{{ LEFT_SIDEBAR_NAVIGATION_AREA_TITLE }}</span></h4>
             <ul id="left-sidebar-navigation-list-condensed" class="filters">
@@ -34,9 +32,7 @@
                     <span class="unread_count normal-count"></span>
                 </li>
             </ul>
-            <div class="left-sidebar-navigation-menu-icon" tabindex="0" role="button" aria-label="{{t 'Other views'}}">
-                <i class="zulip-icon zulip-icon-more-vertical" aria-hidden="true"></i>
-            </div>
+            {{> cofounder/components/icon_button icon="more-vertical" intent="neutral" custom_classes="left-sidebar-navigation-menu-icon" aria-label=(t "Other views") omit_legacy_classes=true}}
         </div>
         <ul id="left-sidebar-navigation-list" class="left-sidebar-navigation-list filters">
             {{> left_sidebar_expanded_view_items_list expanded_views=expanded_views}}
@@ -44,21 +40,14 @@
     </div>
     {{~!-- squash whitespace --~}}
     <div id="left_sidebar_scroll_container" class="scrolling_list" data-simplebar data-simplebar-tab-index="-1">
-        <div id="direct-messages-section-header" class="left-sidebar-section-header direct-messages-container zoomed-out">
-            <i id="toggle-direct-messages-section-icon" class="zulip-icon zulip-icon-heading-triangle-right sidebar-heading-icon rotate-icon-down dm-tooltip-target" aria-hidden="true" tabindex="0" role="button"></i>
-            <h4 class="left-sidebar-title"><span class="dm-tooltip-target">{{ LEFT_SIDEBAR_DIRECT_MESSAGES_TITLE }}</span></h4>
-            <div class="left-sidebar-controls">
-                <a class="show-all-direct-messages tippy-left-sidebar-tooltip-no-label-delay" href="#narrow/is/dm" data-tooltip-template-id="show-all-direct-messages-template">
-                    <i class="zulip-icon zulip-icon-all-messages" aria-label="{{t 'Direct message feed' }}"></i>
-                </a>
-                <span class="compose-new-direct-message tippy-left-sidebar-tooltip-no-label-delay auto-hide-left-sidebar-overlay" tabindex="0" data-tooltip-template-id="new_direct_message_button_tooltip_template">
-                    <i class="left-sidebar-new-direct-message-icon zulip-icon zulip-icon-square-plus" aria-label="{{t 'Start a new DM' }}"></i>
-                </span>
-            </div>
-            <div class="heading-markers-and-unreads">
-                <span class="unread_count"></span>
-            </div>
-        </div>
+        {{> cofounder/components/dm_section_header
+          id="direct-messages-section-header"
+          custom_classes="zoomed-out"
+          is_modal=false
+          has_toggle=true
+          has_filter=false
+          title=LEFT_SIDEBAR_DIRECT_MESSAGES_TITLE
+          }}
         <div class="direct-messages-container zoomed-out hidden-for-spectators">
             <div id="direct-messages-list"></div>
         </div>
@@ -69,9 +58,7 @@
             <div class="hover-spaces-heading">
                 <h4 class="left-sidebar-title">{{t "Spaces"}}</h4>
                 {{#if can_create_spaces}}
-                    <button id="add_hover_space_button" class="button-reset-style" type="button" aria-label="{{t 'Create Space' }}" data-tippy-content="{{t 'Create Space' }}">
-                        <i class="zulip-icon zulip-icon-square-plus" aria-hidden="true"></i>
-                    </button>
+                    {{> cofounder/components/icon_button id="add_hover_space_button" icon="plus" intent="neutral" aria-label=(t "Create Space") data-tippy-content=(t "Create Space") omit_legacy_classes=true}}
                 {{/if}}
             </div>
         {{/if}}
@@ -83,7 +70,7 @@
                 {{/unless}}
                 <div id="login-to-more-streams" class="only-visible-for-spectators login_button">
                     <a class="subscribe-more-link" tabindex="0">
-                        <i class="subscribe-more-icon zulip-icon zulip-icon-log-in" aria-hidden="true" ></i>
+                        {{> cofounder/components/icon name="log-in" compact=true custom_classes="subscribe-more-icon"}}
                         <span class="subscribe-more-label">{{~t "LOG IN TO BROWSE MORE" ~}}</span>
                     </a>
                 </div>
@@ -93,32 +80,27 @@
     <div id="left-sidebar-modal">
         <div class="left-sidebar-modal-close-area" tabindex="0">
             <div class="left-sidebar-modal-back">
-                <i class="zulip-icon zulip-icon-arrow-left" aria-hidden="true"></i>
+                {{> cofounder/components/icon name="chevron-left" compact=true}}
                 <span>Back</span>
             </div>
-            <i class="zulip-icon zulip-icon-close"></i>
+            {{> cofounder/components/icon name="close" compact=true custom_classes="left-sidebar-modal-close-icon"}}
         </div>
         <div id="left-sidebar-modal-content">
             <div id="direct-messages-modal" class="no-display">
-                <div id="direct-messages-modal-section-header" class="direct-messages-container">
-                    <h4 class="left-sidebar-title"><span class="dm-tooltip-target">{{t "ALL DIRECT MESSAGES" }}</span></h4>
-                    <div class="left-sidebar-controls">
-                        <a class="show-all-direct-messages tippy-left-sidebar-tooltip-no-label-delay" href="#narrow/is/dm" data-tooltip-template-id="show-all-direct-messages-template">
-                            <i class="zulip-icon zulip-icon-all-messages" aria-label="{{t 'Direct message feed' }}"></i>
-                        </a>
-                        <span class="compose-new-direct-message tippy-left-sidebar-tooltip-no-label-delay auto-hide-left-sidebar-overlay" data-tooltip-template-id="new_direct_message_button_tooltip_template">
-                            <i class="left-sidebar-new-direct-message-icon zulip-icon zulip-icon-square-plus" aria-label="{{t 'New direct message' }}"></i>
-                        </span>
-                    </div>
-                    <div class="heading-markers-and-unreads">
-                        <span class="unread_count"></span>
-                    </div>
+                {{#> cofounder/components/dm_section_header
+                  id="direct-messages-modal-section-header"
+                  custom_classes=""
+                  is_modal=true
+                  has_toggle=false
+                  has_filter=true
+                  title=(t "ALL DIRECT MESSAGES")
+                  }}
                     <div class="direct-messages-search-section left-sidebar-filter-input-container">
-                        {{#> components/input_wrapper input_type="filter-input" icon="search" input_button_icon="close"}}
-                            <input type="text" class="input-element direct-messages-list-filter home-page-input" autocomplete="off" placeholder="{{t 'Filter direct messages' }}" />
+                        {{#> components/input_wrapper input_type="filter-input" icon="search" input_button_icon="close" input_button_aria_label=(t "Clear direct message filter") cofounder=true}}
+                            <input type="text" class="input-element direct-messages-list-filter home-page-input" autocomplete="off" placeholder="{{t 'Filter direct messages' }}" aria-label="{{t 'Filter direct messages' }}" />
                         {{/components/input_wrapper}}
                     </div>
-                </div>
+                {{/cofounder/components/dm_section_header}}
                 <div id="modal-direct-messages-list" class="scrolling_list" data-simplebar data-simplebar-tab-index="-1"></div>
             </div>
             <div id="more-topics-modal"></div>

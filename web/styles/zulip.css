@@ -270,87 +270,6 @@ p.n-margin {
     padding-top: var(--header-padding-bottom);
 }
 
-/* See https://web.dev/animations-guide/#triggers before adding any funny animation properties here. */
-@keyframes feedback-slide-in {
-    from {
-        transform: translateY(-120%);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(50px);
-        opacity: 1;
-    }
-}
-
-@keyframes feedback-slide-out {
-    from {
-        transform: translateY(50px);
-        opacity: 1;
-    }
-
-    to {
-        transform: translateY(-120%);
-        opacity: 0;
-    }
-}
-
-#feedback-container-content-wrapper {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 400px;
-    max-width: calc(100% - 20px);
-    padding: 15px;
-    background-color: var(--color-background-modal);
-    border-radius: 5px;
-    box-shadow: 0 0 30px hsl(0deg 0% 0% / 25%);
-    box-sizing: border-box;
-}
-
-#feedback_container {
-    display: none;
-    position: fixed;
-    width: 100%;
-    z-index: 110;
-
-    @container app (width < $cq_md_min) {
-        width: calc(90% - 30px);
-        left: 5%;
-        top: 5%;
-    }
-
-    &.show-feedback-container {
-        display: block;
-        animation: feedback-slide-in 0.6s forwards;
-    }
-
-    &.slide-out-feedback-container {
-        animation: feedback-slide-out 0.6s;
-    }
-
-    & h3 {
-        font-size: 16pt;
-        margin-top: 2px;
-        font-weight: 300;
-    }
-
-    .exit-me {
-        margin: 0 0 0 5px;
-    }
-
-    .float-header {
-        display: flex;
-        align-items: center;
-    }
-
-    .feedback-button-container {
-        display: flex;
-        align-items: center;
-        margin-left: auto;
-    }
-}
-
 #navbar-fixed-container {
     position: fixed;
     top: 0;
@@ -710,7 +629,7 @@ i.zulip-icon:focus-visible,
 }
 
 /* List of text-like input types taken from Bootstrap */
-input:not(.input-element) {
+input:not(.input-element, .cf-field__control) {
     &[type="text"],
     &[type="password"],
     &[type="email"],
@@ -845,15 +764,6 @@ strong {
     animation: 2s ease-in-out 2 pulse-unread;
 }
 
-.messagebox-content .slow-send-spinner {
-    display: block;
-    font-size: 0.8571em; /* 12px at 14px/em */
-    text-align: right;
-    opacity: 0.8;
-    color: var(--color-text-default);
-    animation: rotate 1s infinite linear;
-}
-
 .star {
     &:hover {
         cursor: pointer;
@@ -897,36 +807,13 @@ strong {
 }
 
 .selected_message {
-    .messagebox-content {
+    .cf-message-item__body {
         /* We add an outline and shift it inside the message so that without
            any vertical padding changes, we can have the outline surrounding
            the message without overflowing the boundary of the message in any case. */
         outline: 1px solid var(--color-selected-message-outline);
         border-radius: 5px;
         outline-offset: -1px;
-    }
-}
-
-.selected_msg_for_touchscreen {
-    @media (hover: none) {
-        .message_reactions .reaction_button {
-            visibility: visible;
-            pointer-events: all;
-        }
-    }
-}
-
-/* Make the action icon on the message row
-   always visible while the popover is open */
-.has_actions_popover .actions_hover {
-    visibility: visible !important;
-    pointer-events: all !important;
-    opacity: 1 !important;
-
-    & i:focus {
-        /* Avoid displaying a focus outline outside the popover on the \vdots
-           icon when opened via the mouse. */
-        outline: 0 !important;
     }
 }
 
@@ -955,7 +842,7 @@ div.focused-message-list {
 }
 
 /* In conversation view, always show the recipient bar action buttons */
-div.focused-message-list.is-conversation-view .recipient_row {
+div.focused-message-list.is-conversation-view .cf-message-group {
     & .recipient_bar_controls {
         opacity: 1;
         transition: opacity 0.15s ease-in;
@@ -1042,8 +929,7 @@ div.focused-message-list.is-conversation-view .recipient_row {
 }
 
 .information-settings .user-profile-picture,
-.user_sidebar_entry.with_avatar .user-profile-picture,
-.inline_profile_picture {
+.cf-message-item__avatar {
     display: inline-block;
     /* Don't inherit the line-height from message-avatar;
        this preserves the dimensions and rounded corners
@@ -1058,13 +944,12 @@ div.focused-message-list.is-conversation-view .recipient_row {
     }
 }
 
-.inline_profile_picture {
+.cf-message-item__avatar {
     width: var(--message-box-avatar-width);
     height: var(--message-box-avatar-height);
 }
 
-.information-settings .user-profile-picture,
-.user_sidebar_entry.with_avatar .user-profile-picture {
+.information-settings .user-profile-picture {
     width: var(--right-sidebar-avatar-width);
     height: var(--right-sidebar-avatar-height);
     margin-right: var(--right-sidebar-avatar-right-margin);
@@ -1323,7 +1208,7 @@ div.topic_edit_spinner .loading_indicator_spinner {
     flex-direction: column;
     gap: 4px;
 
-    &:has(.banner) {
+    &:has(.cf-banner) {
         /* Only apply bottom margin if there is a banner present. */
         margin-bottom: 10px;
     }
@@ -1336,11 +1221,11 @@ div.topic_edit_spinner .loading_indicator_spinner {
 }
 
 .copy-invite-link-banner {
-    .banner-content {
+    .cf-banner__content {
         white-space: nowrap;
     }
 
-    .banner-label {
+    .cf-banner__label {
         width: 100%;
         text-overflow: ellipsis;
         overflow: hidden;
@@ -1348,7 +1233,7 @@ div.topic_edit_spinner .loading_indicator_spinner {
 }
 
 @container banner (width >= 25em) {
-    #copy_generated_invite_link .action-button-label {
+    #copy_generated_invite_link .cf-button__label {
         display: none;
     }
 }
@@ -1438,8 +1323,7 @@ div.topic_edit_spinner .loading_indicator_spinner {
     }
 }
 
-.message-fade,
-.user_sidebar_entry.user-fade {
+.message-fade {
     opacity: 0.4;
 }
 
@@ -1935,12 +1819,6 @@ body:not(.spectator-view) {
 
         .top-navbar-container {
             margin-left: 40px;
-        }
-
-        #feedback_container {
-            width: calc(90% - 30px);
-            left: 5%;
-            top: 5%;
         }
 
         #typing_notifications,
@@ -2543,7 +2421,7 @@ body:not(.spectator-view) {
 }
 
 .popover-menu-user-avatar-container.deactivated,
-.inline_profile_picture.deactivated {
+.cf-message-item__avatar.deactivated {
     position: relative;
 
     > img {

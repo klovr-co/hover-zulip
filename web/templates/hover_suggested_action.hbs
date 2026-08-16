@@ -1,47 +1,39 @@
 <section
-  class="hover-suggested-action"
-  data-hover-suggested-action-message-id="{{message_id}}"
-  aria-label="{{t 'Suggested Action'}}"
+  class="cf-suggested-action{{#if is_not_action}} cf-suggested-action--dismissed{{else if todo_is_completed}} cf-suggested-action--completed{{else if is_approved}} cf-suggested-action--approved{{/if}}"
+  data-cf-suggested-action-message-id="{{message_id}}"
+  aria-labelledby="cf-suggested-action-heading-{{message_id}}"
   tabindex="-1"
   >
-    <div class="hover-suggested-action__heading">
-        <h4>{{t "Suggested Action"}}</h4>
-        <span class="hover-suggested-action__state">
-            {{#if is_pending}}{{t "Awaiting confirmation"}}{{/if}}
-            {{#if is_approved}}
-                {{#if todo_is_completed}}
-                    {{t "Completed Todo"}}
-                {{else}}
-                    {{t "Active Todo"}}
-                {{/if}}
-            {{/if}}
-            {{#if is_not_action}}{{t "Not an action"}}{{/if}}
-        </span>
+    <div class="cf-suggested-action__heading">
+        <h3 id="cf-suggested-action-heading-{{message_id}}">{{t "Suggested Action"}}</h3>
+        {{> cofounder/components/status tone=state_tone label=state_label custom_classes="cf-suggested-action__state"}}
     </div>
-    <p class="hover-suggested-action__wording">{{wording}}</p>
-    <dl class="hover-suggested-action__facts">
+    <p class="cf-suggested-action__wording">{{wording}}</p>
+    <dl class="cf-suggested-action__facts">
         <div><dt>{{t "Responsibility"}}</dt><dd>{{responsibility}}</dd></div>
         <div><dt>{{t "Due"}}</dt><dd>{{due_date}}</dd></div>
     </dl>
     {{#if is_not_action}}
-        <p class="hover-suggested-action__history">
+        <p class="cf-suggested-action__history">
             {{#tr}}Marked by {{latest_actor}} at {{latest_time}}{{/tr}}
             {{#if latest_reason}} — {{latest_reason}}{{/if}}
         </p>
     {{/if}}
     {{#if is_approved}}
         <div
-          class="hover-suggested-action__todo"
-          data-hover-todo-id="{{todo_id}}"
+          class="cf-suggested-action__todo"
+          data-cf-todo-id="{{todo_id}}"
+          role="region"
+          aria-labelledby="cf-suggested-action-todo-heading-{{todo_id}}"
           tabindex="0"
           >
-            <p>
+            <h4 id="cf-suggested-action-todo-heading-{{todo_id}}">
                 {{#if todo_is_active}}{{#tr}}Todo #{{todo_id}}
                         is active{{/tr}}{{/if}}
                 {{#if todo_is_completed}}{{#tr}}Todo #{{todo_id}}
                         is completed{{/tr}}{{/if}}
-            </p>
-            <p>{{#tr}}Assigned to {{todo_assignee}}{{/tr}}</p>
+            </h4>
+            <p data-cf-todo-assignee-label>{{#tr}}Assigned to {{todo_assignee}}{{/tr}}</p>
             {{#if todo_latest_actor}}
                 <p>
                     {{#tr}}
@@ -49,13 +41,15 @@
                     {{/tr}}
                 </p>
             {{/if}}
-            <div class="hover-suggested-action__controls">
+            <div class="cf-suggested-action__controls">
                 {{#if todo_is_active}}
                     <label>
                         <span>{{t "Assign to"}}</span>
                         <select
-                          data-hover-todo-assignee
-                          aria-label="{{t 'Assign Todo'}}"
+                          class="cf-field__control cf-suggested-action__assignee"
+                          data-cf-todo-assignee
+                          data-cf-current-assignee="{{todo_assignee_user_id}}"
+                          aria-label="{{t 'Assign to Todo'}}"
                           >
                             {{#if todo_has_assignee}}
                                 <option value="{{todo_assignee_user_id}}">
@@ -75,50 +69,54 @@
                     </label>
                     <button
                       type="button"
-                      class="button rounded"
-                      data-hover-todo-operation="assign"
-                      data-hover-todo-id="{{todo_id}}"
+                      class="cf-button cf-button--secondary"
+                      data-cf-todo-operation="assign"
+                      data-cf-todo-id="{{todo_id}}"
+                      disabled
                       >{{t "Assign"}}</button>
                     <button
                       type="button"
-                      class="button rounded sea-green"
-                      data-hover-todo-operation="complete"
-                      data-hover-todo-id="{{todo_id}}"
+                      class="cf-button cf-button--success"
+                      data-cf-todo-operation="complete"
+                      data-cf-todo-id="{{todo_id}}"
                       >{{t "Complete"}}</button>
                 {{/if}}
                 {{#if todo_is_completed}}
                     <button
                       type="button"
-                      class="button rounded"
-                      data-hover-todo-operation="reopen"
-                      data-hover-todo-id="{{todo_id}}"
+                      class="cf-button cf-button--secondary"
+                      data-cf-todo-operation="reopen"
+                      data-cf-todo-id="{{todo_id}}"
                       >{{t "Reopen"}}</button>
                 {{/if}}
             </div>
             <span
-              class="hover-suggested-action__status"
-              data-hover-todo-status
+              class="cf-suggested-action__status"
+              data-cf-todo-status
               role="status"
               aria-live="polite"
+              aria-atomic="true"
               ></span>
         </div>
     {{else}}
-        <div class="hover-suggested-action__controls">
+        <div class="cf-suggested-action__controls">
             {{#if is_pending}}
-                <div class="hover-suggested-action__refinements">
+                <div class="cf-suggested-action__refinements">
                     <label>
                         <span>{{t "Action wording"}}</span>
                         <textarea
                           maxlength="50000"
-                          data-hover-action-wording
+                          class="cf-field__control"
+                          data-cf-action-wording
                           aria-label="{{t 'Action wording'}}"
                           >{{wording}}</textarea>
                     </label>
                     <label>
                         <span>{{t "Assign to"}}</span>
                         <select
-                          data-hover-action-assignee
-                          aria-label="{{t 'Suggested Action assignee'}}"
+                          class="cf-field__control"
+                          data-cf-action-assignee
+                          aria-label="{{t 'Assign to Suggested Action assignee'}}"
                           >
                             <option value="">{{t "Unassigned"}}</option>
                             {{#if approval_has_assignee}}
@@ -136,45 +134,48 @@
                         <input
                           type="date"
                           value="{{approval_due_date}}"
-                          data-hover-action-due-date
+                          class="cf-field__control"
+                          data-cf-action-due-date
                           aria-label="{{t 'Suggested Action due date'}}"
                           />
                     </label>
                 </div>
                 <button
                   type="button"
-                  class="button rounded sea-green"
-                  data-hover-action-decision="approve"
-                  data-hover-message-id="{{message_id}}"
+                  class="cf-button cf-button--success"
+                  data-cf-action-decision="approve"
+                  data-cf-message-id="{{message_id}}"
                   >{{t "Approve"}}</button>
                 <input
                   type="text"
                   maxlength="1000"
-                  data-hover-action-reason
+                  class="cf-field__control cf-suggested-action__reason"
+                  data-cf-action-reason
                   aria-label="{{t 'Optional reason for Not an action'}}"
                   placeholder="{{t 'Optional reason'}}"
                   />
                 <button
                   type="button"
-                  class="button rounded"
-                  data-hover-action-decision="not_action"
-                  data-hover-message-id="{{message_id}}"
+                  class="cf-button cf-button--secondary"
+                  data-cf-action-decision="not_action"
+                  data-cf-message-id="{{message_id}}"
                   >{{t "Not an action"}}</button>
             {{/if}}
             {{#if is_not_action}}
                 <button
                   type="button"
-                  class="button rounded"
-                  data-hover-action-decision="restore"
-                  data-hover-message-id="{{message_id}}"
+                  class="cf-button cf-button--secondary"
+                  data-cf-action-decision="restore"
+                  data-cf-message-id="{{message_id}}"
                   >{{t "Restore"}}</button>
             {{/if}}
         </div>
     {{/if}}
     <span
-      class="hover-suggested-action__status"
-      data-hover-action-status
+      class="cf-suggested-action__status"
+      data-cf-action-status
       role="status"
       aria-live="polite"
+      aria-atomic="true"
       ></span>
 </section>

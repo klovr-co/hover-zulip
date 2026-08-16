@@ -1,0 +1,279 @@
+.cf-conversation-header {
+    position: relative;
+    z-index: 4;
+    min-width: 0;
+    overflow: visible;
+    color: var(--cf-text-primary);
+    background: transparent;
+    box-shadow: none;
+    font-family: var(--cf-font-ui);
+    font-size: var(--cf-type-body);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.cf-conversation-header:is(
+        .cf-conversation-header--channel,
+        .cf-conversation-header--dm
+    )
+    .cf-conversation-header__surface {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-areas: "channel separator topic actions date";
+    grid-template-columns: fit-content(35%) 20px minmax(0, 1fr) auto auto;
+    align-items: center;
+    min-width: 0;
+    min-height: 48px;
+    padding: 6px 8px 6px 10px;
+    overflow: visible;
+    border: 1px solid var(--cf-border-subtle);
+    border-left-color: var(--cf-conversation-accent, var(--cf-color-accent));
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-paper);
+    box-shadow: var(--cf-shadow-control);
+    font-size: var(--cf-type-body);
+    line-height: 20px;
+}
+
+.cf-conversation-header.cf-conversation-header--dm
+    .cf-conversation-header__surface {
+    grid-template-areas: "channel date";
+    grid-template-columns: minmax(0, 1fr) auto;
+    border-left-color: var(--cf-color-accent);
+}
+
+.cf-conversation-header[dir="rtl"] .cf-conversation-header__surface,
+[dir="rtl"] .cf-conversation-header .cf-conversation-header__surface {
+    border-right-color: var(--cf-conversation-accent, var(--cf-color-accent));
+    border-left-color: var(--cf-border-subtle);
+}
+
+.cf-conversation-header__channel,
+.cf-conversation-header__dm {
+    grid-area: channel;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    height: auto;
+    padding: 0;
+    overflow: hidden;
+    color: var(--cf-text-primary);
+    font-weight: 600;
+    text-decoration: none;
+    top: auto;
+}
+
+.cf-conversation-header.cf-conversation-header--dm .cf-conversation-header__dm {
+    min-height: var(--cf-control-height-touch);
+    padding: 0;
+}
+
+.cf-conversation-header__channel:is(:hover, :focus-visible),
+.cf-conversation-header__dm:is(:hover, :focus-visible),
+.cf-conversation-header__topic-link:is(:hover, :focus-visible) {
+    color: var(--cf-color-accent);
+    text-decoration: none;
+}
+
+.cf-conversation-header__channel:focus,
+.cf-conversation-header__dm:focus,
+.cf-conversation-header__topic-link:focus {
+    outline: none;
+}
+
+.cf-conversation-header.cf-conversation-header--channel
+    .cf-conversation-header__channel:focus-visible,
+.cf-conversation-header.cf-conversation-header--channel
+    .cf-conversation-header__topic-link:focus-visible,
+.cf-conversation-header.cf-conversation-header--dm
+    .cf-conversation-header__dm:focus-visible {
+    border-radius: 3px;
+    outline: 2px solid var(--cf-focus);
+    outline-offset: 2px;
+}
+
+.cf-conversation-header__channel-icon,
+.cf-conversation-header__dm-icon {
+    display: grid;
+    flex: none;
+    width: 16px;
+    height: 16px;
+    color: var(--cf-text-secondary) !important;
+    place-items: center;
+}
+
+.cf-conversation-header__channel-icon > .cf-icon,
+.cf-conversation-header__dm-icon > .cf-icon {
+    width: 15px;
+    height: 15px;
+}
+
+.cf-conversation-header__channel-name,
+.cf-conversation-header__dm-name,
+.cf-conversation-header__topic-link {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cf-conversation-header__archived {
+    flex: none;
+    color: var(--cf-text-secondary);
+    font-size: var(--cf-type-meta);
+    font-weight: 500;
+}
+
+.cf-conversation-header.cf-conversation-header--channel
+    .cf-conversation-header__separator {
+    grid-area: separator;
+    display: grid;
+    width: 20px;
+    color: var(--cf-text-tertiary);
+    line-height: 0;
+    place-items: center;
+    top: auto;
+}
+
+.cf-conversation-header__separator > .cf-icon {
+    width: 13px;
+    height: 13px;
+}
+
+.cf-conversation-header.cf-conversation-header--channel
+    .cf-conversation-header__topic {
+    grid-area: topic;
+    display: flex;
+    min-width: 0;
+    padding: 0 8px 0 0;
+    overflow: hidden;
+    top: auto;
+}
+
+.cf-conversation-header__topic-link {
+    display: block;
+    color: var(--cf-text-secondary);
+    font-size: var(--cf-type-label);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.cf-conversation-header.cf-conversation-header--channel
+    .cf-conversation-header__actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    opacity: 1;
+}
+
+.cf-conversation-header__actions .change_visibility_policy {
+    display: flex;
+}
+
+.cf-conversation-header__actions .cf-icon-button {
+    flex: none;
+}
+
+.cf-conversation-header__date {
+    grid-area: date;
+    align-items: center;
+    padding: 0 4px 0 8px;
+    color: var(--cf-text-tertiary);
+    font-size: var(--cf-type-meta);
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 16px;
+    text-transform: none;
+}
+
+.cf-conversation-header__bot {
+    display: inline-flex;
+    width: 14px;
+    height: 14px;
+    margin-left: 4px;
+    vertical-align: -2px;
+}
+
+.cf-conversation-header__bot > .cf-icon {
+    width: 14px;
+    height: 14px;
+}
+
+@container message-lists (width < 560px) {
+    .cf-conversation-header.cf-conversation-header--channel
+        .cf-conversation-header__surface {
+        grid-template-columns: fit-content(35%) 18px minmax(0, 1fr) auto;
+        grid-template-areas: "channel separator topic actions";
+        min-height: 48px;
+        padding-block: 3px;
+    }
+
+    .cf-conversation-header__actions
+        > .recipient-bar-control:not(.recipient-row-topic-menu),
+    .cf-conversation-header__actions > .change_visibility_policy,
+    .cf-conversation-header__date {
+        display: none;
+    }
+
+    .cf-conversation-header__actions .recipient-row-topic-menu {
+        display: flex;
+    }
+}
+
+@media (width <= 600px) {
+    .cf-conversation-header.cf-conversation-header--channel
+        .cf-conversation-header__surface {
+        grid-template-columns: fit-content(35%) 18px minmax(0, 1fr) auto;
+        grid-template-areas: "channel separator topic actions";
+        min-height: 48px;
+        padding: 3px 4px 3px 8px;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .cf-conversation-header.cf-conversation-header--dm
+        .cf-conversation-header__surface {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "channel";
+        padding-block: 3px;
+        padding-inline: 10px;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .cf-conversation-header__channel,
+    .cf-conversation-header__topic,
+    .cf-conversation-header__topic-link {
+        min-height: var(--cf-control-height-touch);
+    }
+
+    .cf-conversation-header__topic,
+    .cf-conversation-header__topic-link {
+        align-items: center;
+    }
+
+    .cf-conversation-header__topic-link {
+        display: flex;
+    }
+
+    .cf-conversation-header__actions
+        > .recipient-bar-control:not(.recipient-row-topic-menu),
+    .cf-conversation-header__actions > .change_visibility_policy,
+    .cf-conversation-header__date {
+        display: none;
+    }
+
+    .cf-conversation-header__actions .recipient-row-topic-menu {
+        display: flex;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cf-conversation-header *,
+    .cf-conversation-header *::before,
+    .cf-conversation-header *::after {
+        transition-duration: 0ms !important;
+    }
+}

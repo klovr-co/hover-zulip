@@ -28,17 +28,29 @@ function generated_message() {
     };
 }
 
+run_test("maps radiogroup navigation keys to response types", () => {
+    const {keyboard_response_type} = hover_response._testing;
+
+    assert.equal(keyboard_response_type("review", "ArrowLeft"), "reply");
+    assert.equal(keyboard_response_type("reply", "ArrowRight"), "review");
+    assert.equal(keyboard_response_type("review", "ArrowUp"), "reply");
+    assert.equal(keyboard_response_type("reply", "ArrowDown"), "review");
+    assert.equal(keyboard_response_type("review", "Home"), "reply");
+    assert.equal(keyboard_response_type("reply", "End"), "review");
+    assert.equal(keyboard_response_type("reply", "Tab"), undefined);
+});
+
 run_test("configures Reply and explicit Review request metadata", () => {
     hover_response.configure_for_reply(generated_message());
-    assert.equal($("#hover-response-controls").prop("hidden"), false);
+    assert.equal($("#cf-review-composer-controls").prop("hidden"), false);
     assert.deepEqual(hover_response.get_request_data(), {
         hover_generated_item_id: 7,
         hover_response_type: "reply",
     });
 
     hover_response.select_response_type("review");
-    $("#hover-review-field").val("venue");
-    $("#hover-review-value").val('"Hall B"');
+    $("#cf-review-field").val("venue");
+    $("#cf-review-value").val('"Hall B"');
     assert.deepEqual(hover_response.get_request_data(), {
         hover_generated_item_id: 7,
         hover_response_type: "review",
@@ -57,19 +69,23 @@ run_test("an ambiguous Review omits patch metadata and clear removes linkage", (
 
     hover_response.clear();
     assert.deepEqual(hover_response.get_request_data(), {});
-    assert.equal($("#hover-response-controls").prop("hidden"), true);
+    assert.equal($("#cf-review-composer-controls").prop("hidden"), true);
 });
 
 run_test("preselects the exact disputed field for a Review", () => {
     hover_response.configure_for_reply(generated_message());
     hover_response.preselect_review_field("venue");
-    $("#hover-review-value").val('"Hall C"');
+    $("#cf-review-value").val('"Hall C"');
     assert.deepEqual(hover_response.get_request_data(), {
         hover_generated_item_id: 7,
         hover_response_type: "review",
         hover_review_field: "venue",
         hover_review_value: '"Hall C"',
     });
+});
+
+run_test("messages without Hover responses do not touch rendered views", () => {
+    hover_response.apply_realtime_responses([{id: 43}]);
 });
 
 run_test("realtime response metadata converges and rerenders the root", ({override}) => {

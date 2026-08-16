@@ -1545,7 +1545,7 @@ test("predicate_basics", ({override}) => {
         clean_reactions: new Map(
             Object.entries({
                 "unicode_emoji,1f3b1": {
-                    class: "message_reaction reacted",
+                    selected: true,
                     count: 2,
                     emoji_alt_code: false,
                     emoji_code: "1f3b1",
@@ -1957,8 +1957,12 @@ test("describe", ({mock_template, override}) => {
     string = "messages sent around March 15, 2026";
     assert.equal(Filter.search_description_as_html(narrow, false), string);
 
-    const devel_decorated = `<span class="decorated-channel-name-wrapper inline-decorated-channel-name"><span class="channel-privacy-type-icon"><i class="zulip-icon zulip-icon-hashtag" aria-hidden="true"></i></span><span class="decorated-channel-name">devel</span></span>`;
-    const river_decorated = `<span class="decorated-channel-name-wrapper inline-decorated-channel-name"><span class="channel-privacy-type-icon"><i class="zulip-icon zulip-icon-hashtag" aria-hidden="true"></i></span><span class="decorated-channel-name">river</span></span>`;
+    const channel_icon = `<svg class="cf-icon cf-icon--compact" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M10 3 8 21M16 3l-2 18M4 9h17M3 15h17"></path>
+</svg>
+`;
+    const devel_decorated = `<span class="decorated-channel-name-wrapper inline-decorated-channel-name"><span class="channel-privacy-type-icon">${channel_icon}</span><span class="decorated-channel-name">devel</span></span>`;
+    const river_decorated = `<span class="decorated-channel-name-wrapper inline-decorated-channel-name"><span class="channel-privacy-type-icon">${channel_icon}</span><span class="decorated-channel-name">river</span></span>`;
 
     const devel_id = new_stream_id();
     make_sub("devel", devel_id);

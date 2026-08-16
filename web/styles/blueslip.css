@@ -8,15 +8,43 @@
 
 .blueslip-animations {
     &.show {
-        animation-name: fadeIn;
+        animation-name: blueslip-fade-in;
         animation-duration: 0.3s;
         animation-fill-mode: forwards;
     }
 
     &.fade-out {
-        animation-name: fadeOut;
+        animation-name: blueslip-fade-out;
         animation-duration: 0.3s;
         animation-fill-mode: forwards;
+    }
+}
+
+@keyframes blueslip-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(
+            calc(-1 * var(--blueslip-overlay-translate-y-distance))
+        );
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes blueslip-fade-out {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(
+            calc(-1 * var(--blueslip-overlay-translate-y-distance))
+        );
     }
 }
 

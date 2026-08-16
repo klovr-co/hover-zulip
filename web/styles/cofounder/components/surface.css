@@ -1,0 +1,29 @@
+.cf-surface {
+    box-sizing: border-box;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-panel);
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-paper);
+    font-family: var(--cf-font-ui);
+    overflow-wrap: anywhere;
+}
+
+.cf-surface > * {
+    min-width: 0;
+}
+
+.cf-surface--padded {
+    padding: var(--cf-space-4);
+}
+
+.cf-surface--raised {
+    border-color: transparent;
+    box-shadow: var(--cf-shadow-panel);
+}
+
+.cf-surface--overlay {
+    border-radius: var(--cf-radius-overlay);
+    box-shadow: var(--cf-shadow-overlay);
+}

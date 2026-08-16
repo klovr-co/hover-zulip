@@ -8,6 +8,7 @@ import render_compose_banner from "../templates/compose_banner/compose_banner.hb
 
 import * as blueslip from "./blueslip.ts";
 import * as buttons from "./buttons.ts";
+import * as cofounder_button from "./cofounder/components/button.ts";
 import * as compose_banner from "./compose_banner.ts";
 import type {DropdownWidget, Option} from "./dropdown_widget.ts";
 import * as group_permission_settings from "./group_permission_settings.ts";
@@ -589,7 +590,7 @@ export function change_save_button_state(
     }
 
     const $save_button = $element.find(".save-button");
-    const $textEl = $save_button.find(".action-button-label");
+    const $textEl = $save_button.find(".cf-button__label");
 
     if (state === "discarded") {
         if (
@@ -661,15 +662,9 @@ export function change_save_button_state(
         // button text and style are updated in the same frame.
         $textEl.text(button_text);
         if (state === "succeeded") {
-            buttons.modify_action_button_style($save_button, {
-                variant: "text",
-                intent: "success",
-            });
+            cofounder_button.set_button_variant($save_button, "success");
         } else {
-            buttons.modify_action_button_style($save_button, {
-                variant: "solid",
-                intent: "brand",
-            });
+            cofounder_button.set_button_variant($save_button, "primary");
         }
     });
 

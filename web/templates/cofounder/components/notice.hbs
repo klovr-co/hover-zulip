@@ -1,0 +1,15 @@
+<div
+  {{#if id}}id="{{id}}"{{/if}}
+  role="{{#if role}}{{role}}{{else}}{{#if (or (eq intent "danger") (eq intent "error") (eq intent "warning") (eq intent "warning-style"))}}alert{{else}}status{{/if}}{{/if}}"
+  class="cf-notice cf-notice--{{intent}}{{#if custom_classes}} {{custom_classes}}{{/if}}{{#if classname}} {{classname}}{{/if}}"
+  {{#unless (eq user_id undefined)}}data-user-id="{{user_id}}"{{/unless}}
+  {{#unless (eq stream_id undefined)}}data-stream-id="{{stream_id}}"{{/unless}}
+  {{#if (or topic_name is_empty_string_topic)}}data-topic-name="{{topic_name}}"{{/if}}
+  {{#unless (eq scheduled_message_id undefined)}}data-scheduled-message-id="{{scheduled_message_id}}"{{/unless}}>
+    <div class="cf-notice__body">
+        {{> @partial-block .}}
+    </div>
+    {{#unless hide_close_button}}
+        {{> button variant="ghost" icon="close" aria-label=(t "Dismiss") custom_classes="cf-notice__close"}}
+    {{/unless}}
+</div>

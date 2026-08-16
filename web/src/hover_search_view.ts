@@ -67,6 +67,7 @@ let response: SearchResponse = {
     source_unavailable_count: 0,
 };
 let status = "";
+let searching = false;
 let visible = false;
 let request: JQuery.jqXHR<unknown> | undefined;
 let request_generation = 0;
@@ -95,12 +96,13 @@ function filter_unauthorized_results(search_response: SearchResponse): SearchRes
     };
 }
 
-function render(): void {
+function render({focus_target}: {focus_target?: string} = {}): void {
     if (!visible) {
         return;
     }
     const knowledge = response.knowledge.map((result) => ({
         ...result,
+        rendered_content_html: result.rendered_content,
         display_time: display_time(result.timestamp),
         kind_label:
             result.kind === "generated"
@@ -115,10 +117,11 @@ function render(): void {
         ...result,
         display_time: display_time(result.record.timestamp),
     }));
-    $("#hover-search-view").html(
+    $("#cf-global-search-view").html(
         render_hover_search_view({
             query: response.query,
             status,
+            searching,
             has_query: response.query !== "",
             knowledge,
             sources,
@@ -128,6 +131,9 @@ function render(): void {
             has_sources: sources.length > 0,
         }),
     );
+    if (focus_target !== undefined) {
+        $(focus_target).trigger("focus");
+    }
 }
 
 function search(query: string): void {
@@ -142,7 +148,8 @@ function search(query: string): void {
             source_unavailable_count: 0,
         };
         status = "";
-        render();
+        searching = false;
+        render({focus_target: "#cf-global-search-input"});
         return;
     }
     const generation = request_generation;
@@ -153,7 +160,8 @@ function search(query: string): void {
         source_unavailable_count: 0,
     };
     status = $t({defaultMessage: "Searching confirmed Spaces…"});
-    render();
+    searching = true;
+    render({focus_target: ".cf-global-search__status"});
     request = channel.post({
         url: "/json/hover/search",
         data: {query: JSON.stringify(normalized)},
@@ -165,16 +173,25 @@ function search(query: string): void {
             status = response.source_unavailable_count
                 ? $t({defaultMessage: "Some Source evidence is temporarily unavailable."})
                 : response.knowledge.length + response.sources.length === 0
-                  ? $t({defaultMessage: "No results found."})
+                  ? $t({
+                        defaultMessage: "No results found. Try a different name, topic, or phrase.",
+                    })
                   : "";
-            render();
+            searching = false;
+            render({
+                focus_target:
+                    response.knowledge.length + response.sources.length === 0
+                        ? ".cf-global-search__status"
+                        : "#cf-global-search-knowledge-heading",
+            });
         },
         error(_xhr, error_type) {
             if (generation !== request_generation || error_type === "abort") {
                 return;
             }
             status = $t({defaultMessage: "Search could not be completed. Try again."});
-            render();
+            searching = false;
+            render({focus_target: ".cf-global-search__status"});
         },
     });
 }
@@ -183,8 +200,8 @@ export function show(): void {
     visible = true;
     inbox_ui.hide();
     recent_view_ui.hide();
-    $("#message_feed_container, #compose, #hover-source-view").hide();
-    $("#hover-search-view").show();
+    $("#message_feed_container, #compose, #cf-source-view").hide();
+    $("#cf-global-search-view").show();
     left_sidebar_navigation_area.select_top_left_corner_item(".top_left_hover_search");
     render();
 }
@@ -196,7 +213,7 @@ export function hide(): void {
     visible = false;
     request?.abort();
     request_generation += 1;
-    $("#hover-search-view").hide();
+    $("#cf-global-search-view").hide();
     $("#message_feed_container, #compose").show();
 }
 
@@ -210,11 +227,11 @@ export function handle_space_event(): void {
 }
 
 export function initialize(): void {
-    $("body").on("submit", "#hover-global-search-form", (event) => {
+    $("body").on("submit", "#cf-global-search-form", (event) => {
         event.preventDefault();
-        search(String($("#hover-global-search-input").val() ?? ""));
+        search(String($("#cf-global-search-input").val() ?? ""));
     });
-    $("body").on("click", ".hover-search-save-button", (event) => {
+    $("body").on("click", ".cf-global-search__save", (event) => {
         const message_id = Number($(event.currentTarget).attr("data-message-id"));
         const result = response.knowledge.find((item) => item.message_id === message_id);
         if (result === undefined) {
