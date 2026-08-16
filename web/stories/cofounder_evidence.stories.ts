@@ -50,7 +50,7 @@ function context_for(state: EvidenceArgs["state"]): object {
 function render_story(args: EvidenceArgs): HTMLElement {
     const canvas = globalThis.document.createElement("div");
     canvas.className = "cf-theme storybook-component";
-    canvas.innerHTML = `<div class="storybook-component-stack storybook-component-stack-vertical" style="max-width:720px">${render_evidence(context_for(args.state))}</div>`;
+    canvas.innerHTML = `<div class="storybook-component-stack storybook-component-stack-vertical storybook-evidence-frame">${render_evidence(context_for(args.state))}</div>`;
     canvas.addEventListener("click", (event) => {
         if (!(event.target instanceof Element)) {
             return;

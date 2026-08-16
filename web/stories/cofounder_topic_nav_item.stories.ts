@@ -57,9 +57,9 @@ export const States: Story = {
         const canvas = globalThis.document.createElement("div");
         canvas.innerHTML = component_story(`
             <nav class="storybook-cf-nav-states storybook-cf-topic-nav-states" aria-label="Product design topics">
-                <p style="margin: 0 0 8px 8px; color: var(--cf-text-secondary); font-size: 11px; font-weight: 650; letter-spacing: 0.1em; text-transform: uppercase">Product design</p>
-                <ul id="stream_filters" class="filters" style="margin: 0; padding: 0; list-style: none">
-                    <li class="narrow-filter stream-expanded" style="margin: 0; padding: 0; list-style: none">
+                <p class="storybook-cf-nav-states__label">Product design</p>
+                <ul id="stream_filters" class="filters storybook-cf-nav-states__list storybook-cf-nav-states__list--topics">
+                    <li class="narrow-filter stream-expanded storybook-cf-nav-states__item">
                         <ul class="topic-list topic-list-has-topics">
                             ${topic({name: "Launch plan", unread: 12})}
                             ${topic({

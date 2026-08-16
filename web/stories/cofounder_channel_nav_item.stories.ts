@@ -60,9 +60,9 @@ function channel({
 export const States: Story = {
     render: () =>
         component_story(`
-            <nav aria-label="Channels" style="width: 280px">
-                <p style="margin: 0 0 8px 8px; color: var(--cf-text-secondary); font-size: 11px; font-weight: 650; letter-spacing: 0.1em; text-transform: uppercase">Channels</p>
-                <ul id="stream_filters" class="filters" style="display: grid; gap: 2px; margin: 0; padding: 0; list-style: none">
+            <nav class="storybook-cf-nav-states" aria-label="Channels">
+                <p class="storybook-cf-nav-states__label">Channels</p>
+                <ul id="stream_filters" class="filters storybook-cf-nav-states__list">
                     ${channel({
                         color: "#0878e8",
                         custom_classes: "active-filter stream-expanded",

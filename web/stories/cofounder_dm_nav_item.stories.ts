@@ -57,7 +57,7 @@ function conversation({
 function render_states(): HTMLElement {
     const container = globalThis.document.createElement("div");
     container.innerHTML = component_story(`
-            <nav aria-label="Direct messages" style="width: 280px">
+            <nav class="storybook-cf-nav-states" aria-label="Direct messages">
                 ${render_dm_section_header({
                     custom_classes: "zoomed-out",
                     has_filter: false,
@@ -66,7 +66,7 @@ function render_states(): HTMLElement {
                     is_modal: false,
                     title: "Direct messages",
                 })}
-                <ul class="dm-list" style="display: grid; gap: 2px; margin: 2px 0 0; padding: 0; list-style: none">
+                <ul class="dm-list storybook-cf-nav-states__list storybook-cf-nav-states__list--dm">
                     ${conversation({is_active: true, name: "Alex Lee", presence: "user-circle-active", unread: 2})}
                     ${conversation({has_unread_mention: true, name: "Jamie Morris", presence: "user-circle-idle", unread: 4})}
                     ${conversation({is_group: true, name: "Design review group", unread: 7})}

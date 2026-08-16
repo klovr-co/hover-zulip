@@ -14,12 +14,12 @@ function render_dialog_story(args: DialogArgs): HTMLElement {
         close_on_overlay_click: true,
         modal_content_html: args.loading
             ? `
-            <p style="margin:0;color:var(--cf-text-secondary);">
+            <p class="storybook-dialog-copy">
                 Saving your changes to the shared workspace now.
             </p>
         `
             : `
-            <p style="margin:0;color:var(--cf-text-secondary);">
+            <p class="storybook-dialog-copy">
                 Review the details before continuing. This action updates the shared workspace.
             </p>
         `,

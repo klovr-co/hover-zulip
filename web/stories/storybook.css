@@ -1637,6 +1637,42 @@ div.storybook-cf-message-items__stack.message-list {
     list-style: none;
 }
 
+.storybook-cf-nav-states__label {
+    margin: 0 0 8px 8px;
+    color: var(--cf-text-secondary);
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.storybook-cf-nav-states__list--dm {
+    margin-top: 2px;
+}
+
+.storybook-cf-nav-states__list--topics {
+    display: block;
+}
+
+.storybook-cf-nav-states__item {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.storybook-conversation-header-frame {
+    width: min(100%, 880px);
+}
+
+.storybook-dialog-copy {
+    margin: 0;
+    color: var(--cf-text-secondary);
+}
+
+.storybook-evidence-frame {
+    max-width: 720px;
+}
+
 .storybook-cf-nav-states__feedback {
     min-height: 1.3em;
     margin: 8px 0 0;

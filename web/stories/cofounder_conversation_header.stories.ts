@@ -26,7 +26,7 @@ const channel = {
 
 const meta = {
     title: "Cofounder/Components/Conversation header",
-    render: () => `<div style="width:min(100%,880px)">${render_header(channel)}</div>`,
+    render: () => `<div class="storybook-conversation-header-frame">${render_header(channel)}</div>`,
 } satisfies Meta;
 
 export default meta;
@@ -36,5 +36,5 @@ export const Channel: Story = {};
 
 export const DirectMessage: Story = {
     render: () =>
-        `<div style="width:min(100%,880px)">${render_header({date_html: "Today", display_reply_to_for_tooltip: "Ava and Helper", is_dm_with_self: false, is_stream: false, pm_with_url: "#dm", recipient_users: [{full_name: "Ava Rodriguez"}, {full_name: "Helper", is_bot: true}]})}</div>`,
+        `<div class="storybook-conversation-header-frame">${render_header({date_html: "Today", display_reply_to_for_tooltip: "Ava and Helper", is_dm_with_self: false, is_stream: false, pm_with_url: "#dm", recipient_users: [{full_name: "Ava Rodriguez"}, {full_name: "Helper", is_bot: true}]})}</div>`,
 };
