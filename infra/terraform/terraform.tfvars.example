@@ -1,0 +1,5 @@
+domain_name         = "app.hover.team"
+administrator_email = "ops@example.com"
+
+# Never leave SSH open to the Internet. Replace with your office/home/VPN public CIDR.
+ssh_allowed_cidrs = ["203.0.113.10/32"]
