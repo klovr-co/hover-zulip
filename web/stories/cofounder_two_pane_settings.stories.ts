@@ -158,6 +158,55 @@ function populate_group_title(host: HTMLElement, group: GroupFixture): void {
         ?.style.setProperty("display", "none");
 }
 
+type SummaryFact = {
+    label: string;
+    value: string;
+};
+
+function render_detail_summary(
+    detail: HTMLElement,
+    heading_id: string,
+    heading_text: string,
+    description: string,
+    facts: SummaryFact[],
+    announcement: string,
+): void {
+    const document = detail.ownerDocument;
+    const summary = document.createElement("section");
+    summary.className = "storybook-two-pane-settings__summary";
+    summary.setAttribute("aria-labelledby", heading_id);
+
+    const heading = document.createElement("h2");
+    heading.id = heading_id;
+    heading.textContent = heading_text;
+
+    const description_element = document.createElement("p");
+    description_element.className = "storybook-two-pane-settings__description";
+    description_element.textContent = description;
+
+    const facts_list = document.createElement("dl");
+    facts_list.className = "storybook-two-pane-settings__facts";
+    for (const fact of facts) {
+        const fact_element = document.createElement("div");
+        const label = document.createElement("dt");
+        label.textContent = fact.label;
+        const value = document.createElement("dd");
+        value.textContent = fact.value;
+        fact_element.append(label, value);
+        facts_list.append(fact_element);
+    }
+
+    const feedback = document.createElement("p");
+    feedback.className = "storybook-two-pane-settings__feedback";
+    feedback.setAttribute("role", "status");
+    feedback.setAttribute("aria-live", "polite");
+    feedback.setAttribute("aria-atomic", "true");
+    feedback.textContent = announcement;
+
+    summary.append(heading, description_element, facts_list, feedback);
+    detail.replaceChildren(summary);
+}
+
 function setup_channel_scene(
     host: HTMLElement,
     channels: ChannelFixture[],
@@ -196,17 +245,18 @@ function setup_channel_scene(
         pane_title.textContent = channel.name;
         empty.hidden = true;
         detail.hidden = false;
-        detail.innerHTML = `
-            <section class="storybook-two-pane-settings__summary" aria-labelledby="storybook-channel-heading-${channel.stream_id}">
-                <h2 id="storybook-channel-heading-${channel.stream_id}">${channel.name}</h2>
-                <p class="storybook-two-pane-settings__description">${channel.rendered_description}</p>
-                <dl class="storybook-two-pane-settings__facts">
-                    <div><dt>Subscribers</dt><dd>${channel.subscriber_count}</dd></div>
-                    <div><dt>Weekly activity</dt><dd>${channel.stream_weekly_traffic} messages</dd></div>
-                    <div><dt>Membership</dt><dd>${channel.subscribed ? "Subscribed" : "Not subscribed"}</dd></div>
-                </dl>
-                <p class="storybook-two-pane-settings__feedback" role="status" aria-live="polite" aria-atomic="true">${announcement}</p>
-            </section>`;
+        render_detail_summary(
+            detail,
+            `storybook-channel-heading-${channel.stream_id}`,
+            channel.name,
+            channel.rendered_description,
+            [
+                {label: "Subscribers", value: String(channel.subscriber_count)},
+                {label: "Weekly activity", value: `${channel.stream_weekly_traffic} messages`},
+                {label: "Membership", value: channel.subscribed ? "Subscribed" : "Not subscribed"},
+            ],
+            announcement,
+        );
     };
 
     const select_channel = (
@@ -477,17 +527,28 @@ function setup_group_scene(
         populate_group_title(host, group);
         empty.hidden = true;
         detail.hidden = false;
-        detail.innerHTML = `
-            <section class="storybook-two-pane-settings__summary" aria-labelledby="storybook-group-heading-${group.id}">
-                <h2 id="storybook-group-heading-${group.id}">${group.name}</h2>
-                <p class="storybook-two-pane-settings__description">${group.description}</p>
-                <dl class="storybook-two-pane-settings__facts">
-                    <div><dt>Members</dt><dd>${group.member_count}</dd></div>
-                    <div><dt>Membership</dt><dd>${group.is_system_group ? "System managed" : group.is_member ? "Joined" : "Not joined"}</dd></div>
-                    <div><dt>Group type</dt><dd>${group.is_system_group ? "System group" : "Custom group"}</dd></div>
-                </dl>
-                <p class="storybook-two-pane-settings__feedback" role="status" aria-live="polite" aria-atomic="true">${announcement}</p>
-            </section>`;
+        render_detail_summary(
+            detail,
+            `storybook-group-heading-${group.id}`,
+            group.name,
+            group.description,
+            [
+                {label: "Members", value: String(group.member_count)},
+                {
+                    label: "Membership",
+                    value: group.is_system_group
+                        ? "System managed"
+                        : group.is_member
+                          ? "Joined"
+                          : "Not joined",
+                },
+                {
+                    label: "Group type",
+                    value: group.is_system_group ? "System group" : "Custom group",
+                },
+            ],
+            announcement,
+        );
     };
 
     const select_group = (
