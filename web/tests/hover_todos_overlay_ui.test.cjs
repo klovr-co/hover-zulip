@@ -44,7 +44,20 @@ run_test(
         const completed = todo({
             id: 2,
             state: "completed",
-            recent_events: [{id: 9, operation: "complete"}],
+            recent_events: [
+                {
+                    id: 9,
+                    kind: "completed",
+                    actor: {user_id: 11, full_name: "Grace"},
+                    occurred_at: "2026-08-17T09:30:00Z",
+                    previous_state: "active",
+                    new_state: "completed",
+                    previous_assignee: null,
+                    new_assignee: null,
+                    reason: "",
+                    notification_message_id: null,
+                },
+            ],
         });
         override(hover_todos, "sorted", () => [active, completed]);
         let context;
@@ -72,6 +85,9 @@ run_test(
         assert.equal(context.todos[1].due_label, "translated: No due date");
         assert.equal(context.todos[1].assignee_label, "translated: Unassigned");
         assert.equal(context.todos[1].latest_event.id, 9);
+        assert.equal(context.todos[1].latest_event_actor, "Grace");
+        assert.equal(context.todos[1].latest_event_time, "2026-08-17T09:30:00Z");
+        assert.equal(context.todos[1].evidence_count, 1);
         assert.equal(context.todos[0].source_hash, "#near/42");
         open_options.on_close();
         assert.equal(exited, true);

@@ -15,7 +15,10 @@ type TodoRenderContext = HoverTodo & {
     assignee_label: string;
     assignable_options: {user_id: number; full_name: string}[];
     source_hash: string;
+    evidence_count: number;
     latest_event?: HoverTodo["recent_events"][number];
+    latest_event_actor?: string;
+    latest_event_time?: string;
 };
 
 function format(todo: HoverTodo): TodoRenderContext {
@@ -29,7 +32,12 @@ function format(todo: HoverTodo): TodoRenderContext {
             (user) => user.user_id !== todo.assignee?.user_id,
         ),
         source_hash: `#near/${todo.generated_item.message_id}`,
-        ...(todo.recent_events[0] !== undefined && {latest_event: todo.recent_events[0]}),
+        evidence_count: todo.generated_item.evidence_count,
+        ...(todo.recent_events[0] !== undefined && {
+            latest_event: todo.recent_events[0],
+            latest_event_actor: todo.recent_events[0].actor.full_name,
+            latest_event_time: todo.recent_events[0].occurred_at,
+        }),
     };
 }
 

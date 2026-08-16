@@ -898,6 +898,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
             SpaceAttachment.PublicationSyncState.BLOCKED,
         )
 
+    @capture_hover_telemetry
     def test_material_dispute_creates_one_native_targeted_request_and_resolves(self) -> None:
         raw = self.six_publications()[1].model_dump(mode="json")
         raw["schema_version"] = "1.1"
