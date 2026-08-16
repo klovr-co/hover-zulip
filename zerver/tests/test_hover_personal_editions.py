@@ -275,9 +275,20 @@ class HoverPersonalEditionsTest(ZulipTestCase):
             has_more=False,
         )
 
-        payload = self.assert_json_success(self.get_editions())
+        with self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry:
+            payload = self.assert_json_success(self.get_editions())
 
         self.assertEqual(payload["sync_status"], "current")
+        self.assertEqual(
+            telemetry.output,
+            [
+                (
+                    "INFO:zulip.hover.telemetry:Hover telemetry event=edition outcome=current "
+                    "cache_used=false edition_count_bucket=one edition_kind=morning "
+                    f"failure_count_bucket=zero realm_id={self.realm.id}"
+                )
+            ],
+        )
         self.assertEqual(PersonalEdition.objects.count(), 51)
         self.assertEqual(
             [call["cursor"] for call in self.adapter.personal_edition_sync_calls],
