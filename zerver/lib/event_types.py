@@ -174,7 +174,9 @@ class HoverModuleVersion(BaseModel):
     description: str
     version: str
     output_type: str
+    lookback_days: int
     destination_topic: str
+    maximum_runtime_seconds: int
     navigation_icon: str
     navigation_order: int
     content_hash: str
