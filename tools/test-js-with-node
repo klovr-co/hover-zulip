@@ -129,7 +129,6 @@ EXEMPT_FILES = make_set(
         "web/src/hbs.d.ts",
         "web/src/hotkey.ts",
         "web/src/hover_source_view.ts",
-        "web/src/hover_spaces_ui.ts",
         "web/src/inbox_ui.ts",
         "web/src/inbox_util.ts",
         "web/src/info_overlay.ts",
