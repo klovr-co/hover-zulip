@@ -72,6 +72,24 @@ run_test("preselects the exact disputed field for a Review", () => {
     });
 });
 
+run_test("realtime messages without an applicable Hover response do not rerender", ({disallow}) => {
+    disallow(message_live_update, "rerender_messages_view_by_message_ids");
+
+    hover_response.apply_realtime_responses([]);
+    hover_response.apply_realtime_responses([{id: 43}]);
+    hover_response.apply_realtime_responses([
+        {
+            id: 44,
+            hover_response: {
+                type: "review",
+                clarification_required: false,
+                root_message_id: 404,
+                generated_item: generated_message().hover_generated_item,
+            },
+        },
+    ]);
+});
+
 run_test("realtime response metadata converges and rerenders the root", ({override}) => {
     const root = generated_message();
     roots.set(root.id, root);
