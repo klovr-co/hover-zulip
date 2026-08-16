@@ -24,10 +24,21 @@ from hover.views_connected_accounts import (
 )
 from hover.views_integrations import associate_integration_route, detach_integration_route
 from hover.views_modules import (
+    add_module_draft_collaborator,
+    archive_module_definition,
+    archive_module_version,
+    create_module_draft,
+    create_successor_module_draft,
     disable_module,
+    get_pipeline_library,
+    grant_pipeline_creator,
     install_module,
     list_module_catalog,
+    publish_module_draft,
     rebind_resume_module,
+    remove_module_draft_collaborator,
+    revoke_pipeline_creator,
+    update_module_draft,
     upgrade_module,
 )
 from hover.views_personal_editions import personal_editions
@@ -636,6 +647,32 @@ v1_api_and_json_patterns = [
     rest_path("hover/spaces/<int:space_id>/members/<int:user_id>", DELETE=remove_space_member),
     rest_path("hover/spaces/<int:space_id>/launch", POST=launch_space),
     rest_path("hover/modules", GET=list_module_catalog),
+    rest_path("hover/pipeline-library", GET=get_pipeline_library),
+    rest_path("hover/pipeline-library/creators", POST=grant_pipeline_creator),
+    rest_path("hover/pipeline-library/creators/<int:user_id>", DELETE=revoke_pipeline_creator),
+    rest_path("hover/pipeline-library/drafts", POST=create_module_draft),
+    rest_path("hover/pipeline-library/drafts/<int:draft_id>", PATCH=update_module_draft),
+    rest_path(
+        "hover/pipeline-library/drafts/<int:draft_id>/collaborators",
+        POST=add_module_draft_collaborator,
+    ),
+    rest_path(
+        "hover/pipeline-library/drafts/<int:draft_id>/collaborators/<int:user_id>",
+        DELETE=remove_module_draft_collaborator,
+    ),
+    rest_path("hover/pipeline-library/drafts/<int:draft_id>/publish", POST=publish_module_draft),
+    rest_path(
+        "hover/pipeline-library/versions/<int:version_id>/successor",
+        POST=create_successor_module_draft,
+    ),
+    rest_path(
+        "hover/pipeline-library/definitions/<int:definition_id>/archive",
+        POST=archive_module_definition,
+    ),
+    rest_path(
+        "hover/pipeline-library/versions/<int:version_id>/archive",
+        POST=archive_module_version,
+    ),
     rest_path("hover/spaces/<int:space_id>/modules", POST=install_module),
     rest_path("hover/module-installations/<int:installation_id>/disable", POST=disable_module),
     rest_path("hover/module-installations/<int:installation_id>/upgrade", POST=upgrade_module),
