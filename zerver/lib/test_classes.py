@@ -2813,6 +2813,12 @@ class MigrationsTestCase(ZulipTransactionTestCase):  # nocoverage
     def setUpBeforeMigration(self, apps: StateApps) -> None:
         pass  # nocoverage
 
+    @override
+    def tearDown(self) -> None:
+        executor = MigrationExecutor(connection)
+        executor.migrate(executor.loader.graph.leaf_nodes())
+        super().tearDown()
+
 
 def get_topic_messages(user_profile: UserProfile, stream: Stream, topic_name: str) -> list[Message]:
     query = UserMessage.objects.filter(

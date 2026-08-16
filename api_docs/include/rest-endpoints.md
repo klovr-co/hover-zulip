@@ -22,6 +22,17 @@
 * [Check thumbnail status](/api/check-thumbnail-status)
 * [Report a message](/api/report-message)
 
+## Hover
+
+* [Get permission-filtered personal editions](/api/get-hover-personal-editions)
+* [Search authorized Hover knowledge](/api/hover-search)
+* [List authorized Hover Todos](/api/list-hover-todos)
+* [Append a Hover Todo event](/api/update-hover-todo)
+* [Decide a Hover Suggested Action](/api/decide-hover-suggested-action)
+* [Get a ranked Hover awareness projection](/api/get-hover-awareness)
+* [Resolve evidence for a generated Hover item](/api/resolve-hover-generated-item-evidence)
+* [Resolve exact conflicting evidence for a Hover Disputed Detail](/api/resolve-hover-disputed-detail-evidence)
+
 ## Scheduled messages
 
 * [Get scheduled messages](/api/get-scheduled-messages)

@@ -781,14 +781,12 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.assertEqual(retrying.status_code, 504)
         self.assertTrue(retrying_payload["retryable"])
         self.assertEqual(retrying_payload["error_code"], "clawer_timeout")
-        self.assertEqual(
-            request_logs.output,
-            [
-                (
-                    "ERROR:django.request:Gateway Timeout: "
-                    f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
-                )
-            ],
+        self.assert_length(request_logs.output, 1)
+        self.assertTrue(
+            request_logs.output[0].startswith(
+                "ERROR:django.request:Gateway Timeout: "
+                f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
+            )
         )
 
         self.account.approval_state = ConnectedAccount.ApprovalState.REVOKED

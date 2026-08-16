@@ -172,6 +172,16 @@ class HoverModulesTest(ZulipTestCase):
         )
         self.assertEqual(conflict.status_code, 409)
 
+        disabled = self.assert_json_success(
+            self.client_post(f"/json/hover/module-installations/{installation.id}/disable")
+        )
+        self.assertTrue(disabled["changed"])
+        self.assertEqual(disabled["installation"]["state"], ModuleInstallation.State.DISABLED)
+        replayed_disable = self.assert_json_success(
+            self.client_post(f"/json/hover/module-installations/{installation.id}/disable")
+        )
+        self.assertFalse(replayed_disable["changed"])
+
     def test_initial_state_and_module_installation_event_converge(self) -> None:
         state = fetch_initial_state_data(
             self.creator, realm=self.realm, event_types={"hover_space"}

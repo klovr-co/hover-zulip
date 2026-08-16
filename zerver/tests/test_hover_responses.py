@@ -211,7 +211,10 @@ class HoverResponseTest(ZulipTestCase):
         self.assert_json_success(registration)
         queue_id = orjson.loads(registration.content)["queue_id"]
 
-        with self.captureOnCommitCallbacks(execute=True):
+        with (
+            self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
             result = self.send_response(
                 response_type="review",
                 content="Confirmed with the venue team.",
@@ -219,6 +222,16 @@ class HoverResponseTest(ZulipTestCase):
                 value='"Hall B"',
             )
         response_data = self.assert_json_success(result)
+        self.assertEqual(
+            telemetry.output,
+            [
+                (
+                    "INFO:zulip.hover.telemetry:Hover telemetry event=review outcome=success "
+                    f"material=false realm_id={self.realm.id} space_id={self.space.id} "
+                    "target_count_bucket=zero"
+                )
+            ],
+        )
 
         fetched = self.get_events(
             {
