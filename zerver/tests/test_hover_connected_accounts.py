@@ -316,7 +316,9 @@ class HoverConnectedAccountTest(ZulipTestCase):
         with self.assertLogs(level="WARNING") as logs:
             missing = self.client_get("/json/hover/connected_accounts/999999")
             cross_realm = self.client_get(f"/json/hover/connected_accounts/{account.id}")
-            missing_grant = self.client_delete("/json/hover/connected_accounts/999999/grants/999999")
+            missing_grant = self.client_delete(
+                "/json/hover/connected_accounts/999999/grants/999999"
+            )
             cross_realm_grant = self.client_delete(
                 f"/json/hover/connected_accounts/{account.id}/grants/{grant.id}"
             )
