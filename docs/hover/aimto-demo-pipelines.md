@@ -14,7 +14,7 @@ workflow. The static command remains the deterministic UI fixture.
 | `mentors_volunteers` | All Learn-a-thon Mentors & Volunteers (WhatsApp) | Event coordination, ownership, staffing and language coverage.                |
 | `volunteers_500`     | 500 volunteers @ Learnathon (WhatsApp)           | Day-one staffing and subgroup decisions.                                      |
 | `resident_lounge`    | Resident Lounge (WhatsApp)                       | Creative delivery, public positioning and campaign progress.                  |
-| `github`             | LearnAIMTO repository                            | Public product and delivery context.                                          |
+| `GitHub`             | LearnAIMTO repository                            | Public product and delivery context.                                          |
 | `instagram`          | `@aimto_26`                                      | Monitoring/publication destination only; never infer a post without evidence. |
 
 ## Pipeline catalogue and expected outputs
