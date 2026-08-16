@@ -10,9 +10,7 @@ from django.urls import URLPattern
 from django.utils import regex_helper
 from pydantic import TypeAdapter
 
-from zerver.lib.markdown.api_return_values_table_generator import (
-    APIReturnValuesTablePreprocessor,
-)
+from zerver.lib.markdown.api_return_values_table_generator import APIReturnValuesTablePreprocessor
 from zerver.lib.request import arguments_map
 from zerver.lib.rest import rest_dispatch
 from zerver.lib.test_classes import ZulipTestCase
