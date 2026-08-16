@@ -799,11 +799,18 @@ class HoverPublicationSyncTest(ZulipTestCase):
         ):
             self.client.raise_request_exception = False
             try:
-                retrying = self.client_post(
-                    f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
-                )
+                with self.assertLogs("django.request", level="ERROR") as request_log:
+                    retrying = self.client_post(
+                        f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
+                    )
             finally:
                 self.client.raise_request_exception = True
+        self.assertEqual(
+            [record.getMessage() for record in request_log.records],
+            [
+                f"Gateway Timeout: /json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
+            ],
+        )
         retrying_payload = orjson.loads(retrying.content)
         self.assertEqual(retrying.status_code, 504)
         self.assertTrue(retrying_payload["retryable"])
