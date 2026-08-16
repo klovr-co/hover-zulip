@@ -14,8 +14,7 @@ const meta = {
     args: {
         corporate_enabled: true,
     },
-    render: (args) =>
-        `<div class="storybook-popover-menu">${render_help_menu(args)}</div>`,
+    render: (args) => `<div class="storybook-popover-menu">${render_help_menu(args)}</div>`,
 } satisfies Meta<PopoverArgs>;
 
 export default meta;
