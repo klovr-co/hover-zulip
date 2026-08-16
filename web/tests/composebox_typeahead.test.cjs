@@ -145,6 +145,7 @@ const stream_list_sort = zrequire("stream_list_sort");
 const compose_pm_pill = zrequire("compose_pm_pill");
 const compose_recipient = zrequire("compose_recipient");
 const composebox_typeahead = zrequire("composebox_typeahead");
+const pygments_data = zrequire("pygments_data");
 const settings_config = zrequire("settings_config");
 const {set_current_user, set_realm} = zrequire("state_data");
 const {initialize_user_settings} = zrequire("user_settings");
@@ -2327,6 +2328,9 @@ test("begins_typeahead", ({override, override_rewire}) => {
     function language_objects(languages) {
         return languages.map((language) => language_item(language));
     }
+    const ipython_aliases = ["ipython", "ipython3", "ipythonconsole"].filter((language) =>
+        Object.hasOwn(pygments_data.langs, language),
+    );
     assert_typeahead_equals(
         "#foo\n~~~py",
         language_objects([
@@ -2340,6 +2344,7 @@ test("begins_typeahead", ({override, override_rewire}) => {
             "pyrex",
             "antlr-python",
             "bst-pybtex",
+            ...ipython_aliases,
             "numpy",
         ]),
     );

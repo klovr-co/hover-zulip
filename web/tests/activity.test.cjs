@@ -395,9 +395,11 @@ test("insert_one_user_into_empty_list", ({override}) => {
         assert.deepEqual(data.item, {
             href: "#narrow/dm/1-Alice-Smith",
             name: "Alice Smith",
+            user_actions_label: "translated: User actions for Alice Smith",
             user_id: 1,
             is_current_user: false,
             num_unread: 0,
+            presence_label: "translated: Active now",
             profile_picture: "/avatar/1",
             user_circle_class: "user-circle-active",
             status_emoji_info: undefined,

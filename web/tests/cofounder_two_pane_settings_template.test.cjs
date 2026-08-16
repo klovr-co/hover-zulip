@@ -113,7 +113,7 @@ run_test("Channel shell story demonstrates complete keyboard and state behavior"
     assert.match(story_source, /const apply_sort/);
     assert.match(story_source, /const filter_rows/);
     assert.match(story_source, /replace_channel_row/);
-    assert.match(story_source, /aria-atomic="true"/);
+    assert.match(story_source, /setAttribute\("aria-atomic", "true"\)/);
     assert.match(story_source, /no_stream_match_filter_empty_text/);
     assert.match(story_source, /globalThis\.matchMedia\("\(width < 700px\)"\)/);
     assert.match(story_source, /reveal_detail && uses_mobile_panes\(\)/);
