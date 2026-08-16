@@ -173,20 +173,32 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
                     # This block is for completeness.
                     ans += self.render_oneof_block(element["items"], spacing + 4)
 
-            if isinstance(element.get("additionalProperties"), dict):
-                additional_properties = element["additionalProperties"]
-                if "description" in additional_properties:
-                    data_type = generate_data_type(additional_properties)
-                    ans.append(
-                        self.render_desc(
-                            additional_properties["description"], spacing + 4, data_type
-                        )
-                    )
-                if "properties" in additional_properties:
-                    ans += self.render_table(
-                        additional_properties["properties"],
-                        spacing + 8,
-                    )
+            ans += self.render_additional_properties(
+                element.get("additionalProperties"), spacing + 4
+            )
+        return ans
+
+    def render_additional_properties(
+        self, additional_properties: object, spacing: int
+    ) -> list[str]:
+        if not isinstance(additional_properties, dict):
+            return []
+
+        data_type = generate_data_type(additional_properties)
+        ans = [
+            self.render_desc(
+                additional_properties.get("description", "Additional properties."),
+                spacing,
+                data_type,
+            )
+        ]
+        if "properties" in additional_properties:
+            ans += self.render_table(additional_properties["properties"], spacing + 4)
+        if "oneOf" in additional_properties:
+            ans += self.render_oneof_block(additional_properties, spacing + 4)
+        ans += self.render_additional_properties(
+            additional_properties.get("additionalProperties"), spacing + 4
+        )
         return ans
 
     def render_table(self, return_values: dict[str, Any], spacing: int) -> list[str]:
@@ -218,37 +230,9 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
             ans.append(self.render_desc(description, spacing, data_type, return_value))
             if "properties" in schema:
                 ans += self.render_table(schema["properties"], spacing + 4)
-            additional_properties = schema.get("additionalProperties", False)
-            if isinstance(additional_properties, dict):
-                data_type = generate_data_type(additional_properties)
-                ans.append(
-                    self.render_desc(
-                        additional_properties.get("description", "Additional properties."),
-                        spacing + 4,
-                        data_type,
-                    )
-                )
-                if "properties" in additional_properties:
-                    ans += self.render_table(
-                        additional_properties["properties"],
-                        spacing + 8,
-                    )
-                elif "oneOf" in additional_properties:
-                    ans += self.render_oneof_block(additional_properties, spacing + 8)
-                elif additional_properties.get("additionalProperties", False):
-                    data_type = generate_data_type(additional_properties["additionalProperties"])
-                    ans.append(
-                        self.render_desc(
-                            additional_properties["additionalProperties"]["description"],
-                            spacing + 8,
-                            data_type,
-                        )
-                    )
-
-                    ans += self.render_table(
-                        additional_properties["additionalProperties"]["properties"],
-                        spacing + 12,
-                    )
+            ans += self.render_additional_properties(
+                schema.get("additionalProperties"), spacing + 4
+            )
             if "items" in schema:
                 if "properties" in schema["items"]:
                     ans += self.render_table(schema["items"]["properties"], spacing + 4)

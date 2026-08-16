@@ -362,9 +362,11 @@ run_test("ignores callbacks from stale and aborted requests", () => {
     stale_request.success(edition_response());
     stale_request.error({}, "error");
     assert.equal($("#hover-editions-view").visible(), false);
+    assert.doesNotMatch($("#hover-editions-view").html(), /A good place to start/);
 
     hover_editions_view.show();
     const current_request = request;
+    assert.notEqual(current_request, stale_request);
     current_request.error({}, "abort");
     assert.doesNotMatch($("#hover-editions-view").html(), /could not be loaded/);
 });

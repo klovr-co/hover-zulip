@@ -88,7 +88,15 @@ class OpenAPIToolsTest(ZulipTestCase):
                         "details": {
                             "type": "object",
                             "additionalProperties": {
-                                "type": "string",
+                                "type": "object",
+                                "additionalProperties": {"type": "string"},
+                            },
+                        },
+                        "boolean_map": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "object",
+                                "additionalProperties": True,
                             },
                         },
                     },
@@ -101,6 +109,9 @@ class OpenAPIToolsTest(ZulipTestCase):
         self.assertIn("The `source_id` value.", rendered[1])
         self.assertIn("The `details` value.", rendered[2])
         self.assertIn("Additional properties.", rendered[3])
+        self.assertIn("Additional properties.", rendered[4])
+        self.assertIn("The `boolean_map` value.", rendered[5])
+        self.assertIn("Additional properties.", rendered[6])
 
     def test_get_openapi_fixture(self) -> None:
         actual = get_openapi_fixture(TEST_ENDPOINT, TEST_METHOD, TEST_RESPONSE_BAD_REQ)[0]["value"]
