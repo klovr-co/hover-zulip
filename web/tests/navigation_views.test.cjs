@@ -129,22 +129,24 @@ run_test("set_hover_enabled", () => {
     );
     assert.equal(built_in_views_meta_data.all_messages.name, "translated: All activity");
     assert.equal(built_in_views_meta_data.recent_view.name, "translated: Team Pulse");
-    assert.equal(built_in_views_meta_data.mentions.name, "translated: Daily Brief");
-    assert.equal(built_in_views_meta_data.mentions.icon, "zulip-icon-sun");
+    assert.equal(built_in_views_meta_data.hover_editions.name, "translated: Daily Brief");
+    assert.equal(built_in_views_meta_data.hover_editions.icon, "zulip-icon-sun");
     assert.equal(built_in_views_meta_data.reminders.name, "translated: Todos");
     assert.equal(built_in_views_meta_data.starred_messages.name, "translated: Saved");
-    assert.ok(
-        navigation_views.get_built_in_views().some((view) => view.fragment === "hover/search"),
-    );
+    const hover_views = navigation_views.get_built_in_views();
+    assert.ok(hover_views.some((view) => view.fragment === "hover/search"));
+    assert.ok(hover_views.some((view) => view.fragment === "hover/editions"));
+    assert.ok(hover_views.every((view) => view.fragment !== "narrow/is/mentioned"));
 
     navigation_views.set_hover_enabled(false);
     assert.equal(built_in_views_meta_data.inbox.name, "translated: Inbox");
     assert.equal(built_in_views_meta_data.inbox.tooltip_template_id, "inbox-tooltip-template");
     assert.equal(built_in_views_meta_data.mentions.name, "translated: Mentions");
     assert.equal(built_in_views_meta_data.mentions.icon, "zulip-icon-at-sign");
-    assert.ok(
-        !navigation_views.get_built_in_views().some((view) => view.fragment === "hover/search"),
-    );
+    const standard_views = navigation_views.get_built_in_views();
+    assert.ok(standard_views.every((view) => view.fragment !== "hover/search"));
+    assert.ok(standard_views.every((view) => view.fragment !== "hover/editions"));
+    assert.ok(standard_views.some((view) => view.fragment === "narrow/is/mentioned"));
 });
 
 run_test("get_all_navigation_views", () => {
