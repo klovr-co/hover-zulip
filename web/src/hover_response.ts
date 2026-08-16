@@ -116,7 +116,9 @@ export function apply_realtime_responses(messages: Message[]): void {
             root_message_ids.add(request_message.id);
         }
     }
-    message_live_update.rerender_messages_view_by_message_ids([...root_message_ids]);
+    if (root_message_ids.size > 0) {
+        message_live_update.rerender_messages_view_by_message_ids([...root_message_ids]);
+    }
 }
 
 export const _testing = {
