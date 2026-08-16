@@ -2,9 +2,9 @@
 
 const assert = require("node:assert/strict");
 
+const render_drag_handle = require("../templates/cofounder/components/drag_handle.hbs");
 const render_active_users = require("../templates/settings/active_user_list_admin.hbs");
 const render_api_key = require("../templates/settings/api_key_modal.hbs");
-const render_drag_handle = require("../templates/cofounder/components/drag_handle.hbs");
 const render_filter = require("../templates/settings/filter_text_input.hbs");
 const render_stream_members = require("../templates/stream_settings/stream_members_table.hbs");
 

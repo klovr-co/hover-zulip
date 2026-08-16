@@ -16,9 +16,7 @@ li.cf-topic-nav-action {
         background-color var(--cf-duration-fast) ease;
 }
 
-li.cf-topic-nav-action.topic-list-item:has(
-        > .cf-topic-nav-action__main
-    ) {
+li.cf-topic-nav-action.topic-list-item:has(> .cf-topic-nav-action__main) {
     padding-right: 0;
     margin-left: 0;
 }
@@ -66,7 +64,9 @@ li.cf-topic-nav-action:is(:hover, :focus-within) {
     grid-area: auto;
 }
 
-.cf-topic-nav-action > .cf-topic-nav-action__main > .cf-topic-nav-action__label {
+.cf-topic-nav-action
+    > .cf-topic-nav-action__main
+    > .cf-topic-nav-action__label {
     min-width: 0;
     padding: 0;
     overflow: hidden;

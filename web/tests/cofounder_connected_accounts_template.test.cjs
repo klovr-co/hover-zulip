@@ -4,10 +4,10 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const {run_test} = require("./lib/test.cjs");
-
 const render_card = require("../templates/settings/connected_account_card.hbs");
 const render_section = require("../templates/settings/connected_accounts_admin.hbs");
+
+const {run_test} = require("./lib/test.cjs");
 
 run_test("connected account settings use standalone Cofounder contracts", () => {
     const section_html = render_section({is_admin: true, realm_hover_enabled: true});

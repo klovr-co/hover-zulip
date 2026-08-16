@@ -820,6 +820,12 @@ body:has(.storybook-two-pane-settings) {
     width: min(100%, 680px);
 }
 
+.storybook-notice-example {
+    display: grid;
+    gap: 12px;
+    width: min(100%, 680px);
+}
+
 .storybook-notice-story__feedback {
     min-height: 1.3em;
     margin: 8px 0 0;

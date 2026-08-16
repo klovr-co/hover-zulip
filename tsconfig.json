@@ -49,4 +49,5 @@
         "static/webpack-bundles",
         "var",
     ],
+    "include": [".storybook/page_params.ts", "web"],
 }
