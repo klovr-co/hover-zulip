@@ -35,7 +35,6 @@ set_global("document", {
     hasFocus: () => false,
 });
 
-const activity_ui = mock_esm("../src/activity_ui");
 const activity = zrequire("../src/activity");
 const browser_history = mock_esm("../src/browser_history", {go_to_location() {}});
 const compose_actions = mock_esm("../src/compose_actions");
@@ -459,7 +458,7 @@ test_while_not_editing_text("streams", ({override}) => {
 test_while_not_editing_text("basic mappings", () => {
     assert_mapping("?", browser_history, "go_to_location");
     assert_mapping("/", search, "initiate_search");
-    assert_mapping("w", activity_ui, "initiate_search");
+    assert_unmapped("w");
     assert_mapping("q", sidebar_ui, "initiate_search");
 
     assert_mapping("A", message_view, "stream_cycle_backward", true);
