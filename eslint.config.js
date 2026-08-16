@@ -77,7 +77,9 @@ export default defineConfig(
                 JQuery: "readonly",
             },
             parserOptions: {
-                projectService: true,
+                projectService: {
+                    allowDefaultProject: [".storybook/page_params.ts"],
+                },
                 tsConfigRootDir: import.meta.dirname,
                 warnOnUnsupportedTypeScriptVersion: false,
             },
