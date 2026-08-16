@@ -17,6 +17,7 @@ if [ "$#" -eq 0 ]; then
             ':!docs/THIRDPARTY' \
             ':!docs/translating' \
             ':!locale' \
+            ':!.ua/knowledge-graph.json' \
             ':!postgresql.conf.template.erb' \
             ':!tools/build-demo-organization-wordlist' \
             ':!tools/setup/emoji/emoji_map.json' \
