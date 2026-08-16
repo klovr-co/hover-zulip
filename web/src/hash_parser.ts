@@ -69,7 +69,6 @@ export function is_overlay_hash(hash: string | undefined): boolean {
         "keyboard-shortcuts",
         "message-formatting",
         "search-operators",
-        "about-zulip",
         "scheduled",
         "reminders",
         "user",
@@ -169,7 +168,6 @@ export function is_spectator_compatible(hash: string): boolean {
         // until one cannot directly upgrade from Zulip 8.x.
         "all_messages",
         "feed",
-        "about-zulip",
         "topics",
     ];
 

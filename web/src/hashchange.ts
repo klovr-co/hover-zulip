@@ -2,7 +2,6 @@ import {$} from "jquery";
 import assert from "minimalistic-assert";
 import * as z from "zod/mini";
 
-import * as about_zulip from "./about_zulip.ts";
 import * as admin from "./admin.ts";
 import * as blueslip from "./blueslip.ts";
 import * as browser_history from "./browser_history.ts";
@@ -351,7 +350,6 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
         case "#streams":
         case "#organization":
         case "#settings":
-        case "#about-zulip":
         case "#scheduled":
         case "#reminders":
             blueslip.error("overlay logic skipped for: " + hash[0]);
@@ -603,11 +601,6 @@ function do_hashchange_overlay(old_hash: string | undefined): void {
 
     if (base === "search-operators") {
         info_overlay.show("search-operators");
-        return;
-    }
-
-    if (base === "about-zulip") {
-        about_zulip.launch();
         return;
     }
 
