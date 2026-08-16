@@ -92,3 +92,4 @@ core
 ## Miscellaneous
 # (Ideally this section is empty.)
 .transifexrc
+config.bat

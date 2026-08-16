@@ -26,7 +26,8 @@ const channel = {
 
 const meta = {
     title: "Cofounder/Components/Conversation header",
-    render: () => `<div class="storybook-conversation-header-frame">${render_header(channel)}</div>`,
+    render: () =>
+        `<div class="storybook-conversation-header-frame">${render_header(channel)}</div>`,
 } satisfies Meta;
 
 export default meta;
