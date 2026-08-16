@@ -1,5 +1,6 @@
 import hashlib
 from datetime import datetime, timezone
+from typing import Any
 from unittest import TestCase
 from uuid import uuid4
 
@@ -26,10 +27,17 @@ from zerver.actions.channel_folders import check_add_channel_folder
 from zerver.lib.test_classes import ZulipTestCase
 from zerver.lib.user_groups import get_system_user_group_by_name
 from zerver.models.groups import SystemGroups
-from zerver.tests.hover_platform_scenario import SCENARIO_FIXTURE, load_hover_platform_scenario
+from zerver.tests.hover_platform_scenario import (
+    SCENARIO_FIXTURE,
+    HoverPlatformScenario,
+    load_hover_platform_scenario,
+)
 
 
 class HoverPlatformScenarioTest(TestCase):
+    def fixture_data(self) -> dict[str, Any]:
+        return orjson.loads(SCENARIO_FIXTURE.read_bytes())
+
     def test_fixture_covers_cross_provider_platform_workflow(self) -> None:
         fixture_bytes = SCENARIO_FIXTURE.read_bytes()
         expected_checksum = SCENARIO_FIXTURE.with_suffix(".json.sha256").read_text().strip()
@@ -71,6 +79,58 @@ class HoverPlatformScenarioTest(TestCase):
         ]:
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, fixture.casefold())
+
+    def test_step_shape_validation(self) -> None:
+        data = self.fixture_data()
+        data["steps"][0]["publication"] = None
+        with self.assertRaisesRegex(ValueError, "must carry exactly one publication"):
+            HoverPlatformScenario.model_validate(data)
+
+        data = self.fixture_data()
+        data["steps"][0]["provider_key"] = None
+        with self.assertRaisesRegex(ValueError, "must identify one provider"):
+            HoverPlatformScenario.model_validate(data)
+
+        data = self.fixture_data()
+        data["steps"][3]["references_step_id"] = None
+        with self.assertRaisesRegex(ValueError, "must reference their predecessor"):
+            HoverPlatformScenario.model_validate(data)
+
+    def test_scenario_workflow_validation(self) -> None:
+        data = self.fixture_data()
+        data["providers"].pop()
+        with self.assertRaisesRegex(ValueError, "all supported fixture providers"):
+            HoverPlatformScenario.model_validate(data)
+
+        data = self.fixture_data()
+        data["providers"].append(data["providers"][0].copy())
+        with self.assertRaisesRegex(ValueError, "providers must be unique"):
+            HoverPlatformScenario.model_validate(data)
+
+        data = self.fixture_data()
+        data["steps"][1]["step_id"] = data["steps"][0]["step_id"]
+        with self.assertRaisesRegex(ValueError, "step IDs must be unique"):
+            HoverPlatformScenario.model_validate(data)
+
+        data = self.fixture_data()
+        data["steps"][3]["references_step_id"] = "later-step"
+        with self.assertRaisesRegex(ValueError, "must point to an earlier step"):
+            HoverPlatformScenario.model_validate(data)
+
+        data = self.fixture_data()
+        data["steps"][0]["provider_key"] = "whatsapp"
+        with self.assertRaisesRegex(ValueError, "must use its provider source"):
+            HoverPlatformScenario.model_validate(data)
+
+        data = self.fixture_data()
+        data["steps"].pop()
+        with self.assertRaisesRegex(ValueError, "complete platform workflow"):
+            HoverPlatformScenario.model_validate(data)
+
+    def test_publication_requires_a_publication_step(self) -> None:
+        scenario = load_hover_platform_scenario()
+        with self.assertRaises(KeyError):
+            scenario.publication("missing-step")
 
 
 class HoverPilotCausalScenarioTest(ZulipTestCase):
