@@ -2,7 +2,6 @@ import {$} from "jquery";
 import assert from "minimalistic-assert";
 import type * as tippy from "tippy.js";
 
-import * as activity_ui from "./activity_ui.ts";
 import * as compose_actions from "./compose_actions.ts";
 import * as compose_recipient from "./compose_recipient.ts";
 import * as compose_state from "./compose_state.ts";
@@ -131,9 +130,6 @@ export function show(opts: {
     compose_actions.on_show_navigation_view();
     popup_banners.close_found_missing_unreads_banner();
 
-    // This has to happen after resetting the current narrow filter, so
-    // that the buddy list is rendered with the correct narrow state.
-    activity_ui.build_user_sidebar();
 }
 
 export function hide(opts: {$view: JQuery; set_visible: (value: boolean) => void}): void {

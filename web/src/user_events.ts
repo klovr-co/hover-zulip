@@ -6,10 +6,8 @@ import {$} from "jquery";
 import assert from "minimalistic-assert";
 import * as z from "zod/mini";
 
-import * as activity_ui from "./activity_ui.ts";
 import * as blueslip from "./blueslip.ts";
 import * as bot_data from "./bot_data.ts";
-import {buddy_list} from "./buddy_list.ts";
 import * as compose_pm_pill from "./compose_pm_pill.ts";
 import * as compose_recipient from "./compose_recipient.ts";
 import * as message_live_update from "./message_live_update.ts";
@@ -26,7 +24,6 @@ import * as settings_exports from "./settings_exports.ts";
 import * as settings_linkifiers from "./settings_linkifiers.ts";
 import * as settings_org from "./settings_org.ts";
 import * as settings_panel_menu from "./settings_panel_menu.ts";
-import * as settings_preferences from "./settings_preferences.ts";
 import * as settings_profile_fields from "./settings_profile_fields.ts";
 import * as settings_realm_user_settings_defaults from "./settings_realm_user_settings_defaults.ts";
 import * as settings_streams from "./settings_streams.ts";
@@ -104,7 +101,6 @@ export const update_person = function update(event: UserUpdate): void {
         people.set_full_name(user, event.full_name);
 
         settings_users.update_user_data(event.user_id, event);
-        activity_ui.redraw();
         message_live_update.update_user_full_name(event.user_id, event.full_name);
         reactions.update_user_full_name(event.user_id);
         pm_list.update_private_messages();
@@ -114,7 +110,6 @@ export const update_person = function update(event: UserUpdate): void {
         if (people.is_my_user_id(event.user_id)) {
             current_user.full_name = event.full_name;
             settings_account.update_full_name(event.full_name);
-            settings_preferences.update_user_list_style_preview_name(event.full_name);
         }
         if (user.is_bot && bot_data.get(event.user_id) !== undefined) {
             bot_data.update(event.user_id, {user_id: event.user_id, full_name: event.full_name});
@@ -201,13 +196,9 @@ export const update_person = function update(event: UserUpdate): void {
             } else {
                 $("#user-avatar-source").hide();
             }
-            settings_preferences.update_user_list_style_preview_avatar(
-                people.small_avatar_url_for_person(user),
-            );
         }
 
         message_live_update.update_avatar(user.user_id, event.avatar_url);
-        buddy_list.insert_or_move([event.user_id]);
         user_profile.update_profile_modal_ui(user, event);
     }
 
@@ -279,7 +270,6 @@ export const update_person = function update(event: UserUpdate): void {
             user_group_edit.remove_deactivated_user_from_all_groups(event.user_id);
             settings_users.update_view_on_deactivate(event.user_id, is_bot_user);
         }
-        buddy_list.insert_or_move([event.user_id]);
         // Update UI elements to reflect the user's deactivated/reactivated status
         pm_list.update_private_messages();
         compose_pm_pill.update_user_pill_active_status(user, event.is_active);

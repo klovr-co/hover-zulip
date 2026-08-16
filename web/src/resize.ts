@@ -47,19 +47,9 @@ export function get_stream_filters_max_height(): number {
 
 function get_new_heights(): {
     stream_filters_max_height: number;
-    buddy_list_wrapper_max_height: number;
 } {
-    const viewport_height = message_viewport.height();
-    const usable_height =
-        viewport_height -
-        Number.parseInt($("#right-sidebar").css("paddingTop"), 10) -
-        ($("#userlist-header").outerHeight(true) ?? 0);
-
-    const buddy_list_wrapper_max_height = Math.max(80, usable_height);
-
     return {
         stream_filters_max_height: get_stream_filters_max_height(),
-        buddy_list_wrapper_max_height,
     };
 }
 
@@ -164,7 +154,6 @@ export function resize_stream_filters_container(): void {
 
 export function resize_sidebars(): void {
     const h = get_new_heights();
-    $("#buddy_list_wrapper").css("max-height", h.buddy_list_wrapper_max_height);
     $("#left_sidebar_scroll_container").css("max-height", h.stream_filters_max_height);
 }
 

@@ -2,7 +2,6 @@ import {$} from "jquery";
 import assert from "minimalistic-assert";
 
 import * as activity from "./activity.ts";
-import * as activity_ui from "./activity_ui.ts";
 import * as browser_history from "./browser_history.ts";
 import * as clipboard_handler from "./clipboard_handler.ts";
 import * as color_picker_popover from "./color_picker_popover.ts";
@@ -202,7 +201,6 @@ const KEYDOWN_MAPPINGS: Record<string, Hotkey | Hotkey[]> = {
     T: {name: "open_recent_view", message_view_only: true},
     U: {name: "toggle_sender_info", message_view_only: true},
     V: {name: "show_lightbox", message_view_only: true},
-    W: {name: "query_users", message_view_only: true},
     X: {name: "compose_private_message", message_view_only: true},
     Y: {name: "list_of_channel_topics", message_view_only: true},
     Z: {name: "zoom_to_message_near", message_view_only: true},
@@ -474,11 +472,6 @@ function process_escape_key(e: JQuery.KeyDownEvent): boolean {
     }
 
     if (processing_text()) {
-        if (activity_ui.searching()) {
-            activity_ui.clear_search();
-            return true;
-        }
-
         if (stream_list.searching()) {
             stream_list.clear_search();
             return true;
@@ -600,11 +593,6 @@ function handle_popover_events(event_name: string): boolean {
 
     if (user_card_popover.user_card.is_open()) {
         user_card_popover.user_card.handle_keyboard(event_name);
-        return true;
-    }
-
-    if (user_card_popover.user_sidebar.is_open()) {
-        user_card_popover.user_sidebar.handle_keyboard(event_name);
         return true;
     }
 
@@ -1181,12 +1169,6 @@ function process_hotkey(e: JQuery.KeyDownEvent, hotkey: Hotkey): boolean {
             } else {
                 sidebar_ui.initiate_search();
             }
-            return true;
-        case "query_users":
-            if (page_params.is_spectator) {
-                return false;
-            }
-            activity_ui.initiate_search();
             return true;
         case "search":
         case "search_with_k":

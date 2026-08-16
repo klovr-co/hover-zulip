@@ -22,10 +22,6 @@ const settings_account = mock_esm("../src/settings_account", {
     add_or_remove_owner_from_role_dropdown() {},
     update_user_own_role_dropdown_state() {},
 });
-const settings_preferences = mock_esm("../src/settings_preferences", {
-    update_user_list_style_preview_name() {},
-    update_user_list_style_preview_avatar() {},
-});
 const settings_bots = mock_esm("../src/settings_bots", {
     redraw_your_bots_list() {},
     toggle_bot_config_download_container() {},
@@ -44,12 +40,6 @@ mock_esm("../src/user_profile", {
     update_user_custom_profile_fields() {},
 });
 
-const buddy_list = mock_esm("../src/buddy_list", {
-    BuddyList: class {
-        insert_or_move = noop;
-    },
-});
-
 const compose_pm_pill = mock_esm("../src/compose_pm_pill", {
     update_user_pill_active_status() {},
 });
@@ -59,9 +49,6 @@ mock_esm("../src/compose_recipient", {
 const pm_list = mock_esm("../src/pm_list", {
     update_private_messages() {},
 });
-
-const buddy_data = new buddy_list.BuddyList();
-buddy_list.buddy_list = buddy_data;
 
 mock_esm("../src/activity_ui", {
     redraw() {},
@@ -220,16 +207,10 @@ run_test("updates", ({override}) => {
     assert.ok(!current_user.is_guest);
     assert.ok(!current_user.is_admin);
 
-    let user_list_style_preview_name;
-    settings_preferences.update_user_list_style_preview_name = (full_name_arg) => {
-        user_list_style_preview_name = full_name_arg;
-    };
-
     user_events.update_person({user_id: me.user_id, full_name: "Me V2"});
     assert.equal(people.my_full_name(), "Me V2");
     assert.equal(user_id, me.user_id);
     assert.equal(full_name, "Me V2");
-    assert.equal(user_list_style_preview_name, "Me V2");
 
     user_events.update_person({user_id: isaac.user_id, new_email: "newton@example.com"});
     person = people.get_by_user_id(isaac.user_id);
@@ -242,28 +223,16 @@ run_test("updates", ({override}) => {
     assert.equal(person.full_name, "Me V2");
 
     let avatar_url;
-    let inserted_or_moved_user_ids;
     message_live_update.update_avatar = (user_id_arg, avatar_url_arg) => {
         user_id = user_id_arg;
         avatar_url = avatar_url_arg;
     };
-    buddy_data.insert_or_move = (user_ids_arg) => {
-        inserted_or_moved_user_ids = user_ids_arg;
-    };
-    let user_list_style_preview_avatar_url;
-    settings_preferences.update_user_list_style_preview_avatar = (avatar_url_arg) => {
-        user_list_style_preview_avatar_url = avatar_url_arg;
-    };
-
     user_events.update_person({user_id: isaac.user_id, full_name: "Sir Isaac"});
     person = people.get_by_email(isaac.email);
     assert.equal(person.full_name, "Sir Isaac");
     assert.equal(person.is_admin, true);
     assert.equal(user_id, isaac.user_id);
     assert.equal(full_name, "Sir Isaac");
-    // The user list style preview shows the current user's name, so
-    // renaming someone else must not update it.
-    assert.equal(user_list_style_preview_name, "Me V2");
 
     person = people.get_by_email(isaac.email);
     assert.equal(person.delivery_email, null);
@@ -283,18 +252,12 @@ run_test("updates", ({override}) => {
     assert.equal(person.full_name, "Sir Isaac");
     assert.equal(user_id, isaac.user_id);
     assert.equal(person.avatar_url, avatar_url);
-    assert.deepEqual(inserted_or_moved_user_ids, [isaac.user_id]);
-    // The user list style preview shows the current user's avatar, so
-    // another user's avatar change must not update it.
-    assert.equal(user_list_style_preview_avatar_url, undefined);
 
     user_events.update_person({user_id: me.user_id, avatar_url: "http://gravatar.com/789456"});
     person = people.get_by_email(me.email);
     assert.equal(person.full_name, "Me V2");
     assert.equal(user_id, me.user_id);
     assert.equal(person.avatar_url, avatar_url);
-    assert.deepEqual(inserted_or_moved_user_ids, [me.user_id]);
-    assert.equal(user_list_style_preview_avatar_url, "http://gravatar.com/789456");
 
     user_events.update_person({user_id: me.user_id, timezone: "UTC"});
     person = people.get_by_email(me.email);
@@ -346,8 +309,6 @@ run_test("updates", ({override}) => {
     user_events.update_person({user_id: test_bot.user_id, bot_owner_id: me.user_id});
     person = people.get_by_email(test_bot.email);
     assert.equal(person.bot_owner_id, me.user_id);
-
-    buddy_list.BuddyList.insert_or_move = noop;
 
     // Test that UI elements are updated when a user is deactivated/reactivated
     let pm_list_updated = false;

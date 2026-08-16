@@ -16,14 +16,7 @@ mock_esm("../src/settings_data", {
     user_can_access_all_other_users: () => true,
 });
 const timerender = mock_esm("../src/timerender");
-mock_esm("../src/buddy_list", {
-    buddy_list: {
-        rerender_participants: noop,
-    },
-});
-
 const compose_fade_helper = zrequire("compose_fade_helper");
-const activity_ui = zrequire("activity_ui");
 const muted_users = zrequire("muted_users");
 const peer_data = zrequire("peer_data");
 const people = zrequire("people");
@@ -461,30 +454,6 @@ test("show offline channel subscribers for small channels", ({override_rewire}) 
     // Make the max channel size lower, so that we hide the offline users
     override_rewire(buddy_data, "max_channel_size_to_show_all_subscribers", 2);
     assert.deepEqual(buddy_data.get_filtered_and_sorted_user_ids(""), [me.user_id, alice.user_id]);
-});
-
-test("get_conversation_participants", () => {
-    people.add_active_user(selma);
-
-    const rome_sub = make_stream({name: "Rome", stream_id: 1001});
-    stream_data.add_sub_for_tests(rome_sub);
-    peer_data.set_subscribers(rome_sub.stream_id, [selma.user_id, me.user_id]);
-
-    const filter_terms = [
-        {operator: "channel", operand: String(rome_sub.stream_id)},
-        {operator: "topic", operand: "Foo"},
-    ];
-    message_lists.set_current(
-        make_message_list(filter_terms, {
-            visible_participants: [selma.user_id],
-        }),
-    );
-
-    activity_ui.rerender_user_sidebar_participants();
-    assert.deepEqual(
-        buddy_data.get_conversation_participants_callback()(),
-        new Set([selma.user_id]),
-    );
 });
 
 test("level", ({override}) => {
