@@ -9,7 +9,6 @@ import render_navbar from "../templates/navbar.hbs";
 import render_try_zulip_modal from "../templates/try_zulip_modal.hbs";
 import render_view_bottom_loading_indicator from "../templates/view_bottom_loading_indicator.hbs";
 
-import * as about_zulip from "./about_zulip.ts";
 import * as activity from "./activity.ts";
 import * as activity_ui from "./activity_ui.ts";
 import * as add_stream_options_popover from "./add_stream_options_popover.ts";
@@ -738,7 +737,6 @@ export async function initialize_everything(state_data) {
     settings_panel_menu.initialize();
     settings_sections.initialize();
     settings_toggle.initialize();
-    about_zulip.initialize();
 
     initialize_unread_ui();
     activity.initialize();
