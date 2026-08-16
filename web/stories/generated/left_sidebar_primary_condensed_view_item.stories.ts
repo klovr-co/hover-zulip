@@ -3,7 +3,6 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/left_sidebar_primary_condensed_view_item.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {

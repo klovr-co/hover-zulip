@@ -3,10 +3,10 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/hover_source_reactions.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
+    "evidence_url": "#storybook",
     "integrations": [
         {
             "custom_classes": "",

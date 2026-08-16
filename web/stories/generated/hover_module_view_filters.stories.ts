@@ -2,15 +2,17 @@
 
 import type {Meta, StoryObj} from "@storybook/html";
 
-import render_template from "../../templates/right_sidebar.hbs";
-
+import render_template from "../../templates/hover_module_view_filters.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
-const fixture = {};
+const fixture = {
+    "space_name": "Space name",
+    "module_name": "Module name"
+};
 
 const meta = {
-    title: "Catalogue/Right Sidebar",
-    render: () => render_template_story("right_sidebar.hbs", render_template, fixture),
+    title: "Catalogue/Hover Module View Filters",
+    render: () => render_template_story("hover_module_view_filters.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

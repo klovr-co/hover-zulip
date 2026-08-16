@@ -389,9 +389,11 @@ class HoverPersonalEditionsTest(ZulipTestCase):
         self.assertEqual(
             current_telemetry.output,
             [
-                "INFO:zulip.hover.telemetry:Hover telemetry event=edition outcome=current "
-                "cache_used=false edition_count_bucket=one edition_kind=end_of_day "
-                f"failure_count_bucket=zero realm_id={self.realm.id}"
+                (
+                    "INFO:zulip.hover.telemetry:Hover telemetry event=edition outcome=current "
+                    "cache_used=false edition_count_bucket=one edition_kind=end_of_day "
+                    f"failure_count_bucket=zero realm_id={self.realm.id}"
+                )
             ],
         )
         error = ClawerSyncError(

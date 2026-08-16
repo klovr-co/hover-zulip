@@ -3,7 +3,6 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/info_density_control_button_group.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {

@@ -3,7 +3,6 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/modal_banner/topic_already_exists_warning_banner.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};

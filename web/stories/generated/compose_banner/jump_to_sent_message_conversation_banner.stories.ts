@@ -3,7 +3,6 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/compose_banner/jump_to_sent_message_conversation_banner.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};

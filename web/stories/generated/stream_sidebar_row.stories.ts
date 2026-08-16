@@ -3,7 +3,6 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/stream_sidebar_row.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
@@ -16,7 +15,8 @@ const fixture = {
     "can_post_messages": true,
     "is_empty_topic_only_channel": true,
     "cannot_create_topics_in_channel": "Cannot create topics in channel",
-    "is_hover_aimto_space": true,
+    "is_hover_space": true,
+    "has_hover_ai_modules": true,
     "hover_ai_modules": [
         {
             "custom_classes": "",

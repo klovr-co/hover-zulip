@@ -3,7 +3,6 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/message_body.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
@@ -20,6 +19,7 @@ const fixture = {
         "show_slow_send_spinner": true,
         "match_content": "Match content",
         "content": "Content",
+        "id": 7,
         "message_reactions": {
             "length": "Length"
         },
@@ -28,10 +28,24 @@ const fixture = {
         }
     },
     "timestr": "Timestr",
+    "is_hover_response": true,
+    "is_hover_review": true,
+    "hover_response_clarification_required": "Hover response clarification required",
+    "is_hover_review_request": true,
+    "hover_review_request_state": "Hover review request state",
     "is_hover_generated_update": true,
+    "is_hover_suggested_action": true,
     "hover_module_name": "Hover module name",
+    "hover_output_label": "Hover output label",
     "hover_source_context": "Hover source context",
+    "hover_state": "Hover state",
+    "hover_importance": "Hover importance",
     "use_match_properties": "Use match properties",
+    "has_hover_revisions": true,
+    "has_hover_disputed_details": true,
+    "hover_has_history": "Hover has history",
+    "hover_history_count": 3,
+    "hover_is_earlier": "Hover is earlier",
     "message_edit_notices_in_left_col": "Message edit notices in left col",
     "has_hover_source_integrations": true
 };

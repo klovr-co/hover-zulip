@@ -2,12 +2,14 @@
 
 import type {Meta, StoryObj} from "@storybook/html";
 
-import render_template from "../../templates/presence_rows.hbs";
-
+import render_template from "../../templates/hover_space_setup_sidebar_row.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "presence_rows": [
+    "id": 7,
+    "name": "Name",
+    "has_hover_attached_sources": true,
+    "hover_attached_sources": [
         {
             "custom_classes": "",
             "disabled": false,
@@ -15,14 +17,19 @@ const fixture = {
             "intent": "primary",
             "label": "Sample action",
             "name": "Sample name",
-            "variant": "primary"
+            "variant": "primary",
+            "key": "Key",
+            "url": "#storybook",
+            "source_key": "Source key",
+            "icon_class": "Icon class",
+            "detail": "Detail"
         }
     ]
 };
 
 const meta = {
-    title: "Catalogue/Presence Rows",
-    render: () => render_template_story("presence_rows.hbs", render_template, fixture),
+    title: "Catalogue/Hover Space Setup Sidebar Row",
+    render: () => render_template_story("hover_space_setup_sidebar_row.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

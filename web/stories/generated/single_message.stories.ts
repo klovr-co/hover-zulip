@@ -3,7 +3,6 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/single_message.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
@@ -20,6 +19,7 @@ const fixture = {
     "is_hidden": true,
     "is_hover_generated_update": true,
     "hover_module_key": "Hover module key",
+    "hover_filter_classes": "Hover filter classes",
     "want_subscription_status_divider": "Want subscription status divider",
     "want_date_divider": "Want date divider",
     "date_divider_html": "Date divider html",

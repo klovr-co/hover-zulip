@@ -3,7 +3,6 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/inbox_view/inbox_folder_with_channels.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {

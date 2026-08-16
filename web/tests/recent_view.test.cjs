@@ -489,7 +489,7 @@ function test(label, f) {
     });
 }
 
-test("test_recent_view_show", ({override, mock_template}) => {
+test("test_recent_view_show", ({mock_template}) => {
     // Note: unread count and urls are fake,
     // since they are generated in external libraries
     // and are not to be tested here.

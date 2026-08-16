@@ -3,7 +3,6 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/settings_overlay.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
@@ -14,6 +13,7 @@ const fixture = {
     "is_admin": true,
     "show_emoji_settings_lock": true,
     "can_edit_user_panel": true,
+    "realm_hover_enabled": "Realm hover enabled",
     "is_owner": true
 };
 

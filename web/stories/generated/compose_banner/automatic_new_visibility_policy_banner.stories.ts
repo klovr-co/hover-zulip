@@ -3,7 +3,6 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/compose_banner/automatic_new_visibility_policy_banner.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};

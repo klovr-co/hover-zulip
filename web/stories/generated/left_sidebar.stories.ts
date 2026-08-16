@@ -3,7 +3,6 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/left_sidebar.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
@@ -21,6 +20,8 @@ const fixture = {
         }
     ],
     "LEFT_SIDEBAR_DIRECT_MESSAGES_TITLE": "LEFT SIDEBAR DIRECT MESSAGES TITLE",
+    "hover_enabled": "Hover enabled",
+    "can_create_spaces": true,
     "is_guest": true
 };
 

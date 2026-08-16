@@ -3,7 +3,6 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/unread_banner/mark_as_read_only_in_conversation_view.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};

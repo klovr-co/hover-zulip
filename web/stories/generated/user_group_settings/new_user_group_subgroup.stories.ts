@@ -3,7 +3,6 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/user_group_settings/new_user_group_subgroup.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {

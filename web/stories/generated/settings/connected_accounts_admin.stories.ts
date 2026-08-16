@@ -2,19 +2,17 @@
 
 import type {Meta, StoryObj} from "@storybook/html";
 
-import render_template from "../../../templates/buddy_list/section_header.hbs";
-
+import render_template from "../../../templates/settings/connected_accounts_admin.hbs";
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_collapsed": true,
-    "id": 7,
-    "header_text": "Header text"
+    "is_admin": true,
+    "realm_hover_enabled": "Realm hover enabled"
 };
 
 const meta = {
-    title: "Catalogue/Buddy List/Section Header",
-    render: () => render_template_story("buddy_list/section_header.hbs", render_template, fixture),
+    title: "Catalogue/Settings/Connected Accounts Admin",
+    render: () => render_template_story("settings/connected_accounts_admin.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;
