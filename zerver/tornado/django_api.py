@@ -251,7 +251,7 @@ def send_event_on_commit(
         try:
             event_dict = orjson.loads(orjson.dumps(event_dict))
         except TypeError:
-            print(event_dict)
+            print("Event is not JSON-serializable")
             raise
 
     def send_event() -> None:
