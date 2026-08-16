@@ -4,6 +4,8 @@
     display: flex;
     gap: var(--cf-space-2);
     align-items: flex-start;
+    min-width: 0;
+    max-width: 100%;
     width: 100%;
     margin-block-end: var(--cf-space-1);
     border: 1px solid var(--cf-border-subtle);
@@ -14,6 +16,11 @@
     font-family: var(--cf-font-ui);
     font-size: var(--cf-type-label);
     line-height: 1.4;
+}
+
+.cf-notice[hidden],
+.cf-notice.hide {
+    display: none;
 }
 
 .cf-notice__body {
@@ -43,7 +50,10 @@
 }
 
 .cf-notice__actions {
+    box-sizing: border-box;
     display: flex;
+    min-width: 0;
+    max-width: 100%;
     gap: var(--cf-space-2);
     align-items: center;
     flex-wrap: wrap;
@@ -52,6 +62,13 @@
 
 .cf-notice__actions:empty {
     display: none;
+}
+
+.cf-notice__actions .cf-button {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: normal;
 }
 
 .cf-notice__close.cf-button {
@@ -65,7 +82,7 @@
 
 .cf-notice__link,
 .cf-notice a:not(.cf-button) {
-    color: var(--cf-color-accent);
+    color: var(--cf-color-accent-hover);
     text-decoration: underline;
     text-decoration-color: color-mix(in srgb, currentcolor 35%, transparent);
     text-underline-offset: 2px;
@@ -106,6 +123,11 @@
 .cf-notice--error {
     border-left-color: var(--cf-color-danger);
     background: var(--cf-color-danger-soft);
+}
+
+.cf-notice--danger .cf-notice__actions .cf-button--secondary,
+.cf-notice--error .cf-notice__actions .cf-button--secondary {
+    border-color: var(--cf-color-danger);
 }
 
 @media (width <= 600px) {

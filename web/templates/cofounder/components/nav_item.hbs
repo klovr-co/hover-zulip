@@ -1,21 +1,21 @@
 <li class="cf-nav-item{{#if selected}} cf-nav-item--selected{{/if}}{{#if disabled}} cf-nav-item--disabled{{/if}}{{#if item_classes}} {{item_classes}}{{/if}}"{{#if data_key}} data-key="{{data_key}}"{{/if}}>
-    <a href="{{href}}" class="cf-nav-item__main{{#if main_classes}} {{main_classes}}{{/if}}"{{#if tooltip_template_id}} data-tooltip-template-id="{{tooltip_template_id}}"{{/if}}{{#if selected}} aria-current="page"{{/if}}{{#if disabled}} aria-disabled="true" tabindex="-1"{{/if}}>
+    <a{{#unless disabled}} href="{{href}}"{{/unless}} class="cf-nav-item__main{{#if main_classes}} {{main_classes}}{{/if}}"{{#if tooltip_template_id}} data-tooltip-template-id="{{tooltip_template_id}}"{{/if}}{{#if selected}} aria-current="page"{{/if}}{{#if disabled}} aria-disabled="true" tabindex="-1"{{/if}}>
         <span class="cf-nav-item__icon">
             {{> icon name=icon compact=true}}
         </span>
         <span class="cf-nav-item__label">{{label}}</span>
         {{#if reserve_badge}}
-        <span class="cf-nav-item__badge{{#unless badge_visible}} hide{{/unless}}{{#if badge_classes}} {{badge_classes}}{{/if}}">{{#if badge_visible}}{{badge}}{{/if}}</span>
+        <span class="cf-nav-item__badge{{#unless badge_visible}} hide{{/unless}}{{#if badge_classes}} {{badge_classes}}{{/if}}"{{#if badge_label}} aria-label="{{badge_label}}: {{badge}}"{{/if}}>{{#if badge_visible}}{{badge}}{{/if}}</span>
         {{/if}}
         {{#if supports_masked_unread}}
-        <span class="cf-nav-item__masked{{#if masked_classes}} {{masked_classes}}{{/if}}" aria-label="{{masked_unread_label}}">
+        <span class="cf-nav-item__masked{{#if masked_classes}} {{masked_classes}}{{/if}}" role="img" aria-label="{{masked_unread_label}}">
             <span aria-hidden="true">&#8226;</span>
         </span>
         {{/if}}
     </a>
     {{#if action_label}}
-    <span class="cf-nav-item__action{{#if action_classes}} {{action_classes}}{{/if}}" tabindex="0" role="button" aria-label="{{action_label}}">
+    <button type="button" class="cf-nav-item__action{{#if action_classes}} {{action_classes}}{{/if}}" aria-label="{{action_label}}" aria-haspopup="menu">
         {{> icon name="more-horizontal" compact=true}}
-    </span>
+    </button>
     {{/if}}
 </li>

@@ -8,7 +8,7 @@
             <a href="" class="cf-app-header__brand" aria-label="{{t 'Go to home view' }}">
                 <span class="cf-app-header__brand-mark" aria-hidden="true">H</span>
                 <span class="cf-app-header__brand-name">HOVER</span>
-                <img id="realm-navbar-wide-logo" src="" alt="{{t 'Workspace logo' }}" class="cf-app-header__realm-logo no-drag"/>
+                <img id="realm-navbar-wide-logo" src="{{realm_logo_url}}" alt="{{t 'Workspace logo' }}" class="cf-app-header__realm-logo no-drag"/>
             </a>
         </div>
         <div class="column-middle cf-app-header__middle" id="navbar-middle">
@@ -27,7 +27,7 @@
                             <div id="searchbox-input-container" class="cf-app-header__search-container pill-container" tabindex="0" role="search" aria-label="{{t 'Search' }}">
                                 {{> cofounder/components/icon name="search" compact=true custom_classes="cf-app-header__search-icon"}}
                                 <div class="cf-app-header__search-content">
-                                    <div class="cf-app-header__search-input" id="search_query" type="text" data-placeholder-text="{{t 'Search' }}"
+                                    <div class="input cf-app-header__search-input" id="search_query" type="text" data-placeholder-text="{{t 'Search' }}"
                                       autocomplete="off" contenteditable="false" aria-label="{{t 'Search input'}}" role="searchbox"></div>
                                 </div>
                                 {{> cofounder/components/icon_button id="search_exit" icon="close" intent="neutral" component_classes="cf-app-header__search-close" aria-label=(t "Exit search") data-tippy-content="Close" omit_legacy_classes=true}}

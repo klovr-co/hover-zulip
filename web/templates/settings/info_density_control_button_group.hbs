@@ -1,4 +1,4 @@
-<div class="cf-settings-stepper button-group" data-property="{{property}}">
+<div class="cf-settings-stepper button-group" data-property="{{property}}" role="group" aria-label="{{#if (eq property "web_font_size_px")}}{{t 'Font size'}}{{else}}{{t 'Line spacing'}}{{/if}}">
     {{#if for_settings_ui}}
         <div class="info-density-button-container">
             <button type="button" class="cf-settings-stepper__button info-density-button default-button" aria-label="{{#if (eq property "web_font_size_px")}}{{t 'Set font size to default'}}{{else}}{{t 'Set line spacing to default' }}{{/if}}">

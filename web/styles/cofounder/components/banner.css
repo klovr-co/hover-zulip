@@ -16,6 +16,10 @@
     line-height: 1.4;
 }
 
+.cf-banner[hidden] {
+    display: none;
+}
+
 .cf-banner__content {
     display: flex;
     gap: var(--cf-space-2) var(--cf-space-3);

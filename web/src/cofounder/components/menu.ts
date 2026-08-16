@@ -7,12 +7,25 @@ export function get_menu_items($root: JQuery): JQuery {
     return $root.find(COFOUNDER_MENU_ITEM_SELECTOR);
 }
 
+export function sync_menuitemradio_checked_state(root: ParentNode): void {
+    for (const input of root.querySelectorAll<HTMLInputElement>("input[type='radio']")) {
+        const choice = input.nextElementSibling;
+        if (choice?.getAttribute("role") === "menuitemradio") {
+            choice.setAttribute("aria-checked", String(input.checked));
+        }
+    }
+}
+
 export function focus_first_menu_item($items: JQuery | undefined, index = 0): void {
     if (!$items) {
         return;
     }
 
-    $items.eq(index).expectOne().trigger("focus");
+    const $item = $items.eq(index);
+    if ($item.length !== 1) {
+        return;
+    }
+    $item.trigger("focus");
 }
 
 export function menu_items_handle_keyboard(key: string, $items?: JQuery): void {
@@ -22,7 +35,7 @@ export function menu_items_handle_keyboard(key: string, $items?: JQuery): void {
 
     const index = $items.index($items.filter(":focus"));
 
-    if (key === "enter") {
+    if (key === "enter" && index !== -1) {
         $items.eq(index).trigger("click");
         return;
     }

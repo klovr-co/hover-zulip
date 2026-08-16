@@ -1,6 +1,6 @@
 <div class="micromodal cf-theme cf-dialog-root" id="{{modal_unique_id}}" aria-hidden="true">
     <div class="modal__overlay cf-dialog-backdrop {{#unless close_on_overlay_click}}ignore-overlay-click{{/unless}}" tabindex="-1">
-        <div {{#if id}}id="{{id}}" {{/if}}class="modal__container cf-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog_title">
+        <div {{#if id}}id="{{id}}" {{/if}}class="modal__container cf-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog_title"{{#if modal_subtitle_html}} aria-describedby="dialog_subtitle"{{/if}}>
             <header class="modal__header cf-dialog__header">
                 <div class="modal__header-content cf-dialog__heading">
                     <h1 id="dialog_title" class="modal__title dialog_heading cf-dialog__title">
@@ -17,7 +17,7 @@
                         <div class="alert" id="dialog_error"></div>
                     {{/if}}
                     {{#if modal_subtitle_html}}
-                    <div class="modal__subtitle cf-dialog__subtitle">
+                    <div id="dialog_subtitle" class="modal__subtitle cf-dialog__subtitle">
                         {{{ modal_subtitle_html }}}
                     </div>
                     {{/if}}

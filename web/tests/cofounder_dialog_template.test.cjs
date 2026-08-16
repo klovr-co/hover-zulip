@@ -2,9 +2,9 @@
 
 const assert = require("node:assert/strict");
 
-const {run_test} = require("./lib/test.cjs");
-
 const render_dialog = require("../templates/dialog_widget.hbs");
+
+const {run_test} = require("./lib/test.cjs");
 
 run_test("renders the Cofounder dialog contract", () => {
     const html = render_dialog({
@@ -20,11 +20,26 @@ run_test("renders the Cofounder dialog contract", () => {
     assert.match(html, /class="micromodal cf-theme cf-dialog-root"/);
     assert.match(html, /class="modal__container cf-dialog"/);
     assert.match(html, /role="dialog" aria-modal="true" aria-labelledby="dialog_title"/);
+    assert.doesNotMatch(html, /aria-describedby="dialog_subtitle"/);
     assert.match(html, /cf-button--secondary[^>]*dialog_exit_button/);
     assert.match(html, /cf-button--primary[^>]*dialog_submit_button/);
-    assert.match(html, /cf-dialog__spinner/);
+    assert.match(html, /cf-dialog__spinner" aria-hidden="true"/);
     assert.match(html, /<svg class="cf-icon cf-icon--compact"/);
     assert.doesNotMatch(html, /zulip-icon/);
+});
+
+run_test("associates the Cofounder dialog subtitle with the dialog", () => {
+    const html = render_dialog({
+        modal_content_html: "<p>Dialog content</p>",
+        modal_exit_button_text: "Cancel",
+        modal_submit_button_text: "Save changes",
+        modal_subtitle_html: "Changes are visible to everyone.",
+        modal_title_text: "Workspace settings",
+        modal_unique_id: "dialog_widget_modal_subtitle",
+    });
+
+    assert.match(html, /aria-describedby="dialog_subtitle"/);
+    assert.match(html, /id="dialog_subtitle" class="modal__subtitle cf-dialog__subtitle"/);
 });
 
 run_test("renders a destructive Cofounder dialog action", () => {

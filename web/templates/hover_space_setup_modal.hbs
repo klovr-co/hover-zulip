@@ -61,9 +61,13 @@
             {{> cofounder/components/status tone="neutral" icon="pin" label=(t "Version pinned")}}
         </div>
         {{#if has_module_installations}}
-            <div class="cf-space-workbench__installed-list">
+            <div
+              class="cf-space-workbench__installed-list"
+              role="list"
+              aria-label="{{t 'Installed AI Modules'}}"
+              >
                 {{#each space.module_installations}}
-                    <div class="cf-space-workbench__installed-row">
+                    <div class="cf-space-workbench__installed-row" role="listitem">
                         <span class="cf-space-workbench__row-copy">
                             <strong>{{name}}</strong>
                             <small>{{t "Version"}}
@@ -77,6 +81,7 @@
                               class="cf-button cf-button--secondary cf-button--compact"
                               data-cf-space-action="disable-module"
                               data-cf-installation-id="{{id}}"
+                              aria-label="{{t 'Disable'}}: {{name}}"
                               >
                                 <span class="cf-button__label">{{t "Disable"}}</span>
                             </button>
@@ -86,13 +91,18 @@
             </div>
         {{/if}}
         {{#if has_module_catalog}}
-            <div class="cf-space-workbench__module-catalog">
+            <div
+              class="cf-space-workbench__module-catalog"
+              role="list"
+              aria-label="{{t 'Available AI Modules'}}"
+              >
                 {{#each module_catalog}}
                     {{#unless is_installed}}
                         <article
                           class="cf-space-workbench__module"
                           data-cf-module-card
                           data-cf-version-id="{{id}}"
+                          role="listitem"
                           >
                             <div class="cf-space-workbench__module-heading">
                                 <span
@@ -199,6 +209,7 @@
                               type="button"
                               class="cf-button cf-button--primary cf-space-workbench__module-action"
                               data-cf-space-action="install-module"
+                              aria-label="{{t 'Enable Module'}}: {{name}}"
                               >
                                 {{> cofounder/components/icon name="plus" compact=true}}
                                 <span class="cf-button__label">{{t "Enable Module"}}</span>
@@ -224,9 +235,13 @@
             {{> cofounder/components/status tone="neutral" icon="eye-off" label=(t "Admins only in Setup")}}
         </div>
 
-        <div class="cf-space-workbench__member-list">
+        <div
+          class="cf-space-workbench__member-list"
+          role="list"
+          aria-label="{{t 'Teammates'}}"
+          >
             {{#each space.membership_suggestions}}
-                <div class="cf-space-workbench__member-row" data-cf-member-row>
+                <div class="cf-space-workbench__member-row" data-cf-member-row role="listitem">
                     <span class="cf-space-workbench__row-copy">
                         <strong>{{full_name}}</strong>
                         <small>{{t "Verified internal match"}}</small>
@@ -250,6 +265,7 @@
                       class="cf-button cf-button--secondary cf-button--compact"
                       data-cf-membership-action="confirm-suggestion"
                       data-cf-user-id="{{user_id}}"
+                      aria-label="{{t 'Confirm'}}: {{full_name}}"
                       >
                         <span class="cf-button__label">{{t "Confirm"}}</span>
                     </button>
@@ -258,6 +274,7 @@
                       class="cf-button cf-button--ghost cf-button--compact"
                       data-cf-membership-action="remove"
                       data-cf-user-id="{{user_id}}"
+                      aria-label="{{t 'Remove'}}: {{full_name}}"
                       >
                         <span class="cf-button__label">{{t "Remove"}}</span>
                     </button>
@@ -265,7 +282,7 @@
             {{/each}}
 
             {{#each space.memberships}}
-                <div class="cf-space-workbench__member-row" data-cf-member-row>
+                <div class="cf-space-workbench__member-row" data-cf-member-row role="listitem">
                     <span class="cf-space-workbench__row-copy">
                         <strong>{{full_name}}</strong>
                         <small>
@@ -306,6 +323,7 @@
                           class="cf-button cf-button--secondary cf-button--compact"
                           data-cf-membership-action="promote"
                           data-cf-user-id="{{user_id}}"
+                          aria-label="{{t 'Make admin'}}: {{full_name}}"
                           >
                             <span class="cf-button__label">{{t "Make admin"}}</span>
                         </button>
@@ -314,6 +332,7 @@
                           class="cf-button cf-button--ghost cf-button--compact"
                           data-cf-membership-action="remove"
                           data-cf-user-id="{{user_id}}"
+                          aria-label="{{t 'Remove'}}: {{full_name}}"
                           >
                             <span class="cf-button__label">{{t "Remove"}}</span>
                         </button>
@@ -343,6 +362,7 @@
                   type="button"
                   class="cf-button cf-button--secondary"
                   data-cf-space-action="add-member"
+                  aria-label="{{t 'Add selected teammate'}}"
                   >
                     {{> cofounder/components/icon name="user-plus" compact=true}}
                     <span class="cf-button__label">{{t "Add teammate"}}</span>

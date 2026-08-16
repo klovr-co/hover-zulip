@@ -289,6 +289,9 @@ function family_fixture(template_path: string): Record<string, unknown> {
 }
 
 const dedicated_fixtures: Record<string, Record<string, unknown>> = {
+    "popovers/user_card/user_card_popover.hbs": {
+        pm_with_url: "#narrow/dm/7",
+    },
     "invite_user_modal.hbs": {
         default_welcome_message_custom_text: "Welcome! We’re glad you’re here.",
         development_environment: false,

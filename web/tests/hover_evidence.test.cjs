@@ -10,6 +10,26 @@ const channel = mock_esm("../src/channel");
 
 const hover_evidence = zrequire("hover_evidence");
 
+run_test("renders a semantic loading state before evidence resolves", ({override}) => {
+    const $content = $("#evidence-loading");
+    const $result = $.create("evidence-loading-result");
+    $content.set_find_results(".simplebar-content", []);
+    $content.set_find_results("[data-cf-evidence-result]", $result);
+    override(channel, "post", () => {});
+
+    hover_evidence.load_evidence($content, "/json/hover/evidence/loading");
+
+    assert.match($content.html(), /cf-evidence-loading/);
+    assert.match($content.html(), /role="status"/);
+    assert.match($content.html(), /aria-live="polite"/);
+    assert.match($content.html(), /aria-busy="true"/);
+    assert.match($content.html(), /tabindex="-1"/);
+    assert.match($content.html(), /data-cf-evidence-result/);
+    assert.match($content.html(), /cf-evidence-loading__placeholder/);
+    assert.match($content.html(), /aria-hidden="true"/);
+    assert.equal($result.is_focused(), true);
+});
+
 run_test("renders validated exact evidence with escaped content", ({override}) => {
     const $content = $("#evidence-content");
     $content.set_find_results(".simplebar-content", []);
@@ -89,6 +109,11 @@ run_test("renders an explicit empty exact-evidence state", ({override}) => {
     override(channel, "post", ({success}) => success({evidence: []}));
     hover_evidence.load_evidence($content, "/json/hover/evidence/3");
     assert.match($content.html(), /No exact source messages/);
+    assert.match($content.html(), /class="cf-evidence-empty"/);
+    assert.match($content.html(), /role="status"/);
+    assert.match($content.html(), /aria-live="polite"/);
+    assert.match($content.html(), /tabindex="-1"/);
+    assert.match($content.html(), /data-cf-evidence-result/);
 });
 
 run_test("updates the visible SimpleBar content after the modal opens", ({override}) => {

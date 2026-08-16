@@ -10,7 +10,7 @@
         {{#if has_reactions}}
         <div class="cf-message-item__reactions" aria-label="{{t 'Reactions' }}">
             {{#each reactions}}
-            <button class="cf-message-item__reaction{{#if selected}} cf-message-item__reaction--selected{{/if}}" type="button" aria-label="{{label}}">
+            <button class="cf-message-item__reaction{{#if selected}} cf-message-item__reaction--selected{{/if}}" type="button" aria-label="{{label}}" aria-pressed="{{#if selected}}true{{else}}false{{/if}}">
                 <span aria-hidden="true">{{emoji}}</span>
                 <span>{{count}}</span>
             </button>

@@ -1,8 +1,8 @@
 <li data-user-id="{{user_id}}" data-name="{{name}}" class="cf-member-row{{#if user_list_style.WITH_AVATAR}} cf-member-row--avatar{{/if}}{{#if has_status_text}} cf-member-row--status{{/if}}{{#if is_current_user}} cf-member-row--self{{/if}}{{#if faded}} cf-member-row--faded{{/if}}">
     <div class="cf-member-row__main">
         {{#if user_list_style.WITH_STATUS}}
-            {{> cofounder/components/presence_dot user_circle_class=user_circle_class user_id=user_id custom_classes="cf-member-row__presence"}}
-            <a class="cf-member-row__link" href="{{href}}" draggable="false">
+            {{> cofounder/components/presence_dot user_circle_class=user_circle_class user_id=user_id presence_label=presence_label custom_classes="cf-member-row__presence"}}
+            <a class="cf-member-row__link" href="{{href}}" draggable="false"{{#unless (eq num_unread 0)}} aria-describedby="{{#if unread_id}}{{unread_id}}{{else}}member-unread-{{user_id}}{{/if}}"{{/unless}}>
                 <div class="cf-member-row__identity">
                     {{> cofounder/components/member_name .}}
                     {{> status_emoji status_emoji_info}}
@@ -14,9 +14,9 @@
                 <div class="cf-member-row__avatar cf-member-row__avatar--loading">
                     <img loading="lazy" src="{{profile_picture}}" alt=""/>
                 </div>
-                {{> cofounder/components/presence_dot user_circle_class=user_circle_class user_id=user_id custom_classes="cf-member-row__presence cf-member-row__presence--avatar"}}
+                {{> cofounder/components/presence_dot user_circle_class=user_circle_class user_id=user_id presence_label=presence_label custom_classes="cf-member-row__presence cf-member-row__presence--avatar"}}
             </div>
-            <a class="cf-member-row__link" href="{{href}}" draggable="false">
+            <a class="cf-member-row__link" href="{{href}}" draggable="false"{{#unless (eq num_unread 0)}} aria-describedby="{{#if unread_id}}{{unread_id}}{{else}}member-unread-{{user_id}}{{/if}}"{{/unless}}>
                 <div class="cf-member-row__identity">
                     {{> cofounder/components/member_name .}}
                     {{> status_emoji status_emoji_info}}
@@ -24,22 +24,22 @@
                 <span class="cf-member-row__status">{{status_text}}</span>
             </a>
         {{else}}
-            {{> cofounder/components/presence_dot user_circle_class=user_circle_class user_id=user_id custom_classes="cf-member-row__presence"}}
-            <a class="cf-member-row__link" href="{{href}}" draggable="false">
+            {{> cofounder/components/presence_dot user_circle_class=user_circle_class user_id=user_id presence_label=presence_label custom_classes="cf-member-row__presence"}}
+            <a class="cf-member-row__link" href="{{href}}" draggable="false"{{#unless (eq num_unread 0)}} aria-describedby="{{#if unread_id}}{{unread_id}}{{else}}member-unread-{{user_id}}{{/if}}"{{/unless}}>
                 <div class="cf-member-row__identity">
                     {{> cofounder/components/member_name .}}
                     {{> status_emoji status_emoji_info}}
                 </div>
             </a>
         {{/if}}
-        <span class="cf-member-row__unread {{#if (eq num_unread 0)}}hide{{/if}}">{{#unless (eq num_unread 0)}}{{num_unread}}{{/unless}}</span>
+        <span id="{{#if unread_id}}{{unread_id}}{{else}}member-unread-{{user_id}}{{/if}}" class="cf-member-row__unread {{#if (eq num_unread 0)}}hide{{/if}}" aria-label="{{t 'Unread messages'}}: {{num_unread}}">{{#unless (eq num_unread 0)}}{{num_unread}}{{/unless}}</span>
     </div>
     {{#unless user_list_style.WITH_AVATAR}}
     {{> cofounder/components/icon_button
       icon="more-vertical"
       intent="neutral"
       component_classes="cf-member-row__actions"
-      aria-label=(t "User actions")
+      aria-label=user_actions_label
       omit_legacy_classes=true
       }}
     {{/unless}}

@@ -1,6 +1,6 @@
 <main class="cf-awareness-shell" aria-label="{{title}}">
-    <div class="cf-awareness-status" role="status" aria-live="polite">
-        {{status}}
+    <div class="cf-awareness-status">
+        <span class="cf-awareness-status__message" role="status" aria-live="polite">{{status}}</span>
         {{#if show_retry}}
             {{> cofounder/components/button id="cf-awareness-retry" variant="secondary" label=(t "Try again") }}
         {{/if}}

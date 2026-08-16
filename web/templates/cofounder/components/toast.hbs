@@ -1,7 +1,7 @@
-<div role="{{#if (or (eq intent "danger") (eq intent "error") (eq intent "warning"))}}alert{{else}}status{{/if}}" class="cf-toast cf-toast--{{intent}}{{#if custom_classes}} {{custom_classes}}{{/if}}">
+<div role="{{#if (or (eq intent "danger") (eq intent "error") (eq intent "warning"))}}alert{{else}}status{{/if}}" aria-atomic="true" class="cf-toast cf-toast--{{intent}}{{#if custom_classes}} {{custom_classes}}{{/if}}">
     <div class="cf-toast__header">
         {{#if (or title reserve_title)}}
-        <h2 class="cf-toast__title">{{title}}</h2>
+        <div class="cf-toast__title">{{title}}</div>
         {{/if}}
         {{#if has_undo_button}}
         <div class="cf-toast__actions">

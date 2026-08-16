@@ -5,6 +5,8 @@
     flex-wrap: wrap;
     gap: 5px;
     align-items: center;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .cf-message-feedback {
@@ -17,7 +19,9 @@
 }
 
 .cf-source-actions__label {
+    max-width: 100%;
     margin-inline-end: 3px;
+    overflow-wrap: anywhere;
     color: var(--cf-text-secondary);
     font-family: var(--cf-font-ui);
     font-size: 11px;
@@ -36,6 +40,7 @@
     align-items: center;
     justify-content: center;
     min-width: 44px;
+    max-width: 100%;
     min-height: 28px;
     padding: 2px 7px;
     border: 1px solid var(--cf-border-subtle);
@@ -47,6 +52,7 @@
     font-size: var(--cf-type-meta);
     line-height: 1;
     text-decoration: none;
+    overflow-wrap: anywhere;
     cursor: pointer;
     transition:
         color var(--cf-duration-fast) ease,
@@ -56,9 +62,9 @@
 }
 
 .cf-source-action:is(:hover, :focus-visible) {
-    border-color: var(--cf-color-accent);
-    color: var(--cf-color-accent);
-    background: var(--cf-color-accent-soft);
+    border-color: var(--cf-color-accent-hover);
+    color: var(--cf-color-accent-hover);
+    background: var(--cf-surface-selected);
 }
 
 .cf-source-action:focus {
@@ -85,7 +91,7 @@
 }
 
 .cf-source-action--static {
-    color: var(--cf-text-tertiary);
+    color: var(--cf-text-secondary);
     background: var(--cf-surface-subtle);
     cursor: default;
 }
@@ -95,6 +101,11 @@
     width: 17px;
     height: 17px;
     margin: 1px 3px;
+}
+
+.cf-source-action__count {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .cf-source-action--whatsapp .cf-source-action__icon {
@@ -110,6 +121,11 @@
 }
 
 @media (hover: none), (width <= 600px) {
+    .cf-source-actions__label {
+        flex-basis: 100%;
+        margin-inline-end: 0;
+    }
+
     .cf-source-action {
         min-width: var(--cf-control-height-touch);
         min-height: var(--cf-control-height-touch);

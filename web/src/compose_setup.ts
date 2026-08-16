@@ -402,7 +402,13 @@ export function initialize(): void {
         const classname_selector = `.${CSS.escape(classname)}`;
         $("body").on("click", `${classname_selector} .cf-notice__close`, (event) => {
             event.preventDefault();
-            $(event.target).parents(classname_selector).remove();
+            const $close_button = $(event.currentTarget);
+            const $focus_target = $close_button
+                .closest(".message_edit_form, #compose")
+                .find("textarea")
+                .first();
+            $close_button.closest(classname_selector).remove();
+            $focus_target.trigger("focus");
         });
     }
 

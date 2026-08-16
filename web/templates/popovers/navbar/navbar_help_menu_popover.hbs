@@ -1,5 +1,5 @@
-<div class="cf-menu popover-menu" id="help-menu-dropdown" aria-labelledby="help-menu" data-simplebar data-simplebar-tab-index="-1">
-    <ul role="menu" class="cf-menu__list popover-menu-list">
+<div class="cf-menu popover-menu" id="help-menu-dropdown" data-simplebar data-simplebar-tab-index="-1">
+    <ul role="menu" aria-label="{{t 'Help menu'}}" class="cf-menu__list popover-menu-list">
         <li role="none" class="link-item cf-menu__item popover-menu-list-item">
             <a role="menuitem" href="/help/" target="_blank" rel="noopener noreferrer" class="navigate-link-on-enter cf-menu__action popover-menu-link">
                 {{> ../../cofounder/components/icon name="circle-help" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
@@ -7,23 +7,23 @@
             </a>
         </li>
         <li role="none" class="link-item cf-menu__item popover-menu-list-item">
-            <a role="menuitem" tabindex="0" class="navigate-link-on-enter cf-menu__action popover-menu-link" data-overlay-trigger="keyboard-shortcuts">
+            <button type="button" role="menuitem" class="cf-menu__action popover-menu-link" data-overlay-trigger="keyboard-shortcuts">
                 {{> ../../cofounder/components/icon name="keyboard" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t 'Keyboard shortcuts' }}</span>
                 {{popover_hotkey_hints "?"}}
-            </a>
+            </button>
         </li>
         <li role="none" class="link-item cf-menu__item popover-menu-list-item hidden-for-spectators">
-            <a role="menuitem" tabindex="0" class="navigate-link-on-enter cf-menu__action popover-menu-link" data-overlay-trigger="message-formatting">
+            <button type="button" role="menuitem" class="cf-menu__action popover-menu-link" data-overlay-trigger="message-formatting">
                 {{> ../../cofounder/components/icon name="edit" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t 'Message formatting' }}</span>
-            </a>
+            </button>
         </li>
         <li role="none" class="link-item cf-menu__item popover-menu-list-item">
-            <a role="menuitem" tabindex="0" class="navigate-link-on-enter cf-menu__action popover-menu-link" data-overlay-trigger="search-operators">
+            <button type="button" role="menuitem" class="cf-menu__action popover-menu-link" data-overlay-trigger="search-operators">
                 {{> ../../cofounder/components/icon name="search" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t 'Search filters' }}</span>
-            </a>
+            </button>
         </li>
         <li role="none" class="link-item cf-menu__item popover-menu-list-item" id="gear_menu_about_zulip">
             <a role="menuitem" href="#about-zulip" class="navigate-link-on-enter cf-menu__action popover-menu-link">

@@ -63,6 +63,10 @@
     list-style: none;
 }
 
+.cf-settings-nav__list[hidden] {
+    display: none;
+}
+
 .cf-settings-nav .cf-settings-nav__item {
     box-sizing: border-box;
     display: grid;
@@ -252,6 +256,20 @@
     color: var(--cf-text-secondary);
 }
 
+.cf-settings-shell
+    :is(
+        .settings-section-title,
+        .settings-section-description,
+        .settings-subsection-title,
+        .cf-settings-field-row__label,
+        .settings-field-label,
+        .cf-settings-density__label
+    ) {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
 .cf-settings-section {
     border-top: 1px solid var(--cf-border-subtle);
 }
@@ -402,9 +420,9 @@
 
 .cf-settings-stepper {
     display: grid;
-    grid-template-columns: var(--cf-control-height) minmax(48px, 1fr) var(
-            --cf-control-height
-        ) var(--cf-control-height);
+    grid-template-columns:
+        var(--cf-control-height) minmax(48px, 1fr) var(--cf-control-height)
+        var(--cf-control-height);
     gap: 2px;
     align-items: center;
     width: 100%;
@@ -487,6 +505,7 @@
 @media (width <= 700px) {
     .cf-settings-shell {
         grid-template: 56px minmax(0, 1fr) / 100%;
+        contain: paint;
         width: 100vw;
         height: 100dvh;
         margin: 0;
@@ -507,20 +526,36 @@
         border: 0;
     }
 
+    .cf-settings-shell:has(.cf-settings-shell__content.show)
+        .cf-settings-shell__sidebar {
+        visibility: hidden;
+        pointer-events: none;
+    }
+
     .cf-settings-shell__content.content-wrapper {
         position: absolute;
         z-index: 2;
         top: 56px;
-        left: 100%;
+        left: 0;
         display: block;
+        visibility: hidden;
         width: 100%;
         height: calc(100dvh - 56px);
+        pointer-events: none;
+        transform: translateX(100%);
         transition: transform var(--cf-duration-base) var(--cf-ease-out);
     }
 
     .cf-settings-shell__content.content-wrapper.show {
-        left: 100%;
-        transform: translateX(-100%);
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateX(0);
+    }
+
+    .cf-settings-shell:not(:has(.cf-settings-shell__content.show))
+        .cf-settings-shell__back {
+        visibility: hidden;
+        pointer-events: none;
     }
 
     .cf-settings-shell__header.settings-header {
@@ -549,7 +584,7 @@
     .cf-settings-field-row,
     .cf-settings-shell .general-settings > .input-group,
     .cf-settings-shell .general-settings > .settings-checkbox-wrapper {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: var(--cf-space-2);
         align-items: stretch;
         padding: var(--cf-space-3) 0;
@@ -584,10 +619,9 @@
     }
 
     .cf-settings-stepper {
-        grid-template-columns: var(--cf-control-height-touch) minmax(
-                48px,
-                1fr
-            ) var(--cf-control-height-touch) var(--cf-control-height-touch);
+        grid-template-columns:
+            var(--cf-control-height-touch) minmax(48px, 1fr)
+            var(--cf-control-height-touch) var(--cf-control-height-touch);
     }
 }
 

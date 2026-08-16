@@ -68,6 +68,14 @@ export function hide_unread_banner(): void {
     toggle_dummy_banner(true);
 }
 
+function focus_current_message_list(): void {
+    const message_list = document.querySelector(".focused-message-list");
+    if (message_list instanceof HTMLElement) {
+        message_list.tabIndex = -1;
+        message_list.focus({preventScroll: true});
+    }
+}
+
 export function reset_unread_banner(): void {
     hide_unread_banner();
     user_closed_unread_banner = false;
@@ -110,7 +118,7 @@ export function initialize({
 }): void {
     const skip_animations = true;
     update_unread_counts(skip_animations);
-    $("body").on("click", "#mark_view_read", () => {
+    $("body").on("click", ".mark-view-read", () => {
         assert(message_lists.current !== undefined);
         // Mark all messages matching the current narrow as read on
         // the server, so that unreads outside the locally fetched
@@ -121,10 +129,12 @@ export function initialize({
         message_lists.current.resume_reading();
 
         hide_unread_banner();
+        focus_current_message_list();
     });
-    $("body").on("click", "#mark_as_read_close", () => {
+    $("body").on("click", ".mark-as-read-state-banner .cf-notice__close", () => {
         hide_unread_banner();
         user_closed_unread_banner = true;
+        focus_current_message_list();
     });
 
     // The combination of these functions in sequence ensures we have

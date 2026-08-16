@@ -99,7 +99,42 @@ function render_review_workflow(args: ReviewWorkflowArgs): HTMLElement {
                     },
                 })}
             </div>
-        </main>`;
+        </main>
+        <p class="storybook-cf-message-items__feedback" role="status" aria-live="polite" aria-atomic="true"></p>`;
+
+    const feedback = canvas.querySelector<HTMLElement>(".storybook-cf-message-items__feedback");
+    canvas.addEventListener("click", (event) => {
+        if (!(event.target instanceof Element) || feedback === null) {
+            return;
+        }
+
+        const button = event.target.closest<HTMLButtonElement>("button");
+        if (button === null || button.disabled) {
+            return;
+        }
+
+        const detail = button.closest<HTMLElement>(".cf-review-detail");
+        const field = detail
+            ?.querySelector<HTMLElement>(".cf-review-detail__field")
+            ?.textContent?.trim();
+        if (button.matches("[data-cf-evidence-url]")) {
+            feedback.textContent = field
+                ? `Conflicting sources opened for ${field}.`
+                : "Conflicting sources opened.";
+            return;
+        }
+        if (button.matches("[data-cf-review-message-id][data-cf-review-field-path]")) {
+            feedback.textContent = field ? `Review started for ${field}.` : "Review started.";
+            return;
+        }
+        if (button.classList.contains("cf-generated-update__details")) {
+            feedback.textContent = "Update details opened.";
+            return;
+        }
+
+        const label = button.getAttribute("aria-label") ?? button.textContent?.trim() ?? "Action";
+        feedback.textContent = `${label} selected.`;
+    });
     return canvas;
 }
 

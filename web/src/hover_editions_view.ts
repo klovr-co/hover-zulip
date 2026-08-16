@@ -80,6 +80,7 @@ let loaded = false;
 let loading = false;
 let status = "";
 let show_retry = false;
+let status_is_error = false;
 let request: JQuery.jqXHR<unknown> | undefined;
 let request_generation = 0;
 
@@ -121,8 +122,15 @@ function section_data(): {key: string; label: string; items: EditionItem[]}[] {
 
 function render({
     focus_carousel = false,
+    focus_panel = false,
+    focus_status = false,
     focus_tab,
-}: {focus_carousel?: boolean; focus_tab?: EditionKind} = {}): void {
+}: {
+    focus_carousel?: boolean;
+    focus_panel?: boolean;
+    focus_status?: boolean;
+    focus_tab?: EditionKind;
+} = {}): void {
     if (!visible) {
         return;
     }
@@ -149,6 +157,12 @@ function render({
             end_of_day_tabindex: selected_edition === "end_of_day" ? "0" : "-1",
             active_tab_id: tab_ids[selected_edition],
             active_panel_id: panel_ids[selected_edition],
+            panel_aria_busy: loading ? "true" : "false",
+            status_aria_live: status_is_error ? "assertive" : "polite",
+            status_class: status_is_error
+                ? "cf-edition-status cf-edition-status--error"
+                : "cf-edition-status",
+            status_role: status_is_error ? "alert" : "status",
             inactive_tab_id: tab_ids[selected_edition === "morning" ? "end_of_day" : "morning"],
             inactive_panel_id: panel_ids[selected_edition === "morning" ? "end_of_day" : "morning"],
             focus_mode: view_mode === "focus",
@@ -172,6 +186,10 @@ function render({
         $(".cf-edition-carousel").trigger("focus");
     } else if (focus_tab !== undefined) {
         $(`#${tab_ids[focus_tab]}`).trigger("focus");
+    } else if (focus_status) {
+        $(".cf-edition-status").trigger("focus");
+    } else if (focus_panel) {
+        $(`#${panel_ids[selected_edition]}`).trigger("focus");
     }
 }
 
@@ -181,14 +199,15 @@ function select_edition(edition: EditionKind, {focus_tab = false} = {}): void {
     render({...(focus_tab && {focus_tab: edition})});
 }
 
-function load(): void {
+function load({focus_status = false}: {focus_status?: boolean} = {}): void {
     request?.abort();
     request_generation += 1;
     const generation = request_generation;
     loading = true;
     status = $t({defaultMessage: "Preparing your latest edition…"});
     show_retry = false;
-    render();
+    status_is_error = false;
+    render({focus_status});
     request = channel.get({
         url: "/json/hover/personal-editions",
         success(raw_data) {
@@ -198,6 +217,7 @@ function load(): void {
             response = response_schema.parse(raw_data);
             loaded = true;
             loading = false;
+            status_is_error = false;
             show_retry = response.sync_status === "degraded";
             status =
                 response.sync_status === "degraded"
@@ -215,7 +235,7 @@ function load(): void {
                     selected_edition = other;
                 }
             }
-            render();
+            render({focus_panel: focus_status});
         },
         error(_xhr, error_type) {
             if (generation !== request_generation || error_type === "abort") {
@@ -223,8 +243,9 @@ function load(): void {
             }
             loading = false;
             show_retry = true;
+            status_is_error = true;
             status = $t({defaultMessage: "Your edition could not be loaded. Try again."});
-            render();
+            render({focus_status});
         },
     });
 }
@@ -320,6 +341,7 @@ export function initialize(): void {
     $("body").on("click", "#cf-edition-view-all", () => {
         view_mode = "all";
         render();
+        $("#cf-edition-focus-view").trigger("focus");
     });
     $("body").on("click", "#cf-edition-previous", () => {
         move_slide(-1);
@@ -336,7 +358,9 @@ export function initialize(): void {
             move_slide(1);
         }
     });
-    $("body").on("click", "#cf-edition-retry", load);
+    $("body").on("click", "#cf-edition-retry", () => {
+        load({focus_status: true});
+    });
 }
 
 export const test = {
@@ -352,6 +376,7 @@ export const test = {
         loading = false;
         status = "";
         show_retry = false;
+        status_is_error = false;
         request = undefined;
         request_generation = 0;
     },

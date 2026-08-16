@@ -735,13 +735,14 @@
 
     .moving_bar {
         position: absolute;
+        left: 0;
+        bottom: 0;
         width: 0;
+        height: 4px;
         /* The progress updates seem to come every second or so,
         so this is the smoothest it can probably get. */
         transition: width 1s ease-in-out; /* stylelint-disable-line plugin/no-low-performance-animation-properties */
-        background: color-mix(in srgb, var(--cf-color-accent) 18%, transparent);
-        top: 0;
-        bottom: 0;
+        background: var(--cf-color-accent);
     }
 
     /* Keep these elements visible above the
@@ -751,6 +752,12 @@
     .upload_banner_cancel_button {
         z-index: 1;
         position: relative;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .upload_banner .moving_bar {
+        transition: none;
     }
 }
 

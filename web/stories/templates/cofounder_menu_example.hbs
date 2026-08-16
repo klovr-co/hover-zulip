@@ -1,10 +1,14 @@
-<div class="cf-theme" style="width: 260px; padding: 16px;">
-    {{#> ../../templates/cofounder/components/menu id="cofounder-menu-example"}}
+<div class="cf-theme storybook-menu-story">
+    <div class="tippy-box" data-theme="cofounder-menu">
+        <div class="tippy-content">
+    {{#> ../../templates/cofounder/components/menu id="cofounder-menu-example" aria-label=(t "Workspace actions")}}
         {{> ../../templates/cofounder/components/menu_item icon="check" label=(t "Current workspace") selected=true}}
         {{> ../../templates/cofounder/components/menu_item icon="search" label=(t "Search sources") shortcut="⌘K"}}
         {{> ../../templates/cofounder/components/menu_item icon="plus" label=(t "New source")}}
         <li role="separator" class="cf-menu__separator"></li>
-        {{> ../../templates/cofounder/components/menu_item label=(t "Unavailable action") disabled=true}}
+        {{> ../../templates/cofounder/components/menu_item href="#disabled-target" target="_blank" rel="noopener" label=(t "Unavailable action") disabled=true}}
         {{> ../../templates/cofounder/components/menu_item icon="warning" label=(t "Remove workspace") danger=true}}
     {{/../../templates/cofounder/components/menu}}
+        </div>
+    </div>
 </div>

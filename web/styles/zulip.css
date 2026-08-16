@@ -629,7 +629,7 @@ i.zulip-icon:focus-visible,
 }
 
 /* List of text-like input types taken from Bootstrap */
-input:not(.input-element) {
+input:not(.input-element, .cf-field__control) {
     &[type="text"],
     &[type="password"],
     &[type="email"],

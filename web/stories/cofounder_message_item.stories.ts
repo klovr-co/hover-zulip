@@ -73,7 +73,7 @@ function render_message_items(args: MessageItemArgs): HTMLElement {
                 <h2>Message rows</h2>
                 <span>Real templates, stateful controls, and content behavior.</span>
             </div>
-            <strong>${args.narrow ? "390 px" : "Desktop"}</strong>
+            <strong>${args.narrow ? "≤ 390 px" : "Desktop"}</strong>
         </header>
         <main class="storybook-cf-message-items__stage">
             <div class="message-list storybook-cf-message-items__stack" role="list">
@@ -110,11 +110,47 @@ function render_message_items(args: MessageItemArgs): HTMLElement {
                     time: "Sending",
                 })}
             </div>
-        </main>`;
+        </main>
+        <p class="storybook-cf-message-items__feedback" role="status" aria-live="polite"></p>`;
 
     canvas
         .querySelector<HTMLElement>(".cf-message-actions__edit")
         ?.classList.add("cf-message-actions__edit--can-edit");
+    canvas
+        .querySelector<HTMLElement>(".cf-message-item")
+        ?.classList.add("storybook-cf-message-item--active");
+
+    const feedback = canvas.querySelector<HTMLElement>(".storybook-cf-message-items__feedback");
+    canvas.addEventListener("click", (event) => {
+        if (!(event.target instanceof Element)) {
+            return;
+        }
+
+        const button = event.target.closest<HTMLButtonElement>("button");
+        if (!button || button.disabled || !feedback) {
+            return;
+        }
+
+        if (button.classList.contains("cf-message-reaction")) {
+            const selected = button.getAttribute("aria-pressed") !== "true";
+            button.classList.toggle("cf-message-reaction--selected", selected);
+            button.setAttribute("aria-pressed", String(selected));
+            feedback.textContent = selected ? "Reaction added." : "Reaction removed.";
+            return;
+        }
+
+        if (button.classList.contains("cf-message-actions__star-button")) {
+            const selected = button.getAttribute("aria-pressed") !== "true";
+            button.classList.toggle("cf-message-actions__star-button--selected", selected);
+            button.setAttribute("aria-pressed", String(selected));
+            button.setAttribute("aria-label", selected ? "Unstar message" : "Star message");
+            feedback.textContent = selected ? "Message starred." : "Message unstarred.";
+            return;
+        }
+
+        const label = button.getAttribute("aria-label") ?? button.textContent?.trim() ?? "Action";
+        feedback.textContent = `${label} selected.`;
+    });
     return canvas;
 }
 
@@ -132,4 +168,5 @@ export const StateGallery: Story = {};
 
 export const NarrowTouch: Story = {
     args: {narrow: true},
+    parameters: {viewport: {defaultViewport: "mobile1"}},
 };

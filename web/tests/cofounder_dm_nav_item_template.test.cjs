@@ -36,8 +36,14 @@ run_test("direct-message row renders the Cofounder navigation contract", () => {
     assert.match(html, /aria-current="page"/);
     assert.match(html, /class="cf-dm-nav__presence-dot user-circle-active"/);
     assert.match(html, /class="cf-dm-nav__label-text conversation-partners-list">Alex Lee/);
-    assert.match(html, /class="cf-dm-nav__mention unread_mention_info">@/);
-    assert.match(html, /class="cf-dm-nav__badge unread_count">4/);
+    assert.match(
+        html,
+        /class="cf-dm-nav__mention unread_mention_info" aria-label="translated: Mentioned you">@/,
+    );
+    assert.match(
+        html,
+        /class="cf-dm-nav__badge unread_count" aria-label="translated: Unread messages: 4">4/,
+    );
     assert.doesNotMatch(html, /zulip-icon/);
 });
 
@@ -71,6 +77,9 @@ run_test("more-conversations row is a native Cofounder action", () => {
     assert.match(html, /id="show-more-direct-messages" class="cf-dm-nav-action/);
     assert.match(html, /<button type="button" class="cf-dm-nav-action__main dm-name">/);
     assert.match(html, /class="cf-dm-nav-action__label">translated: More conversations/);
-    assert.match(html, /class="cf-dm-nav-action__badge unread_count">8/);
+    assert.match(
+        html,
+        /class="cf-dm-nav-action__badge unread_count" aria-label="translated: Unread messages: 8">8/,
+    );
     assert.doesNotMatch(html, /<a|zulip-icon/);
 });

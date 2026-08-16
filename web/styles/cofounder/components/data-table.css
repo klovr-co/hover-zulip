@@ -28,6 +28,17 @@
     border-radius: 0 0 var(--cf-radius-control) var(--cf-radius-control);
 }
 
+.cf-data-table__sr-only-head th {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    border: 0;
+    white-space: nowrap;
+}
+
 .cf-data-table__heading {
     box-sizing: border-box;
     height: 34px;
@@ -176,26 +187,6 @@
     height: 14px;
 }
 
-.cf-presence-dot {
-    display: block;
-    box-sizing: border-box;
-    width: 9px;
-    height: 9px;
-    margin: 2px;
-    border: 2px solid var(--cf-surface-paper);
-    border-radius: 50%;
-    background: var(--cf-color-disabled);
-    box-shadow: 0 0 0 1px var(--cf-border-subtle);
-}
-
-.cf-presence-dot--active {
-    background: var(--cf-color-success);
-}
-
-.cf-presence-dot--idle {
-    background: var(--cf-color-warning);
-}
-
 .cf-data-table__empty {
     height: auto;
     padding: 44px var(--cf-space-4);
@@ -203,6 +194,11 @@
     background: var(--cf-surface-paper);
     font-size: var(--cf-type-body);
     text-align: center;
+}
+
+.cf-data-table__empty-message {
+    margin: 0;
+    overflow-wrap: anywhere;
 }
 
 /* Settings lists keep sort state on semantic table headers for ListWidget. */
@@ -276,6 +272,7 @@
 .cf-data-table--settings > tbody > tr > td {
     height: 42px;
     padding: 5px var(--cf-space-2);
+    overflow-wrap: anywhere;
     border: 0;
     color: var(--cf-text-primary);
     background: var(--cf-surface-paper);
@@ -446,6 +443,12 @@
 
     .cf-data-table--settings > tbody > tr > td {
         height: 48px;
+    }
+
+    .cf-data-table--settings > thead > tr > th {
+        height: 48px;
+        overflow-wrap: anywhere;
+        white-space: normal;
     }
 }
 
@@ -724,6 +727,10 @@
     place-items: center;
 }
 
+#recent_view .cf-data-table .recent-view-table-unread-count.unread_hidden {
+    display: none;
+}
+
 #recent_view #recent_view_folder_filter_button {
     width: var(--cf-control-height);
     min-width: var(--cf-control-height);
@@ -781,6 +788,12 @@
         width: var(--cf-control-height-touch);
         min-width: var(--cf-control-height-touch);
         min-height: var(--cf-control-height-touch);
+    }
+
+    #recent_view #recent-view-search-wrapper {
+        --input-button-width: var(--cf-control-height-touch);
+
+        min-width: 0;
     }
 
     .cf-load-more {

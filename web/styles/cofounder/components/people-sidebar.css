@@ -247,18 +247,23 @@
 }
 
 .cf-member-row__unread:not(.hide) {
+    box-sizing: border-box;
     display: grid;
     min-width: 17px;
+    max-width: 37px;
     height: 17px;
+    overflow: hidden;
     margin: 0;
     padding: 0 4px;
     border-radius: var(--cf-radius-pill);
     color: var(--cf-surface-paper);
-    background: var(--cf-color-accent);
+    background: var(--cf-color-accent-hover);
     font-size: 10px;
     font-weight: 700;
     line-height: 1;
     place-items: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .cf-member-row__actions.cf-icon-button {
@@ -337,6 +342,10 @@
 
     .cf-member-row {
         grid-template-columns: minmax(0, 1fr) var(--cf-control-height-touch);
+    }
+
+    .cf-member-row--avatar {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .cf-member-row__link {

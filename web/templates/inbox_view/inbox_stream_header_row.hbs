@@ -13,7 +13,7 @@
                         </span>
                     {{/if}}
                 </div>
-                <button type="button" class="cf-conversation-list__collapse collapsible-button toggle-inbox-header-icon {{#if is_collapsed}}icon-collapsed-state{{/if}}" tabindex="-1" aria-label="{{t 'Toggle channel'}}">{{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="channel-row-chevron"}}</button>
+                <button type="button" class="cf-conversation-list__collapse collapsible-button toggle-inbox-header-icon {{#if is_collapsed}}icon-collapsed-state{{/if}}" tabindex="-1" aria-label="{{t 'Toggle channel'}}" aria-expanded="{{#if is_collapsed}}false{{else}}true{{/if}}">{{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="channel-row-chevron"}}</button>
                 <span class="cf-conversation-list__mention unread_mention_info tippy-zulip-tooltip
                   {{#unless mention_in_unread}}hidden{{/unless}}"
                   data-tippy-content="{{t 'You have unread mentions'}}">@</span>

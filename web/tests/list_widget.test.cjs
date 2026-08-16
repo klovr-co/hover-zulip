@@ -79,7 +79,32 @@ function make_scroll_container() {
 function make_sort_container() {
     const $sort_container = {cleared: false, siblings_deactivated: false};
 
+    const $sortable_headers = {
+        attr() {
+            return $sortable_headers;
+        },
+        filter(selector) {
+            assert.equal(selector, ".active");
+            return {length: 0};
+        },
+    };
+    const $sort_buttons = {
+        attr() {
+            return $sort_buttons;
+        },
+        filter(selector) {
+            assert.equal(selector, ".active");
+            return {attr() {}};
+        },
+    };
+
     $sort_container.find = (selector) => {
+        if (selector === "th[data-sort]") {
+            return $sortable_headers;
+        }
+        if (selector === "button[data-sort]") {
+            return $sort_buttons;
+        }
         assert.equal(selector, "[data-sort].active");
         return {
             not($excluded) {
@@ -95,13 +120,19 @@ function make_sort_container() {
     };
 
     $sort_container.on = (ev, sel, f) => {
-        assert.equal(ev, "click.list_widget_sort");
-        assert.equal(sel, "[data-sort]");
-        $sort_container.f = f;
+        if (ev === "click.list_widget_sort") {
+            assert.equal(sel, "[data-sort]");
+            $sort_container.f = f;
+            return;
+        }
+        assert.equal(ev, "keydown.list_widget_sort");
+        assert.equal(sel, "th[data-sort]");
+        $sort_container.keydown_f = f;
     };
 
-    $sort_container.off = (ev) => {
-        assert.equal(ev, "click.list_widget_sort");
+    $sort_container.off = (ev, sel) => {
+        assert.ok(ev === "click.list_widget_sort" || ev === "keydown.list_widget_sort");
+        assert.equal(sel, ev === "click.list_widget_sort" ? "[data-sort]" : "th[data-sort]");
         $sort_container.cleared = true;
     };
 
@@ -480,9 +511,18 @@ run_test("sorting", () => {
 
     $button = sort_button(button_opts);
 
-    $sort_container.f.apply($button);
+    let keyboard_event_prevented = false;
+    $sort_container.keydown_f.apply($button, [
+        {
+            key: "Enter",
+            preventDefault() {
+                keyboard_event_prevented = true;
+            },
+        },
+    ]);
 
     assert.ok(cleared);
+    assert.ok(keyboard_event_prevented);
     assert.ok($sort_container.siblings_deactivated);
 
     expected_html = html_for([alice, bob, cal, dave, ellen]);

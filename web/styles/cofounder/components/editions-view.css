@@ -41,6 +41,7 @@
 .cf-edition-header h1 {
     max-width: 700px;
     margin: 0;
+    overflow-wrap: anywhere;
     font-family: var(--cf-font-display);
     font-size: clamp(40px, 6vw, 66px);
     font-weight: 400;
@@ -51,12 +52,14 @@
 .cf-edition-header > p {
     max-width: 610px;
     margin: 16px 0 25px;
+    overflow-wrap: anywhere;
     color: var(--cf-text-secondary);
     font-size: 17px;
     line-height: 1.55;
 }
 
 .cf-edition-tabs {
+    box-sizing: border-box;
     display: inline-flex;
     gap: 4px;
     padding: 4px;
@@ -86,12 +89,31 @@
 .cf-edition-status {
     min-height: 24px;
     padding: 14px 0 2px;
+    overflow-wrap: anywhere;
     color: var(--cf-text-secondary);
     font-size: 13px;
 }
 
+.cf-edition-status--error {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding: 10px 12px;
+    border: 1px solid var(--cf-border-subtle);
+    border-inline-start: 3px solid var(--cf-color-danger);
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-text-primary);
+    background: var(--cf-color-danger-soft);
+}
+
 #cf-edition-retry {
     margin-inline-start: 7px;
+}
+
+.cf-edition-status--error #cf-edition-retry {
+    margin-inline-start: 0;
 }
 
 .cf-edition-view-controls {
@@ -118,6 +140,7 @@
 .cf-edition-section > h2,
 .cf-edition-section-label {
     margin: 0 0 7px;
+    overflow-wrap: anywhere;
     color: var(--cf-text-secondary);
     font-family: var(--cf-font-ui);
     font-size: 12px;
@@ -139,6 +162,7 @@
 .cf-edition-passage h2,
 .cf-edition-passage h3 {
     margin: 0 0 12px;
+    overflow-wrap: anywhere;
     font-family: var(--cf-font-display);
     font-size: clamp(25px, 3vw, 34px);
     font-weight: 400;
@@ -149,6 +173,7 @@
 .cf-edition-passage > p {
     max-width: 68ch;
     margin: 0 0 20px;
+    overflow-wrap: anywhere;
     color: color-mix(in srgb, var(--cf-text-primary) 88%, transparent);
     font-family: var(--cf-font-display);
     font-size: 18px;
@@ -166,6 +191,7 @@
 .cf-edition-sources-link {
     display: inline-flex;
     align-items: baseline;
+    min-width: 0;
     color: var(--cf-color-accent-hover);
     font-size: 14px;
     font-weight: 750;
@@ -177,6 +203,8 @@
 }
 
 .cf-edition-update-link > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
     color: var(--cf-text-secondary);
     font-size: 12px;
     font-weight: 500;
@@ -217,6 +245,7 @@
 
 .cf-edition-all-clear h2 {
     margin: 1px 0 5px;
+    overflow-wrap: anywhere;
     font-family: var(--cf-font-display);
     font-size: 22px;
     font-weight: 400;
@@ -225,8 +254,18 @@
 .cf-edition-all-clear p,
 .cf-edition-empty {
     margin: 0;
+    overflow-wrap: anywhere;
     color: var(--cf-text-secondary);
     line-height: 1.55;
+}
+
+.cf-edition-empty {
+    padding: 22px 24px;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-overlay);
+    background: var(--cf-surface-canvas);
+    font-family: var(--cf-font-display);
+    font-size: 18px;
 }
 
 .cf-edition-carousel {
@@ -347,6 +386,10 @@
         align-items: flex-start;
         flex-direction: column;
         gap: 10px;
+    }
+
+    .cf-edition-empty {
+        padding: 18px 20px;
     }
 
     .cf-edition-sources-link {

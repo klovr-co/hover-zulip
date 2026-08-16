@@ -236,12 +236,28 @@ function add_upload_banner(
     banner_text: string,
     file_id: string,
     is_upload_process_tracker = false,
+    file_name?: string,
 ): void {
     const new_banner_html = render_upload_banner({
         banner_type,
         is_upload_process_tracker,
         banner_text,
         file_id,
+        progress_label:
+            file_name === undefined
+                ? $t({defaultMessage: "Upload progress"})
+                : $t({defaultMessage: "Upload progress for {filename}"}, {filename: file_name}),
+        cancel_button_label:
+            file_name === undefined
+                ? $t({defaultMessage: "Cancel upload"})
+                : $t({defaultMessage: "Cancel upload of {filename}"}, {filename: file_name}),
+        hide_button_label:
+            file_name === undefined
+                ? $t({defaultMessage: "Dismiss upload notice"})
+                : $t(
+                      {defaultMessage: "Hide upload progress for {filename}"},
+                      {filename: file_name},
+                  ),
     });
     compose_banner.append_compose_banner_to_banner_list(
         $(new_banner_html),
@@ -336,6 +352,7 @@ export let upload_files = (
             $t({defaultMessage: "Uploading {filename}…"}, {filename: file.name}),
             file_id,
             true,
+            file.name,
         );
         // eslint-disable-next-line @typescript-eslint/no-loop-func
         config.upload_banner_cancel_button(file_id).on("click", () => {
@@ -531,9 +548,9 @@ export function setup_upload(config: Config): Uppy<Meta, TusBody> {
         assert(file !== undefined);
         assert(progress.bytesTotal !== null);
         const percent_complete = (100 * progress.bytesUploaded) / progress.bytesTotal;
-        $(`${config.upload_banner_identifier(file.id)} .moving_bar`).css({
-            width: `${percent_complete}%`,
-        });
+        $(`${config.upload_banner_identifier(file.id)} .moving_bar`)
+            .css({width: `${percent_complete}%`})
+            .attr("aria-valuenow", Math.round(percent_complete));
     });
 
     $<HTMLInputElement>(config.file_input_identifier()).on("change", (event) => {

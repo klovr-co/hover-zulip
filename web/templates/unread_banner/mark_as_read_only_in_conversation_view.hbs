@@ -1,5 +1,5 @@
-{{#> ../cofounder/components/notice . intent="info" id="mark_as_read_turned_off_banner"}}
-    <p id="mark_as_read_turned_off_content" class="cf-notice__content">
+{{#> ../cofounder/components/notice . intent="info" custom_classes="mark-as-read-state-banner"}}
+    <p class="cf-notice__content mark-as-read-state-content">
         {{#tr}}
             Messages will not be automatically marked as read because this is not a
             <z-conversation-view>conversation</z-conversation-view> view. <z-link>Change setting</z-link>
@@ -8,6 +8,6 @@
         {{/tr}}
     </p>
     <div class="cf-notice__actions">
-        {{> ../cofounder/components/button variant="secondary" id="mark_view_read" label=(t "Mark as read") custom_classes="cf-notice__action"}}
+        {{> ../cofounder/components/button variant="secondary" label=(t "Mark as read") custom_classes="cf-notice__action mark-view-read"}}
     </div>
 {{/../cofounder/components/notice}}

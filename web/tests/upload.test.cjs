@@ -486,6 +486,12 @@ test("uppy_events", ({override_rewire, mock_template}) => {
     upload.setup_upload(upload.compose_config);
     assert.equal(Object.keys(callbacks).length, 6);
 
+    const on_upload_progress_callback = callbacks["upload-progress"];
+    on_upload_progress_callback(file, {bytesTotal: 400, bytesUploaded: 100});
+    const $progress = $(`${upload.compose_config.upload_banner_identifier(file.id)} .moving_bar`);
+    assert.equal($progress[0].style.getPropertyValue("width"), "25%");
+    assert.equal($progress.attr("aria-valuenow"), "25");
+
     // Simulate tus-js-client having recorded this upload in our
     // InMemoryUrlStorage, which it does while uploading -- keyed by its
     // `/api/v1/tus/...` upload URL. That URL is what upload-success uses

@@ -1,11 +1,11 @@
 <section
-  class="cf-suggested-action"
+  class="cf-suggested-action{{#if is_not_action}} cf-suggested-action--dismissed{{else if todo_is_completed}} cf-suggested-action--completed{{else if is_approved}} cf-suggested-action--approved{{/if}}"
   data-cf-suggested-action-message-id="{{message_id}}"
-  aria-label="{{t 'Suggested Action'}}"
+  aria-labelledby="cf-suggested-action-heading-{{message_id}}"
   tabindex="-1"
   >
     <div class="cf-suggested-action__heading">
-        <h4>{{t "Suggested Action"}}</h4>
+        <h3 id="cf-suggested-action-heading-{{message_id}}">{{t "Suggested Action"}}</h3>
         {{> cofounder/components/status tone=state_tone label=state_label custom_classes="cf-suggested-action__state"}}
     </div>
     <p class="cf-suggested-action__wording">{{wording}}</p>
@@ -23,15 +23,17 @@
         <div
           class="cf-suggested-action__todo"
           data-cf-todo-id="{{todo_id}}"
+          role="region"
+          aria-labelledby="cf-suggested-action-todo-heading-{{todo_id}}"
           tabindex="0"
           >
-            <p>
+            <h4 id="cf-suggested-action-todo-heading-{{todo_id}}">
                 {{#if todo_is_active}}{{#tr}}Todo #{{todo_id}}
                         is active{{/tr}}{{/if}}
                 {{#if todo_is_completed}}{{#tr}}Todo #{{todo_id}}
                         is completed{{/tr}}{{/if}}
-            </p>
-            <p>{{#tr}}Assigned to {{todo_assignee}}{{/tr}}</p>
+            </h4>
+            <p data-cf-todo-assignee-label>{{#tr}}Assigned to {{todo_assignee}}{{/tr}}</p>
             {{#if todo_latest_actor}}
                 <p>
                     {{#tr}}
@@ -46,7 +48,8 @@
                         <select
                           class="cf-field__control cf-suggested-action__assignee"
                           data-cf-todo-assignee
-                          aria-label="{{t 'Assign Todo'}}"
+                          data-cf-current-assignee="{{todo_assignee_user_id}}"
+                          aria-label="{{t 'Assign to Todo'}}"
                           >
                             {{#if todo_has_assignee}}
                                 <option value="{{todo_assignee_user_id}}">
@@ -69,6 +72,7 @@
                       class="cf-button cf-button--secondary"
                       data-cf-todo-operation="assign"
                       data-cf-todo-id="{{todo_id}}"
+                      disabled
                       >{{t "Assign"}}</button>
                     <button
                       type="button"
@@ -91,6 +95,7 @@
               data-cf-todo-status
               role="status"
               aria-live="polite"
+              aria-atomic="true"
               ></span>
         </div>
     {{else}}
@@ -111,7 +116,7 @@
                         <select
                           class="cf-field__control"
                           data-cf-action-assignee
-                          aria-label="{{t 'Suggested Action assignee'}}"
+                          aria-label="{{t 'Assign to Suggested Action assignee'}}"
                           >
                             <option value="">{{t "Unassigned"}}</option>
                             {{#if approval_has_assignee}}
@@ -171,5 +176,6 @@
       data-cf-action-status
       role="status"
       aria-live="polite"
+      aria-atomic="true"
       ></span>
 </section>

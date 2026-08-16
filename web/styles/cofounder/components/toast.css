@@ -56,9 +56,9 @@
 
 .cf-toast__close.cf-button {
     grid-area: close;
+    align-self: start;
     width: var(--cf-control-height);
     min-height: var(--cf-control-height);
-    margin: calc(-1 * var(--cf-space-1));
     padding: 0;
 }
 

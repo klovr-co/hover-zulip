@@ -2,7 +2,7 @@
 <div class="stream-row cf-two-pane-shell__row" data-stream-id="{{stream_id}}" data-stream-name="{{name}}">
 
     {{#if subscribed}}
-        <button type="button" class="check checked sub_unsub_button cf-two-pane-shell__membership-action" aria-label="{{t 'Unsubscribe from channel' }}">
+        <button type="button" class="check checked sub_unsub_button cf-two-pane-shell__membership-action" aria-label="{{t 'Unsubscribe from channel' }}: {{name}}">
 
             <span class="tippy-zulip-tooltip" data-tooltip-template-id="unsubscribe-from-{{stream_id}}-stream-tooltip-template">
                 <template id="unsubscribe-from-{{stream_id}}-stream-tooltip-template">
@@ -19,7 +19,7 @@
             <span class="sub_unsub_status"></span>
         </button>
     {{else}}
-        <button type="button" class="check sub_unsub_button cf-two-pane-shell__membership-action {{#unless should_display_subscription_button}}disabled{{/unless}}" aria-label="{{t 'Subscribe to channel' }}" {{#unless should_display_subscription_button}}disabled{{/unless}}>
+        <button type="button" class="check sub_unsub_button cf-two-pane-shell__membership-action {{#unless should_display_subscription_button}}disabled{{/unless}}" aria-label="{{t 'Subscribe to channel' }}: {{name}}" {{#unless should_display_subscription_button}}disabled{{/unless}}>
 
             <span class="tippy-zulip-tooltip"  data-tooltip-template-id="{{#if should_display_subscription_button}}subscribe-to-{{stream_id}}-stream-tooltip-template{{else}}cannot-subscribe-to-{{stream_id}}-stream-tooltip-template{{/if}}">
                 <template id="subscribe-to-{{stream_id}}-stream-tooltip-template">
@@ -46,7 +46,7 @@
         </button>
     {{/if}}
     {{> subscription_setting_icon . }}
-    <div class="sub-info-box">
+    <div class="sub-info-box cf-two-pane-shell__row-main" role="button" tabindex="0" aria-label="{{t 'Open channel settings'}}: {{name}}" aria-controls="stream_settings">
         <div class="top-bar">
             <div class="stream-name">{{name}}</div>
             <div class="subscriber-count tippy-zulip-tooltip" data-tippy-content="{{t 'Subscriber count' }}">

@@ -41,7 +41,7 @@ ul.topic-list:has(> li.cf-topic-nav)::after {
 
 .cf-topic-nav--selected,
 .cf-topic-nav.active-sub-filter {
-    color: var(--cf-color-accent);
+    color: var(--cf-color-accent-hover);
     background: var(--cf-surface-selected);
     box-shadow: inset 3px 0 0 var(--cf-color-accent);
 }
@@ -116,7 +116,7 @@ ul.topic-list:has(> li.cf-topic-nav)::after {
 }
 
 .cf-topic-nav__mention {
-    color: var(--cf-color-accent);
+    color: var(--cf-color-accent-hover);
     font-size: var(--cf-type-meta);
     font-weight: 700;
 }
@@ -163,9 +163,16 @@ ul.topic-list:has(> li.cf-topic-nav)::after {
     display: grid;
 }
 
+.cf-topic-nav > .cf-topic-nav__more {
+    display: grid;
+    visibility: hidden;
+    pointer-events: none;
+}
+
 .cf-topic-nav:is(:hover, :focus-within, .highlighted_row) > .cf-topic-nav__more,
 .cf-topic-nav > .cf-topic-nav__more.left_sidebar_menu_icon_visible {
-    display: grid;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .cf-topic-nav > .cf-topic-nav__action:is(:hover, :focus-visible) {
@@ -184,7 +191,8 @@ ul.topic-list:has(> li.cf-topic-nav)::after {
 
 @media (hover: none) {
     .cf-topic-nav > .cf-topic-nav__more {
-        display: grid;
+        visibility: visible;
+        pointer-events: auto;
     }
 }
 

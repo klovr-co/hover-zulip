@@ -575,6 +575,7 @@ export class BuddyList extends BuddyListConf {
         $("#buddy-list-participants-container .cf-people-sidebar__section-header").append(
             $(
                 render_section_header({
+                    controls_id: "buddy-list-participants",
                     id: "buddy-list-participants-section-heading",
                     header_text: $t({defaultMessage: "This Conversation"}),
                     is_collapsed: this.participants_section.is_collapsed,
@@ -585,6 +586,7 @@ export class BuddyList extends BuddyListConf {
         $("#buddy-list-users-matching-view-container .cf-people-sidebar__section-header").append(
             $(
                 render_section_header({
+                    controls_id: "buddy-list-users-matching-view",
                     id: "buddy-list-users-matching-view-section-heading",
                     header_text: current_sub
                         ? $t({defaultMessage: "This Channel"})
@@ -597,6 +599,7 @@ export class BuddyList extends BuddyListConf {
         $("#buddy-list-other-users-container .cf-people-sidebar__section-header").append(
             $(
                 render_section_header({
+                    controls_id: "buddy-list-other-users",
                     id: "buddy-list-other-users-section-heading",
                     header_text: $t({defaultMessage: "Others"}),
                     is_collapsed: this.other_users_section.is_collapsed,

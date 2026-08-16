@@ -45,6 +45,47 @@ function render_feed_controls(): HTMLElement {
         ],
     })}</div>`;
     canvas.querySelector(".cf-revision-trail")?.setAttribute("open", "");
+    canvas.addEventListener("click", (event) => {
+        if (!(event.target instanceof Element)) {
+            return;
+        }
+        const button = event.target.closest<HTMLButtonElement>(".cf-feed-filter");
+        if (button === null) {
+            return;
+        }
+        const controls = button.closest<HTMLElement>(".cf-feed-controls");
+        if (controls === null) {
+            return;
+        }
+        const status = controls.querySelector<HTMLElement>(".cf-feed-controls__status");
+        if (status === null) {
+            return;
+        }
+
+        const selector =
+            button.dataset["cfFeedFilter"] === undefined
+                ? "[data-cf-feed-history]"
+                : "[data-cf-feed-filter]";
+        for (const candidate of controls.querySelectorAll<HTMLButtonElement>(selector)) {
+            const selected = candidate === button;
+            candidate.classList.toggle("cf-feed-filter--selected", selected);
+            candidate.setAttribute("aria-pressed", String(selected));
+        }
+
+        if (button.dataset["cfFeedFilter"] !== undefined) {
+            const label =
+                button.querySelector(".cf-feed-filter__label")?.textContent.trim() ?? "All";
+            status.textContent =
+                button.dataset["cfFeedFilter"] === "all"
+                    ? "Showing teammate posts and the latest meaningful state of every enabled Module."
+                    : `Showing ${label} updates from the same native Space history.`;
+            return;
+        }
+        status.textContent =
+            button.dataset["cfFeedHistory"] === "all"
+                ? "Showing the complete chronological Module history, including earlier insight states."
+                : "Showing the latest state of each insight. Earlier updates remain in Full history.";
+    });
     return canvas;
 }
 

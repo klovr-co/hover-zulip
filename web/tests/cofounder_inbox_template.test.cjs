@@ -1,12 +1,19 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const render_folder = require("../templates/inbox_view/inbox_folder_row.hbs");
 const render_row = require("../templates/inbox_view/inbox_row.hbs");
 const render_view = require("../templates/inbox_view/inbox_view.hbs");
 
 const {run_test} = require("./lib/test.cjs");
+
+const conversation_list_css = fs.readFileSync(
+    path.join(__dirname, "../styles/cofounder/components/conversation-list.css"),
+    "utf8",
+);
 
 const policies = {FOLLOWED: "FOLLOWED", INHERIT: "INHERIT", MUTED: "MUTED", UNMUTED: "UNMUTED"};
 const columns = {ACTION_MENU: 3, FULL_ROW: 0, TOPIC_VISIBILITY: 2, UNREAD_COUNT: 1};
@@ -27,7 +34,27 @@ run_test("Inbox shell uses the Cofounder conversation-list contract", () => {
     assert.match(html, /cf-conversation-list__filter-select/);
     assert.match(html, /cf-conversation-list__folder-menu/);
     assert.match(html, /cf-button--secondary/);
+    assert.match(html, /id="inbox-empty-without-search"[^>]*role="status"/);
+    assert.match(html, /aria-live="polite"/);
+    assert.match(html, /inbox-empty-illustration" aria-hidden="true"/);
     assert.doesNotMatch(html, /zulip-icon|<i(?:\s|>)/);
+});
+
+run_test("Inbox complete state is self-contained in the Cofounder stylesheet", () => {
+    assert.match(conversation_list_css, /empty-view-illustrations\/inbox-done\.svg/);
+    assert.match(conversation_list_css, /\.inbox-empty-action-filtered\s*{[^}]*display:\s*none/s);
+    assert.match(
+        conversation_list_css,
+        /\.inbox-empty-action-link\s*{[^}]*text-decoration:\s*underline/s,
+    );
+    assert.match(
+        conversation_list_css,
+        /\.inbox-empty-title\s*{[^}]*width:\s*min\(100%, 560px\)[^}]*overflow-wrap:\s*anywhere/s,
+    );
+    assert.match(
+        conversation_list_css,
+        /\.inbox-empty-action\s*{[^}]*width:\s*min\(100%, 560px\)[^}]*overflow-wrap:\s*anywhere/s,
+    );
 });
 
 run_test("Inbox topic rows use typed policy and action icons", () => {
@@ -97,5 +124,6 @@ run_test("Inbox folder rows expose typed collapse controls", () => {
     assert.match(html, /cf-conversation-list__section-label/);
     assert.match(html, /cf-conversation-list__collapse/);
     assert.match(html, /type="button"/);
+    assert.match(html, /aria-expanded="true"/);
     assert.doesNotMatch(html, /zulip-icon|<i(?:\s|>)/);
 });

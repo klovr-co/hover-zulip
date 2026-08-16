@@ -1,5 +1,18 @@
 {{#if loading}}
-    <p role="status" aria-live="polite">{{t "Resolving the exact source messages…"}}</p>
+    <div
+      class="cf-evidence-loading"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      tabindex="-1"
+      data-cf-evidence-result
+    >
+        <p>{{t "Resolving the exact source messages…"}}</p>
+        <div class="cf-evidence-loading__placeholder" aria-hidden="true">
+            <span></span>
+            <span></span>
+        </div>
+    </div>
 {{else if error}}
     {{#if retryable}}
         <div class="cf-notice cf-notice--warning cf-evidence-result" role="alert" tabindex="-1" data-cf-evidence-result>
@@ -18,7 +31,13 @@
         </div>
     {{/if}}
 {{else if empty}}
-    <p tabindex="-1" data-cf-evidence-result>
+    <p
+      class="cf-evidence-empty"
+      role="status"
+      aria-live="polite"
+      tabindex="-1"
+      data-cf-evidence-result
+    >
         {{t "No exact source messages are available for this update."}}
     </p>
 {{else}}

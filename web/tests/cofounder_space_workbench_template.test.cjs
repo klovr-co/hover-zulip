@@ -18,6 +18,10 @@ const behavior_source = fs.readFileSync(
     path.join(project_root, "web/src/hover_spaces_ui.ts"),
     "utf8",
 );
+const story_source = fs.readFileSync(
+    path.join(project_root, "web/stories/cofounder_settings_dialogs.stories.ts"),
+    "utf8",
+);
 const production_bundle = fs.readFileSync(
     path.join(project_root, "web/src/bundles/app.ts"),
     "utf8",
@@ -93,6 +97,12 @@ run_test("Space setup renders the standalone Cofounder workbench contract", () =
     assert.match(html, /data-cf-space-panel="source"/);
     assert.match(html, /data-cf-space-action="install-module"/);
     assert.match(html, /data-cf-membership-action="confirm-suggestion"/);
+    assert.match(html, /role="list"\s+aria-label="(?:translated: )?Teammates"/);
+    assert.match(html, /role="listitem"/);
+    assert.match(html, /aria-label="(?:translated: )?Disable: Suggested Actions"/);
+    assert.match(html, /aria-label="(?:translated: )?Enable Module: Conversation Digest"/);
+    assert.match(html, /aria-label="(?:translated: )?Confirm: Maya Chen"/);
+    assert.match(html, /aria-label="(?:translated: )?Remove: Maya Chen"/);
     assert.match(html, /class="cf-field__control"/);
     assert.match(html, /class="cf-status cf-status--accent"/);
     assert.match(html, /id="cf-space-launch-requirements"/);
@@ -120,10 +130,24 @@ run_test("Source discovery results use typed icons and Cofounder action hooks", 
     assert.match(html, /name="cf_source_candidate"/);
     assert.match(html, /for="cf-source-candidate-0"/);
     assert.match(html, /data-cf-space-action="preview-source"/);
+    assert.match(html, /aria-label="(?:translated: )?Preview: Mentors &amp; Volunteers"/);
     assert.match(html, /data-cf-space-action="more-sources"/);
     assert.match(html, /class="cf-icon cf-icon--compact"/);
     assert.doesNotMatch(html, /<label[^>]*>[\s\S]*<button[\s\S]*<\/label>/);
     assert.doesNotMatch(html, legacy_contract);
+});
+
+run_test("Space Setup story models dependent workbench outcomes", () => {
+    assert.match(story_source, /setup_space_setup_dialog/);
+    assert.match(story_source, /submitButton\.disabled = true/);
+    assert.match(story_source, /Source identity verified\./);
+    assert.match(story_source, /No permitted Sources found\./);
+    assert.match(story_source, /Choose a custom history start date\./);
+    assert.match(story_source, /trigger set to/);
+    assert.match(story_source, /confirmed as a Space teammate\./);
+    assert.match(story_source, /Run final check & launch/);
+    assert.match(story_source, /Final launch check passed\./);
+    assert.match(story_source, /setup: setup_space_setup_dialog/);
 });
 
 run_test("Space workbench behavior and styles have no legacy compatibility bridge", () => {

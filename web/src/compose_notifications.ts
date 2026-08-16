@@ -445,7 +445,7 @@ export function initialize(opts: {
             e.preventDefault();
         },
     );
-    $("#compose_banners").on("click", ".sent_scroll_to_view .action-button", (e) => {
+    $("#compose_banners").on("click", ".sent_scroll_to_view .cf-notice__action", (e) => {
         assert(message_lists.current !== undefined);
         const message_id = Number($(e.currentTarget).attr("data-message-id"));
         message_lists.current.select_id(message_id);

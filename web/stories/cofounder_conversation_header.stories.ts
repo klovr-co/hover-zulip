@@ -36,5 +36,5 @@ export const Channel: Story = {};
 
 export const DirectMessage: Story = {
     render: () =>
-        `<div style="width:min(100%,880px)">${render_header({date_html: "Today", display_reply_to_for_tooltip: "Ava and Helper Bot", is_dm_with_self: false, is_stream: false, pm_with_url: "#dm", recipient_users: [{full_name: "Ava Rodriguez"}, {full_name: "Helper Bot", is_bot: true}]})}</div>`,
+        `<div style="width:min(100%,880px)">${render_header({date_html: "Today", display_reply_to_for_tooltip: "Ava and Helper", is_dm_with_self: false, is_stream: false, pm_with_url: "#dm", recipient_users: [{full_name: "Ava Rodriguez"}, {full_name: "Helper", is_bot: true}]})}</div>`,
 };

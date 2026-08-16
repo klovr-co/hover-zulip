@@ -17,7 +17,7 @@ Usage example:
     {{> @partial-block .}}
     {{#if input_button_icon}}
         {{#if (eq input_type "filter-input") }}
-            {{> icon_button custom_classes="input-button input-close-filter-button" squared=true icon=input_button_icon intent="neutral" }}
+            {{> icon_button custom_classes="input-button input-close-filter-button" squared=true icon=input_button_icon intent="neutral" aria-label=input_button_aria_label }}
         {{else}}
             {{> icon_button custom_classes="input-button" squared=true icon=input_button_icon intent="neutral" }}
         {{/if}}

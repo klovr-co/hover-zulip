@@ -23,6 +23,7 @@ run_test("message owns identity content actions and reactions", () => {
     assert.match(html, /cf-message-item__sender[^>]*>Ava/);
     assert.match(html, /cf-message-item__content">A useful update/);
     assert.match(html, /cf-message-item__reaction--selected/);
+    assert.match(html, /cf-message-item__reaction--selected[^>]*aria-pressed="true"/);
     assert.match(html, /cf-message-item__actions/);
     assert.match(html, /aria-label="translated: Message actions"/);
     assert.doesNotMatch(html, /message_row|zulip-icon|<i(?:\s|>)/);
@@ -82,10 +83,19 @@ run_test("production message row exposes the Cofounder message contract", () => 
         path.join(__dirname, "../styles/cofounder/components/message.css"),
         "utf8",
     );
+    const action_css = fs.readFileSync(
+        path.join(__dirname, "../styles/cofounder/components/message-actions.css"),
+        "utf8",
+    );
     const composition_css = fs.readFileSync(
         path.join(__dirname, "../styles/message_row.css"),
         "utf8",
     );
+    const story_source = fs.readFileSync(
+        path.join(__dirname, "../stories/cofounder_message_item.stories.ts"),
+        "utf8",
+    );
+    const story_css = fs.readFileSync(path.join(__dirname, "../stories/storybook.css"), "utf8");
 
     assert.match(html, /class="cf-message-item(?:\s|")/);
     assert.match(html, /cf-message-item--with-sender/);
@@ -96,8 +106,13 @@ run_test("production message row exposes the Cofounder message contract", () => 
     assert.match(html, /class="cf-message-item__content(?:\s|")/);
     assert.match(html, /class="cf-message-item__avatar(?:\s|")/);
     assert.match(html, /cf-message-item__bot/);
+    assert.match(html, /cf-message-item__unread-label">translated: Unread message/);
     assert.match(html, /<rect x="4" y="7" width="16" height="12" rx="3">/);
     assert.match(component_css, /\.cf-message-item--preview/);
+    assert.match(
+        component_css,
+        /\.cf-message-item--preview \.cf-message-item__time\s*{[^}]*color: var\(--cf-text-secondary\)/s,
+    );
     assert.match(
         component_css,
         /\.cf-message-item--preview \.cf-message-item__body\s*{[^}]*display: block/s,
@@ -107,6 +122,39 @@ run_test("production message row exposes the Cofounder message contract", () => 
         /\.cf-message-item--preview \.cf-message-item__content\s*{[^}]*grid-area: auto/s,
     );
     assert.match(component_css, /\.cf-message-item:not\(\.cf-message-item--preview\)/);
+    assert.match(component_css, /\.cf-message-item__unread-label\s*{[^}]*clip-path: inset\(50%\)/s);
+    assert.match(
+        component_css,
+        /\.cf-message-item:not\(\.cf-message-item--preview\) \.cf-message-item__time\s*{[^}]*var\(--cf-text-secondary\)/s,
+    );
+    assert.match(
+        component_css,
+        /\.cf-message-item:not\(\.cf-message-item--preview\) \.cf-message-item__time\s*{[^}]*max-width: 14ch;[^}]*text-overflow: ellipsis/s,
+    );
+    assert.match(
+        component_css,
+        /\.cf-message-item--with-sender[\s\S]*\.cf-message-item__sender:focus-visible\s*{[^}]*outline: 2px solid var\(--cf-focus\)/,
+    );
+    assert.match(
+        action_css,
+        /\.cf-message-actions__button\s*{[^}]*opacity: 0;[^}]*pointer-events: none/s,
+    );
+    assert.match(
+        action_css,
+        /\.cf-message-actions__button:focus-visible\s*{[^}]*pointer-events: auto/s,
+    );
+    assert.match(template_source, /role="status" aria-label="{{t 'Message sending' }}"/);
+    assert.match(story_source, /cf-message-actions__star-button--selected/);
+    assert.match(story_source, /role="status" aria-live="polite"/);
+    assert.match(story_source, /storybook-cf-message-item--active/);
+    assert.match(story_source, /defaultViewport: "mobile1"/);
+    assert.match(story_source, /≤ 390 px/);
+    assert.match(
+        story_css,
+        /\.storybook-cf-message-item--active \.cf-message-actions__button\s*{[^}]*opacity: 1;[^}]*pointer-events: auto/s,
+    );
+    assert.match(story_css, /width: min\(100%, 390px\)/);
+    assert.match(story_css, /color: var\(--cf-color-accent-hover\)/);
     assert.doesNotMatch(
         html,
         /\b(?:message_row|messagebox-content|messagebox|recipient_row|selectable_row|private-message|message_content|message-time|message_sender|sender_name|sender_name_text|message-avatar|inline_profile_picture|inline-profile-picture-wrapper|slow-send-spinner|message_length_controller)\b/,

@@ -1,7 +1,10 @@
 .cf-status {
+    box-sizing: border-box;
     display: inline-flex;
     gap: 5px;
     align-items: center;
+    min-width: 0;
+    max-inline-size: 100%;
     min-height: 22px;
     padding: 2px 7px;
     border: 1px solid var(--cf-border-subtle);
@@ -10,6 +13,16 @@
     background: var(--cf-surface-paper);
     font: 600 var(--cf-type-meta) / 1.2 var(--cf-font-ui);
     white-space: nowrap;
+}
+
+.cf-status > span:last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cf-status > .cf-icon {
+    flex: none;
 }
 
 .cf-status--accent {
@@ -28,7 +41,7 @@
         var(--cf-color-success) 24%,
         var(--cf-border-subtle)
     );
-    color: var(--cf-color-success);
+    color: var(--cf-color-success-strong);
     background: var(--cf-color-success-soft);
 }
 

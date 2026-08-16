@@ -51,6 +51,19 @@ function render_story(args: EvidenceArgs): HTMLElement {
     const canvas = globalThis.document.createElement("div");
     canvas.className = "cf-theme storybook-component";
     canvas.innerHTML = `<div class="storybook-component-stack storybook-component-stack-vertical" style="max-width:720px">${render_evidence(context_for(args.state))}</div>`;
+    canvas.addEventListener("click", (event) => {
+        if (!(event.target instanceof Element)) {
+            return;
+        }
+        const retry_button = event.target.closest<HTMLElement>("[data-cf-evidence-retry-url]");
+        const stack = canvas.querySelector<HTMLElement>(".storybook-component-stack");
+        if (retry_button === null || stack === null) {
+            return;
+        }
+        event.preventDefault();
+        stack.innerHTML = render_evidence(context_for("loading"));
+        stack.querySelector<HTMLElement>("[data-cf-evidence-result]")?.focus();
+    });
     return canvas;
 }
 

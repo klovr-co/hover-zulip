@@ -190,4 +190,11 @@
     .cf-channel-nav__main {
         min-height: var(--cf-control-height-touch);
     }
+
+    .cf-channel-nav__header .cf-channel-nav__action {
+        width: var(--cf-control-height-touch);
+        min-height: var(--cf-control-height-touch);
+        padding: 0;
+        margin: 0;
+    }
 }

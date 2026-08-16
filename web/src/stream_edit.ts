@@ -1024,6 +1024,19 @@ export function initialize(): void {
     });
 
     $("#channels_overlay_container").on(
+        "keydown",
+        ".cf-two-pane-shell__row-main",
+        function (this: HTMLElement, event) {
+            if (event.key !== "Enter" && event.key !== " ") {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            this.closest<HTMLElement>(".stream-row")?.click();
+        },
+    );
+
+    $("#channels_overlay_container").on(
         "click",
         ".subscriber-count",
         function (this: HTMLElement, e) {

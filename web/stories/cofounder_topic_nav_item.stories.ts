@@ -53,9 +53,10 @@ function topic({
 }
 
 export const States: Story = {
-    render: () =>
-        component_story(`
-            <nav aria-label="Product design topics" style="width: 280px">
+    render() {
+        const canvas = globalThis.document.createElement("div");
+        canvas.innerHTML = component_story(`
+            <nav class="storybook-cf-nav-states storybook-cf-topic-nav-states" aria-label="Product design topics">
                 <p style="margin: 0 0 8px 8px; color: var(--cf-text-secondary); font-size: 11px; font-weight: 650; letter-spacing: 0.1em; text-transform: uppercase">Product design</p>
                 <ul id="stream_filters" class="filters" style="margin: 0; padding: 0; list-style: none">
                     <li class="narrow-filter stream-expanded" style="margin: 0; padding: 0; list-style: none">
@@ -79,6 +80,46 @@ export const States: Story = {
                         </ul>
                     </li>
                 </ul>
+                <p class="storybook-cf-nav-states__feedback" role="status" aria-live="polite" aria-atomic="true"></p>
             </nav>
-        `),
+        `);
+        const feedback = canvas.querySelector<HTMLElement>(".storybook-cf-nav-states__feedback");
+        canvas.addEventListener("click", (event) => {
+            if (!(event.target instanceof Element) || feedback === null) {
+                return;
+            }
+            const action = event.target.closest<HTMLButtonElement>(".cf-topic-nav__action");
+            if (action !== null) {
+                feedback.textContent = `${action.getAttribute("aria-label") ?? "Topic action"} opened.`;
+                action.focus();
+                return;
+            }
+            const topic_link = event.target.closest<HTMLAnchorElement>(".cf-topic-nav__main");
+            if (topic_link !== null) {
+                event.preventDefault();
+                for (const row of canvas.querySelectorAll<HTMLElement>(".cf-topic-nav")) {
+                    row.classList.remove("cf-topic-nav--selected", "active-sub-filter");
+                    row.querySelector(".cf-topic-nav__main")?.removeAttribute("aria-current");
+                }
+                const row = topic_link.closest<HTMLElement>(".cf-topic-nav");
+                row?.classList.add("cf-topic-nav--selected", "active-sub-filter");
+                topic_link.setAttribute("aria-current", "page");
+                const label = row?.querySelector(".cf-topic-nav__label-inner")?.textContent?.trim();
+                feedback.textContent = `${label ?? "Topic"} selected.`;
+                topic_link.focus();
+                return;
+            }
+            const utility_link = event.target.closest<HTMLAnchorElement>(
+                ".cf-topic-nav-action__main",
+            );
+            if (utility_link !== null) {
+                event.preventDefault();
+                const label =
+                    utility_link.textContent?.trim().replaceAll(/\s+/g, " ") ?? "Topic action";
+                feedback.textContent = `${label} opened.`;
+                utility_link.focus();
+            }
+        });
+        return canvas;
+    },
 };

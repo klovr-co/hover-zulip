@@ -1,11 +1,14 @@
 .cf-button {
     appearance: none;
+    box-sizing: border-box;
     position: relative;
     display: inline-flex;
     gap: 6px;
     justify-content: center;
     align-items: center;
     min-height: var(--cf-control-height);
+    min-width: 0;
+    max-inline-size: 100%;
     padding: 4px 10px;
     border: 1px solid transparent;
     border-radius: var(--cf-radius-control);
@@ -26,6 +29,11 @@
         box-shadow var(--cf-duration-base) var(--cf-ease-out);
 }
 
+.cf-button[hidden],
+.cf-button.hide {
+    display: none;
+}
+
 .cf-button:hover {
     text-decoration: none;
 }
@@ -36,8 +44,8 @@
 
 .cf-button:focus-visible {
     border-color: var(--cf-focus);
-    outline: 2px solid color-mix(in srgb, var(--cf-focus) 22%, transparent);
-    outline-offset: 1px;
+    outline: 2px solid var(--cf-focus);
+    outline-offset: 2px;
 }
 
 .cf-button:disabled,
@@ -97,6 +105,11 @@
     background: var(--cf-surface-hover);
 }
 
+.cf-button--ghost:active {
+    color: var(--cf-text-primary);
+    background: var(--cf-color-surface-pressed);
+}
+
 .cf-button--danger {
     border-color: var(--cf-color-danger);
     color: var(--cf-text-inverse);
@@ -108,14 +121,36 @@
     background: var(--cf-color-danger-hover);
 }
 
+.cf-button--danger:active {
+    border-color: var(--cf-color-danger-pressed);
+    background: var(--cf-color-danger-pressed);
+}
+
 .cf-button--success {
-    border-color: color-mix(
-        in srgb,
-        var(--cf-color-success) 28%,
-        var(--cf-border-subtle)
-    );
-    color: var(--cf-color-success);
+    border-color: var(--cf-color-success);
+    color: var(--cf-color-success-strong);
     background: var(--cf-color-success-soft);
+}
+
+.cf-button--success:hover {
+    border-color: var(--cf-color-success);
+    color: var(--cf-color-success-strong);
+    background: color-mix(
+        in srgb,
+        var(--cf-color-success) 14%,
+        var(--cf-surface-paper)
+    );
+}
+
+.cf-button--success:active {
+    border-color: var(--cf-color-success-strong);
+    color: var(--cf-color-success-strong);
+    background: color-mix(
+        in srgb,
+        var(--cf-color-success) 22%,
+        var(--cf-surface-paper)
+    );
+    box-shadow: none;
 }
 
 .cf-button--compact {

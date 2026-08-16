@@ -32,7 +32,8 @@
         {{/if}}
     </div>
     {{/if}}
-    <div class="cf-message-item__unread-marker"><div class="cf-message-item__unread-fill"></div></div>
+    <div class="cf-message-item__unread-marker" aria-hidden="true"><div class="cf-message-item__unread-fill"></div></div>
+    {{#if msg.unread}}<span class="cf-message-item__unread-label">{{t "Unread message"}}</span>{{/if}}
     <div class="cf-message-item__frame">
         <div class="cf-message-item__body{{#if status_message}} cf-message-item__body--status is-me-message{{/if}}">
             {{> message_body .}}

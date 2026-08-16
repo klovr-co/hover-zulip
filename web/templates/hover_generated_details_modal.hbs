@@ -14,10 +14,10 @@
         <ol class="cf-generated-history">
             {{#each history}}
                 <li class="cf-generated-history__entry">
-                    <a href="{{url}}">{{title}}</a>
-                    <span>
+                    <a href="{{url}}"{{#if is_current}} aria-current="true"{{/if}}>{{title}}</a>
+                    <span class="cf-generated-history__meta">
                         {{#if state}}
-                            {{state}}
+                            <span class="cf-generated-history__state">{{state}}</span>
                         {{else}}
                             {{t "Published"}}
                         {{/if}}

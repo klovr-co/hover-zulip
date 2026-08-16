@@ -67,6 +67,7 @@ let response: SearchResponse = {
     source_unavailable_count: 0,
 };
 let status = "";
+let searching = false;
 let visible = false;
 let request: JQuery.jqXHR<unknown> | undefined;
 let request_generation = 0;
@@ -95,7 +96,7 @@ function filter_unauthorized_results(search_response: SearchResponse): SearchRes
     };
 }
 
-function render(): void {
+function render({focus_target}: {focus_target?: string} = {}): void {
     if (!visible) {
         return;
     }
@@ -120,6 +121,7 @@ function render(): void {
         render_hover_search_view({
             query: response.query,
             status,
+            searching,
             has_query: response.query !== "",
             knowledge,
             sources,
@@ -129,6 +131,9 @@ function render(): void {
             has_sources: sources.length > 0,
         }),
     );
+    if (focus_target !== undefined) {
+        $(focus_target).trigger("focus");
+    }
 }
 
 function search(query: string): void {
@@ -143,7 +148,8 @@ function search(query: string): void {
             source_unavailable_count: 0,
         };
         status = "";
-        render();
+        searching = false;
+        render({focus_target: "#cf-global-search-input"});
         return;
     }
     const generation = request_generation;
@@ -154,7 +160,8 @@ function search(query: string): void {
         source_unavailable_count: 0,
     };
     status = $t({defaultMessage: "Searching confirmed Spaces…"});
-    render();
+    searching = true;
+    render({focus_target: ".cf-global-search__status"});
     request = channel.post({
         url: "/json/hover/search",
         data: {query: JSON.stringify(normalized)},
@@ -166,16 +173,25 @@ function search(query: string): void {
             status = response.source_unavailable_count
                 ? $t({defaultMessage: "Some Source evidence is temporarily unavailable."})
                 : response.knowledge.length + response.sources.length === 0
-                  ? $t({defaultMessage: "No results found."})
+                  ? $t({
+                        defaultMessage: "No results found. Try a different name, topic, or phrase.",
+                    })
                   : "";
-            render();
+            searching = false;
+            render({
+                focus_target:
+                    response.knowledge.length + response.sources.length === 0
+                        ? ".cf-global-search__status"
+                        : "#cf-global-search-knowledge-heading",
+            });
         },
         error(_xhr, error_type) {
             if (generation !== request_generation || error_type === "abort") {
                 return;
             }
             status = $t({defaultMessage: "Search could not be completed. Try again."});
-            render();
+            searching = false;
+            render({focus_target: ".cf-global-search__status"});
         },
     });
 }

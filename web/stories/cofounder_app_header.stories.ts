@@ -14,7 +14,11 @@ const avatar = `data:image/svg+xml,${encodeURIComponent(
 function render_app_header(args: AppHeaderArgs): HTMLElement {
     const canvas = globalThis.document.createElement("div");
     canvas.className = "cf-theme storybook-app-header";
-    canvas.innerHTML = render_navbar({embedded: false, user_avatar: avatar});
+    canvas.innerHTML = render_navbar({
+        embedded: false,
+        realm_logo_url: avatar,
+        user_avatar: avatar,
+    });
 
     if (args.search_expanded) {
         canvas

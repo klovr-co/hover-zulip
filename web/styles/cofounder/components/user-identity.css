@@ -25,6 +25,12 @@
     min-width: 0;
 }
 
+.cf-user-card .custom-profile-field-link {
+    display: flex;
+    align-items: center;
+    min-height: var(--cf-control-height);
+}
+
 .cf-user-card .copy-custom-profile-field-link {
     flex: none;
     margin-left: auto;
@@ -56,8 +62,22 @@
     height: 13px;
 }
 
+.cf-user-profile .custom-profile-fields-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--cf-control-height);
+}
+
 @media (width <= 600px) {
     .cf-user-card {
         width: calc(100vw - 16px);
+    }
+
+    .cf-user-card .custom-profile-field-link {
+        min-height: var(--cf-control-height-touch);
+    }
+
+    .cf-user-profile .custom-profile-fields-link {
+        min-height: var(--cf-control-height-touch);
     }
 }

@@ -4,6 +4,7 @@ import type * as tippy from "tippy.js";
 
 import render_navbar_gear_menu_popover from "../templates/popovers/navbar/navbar_gear_menu_popover.hbs";
 
+import * as cofounder_menu from "./cofounder/components/menu.ts";
 import * as demo_organizations_ui from "./demo_organizations_ui.ts";
 import * as information_density from "./information_density.ts";
 import * as popover_menus from "./popover_menus.ts";
@@ -130,6 +131,7 @@ export function initialize(): void {
 
             $popper.on("change", "input[name='theme-select']", (e) => {
                 const theme_code = Number.parseInt($(e.currentTarget).attr("data-theme-code")!, 10);
+                cofounder_menu.sync_menuitemradio_checked_state(instance.popper);
                 requestAnimationFrame(() => {
                     theme.set_theme_for_spectator(theme_code);
                 });

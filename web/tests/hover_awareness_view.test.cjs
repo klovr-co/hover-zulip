@@ -153,6 +153,8 @@ run_test("Team Pulse exposes an empty state and retryable loading error", ({over
     requests.at(-1).error({}, "error");
     const html = $("#cf-awareness-view").html();
     assert.match(html, /Live awareness could not be loaded/);
+    assert.match(html, /class="cf-awareness-status__message" role="status" aria-live="polite"/);
+    assert.match(html, /<\/span>\s*<button[^>]+id="cf-awareness-retry"/);
     assert.match(html, /id="cf-awareness-retry"/);
     assert.match(html, /class="cf-button cf-button--secondary"/);
     assert.doesNotMatch(html, /class="button rounded small"/);

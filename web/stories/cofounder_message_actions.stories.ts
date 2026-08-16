@@ -31,42 +31,87 @@ function render_message_actions(args: MessageActionArgs): HTMLElement {
         <header class="storybook-cf-message-controls__header">
             <div>
                 <h2>Message actions &amp; reactions</h2>
-                <p>Production controls, persistent reaction state, and narrow-touch geometry.</p>
+                <p>Try the production controls, persistent reaction state, and narrow-touch geometry.</p>
             </div>
             <span>COFOUNDER</span>
         </header>
         <div class="storybook-cf-message-controls__grid">
-            <article class="storybook-cf-message-controls__message">
+            <article class="storybook-cf-message-controls__message" aria-labelledby="message-actions-available-title">
                 <div class="storybook-cf-message-controls__identity">
-                    <strong>Ava Rodriguez</strong>
-                    <span>10:32 AM</span>
+                    <h3 id="message-actions-available-title">Ava Rodriguez</h3>
+                    <time datetime="10:32">10:32 AM</time>
                     <div class="cf-message-actions">${render_message_controls({is_archived: false, msg: {locally_echoed: false, sent_by_me: false, starred: false}})}</div>
                 </div>
                 <p>The launch notes are ready for a final pass before we share them with the team.</p>
                 ${render_message_reactions({is_archived: false, msg: {message_reactions: [reaction("thumbs up", "👍", "4", true), reaction("sparkles", "✨", "2")]}})}
             </article>
-            <article class="storybook-cf-message-controls__message">
+            <article class="storybook-cf-message-controls__message" aria-labelledby="message-actions-own-title">
                 <div class="storybook-cf-message-controls__identity">
-                    <strong>You</strong>
-                    <span>10:45 AM</span>
+                    <h3 id="message-actions-own-title">You</h3>
+                    <time datetime="10:45">10:45 AM</time>
                     <div class="cf-message-actions">${render_message_controls({is_archived: false, msg: {locally_echoed: false, sent_by_me: true, starred: true}})}</div>
                 </div>
                 <p>I’ll resolve the last two comments and post the approved version this afternoon.</p>
                 ${render_message_reactions({is_archived: true, msg: {message_reactions: [reaction("check", "✅", "You", true)]}})}
             </article>
-            <article class="storybook-cf-message-controls__message storybook-cf-message-controls__message--failed">
+            <article class="storybook-cf-message-controls__message storybook-cf-message-controls__message--failed" aria-labelledby="message-actions-failed-title">
                 <div class="storybook-cf-message-controls__identity">
-                    <strong>Send failed</strong>
+                    <h3 id="message-actions-failed-title">Send failed</h3>
                     <span>Retry or dismiss</span>
                     <div class="cf-message-actions">${render_message_controls_failed()}</div>
                 </div>
                 <p>Your draft is safe. Check your connection, then retry the message.</p>
             </article>
+            <p class="storybook-cf-message-controls__feedback" role="status" aria-live="polite"></p>
         </div>`;
 
     canvas
         .querySelector<HTMLElement>(".cf-message-actions__edit")
         ?.classList.add("cf-message-actions__edit--can-edit");
+
+    const feedback = canvas.querySelector<HTMLElement>(".storybook-cf-message-controls__feedback");
+    canvas.addEventListener("click", (event) => {
+        if (!(event.target instanceof Element)) {
+            return;
+        }
+
+        const button = event.target.closest<HTMLButtonElement>("button");
+        if (!button || button.disabled || !feedback) {
+            return;
+        }
+
+        if (button.classList.contains("cf-message-reaction")) {
+            const selected = button.getAttribute("aria-pressed") !== "true";
+            button.classList.toggle("cf-message-reaction--selected", selected);
+            button.setAttribute("aria-pressed", String(selected));
+            feedback.textContent = selected ? "Reaction added." : "Reaction removed.";
+            return;
+        }
+
+        if (button.classList.contains("cf-message-actions__star-button")) {
+            const selected = button.getAttribute("aria-pressed") !== "true";
+            button.classList.toggle("cf-message-actions__star-button--selected", selected);
+            button.setAttribute("aria-pressed", String(selected));
+            button.setAttribute("aria-label", selected ? "Unstar message" : "Star message");
+            feedback.textContent = selected ? "Message starred." : "Message unstarred.";
+            return;
+        }
+
+        if (button.classList.contains("refresh-failed-message")) {
+            button.classList.add("rotating");
+            button.closest("article")?.setAttribute("aria-busy", "true");
+            feedback.textContent = "Retry requested.";
+            return;
+        }
+
+        if (button.classList.contains("remove-failed-message")) {
+            button.closest("article")?.setAttribute("hidden", "");
+            feedback.textContent = "Failed draft dismissed.";
+            return;
+        }
+
+        feedback.textContent = `${button.getAttribute("aria-label") ?? "Action"} selected.`;
+    });
     return canvas;
 }
 
@@ -84,4 +129,5 @@ export const StateGallery: Story = {};
 
 export const NarrowTouch: Story = {
     args: {compact: true},
+    parameters: {viewport: {defaultViewport: "mobile1"}},
 };

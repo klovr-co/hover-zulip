@@ -10,7 +10,7 @@
                 {{> cofounder/components/icon name=provider_icon}}
             </span>
             <h1>{{source.display_name}}</h1>
-            {{> cofounder/components/status tone="neutral" label=(t "Source records · Read-only") custom_classes="cf-source-view__readonly-status"}}
+            {{> cofounder/components/status tone="neutral" label=(t "Read-only records") custom_classes="cf-source-view__readonly-status"}}
             {{#if source.is_history_retained}}
                 {{> cofounder/components/status tone="warning" label=(t "History retained") custom_classes="cf-source-view__retained-status"}}
             {{/if}}
@@ -31,28 +31,44 @@
                   value="{{query}}"
                   maxlength="100"
                   autocomplete="off"
+                  aria-controls="cf-source-record-list"
+                  aria-describedby="cf-source-view-status"
                   />
                 {{> cofounder/components/button type="submit" variant="secondary" label=(t "Search")}}
             </div>
         </form>
     </header>
     <div
-      class="cf-source-view__status"
+      class="cf-source-view__status{{#if has_error}} cf-source-view__status--error{{/if}}{{#if is_empty}} cf-source-view__status--empty{{/if}}"
+      id="cf-source-view-status"
       role="status"
       aria-live="polite"
+      aria-atomic="true"
       >
-        {{status}}
+        {{#if is_loading}}
+            {{> cofounder/components/icon name="loader-circle" compact=true custom_classes="cf-source-view__loading-indicator"}}
+        {{else if has_error}}
+            {{> cofounder/components/icon name="warning" compact=true custom_classes="cf-source-view__error-indicator"}}
+        {{else if is_empty}}
+            {{> cofounder/components/icon name=empty_icon custom_classes="cf-source-view__empty-indicator"}}
+        {{/if}}
+        <span class="cf-source-view__status-message">{{status}}</span>
+        {{#if is_empty}}
+            <span class="cf-source-view__empty-hint">{{empty_hint}}</span>
+        {{/if}}
     </div>
     {{#if show_load_older}}
         {{> cofounder/components/button id="cf-source-load-older" variant="secondary" label=(t "Load older") custom_classes="cf-source-view__page-action"}}
     {{/if}}
     {{#if show_retry}}
-        {{> cofounder/components/button id="cf-source-retry" variant="secondary" label=(t "Retry") custom_classes="cf-source-view__page-action"}}
+        {{> cofounder/components/button id="cf-source-retry" variant="secondary" label=(t "Retry") aria-label=(t "Retry loading Source records") custom_classes="cf-source-view__page-action"}}
     {{/if}}
     <div
+      id="cf-source-record-list"
       class="cf-source-view__record-list"
       role="list"
       aria-label="{{t 'Source records'}}"
+      aria-busy="{{#if is_loading}}true{{else}}false{{/if}}"
       >
         {{#each date_groups}}
             <section class="cf-source-view__date-group">

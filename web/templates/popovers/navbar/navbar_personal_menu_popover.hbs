@@ -15,7 +15,7 @@
             </div>
         </header>
         <section class="dropdown-menu-list-section personal-menu-actions" data-user-id="{{user_id}}">
-            <ul role="menu" class="cf-menu__list popover-menu-list">
+            <ul role="menu" aria-label="{{t 'Personal menu'}}" class="cf-menu__list popover-menu-list">
                 {{#if status_content_available}}
                 <li role="none" class="text-item cf-menu__item popover-menu-list-item">
                     <span class="personal-menu-status-wrapper">
@@ -101,20 +101,19 @@
                     </a>
                 </li>
                 <li role="none" class="cf-menu__item popover-menu-list-item">
-                    <div role="group" class="tab-picker popover-menu-tab-group" aria-label="{{t 'App theme' }}">
-                        <input type="radio" id="select-automatic-theme" class="tab-option" name="theme-select" data-theme-code="{{color_scheme_values.automatic.code}}" {{#if (eq user_color_scheme color_scheme_values.automatic.code)}}checked{{/if}} />
-                        <label role="menuitemradio" class="tab-option-content tippy-zulip-delayed-tooltip" for="select-automatic-theme" aria-label="{{t 'Select automatic theme' }}" data-tooltip-template-id="automatic-theme-template" tabindex="0">
+                    <div role="group" class="theme-switcher cf-menu__choice-group popover-menu-tab-group" aria-label="{{t 'App theme' }}">
+                        <input type="radio" id="select-automatic-theme" class="cf-menu__choice-input" name="theme-select" data-theme-code="{{color_scheme_values.automatic.code}}" tabindex="-1" aria-hidden="true" {{#if (eq user_color_scheme color_scheme_values.automatic.code)}}checked{{/if}} />
+                        <label role="menuitemradio" class="cf-menu__choice tippy-zulip-delayed-tooltip" for="select-automatic-theme" aria-label="{{t 'Select automatic theme' }}" aria-checked="{{#if (eq user_color_scheme color_scheme_values.automatic.code)}}true{{else}}false{{/if}}" data-tooltip-template-id="automatic-theme-template" tabindex="0">
                             {{> ../../cofounder/components/icon name="monitor" compact=true}}
                         </label>
-                        <input type="radio" id="select-light-theme" class="tab-option" name="theme-select" data-theme-code="{{color_scheme_values.light.code}}" {{#if (eq user_color_scheme color_scheme_values.light.code)}}checked{{/if}} />
-                        <label role="menuitemradio" class="tab-option-content tippy-zulip-delayed-tooltip" for="select-light-theme" aria-label="{{t 'Select light theme' }}" data-tippy-content="{{t 'Light theme' }}" tabindex="0">
+                        <input type="radio" id="select-light-theme" class="cf-menu__choice-input" name="theme-select" data-theme-code="{{color_scheme_values.light.code}}" tabindex="-1" aria-hidden="true" {{#if (eq user_color_scheme color_scheme_values.light.code)}}checked{{/if}} />
+                        <label role="menuitemradio" class="cf-menu__choice tippy-zulip-delayed-tooltip" for="select-light-theme" aria-label="{{t 'Select light theme' }}" aria-checked="{{#if (eq user_color_scheme color_scheme_values.light.code)}}true{{else}}false{{/if}}" data-tippy-content="{{t 'Light theme' }}" tabindex="0">
                             {{> ../../cofounder/components/icon name="sun" compact=true}}
                         </label>
-                        <input type="radio" id="select-dark-theme" class="tab-option" name="theme-select" data-theme-code="{{color_scheme_values.dark.code}}" {{#if (eq user_color_scheme color_scheme_values.dark.code)}}checked{{/if}} />
-                        <label role="menuitemradio" class="tab-option-content tippy-zulip-delayed-tooltip" for="select-dark-theme" aria-label="{{t 'Select dark theme' }}" data-tippy-content="{{t 'Dark theme' }}" tabindex="0">
+                        <input type="radio" id="select-dark-theme" class="cf-menu__choice-input" name="theme-select" data-theme-code="{{color_scheme_values.dark.code}}" tabindex="-1" aria-hidden="true" {{#if (eq user_color_scheme color_scheme_values.dark.code)}}checked{{/if}} />
+                        <label role="menuitemradio" class="cf-menu__choice tippy-zulip-delayed-tooltip" for="select-dark-theme" aria-label="{{t 'Select dark theme' }}" aria-checked="{{#if (eq user_color_scheme color_scheme_values.dark.code)}}true{{else}}false{{/if}}" data-tippy-content="{{t 'Dark theme' }}" tabindex="0">
                             {{> ../../cofounder/components/icon name="moon" compact=true}}
                         </label>
-                        <span class="slider"></span>
                     </div>
                 </li>
                 <li role="none" class="cf-menu__item popover-menu-list-item">

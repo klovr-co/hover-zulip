@@ -4,9 +4,9 @@
         {{#if has_unread_count}}
         <span class="label-and-unread-wrapper">
             <span class="cf-menu__label popover-menu-label">{{name}}</span>
-            <span class="unread_count {{unread_count_type}}">{{#unless (eq unread_count 0)}}{{unread_count}}{{/unless}}</span>
+            <span class="unread_count {{unread_count_type}}" aria-label="{{t 'Unread messages'}}: {{unread_count}}">{{#unless (eq unread_count 0)}}{{unread_count}}{{/unless}}</span>
             {{#if supports_masked_unread}}
-            <span class="masked_unread_count">
+            <span class="masked_unread_count" role="img" aria-label="{{t 'Some unread messages are hidden'}}">
                 {{> ../../cofounder/components/icon name="masked-unread" compact=true custom_classes="masked-unread-icon"}}
             </span>
             {{/if}}

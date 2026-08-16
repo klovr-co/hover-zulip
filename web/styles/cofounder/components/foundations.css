@@ -19,11 +19,13 @@
     --cf-color-accent-hover: #0668ca;
     --cf-color-accent-soft: #eaf4ff;
     --cf-color-success: #278642;
+    --cf-color-success-strong: #267c3f;
     --cf-color-success-soft: #edf8ef;
     --cf-color-warning: #9a6500;
     --cf-color-warning-soft: #fff6df;
     --cf-color-danger: #c63b35;
     --cf-color-danger-hover: #a92f2a;
+    --cf-color-danger-pressed: #8f2723;
     --cf-color-danger-soft: #fff0ee;
     --cf-color-provider-whatsapp: hsl(147deg 77% 31%);
     --cf-color-provider-github: hsl(213deg 13% 16%);

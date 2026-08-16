@@ -62,6 +62,7 @@
                             {{> dropdown_widget_wrapper
                               widget_name="compose_select_recipient"
                               cofounder=true
+                              hide_inner_from_accessibility=true
                               aria-label=(t "Message recipient")}}
                             <div class="topic-marker-container">
                                 <a role="button" class="cf-composer__conversation-arrow conversation-arrow" aria-label="{{t 'Open conversation' }}">
@@ -91,8 +92,8 @@
                         <div class="cf-review-composer__header">
                             <strong class="cf-review-composer__title">{{t "Respond to Hover's update" }}</strong>
                             <div class="cf-review-composer__mode-switch" role="radiogroup" aria-label="{{t 'Response type' }}">
-                                <button type="button" class="cf-review-composer__mode" data-cf-response-mode="reply" role="radio" aria-checked="true">{{t 'Reply' }}</button>
-                                <button type="button" class="cf-review-composer__mode" data-cf-response-mode="review" role="radio" aria-checked="false">{{t 'Review' }}</button>
+                                <button type="button" class="cf-review-composer__mode" data-cf-response-mode="reply" role="radio" aria-checked="true" tabindex="0">{{t 'Reply' }}</button>
+                                <button type="button" class="cf-review-composer__mode" data-cf-response-mode="review" role="radio" aria-checked="false" tabindex="-1">{{t 'Review' }}</button>
                             </div>
                         </div>
                         <p class="cf-review-composer__help" data-cf-reply-help>{{t 'Reply adds context without changing Hover’s current interpretation.' }}</p>
@@ -138,7 +139,7 @@
                             <span id="compose-limit-indicator" class="message-limit-indicator"></span>
                             <div class="message-send-controls cf-composer__send-controls">
                                 <button type="submit" id="compose-send-button" class="cf-composer__send-button send_message compose-submit-button compose-send-or-save-button" aria-label="{{t 'Send' }}">
-                                    <img class="loader" alt="" src="" />
+                                    <img class="loader" alt="" src="/static/images/loading/loader-white.svg" />
                                     {{> cofounder/components/icon name="send" compact=true custom_classes="cf-composer__send-icon"}}
                                 </button>
                                 <button class="cf-composer__send-options send-control-button send-related-action-button" id="send_later" tabindex=0 type="button" data-tippy-content="{{t 'Send options' }}" aria-label="{{t 'Send options' }}">

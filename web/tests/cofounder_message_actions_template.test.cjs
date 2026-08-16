@@ -67,6 +67,12 @@ run_test("message actions and reactions use standalone Cofounder contracts", () 
         path.join(__dirname, "../src/message_store.ts"),
         "utf8",
     );
+    const story_source = fs.readFileSync(
+        path.join(__dirname, "../stories/cofounder_message_actions.stories.ts"),
+        "utf8",
+    );
+    const story_css = fs.readFileSync(path.join(__dirname, "../stories/storybook.css"), "utf8");
+    const app_css = fs.readFileSync(path.join(__dirname, "../styles/cofounder/app.css"), "utf8");
     const reaction_type = reaction_type_source.match(
         /export type MessageCleanReaction = \{([\s\S]*?)\};/,
     );
@@ -76,7 +82,7 @@ run_test("message actions and reactions use standalone Cofounder contracts", () 
     assert.match(actions_html, /cf-message-actions__more-button[^>]+aria-haspopup="menu"/);
     assert.match(actions_html, /cf-message-actions__star-button--selected/);
     assert.match(actions_html, /aria-pressed="true"/);
-    assert.match(reactions_html, /class="cf-message-reactions"/);
+    assert.match(reactions_html, /class="cf-message-reactions" role="group"/);
     assert.match(reactions_html, /cf-message-reaction--selected/);
     assert.match(reactions_html, /class="cf-message-reaction__count">3/);
     assert.match(reactions_html, /<button[^>]+cf-message-reactions__add/);
@@ -91,6 +97,18 @@ run_test("message actions and reactions use standalone Cofounder contracts", () 
     assert.match(action_css, /\.cf-message-actions__star-button--selected/);
     assert.match(reaction_css, /\.cf-message-reaction:disabled/);
     assert.match(reaction_css, /@media \(hover: none\)/);
+    assert.match(reaction_css, /max-width: 100%/);
+    assert.match(reaction_css, /color: var\(--cf-color-accent-hover\)/);
+    assert.match(reaction_css, /\.cf-message-reaction\.cf-message-reaction--selected:disabled/);
+    assert.match(app_css, /\.cf-menu__action,\s+\.cf-message-reaction/);
+    assert.match(action_css, /animation: none/);
+    assert.match(story_source, /cf-message-reaction--selected/);
+    assert.match(story_source, /cf-message-actions__star-button--selected/);
+    assert.match(story_source, /role="status" aria-live="polite"/);
+    assert.match(story_source, /defaultViewport: "mobile1"/);
+    assert.match(story_css, /grid-template-areas: "author time controls"/);
+    assert.match(story_css, /"controls controls"/);
+    assert.match(story_css, /storybook-cf-message-controls--compact[\s\S]*min-width: 40px/);
     assert.doesNotMatch(action_css + reaction_css, /var\(--ds-/);
     assert.doesNotMatch(legacy_message_css, /\.message_controls\b/);
     assert.doesNotMatch(legacy_reaction_css, /\.message_reactions\b/);

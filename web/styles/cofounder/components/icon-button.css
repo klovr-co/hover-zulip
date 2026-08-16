@@ -12,7 +12,7 @@
     border: 0;
     border-radius: calc(var(--cf-radius-control) - 2px);
     color: var(--cf-text-secondary);
-    background: transparent;
+    background-color: transparent;
     box-shadow: none;
     clip-path: none;
     cursor: pointer;
@@ -25,13 +25,17 @@
 
 .cf-icon-button:is(:hover, :focus-visible) {
     color: var(--cf-text-primary);
-    background: color-mix(in srgb, var(--cf-border-subtle) 60%, transparent);
+    background-color: color-mix(
+        in srgb,
+        var(--cf-border-subtle) 60%,
+        transparent
+    );
     clip-path: none;
 }
 
 .cf-icon-button:active {
     color: var(--cf-color-ink-pressed);
-    background: var(--cf-color-surface-pressed);
+    background-color: var(--cf-color-surface-pressed);
     clip-path: none;
 }
 
@@ -54,7 +58,7 @@
         :focus-visible
     ) {
     color: var(--cf-color-accent-hover);
-    background: var(--cf-color-accent-soft);
+    background-color: var(--cf-color-accent-soft);
 }
 
 .cf-icon-button:is(.cf-icon-button--success, .icon-button-success) {
@@ -65,7 +69,7 @@
         :hover,
         :focus-visible
     ) {
-    background: var(--cf-color-success-soft);
+    background-color: var(--cf-color-success-soft);
 }
 
 .cf-icon-button:is(.cf-icon-button--warning, .icon-button-warning) {
@@ -76,7 +80,7 @@
         :hover,
         :focus-visible
     ) {
-    background: var(--cf-color-warning-soft);
+    background-color: var(--cf-color-warning-soft);
 }
 
 .cf-icon-button:is(.cf-icon-button--danger, .icon-button-danger) {
@@ -88,17 +92,33 @@
         :focus-visible
     ) {
     color: var(--cf-color-danger-hover);
-    background: var(--cf-color-danger-soft);
+    background-color: var(--cf-color-danger-soft);
+}
+
+.cf-icon-button:is(
+        .cf-icon-button--neutral,
+        .cf-icon-button--brand,
+        .cf-icon-button--success,
+        .cf-icon-button--warning,
+        .cf-icon-button--danger,
+        .icon-button-neutral,
+        .icon-button-brand,
+        .icon-button-success,
+        .icon-button-warning,
+        .icon-button-danger
+    ):active {
+    color: var(--cf-color-ink-pressed);
+    background-color: var(--cf-color-surface-pressed);
 }
 
 .cf-icon-button--square {
-    background: var(--cf-surface-paper);
+    background-color: var(--cf-surface-paper);
     box-shadow: var(--cf-shadow-control);
 }
 
 .cf-icon-button:disabled {
     color: var(--cf-color-disabled);
-    background: transparent;
+    background-color: transparent;
     opacity: 1;
     pointer-events: none;
     cursor: not-allowed;

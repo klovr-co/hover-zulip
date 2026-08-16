@@ -34,7 +34,23 @@ function render_story(): HTMLElement {
     canvas.innerHTML = `<div class="storybook-component-stack">${render_source_actions({
         evidence_url: "#sources",
         integrations,
-    })}</div>`;
+    })}<p class="storybook-source-actions__feedback" role="status" aria-live="polite" aria-atomic="true"></p></div>`;
+    const feedback = canvas.querySelector<HTMLElement>(".storybook-source-actions__feedback");
+    canvas
+        .querySelector<HTMLButtonElement>("[data-cf-evidence-url]")
+        ?.addEventListener("click", () => {
+            if (feedback) {
+                feedback.textContent = "Source evidence dialog requested.";
+            }
+        });
+    for (const link of canvas.querySelectorAll<HTMLAnchorElement>(".cf-source-action[href]")) {
+        link.addEventListener("click", (event) => {
+            event.preventDefault();
+            if (feedback) {
+                feedback.textContent = `${link.getAttribute("aria-label") ?? "Source integration"} requested.`;
+            }
+        });
+    }
     return canvas;
 }
 

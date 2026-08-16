@@ -56,13 +56,18 @@
 
 .cf-generated-update__chip {
     flex: none;
+    min-width: 0;
+    max-width: 28ch;
     padding: 4px 8px;
+    overflow: hidden;
     border-radius: var(--cf-radius-pill);
     color: var(--cf-text-inverse);
     background: var(--cf-color-ink);
     font-weight: 650;
     letter-spacing: 0.08em;
+    text-overflow: ellipsis;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .cf-generated-update__context {
@@ -97,8 +102,14 @@
 }
 
 .cf-generated-details {
+    min-width: 0;
     color: var(--cf-text-primary);
     font-family: var(--cf-font-ui);
+}
+
+.cf-generated-details:focus {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: 2px;
 }
 
 .cf-generated-details__summary {
@@ -108,6 +119,12 @@
     align-items: center;
     padding-bottom: 15px;
     border-bottom: 1px solid var(--cf-border-subtle);
+}
+
+.cf-generated-details__summary > strong {
+    flex: 1 1 16ch;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .cf-generated-details__technical {
@@ -125,6 +142,8 @@
 }
 
 .cf-generated-details__technical dt {
+    min-width: 0;
+    overflow-wrap: anywhere;
     color: var(--cf-text-tertiary);
     font-size: 11px;
     font-weight: 700;
@@ -140,6 +159,7 @@
 
 .cf-generated-details__note {
     margin: 15px 0 0;
+    overflow-wrap: anywhere;
     color: var(--cf-text-tertiary);
     font-size: var(--cf-type-meta);
 }
@@ -154,6 +174,7 @@
 
 .cf-generated-history__entry {
     display: grid;
+    min-width: 0;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 4px 12px;
     padding: 12px 14px;
@@ -163,9 +184,18 @@
 }
 
 .cf-generated-history__entry > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
     color: var(--cf-text-tertiary);
     font-size: var(--cf-type-meta);
+}
+
+.cf-generated-history__state {
     text-transform: capitalize;
+}
+
+.cf-generated-history__meta {
+    grid-column: 1 / -1;
 }
 
 .cf-generated-history__entry > a {
@@ -176,9 +206,11 @@
 .cf-generated-history__current {
     grid-column: 2;
     grid-row: 1;
+    max-width: 24ch;
     color: var(--cf-color-accent);
     font-weight: 700;
     letter-spacing: 0.06em;
+    text-align: end;
     text-transform: uppercase !important;
 }
 

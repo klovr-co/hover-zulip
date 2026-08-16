@@ -134,6 +134,18 @@ export function initialize(): void {
     };
     $("#main_div").on("click", "[data-cf-todo-operation]", handle_todo_operation);
     $("body").on("click", "[data-cf-todo-operation]", handle_todo_operation);
+    const handle_todo_assignee_change = (event: JQuery.ChangeEvent): void => {
+        event.stopPropagation();
+        const $select = $(event.currentTarget);
+        const current_assignee = $select.attr("data-cf-current-assignee") ?? "";
+        const selected_assignee = String($select.val() ?? "");
+        $select
+            .closest("[data-cf-todo-id]")
+            .find("[data-cf-todo-operation='assign']")
+            .prop("disabled", selected_assignee === current_assignee);
+    };
+    $("#main_div").on("change", "[data-cf-todo-assignee]", handle_todo_assignee_change);
+    $("body").on("change", "[data-cf-todo-assignee]", handle_todo_assignee_change);
 }
 
 export const event_schema = z.object({

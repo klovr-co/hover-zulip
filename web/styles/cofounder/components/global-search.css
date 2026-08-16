@@ -9,12 +9,14 @@
 
 .cf-global-search__shell {
     box-sizing: border-box;
+    min-width: 0;
     width: min(
         var(--cf-layout-content-width),
         calc(100% - (2 * var(--cf-space-6)))
     );
     margin: 0 auto;
     padding: 44px 0 72px;
+    overflow-wrap: anywhere;
 }
 
 .cf-global-search__header {
@@ -81,6 +83,37 @@
     color: var(--cf-text-secondary);
 }
 
+.cf-global-search__status:focus {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: 2px;
+}
+
+.cf-global-search__loading {
+    display: grid;
+    gap: 14px;
+    padding-top: 32px;
+}
+
+.cf-global-search__loading span {
+    width: 100%;
+    height: 18px;
+    border-radius: var(--cf-radius-control);
+    background: var(--cf-color-surface-hover);
+}
+
+.cf-global-search__loading span:nth-child(2) {
+    width: 76%;
+}
+
+.cf-global-search__loading span:nth-child(3) {
+    width: 48%;
+}
+
+.cf-global-search__section h2:focus {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: 2px;
+}
+
 .cf-global-search__section {
     padding-top: 32px;
 }
@@ -125,6 +158,7 @@
 
 .cf-global-search__result-list {
     display: grid;
+    min-width: 0;
     gap: var(--cf-space-3);
     margin: 0;
     padding: 0;
@@ -133,6 +167,7 @@
 
 .cf-global-search__result {
     position: relative;
+    min-width: 0;
     padding: 18px 20px;
     border: 1px solid var(--cf-border-subtle);
     border-radius: var(--cf-radius-panel);

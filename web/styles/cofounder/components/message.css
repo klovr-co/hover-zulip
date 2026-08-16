@@ -71,11 +71,18 @@
     outline-offset: 2px;
 }
 
+.cf-message-item--with-sender
+    .cf-message-item__sender-line
+    .cf-message-item__sender:focus-visible {
+    outline: 2px solid var(--cf-focus);
+    outline-offset: 2px;
+}
+
 .cf-message-item--preview .cf-message-item__time {
     flex: none;
     justify-self: auto;
     padding: 0;
-    color: var(--cf-text-tertiary);
+    color: var(--cf-text-secondary);
     font-size: var(--cf-type-meta);
     line-height: inherit;
     grid-area: auto;
@@ -135,6 +142,17 @@
 
 .cf-message-item__unread-fill {
     background: var(--cf-color-accent);
+}
+
+.cf-message-item__unread-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    border: 0;
+    white-space: nowrap;
 }
 
 .cf-message-item__frame {
@@ -197,11 +215,15 @@
 }
 
 .cf-message-item:not(.cf-message-item--preview) .cf-message-item__time {
-    color: var(--cf-text-tertiary);
+    overflow: hidden;
+    max-width: 14ch;
+    color: var(--cf-text-secondary);
     font-size: var(--cf-type-meta);
     font-weight: 400;
     letter-spacing: normal;
     opacity: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .cf-message-item:not(.cf-message-item--preview) .cf-message-item__time:hover {

@@ -55,6 +55,7 @@ function replace_content($content: JQuery, html: string): void {
 
 export function load_evidence($content: JQuery, url: string): void {
     replace_content($content, render_hover_evidence_modal({loading: true}));
+    focus_result($content);
     void channel.post({
         url,
         success(response) {

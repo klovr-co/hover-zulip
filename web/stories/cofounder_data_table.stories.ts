@@ -24,7 +24,7 @@ function render_settings_table(): HTMLElement {
         ["Mei Lin", "mei@cofounder.test", "Member", "Yesterday"],
         ["Ravi Shah", "ravi@cofounder.test", "Guest", "4 days ago"],
     ];
-    const body = host.querySelector("#admin_users_table");
+    const body = host.querySelector<HTMLTableSectionElement>("#admin_users_table");
     if (body) {
         body.innerHTML = rows
             .map(
@@ -42,6 +42,59 @@ function render_settings_table(): HTMLElement {
                     </tr>`,
             )
             .join("");
+
+        const sortableHeaders = [...host.querySelectorAll<HTMLTableCellElement>("th[data-sort]")];
+        const syncSortState = (activeHeader: HTMLTableCellElement): void => {
+            for (const header of sortableHeaders) {
+                header.classList.toggle("active", header === activeHeader);
+                if (header !== activeHeader) {
+                    header.classList.remove("descend");
+                }
+                header.setAttribute(
+                    "aria-sort",
+                    header === activeHeader
+                        ? header.classList.contains("descend")
+                            ? "descending"
+                            : "ascending"
+                        : "none",
+                );
+            }
+        };
+        const sortByHeader = (header: HTMLTableCellElement): void => {
+            if (header.classList.contains("active")) {
+                header.classList.toggle("descend");
+            }
+            syncSortState(header);
+            const sortedRows = [...body.rows].toSorted((left, right) => {
+                const leftValue = left.cells[header.cellIndex]?.textContent?.trim() ?? "";
+                const rightValue = right.cells[header.cellIndex]?.textContent?.trim() ?? "";
+                return leftValue.localeCompare(rightValue, undefined, {
+                    numeric: true,
+                    sensitivity: "base",
+                });
+            });
+            if (header.classList.contains("descend")) {
+                sortedRows.reverse();
+            }
+            body.append(...sortedRows);
+        };
+        for (const header of sortableHeaders) {
+            header.tabIndex = 0;
+            header.addEventListener("click", () => {
+                sortByHeader(header);
+            });
+            header.addEventListener("keydown", (event) => {
+                if (event.key !== "Enter" && event.key !== " ") {
+                    return;
+                }
+                event.preventDefault();
+                sortByHeader(header);
+            });
+        }
+        const activeHeader = sortableHeaders.find((header) => header.classList.contains("active"));
+        if (activeHeader) {
+            syncSortState(activeHeader);
+        }
     }
 
     return host;

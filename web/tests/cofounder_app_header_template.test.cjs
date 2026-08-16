@@ -9,7 +9,11 @@ const render_navbar = require("../templates/navbar.hbs");
 const {run_test} = require("./lib/test.cjs");
 
 run_test("application header uses standalone Cofounder contracts", () => {
-    const html = render_navbar({embedded: false, user_avatar: "/avatar/7"});
+    const html = render_navbar({
+        embedded: false,
+        realm_logo_url: "/logo/7",
+        user_avatar: "/avatar/7",
+    });
     const behavior_source = [
         "../src/gear_menu.ts",
         "../src/left_sidebar_tooltips.ts",
@@ -35,6 +39,7 @@ run_test("application header uses standalone Cofounder contracts", () => {
     assert.match(html, /<nav[^>]+cf-app-header__nav/);
     assert.match(html, /cf-app-header__brand-mark[^>]*>H</);
     assert.match(html, /cf-app-header__brand-name[^>]*>HOVER</);
+    assert.match(html, /id="realm-navbar-wide-logo" src="\/logo\/7"/);
     assert.match(html, /id="searchbox_form" class="cf-app-header__search"/);
     assert.match(html, /cf-app-header__search-container/);
     assert.match(html, /cf-app-header__search-input/);
@@ -46,6 +51,7 @@ run_test("application header uses standalone Cofounder contracts", () => {
     assert.equal((html.match(/id="login_button"/g) ?? []).length, 1);
     assert.match(behavior_source, /cf-app-header__search--expanded/);
     assert.match(behavior_source, /cf-app-header__item--active/);
+    assert.match(behavior_source, /realm_logo_url: realm\.realm_logo_url/);
     assert.match(component_css, /var\(--cf-surface-paper\)/);
     assert.match(search_css, /\.cf-app-header__search--expanded/);
     assert.match(search_css, /\.cf-app-header__search-container/);

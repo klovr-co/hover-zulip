@@ -1,5 +1,5 @@
 <div class="cf-menu popover-menu" data-simplebar data-simplebar-tab-index="-1">
-    <ul role="menu" class="cf-menu__list popover-menu-list condensed-views-popover-menu">
+    <ul role="menu" aria-label="{{t 'Views'}}" class="cf-menu__list popover-menu-list condensed-views-popover-menu">
         {{#each views}}
             {{> left_sidebar_view_popover_item .}}
         {{/each}}
@@ -7,14 +7,14 @@
         <li role="separator" class="cf-menu__separator popover-menu-separator"></li>
         {{#if unread_messages_present}}
         <li role="none" class="link-item cf-menu__item popover-menu-list-item">
-            <a role="menuitem" class="cf-menu__action popover-menu-link mark_all_messages_as_read" tabindex="0">
+            <button type="button" role="menuitem" class="cf-menu__action popover-menu-link mark_all_messages_as_read" tabindex="0">
                 {{> ../../cofounder/components/icon name="check" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Mark messages as read" }}</span>
-            </a>
+            </button>
         </li>
         {{/if}}
         <li role="none" class="link-item cf-menu__item popover-menu-list-item">
-            <a role="menuitem" class="cf-menu__action popover-menu-link toggle_display_unread_message_count" tabindex="0">
+            <button type="button" role="menuitem" class="cf-menu__action popover-menu-link toggle_display_unread_message_count" tabindex="0">
                 {{#if show_unread_count}}
                 {{> ../../cofounder/components/icon name="eye-off" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Hide unread counter" }}</span>
@@ -22,7 +22,7 @@
                 {{> ../../cofounder/components/icon name="eye" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Show unread counter" }}</span>
                 {{/if}}
-            </a>
+            </button>
         </li>
         {{/unless}}
     </ul>

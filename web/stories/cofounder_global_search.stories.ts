@@ -61,6 +61,7 @@ function context_for(mode: GlobalSearchArgs["mode"]): object {
             knowledge: [],
             knowledge_count: 0,
             query: "venue handoff",
+            searching: true,
             source_count: 0,
             sources: [],
             status: "Searching confirmed Spaces…",
@@ -74,9 +75,10 @@ function context_for(mode: GlobalSearchArgs["mode"]): object {
             knowledge: [],
             knowledge_count: 0,
             query: "unmatched planning note",
+            searching: false,
             source_count: 0,
             sources: [],
-            status: "No results found.",
+            status: "No results found. Try a different name, topic, or phrase.",
         };
     }
     return {
@@ -86,6 +88,7 @@ function context_for(mode: GlobalSearchArgs["mode"]): object {
         knowledge,
         knowledge_count: knowledge.length,
         query: "venue handoff",
+        searching: false,
         source_count: sources.length,
         sources,
         status: "",
@@ -96,6 +99,42 @@ function render_story(args: GlobalSearchArgs): HTMLElement {
     const canvas = globalThis.document.createElement("div");
     canvas.className = "cf-theme cf-global-search";
     canvas.innerHTML = render_global_search(context_for(args.mode));
+    canvas.addEventListener("submit", (event) => {
+        if (
+            !(event.target instanceof HTMLFormElement) ||
+            event.target.id !== "cf-global-search-form"
+        ) {
+            return;
+        }
+        event.preventDefault();
+        const input = canvas.querySelector<HTMLInputElement>("#cf-global-search-input");
+        const query = input?.value.trim().replaceAll(/\s+/g, " ") ?? "";
+        canvas.innerHTML = render_global_search({
+            ...context_for("searching"),
+            has_query: query !== "",
+            query,
+            searching: query !== "",
+            status: query === "" ? "" : "Searching confirmed Spaces…",
+        });
+        canvas
+            .querySelector<HTMLElement>(
+                query === "" ? "#cf-global-search-input" : ".cf-global-search__status",
+            )
+            ?.focus();
+    });
+    canvas.addEventListener("click", (event) => {
+        if (!(event.target instanceof Element)) {
+            return;
+        }
+        const button = event.target.closest<HTMLButtonElement>(".cf-global-search__save");
+        const label = button?.querySelector<HTMLElement>(".cf-button__label");
+        if (button === null || label === null || label === undefined) {
+            return;
+        }
+        const saved = button.getAttribute("aria-pressed") === "true";
+        button.setAttribute("aria-pressed", String(!saved));
+        label.textContent = saved ? "Save" : "Remove from Saved";
+    });
     return canvas;
 }
 

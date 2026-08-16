@@ -10,7 +10,7 @@
             {{/if}}
         </div>
         <div class="popover-menu-user-info">
-            <div class="popover-menu-user-full-name text-select" data-tippy-content="{{user_full_name}}">
+            <div class="popover-menu-user-full-name text-select" role="heading" aria-level="2" data-tippy-content="{{user_full_name}}">
                 {{> ../../user_full_name name=user_full_name}}
                 {{#if is_bot}}
                     {{> ../../cofounder/components/icon name="bot" compact=true}}
@@ -33,7 +33,7 @@
             </div>
         </div>
     </div>
-    <ul role="menu" class="cf-menu__list popover-menu-list" data-user-id="{{user_id}}">
+    <ul role="menu" aria-label="{{t 'User actions' }}: {{user_full_name}}" class="cf-menu__list popover-menu-list" data-user-id="{{user_id}}">
         {{#if status_content_available}}
             <li role="none" class="text-item cf-menu__item popover-menu-list-item hidden-for-spectators">
                 <span class="personal-menu-status-wrapper">
@@ -145,7 +145,7 @@
             {{#if user_email}}
                 <li role="none" class="cf-menu__item popover-menu-list-item text-item user-card-popover-email-field hidden-for-spectators">
                     <span class="user_popover_email">{{ user_email }}</span>
-                    {{> ../../cofounder/components/icon_button icon="copy" intent="neutral" squared=true id="popover-menu-copy-email" custom_classes="popover-menu-link copy-button hide_copy_icon" aria-label=(t "Copy email") data-tippy-content=(t "Copy email") data-clipboard-text=user_email}}
+                    {{> ../../cofounder/components/icon_button icon="copy" intent="neutral" squared=true role="menuitem" id="popover-menu-copy-email" custom_classes="popover-menu-link copy-button hide_copy_icon" aria-label=(t "Copy email") data-tippy-content=(t "Copy email") data-clipboard-text=user_email}}
                 </li>
             {{/if}}
         {{/if}}

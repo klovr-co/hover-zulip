@@ -7,18 +7,34 @@
 }
 
 .cf-awareness-shell {
-    margin: 0 var(--cf-layout-conversation-gutter);
+    width: min(
+        var(--cf-layout-content-width),
+        calc(
+            100% - var(--cf-layout-conversation-gutter) -
+                var(--cf-layout-conversation-gutter)
+        )
+    );
+    margin: 0 auto;
     padding: 74px 0 88px;
 }
 
 .cf-awareness-status {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
     min-height: 30px;
     color: var(--cf-text-secondary);
     font-size: 14px;
 }
 
+.cf-awareness-status__message {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
 #cf-awareness-retry {
-    margin-inline-start: 10px;
+    flex: none;
 }
 
 .cf-awareness-feed {
@@ -37,9 +53,11 @@
 }
 
 .cf-awareness-card--unread {
-    box-shadow:
-        inset 4px 0 0 var(--cf-color-accent),
-        var(--cf-shadow-panel);
+    background: color-mix(
+        in srgb,
+        var(--cf-color-accent) 2%,
+        var(--cf-surface-paper)
+    );
 }
 
 .cf-awareness-card__body {
@@ -57,6 +75,7 @@
 
 .cf-awareness-card__main {
     min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .cf-awareness-card__meta,
@@ -170,6 +189,7 @@
 
 @media (width <= 560px) {
     .cf-awareness-shell {
+        width: auto;
         margin-inline: 12px;
         padding-top: 56px;
     }

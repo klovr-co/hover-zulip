@@ -41,6 +41,7 @@
 
 .cf-dialog__title {
     margin: 0;
+    overflow-wrap: anywhere;
     color: var(--cf-text-primary);
     font-size: var(--cf-type-title);
     font-weight: 650;
@@ -49,6 +50,7 @@
 
 .cf-dialog__subtitle {
     margin-top: var(--cf-space-2);
+    overflow-wrap: anywhere;
     color: var(--cf-text-secondary);
     font-size: var(--cf-type-label);
     line-height: var(--cf-line-body);
@@ -72,7 +74,205 @@
     max-width: none;
     padding: var(--cf-space-4);
     overflow: hidden auto;
+    overflow-wrap: anywhere;
     color: var(--cf-text-primary);
+}
+
+.cf-dialog#copy_email_address_modal {
+    width: min(560px, 100%);
+}
+
+.cf-dialog .copy-email-modal {
+    display: grid;
+    gap: var(--cf-space-4);
+    min-width: 0;
+}
+
+.cf-dialog .copy-email-modal > :is(.input-group, hr, .stream-email-header) {
+    margin: 0;
+}
+
+.cf-dialog .copy-email-modal .settings-field-label {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    color: var(--cf-text-primary);
+    font-size: var(--cf-type-label);
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.cf-dialog .cf-email-options {
+    display: grid;
+    gap: var(--cf-space-1);
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    margin: 0;
+}
+
+.cf-dialog .cf-email-options__legend {
+    width: 100%;
+    padding: 0 0 var(--cf-space-2);
+    margin: 0;
+    color: var(--cf-text-primary);
+    font-size: var(--cf-type-label);
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.cf-dialog .cf-email-options > .input-group {
+    min-width: 0;
+    margin: 0;
+}
+
+.cf-dialog .cf-email-options__option.checkbox {
+    box-sizing: border-box;
+    display: flex;
+    gap: var(--cf-space-2);
+    align-items: center;
+    width: 100%;
+    min-height: var(--cf-control-height);
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--cf-text-primary);
+    cursor: pointer;
+}
+
+.cf-dialog .cf-email-options__option > :is(input, .rendered-checkbox) {
+    flex: none;
+}
+
+.cf-dialog .cf-email-options__label {
+    min-width: 0;
+}
+
+.cf-dialog .cf-email-options__divider,
+.cf-dialog .copy-email-modal__divider {
+    width: 100%;
+    height: 1px;
+    border: 0;
+    background: var(--cf-border-subtle);
+}
+
+.cf-dialog .cf-email-options__divider {
+    margin: var(--cf-space-1) 0;
+}
+
+.cf-dialog .stream-email-header {
+    color: var(--cf-text-primary);
+    font-size: var(--cf-type-heading-sm);
+    font-weight: 650;
+    line-height: 1.3;
+}
+
+.cf-dialog#edit_channel_folder {
+    width: min(600px, 100%);
+}
+
+.cf-dialog#edit_channel_folder .cf-dialog__body {
+    gap: var(--cf-space-4);
+}
+
+.cf-dialog#edit_channel_folder
+    :is(.cf-channel-folder-form__field, .cf-channel-folder-form__section) {
+    display: grid;
+    gap: var(--cf-space-2);
+    min-width: 0;
+}
+
+.cf-dialog#edit_channel_folder .modal-field-label {
+    max-width: 100%;
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--cf-text-primary);
+    font-size: var(--cf-type-label);
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.cf-dialog#edit_channel_folder
+    :is(.modal_text_input, .modal-textarea).cf-field__control {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+.cf-dialog#edit_channel_folder .modal-textarea.cf-field__control {
+    min-height: 72px;
+    resize: vertical;
+}
+
+.cf-dialog#edit_channel_folder .folder-channels-list-header {
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--cf-text-primary);
+    font-size: var(--cf-type-heading-sm);
+    font-weight: 650;
+    line-height: 1.3;
+}
+
+.cf-dialog#edit_channel_folder .stream-list-container {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: var(--cf-space-1);
+    height: min(30vh, 240px);
+    min-height: 160px;
+    padding: var(--cf-space-1);
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-control);
+    margin: 0;
+    background: var(--cf-surface-canvas);
+}
+
+.cf-dialog#edit_channel_folder .modal-list-scroll-container {
+    min-height: 0;
+    height: auto;
+    overflow: hidden auto;
+}
+
+.cf-dialog#edit_channel_folder .folder-stream-list {
+    padding: 0;
+    margin: 0;
+}
+
+.cf-dialog#edit_channel_folder .folder-stream-list > [hidden] {
+    display: none;
+}
+
+.cf-dialog#edit_channel_folder .modal-channel-list-row {
+    box-sizing: border-box;
+    min-height: var(--cf-control-height-touch);
+    padding-inline-end: var(--cf-space-1);
+    color: var(--cf-text-primary);
+}
+
+.cf-dialog#edit_channel_folder
+    .modal-channel-list-row:is(:hover, :focus-within) {
+    background: var(--cf-surface-hover);
+}
+
+.cf-dialog#edit_channel_folder .modal-channel-list-row .list-row-content {
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: var(--cf-control-height-touch);
+    padding: var(--cf-space-2);
+    align-items: center;
+}
+
+.cf-dialog#edit_channel_folder .add_channel_folder_widget {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--cf-space-2);
+    margin: 0;
+}
+
+.cf-dialog#edit_channel_folder
+    .add_channel_folder_widget
+    .dropdown-widget-button {
+    width: 100%;
+    max-width: none;
 }
 
 .cf-dialog__footer {
@@ -87,6 +287,7 @@
 
 .cf-dialog__footer-note {
     margin-right: auto;
+    overflow-wrap: anywhere;
     color: var(--cf-text-secondary);
     font-size: var(--cf-type-meta);
 }
@@ -116,7 +317,7 @@
 }
 
 .cf-dialog__submit[aria-busy="true"] .cf-button__label {
-    visibility: hidden;
+    opacity: 0;
 }
 
 .cf-dialog__submit[aria-busy="true"] {
@@ -159,6 +360,10 @@
     .cf-dialog__close:is(.cf-button, .cf-icon-button) {
         width: var(--cf-control-height-touch);
         min-width: var(--cf-control-height-touch);
+        min-height: var(--cf-control-height-touch);
+    }
+
+    .cf-dialog .cf-email-options__option.checkbox {
         min-height: var(--cf-control-height-touch);
     }
 }

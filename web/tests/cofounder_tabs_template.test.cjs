@@ -1,10 +1,12 @@
 "use strict";
 
 const assert = require("node:assert/strict");
-
-const {run_test} = require("./lib/test.cjs");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const render_tabs = require("../templates/cofounder/components/tabs.hbs");
+
+const {run_test} = require("./lib/test.cjs");
 
 run_test("renders the standalone Cofounder tabs contract", () => {
     const html = render_tabs({
@@ -24,6 +26,26 @@ run_test("renders the standalone Cofounder tabs contract", () => {
     assert.match(html, /aria-selected="true"[^>]+tabindex="0"/);
     assert.match(html, /cf-tabs__tab cf-tabs__tab--disabled/);
     assert.match(html, /aria-disabled="true"/);
+    const css = fs.readFileSync(
+        path.join(__dirname, "../styles/cofounder/components/tabs.css"),
+        "utf8",
+    );
+    const story_source = fs.readFileSync(
+        path.join(__dirname, "../stories/cofounder_tabs.stories.ts"),
+        "utf8",
+    );
+    assert.match(css, /\.cf-tabs__tab--selected \{[\s\S]*?color: var\(--cf-color-accent-hover\)/);
+    assert.match(story_source, /select_tab/);
+    assert.match(
+        story_source,
+        /candidate\.classList\.toggle\("cf-tabs__tab--selected", selected\)/,
+    );
+    assert.match(story_source, /event\.key !== "ArrowLeft"/);
+    assert.match(
+        story_source,
+        /candidate !== undefined[\s\S]*candidate\.getAttribute\("aria-disabled"\) !== "true"/,
+    );
+    assert.match(story_source, /tab\.focus\(\)/);
     assert.doesNotMatch(html, /tab-switcher/);
     assert.doesNotMatch(html, /ind-tab/);
 });

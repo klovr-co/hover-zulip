@@ -8,12 +8,16 @@
 }
 
 .cf-source-view__shell {
+    box-sizing: border-box;
+    min-width: 0;
     width: min(760px, calc(100% - 40px));
     margin: 0 auto;
     padding: 32px 0 80px;
 }
 
 .cf-source-view__header {
+    box-sizing: border-box;
+    min-width: 0;
     padding: 24px;
     border: 1px solid var(--cf-border-subtle);
     border-radius: var(--cf-radius-overlay);
@@ -26,6 +30,7 @@
     color: var(--cf-text-secondary);
     font-size: var(--cf-type-meta);
     font-weight: 600;
+    overflow-wrap: anywhere;
 }
 
 .cf-source-view__title-row {
@@ -33,6 +38,7 @@
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
+    min-width: 0;
 }
 
 .cf-source-view__provider-icon {
@@ -51,18 +57,27 @@
 }
 
 .cf-source-view__title-row h1 {
+    min-width: 0;
     margin: 0;
     font-size: 24px;
     font-weight: 650;
     line-height: 1.2;
+    overflow-wrap: anywhere;
 }
 
 .cf-source-view__metadata {
     display: flex;
     gap: 6px;
+    flex-wrap: wrap;
+    min-width: 0;
     margin-top: 7px;
     color: var(--cf-text-secondary);
     font-size: var(--cf-type-meta);
+}
+
+.cf-source-view__metadata > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .cf-source-view__header > p {
@@ -70,6 +85,7 @@
     color: var(--cf-text-secondary);
     font-size: var(--cf-type-body);
     line-height: 1.5;
+    overflow-wrap: anywhere;
 }
 
 .cf-source-view__search {
@@ -89,10 +105,65 @@
 }
 
 .cf-source-view__status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
     min-height: 22px;
     margin: 18px 0 8px;
     color: var(--cf-text-secondary);
     font-size: var(--cf-type-body);
+    overflow-wrap: anywhere;
+}
+
+.cf-source-view__loading-indicator {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    color: var(--cf-text-secondary);
+}
+
+.cf-source-view__status--error {
+    padding: 10px 12px;
+    border: 1px solid
+        color-mix(in srgb, var(--cf-color-danger) 32%, var(--cf-border-subtle));
+    border-left: 3px solid var(--cf-color-danger);
+    border-radius: var(--cf-radius-control);
+    color: var(--cf-color-danger-hover);
+    background: var(--cf-color-danger-soft);
+}
+
+.cf-source-view__error-indicator {
+    flex: none;
+    width: 16px;
+    height: 16px;
+}
+
+.cf-source-view__status--empty {
+    box-sizing: border-box;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 148px;
+    padding: 28px 20px;
+    border: 1px solid var(--cf-border-subtle);
+    border-radius: var(--cf-radius-panel);
+    color: var(--cf-text-primary);
+    background: var(--cf-surface-paper);
+    text-align: center;
+}
+
+.cf-source-view__empty-indicator {
+    width: 28px;
+    height: 28px;
+    color: var(--cf-text-secondary);
+}
+
+.cf-source-view__status--empty .cf-source-view__status-message {
+    font-weight: 650;
+}
+
+.cf-source-view__empty-hint {
+    max-width: 480px;
+    color: var(--cf-text-secondary);
 }
 
 .cf-source-view__page-action.cf-button {
@@ -106,10 +177,13 @@
     font-size: var(--cf-type-meta);
     font-weight: 700;
     letter-spacing: 0.04em;
+    overflow-wrap: anywhere;
     text-transform: uppercase;
 }
 
 .cf-source-record {
+    box-sizing: border-box;
+    min-width: 0;
     padding: 16px 18px;
     border: 1px solid var(--cf-border-subtle);
     border-radius: var(--cf-radius-panel);
@@ -119,9 +193,18 @@
 
 .cf-source-record__header {
     display: flex;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
+    flex-wrap: wrap;
+    min-width: 0;
     margin-bottom: 7px;
+}
+
+.cf-source-record__header strong,
+.cf-source-record__header time {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .cf-source-record__header time {
@@ -147,6 +230,8 @@
 .cf-source-record__reply strong,
 .cf-source-record__reply span {
     display: block;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .cf-source-record__transcript,
@@ -168,8 +253,15 @@
     display: flex;
     align-items: center;
     gap: 7px;
+    flex-wrap: wrap;
+    min-width: 0;
     color: var(--cf-text-secondary);
     font-size: var(--cf-type-meta);
+}
+
+.cf-source-record__media > span:not(:first-child) {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .cf-source-record__media .cf-icon {
@@ -179,7 +271,7 @@
 
 .cf-source-record__media-unavailable {
     margin-left: auto;
-    color: var(--cf-color-danger);
+    color: var(--cf-color-danger-hover);
     font-weight: 650;
 }
 

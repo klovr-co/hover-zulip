@@ -1,5 +1,5 @@
 <div class="cf-menu popover-menu no-auto-hide-left-sidebar-overlay" id="stream-actions-menu-popover" data-simplebar data-simplebar-tab-index="-1">
-    <ul role="menu" class="cf-menu__list popover-menu-list" data-stream-id="{{ stream.stream_id }}" data-name="{{ stream.name }}">
+    <ul role="menu" aria-label="{{t 'Channel actions'}} — {{stream.name}}" class="cf-menu__list popover-menu-list" data-stream-id="{{ stream.stream_id }}" data-name="{{ stream.name }}">
         <li role="none" class="popover-stream-header text-item cf-menu__item popover-menu-list-item">
             <span class="stream-privacy-original-color-{{stream.stream_id}} stream-privacy filter-icon" style="color: {{stream.color}}">
                 {{> ../../stream_privacy
@@ -11,25 +11,25 @@
         <li role="separator" class="cf-menu__separator popover-menu-separator"></li>
         {{#if has_unread_messages}}
         <li role="none" class="link-item cf-menu__item popover-menu-list-item hidden-for-spectators">
-            <a role="menuitem" class="mark_stream_as_read cf-menu__action popover-menu-link" tabindex="0">
+            <button type="button" role="menuitem" class="mark_stream_as_read cf-menu__action popover-menu-link" tabindex="0">
                 {{> ../../cofounder/components/icon name="check" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Mark all messages as read"}}</span>
-            </a>
+            </button>
         </li>
         {{else}}
         <li role="none" class="link-item cf-menu__item popover-menu-list-item hidden-for-spectators">
-            <a role="menuitem" class="mark_stream_as_unread cf-menu__action popover-menu-link" tabindex="0">
+            <button type="button" role="menuitem" class="mark_stream_as_unread cf-menu__action popover-menu-link" tabindex="0">
                 {{> ../../cofounder/components/icon name="mail" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Mark all messages as unread"}}</span>
-            </a>
+            </button>
         </li>
         {{/if}}
         {{#if show_go_to_channel_feed}}
         <li role="none" class="link-item cf-menu__item popover-menu-list-item">
-            <a role="menuitem" class="stream-popover-go-to-channel-feed cf-menu__action popover-menu-link" tabindex="0">
+            <button type="button" role="menuitem" class="stream-popover-go-to-channel-feed cf-menu__action popover-menu-link" tabindex="0">
                 {{> ../../cofounder/components/icon name="activity" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Go to channel feed" }}</span>
-            </a>
+            </button>
         </li>
         {{/if}}
         {{#if show_go_to_list_of_topics}}
@@ -37,15 +37,15 @@
             <a role="menuitem" href="{{stream.list_of_topics_view_url}}" class="stream-popover-go-to-list-of-topics navigate-link-on-enter cf-menu__action popover-menu-link" tabindex="0">
                 {{> ../../cofounder/components/icon name="list" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Go to list of topics" }}</span>
-                {{../popover_hotkey_hints "Y"}}
+                {{popover_hotkey_hints "Y"}}
             </a>
         </li>
         {{/if}}
         <li role="none" class="link-item cf-menu__item popover-menu-list-item">
-            <a role="menuitem" class="copy_stream_link cf-menu__action popover-menu-link" data-clipboard-text="{{ stream.url }}" tabindex="0">
+            <button type="button" role="menuitem" class="copy_stream_link cf-menu__action popover-menu-link" data-clipboard-text="{{ stream.url }}" tabindex="0">
                 {{> ../../cofounder/components/icon name="link-alt" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Copy link to channel" }}</span>
-            </a>
+            </button>
         </li>
         <li role="separator" class="cf-menu__separator popover-menu-separator hidden-for-spectators"></li>
         <li role="none" class="link-item cf-menu__item popover-menu-list-item hidden-for-spectators">
@@ -55,7 +55,7 @@
             </a>
         </li>
         <li role="none" class="link-item cf-menu__item popover-menu-list-item hidden-for-spectators">
-            <a role="menuitem" class="pin_to_top cf-menu__action popover-menu-link" tabindex="0">
+            <button type="button" role="menuitem" class="pin_to_top cf-menu__action popover-menu-link" tabindex="0">
                 {{#if stream.pin_to_top}}
                 {{> ../../cofounder/components/icon name="pin-off" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Unpin channel from top"}}</span>
@@ -63,10 +63,10 @@
                 {{> ../../cofounder/components/icon name="pin" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Pin channel to top"}}</span>
                 {{/if}}
-            </a>
+            </button>
         </li>
         <li role="none" class="link-item cf-menu__item popover-menu-list-item hidden-for-spectators">
-            <a role="menuitem" class="toggle_stream_muted cf-menu__action popover-menu-link" tabindex="0">
+            <button type="button" role="menuitem" class="toggle_stream_muted cf-menu__action popover-menu-link" tabindex="0">
                 {{#if stream.is_muted}}
                 {{> ../../cofounder/components/icon name="unmute" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Unmute channel"}}</span>
@@ -74,21 +74,21 @@
                 {{> ../../cofounder/components/icon name="mute" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Mute channel"}}</span>
                 {{/if}}
-            </a>
+            </button>
         </li>
         {{#unless stream.is_archived}}
         <li role="none" class="link-item cf-menu__item popover-menu-list-item hidden-for-spectators">
-            <a role="menuitem" class="popover_sub_unsub_button cf-menu__action popover-menu-link" tabindex="0">
+            <button type="button" role="menuitem" class="popover_sub_unsub_button cf-menu__action popover-menu-link" tabindex="0">
                 {{> ../../cofounder/components/icon name="circle-x" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Unsubscribe"}}</span>
-            </a>
+            </button>
         </li>
         <li role="separator" class="cf-menu__separator popover-menu-separator hidden-for-spectators"></li>
         <li role="none" class="link-item cf-menu__item popover-menu-list-item hidden-for-spectators">
-            <a role="menuitem" class="choose_stream_color cf-menu__action popover-menu-link" data-stream-id="{{ stream.stream_id }}" tabindex="0">
+            <button type="button" role="menuitem" class="choose_stream_color cf-menu__action popover-menu-link" data-stream-id="{{ stream.stream_id }}" tabindex="0">
                 {{> ../../cofounder/components/icon name="palette" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
                 <span class="cf-menu__label popover-menu-label">{{t "Change color"}}</span>
-            </a>
+            </button>
         </li>
         {{/unless}}
     </ul>

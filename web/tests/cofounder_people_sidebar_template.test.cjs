@@ -27,12 +27,16 @@ run_test("People sidebar uses standalone Cofounder component contracts", () => {
         href: "#dm/7",
         name: "Ava Rodriguez",
         num_unread: 3,
+        presence_label: "Active now",
         status_text: "Reviewing the launch brief",
+        unread_id: "people-sidebar-unread-7",
+        user_actions_label: "User actions for Ava Rodriguez",
         user_circle_class: "user-circle-active",
         user_id: 7,
         user_list_style: {WITH_AVATAR: false, WITH_STATUS: true},
     });
     const section_html = render_section_header({
+        controls_id: "members-list",
         header_text: "Members",
         id: "members-heading",
         is_collapsed: false,
@@ -48,8 +52,41 @@ run_test("People sidebar uses standalone Cofounder component contracts", () => {
     assert.match(sidebar_html, /cf-people-sidebar__menu/);
     assert.match(row_html, /cf-member-row--status/);
     assert.match(row_html, /cf-presence-dot--user-circle-active/);
-    assert.match(row_html, /cf-member-row__unread/);
+    assert.match(row_html, /role="img" aria-label="Active now"/);
+    assert.match(row_html, /aria-label="User actions for Ava Rodriguez"/);
+    assert.match(row_html, /aria-describedby="people-sidebar-unread-7"/);
+    assert.match(
+        row_html,
+        /id="people-sidebar-unread-7"[^>]+aria-label="translated: Unread messages: 3"/,
+    );
+    const component_css = fs.readFileSync(
+        path.join(__dirname, "../styles/cofounder/components/people-sidebar.css"),
+        "utf8",
+    );
+    const story = fs.readFileSync(
+        path.join(__dirname, "../stories/cofounder_people_sidebar.stories.ts"),
+        "utf8",
+    );
+    const data_table_css = fs.readFileSync(
+        path.join(__dirname, "../styles/cofounder/components/data-table.css"),
+        "utf8",
+    );
+    const user_card_popover = fs.readFileSync(
+        path.join(__dirname, "../src/user_card_popover.ts"),
+        "utf8",
+    );
+    assert.match(component_css, /\.cf-member-row__unread:not\(\.hide\)[\s\S]*max-width: 37px/);
+    assert.match(
+        component_css,
+        /\.cf-member-row--avatar \{\s*grid-template-columns: minmax\(0, 1fr\)/,
+    );
+    assert.match(story, /visible_count === 1 \? "person" : "people"/);
+    assert.match(story, /conversation selected\./);
+    assert.match(story, /actions opened\./);
+    assert.doesNotMatch(data_table_css, /(?:^|\n)\.cf-presence-dot(?:\s|,|\{)/);
+    assert.doesNotMatch(user_card_popover, /on\("keydown", "\.cf-member-row__actions"/);
     assert.match(section_html, /aria-expanded="true"/);
+    assert.match(section_html, /aria-controls="members-list"/);
     assert.match(section_html, /cf-people-sidebar__section-toggle/);
     assert.doesNotMatch(
         source + sidebar_html + row_html + section_html,

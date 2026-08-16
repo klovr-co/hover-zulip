@@ -1,4 +1,4 @@
-<li{{#if id}} id="{{id}}"{{/if}} class="cf-settings-nav__item sidebar-item{{#if custom_classes}} {{custom_classes}}{{/if}}{{#if collapsible}} collapse-org-settings{{/if}}{{#if hide_org_settings}} hide-org-settings{{/if}}{{#if hidden}} hide{{/if}}" tabindex="0"{{#if section}} data-section="{{section}}"{{/if}}>
+<li{{#if id}} id="{{id}}"{{/if}} class="cf-settings-nav__item sidebar-item{{#if custom_classes}} {{custom_classes}}{{/if}}{{#if collapsible}} collapse-org-settings{{/if}}{{#if hide_org_settings}} hide-org-settings{{/if}}{{#if hidden}} hide{{/if}}" role="link" tabindex="-1"{{#if section}} data-section="{{section}}" aria-controls="settings_content"{{/if}}>
     <span{{#if icon_id}} id="{{icon_id}}"{{/if}} class="cf-settings-nav__icon sidebar-item-icon" aria-hidden="true">
         {{> icon name=icon compact=true}}
     </span>

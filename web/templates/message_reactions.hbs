@@ -1,4 +1,4 @@
-<div class="cf-message-reactions" aria-label="{{t 'Message reactions' }}">
+<div class="cf-message-reactions" role="group" aria-label="{{t 'Message reactions' }}">
     {{#each this/msg/message_reactions}}
         {{> message_reaction . is_archived=../is_archived}}
     {{/each}}

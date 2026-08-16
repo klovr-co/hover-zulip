@@ -2,13 +2,13 @@
     <div id="recent_filters_group">
         {{> recent_view_filters .}}
     </div>
-    {{#> components/input_wrapper . input_type="filter-input" id="recent-view-search-wrapper" icon="search" input_button_icon="close" cofounder=true custom_classes="cf-data-table__search"}}
+    {{#> components/input_wrapper . input_type="filter-input" id="recent-view-search-wrapper" icon="search" input_button_icon="close" input_button_aria_label=(t 'Clear conversation filter') cofounder=true custom_classes="cf-data-table__search"}}
         <input type="text" id="recent_view_search" class="input-element user-list-filter" value="{{ search_val }}" autocomplete="off" placeholder="{{t 'Filter topics' }}" aria-label="{{t 'Filter conversations' }}" />
     {{/components/input_wrapper}}
 </div>
 <div class="cf-data-table__header-frame table_fix_head">
     <div class="recent-view-container">
-        <table class="cf-data-table cf-data-table--header table table-responsive">
+        <table class="cf-data-table cf-data-table--header table table-responsive" role="presentation">
             <thead id="recent-view-table-headers">
                 <tr>
                     <th class="cf-data-table__heading recent-view-topic-header">

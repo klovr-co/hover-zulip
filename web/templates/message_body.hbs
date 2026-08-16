@@ -38,7 +38,7 @@
 </a>
 
 {{#if (and (not msg/failed_request) msg/locally_echoed)}}
-    <span data-tooltip-template-id="slow-send-spinner-tooltip-template" class="cf-message-item__pending-indicator{{#unless msg/show_slow_send_spinner }} hidden{{/unless}}">{{> cofounder/components/icon name="loader-circle" compact=true}}</span>
+    <span data-tooltip-template-id="slow-send-spinner-tooltip-template" class="cf-message-item__pending-indicator{{#unless msg/show_slow_send_spinner }} hidden{{/unless}}" role="status" aria-label="{{t 'Message sending' }}">{{> cofounder/components/icon name="loader-circle" compact=true}}</span>
 {{/if}}
 
 <div class="cf-message-actions no-select">

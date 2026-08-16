@@ -58,7 +58,7 @@
 }
 
 .cf-tabs__tab--selected {
-    color: var(--cf-color-accent);
+    color: var(--cf-color-accent-hover);
     background: var(--cf-surface-selected);
     box-shadow: inset 0 0 0 1px
         color-mix(in srgb, var(--cf-color-accent) 20%, transparent);

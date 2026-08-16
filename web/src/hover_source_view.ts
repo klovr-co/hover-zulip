@@ -75,6 +75,8 @@ let request_generation = 0;
 let request: JQuery.jqXHR<unknown> | undefined;
 let status = "";
 let show_retry = false;
+let is_loading = false;
+let has_error = false;
 let loading_older = false;
 let retry_cursor: string | undefined;
 let restore_focus_hash: string | undefined;
@@ -126,6 +128,7 @@ function render(): void {
             ),
         }))
         .toArray();
+    const is_empty = !is_loading && !has_error && records.size === 0 && status !== "";
     $("#cf-source-view").html(
         render_hover_source_view({
             space_name: space.name,
@@ -133,6 +136,16 @@ function render(): void {
             provider_icon: provider_icon(attachment.source.provider_key),
             query: current_query,
             status,
+            is_loading,
+            has_error,
+            is_empty,
+            empty_icon: current_query ? "search" : "archive",
+            empty_hint: current_query
+                ? $t({defaultMessage: "Try a different search phrase."})
+                : $t({
+                      defaultMessage:
+                          "Records will appear here after the connected Source imports confirmed history.",
+                  }),
             show_retry,
             show_load_older: has_more && !loading_older,
             date_groups,
@@ -152,6 +165,8 @@ function load(cursor?: string): void {
     const previous_scroll_height = $("#cf-source-view").get(0)?.scrollHeight ?? 0;
     const previous_scroll_top = $("#cf-source-view").scrollTop() ?? 0;
     show_retry = false;
+    is_loading = true;
+    has_error = false;
     status = loading_older
         ? $t({defaultMessage: "Loading older records…"})
         : $t({defaultMessage: "Loading Source records…"});
@@ -174,6 +189,8 @@ function load(cursor?: string): void {
             next_cursor = response.next_cursor;
             has_more = response.has_more;
             loading_older = false;
+            is_loading = false;
+            has_error = false;
             retry_cursor = undefined;
             status =
                 records.size === 0
@@ -197,6 +214,8 @@ function load(cursor?: string): void {
                 return;
             }
             loading_older = false;
+            is_loading = false;
+            has_error = true;
             const retryable = z
                 .object({
                     retryable: z.boolean(),
@@ -282,6 +301,8 @@ export function clear(): void {
     records = new Map();
     status = "";
     show_retry = false;
+    is_loading = false;
+    has_error = false;
     loading_older = false;
     retry_cursor = undefined;
     $("#cf-source-view").empty();

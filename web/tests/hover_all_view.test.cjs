@@ -30,6 +30,7 @@ run_test("renders stable Module and Source filter keys", () => {
     assert.match(html, /data-cf-feed-filter-key="42"/);
     assert.match(html, /cf-feed-filter__label">Conversation Digest/);
     assert.match(html, /cf-feed-filter__count">7<\/span>/);
+    assert.match(html, /class="cf-feed-controls__status" role="status" aria-live="polite"/);
     assert.doesNotMatch(html, /class="[^"]*hover-/);
 });
 
@@ -44,5 +45,6 @@ run_test("renders latest and full-history controls for a Module topic", () => {
     assert.match(html, /data-cf-feed-history="all"/);
     assert.match(html, />Progress Tracker<\/strong>/);
     assert.match(html, /Earlier updates remain in Full history/);
+    assert.match(html, /class="cf-feed-controls__status" role="status" aria-live="polite"/);
     assert.doesNotMatch(html, /class="[^"]*hover-/);
 });

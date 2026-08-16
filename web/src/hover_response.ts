@@ -43,6 +43,7 @@ function render_type(): void {
     $(".cf-review-composer__mode").each((_index, element) => {
         const selected = $(element).attr("data-cf-response-mode") === response_type;
         $(element).attr("aria-checked", String(selected));
+        $(element).attr("tabindex", selected ? "0" : "-1");
     });
     $("[data-cf-reply-help]").prop("hidden", response_type !== "reply");
     $("[data-cf-review-patch]").prop("hidden", response_type !== "review");
@@ -51,6 +52,19 @@ function render_type(): void {
 export function select_response_type(selected: ResponseType): void {
     response_type = selected;
     render_type();
+}
+
+function keyboard_response_type(current: ResponseType, key: string): ResponseType | undefined {
+    if (key === "Home") {
+        return "reply";
+    }
+    if (key === "End") {
+        return "review";
+    }
+    if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(key)) {
+        return current === "reply" ? "review" : "reply";
+    }
+    return undefined;
 }
 
 export function preselect_review_field(field_path: string): void {
@@ -86,6 +100,19 @@ export function initialize(): void {
         if (selected === "reply" || selected === "review") {
             select_response_type(selected);
         }
+    });
+    $("body").on("keydown", ".cf-review-composer__mode", (event) => {
+        const current = $(event.currentTarget).attr("data-cf-response-mode");
+        if (current !== "reply" && current !== "review") {
+            return;
+        }
+        const selected = keyboard_response_type(current, event.key);
+        if (selected === undefined) {
+            return;
+        }
+        event.preventDefault();
+        select_response_type(selected);
+        $(`.cf-review-composer__mode[data-cf-response-mode="${selected}"]`).trigger("focus");
     });
 }
 
@@ -124,6 +151,7 @@ export function apply_realtime_responses(messages: Message[]): void {
 }
 
 export const _testing = {
+    keyboard_response_type,
     get_generated_item_id(): number | undefined {
         return generated_item_id;
     },

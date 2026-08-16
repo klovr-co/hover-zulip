@@ -2136,6 +2136,19 @@ export function initialize(): void {
     });
 
     $("#groups_overlay_container").on(
+        "keydown",
+        ".cf-two-pane-shell__row-main",
+        function (this: HTMLElement, event) {
+            if (event.key !== "Enter" && event.key !== " ") {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            this.closest<HTMLElement>(".group-row")?.click();
+        },
+    );
+
+    $("#groups_overlay_container").on(
         "click",
         ".open-group-info-button",
         function (this: HTMLElement, e) {
@@ -2260,7 +2273,11 @@ export function initialize(): void {
                             $("#dialog_error .permissions-button").on("click", () => {
                                 select_tab = "permissions";
                                 update_toggler_for_group_setting(user_group);
-                                dialog_widget.close();
+                                dialog_widget.close(() => {
+                                    $(
+                                        '#user_group_settings .cf-tabs__tab[data-tab-key="permissions"]',
+                                    ).trigger("focus");
+                                });
                             });
                         } else {
                             ui_report.error(

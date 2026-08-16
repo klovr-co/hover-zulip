@@ -22,7 +22,9 @@ run_test("Recent View table uses the Cofounder data-table contract", () => {
 
     assert.match(html, /cf-data-table__toolbar/);
     assert.match(html, /cf-data-table--header/);
+    assert.match(html, /role="presentation"/);
     assert.match(html, /cf-data-table__sort/);
+    assert.match(html, /aria-label="translated: Clear conversation filter"/);
     assert.match(html, /type="button"[^>]*data-sort="channel_sort"/);
     assert.doesNotMatch(html, /zulip-icon|<i(?:\s|>)/);
 });
@@ -69,7 +71,68 @@ run_test("Recent View rows use Cofounder cells and typed action icons", () => {
     assert.match(html, /cf-data-table__row--unread/);
     assert.match(html, /cf-data-table__cell/);
     assert.match(html, /data-cf-icon-name="follow"/);
+    assert.match(html, /aria-label="translated: Mark as read: Homepage redesign"/);
+    assert.match(
+        html,
+        /role="button" aria-label="translated: Topic actions menu: Homepage redesign"/,
+    );
+    assert.match(html, /aria-hidden="true" data-cf-icon-name="follow"/);
     assert.doesNotMatch(html, /zulip-icon|<i(?:\s|>)/);
+});
+
+run_test("Recent View Cofounder styles keep zero-count actions hidden", () => {
+    const css = require("node:fs").readFileSync(
+        require("node:path").join(__dirname, "../styles/cofounder/components/data-table.css"),
+        "utf8",
+    );
+
+    assert.match(css, /recent-view-table-unread-count\.unread_hidden[\s\S]*display: none/);
+    assert.match(css, /cf-data-table__sr-only-head th[\s\S]*clip-path: inset\(50%\)/);
+});
+
+run_test("Recent View body table owns its accessible table semantics", () => {
+    const index = require("node:fs").readFileSync(
+        require("node:path").join(__dirname, "../../templates/zerver/app/index.html"),
+        "utf8",
+    );
+
+    assert.match(
+        index,
+        /id="recent-view-content-table"[\s\S]*aria-label="\{\{ _\('Recent conversations'\) \}\}"/,
+    );
+    assert.match(index, /cf-data-table__sr-only-head[\s\S]*Channel and conversation/);
+    assert.match(index, /last-fetched-message" role="status" aria-live="polite"/);
+    assert.match(
+        index,
+        /type="button"[\s\S]*fetch-messages-button notvisible"[\s\S]*aria-busy="false"/,
+    );
+});
+
+run_test("Recent View load-more workflow preserves a pending accessible name", () => {
+    const recent_view_ui = require("node:fs").readFileSync(
+        require("node:path").join(__dirname, "../src/recent_view_ui.ts"),
+        "utf8",
+    );
+    const story = require("node:fs").readFileSync(
+        require("node:path").join(__dirname, "../stories/cofounder_recent_view.stories.ts"),
+        "utf8",
+    );
+
+    assert.match(
+        recent_view_ui,
+        /"aria-busy": "true"[\s\S]*defaultMessage: "Loading older messages"/,
+    );
+    assert.match(recent_view_ui, /attr\("aria-busy", "false"\)\.removeAttr\("aria-label"\)/);
+    assert.match(story, /Loading older conversations…/);
+    assert.match(story, /1 older conversation loaded\. All conversations are available\./);
+    assert.match(story, /rows\.push\(loaded_row\)[\s\S]*loaded_row\.focus\(\)/);
+    assert.match(
+        require("node:fs").readFileSync(
+            require("node:path").join(__dirname, "../stories/storybook.css"),
+            "utf8",
+        ),
+        /recent-view-load-more-container\[hidden\][\s\S]*display: none/,
+    );
 });
 
 run_test("Recent View empty state uses Cofounder load-more controls", () => {
@@ -80,7 +143,12 @@ run_test("Recent View empty state uses Cofounder load-more controls", () => {
     });
 
     assert.match(html, /cf-data-table__empty/);
+    assert.match(
+        html,
+        /cf-data-table__empty-message"[\s\S]*role="status"[\s\S]*aria-live="polite"[\s\S]*aria-atomic="true"/,
+    );
     assert.match(html, /cf-load-more--empty/);
     assert.match(html, /cf-button--secondary/);
+    assert.match(html, /type="button"[^>]*fetch-messages-button[^>]*aria-busy="false"/);
     assert.doesNotMatch(html, /action-button/);
 });

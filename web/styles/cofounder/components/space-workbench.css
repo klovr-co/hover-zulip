@@ -511,6 +511,18 @@
 }
 
 @media (width <= 600px) {
+    .cf-space-workbench__identity {
+        display: grid;
+        gap: var(--cf-space-1);
+    }
+
+    .cf-space-workbench__category {
+        min-inline-size: 0;
+        margin-block-start: 0;
+        justify-self: start;
+        overflow-wrap: anywhere;
+    }
+
     .cf-space-workbench .cf-button--compact {
         min-block-size: var(--cf-control-height-touch);
         padding-inline: 12px;

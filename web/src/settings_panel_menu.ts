@@ -28,6 +28,10 @@ export function mobile_deactivate_section(): void {
     const $settings_overlay_container = $("#settings_overlay_container");
     $settings_overlay_container.find(".right").removeClass("show");
     $settings_overlay_container.find(".settings-header.mobile").removeClass("slide-left");
+    const current = [
+        ...$settings_overlay_container.find(".cf-settings-nav__item[aria-current='page']"),
+    ].find((element) => element.getClientRects().length > 0);
+    current?.focus();
 }
 
 export function mobile_activate_section(): void {
@@ -85,6 +89,8 @@ export class SettingsPanelMenu {
         this.hash_prefix = opts.hash_prefix;
         this.base = opts.hash_prefix === "settings/" ? "settings" : "organization";
         this.$curr_li = this.$main_elem.children("li").eq(0);
+        this.$main_elem.children("li").attr("tabindex", "-1");
+        this.$curr_li.attr("tabindex", "0");
         this.current_tab = this.$curr_li.attr("data-section")!;
         this.current_user_settings_tab = "active";
         this.current_bot_settings_tab = {
@@ -310,8 +316,12 @@ export class SettingsPanelMenu {
             this.$curr_li = $li_for_section;
         }
 
-        this.$main_elem.children("li").removeClass("active").removeAttr("aria-current");
-        this.$curr_li.addClass("active").attr("aria-current", "page");
+        this.$main_elem
+            .children("li")
+            .removeClass("active")
+            .removeAttr("aria-current")
+            .attr("tabindex", "-1");
+        this.$curr_li.addClass("active").attr({"aria-current": "page", tabindex: "0"});
         this.set_current_tab(section);
 
         if (section !== "users" && section !== "bots") {

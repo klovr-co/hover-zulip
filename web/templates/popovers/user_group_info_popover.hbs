@@ -1,10 +1,10 @@
 <div class="cf-menu popover-menu user-group-info-popover" data-simplebar data-simplebar-tab-index="-1">
-    <ul role="menu" class="cf-menu__list popover-menu-list">
+    <ul role="menu" aria-labelledby="user-group-info-name" class="cf-menu__list popover-menu-list">
         <li role="none" class="link-item cf-menu__item popover-menu-list-item">
             <div class="popover-group-menu-info">
                 <div class="popover-group-menu-name-container">
                     {{> ../cofounder/components/icon name="users" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
-                    <span class="popover-group-menu-name">{{group_name}}</span>
+                    <h2 class="popover-group-menu-name" id="user-group-info-name">{{group_name}}</h2>
                 </div>
                 {{#if group_description}}
                     <div class="popover-group-menu-description">{{group_description}}</div>
@@ -13,7 +13,7 @@
         </li>
         {{#unless (and (eq displayed_members.length 0) (eq displayed_subgroups.length 0))}}
             {{#if user_can_access_all_other_users}}
-                <li role="none" class="cf-menu__item popover-menu-list-item text-item italic">
+                <li role="none" class="group-member-count cf-menu__item popover-menu-list-item text-item italic">
                     {{#tr}}
                         {members_count, plural, =1 {1 member} other {# members}}
                     {{/tr}}
@@ -29,12 +29,18 @@
         <li role="none" class="cf-menu__item popover-menu-list-item">
             {{#unless (and (eq displayed_members.length 0) (eq displayed_subgroups.length 0))}}
                 <ul class="cf-menu__list popover-menu-list popover-group-menu-member-list" data-simplebar data-simplebar-tab-index="-1" data-simplebar-auto-hide="false">
+                    {{#unless (eq displayed_subgroups.length 0)}}
+                        <li class="popover-group-menu-section-label">{{t "Subgroups" }}</li>
+                    {{/unless}}
                     {{#each displayed_subgroups}}
                         <li class="popover-group-menu-member">
                             {{> ../cofounder/components/icon name="users" compact=true custom_classes="popover-group-member-icon cf-menu__icon popover-menu-icon"}}
                             <span class="popover-group-menu-member-name">{{name}}</span>
                         </li>
                     {{/each}}
+                    {{#unless (eq displayed_members.length 0)}}
+                        <li class="popover-group-menu-section-label">{{t "Members" }}</li>
+                    {{/unless}}
                     {{#each displayed_members}}
                         <li class="popover-group-menu-member">
                             {{#if is_bot}}
@@ -66,8 +72,8 @@
                                         </a>
                                     {{/if}}
                                 {{else}}
-                                    <a href="{{group_members_url}}" role="menuitem">
-                                        {{t "View all members"}}
+                                    <a href="{{group_members_url}}" role="menuitem" class="cf-menu__action popover-menu-link" tabindex="0">
+                                        <span class="cf-menu__label">{{t "View all members"}}</span>
                                     </a>
                                 {{/if}}
                             </span>

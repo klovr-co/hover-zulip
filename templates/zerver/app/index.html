@@ -276,7 +276,15 @@ Accessing messages requires an account and Zulip API key.
                     <table
                       id="recent-view-content-table"
                       class="cf-data-table cf-data-table--body"
+                      aria-label="{{ _('Recent conversations') }}"
                       >
+                        <thead class="cf-data-table__sr-only-head">
+                            <tr>
+                                <th>{{ _('Channel and conversation') }}</th>
+                                <th>{{ _('Participants') }}</th>
+                                <th>{{ _('Time') }}</th>
+                            </tr>
+                        </thead>
                         <tbody
                           data-empty="{{ _('No conversations match your filters.') }}"
                           id="recent-view-content-tbody"
@@ -302,11 +310,13 @@ Accessing messages requires an account and Zulip API key.
                     <div
                       class="cf-load-more recent-view-load-more-container notvisible"
                       >
-                        <div class="cf-load-more__message last-fetched-message">
+                        <div class="cf-load-more__message last-fetched-message" role="status" aria-live="polite">
                             {{ _('This view is still loading messages.') }}
                         </div>
                         <button
+                          type="button"
                           class="cf-button cf-button--secondary fetch-messages-button notvisible"
+                          aria-busy="false"
                           >
                             <span class="loading-indicator"></span>
                             <span class="cf-button__label button-label">

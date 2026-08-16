@@ -19,27 +19,33 @@
             </div>
             <div class="cf-todos__list" aria-live="polite">
                 {{#if empty}}
-                    <div class="no-overlay-messages">
-                        <strong>{{t "No Todos yet."}}</strong>
-                        <p>{{t "Approved Suggested Actions will appear here."}}</p>
-                    </div>
+                    <section
+                      class="cf-todos__empty"
+                      aria-labelledby="cf-todos-empty-heading"
+                      aria-describedby="cf-todos-empty-description"
+                      >
+                        <strong id="cf-todos-empty-heading">{{t "No Todos yet."}}</strong>
+                        <p id="cf-todos-empty-description">
+                            {{t "Approved Suggested Actions will appear here."}}
+                        </p>
+                    </section>
                 {{/if}}
                 {{#each todos}}
                     <article
-                      class="cf-todo-card"
+                      class="cf-todo-card{{#if is_completed}} cf-todo-card--completed{{else}} cf-todo-card--active{{/if}}"
                       data-cf-todo-id="{{id}}"
                       tabindex="0"
-                      aria-label="{{wording}}"
+                      aria-labelledby="cf-todo-card-heading-{{id}}"
                       >
                         <div class="cf-todo-card__heading">
                             <span class="cf-todo-card__space">{{space.name}}</span>
                             {{> cofounder/components/status tone=state_tone label=state_label custom_classes="cf-todo-card__state"}}
                         </div>
-                        <h2>{{wording}}</h2>
+                        <h2 id="cf-todo-card-heading-{{id}}">{{wording}}</h2>
                         <dl class="cf-todo-card__facts">
                             <div>
                                 <dt>{{t "Assignee"}}</dt>
-                                <dd>{{assignee_label}}</dd>
+                                <dd data-cf-todo-assignee-label>{{assignee_label}}</dd>
                             </div>
                             <div>
                                 <dt>{{t "Due"}}</dt>
@@ -75,7 +81,8 @@
                                     <select
                                       class="cf-field__control cf-todo-card__assignee"
                                       data-cf-todo-assignee
-                                      aria-label="{{t 'Assign Todo'}}"
+                                      data-cf-current-assignee="{{#if assignee}}{{assignee.user_id}}{{/if}}"
+                                      aria-label="{{t 'Assign to Todo'}}"
                                       >
                                         {{#if assignee}}
                                             <option
@@ -100,6 +107,7 @@
                                   class="cf-button cf-button--secondary"
                                   data-cf-todo-operation="assign"
                                   data-cf-todo-id="{{id}}"
+                                  disabled
                                   >
                                     {{t "Assign"}}
                                 </button>
@@ -128,6 +136,7 @@
                           data-cf-todo-status
                           role="status"
                           aria-live="polite"
+                          aria-atomic="true"
                           >
                         </span>
                     </article>

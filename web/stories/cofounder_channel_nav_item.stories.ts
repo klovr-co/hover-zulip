@@ -152,6 +152,7 @@ export const SpaceNavigation: Story = {
                         is_muted: false,
                         is_web_public: false,
                         name: "AIMTO Events",
+                        selected: true,
                         url: "#aimto-events",
                     })}
                     ${render_space_setup_row({

@@ -234,3 +234,16 @@
         white-space: normal;
     }
 }
+
+@container message-lists (width <= 600px) {
+    .cf-review-detail__actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .cf-review-detail__actions .cf-button {
+        inline-size: 100%;
+        min-block-size: var(--cf-control-height-touch);
+        white-space: normal;
+    }
+}

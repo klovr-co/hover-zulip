@@ -90,6 +90,14 @@
     block-size: 14px;
 }
 
+.cf-feed-filter__label {
+    min-inline-size: 0;
+    max-inline-size: 28ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .cf-feed-filter__count {
     min-inline-size: 18px;
     padding: 1px var(--cf-space-1);
@@ -127,6 +135,7 @@
 
 .cf-feed-controls__status {
     margin: var(--cf-space-2) 0 0;
+    overflow-wrap: anywhere;
 }
 
 .cf-revision-trail {

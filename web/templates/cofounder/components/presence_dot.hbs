@@ -4,5 +4,5 @@
         {{custom_classes}}"
     data-presence-indicator-user-id="{{user_id}}"
     {{#if tooltip_content}}data-tippy-content="{{tooltip_content}}"{{/if}}
-    aria-hidden="true"
+    {{#if presence_label}}role="img" aria-label="{{presence_label}}"{{else}}aria-hidden="true"{{/if}}
 ></span>

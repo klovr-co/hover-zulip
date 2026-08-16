@@ -1,6 +1,6 @@
 <div
   {{#if id}}id="{{id}}"{{/if}}
-  role="{{#if (or (eq intent "danger") (eq intent "error") (eq intent "warning") (eq intent "warning-style"))}}alert{{else}}status{{/if}}"
+  role="{{#if role}}{{role}}{{else}}{{#if (or (eq intent "danger") (eq intent "error") (eq intent "warning") (eq intent "warning-style"))}}alert{{else}}status{{/if}}{{/if}}"
   class="cf-notice cf-notice--{{intent}}{{#if custom_classes}} {{custom_classes}}{{/if}}{{#if classname}} {{classname}}{{/if}}"
   {{#unless (eq user_id undefined)}}data-user-id="{{user_id}}"{{/unless}}
   {{#unless (eq stream_id undefined)}}data-stream-id="{{stream_id}}"{{/unless}}

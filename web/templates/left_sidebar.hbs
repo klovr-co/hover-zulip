@@ -1,7 +1,7 @@
-<div class="left-sidebar" id="left-sidebar" role="navigation">
+<div class="left-sidebar" id="left-sidebar" role="navigation" aria-label="{{t 'Workspace navigation'}}">
     <div id="left-sidebar-search">
         <div class="input-wrapper-for-tooltip tippy-zulip-delayed-tooltip" data-tooltip-template-id="filter-left-sidebar-tooltip-template">
-            {{#> components/input_wrapper input_type="filter-input" custom_classes="left-sidebar-search-section" icon="search" input_button_icon="close" cofounder=true}}
+            {{#> components/input_wrapper input_type="filter-input" custom_classes="left-sidebar-search-section" icon="search" input_button_icon="close" input_button_aria_label=(t "Clear navigation filter") cofounder=true}}
                 <input type="text" class="input-element left-sidebar-search-input" autocomplete="off" placeholder="{{#if hover_enabled}}{{t 'Filter Home and Spaces' }}{{else}}{{t 'Filter left sidebar' }}{{/if}}" aria-label="{{#if hover_enabled}}{{t 'Filter Home and Spaces' }}{{else}}{{t 'Filter left sidebar' }}{{/if}}" />
             {{/components/input_wrapper}}
         </div>
@@ -96,8 +96,8 @@
                   title=(t "ALL DIRECT MESSAGES")
                   }}
                     <div class="direct-messages-search-section left-sidebar-filter-input-container">
-                        {{#> components/input_wrapper input_type="filter-input" icon="search" input_button_icon="close" cofounder=true}}
-                            <input type="text" class="input-element direct-messages-list-filter home-page-input" autocomplete="off" placeholder="{{t 'Filter direct messages' }}" />
+                        {{#> components/input_wrapper input_type="filter-input" icon="search" input_button_icon="close" input_button_aria_label=(t "Clear direct message filter") cofounder=true}}
+                            <input type="text" class="input-element direct-messages-list-filter home-page-input" autocomplete="off" placeholder="{{t 'Filter direct messages' }}" aria-label="{{t 'Filter direct messages' }}" />
                         {{/components/input_wrapper}}
                     </div>
                 {{/cofounder/components/dm_section_header}}

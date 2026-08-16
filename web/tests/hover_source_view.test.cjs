@@ -105,11 +105,21 @@ run_test("renders loading and first-page empty states", () => {
         query: '""',
     });
     assert.match($("#cf-source-view").html(), /Loading Source records/);
-    assert.match($("#cf-source-view").html(), /Source records · Read-only/);
+    assert.match($("#cf-source-view").html(), /cf-source-view__loading-indicator/);
+    assert.match($("#cf-source-view").html(), /aria-busy="true"/);
+    assert.match($("#cf-source-view").html(), /Read-only records/);
 
     requests[0].success(response([]));
     const html = $("#cf-source-view").html();
+    assert.match(html, /aria-busy="false"/);
+    assert.doesNotMatch(html, /cf-source-view__loading-indicator/);
+    assert.match(html, /cf-source-view__status--empty/);
+    assert.match(html, /cf-source-view__empty-indicator/);
     assert.match(html, /This Source has no records in its confirmed history/);
+    assert.match(
+        html,
+        /Records will appear here after the connected Source imports confirmed history/,
+    );
     assert.doesNotMatch(html, /class="cf-source-record"/);
 });
 
@@ -164,6 +174,8 @@ run_test("renders records and searches with a no-match state", () => {
 
     requests[1].success(response([]));
     assert.match($("#cf-source-view").html(), /No records match this search/);
+    assert.match($("#cf-source-view").html(), /Try a different search phrase/);
+    assert.match($("#cf-source-view").html(), /cf-source-view__status--empty/);
 });
 
 run_test("retries a retryable first-page error", () => {
@@ -183,6 +195,10 @@ run_test("retries a retryable first-page error", () => {
     const error_html = $("#cf-source-view").html();
     assert.match(error_html, /rate limited/);
     assert.match(error_html, /5 seconds/);
+    assert.match(error_html, /cf-source-view__status--error/);
+    assert.match(error_html, /cf-source-view__error-indicator/);
+    assert.match(error_html, /aria-label="(?:translated: )?Retry loading Source records"/);
+    assert.match(error_html, /aria-busy="false"/);
     assert.match(error_html, /id="cf-source-retry"/);
 
     $("body").get_on_handler("click", "#cf-source-retry")();
@@ -194,6 +210,8 @@ run_test("retries a retryable first-page error", () => {
         query: '""',
     });
     assert.match($("#cf-source-view").html(), /Loading Source records/);
+    assert.doesNotMatch($("#cf-source-view").html(), /cf-source-view__status--error/);
+    assert.match($("#cf-source-view").html(), /aria-busy="true"/);
 });
 
 run_test("loads older records and preserves the reading position", () => {

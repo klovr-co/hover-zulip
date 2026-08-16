@@ -57,9 +57,15 @@
       id="{{active_panel_id}}"
       role="tabpanel"
       aria-labelledby="{{active_tab_id}}"
+      aria-busy="{{panel_aria_busy}}"
       tabindex="0"
       >
-        <div class="cf-edition-status" role="status" aria-live="polite">
+        <div
+          class="{{status_class}}"
+          role="{{status_role}}"
+          aria-live="{{status_aria_live}}"
+          tabindex="-1"
+          >
             {{status}}
             {{#if show_retry}}
                 {{> cofounder/components/button id="cf-edition-retry" variant="secondary" label=(t "Retry")}}
@@ -76,7 +82,9 @@
               aria-label="{{t 'Reading view'}}"
               >
                 {{#if all_mode}}
-                    {{> cofounder/components/button id="cf-edition-focus-view" variant="ghost" icon="panel-left" label=(t "Focus view") custom_classes="cf-edition-view-button"}}
+                    {{#if has_items}}
+                        {{> cofounder/components/button id="cf-edition-focus-view" variant="ghost" icon="panel-left" label=(t "Focus view") custom_classes="cf-edition-view-button"}}
+                    {{/if}}
                 {{else}}
                     {{> cofounder/components/button id="cf-edition-view-all" variant="ghost" icon="list" label=(t "View all") custom_classes="cf-edition-view-button"}}
                 {{/if}}

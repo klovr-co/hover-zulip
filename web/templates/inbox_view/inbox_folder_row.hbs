@@ -12,7 +12,7 @@
                         {{/if}}
                     </span>
                 </div>
-                <button type="button" class="cf-conversation-list__collapse collapsible-button" tabindex="-1" aria-label="{{t 'Toggle section'}}">{{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="folder-row-chevron"}}</button>
+                <button type="button" class="cf-conversation-list__collapse collapsible-button" tabindex="-1" aria-label="{{t 'Toggle section'}}" aria-expanded="{{#if is_collapsed}}false{{else}}true{{/if}}">{{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="folder-row-chevron"}}</button>
                 <span class="cf-conversation-list__mention unread_mention_info tippy-zulip-tooltip
                   {{#unless has_unread_mention}}hidden{{/unless}}"
                   data-tippy-content="{{t 'You have unread mentions' }}">@</span>

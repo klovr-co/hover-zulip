@@ -54,9 +54,9 @@ function conversation({
     });
 }
 
-export const States: Story = {
-    render: () =>
-        component_story(`
+function render_states(): HTMLElement {
+    const container = globalThis.document.createElement("div");
+    container.innerHTML = component_story(`
             <nav aria-label="Direct messages" style="width: 280px">
                 ${render_dm_section_header({
                     custom_classes: "zoomed-out",
@@ -70,10 +70,40 @@ export const States: Story = {
                     ${conversation({is_active: true, name: "Alex Lee", presence: "user-circle-active", unread: 2})}
                     ${conversation({has_unread_mention: true, name: "Jamie Morris", presence: "user-circle-idle", unread: 4})}
                     ${conversation({is_group: true, name: "Design review group", unread: 7})}
-                    ${conversation({is_bot: true, name: "Release bot", unread: 1})}
+                    ${conversation({is_bot: true, name: "Release", unread: 1})}
                     ${conversation({is_current_user: true, is_zero: true, name: "Maxine", unread: 0})}
                     ${render_more_pms({more_conversations_unread_count: 8})}
                 </ul>
             </nav>
-        `),
+        `);
+
+    const component = container.firstElementChild;
+    if (!(component instanceof HTMLElement)) {
+        throw new TypeError("The direct-message navigation story did not render.");
+    }
+
+    const toggle = component.querySelector<HTMLButtonElement>(
+        "#toggle-direct-messages-section-icon",
+    );
+    const list = component.querySelector<HTMLElement>(".dm-list");
+    toggle?.addEventListener("click", () => {
+        const expanded = toggle.getAttribute("aria-expanded") !== "true";
+        toggle.setAttribute("aria-expanded", String(expanded));
+        toggle.setAttribute(
+            "aria-label",
+            expanded ? "Collapse direct messages" : "Expand direct messages",
+        );
+        toggle.classList.toggle("rotate-icon-down", expanded);
+        toggle.classList.toggle("rotate-icon-right", !expanded);
+        if (list) {
+            list.hidden = !expanded;
+            list.style.display = expanded ? "grid" : "none";
+        }
+    });
+
+    return component;
+}
+
+export const States: Story = {
+    render: render_states,
 };

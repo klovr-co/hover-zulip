@@ -18,6 +18,7 @@ run_test("sidebar DM header renders the Cofounder control contract", () => {
 
     assert.match(html, /id="direct-messages-section-header" class="cf-dm-section-header/);
     assert.match(html, /<button id="toggle-direct-messages-section-icon"[^>]+rotate-icon-down/);
+    assert.match(html, /aria-label="translated: Collapse direct messages" aria-expanded="true"/);
     assert.match(html, /class="cf-dm-section-header__title left-sidebar-title"/);
     assert.match(html, /<a class="cf-dm-section-header__action show-all-direct-messages/);
     assert.match(

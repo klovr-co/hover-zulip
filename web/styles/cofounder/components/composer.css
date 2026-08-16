@@ -19,6 +19,8 @@
 }
 
 #compose:has(.cf-composer--production) {
+    --compose-send-controls-width: 130px;
+
     bottom: 17px;
 }
 
@@ -61,6 +63,13 @@
 .cf-composer__editor:has(.cf-composer__textarea:focus) {
     border-color: var(--cf-focus) !important;
     box-shadow: inset 0 -1px var(--cf-focus);
+}
+
+.cf-composer--production
+    #compose_select_recipient_widget_wrapper:focus-visible {
+    border-radius: var(--cf-radius-control);
+    outline: 2px solid color-mix(in srgb, var(--cf-focus) 24%, transparent);
+    outline-offset: 1px;
 }
 
 .cf-composer__textarea {
@@ -268,12 +277,26 @@
 }
 
 .cf-composer__recipient-channel {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
     color: var(--cf-text-primary);
     font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .cf-composer__recipient-separator {
-    color: var(--cf-text-tertiary);
+    flex: 0 0 auto;
+    color: var(--cf-text-secondary);
+}
+
+.cf-composer__recipient-topic {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .cf-composer__standalone-editor {
@@ -308,7 +331,7 @@
 .cf-composer__standalone-send {
     width: var(--cf-control-height-touch);
     height: var(--cf-control-height-touch);
-    margin-left: 4px;
+    margin-inline-start: 4px;
 }
 
 @media (width <= 600px) {
@@ -354,6 +377,14 @@
 
     .cf-composer__send-options {
         flex: 0 0 var(--cf-control-height-touch) !important;
+    }
+
+    .cf-composer__shortcut {
+        display: none;
+    }
+
+    .cf-composer__standalone-send {
+        margin-inline: auto 0;
     }
 
     .cf-composer__close,

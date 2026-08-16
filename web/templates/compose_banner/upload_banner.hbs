@@ -1,12 +1,14 @@
 <div role="{{#if (eq banner_type "error")}}alert{{else}}status{{/if}}" class="cf-notice cf-notice--{{banner_type}} upload_banner file_{{file_id}}">
-    <div class="moving_bar"></div>
+    {{#if is_upload_process_tracker}}
+    <div class="moving_bar" role="progressbar" aria-label="{{progress_label}}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+    {{/if}}
     <div class="cf-notice__body">
         <p class="upload_msg cf-notice__content">{{banner_text}}</p>
         {{#if is_upload_process_tracker}}
         <div class="cf-notice__actions">
-            {{> ../cofounder/components/button variant="secondary" label=(t "Cancel") custom_classes="cf-notice__action upload_banner_cancel_button"}}
+            {{> ../cofounder/components/button variant="secondary" label=(t "Cancel") aria-label=cancel_button_label custom_classes="cf-notice__action upload_banner_cancel_button"}}
         </div>
         {{/if}}
     </div>
-    {{> ../cofounder/components/button variant="ghost" icon="close" aria-label=(t "Dismiss") custom_classes="cf-notice__close"}}
+    {{> ../cofounder/components/button variant="ghost" icon="close" aria-label=hide_button_label custom_classes="cf-notice__close"}}
 </div>

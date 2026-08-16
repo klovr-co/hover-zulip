@@ -35,13 +35,12 @@
     box-shadow: none;
     font: inherit;
     opacity: 0;
-    visibility: hidden;
+    pointer-events: none;
     cursor: pointer;
     transition:
         color var(--cf-duration-fast) ease,
         background-color var(--cf-duration-fast) ease,
-        opacity var(--cf-duration-fast) ease,
-        visibility var(--cf-duration-fast) ease;
+        opacity var(--cf-duration-fast) ease;
 }
 
 .cf-message-actions__edit > .cf-message-actions__button {
@@ -59,7 +58,7 @@
 .cf-message-actions__button.cf-message-actions__failed-button,
 .has_actions_popover .cf-message-actions__more-button {
     opacity: 1;
-    visibility: visible;
+    pointer-events: auto;
 }
 
 .cf-message-actions__button:is(:hover, :active) {
@@ -76,7 +75,7 @@
     outline: 2px solid var(--cf-focus);
     outline-offset: -2px;
     opacity: 1;
-    visibility: visible;
+    pointer-events: auto;
 }
 
 .cf-message-actions__button:active > .cf-icon {
@@ -90,7 +89,7 @@
 .cf-message-actions__star-button--selected {
     color: var(--cf-color-warning);
     opacity: 1;
-    visibility: visible;
+    pointer-events: auto;
 }
 
 .cf-message-actions__star-button--selected > .cf-icon {
@@ -114,6 +113,7 @@
 .cf-message-item--pending
     .cf-message-actions__button:not(.cf-message-actions__failed-button) {
     visibility: hidden;
+    pointer-events: none;
 }
 
 #report-message-preview-container .cf-message-actions {
@@ -139,7 +139,7 @@
         min-width: 40px;
         min-height: 40px;
         opacity: 1;
-        visibility: visible;
+        pointer-events: auto;
     }
 }
 
@@ -149,7 +149,7 @@
     }
 
     .cf-message-actions__failed-button.rotating > .cf-icon {
-        animation-duration: 2s;
+        animation: none;
     }
 }
 

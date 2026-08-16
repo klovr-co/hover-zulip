@@ -169,6 +169,7 @@ run_test("renders a prose-first full edition and a manual accessible focus view"
     const all_handler = $("body").get_on_handler("click", "#cf-edition-view-all");
     all_handler();
     assert.match($("#cf-editions-view").html(), /Full edition/);
+    assert.equal($("#cf-edition-focus-view").is_focused(), true);
     clock.reset();
 });
 
@@ -179,6 +180,7 @@ run_test("renders the first-edition empty state", () => {
 
     assert.match($("#cf-editions-view").html(), /Preparing your latest edition/);
     assert.match($("#cf-editions-view").html(), /cf-edition-loading/);
+    assert.match(opening_panel_tag($("#cf-editions-view").html(), "morning"), /aria-busy="true"/);
     request.success({
         sync_status: "empty",
         editions: {morning: null, end_of_day: null},
@@ -189,6 +191,26 @@ run_test("renders the first-edition empty state", () => {
     assert.match(html, /Your Daily Brief/);
     assert.doesNotMatch(html, /cf-edition-loading/);
     assert.doesNotMatch(html, /id="cf-edition-retry"/);
+    assert.doesNotMatch(html, /id="cf-edition-focus-view"/);
+    assert.match(opening_panel_tag(html, "morning"), /aria-busy="false"/);
+});
+
+run_test("omits focus view for a published edition without items", () => {
+    hover_editions_view.test.reset();
+    hover_editions_view.initialize();
+    hover_editions_view.show();
+
+    const data = edition_response();
+    data.editions.morning.all_clear = false;
+    data.editions.morning.sections = {
+        urgency: [],
+        unresolved_carryover: [],
+        guidance: [],
+    };
+    request.success(data);
+
+    const html = $("#cf-editions-view").html();
+    assert.match(html, /There are no confirmed updates to feature in this edition/);
     assert.doesNotMatch(html, /id="cf-edition-focus-view"/);
 });
 
@@ -202,6 +224,10 @@ run_test("renders a hard error and retries from loading state", () => {
     let html = $("#cf-editions-view").html();
     assert.match(html, /Your edition could not be loaded/);
     assert.match(html, /id="cf-edition-retry"/);
+    assert.match(
+        html,
+        /class="cf-edition-status cf-edition-status--error"\s+role="alert"\s+aria-live="assertive"/,
+    );
     assert.doesNotMatch(html, /cf-edition-loading/);
 
     $("body").get_on_handler("click", "#cf-edition-retry")();
@@ -212,9 +238,11 @@ run_test("renders a hard error and retries from loading state", () => {
     assert.match(html, /Preparing your latest edition/);
     assert.match(html, /cf-edition-loading/);
     assert.doesNotMatch(html, /id="cf-edition-retry"/);
+    assert.equal($(".cf-edition-status").is_focused(), true);
 
     request.success(edition_response());
     assert.match($("#cf-editions-view").html(), /A good place to start/);
+    assert.equal($("#cf-edition-panel-morning").is_focused(), true);
 });
 
 run_test("switches Morning and End of day tabs with selected semantics", () => {

@@ -25,6 +25,63 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<ComposerArgs>;
+type ReviewMode = "reply" | "review";
+
+function is_review_mode(value: string | undefined): value is ReviewMode {
+    return value === "reply" || value === "review";
+}
+
+function apply_review_mode(host: HTMLElement, selected: ReviewMode): void {
+    for (const mode of host.querySelectorAll<HTMLButtonElement>(
+        ":scope .cf-review-composer__mode",
+    )) {
+        const is_selected = mode.dataset["cfResponseMode"] === selected;
+        mode.setAttribute("aria-checked", String(is_selected));
+        mode.tabIndex = is_selected ? 0 : -1;
+    }
+    const reply_help = host.querySelector<HTMLElement>(":scope [data-cf-reply-help]");
+    const review_patch = host.querySelector<HTMLElement>(":scope [data-cf-review-patch]");
+    if (reply_help !== null) {
+        reply_help.hidden = selected !== "reply";
+    }
+    if (review_patch !== null) {
+        review_patch.hidden = selected !== "review";
+    }
+}
+
+function initialize_review_mode(host: HTMLElement): void {
+    const modes = [...host.querySelectorAll<HTMLButtonElement>(":scope .cf-review-composer__mode")];
+    for (const [index, mode] of modes.entries()) {
+        mode.addEventListener("click", () => {
+            const selected = mode.dataset["cfResponseMode"];
+            if (is_review_mode(selected)) {
+                apply_review_mode(host, selected);
+            }
+        });
+        mode.addEventListener("keydown", (event) => {
+            let next_index: number | undefined;
+            if (event.key === "Home") {
+                next_index = 0;
+            } else if (event.key === "End") {
+                next_index = modes.length - 1;
+            } else if (["ArrowLeft", "ArrowUp"].includes(event.key)) {
+                next_index = (index - 1 + modes.length) % modes.length;
+            } else if (["ArrowRight", "ArrowDown"].includes(event.key)) {
+                next_index = (index + 1) % modes.length;
+            }
+            if (next_index === undefined) {
+                return;
+            }
+            event.preventDefault();
+            const next_mode = modes[next_index];
+            if (next_mode === undefined || !is_review_mode(next_mode.dataset["cfResponseMode"])) {
+                return;
+            }
+            apply_review_mode(host, next_mode.dataset["cfResponseMode"]);
+            next_mode.focus();
+        });
+    }
+}
 
 function render_production_toolbar(): HTMLElement {
     const host = globalThis.document.createElement("div");
@@ -44,6 +101,22 @@ function render_production_toolbar(): HTMLElement {
         tenor_enabled: false,
     });
     host.append(container);
+
+    const recipient_value = host.querySelector<HTMLElement>(
+        ":scope #compose_select_recipient_widget .dropdown_widget_value",
+    );
+    if (recipient_value !== null) {
+        recipient_value.textContent = "design";
+    }
+    const topic = host.querySelector<HTMLInputElement>(":scope #stream_message_recipient_topic");
+    if (topic !== null) {
+        topic.value = "Homepage redesign";
+    }
+    const direct_recipient = host.querySelector<HTMLElement>(":scope #compose-direct-recipient");
+    if (direct_recipient !== null) {
+        direct_recipient.hidden = true;
+        direct_recipient.style.display = "none";
+    }
     return host;
 }
 
@@ -52,16 +125,12 @@ function render_production_review(narrow = false): HTMLElement {
     host.classList.add("storybook-production-compose--review");
     host.classList.toggle("storybook-production-compose--narrow", narrow);
 
-    const controls = host.querySelector<HTMLElement>("#cf-review-composer-controls");
+    const controls = host.querySelector<HTMLElement>(":scope #cf-review-composer-controls");
     controls?.removeAttribute("hidden");
-    const reply = host.querySelector<HTMLElement>('[data-cf-response-mode="reply"]');
-    const review = host.querySelector<HTMLElement>('[data-cf-response-mode="review"]');
-    reply?.setAttribute("aria-checked", "false");
-    review?.setAttribute("aria-checked", "true");
-    host.querySelector<HTMLElement>("[data-cf-reply-help]")?.setAttribute("hidden", "");
-    host.querySelector<HTMLElement>("[data-cf-review-patch]")?.removeAttribute("hidden");
+    apply_review_mode(host, "review");
+    initialize_review_mode(host);
 
-    const field = host.querySelector<HTMLSelectElement>("#cf-review-field");
+    const field = host.querySelector<HTMLSelectElement>(":scope #cf-review-field");
     if (field !== null) {
         for (const [label, option_value] of [
             ["venue", "venue"],
@@ -74,7 +143,7 @@ function render_production_review(narrow = false): HTMLElement {
         }
         field.value = "delivery_entrance";
     }
-    const value = host.querySelector<HTMLInputElement>("#cf-review-value");
+    const value = host.querySelector<HTMLInputElement>(":scope #cf-review-value");
     if (value !== null) {
         value.value = '"South gate"';
     }

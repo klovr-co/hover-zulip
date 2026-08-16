@@ -36,13 +36,13 @@
                 <span class="unread_mention_info tippy-zulip-tooltip {{#unless has_unread_mention}}unread_hidden{{/unless}}"
                   data-tippy-content="{{t 'You have unread mentions' }}">@</span>
                 <div class="recent_topic_actions recent-view-unread-count-wrapper">
-                    <span class="unread_count unread_count_pm recent-view-table-unread-count recent_view_focusable {{#if (eq unread_count 0)}}unread_hidden{{/if}} on_hover_topic_read" data-user-ids-string="{{user_ids_string}}" data-tippy-content="{{t 'Mark as read' }}" data-tippy-trigger="mouseenter" role="button" aria-label="{{t 'Mark as read' }}" data-col-index="{{ column_indexes.read }}" tabindex="0">{{unread_count}}</span>
+                    <span class="unread_count unread_count_pm recent-view-table-unread-count recent_view_focusable {{#if (eq unread_count 0)}}unread_hidden{{/if}} on_hover_topic_read" data-user-ids-string="{{user_ids_string}}" data-tippy-content="{{t 'Mark as read' }}" data-tippy-trigger="mouseenter" role="button" aria-label="{{t 'Mark as read' }}: {{pm_users_as_plain}}" data-col-index="{{ column_indexes.read }}" tabindex="0">{{unread_count}}</span>
                 </div>
                 {{else}}
                 <span class="unread_mention_info tippy-zulip-tooltip {{#unless mention_in_unread}}unread_hidden{{/unless}}"
                   data-tippy-content="{{t 'You have unread mentions'}}">@</span>
                 <div class="recent_topic_actions recent-view-unread-count-wrapper">
-                    <span class="unread_count recent-view-table-unread-count hidden-for-spectators recent_view_focusable {{#if (eq unread_count 0)}}unread_hidden{{/if}} on_hover_topic_read" data-stream-id="{{stream_id}}" data-topic-name="{{topic}}" data-tippy-content="{{t 'Mark as read' }}" data-tippy-trigger="mouseenter" role="button" aria-label="{{t 'Mark as read' }}" data-col-index="{{ column_indexes.read }}" tabindex="0">{{unread_count}}</span>
+                    <span class="unread_count recent-view-table-unread-count hidden-for-spectators recent_view_focusable {{#if (eq unread_count 0)}}unread_hidden{{/if}} on_hover_topic_read" data-stream-id="{{stream_id}}" data-topic-name="{{topic}}" data-tippy-content="{{t 'Mark as read' }}" data-tippy-trigger="mouseenter" role="button" aria-label="{{t 'Mark as read' }}: {{topic_display_name}}" data-col-index="{{ column_indexes.read }}" tabindex="0">{{unread_count}}</span>
                 </div>
                 {{/if}}
             </div>
@@ -75,16 +75,16 @@
                 <a class="last-msg-link" href="{{last_msg_url}}" tabindex="-1">{{ last_msg_time }}</a>
             </div>
             {{#unless (or is_archived is_private)}}
-                <div class="recent_topic_actions hidden-for-spectators recent_view_focusable recent-view-topic-visibility" data-col-index="{{ column_indexes.mute }}" tabindex="0">
+                <div class="recent_topic_actions hidden-for-spectators recent_view_focusable recent-view-topic-visibility" data-col-index="{{ column_indexes.mute }}" role="button" aria-label="{{t 'Topic actions menu' }}: {{topic_display_name}}" aria-haspopup="menu" tabindex="0">
                     <span class="change_visibility_policy" data-stream-id="{{stream_id}}" data-topic-name="{{topic}}">
                         {{#if (eq visibility_policy all_visibility_policies.FOLLOWED)}}
-                            <span class="cf-data-table__row-action recipient_bar_icon visibility-status-icon" aria-label="{{t 'Topic actions menu' }}" aria-haspopup="true" data-cf-icon-name="follow" data-stream-id="{{stream_id}}" data-topic-name="{{topic}}" data-topic-url="{{topic_url}}" data-tippy-content="{{t 'You follow this topic.'}}" role="button">{{> cofounder/components/icon name="follow" compact=true }}</span>
+                            <span class="cf-data-table__row-action recipient_bar_icon visibility-status-icon" aria-hidden="true" data-cf-icon-name="follow" data-stream-id="{{stream_id}}" data-topic-name="{{topic}}" data-topic-url="{{topic_url}}" data-tippy-content="{{t 'You follow this topic.'}}">{{> cofounder/components/icon name="follow" compact=true }}</span>
                         {{else if (eq visibility_policy all_visibility_policies.UNMUTED)}}
-                            <span class="cf-data-table__row-action recipient_bar_icon visibility-status-icon" aria-label="{{t 'Topic actions menu' }}" aria-haspopup="true" data-cf-icon-name="unmute" data-stream-id="{{stream_id}}" data-topic-name="{{topic}}" data-topic-url="{{topic_url}}" data-tippy-content="{{t 'You have unmuted this topic.'}}" role="button">{{> cofounder/components/icon name="unmute" compact=true }}</span>
+                            <span class="cf-data-table__row-action recipient_bar_icon visibility-status-icon" aria-hidden="true" data-cf-icon-name="unmute" data-stream-id="{{stream_id}}" data-topic-name="{{topic}}" data-topic-url="{{topic_url}}" data-tippy-content="{{t 'You have unmuted this topic.'}}">{{> cofounder/components/icon name="unmute" compact=true }}</span>
                         {{else if (eq visibility_policy all_visibility_policies.MUTED)}}
-                            <span class="cf-data-table__row-action recipient_bar_icon visibility-status-icon" aria-label="{{t 'Topic actions menu' }}" aria-haspopup="true" data-cf-icon-name="mute" data-stream-id="{{stream_id}}" data-topic-name="{{topic}}" data-topic-url="{{topic_url}}" data-tippy-content="{{t 'You have muted this topic.'}}" role="button">{{> cofounder/components/icon name="mute" compact=true }}</span>
+                            <span class="cf-data-table__row-action recipient_bar_icon visibility-status-icon" aria-hidden="true" data-cf-icon-name="mute" data-stream-id="{{stream_id}}" data-topic-name="{{topic}}" data-topic-url="{{topic_url}}" data-tippy-content="{{t 'You have muted this topic.'}}">{{> cofounder/components/icon name="mute" compact=true }}</span>
                         {{else}}
-                            <span class="cf-data-table__row-action recent-view-row-topic-menu visibility-status-icon" aria-label="{{t 'Topic actions menu' }}" aria-haspopup="true" data-cf-icon-name="more-vertical" data-stream-id="{{stream_id}}" data-topic-name="{{topic}}" data-topic-url="{{topic_url}}" role="button">{{> cofounder/components/icon name="more-vertical" compact=true }}</span>
+                            <span class="cf-data-table__row-action recent-view-row-topic-menu visibility-status-icon" aria-hidden="true" data-cf-icon-name="more-vertical" data-stream-id="{{stream_id}}" data-topic-name="{{topic}}" data-topic-url="{{topic_url}}">{{> cofounder/components/icon name="more-vertical" compact=true }}</span>
                         {{/if}}
                     </span>
                 </div>

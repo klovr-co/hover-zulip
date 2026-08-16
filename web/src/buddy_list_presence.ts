@@ -23,5 +23,11 @@ export function update_indicators(): void {
         if (!$indicator.hasClass("cf-presence-dot")) {
             $indicator.addClass(`zulip-icon-${user_circle_class}`);
         }
+        if ($indicator.attr("aria-hidden") !== "true") {
+            $indicator.attr(
+                "aria-label",
+                buddy_data.get_user_presence_label(user_id, is_deactivated),
+            );
+        }
     });
 }

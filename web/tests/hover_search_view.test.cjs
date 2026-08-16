@@ -99,15 +99,28 @@ run_test("knowledge ranks before read-only Sources and uses native starred state
     hover_search_view.test.search("  venue   handoff ");
     assert.equal(request.url, "/json/hover/search");
     assert.deepEqual(request.data, {query: JSON.stringify("venue handoff")});
+    let html = $("#cf-global-search-view").html();
+    assert.match(html, /aria-busy="true"/);
+    assert.match(html, /class="cf-global-search__loading" aria-hidden="true"/);
+    assert.doesNotMatch(html, /cf-global-search-knowledge-heading/);
+    assert.doesNotMatch(html, /No human or generated posts match/);
+    assert.equal($(".cf-global-search__status").is_focused(), true);
     request.success(response());
 
-    const html = $("#cf-global-search-view").html();
+    html = $("#cf-global-search-view").html();
+    assert.match(html, /aria-busy="false"/);
+    assert.doesNotMatch(html, /cf-global-search__loading/);
+    assert.equal($("#cf-global-search-knowledge-heading").is_focused(), true);
     assert.ok(
         html.indexOf('id="cf-global-search-knowledge-heading"') <
             html.indexOf('id="cf-global-search-sources-heading"'),
     );
     assert.match(html, /Generated update/);
     assert.match(html, /Source evidence cannot be saved/);
+    assert.match(html, /class="cf-global-search__status"/);
+    assert.match(html, /role="status"/);
+    assert.match(html, /aria-live="polite"/);
+    assert.match(html, /tabindex="-1"/);
     assert.match(html, /&lt;img/);
     assert.doesNotMatch(html, /<img src=x onerror=alert\(1\)>/);
     assert.match(html, /data-message-id="42"/);
@@ -146,4 +159,23 @@ run_test("later searches replace stale requests", () => {
     // An old success is ignored by the request generation guard.
     first_request.success(response());
     assert.match($("#cf-global-search-view").html(), /value="second"/);
+});
+
+run_test("a successful empty search settles with recovery guidance and status focus", () => {
+    authorized_spaces = [{id: 3, state: "launched"}];
+    hover_search_view.test.search("unmatched planning note");
+    request.success({
+        ...response(),
+        query: "unmatched planning note",
+        knowledge: [],
+        sources: [],
+    });
+
+    const html = $("#cf-global-search-view").html();
+    assert.match(html, /aria-busy="false"/);
+    assert.match(html, /No results found. Try a different name, topic, or phrase./);
+    assert.match(html, /No human or generated posts match/);
+    assert.match(html, /No Source records match/);
+    assert.doesNotMatch(html, /cf-global-search__loading/);
+    assert.equal($(".cf-global-search__status").is_focused(), true);
 });

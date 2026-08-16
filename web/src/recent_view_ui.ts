@@ -360,7 +360,7 @@ function update_load_more_banner(): void {
     const $button = $container.find(".fetch-messages-button");
     $button.toggleClass("notvisible", false);
     $button.find(".button-label").toggleClass("invisible", false);
-    $button.prop("disabled", false);
+    $button.prop("disabled", false).attr("aria-busy", "false").removeAttr("aria-label");
     loading.destroy_indicator($button.find(".loading-indicator"));
 }
 
@@ -2542,7 +2542,10 @@ export function initialize({
         function (this: HTMLElement) {
             const $button = $(this);
             $button.find(".button-label").toggleClass("invisible", true);
-            $button.prop("disabled", true);
+            $button.prop("disabled", true).attr({
+                "aria-busy": "true",
+                "aria-label": $t({defaultMessage: "Loading older messages"}),
+            });
             loading.make_indicator($button.find(".loading-indicator"), {width: 20});
             maybe_load_older_messages(unread.first_unread_unmuted_message_id);
         },

@@ -4,7 +4,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    overflow: hidden;
+    min-width: 0;
+    max-width: 100%;
     color: var(--cf-text-secondary);
     font-family: var(--cf-font-ui);
     user-select: none;
@@ -25,6 +26,7 @@
     align-items: center;
     justify-content: center;
     min-width: 36px;
+    max-width: 100%;
     min-height: 28px;
     padding: 2px 7px;
     border: 1px solid var(--cf-border-subtle);
@@ -51,7 +53,7 @@
 .cf-message-reactions__add:is(:hover, :focus-visible),
 .cf-message-reaction--selected {
     border-color: var(--cf-color-accent);
-    color: var(--cf-color-accent);
+    color: var(--cf-color-accent-hover);
     background: var(--cf-color-accent-soft);
 }
 
@@ -79,6 +81,13 @@
     cursor: not-allowed;
 }
 
+.cf-message-reaction.cf-message-reaction--selected:disabled {
+    border-color: var(--cf-color-accent);
+    color: var(--cf-color-accent-hover);
+    background: var(--cf-color-accent-soft);
+    opacity: 1;
+}
+
 .cf-message-reaction__emoji {
     position: static;
     flex: none;
@@ -88,13 +97,21 @@
 }
 
 .cf-message-reaction__emoji-code {
+    overflow: hidden;
+    max-width: 18ch;
     font-size: 0.9em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .cf-message-reaction__count {
+    overflow: hidden;
     min-width: 1ch;
+    max-width: 12ch;
     margin: 0;
     line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .cf-message-reactions__add {

@@ -96,6 +96,9 @@ run_test("generated updates use production-owned Cofounder contracts", () => {
     assert.match(details_html, /data-cf-generated-details/);
     assert.match(history_html, /class="cf-generated-history"/);
     assert.match(history_html, /class="cf-generated-history__entry"/);
+    assert.match(history_html, /aria-current="true"/);
+    assert.match(history_html, /class="cf-generated-history__meta"/);
+    assert.match(history_html, /class="cf-generated-history__state">active/);
     assert.match(history_html, /class="cf-generated-history__current"/);
     assert.doesNotMatch(
         html + details_html + history_html + behavior_source,

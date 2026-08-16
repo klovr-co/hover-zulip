@@ -1,4 +1,4 @@
-<div class="cf-source-actions" aria-label="{{t 'Knowledge sources'}}">
+<div class="cf-source-actions" role="group" aria-label="{{t 'Knowledge sources'}}">
     <span class="cf-source-actions__label">{{t "Sources"}}</span>
     {{#if evidence_url}}
         <button
@@ -18,7 +18,7 @@
                     href="{{url}}"
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="{{name}}"
+                    aria-label="{{name}}: {{count}}"
                     title="{{name}}"
                 >
                     {{#if (eq key "whatsapp")}}
@@ -36,7 +36,8 @@
                 <span
                     class="cf-source-action cf-source-action--integration cf-source-action--{{key}}
                         cf-source-action--static"
-                    aria-label="{{name}}"
+                    role="img"
+                    aria-label="{{name}}: {{count}}"
                     title="{{name}}"
                 >
                     {{#if (eq key "whatsapp")}}

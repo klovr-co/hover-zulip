@@ -68,7 +68,7 @@ function dm(overrides: Record<string, unknown> = {}): Record<string, unknown> {
 
 function render_scene({empty = false} = {}): HTMLElement {
     const host = globalThis.document.createElement("section");
-    host.className = "cf-theme storybook-inbox no-visible-focus-outlines";
+    host.className = "cf-theme storybook-inbox";
     host.setAttribute("aria-label", "Inbox");
 
     const pane = globalThis.document.createElement("div");
@@ -202,6 +202,34 @@ function render_scene({empty = false} = {}): HTMLElement {
         emptyState?.style.setProperty("display", "flex");
     }
     host.append(pane);
+
+    function toggle_header(header: HTMLElement): void {
+        const collapsed = header.classList.toggle("inbox-collapsed-state");
+        header
+            .querySelector<HTMLElement>(".cf-conversation-list__collapse")
+            ?.setAttribute("aria-expanded", String(!collapsed));
+    }
+
+    host.addEventListener("click", (event) => {
+        if (!(event.target instanceof Element)) {
+            return;
+        }
+        const button = event.target.closest(".cf-conversation-list__collapse");
+        const header = button?.closest<HTMLElement>(".inbox-header");
+        if (header !== null && header !== undefined) {
+            toggle_header(header);
+        }
+    });
+    host.addEventListener("keydown", (event) => {
+        if (!(event.target instanceof HTMLElement) || !event.target.matches(".inbox-header")) {
+            return;
+        }
+        if (event.key !== "Enter" && event.key !== " ") {
+            return;
+        }
+        event.preventDefault();
+        toggle_header(event.target);
+    });
     return host;
 }
 

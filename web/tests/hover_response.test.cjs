@@ -28,6 +28,18 @@ function generated_message() {
     };
 }
 
+run_test("maps radiogroup navigation keys to response types", () => {
+    const {keyboard_response_type} = hover_response._testing;
+
+    assert.equal(keyboard_response_type("review", "ArrowLeft"), "reply");
+    assert.equal(keyboard_response_type("reply", "ArrowRight"), "review");
+    assert.equal(keyboard_response_type("review", "ArrowUp"), "reply");
+    assert.equal(keyboard_response_type("reply", "ArrowDown"), "review");
+    assert.equal(keyboard_response_type("review", "Home"), "reply");
+    assert.equal(keyboard_response_type("reply", "End"), "review");
+    assert.equal(keyboard_response_type("reply", "Tab"), undefined);
+});
+
 run_test("configures Reply and explicit Review request metadata", () => {
     hover_response.configure_for_reply(generated_message());
     assert.equal($("#cf-review-composer-controls").prop("hidden"), false);

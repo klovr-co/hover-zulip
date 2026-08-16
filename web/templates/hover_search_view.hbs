@@ -23,12 +23,22 @@
         </div>
     </header>
 
-    <div class="cf-global-search__status" role="status" aria-live="polite">{{status}}</div>
+    <div
+      class="cf-global-search__status"
+      role="status"
+      aria-live="polite"
+      aria-busy="{{#if searching}}true{{else}}false{{/if}}"
+      tabindex="-1"
+      >{{status}}</div>
 
-    {{#if has_query}}
+    {{#if searching}}
+        <div class="cf-global-search__loading" aria-hidden="true">
+            <span></span><span></span><span></span>
+        </div>
+    {{else if has_query}}
         <section class="cf-global-search__section" aria-labelledby="cf-global-search-knowledge-heading">
             <div class="cf-global-search__section-heading">
-                <h2 id="cf-global-search-knowledge-heading">{{t "Knowledge"}}</h2>
+                <h2 id="cf-global-search-knowledge-heading" tabindex="-1">{{t "Knowledge"}}</h2>
                 <span class="cf-global-search__count" aria-label="{{t 'Knowledge result count'}}">{{knowledge_count}}</span>
             </div>
             {{#if has_knowledge}}
@@ -64,7 +74,7 @@
 
         <section class="cf-global-search__section cf-global-search__section--sources" aria-labelledby="cf-global-search-sources-heading">
             <div class="cf-global-search__section-heading">
-                <h2 id="cf-global-search-sources-heading">{{t "Sources"}}</h2>
+                <h2 id="cf-global-search-sources-heading" tabindex="-1">{{t "Sources"}}</h2>
                 <span class="cf-global-search__count" aria-label="{{t 'Source result count'}}">{{source_count}}</span>
             </div>
             <p class="cf-global-search__section-description">{{t "Read-only records from attached Sources. Source evidence cannot be saved in this pilot."}}</p>

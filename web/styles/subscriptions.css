@@ -1592,29 +1592,16 @@
 
 #deactivation-confirm-modal {
     .alert {
-        padding-right: 14px;
-        background-color: var(--cf-color-danger-soft);
+        padding: 0;
+        background-color: transparent;
     }
 
     .cannot-deactivate-group-banner {
-        border: none;
         margin: 0;
 
         .banner-text {
             margin: 0;
-            padding-right: 4px;
-        }
-
-        .permissions-button {
-            text-wrap: nowrap;
-
-            &:focus {
-                outline: 0;
-            }
-
-            &:focus-visible {
-                outline: 2px solid var(--color-outline-focus);
-            }
+            padding-inline-end: 4px;
         }
     }
 }
