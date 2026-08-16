@@ -124,7 +124,7 @@ def _canonical_hash(payload: dict[str, Any]) -> str:
     ).hexdigest()
 
 
-@transaction.atomic
+@transaction.atomic(savepoint=False)
 def ensure_prebuilt_module_catalog(realm: Realm) -> None:
     for item in PREBUILT_MODULES:
         definition, _ = ModuleDefinition.objects.get_or_create(
@@ -374,7 +374,7 @@ def _send_space_update(space: Space) -> None:
     )
 
 
-@transaction.atomic
+@transaction.atomic(savepoint=False)
 def do_install_module(
     *,
     acting_user: UserProfile,
@@ -557,7 +557,7 @@ def do_upgrade_module(
     )
 
 
-@transaction.atomic
+@transaction.atomic(savepoint=False)
 def pause_installations_for_attachment(attachment: SpaceAttachment) -> None:
     installations = list(
         ModuleInstallation.objects.select_for_update(no_key=True).filter(

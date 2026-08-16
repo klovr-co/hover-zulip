@@ -109,8 +109,8 @@ intended role.
 | Subtle border   | `--ds-border-subtle`   | Slate 200, `#c3c6d7`   |
 | Primary action  | `--ds-action-primary`  | Blue 500, `#004ac6`    |
 | Accent action   | `--ds-action-accent`   | Blue 500, `#004ac6`    |
-| Keyboard focus  | `--ds-focus`           | `#0053db`               |
-| Text selection  | `--ds-selection`       | `#dbe1ff`               |
+| Keyboard focus  | `--ds-focus`           | `#0053db`              |
+| Text selection  | `--ds-selection`       | `#dbe1ff`              |
 
 Use blue for primary interaction, links, focus, unread state, and selection.
 Use cyan and green only for meaningful activity or success. Do not create large

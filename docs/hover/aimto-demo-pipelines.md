@@ -3,30 +3,30 @@
 ## Purpose
 
 Replace the fixed development posts created by `populate_hover_demo` one
-module at a time.  Each pipeline owns one visible AIMTO module and writes a
+module at a time. Each pipeline owns one visible AIMTO module and writes a
 source-backed output through Clawer's existing durable Hover publication
-workflow.  The static command remains the deterministic UI fixture.
+workflow. The static command remains the deterministic UI fixture.
 
 ## Source set
 
-| Key | Source | Use in the first pilot |
-| --- | --- | --- |
-| `mentors_volunteers` | All Learn-a-thon Mentors & Volunteers (WhatsApp) | Event coordination, ownership, staffing and language coverage. |
-| `volunteers_500` | 500 volunteers @ Learnathon (WhatsApp) | Day-one staffing and subgroup decisions. |
-| `resident_lounge` | Resident Lounge (WhatsApp) | Creative delivery, public positioning and campaign progress. |
-| `github` | LearnAIMTO repository | Public product and delivery context. |
-| `instagram` | `@aimto_26` | Monitoring/publication destination only; never infer a post without evidence. |
+| Key                  | Source                                           | Use in the first pilot                                                        |
+| -------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `mentors_volunteers` | All Learn-a-thon Mentors & Volunteers (WhatsApp) | Event coordination, ownership, staffing and language coverage.                |
+| `volunteers_500`     | 500 volunteers @ Learnathon (WhatsApp)           | Day-one staffing and subgroup decisions.                                      |
+| `resident_lounge`    | Resident Lounge (WhatsApp)                       | Creative delivery, public positioning and campaign progress.                  |
+| `github`             | LearnAIMTO repository                            | Public product and delivery context.                                          |
+| `instagram`          | `@aimto_26`                                      | Monitoring/publication destination only; never infer a post without evidence. |
 
 ## Pipeline catalogue and expected outputs
 
-| Pipeline | Trigger / window | Contract | Expected AIMTO output |
-| --- | --- | --- | --- |
-| Conversation Digest | 15-minute debounce after relevant WhatsApp activity, per group | `digest` | What changed, confirmed facts, unresolved points and why it matters. Example: volunteer recruitment grew but blue-zone ownership is still unresolved. |
-| Progress Tracker | 15-minute debounce after a milestone, ownership change, blocker or completion signal | `progress_update` | Status, owner where known, completed work, blockers/dependencies and next milestone. Example: *AICB lobby poster delivery — in progress; final 16:9 and 9:16 PNG approval remains.* |
-| Suggested Actions | After a confirmed unresolved task is extracted from a group digest | `suggested_action` | A proposal only—wording, rationale/evidence, suggested assignee and due point. Example: *Confirm Mandarin, Malay and Tamil coverage at the Monday briefing.* |
-| Decisions | After explicit agreement or instruction is detected, per group | `decision` | Decision text, active/superseded/reversed lifecycle, rationale and exact evidence. Example: *Keep overall coordination in the main group.* |
-| Marketing Digest | Daily scheduled campaign window, plus material campaign events | `digest` | Shareable development, supporting facts and amplification angle. Example: *University challenge leaderboard is live.* |
-| Topic Analysis | Manual question or daily cross-group run | `analysis` | Question, main finding, supporting signals, uncertainty and practical implication. Example: *Volunteer readiness is strong, but ownership data lags behind headcount.* |
+| Pipeline            | Trigger / window                                                                     | Contract           | Expected AIMTO output                                                                                                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Conversation Digest | 15-minute debounce after relevant WhatsApp activity, per group                       | `digest`           | What changed, confirmed facts, unresolved points and why it matters. Example: volunteer recruitment grew but blue-zone ownership is still unresolved.                               |
+| Progress Tracker    | 15-minute debounce after a milestone, ownership change, blocker or completion signal | `progress_update`  | Status, owner where known, completed work, blockers/dependencies and next milestone. Example: _AICB lobby poster delivery — in progress; final 16:9 and 9:16 PNG approval remains._ |
+| Suggested Actions   | After a confirmed unresolved task is extracted from a group digest                   | `suggested_action` | A proposal only—wording, rationale/evidence, suggested assignee and due point. Example: _Confirm Mandarin, Malay and Tamil coverage at the Monday briefing._                        |
+| Decisions           | After explicit agreement or instruction is detected, per group                       | `decision`         | Decision text, active/superseded/reversed lifecycle, rationale and exact evidence. Example: _Keep overall coordination in the main group._                                          |
+| Marketing Digest    | Daily scheduled campaign window, plus material campaign events                       | `digest`           | Shareable development, supporting facts and amplification angle. Example: _University challenge leaderboard is live._                                                               |
+| Topic Analysis      | Manual question or daily cross-group run                                             | `analysis`         | Question, main finding, supporting signals, uncertainty and practical implication. Example: _Volunteer readiness is strong, but ownership data lags behind headcount._              |
 
 ## Delivery order
 
@@ -59,5 +59,5 @@ must create a `progress_update` with:
 - evidence references to the exact WhatsApp messages used.
 
 The pipeline must withhold output when its evidence cannot support a status or
-next milestone.  That is preferable to producing a convincing but invented
+next milestone. That is preferable to producing a convincing but invented
 progress update.
