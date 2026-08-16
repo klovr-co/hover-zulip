@@ -1,0 +1,317 @@
+<div class="hover-pipeline-editor" data-draft-id="{{draft_id}}">
+    <div
+      id="hover_pipeline_library_status"
+      class="alert"
+      role="status"
+      aria-live="polite"
+      >
+    </div>
+    <header class="hover-pipeline-editor__header">
+        <button
+          type="button"
+          class="button-reset-style"
+          data-pipeline-back
+          aria-label="{{t 'Back to Pipeline Library'}}"
+          >
+            <i class="zulip-icon zulip-icon-arrow-left" aria-hidden="true"></i>
+        </button>
+        <div>
+            <p class="hover-pipeline-library__eyebrow">
+                {{#if is_new}}
+                    {{t "New private draft"}}
+                {{else}}
+                    {{t "Private version workshop"}}
+                {{/if}}
+            </p>
+            <h2>
+                {{#if contract.name}}
+                    {{contract.name}}
+                {{else}}
+                    {{t "Untitled pipeline"}}
+                {{/if}}
+            </h2>
+            <p>
+                {{#if can_edit}}
+                    {{t
+                      "Saving changes updates only this private revision. Publish when the contract is complete."
+                      }}
+                {{else}}
+                    {{t "This draft is read-only for your current role."}}
+                {{/if}}
+            </p>
+        </div>
+        <span class="hover-pipeline-library__state is-private">
+            <i class="zulip-icon zulip-icon-lock" aria-hidden="true"></i>
+            {{#if is_new}}
+                {{t "Not saved"}}
+            {{else}}
+                {{t "Revision"}} {{revision}}
+            {{/if}}
+        </span>
+    </header>
+
+    <form id="hover_pipeline_draft_form">
+        <fieldset data-pipeline-contract-fieldset>
+            <section class="hover-pipeline-editor__section">
+                <div class="hover-pipeline-editor__section-title">
+                    <span>01</span>
+                    <div>
+                        <h3>{{t "Identity & destination"}}</h3>
+                        <p>
+                            {{t
+                              "How teammates recognize this version in the library and its native Space topic."
+                              }}
+                        </p>
+                    </div>
+                </div>
+                <div class="hover-pipeline-editor__grid">
+                    <label>{{t "Stable key"}}<input
+                            name="stable_key"
+                            value="{{contract.stable_key}}"
+                            required
+                            maxlength="80"
+                            pattern="[a-z0-9_]+"
+                        /></label>
+                    <label>{{t "Version"}}<input
+                            name="version"
+                            value="{{contract.version}}"
+                            required
+                            maxlength="32"
+                        /></label>
+                    <label class="is-wide">{{t "Name"}}<input
+                            name="name"
+                            value="{{contract.name}}"
+                            required
+                            maxlength="120"
+                        /></label>
+                    <label class="is-wide">{{t "Description"}}<textarea
+                            name="description"
+                            rows="3"
+                            required
+                        >{{contract.description}}</textarea></label>
+                    <label>{{t "Destination topic"}}<input
+                            name="destination_topic"
+                            value="{{contract.destination_topic}}"
+                            required
+                            maxlength="60"
+                        /></label>
+                    <label>{{t "Output type"}}<input
+                            name="output_type"
+                            value="{{contract.output_type}}"
+                            required
+                            maxlength="80"
+                        /></label>
+                    <label>{{t "Navigation icon"}}<input
+                            name="navigation_icon"
+                            value="{{contract.navigation_icon}}"
+                            required
+                            maxlength="80"
+                        /></label>
+                    <label>{{t "Navigation order"}}<input
+                            name="navigation_order"
+                            type="number"
+                            value="{{contract.navigation_order}}"
+                            required
+                            min="0"
+                            max="10000"
+                        /></label>
+                </div>
+            </section>
+
+            <section class="hover-pipeline-editor__section">
+                <div class="hover-pipeline-editor__section-title">
+                    <span>02</span>
+                    <div>
+                        <h3>{{t "Evidence & execution"}}</h3>
+                        <p>
+                            {{t
+                              "A bounded, structured contract — never provider credentials or sample private content."
+                              }}
+                        </p>
+                    </div>
+                </div>
+                <div class="hover-pipeline-editor__grid">
+                    <label>{{t "Lookback days"}}<input
+                            name="lookback_days"
+                            type="number"
+                            value="{{contract.lookback_days}}"
+                            required
+                            min="1"
+                            max="366"
+                        /></label>
+                    <label>{{t "Maximum runtime (seconds)"}}<input
+                            name="maximum_runtime_seconds"
+                            type="number"
+                            value="{{contract.maximum_runtime_seconds}}"
+                            required
+                            min="1"
+                        /></label>
+                    <label>{{t "Runtime identity"}}<input
+                            name="runtime_key"
+                            value="{{contract.runtime_key}}"
+                            required
+                            maxlength="120"
+                            autocomplete="off"
+                        /></label>
+                    <label>{{t "Prompt identity"}}<input
+                            name="prompt_key"
+                            value="{{contract.prompt_key}}"
+                            required
+                            maxlength="120"
+                            autocomplete="off"
+                        /></label>
+                    <label class="is-wide">{{t
+                            "Registered integrations (comma-separated)"
+                        }}<input
+                            name="integration_keys"
+                            value="{{integration_keys_text}}"
+                            placeholder="{{t 'calendar, documents'}}"
+                            autocomplete="off"
+                        /></label>
+                    <label class="is-wide">{{t
+                            "Input contract (JSON)"
+                        }}<textarea
+                            name="input_contract"
+                            class="hover-pipeline-editor__code"
+                            rows="6"
+                            required
+                            spellcheck="false"
+                        >{{input_contract_text}}</textarea></label>
+                    <label class="is-wide">{{t
+                            "Source requirements (JSON)"
+                        }}<textarea
+                            name="requirements"
+                            class="hover-pipeline-editor__code"
+                            rows="6"
+                            required
+                            spellcheck="false"
+                        >{{requirements_text}}</textarea></label>
+                </div>
+                <fieldset class="hover-pipeline-editor__triggers">
+                    <legend>{{t "Supported triggers"}}</legend>
+                    <label><input
+                            type="checkbox"
+                            name="supported_trigger"
+                            value="manual"
+                        />{{t "Manual"}}</label>
+                    <label><input
+                            type="checkbox"
+                            name="supported_trigger"
+                            value="schedule"
+                        />{{t "Scheduled"}}</label>
+                </fieldset>
+            </section>
+
+            <section class="hover-pipeline-editor__section">
+                <div class="hover-pipeline-editor__section-title">
+                    <span>03</span>
+                    <div>
+                        <h3>{{t "Output template"}}</h3>
+                        <p>
+                            {{t
+                              "The structured presentation contract stored with this immutable version."
+                              }}
+                        </p>
+                    </div>
+                </div>
+                <label class="hover-pipeline-editor__output-label">{{t
+                        "Output template (JSON)"
+                    }}<textarea
+                        name="output_template"
+                        class="hover-pipeline-editor__code"
+                        rows="8"
+                        required
+                        spellcheck="false"
+                    >{{output_template_text}}</textarea></label>
+            </section>
+        </fieldset>
+
+        {{#unless is_new}}
+            <section
+              class="hover-pipeline-editor__section hover-pipeline-editor__collaboration"
+              >
+                <div class="hover-pipeline-editor__section-title">
+                    <span>04</span>
+                    <div>
+                        <h3>{{t "Collaborators"}}</h3>
+                        <p>
+                            {{t
+                              "Only active Pipeline Creators can be explicitly added to this private draft."
+                              }}
+                        </p>
+                    </div>
+                </div>
+                {{#if has_collaborators}}
+                    <ul class="hover-pipeline-library__people">
+                        {{#each collaborators}}
+                            <li>
+                                <span><strong>{{full_name}}</strong><small>{{t
+                                            "Explicit collaborator"
+                                        }}</small></span>
+                                {{#if can_remove}}
+                                    <button
+                                      type="button"
+                                      class="button rounded small"
+                                      data-pipeline-remove-collaborator="{{user_id}}"
+                                      >{{t "Remove"}}</button>
+                                {{/if}}
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{/if}}
+                {{#if can_manage_collaborators}}
+                    <div class="hover-pipeline-library__inline-form">
+                        <label for="hover_pipeline_collaborator_user">{{t
+                                "Add collaborator"
+                            }}</label>
+                        <select
+                          id="hover_pipeline_collaborator_user"
+                          class="modal_select"
+                          >
+                            <option value="">
+                                {{t
+                                  "Choose a Pipeline Creator"
+                                  }}
+                            </option>
+                            {{#each eligible_collaborators}}
+                                <option
+                                  value="{{user_id}}"
+                                  >
+                                    {{full_name}}
+                                </option>
+                            {{/each}}
+                        </select>
+                        <button
+                          type="button"
+                          class="button rounded"
+                          data-pipeline-add-collaborator
+                          >{{t "Add"}}</button>
+                    </div>
+                {{/if}}
+            </section>
+        {{/unless}}
+
+        <footer class="hover-pipeline-editor__actions">
+            <button type="button" class="button rounded" data-pipeline-back>{{t
+                    "Back to library"
+                }}</button>
+            {{#if can_edit}}
+                <span></span>
+                <button type="submit" class="button rounded">
+                    {{#if is_new}}
+                        {{t "Create private draft"}}
+                    {{else}}
+                        {{t "Save revision"}}
+                    {{/if}}
+                </button>
+                {{#unless is_new}}
+                    <button
+                      type="button"
+                      class="button rounded sea-green"
+                      data-pipeline-publish
+                      >{{t "Publish immutable version"}}</button>
+                {{/unless}}
+            {{/if}}
+        </footer>
+    </form>
+</div>

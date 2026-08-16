@@ -1,0 +1,317 @@
+<div class="hover-pipeline-library__surface">
+    <div
+      id="hover_pipeline_library_status"
+      class="alert"
+      role="status"
+      aria-live="polite"
+      >
+    </div>
+    <header class="hover-pipeline-library__hero">
+        <div>
+            <p class="hover-pipeline-library__eyebrow">
+                {{t
+                  "Organization automation"
+                  }}
+            </p>
+            <h2>{{t "Pipelines, pinned with intent."}}</h2>
+            <p>
+                {{t
+                  "Discover immutable published versions. Creators can shape private drafts without changing anything already installed in a Space."
+                  }}
+            </p>
+        </div>
+        {{#if permissions.can_create}}
+            <button
+              type="button"
+              class="button rounded sea-green"
+              data-pipeline-create-draft
+              >
+                <i
+                  class="zulip-icon zulip-icon-square-plus"
+                  aria-hidden="true"
+                  ></i>
+                {{t "New pipeline"}}
+            </button>
+        {{else}}
+            <span class="hover-pipeline-library__readonly">
+                <i class="zulip-icon zulip-icon-lock" aria-hidden="true"></i>
+                {{t "Published library · Read-only"}}
+            </span>
+        {{/if}}
+    </header>
+
+    {{#if permissions.can_manage_creators}}
+        <details class="hover-pipeline-library__creator-panel">
+            <summary>
+                <span>
+                    <strong>{{t "Pipeline Creators"}}</strong>
+                    <small>
+                        {{t
+                          "Grant draft and publication access without changing organization roles."
+                          }}
+                    </small>
+                </span>
+                <span
+                  class="hover-pipeline-library__count"
+                  >{{creator_count}}</span>
+            </summary>
+            <div class="hover-pipeline-library__creator-body">
+                <form
+                  class="hover-pipeline-library__inline-form"
+                  data-pipeline-grant-creator
+                  >
+                    <label for="hover_pipeline_creator_user">
+                        {{t
+                          "Add a creator"
+                          }}
+                    </label>
+                    <select
+                      id="hover_pipeline_creator_user"
+                      class="modal_select"
+                      >
+                        <option value="">{{t "Choose a teammate"}}</option>
+                        {{#each eligible_creators}}
+                            <option value="{{user_id}}">{{full_name}}</option>
+                        {{/each}}
+                    </select>
+                    <button type="submit" class="button rounded">
+                        {{t "Grant"}}
+                    </button>
+                </form>
+                {{#if has_creators}}
+                    <ul class="hover-pipeline-library__people">
+                        {{#each creators}}
+                            <li>
+                                <span>
+                                    <strong>{{full_name}}</strong>
+                                    <small>{{t "Pipeline Creator"}}</small>
+                                </span>
+                                <button
+                                  type="button"
+                                  class="button rounded small"
+                                  data-pipeline-revoke-creator="{{user_id}}"
+                                  >{{t "Revoke"}}</button>
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{else}}
+                    <p class="hover-pipeline-library__empty-inline">
+                        {{t
+                          "No explicit Pipeline Creators yet. Organization administrators can still publish."
+                          }}
+                    </p>
+                {{/if}}
+            </div>
+        </details>
+    {{/if}}
+
+    {{#if has_drafts}}
+        <section
+          class="hover-pipeline-library__section"
+          aria-labelledby="hover_pipeline_drafts_heading"
+          >
+            <div class="hover-pipeline-library__section-heading">
+                <div>
+                    <p class="hover-pipeline-library__eyebrow">
+                        {{t "Private workshop"}}
+                    </p>
+                    <h3 id="hover_pipeline_drafts_heading">
+                        {{t "Visible drafts"}}
+                    </h3>
+                </div>
+                <span>
+                    {{t
+                      "Only authors, explicit collaborators, and administrators can see these."
+                      }}
+                </span>
+            </div>
+            <div class="hover-pipeline-library__draft-grid">
+                {{#each drafts}}
+                    <article class="hover-pipeline-library__draft-card">
+                        <div class="hover-pipeline-library__card-topline">
+                            <span
+                              class="hover-pipeline-library__state is-private"
+                              >
+                                <i
+                                  class="zulip-icon zulip-icon-lock"
+                                  aria-hidden="true"
+                                  ></i>
+                                {{#if is_published}}
+                                    {{t "Published draft record"}}
+                                {{else}}
+                                    {{t "Private draft"}}
+                                {{/if}}
+                            </span>
+                            <span>{{t "Revision"}} {{revision}}</span>
+                        </div>
+                        <h4>{{contract.name}}</h4>
+                        <p>{{contract.description}}</p>
+                        <dl class="hover-pipeline-library__facts">
+                            <div>
+                                <dt>{{t "Version"}}</dt>
+                                <dd>{{contract.version}}</dd>
+                            </div>
+                            <div>
+                                <dt>{{t "Lookback"}}</dt>
+                                <dd>{{contract.lookback_days}} {{t "days"}}</dd>
+                            </div>
+                            <div>
+                                <dt>{{t "Owner"}}</dt>
+                                <dd>{{author_name}}</dd>
+                            </div>
+                            <div>
+                                <dt>{{t "Collaborators"}}</dt>
+                                <dd>{{collaborator_count}}</dd>
+                            </div>
+                        </dl>
+                        <div class="hover-pipeline-library__card-actions">
+                            <button
+                              type="button"
+                              class="button rounded"
+                              data-pipeline-open-draft="{{id}}"
+                              >
+                                {{#if can_edit}}
+                                    {{t "Edit draft"}}
+                                {{else}}
+                                    {{t "View draft"}}
+                                {{/if}}
+                            </button>
+                        </div>
+                    </article>
+                {{/each}}
+            </div>
+        </section>
+    {{/if}}
+
+    <section
+      class="hover-pipeline-library__section"
+      aria-labelledby="hover_pipeline_published_heading"
+      >
+        <div class="hover-pipeline-library__section-heading">
+            <div>
+                <p class="hover-pipeline-library__eyebrow">
+                    {{t "Published shelf"}}
+                </p>
+                <h3 id="hover_pipeline_published_heading">
+                    {{t "Pipeline Library"}}
+                </h3>
+            </div>
+            <span>
+                {{t
+                  "Every version is immutable; Spaces stay pinned until explicitly upgraded."
+                  }}
+            </span>
+        </div>
+        {{#if has_definitions}}
+            <div class="hover-pipeline-library__definition-list">
+                {{#each definitions}}
+                    <article class="{{definition_class}}">
+                        <header>
+                            <span
+                              class="hover-pipeline-library__glyph"
+                              aria-hidden="true"
+                              >
+                                <i class="zulip-icon {{latest_icon}}"></i>
+                            </span>
+                            <div>
+                                <div class="hover-pipeline-library__title-row">
+                                    <h4>{{name}}</h4>
+                                    {{#if archived}}
+                                        <span
+                                          class="hover-pipeline-library__state is-archived"
+                                          >{{t "Definition archived"}}</span>
+                                    {{/if}}
+                                </div>
+                                <p>{{description}}</p>
+                                <code>{{stable_key}}</code>
+                            </div>
+                            {{#if can_archive_definition}}
+                                <button
+                                  type="button"
+                                  class="button rounded small"
+                                  data-pipeline-archive-definition="{{id}}"
+                                  >{{t "Archive definition"}}</button>
+                            {{/if}}
+                        </header>
+                        <div class="hover-pipeline-library__versions">
+                            {{#each versions}}
+                                <div class="{{version_class}}">
+                                    <div
+                                      class="hover-pipeline-library__version-heading"
+                                      >
+                                        <span>
+                                            <strong>v{{version}}</strong>
+                                            <small>{{destination_topic}}
+                                                ·
+                                                {{output_type}}</small>
+                                        </span>
+                                        <span class="{{state_class}}">
+                                            {{#if archived}}
+                                                {{t "Archived"}}
+                                            {{else}}
+                                                {{t "Immutable"}}
+                                            {{/if}}
+                                        </span>
+                                    </div>
+                                    <dl class="hover-pipeline-library__facts">
+                                        <div>
+                                            <dt>{{t "Lookback"}}</dt>
+                                            <dd>{{lookback_days}} {{t "days"}}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>{{t "Runtime ceiling"}}</dt>
+                                            <dd>{{maximum_runtime_seconds}}s</dd>
+                                        </div>
+                                        <div>
+                                            <dt>{{t "Triggers"}}</dt>
+                                            <dd>{{trigger_summary}}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>{{t "Sources"}}</dt>
+                                            <dd>{{requirement_summary}}</dd>
+                                        </div>
+                                    </dl>
+                                    <div
+                                      class="hover-pipeline-library__version-foot"
+                                      >
+                                        <span>{{published_label}}</span>
+                                        <div>
+                                            {{#if can_create_successor}}
+                                                <button
+                                                  type="button"
+                                                  class="button rounded small"
+                                                  data-pipeline-create-successor="{{id}}"
+                                                  >{{t
+                                                        "Draft successor"
+                                                    }}</button>
+                                            {{/if}}
+                                            {{#if can_archive_version}}
+                                                <button
+                                                  type="button"
+                                                  class="button rounded small"
+                                                  data-pipeline-archive-version="{{id}}"
+                                                  >{{t
+                                                        "Archive version"
+                                                    }}</button>
+                                            {{/if}}
+                                        </div>
+                                    </div>
+                                </div>
+                            {{/each}}
+                        </div>
+                    </article>
+                {{/each}}
+            </div>
+        {{else}}
+            <div class="hover-pipeline-library__empty">
+                <i class="zulip-icon zulip-icon-bot" aria-hidden="true"></i>
+                <strong>{{t "No published pipelines yet"}}</strong>
+                <span>
+                    {{t
+                      "A Pipeline Creator can prepare the first private draft."
+                      }}
+                </span>
+            </div>
+        {{/if}}
+    </section>
+</div>
