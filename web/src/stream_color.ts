@@ -25,7 +25,10 @@ export function update_stream_recipient_color($stream_header: JQuery, color?: st
 
         $stream_header
             .find(".message-header-contents")
-            .css("background-color", recipient_bar_color);
+            .css({
+                "--cf-conversation-accent": recipient_bar_color,
+                "background-color": recipient_bar_color,
+            });
     }
 }
 

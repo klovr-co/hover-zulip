@@ -30,7 +30,8 @@ run_test("channel conversation header delegates to Cofounder markup", () => {
     });
 
     assert.match(html, /cf-conversation-header--channel/);
-    assert.match(html, /--cf-conversation-accent: #4f8394/);
+    assert.match(html, /data-recipient-bar-color="#4f8394"/);
+    assert.doesNotMatch(html, /style=/);
     assert.match(html, /narrows_by_recipient/);
     assert.match(html, /narrows_by_topic/);
     assert.match(html, /recipient-row-topic-menu/);
