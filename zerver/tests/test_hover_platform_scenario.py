@@ -221,12 +221,18 @@ class HoverPilotCausalScenarioTest(ZulipTestCase):
             publications=[publication], next_cursor="memory:scenario", has_more=False
         )
 
-        with self.assertLogs("zulip.hover.telemetry", level="INFO"):
+        with (
+            self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
             sync_space_attachment(
                 attachment_id=self.attachment.id,
                 assistant=self.assistant,
                 clawer_sync=self.adapter,
             )
+        self.assertTrue(
+            any("event=publication_sync outcome=success" in line for line in telemetry.output)
+        )
         generated_item = GeneratedItem.objects.get(publication_id=publication.publication_id)
         action = SuggestedAction.objects.get(generated_item=generated_item)
         self.assertEqual(action.assignee, self.user)

@@ -431,7 +431,10 @@ class HoverPublicationSyncTest(ZulipTestCase):
             publications=[second, first, third],
         )
 
-        with self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry:
+        with (
+            self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
             recovered = sync_space_attachment(
                 attachment_id=self.attachment.id,
                 assistant=self.assistant,
