@@ -62,7 +62,7 @@ export function set_message_reminder(send_at_time: number, message_id: number, n
             });
         },
         error(xhr: JQuery.jqXHR): void {
-            ui_report.generic_error($t({defaultMessage: "Failed"}), xhr, 2000);
+            ui_report.error($t({defaultMessage: "Failed"}), xhr, $("#home-error"), 2000);
         },
     });
 }
@@ -161,7 +161,7 @@ export function rerender_reminders_for_message(message_id: number): void {
             $existing.replaceWith($(rendered_message_reminders_html));
         } else {
             // Insert after reactions if they exist, otherwise after "more" section.
-            const $content = $row.find(".cf-message-item__body");
+            const $content = $row.find(".messagebox-content");
             $content.append($(rendered_message_reminders_html));
         }
     });

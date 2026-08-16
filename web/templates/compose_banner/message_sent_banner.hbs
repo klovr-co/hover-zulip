@@ -1,5 +1,5 @@
-{{#> ../cofounder/components/notice . intent="success" custom_classes="above_compose_banner"}}
-    <p class="cf-notice__content">
+<div class="above_compose_banner main-view-banner success {{classname}}">
+    <p class="banner_content">
         {{banner_text}}
         {{#if message_recipient}}
         <a class="above_compose_banner_action_link" {{#if above_composebox_narrow_url}}href="{{above_composebox_narrow_url}}"{{/if}} data-message-id="{{link_msg_id}}">
@@ -17,10 +17,9 @@
         {{/if}}
     </p>
     {{#if action_button_text}}
-    <div class="cf-notice__actions">
-        <button type="button" class="cf-button cf-button--success cf-notice__action" data-message-id="{{link_msg_id}}">
-            <span class="cf-button__label">{{action_button_text}}</span>
+        <button class="action-button action-button-subtle-success" data-message-id="{{link_msg_id}}">
+            <span class="action-button-label">{{ action_button_text }}</span>
         </button>
-    </div>
     {{/if}}
-{{/../cofounder/components/notice}}
+    <a role="button" class="zulip-icon zulip-icon-close main-view-banner-close-button" tabindex="0" aria-label="{{t 'Dismiss' }}"></a>
+</div>

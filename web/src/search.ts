@@ -141,7 +141,7 @@ function narrow_to_search_contents_with_search_bar_open(): void {
     // message header. But here we'll let the message header
     // get rendered first, so that it's up to date with the
     // new narrow, and then reopen search if it got closed.
-    if ($(".cf-app-header__search--expanded").length === 0) {
+    if ($(".navbar-search.expanded").length === 0) {
         open_search_bar_and_close_narrow_description();
         focus_search_input_at_end();
         search_input_has_changed = true;
@@ -163,7 +163,7 @@ export function initialize(opts: {on_narrow_search: OnNarrowSearch}): void {
     });
 
     $("#searchbox-input-container").on("keydown", (e) => {
-        if (e.key === "Enter" && $("#searchbox .cf-app-header__search--expanded").length === 0) {
+        if (e.key === "Enter" && $("#searchbox .navbar-search.expanded").length === 0) {
             // Prevent propagation, and wait for the keyup to open search, because
             // we also need to prevent propagation there to not have the event caught
             // by the typeahead event handlers.
@@ -173,7 +173,7 @@ export function initialize(opts: {on_narrow_search: OnNarrowSearch}): void {
     });
 
     $("#searchbox-input-container").on("keyup", (e) => {
-        if (e.key === "Enter" && $("#searchbox .cf-app-header__search--expanded").length === 0) {
+        if (e.key === "Enter" && $("#searchbox .navbar-search.expanded").length === 0) {
             initiate_search();
             e.preventDefault();
             e.stopPropagation();
@@ -341,16 +341,16 @@ export function initialize(opts: {on_narrow_search: OnNarrowSearch}): void {
         // when an option is selected and we're closing search).
         // Instead we explicitly initiate search on click and on specific keyboard
         // shortcuts.
-        if ($("#searchbox .cf-app-header__search--expanded").length === 0) {
+        if ($("#searchbox .navbar-search.expanded").length === 0) {
             initiate_search();
         }
     });
 
-    $(".cf-app-header__search-icon").on("mousedown", (e: JQuery.MouseDownEvent): void => {
+    $(".search_icon").on("mousedown", (e: JQuery.MouseDownEvent): void => {
         e.preventDefault();
         // Clicking on the collapsed search box's icon opens search, but
         // clicking on the expanded search box's search icon does nothing.
-        if ($(e.target).parents(".cf-app-header__search--expanded").length === 0) {
+        if ($(e.target).parents(".navbar-search.expanded").length === 0) {
             initiate_search();
         }
     });
@@ -443,7 +443,7 @@ export function rewire_exit_search(value: typeof exit_search): void {
 export let open_search_bar_and_close_narrow_description = (clear = false): void => {
     reset_searchbox(clear);
     $("#search_query").attr("contenteditable", "true");
-    $(".cf-app-header__search").addClass("cf-app-header__search--expanded");
+    $(".navbar-search").addClass("expanded");
     $("#message_view_header").addClass("hidden");
     popovers.hide_all();
 };
@@ -462,7 +462,7 @@ export function close_search(): void {
     // closeInputFieldOnHide may have already closed the bar via
     // close_search_bar_and_open_narrow_description during the hide() call
     // above. Close it if the bar is still open.
-    if ($(".cf-app-header__search").hasClass("cf-app-header__search--expanded")) {
+    if ($(".navbar-search").hasClass("expanded")) {
         close_search_bar_and_open_narrow_description();
     }
 }
@@ -473,7 +473,7 @@ export function close_search_bar_and_open_narrow_description(): void {
     }
 
     $("#search_query").attr("contenteditable", "false");
-    $(".cf-app-header__search").removeClass("cf-app-header__search--expanded");
+    $(".navbar-search").removeClass("expanded");
     $("#message_view_header").removeClass("hidden");
 
     if ($("#search_query").is(":focus")) {

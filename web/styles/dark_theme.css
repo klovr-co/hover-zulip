@@ -132,6 +132,12 @@
         color: inherit;
     }
 
+    .alert.home-error-bar {
+        color: hsl(236deg 33% 90%);
+        background-color: hsl(35deg 84% 62% / 25%);
+        border: 1px solid hsl(11deg 46% 54%);
+    }
+
     .alert.alert-success {
         color: inherit;
         background-color: hsl(161deg 60% 46% / 20%);
@@ -149,6 +155,20 @@
         background-color: hsl(318deg 12% 21%);
         color: inherit;
         border: 1px solid hsl(0deg 75% 65%);
+    }
+
+    .alert-box .alert,
+    .alert-box .stacktrace,
+    .alert.alert-error {
+        background-color: hsl(318deg 12% 21%);
+        color: inherit;
+        border: 1px solid hsl(0deg 75% 65%);
+    }
+
+    .alert-box {
+        .alert.alert-error::before {
+            color: hsl(0deg 75% 65%);
+        }
     }
 
     .stacktrace {

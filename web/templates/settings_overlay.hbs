@@ -1,76 +1,164 @@
-<div id="settings_page" class="cf-settings-shell overlay-content overlay-container">
-    <div class="cf-settings-shell__mobile-header settings-header mobile">
-        <button type="button" class="cf-icon-button cf-icon-button--neutral cf-settings-shell__back" aria-label="{{t 'Back to settings'}}">
-            {{> cofounder/components/icon name="chevron-left" compact=true}}
-        </button>
+<div id="settings_page" class="overlay-content overlay-container">
+    <div class="settings-header mobile">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
         <h1>{{t "Settings" }}<span class="section"></span></h1>
-        <button type="button" class="cf-icon-button cf-icon-button--neutral cf-settings-shell__close exit" aria-label="{{t 'Close settings'}}">
-            {{> cofounder/components/icon name="close" compact=true}}
-        </button>
+        <div class="exit">
+            <span class="exit-sign">&times;</span>
+        </div>
     </div>
-    <div class="cf-settings-shell__sidebar sidebar-wrapper">
+    <div class="sidebar-wrapper">
         <div class="tab-container"></div>
-        <div class="cf-settings-nav sidebar left" data-simplebar data-simplebar-tab-index="-1">
-            <nav class="sidebar-list dark-grey small-text" aria-label="{{t 'Settings sections'}}">
-                <ul class="cf-settings-nav__list normal-settings-list">
-                    {{> cofounder/components/settings_nav_item section="profile" icon="user" label=(t "Profile")}}
-                    {{> cofounder/components/settings_nav_item section="account-and-privacy" icon="lock" label=(t "Account & privacy")}}
-                    {{> cofounder/components/settings_nav_item section="preferences" icon="sliders" label=(t "Preferences")}}
-                    {{> cofounder/components/settings_nav_item section="notifications" icon="alarm" label=(t "Notifications")}}
+        <div class="sidebar left" data-simplebar data-simplebar-tab-index="-1">
+            <div class="sidebar-list dark-grey small-text">
+                <ul class="normal-settings-list">
+                    <li class="sidebar-item" tabindex="0" data-section="profile">
+                        <i class="sidebar-item-icon fa fa-user" aria-hidden="true"></i>
+                        <div class="text">{{t "Profile" }}</div>
+                    </li>
+                    <li class="sidebar-item" tabindex="0" data-section="account-and-privacy">
+                        <i class="sidebar-item-icon fa fa-lock" aria-hidden="true"></i>
+                        <div class="text">{{t "Account & privacy" }}</div>
+                    </li>
+                    <li class="sidebar-item" tabindex="0" data-section="preferences">
+                        <i class="sidebar-item-icon fa fa-sliders" aria-hidden="true"></i>
+                        <div class="text">{{t "Preferences" }}</div>
+                    </li>
+                    <li class="sidebar-item" tabindex="0" data-section="notifications">
+                        <i class="sidebar-item-icon fa fa-exclamation-triangle" aria-hidden="true"></i>
+                        <div class="text">{{t "Notifications" }}</div>
+                    </li>
                     {{#unless is_guest}}
-                        {{> cofounder/components/settings_nav_item section="bots" icon="bot" label=(t "Bots") locked=(not (or can_create_new_bots can_manage_bot)) lock_tooltip=(t "You do not have permission to create or manage bots.")}}
+                        <li class="sidebar-item" tabindex="0" data-section="bots">
+                            <i class="sidebar-item-icon zulip-icon zulip-icon-bot" aria-hidden="true"></i>
+                            <div class="text">{{t 'Bots'}}</div>
+                            <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if (or can_create_new_bots can_manage_bot)}}style="display: none;"{{/if}} data-tippy-content="{{t 'You do not have permission to create or manage bots.' }}"></i>
+                        </li>
                     {{/unless}}
-                    {{> cofounder/components/settings_nav_item section="alert-words" icon="book" label=(t "Alert words")}}
+                    <li class="sidebar-item" tabindex="0" data-section="alert-words">
+                        <i class="sidebar-item-icon fa fa-book" aria-hidden="true"></i>
+                        <div class="text">{{t "Alert words" }}</div>
+                    </li>
                     {{#if show_uploaded_files_section}}
-                        {{> cofounder/components/settings_nav_item section="uploaded-files" icon="paperclip" label=(t "Uploaded files")}}
+                    <li class="sidebar-item" tabindex="0" data-section="uploaded-files">
+                        <i class="sidebar-item-icon fa fa-paperclip" aria-hidden="true"></i>
+                        <div class="text">{{t "Uploaded files" }}</div>
+                    </li>
                     {{/if}}
-                    {{> cofounder/components/settings_nav_item section="topics" icon="hash" label=(t "Topics")}}
-                    {{> cofounder/components/settings_nav_item section="muted-users" icon="eye-off" label=(t "Muted users")}}
+                    <li class="sidebar-item" tabindex="0" data-section="topics">
+                        <i class="sidebar-item-icon zulip-icon zulip-icon-topic" aria-hidden="true"></i>
+                        <div class="text">{{t "Topics" }}</div>
+                    </li>
+                    <li class="sidebar-item" tabindex="0" data-section="muted-users">
+                        <i class="sidebar-item-icon fa fa-eye-slash" aria-hidden="true"></i>
+                        <div class="text">{{t "Muted users" }}</div>
+                    </li>
                 </ul>
 
-                <ul class="cf-settings-nav__list org-settings-list">
-                    {{> cofounder/components/settings_nav_item section="organization-profile" icon="users" label=(t "Organization profile") locked=(not is_admin) lock_tooltip=(t "Only organization administrators can edit these settings.")}}
-                    {{> cofounder/components/settings_nav_item section="organization-settings" icon="sliders" label=(t "Organization settings") collapsible=true hide_org_settings=(not is_admin) locked=(not is_admin) lock_tooltip=(t "Only organization administrators can edit these settings")}}
-                    {{> cofounder/components/settings_nav_item section="organization-permissions" icon="lock" label=(t "Organization permissions") collapsible=true hide_org_settings=(not is_admin) locked=(not is_admin) lock_tooltip=(t "Only organization administrators can edit these settings.")}}
-                    {{> cofounder/components/settings_nav_item section="emoji-settings" icon="smile" label=(t "Custom emoji") locked=show_emoji_settings_lock lock_tooltip=(t "You do not have permission to add custom emoji.")}}
-                    {{> cofounder/components/settings_nav_item section="linkifier-settings" icon="at-sign" label=(t "Linkifiers") locked=(not is_admin) lock_tooltip=(t "Only organization administrators can edit these settings.")}}
-                    {{> cofounder/components/settings_nav_item section="playground-settings" icon="external-link" label=(t "Code playgrounds") locked=(not is_admin) lock_tooltip=(t "Only organization administrators can edit these settings.")}}
+                <ul class="org-settings-list">
+                    <li class="sidebar-item" tabindex="0" data-section="organization-profile">
+                        <i class="sidebar-item-icon fa fa-id-card" aria-hidden="true"></i>
+                        <div class="text">{{t "Organization profile" }}</div>
+                        <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if is_admin}}style="display: none;"{{/if}} data-tippy-content="{{t 'Only organization administrators can edit these settings.' }}"></i>
+                    </li>
+                    <li class="sidebar-item collapse-org-settings {{#unless is_admin}}hide-org-settings{{/unless}}" tabindex="0" data-section="organization-settings">
+                        <i class="sidebar-item-icon fa fa-sliders" aria-hidden="true"></i>
+                        <div class="text">{{t "Organization settings" }}</div>
+                        <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if is_admin}}style="display: none;"{{/if}} data-tippy-content="{{t 'Only organization administrators can edit these settings' }}"></i>
+                    </li>
+                    <li class="sidebar-item collapse-org-settings {{#unless is_admin}}hide-org-settings{{/unless}}" tabindex="0" data-section="organization-permissions">
+                        <i class="sidebar-item-icon fa fa-lock" aria-hidden="true"></i>
+                        <div class="text">{{t "Organization permissions" }}</div>
+                        <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if is_admin}}style="display: none;"{{/if}} data-tippy-content="{{t 'Only organization administrators can edit these settings.' }}"></i>
+                    </li>
+                    <li class="sidebar-item" tabindex="0" data-section="emoji-settings">
+                        <i class="sidebar-item-icon fa fa-smile-o" aria-hidden="true"></i>
+                        <div class="text">{{t "Custom emoji" }}</div>
+                        <i class="locked fa fa-lock tippy-zulip-tooltip" {{#unless show_emoji_settings_lock}}style="display: none;"{{/unless}} data-tippy-content="{{t 'You do not have permission to add custom emoji.'}}"></i>
+                    </li>
+                    <li class="sidebar-item" tabindex="0" data-section="linkifier-settings">
+                        <i class="sidebar-item-icon fa fa-font" aria-hidden="true"></i>
+                        <div class="text">{{t "Linkifiers" }}</div>
+                        <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if is_admin}}style="display: none;"{{/if}} data-tippy-content="{{t 'Only organization administrators can edit these settings.' }}"></i>
+                    </li>
+                    <li class="sidebar-item" tabindex="0" data-section="playground-settings">
+                        <i class="sidebar-item-icon fa fa-external-link" aria-hidden="true"></i>
+                        <div class="text">{{t "Code playgrounds" }}</div>
+                        <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if is_admin}}style="display: none;"{{/if}} data-tippy-content="{{t 'Only organization administrators can edit these settings.' }}"></i>
+                    </li>
                     {{#unless is_guest}}
-                        {{> cofounder/components/settings_nav_item section="users" icon="users" label=(t "Users") locked=(not can_edit_user_panel) lock_tooltip=(t "Only organization administrators can edit these settings.")}}
+                    <li class="sidebar-item" tabindex="0" data-section="users">
+                        <i class="sidebar-item-icon fa fa-user" aria-hidden="true"></i>
+                        <div class="text">{{t "Users" }}</div>
+                        <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if can_edit_user_panel }}style="display: none;"{{/if}} data-tippy-content="{{t 'Only organization administrators can edit these settings.' }}"></i>
+                    </li>
                     {{/unless}}
                     {{#unless is_guest}}
-                        {{> cofounder/components/settings_nav_item section="bots" icon="bot" label=(t "Bots") locked=(not (or can_create_new_bots can_manage_bot)) lock_tooltip=(t "You do not have permission to create or manage bots.")}}
+                    <li class="sidebar-item" tabindex="0" data-section="bots">
+                        <i class="sidebar-item-icon zulip-icon zulip-icon-bot" aria-hidden="true"></i>
+                        <div class="text">{{t "Bots" }}</div>
+                        <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if (or can_create_new_bots can_manage_bot)}}style="display: none;"{{/if}} data-tippy-content="{{t 'You do not have permission to create or manage bots.' }}"></i>
+                    </li>
                     {{/unless}}
                     {{#if is_admin}}
-                        {{> cofounder/components/settings_nav_item section="profile-field-settings" icon="user" label=(t "Custom profile fields")}}
+                    <li class="sidebar-item" tabindex="0" data-section="profile-field-settings">
+                        <i class="sidebar-item-icon fa fa-id-card" aria-hidden="true"></i>
+                        <div class="text">{{t "Custom profile fields" }}</div>
+                    </li>
                     {{/if}}
-                    {{> cofounder/components/settings_nav_item section="organization-level-user-defaults" icon="sliders" label=(t "Default user settings") collapsible=true hide_org_settings=(not is_admin) locked=(not is_admin) lock_tooltip=(t "Only organization administrators can edit these settings.")}}
-                    {{> cofounder/components/settings_nav_item section="channel-folders" icon="folder-cog" label=(t "Channel folders") collapsible=true hide_org_settings=(not is_admin) locked=(not is_admin) lock_tooltip=(t "Only organization administrators can edit these settings.")}}
+                    <li class="sidebar-item collapse-org-settings {{#unless is_admin}}hide-org-settings{{/unless}}" tabindex="0" data-section="organization-level-user-defaults">
+                        <i class="sidebar-item-icon fa fa-cog" aria-hidden="true"></i>
+                        <div class="text">{{t "Default user settings" }}</div>
+                        <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if is_admin}}style="display: none;"{{/if}} data-tippy-content="{{t 'Only organization administrators can edit these settings.' }}"></i>
+                    </li>
+                    <li class="sidebar-item collapse-org-settings {{#unless is_admin}}hide-org-settings{{/unless}}" tabindex="0" data-section="channel-folders">
+                        <i class="sidebar-item-icon zulip-icon zulip-icon-folder"></i>
+                        <div class="text">{{t "Channel folders" }}</div>
+                        <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if is_admin}}style="display: none;"{{/if}} data-tippy-content="{{t 'Only organization administrators can edit these settings.' }}"></i>
+                    </li>
                     {{#if is_admin}}
-                        {{> cofounder/components/settings_nav_item section="connected-account-settings" icon="link-alt" label=(t "Connected Accounts") custom_classes="cf-connected-account-settings-entry" hidden=(not realm_hover_enabled)}}
+                    <li class="sidebar-item hover-connected-account-settings-entry {{#unless realm_hover_enabled}}hide{{/unless}}" tabindex="0" data-section="connected-account-settings">
+                        <i class="sidebar-item-icon fa fa-plug" aria-hidden="true"></i>
+                        <div class="text">{{t "Connected Accounts"}}</div>
+                    </li>
                     {{/if}}
                     {{#unless is_guest}}
-                        {{> cofounder/components/settings_nav_item section="default-channels-list" icon="hash" label=(t "Default channels") collapsible=true hide_org_settings=(not is_admin) locked=(not is_admin) lock_tooltip=(t "Only organization administrators can edit these settings.")}}
+                    <li class="sidebar-item collapse-org-settings {{#unless is_admin}}hide-org-settings{{/unless}}" tabindex="0" data-section="default-channels-list">
+                        <i class="sidebar-item-icon fa fa-exchange" aria-hidden="true"></i>
+                        <div class="text">{{t "Default channels" }}</div>
+                        {{#unless is_admin}}
+                        <i class="locked fa fa-lock tippy-zulip-tooltip" data-tippy-content="{{t 'Only organization administrators can edit these settings.' }}"></i>
+                        {{/unless}}
+                    </li>
                     {{/unless}}
-                    {{> cofounder/components/settings_nav_item section="auth-methods" icon="lock" label=(t "Authentication methods") collapsible=true hide_org_settings=(not is_admin) locked=(not is_owner) lock_tooltip=(t "Only organization owners can edit these settings.")}}
+                    <li class="sidebar-item collapse-org-settings {{#unless is_admin}}hide-org-settings{{/unless}}" tabindex="0" data-section="auth-methods">
+                        <i class="sidebar-item-icon fa fa-key" aria-hidden="true"></i>
+                        <div class="text">{{t "Authentication methods" }}</div>
+                        <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if is_owner}}style="display: none;"{{/if}} data-tippy-content="{{t 'Only organization owners can edit these settings.' }}"></i>
+                    </li>
                     {{#if is_admin}}
-                        {{> cofounder/components/settings_nav_item section="data-exports-admin" icon="archive" label=(t "Data exports")}}
+                    <li class="sidebar-item" tabindex="0" data-section="data-exports-admin">
+                        <i class="sidebar-item-icon fa fa-database" aria-hidden="true"></i>
+                        <div class="text">{{t "Data exports" }}</div>
+                    </li>
                     {{/if}}
                     {{#unless is_admin}}
-                        {{> cofounder/components/settings_nav_item icon="chevron-down" label=(t "Show more") custom_classes="collapse-settings-button" icon_id="toggle_collapse_chevron" label_id="toggle_collapse"}}
+                    <li class="sidebar-item collapse-settings-button">
+                        <i id='toggle_collapse_chevron' class='sidebar-item-icon fa fa-angle-double-down'></i>
+                        <div class="text" id='toggle_collapse'>{{t "Show more" }}</div>
+                    </li>
                     {{/unless}}
                 </ul>
-            </nav>
+            </div>
         </div>
     </div>
-    <div class="cf-settings-shell__content content-wrapper right">
-        <div class="cf-settings-shell__header settings-header">
+    <div class="content-wrapper right">
+        <div class="settings-header">
             <h1><span class="header-prefix"></span><span class="section"></span></h1>
-            <button type="button" class="cf-icon-button cf-icon-button--neutral cf-settings-shell__close exit" aria-label="{{t 'Close settings'}}">
-                {{> cofounder/components/icon name="close" compact=true}}
-            </button>
+            <div class="exit">
+                <span class="exit-sign">&times;</span>
+            </div>
         </div>
-        <div id="settings_content" class="cf-settings-shell__viewport" data-simplebar data-simplebar-tab-index="-1" data-simplebar-auto-hide="false">
+        <div id="settings_content" data-simplebar data-simplebar-tab-index="-1" data-simplebar-auto-hide="false">
             <div class="organization-box organization">
 
             </div>

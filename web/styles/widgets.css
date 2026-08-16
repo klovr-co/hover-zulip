@@ -3,114 +3,42 @@
 }
 
 .widget-choices {
-    --widget-paper: var(--cf-surface-paper);
-    --widget-text: var(--cf-text-primary);
-    --widget-muted: var(--cf-text-secondary);
-    --widget-border: var(--cf-border-subtle);
-    --widget-focus: var(--cf-focus);
-
-    max-width: 34rem;
-    padding: 20px;
-    border: 1px solid var(--widget-border);
-    border-radius: 14px;
-    background: var(--widget-paper);
-    box-shadow: 0 18px 45px hsl(30deg 12% 15% / 7%);
-    color: var(--widget-text);
-
     & ul {
-        display: grid;
-        gap: 8px;
-        margin: 12px 0 0;
-        padding: 0;
+        padding: 3px;
     }
 
     & li {
+        padding: 2px;
         list-style: none;
     }
 
-    .widget-choice {
-        display: grid;
-        grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
-        gap: 12px;
-        width: 100%;
-        min-height: 40px;
-        padding: 9px 12px;
-        border: 1px solid var(--widget-border);
-        border-radius: 8px;
-        background: var(--widget-paper);
-        color: var(--widget-text);
-        font-weight: 400;
+    & button {
+        font-weight: 700;
+        color: hsl(240deg 100% 50%);
         font-family: inherit;
         font-size: inherit;
-        line-height: 1.35;
-        text-align: start;
-
-        &:hover {
-            border-color: color-mix(
-                in srgb,
-                var(--widget-focus) 48%,
-                var(--widget-border)
-            );
-            background: color-mix(
-                in srgb,
-                var(--widget-focus) 6%,
-                var(--widget-paper)
-            );
-        }
-
-        &:focus-visible {
-            outline: 3px solid
-                color-mix(in srgb, var(--widget-focus) 42%, transparent);
-            outline-offset: 2px;
-        }
-    }
-
-    .widget-choice-short-name {
-        color: var(--widget-focus);
-        font-weight: 650;
-    }
-
-    .widget-choice-long-name {
-        color: var(--widget-muted);
     }
 
     .widget-choices-heading {
-        color: var(--widget-text);
-        font-size: 1rem;
-        font-weight: 650;
-        letter-spacing: -0.01em;
+        font-weight: 600;
     }
 }
 
 .todo-widget {
-    --widget-paper: var(--cf-surface-paper);
-    --widget-text: var(--cf-text-primary);
-    --widget-muted: var(--cf-text-secondary);
-    --widget-border: var(--cf-border-subtle);
-    --widget-focus: var(--cf-focus);
-
-    max-width: 46rem;
-    padding: 20px;
-    border: 1px solid var(--widget-border);
-    border-radius: 14px;
-    background: var(--widget-paper);
-    box-shadow: 0 18px 45px hsl(30deg 12% 15% / 7%);
-    color: var(--widget-text);
-
     .todo-task-list-title-bar {
         flex: 1 1 auto;
         display: flex;
         /* Ensure controls remain visible on narrower screens. */
         flex-flow: row wrap;
-        gap: 8px;
-        margin-bottom: 16px;
+        gap: 5px;
+        margin-bottom: var(--markdown-interelement-space-px);
     }
 
     .add-task-bar {
         display: flex;
         /* Ensure controls remain visible on narrower screens. */
         flex-flow: row wrap;
-        gap: 8px;
+        gap: 5px;
     }
 
     /* For the box-shadow to be visible on the left */
@@ -144,7 +72,7 @@
                 font-weight: 300;
                 line-height: 0.8;
                 text-align: center;
-                border: 1px solid var(--widget-border);
+                border: 2px solid var(--color-border-todo-checkbox);
 
                 border-radius: 4px;
                 filter: brightness(1);
@@ -157,8 +85,8 @@
                 background-size: 75%;
                 background-position: 50% 50%;
                 background-repeat: no-repeat;
-                background-color: var(--widget-focus);
-                border-color: var(--widget-focus);
+                background-color: var(--color-background-todo-checkbox-checked);
+                border-color: var(--color-border-todo-checkbox-checked);
             }
 
             &:disabled ~ .custom-checkbox {
@@ -167,17 +95,13 @@
             }
 
             &:hover ~ .custom-checkbox {
-                border-color: var(--widget-focus);
+                border-color: var(--color-border-todo-checkbox-hover);
             }
 
             &:not(:checked):hover ~ .custom-checkbox {
                 /* We only change the background color on hover,
                    when the checkbox is not checked. */
-                background-color: color-mix(
-                    in srgb,
-                    var(--widget-focus) 8%,
-                    var(--widget-paper)
-                );
+                background-color: var(--color-background-todo-checkbox-hover);
             }
 
             &:focus ~ .custom-checkbox {
@@ -192,39 +116,36 @@
     .poll-question-header,
     .todo-task-list-title-header {
         font-size: 1.1em;
-        font-weight: 650;
+        font-weight: 600;
     }
 
     & li {
         display: flex;
-        gap: 8px;
+        gap: 5px;
         align-items: baseline;
         list-style: none;
-        margin: 0 0 8px;
+        margin: 0 0 5px;
     }
 
     & ul {
-        margin: 0 0 8px;
+        margin: 0 0 5px;
         padding: 0;
     }
 
     & input[type="text"] {
         /* Reset from zulip.css */
         height: unset;
-        min-height: 40px;
-        border: 1px solid var(--widget-border);
-        box-shadow: none;
-        border-radius: 8px;
-        background: var(--widget-paper);
-        color: var(--widget-text);
+        border: 1px solid hsl(0deg 0% 80%);
+        box-shadow: inset 0 1px 1px hsl(0deg 0% 0% / 7.5%);
+        border-radius: 4px;
+        color: var(--color-text-default);
         font-family: inherit;
 
         &:focus {
-            border-color: var(--widget-focus);
+            border-color: hsl(206deg 80% 62% / 80%);
             outline: 0;
-            box-shadow: 0 0 0 3px
-                color-mix(in srgb, var(--widget-focus) 22%, transparent);
-            background-color: var(--widget-paper);
+            box-shadow: none;
+            background-color: var(--color-background-widget-input);
             transition:
                 border-color linear 0.2s,
                 box-shadow linear 0.2s;
@@ -303,22 +224,22 @@
 button {
     &.add-task,
     &.poll-option {
-        min-height: 40px;
-        color: var(--cf-text-inverse);
-        border: 1px solid var(--cf-surface-inverse);
+        color: hsl(156deg 41% 40%);
+        border: 1px solid hsl(156deg 28% 70%);
         width: max-content;
         flex: 0 0 auto;
-        border-radius: 8px;
-        background-color: var(--cf-surface-inverse);
-        padding: 8px 14px;
+        border-radius: 3px;
+        background-color: var(--color-background-widget-button);
+        padding: 4px;
+        padding-left: 14px;
+        padding-right: 14px;
         font-family: inherit;
         font-size: inherit;
 
         &:hover,
         &:focus {
             outline: 0;
-            border-color: var(--cf-surface-inverse);
-            background-color: var(--cf-color-ink-hover);
+            border-color: hsl(156deg 30% 50%);
             transition: 0.2s ease;
             transition-property: background-color, border-color, color;
         }

@@ -1,7 +1,6 @@
-<div class="cf-filter-field search-container">
-    {{> ../cofounder/components/icon name="search" compact=true custom_classes="cf-filter-field__icon"}}
-    <input type="text" {{#if id}}id="{{id}}"{{/if}} class="cf-filter-field__input search filter_text_input" placeholder="{{placeholder}}" aria-label="{{aria_label}}"/>
-    <button type="button" class="cf-filter-field__clear clear-filter" aria-label="{{t 'Clear filter' }}">
-        {{> ../cofounder/components/icon name="close" compact=true}}
+<div class="search-container">
+    <input type="text" {{#if id}}id="{{id}}"{{/if}} class="search filter_text_input" placeholder="{{placeholder}}" aria-label="{{aria_label}}"/>
+    <button type="button" class="clear-filter">
+        <i class="zulip-icon zulip-icon-close"></i>
     </button>
 </div>

@@ -238,9 +238,7 @@ export function initialize(): void {
         onShow(instance) {
             let content = $t({defaultMessage: "Select draft"});
             const $elem = $(instance.reference);
-            if (
-                $($elem).parent().find(".draft-selection-checkbox").attr("aria-checked") === "true"
-            ) {
+            if ($($elem).parent().find(".draft-selection-checkbox").hasClass("fa-check-square")) {
                 content = $t({defaultMessage: "Deselect draft"});
             }
             instance.setContent(content);
@@ -315,7 +313,7 @@ export function initialize(): void {
 
     $("body").on(
         "blur",
-        ".cf-message-actions__button, .delete-selected-drafts-button-container",
+        ".message_control_button, .delete-selected-drafts-button-container",
         function (this: tippy.ReferenceElement, _event: JQuery.Event) {
             // Remove tooltip when user is trying to tab through all the icons.
             // If user tabs slowly, tooltips are displayed otherwise they are
@@ -380,7 +378,7 @@ export function initialize(): void {
         // TODO: Ideally, we'd extend this to be a common mechanism for
         // tab switchers, with the strings living in a more normal configuration
         // location.
-        target: ".stream_sorter_toggle .cf-tabs__tab [data-tippy-content]",
+        target: ".stream_sorter_toggle .ind-tab [data-tippy-content]",
 
         // Adjust their placement to `bottom`.
         placement: "bottom",

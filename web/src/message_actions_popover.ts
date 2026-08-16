@@ -28,7 +28,7 @@ import {the} from "./util.ts";
 let message_actions_popover_keyboard_toggle = false;
 
 function get_action_menu_menu_items(): JQuery {
-    return $("[data-tippy-root] #message-actions-menu-dropdown .cf-menu__action");
+    return $("[data-tippy-root] #message-actions-menu-dropdown li:not(.divider) a");
 }
 
 function focus_first_action_popover_item(): void {
@@ -61,7 +61,7 @@ export function toggle_message_actions_menu(message: Message): boolean {
     }
 
     message_viewport.maybe_scroll_to_show_message_top();
-    const $popover_reference = $(".selected_message .cf-message-actions__more-button");
+    const $popover_reference = $(".selected_message .actions_hover .message-actions-menu-button");
     message_actions_popover_keyboard_toggle = true;
     $popover_reference.trigger("click");
     return true;
@@ -75,8 +75,8 @@ export function initialize({
         target: tippy.ReferenceElement,
     ) => void;
 }): void {
-    popover_menus.register_popover_menu(".cf-message-actions__more-button", {
-        theme: "cofounder-menu",
+    popover_menus.register_popover_menu(".actions_hover .message-actions-menu-button", {
+        theme: "popover-menu",
         placement: "bottom",
         popperOptions: {
             modifiers: [
@@ -92,14 +92,14 @@ export function initialize({
         },
         onShow(instance) {
             popover_menus.on_show_prep(instance);
-            const $row = $(instance.reference).closest(".cf-message-item");
+            const $row = $(instance.reference).closest(".message_row");
             const message_id = rows.id($row);
             const args = popover_menus_data.get_actions_popover_content_context(message_id);
             instance.setContent(parse_html(render_message_actions_popover(args)));
             $row.addClass("has_actions_popover");
         },
         onMount(instance) {
-            const $row = $(instance.reference).closest(".cf-message-item");
+            const $row = $(instance.reference).closest(".message_row");
             const message_id = rows.id($row);
             let quote_content: string | undefined;
             const highlighted_message_ids = compose_reply.get_highlighted_message_ids();
@@ -227,7 +227,7 @@ export function initialize({
                 popover_menus.hide_current_popover_if_visible(instance);
             });
 
-            $popper.one("click", ".cf-message-actions-menu__reaction", (e) => {
+            $popper.one("click", ".reaction_button", (e) => {
                 const message_id = Number($(e.currentTarget).attr("data-message-id"));
                 // Don't propagate the click event since the emoji_picker code opens a
                 // popover which we don't want to hide after actions popover is hidden.
@@ -245,13 +245,13 @@ export function initialize({
                 void (async () => {
                     await clipboard_handler.popover_copy_link_to_clipboard(instance, $(this));
                     show_copied_confirmation(
-                        the($(instance.reference).closest(".cf-message-actions")),
+                        the($(instance.reference).closest(".message_controls")),
                     );
                 })();
             });
         },
         onHidden(instance) {
-            const $row = $(instance.reference).closest(".cf-message-item");
+            const $row = $(instance.reference).closest(".message_row");
             $row.removeClass("has_actions_popover");
             instance.destroy();
             popover_menus.popover_instances.message_actions = null;

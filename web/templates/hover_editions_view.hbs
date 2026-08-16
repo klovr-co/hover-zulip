@@ -1,12 +1,12 @@
-<main class="cf-edition-shell" aria-labelledby="cf-edition-heading">
-    <header class="cf-edition-header">
-        <div class="cf-edition-header__topline">
-            <span class="cf-edition-marker">{{edition_marker}}</span>
+<main class="hover-edition-shell" aria-labelledby="hover-edition-heading">
+    <header class="hover-edition-header">
+        <div class="hover-edition-header__topline">
+            <span class="hover-edition-marker">{{edition_marker}}</span>
             {{#if edition}}
                 <time datetime="{{edition.covered_end}}">{{display_date}}</time>
             {{/if}}
         </div>
-        <h1 id="cf-edition-heading">
+        <h1 id="hover-edition-heading">
             {{#if edition}}
                 {{edition.title}}
             {{else}}
@@ -26,27 +26,27 @@
         </p>
 
         <div
-          class="cf-edition-tabs"
+          class="hover-edition-tabs"
           role="tablist"
           aria-label="{{t 'Choose an edition'}}"
           >
             <button
-              id="cf-edition-tab-morning"
+              id="hover-edition-tab-morning"
               type="button"
-              class="cf-edition-tab"
+              class="button-reset-style hover-edition-tab"
               data-edition="morning"
               role="tab"
-              aria-controls="cf-edition-panel-morning"
+              aria-controls="hover-edition-panel-morning"
               aria-selected="{{morning_aria_selected}}"
               tabindex="{{morning_tabindex}}"
               >{{t "Morning"}}</button>
             <button
-              id="cf-edition-tab-end-of-day"
+              id="hover-edition-tab-end-of-day"
               type="button"
-              class="cf-edition-tab"
+              class="button-reset-style hover-edition-tab"
               data-edition="end_of_day"
               role="tab"
-              aria-controls="cf-edition-panel-end-of-day"
+              aria-controls="hover-edition-panel-end-of-day"
               aria-selected="{{end_of_day_aria_selected}}"
               tabindex="{{end_of_day_tabindex}}"
               >{{t "End of day"}}</button>
@@ -57,50 +57,66 @@
       id="{{active_panel_id}}"
       role="tabpanel"
       aria-labelledby="{{active_tab_id}}"
-      aria-busy="{{panel_aria_busy}}"
       tabindex="0"
       >
-        <div
-          class="{{status_class}}"
-          role="{{status_role}}"
-          aria-live="{{status_aria_live}}"
-          tabindex="-1"
-          >
+        <div class="hover-edition-status" role="status" aria-live="polite">
             {{status}}
             {{#if show_retry}}
-                {{> cofounder/components/button id="cf-edition-retry" variant="secondary" label=(t "Retry")}}
+                <button
+                  id="hover-edition-retry"
+                  type="button"
+                  class="button-reset-style"
+                  >{{t "Retry"}}</button>
             {{/if}}
         </div>
 
         {{#if loading}}
-            <div class="cf-edition-loading" aria-hidden="true">
+            <div class="hover-edition-loading" aria-hidden="true">
                 <span></span><span></span><span></span>
             </div>
         {{else if edition}}
             <div
-              class="cf-edition-view-controls"
+              class="hover-edition-view-controls"
               aria-label="{{t 'Reading view'}}"
               >
                 {{#if all_mode}}
-                    {{#if has_items}}
-                        {{> cofounder/components/button id="cf-edition-focus-view" variant="ghost" icon="panel-left" label=(t "Focus view") custom_classes="cf-edition-view-button"}}
-                    {{/if}}
+                    <button
+                      id="hover-edition-focus-view"
+                      type="button"
+                      class="button-reset-style"
+                      >
+                        <i
+                          class="zulip-icon zulip-icon-panel-right"
+                          aria-hidden="true"
+                          ></i>
+                        {{t "Focus view"}}
+                    </button>
                 {{else}}
-                    {{> cofounder/components/button id="cf-edition-view-all" variant="ghost" icon="list" label=(t "View all") custom_classes="cf-edition-view-button"}}
+                    <button
+                      id="hover-edition-view-all"
+                      type="button"
+                      class="button-reset-style"
+                      >
+                        <i
+                          class="zulip-icon zulip-icon-list"
+                          aria-hidden="true"
+                          ></i>
+                        {{t "View all"}}
+                    </button>
                 {{/if}}
             </div>
 
             {{#if focus_mode}}
                 {{#if current_slide}}
                     <section
-                      class="cf-edition-carousel"
+                      class="hover-edition-carousel"
                       role="region"
                       aria-roledescription="carousel"
                       aria-label="{{t 'Daily Brief focus view'}}"
                       tabindex="0"
                       >
                         <div
-                          class="cf-edition-carousel__progress"
+                          class="hover-edition-carousel__progress"
                           role="status"
                           aria-live="polite"
                           >
@@ -111,7 +127,7 @@
                         }}
                         </div>
                         <article
-                          class="cf-edition-passage cf-edition-slide"
+                          class="hover-edition-passage hover-edition-slide"
                           aria-roledescription="slide"
                           aria-label="{{t
                           'Item {slide_number} of {slide_count}'
@@ -120,13 +136,13 @@
                           }}"
                           >
                             <span
-                              class="cf-edition-section-label"
+                              class="hover-edition-section-label"
                               >{{current_slide.section_label}}</span>
                             <h2>{{current_slide.title}}</h2>
                             <p>{{current_slide.detail}}</p>
-                            <div class="cf-edition-passage__actions">
+                            <div class="hover-edition-passage__actions">
                                 <a
-                                  class="cf-edition-update-link"
+                                  class="hover-edition-update-link"
                                   href="{{current_slide.update.url}}"
                                   >
                                     {{t "Open update"}}
@@ -137,53 +153,87 @@
                                 {{#if current_slide.update.evidence_url}}
                                     <button
                                       type="button"
-                                      class="cf-edition-sources-link"
-                                      data-cf-evidence-url="{{current_slide.update.evidence_url}}"
+                                      class="button-reset-style hover-edition-sources-link hover-view-evidence"
+                                      data-evidence-url="{{current_slide.update.evidence_url}}"
                                       aria-haspopup="dialog"
                                       >{{t "View sources"}}</button>
                                 {{/if}}
                             </div>
                         </article>
-                        <div class="cf-edition-carousel__controls">
+                        <div class="hover-edition-carousel__controls">
                             {{#if can_go_previous}}
-                                {{> cofounder/components/button id="cf-edition-previous" variant="secondary" icon="chevron-left" aria-label=(t "Previous item") custom_classes="cf-edition-carousel__button"}}
+                                <button
+                                  id="hover-edition-previous"
+                                  type="button"
+                                  class="button-reset-style"
+                                  aria-label="{{t 'Previous item'}}"
+                                  ><i
+                                    class="zulip-icon zulip-icon-arrow-left"
+                                    aria-hidden="true"
+                                ></i></button>
                             {{else}}
-                                {{> cofounder/components/button id="cf-edition-previous" variant="secondary" icon="chevron-left" aria-label=(t "Previous item") custom_classes="cf-edition-carousel__button" disabled=true}}
+                                <button
+                                  id="hover-edition-previous"
+                                  type="button"
+                                  class="button-reset-style"
+                                  aria-label="{{t 'Previous item'}}"
+                                  disabled
+                                  ><i
+                                    class="zulip-icon zulip-icon-arrow-left"
+                                    aria-hidden="true"
+                                ></i></button>
                             {{/if}}
                             {{#if can_go_next}}
-                                {{> cofounder/components/button id="cf-edition-next" variant="secondary" icon="chevron-right" aria-label=(t "Next item") custom_classes="cf-edition-carousel__button"}}
+                                <button
+                                  id="hover-edition-next"
+                                  type="button"
+                                  class="button-reset-style"
+                                  aria-label="{{t 'Next item'}}"
+                                  ><i
+                                    class="zulip-icon zulip-icon-arrow-right"
+                                    aria-hidden="true"
+                                ></i></button>
                             {{else}}
-                                {{> cofounder/components/button id="cf-edition-next" variant="secondary" icon="chevron-right" aria-label=(t "Next item") custom_classes="cf-edition-carousel__button" disabled=true}}
+                                <button
+                                  id="hover-edition-next"
+                                  type="button"
+                                  class="button-reset-style"
+                                  aria-label="{{t 'Next item'}}"
+                                  disabled
+                                  ><i
+                                    class="zulip-icon zulip-icon-arrow-right"
+                                    aria-hidden="true"
+                                ></i></button>
                             {{/if}}
                         </div>
                     </section>
                 {{else}}
-                    <p class="cf-edition-empty">
+                    <p class="hover-edition-empty">
                         {{t
                           "There are no confirmed updates to feature in this edition."
                           }}
                     </p>
                 {{/if}}
             {{else}}
-                <div class="cf-edition-scroll" aria-label="{{t 'Full edition'}}">
+                <div class="hover-edition-scroll" aria-label="{{t 'Full edition'}}">
                     {{#each sections}}
                         {{#if has_items}}
                             <section
-                              class="cf-edition-section"
-                              aria-labelledby="cf-edition-section-{{key}}"
+                              class="hover-edition-section"
+                              aria-labelledby="hover-edition-section-{{key}}"
                               >
                                 <h2
-                                  id="cf-edition-section-{{key}}"
+                                  id="hover-edition-section-{{key}}"
                                   >
                                     {{label}}
                                 </h2>
                                 {{#each items}}
-                                    <article class="cf-edition-passage">
+                                    <article class="hover-edition-passage">
                                         <h3>{{title}}</h3>
                                         <p>{{detail}}</p>
-                                        <div class="cf-edition-passage__actions">
+                                        <div class="hover-edition-passage__actions">
                                             <a
-                                              class="cf-edition-update-link"
+                                              class="hover-edition-update-link"
                                               href="{{update.url}}"
                                               >
                                                 {{t "Open update"}}
@@ -194,8 +244,8 @@
                                             {{#if update.evidence_url}}
                                                 <button
                                                   type="button"
-                                                  class="cf-edition-sources-link"
-                                                  data-cf-evidence-url="{{update.evidence_url}}"
+                                                  class="button-reset-style hover-edition-sources-link hover-view-evidence"
+                                                  data-evidence-url="{{update.evidence_url}}"
                                                   aria-haspopup="dialog"
                                                   >{{t "View sources"}}</button>
                                             {{/if}}
@@ -206,8 +256,8 @@
                         {{/if}}
                     {{/each}}
                     {{#if edition.all_clear}}
-                        <aside class="cf-edition-all-clear">
-                            <span aria-hidden="true">{{> cofounder/components/icon name="check"}}</span>
+                        <aside class="hover-edition-all-clear">
+                            <span aria-hidden="true">✓</span>
                             <div>
                                 <h2>{{t "Everything else is moving well"}}</h2>
                                 <p>
@@ -219,7 +269,7 @@
                         </aside>
                     {{else}}
                         {{#unless has_items}}
-                            <p class="cf-edition-empty">
+                            <p class="hover-edition-empty">
                                 {{t
                                   "There are no confirmed updates to feature in this edition."
                                   }}

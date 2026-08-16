@@ -193,14 +193,6 @@ function format_channel_item_html(stream: StreamSubscription): string {
     return render_channel_list_item({
         stream,
         can_manage_folder: settings_data.can_user_manage_folder(),
-        remove_channel_label: $t(
-            {defaultMessage: "Remove {channel_name} from folder"},
-            {channel_name: stream.name},
-        ),
-        view_channel_label: $t(
-            {defaultMessage: "View details for {channel_name}"},
-            {channel_name: stream.name},
-        ),
     });
 }
 

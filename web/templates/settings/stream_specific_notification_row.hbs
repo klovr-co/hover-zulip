@@ -6,8 +6,8 @@
               is_web_public=stream.is_web_public }}
         </span>
         {{stream.stream_name}}
-        {{> ../components/icon_button icon="mute" intent="brand" custom_classes="tippy-zulip-delayed-tooltip unmute_stream" data-tippy-content=(t "Unmute") aria-label=(t "Unmute") hidden=(not muted)}}
-        {{> ../components/icon_button icon="reset" intent="neutral" custom_classes="tippy-zulip-delayed-tooltip reset_stream_notifications" data-tippy-content=(t "Reset to default notifications") aria-label=(t "Reset to default notifications")}}
+        <i class="zulip-icon icon-button-brand zulip-icon-mute tippy-zulip-delayed-tooltip unmute_stream" role="button" tabindex="0" data-tippy-content="{{t 'Unmute' }}" aria-label="{{t 'Unmute' }}" {{#unless muted}}style="display: none;"{{/unless}}></i>
+        <i class="zulip-icon icon-button-neutral zulip-icon-reset tippy-zulip-delayed-tooltip reset_stream_notifications" role="button" tabindex="0" data-tippy-content="{{t 'Reset to default notifications' }}" aria-label="{{t 'Reset to default notifications' }}"></i>
     </td>
     {{#each stream_specific_notification_settings}}
         {{> notification_settings_checkboxes

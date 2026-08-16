@@ -23,9 +23,7 @@ export function message_unhover(): void {
         clearTimeout(move_timeout);
         move_timeout = undefined;
     }
-    $current_message_hover
-        .find(".cf-message-actions__edit")
-        .removeClass("cf-message-actions__edit--can-edit cf-message-actions__edit--can-move");
+    $current_message_hover.removeClass("can-edit-content can-move-message");
     $current_message_hover = undefined;
 }
 
@@ -60,7 +58,7 @@ export function reapply_hover_on_row_replace(
     // the browser does not refire `mouseover` for the replacement row
     // even if the cursor is still positioned over it. Without this
     // transfer, the new row would be missing the
-    // Cofounder edit/move entitlement modifiers that the hover
+    // `can-edit-content` / `can-move-message` classes that the hover
     // handler normally applies, and `$current_message_hover` would
     // still point at the detached old row.
     if ($current_message_hover === undefined) {
@@ -81,23 +79,21 @@ function change_edit_content_button($message_row: JQuery, message: Message): voi
     const is_content_editable = message_edit.is_content_editable(message);
     const can_move_message = message_edit.can_move_message(message);
 
-    const $edit_content = $message_row.find(".cf-message-actions__edit");
-    if (is_content_editable && !$edit_content.hasClass("cf-message-actions__edit--can-edit")) {
-        $edit_content.addClass("cf-message-actions__edit--can-edit");
-        $edit_content.removeClass("cf-message-actions__edit--can-move");
+    const $edit_content = $message_row.find(".edit_content");
+    if (is_content_editable && !$edit_content.hasClass("can-edit-content")) {
+        $edit_content.addClass("can-edit-content");
+        $edit_content.removeClass("can-move-message");
         $edit_content.attr("data-tooltip-template-id", "edit-content-tooltip-template");
     } else if (
         !is_content_editable &&
         can_move_message &&
-        !$edit_content.hasClass("cf-message-actions__edit--can-move")
+        !$edit_content.hasClass("can-move-message")
     ) {
-        $edit_content.addClass("cf-message-actions__edit--can-move");
-        $edit_content.removeClass("cf-message-actions__edit--can-edit");
+        $edit_content.addClass("can-move-message");
+        $edit_content.removeClass("can-edit-content");
         $edit_content.attr("data-tooltip-template-id", "move-message-tooltip-template");
     } else if (!is_content_editable && !can_move_message) {
-        $edit_content.removeClass(
-            "cf-message-actions__edit--can-edit cf-message-actions__edit--can-move",
-        );
+        $edit_content.removeClass("can-edit-content can-move-message");
     }
 
     if (edit_timeout === undefined) {
@@ -128,22 +124,22 @@ function change_edit_content_button($message_row: JQuery, message: Message): voi
 }
 
 export function initialize(): void {
-    $("#main_div").on("mouseover", ".message-list .cf-message-item", function (this: HTMLElement) {
-        const $row = $(this).closest(".cf-message-item");
+    $("#main_div").on("mouseover", ".message-list .message_row", function (this: HTMLElement) {
+        const $row = $(this).closest(".message_row");
         message_hover($row);
     });
 
-    $("#main_div").on("mouseleave", ".message-list .cf-message-item", () => {
+    $("#main_div").on("mouseleave", ".message-list .message_row", () => {
         message_unhover();
     });
 
     $("#main_div").on("mouseover", ".sender_info_hover", function (this: HTMLElement) {
-        const $row = $(this).closest(".cf-message-item");
+        const $row = $(this).closest(".message_row");
         $row.addClass("sender_info_hovered");
     });
 
     $("#main_div").on("mouseout", ".sender_info_hover", function (this: HTMLElement) {
-        const $row = $(this).closest(".cf-message-item");
+        const $row = $(this).closest(".message_row");
         $row.removeClass("sender_info_hovered");
     });
 
@@ -184,11 +180,11 @@ export function initialize(): void {
     );
 
     $("body").on("mouseover", ".message_edit_content", function () {
-        $(this).closest(".cf-message-item").find(".copy_message").show();
+        $(this).closest(".message_row").find(".copy_message").show();
     });
 
     $("body").on("mouseout", ".message_edit_content", function () {
-        $(this).closest(".cf-message-item").find(".copy_message").hide();
+        $(this).closest(".message_row").find(".copy_message").hide();
     });
 
     $("body").on("mouseenter", ".copy_message", function () {

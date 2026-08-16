@@ -1,5 +1,4 @@
 import * as blueslip from "./blueslip.ts";
-import type {CofounderIconName} from "./cofounder/components/icon.ts";
 import {$t} from "./i18n.ts";
 import type {NavigationView, StateData} from "./state_data.ts";
 import {user_settings} from "./user_settings.ts";
@@ -8,7 +7,7 @@ export type BuiltInViewBasicMetadata = {
     fragment: string;
     name: string;
     is_pinned: boolean;
-    cf_icon: CofounderIconName;
+    icon: string;
     css_class_suffix: string;
     tooltip_template_id: string;
     has_unread_count: boolean;
@@ -26,7 +25,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         fragment: "inbox",
         name: $t({defaultMessage: "Inbox"}),
         is_pinned: true,
-        cf_icon: "inbox",
+        icon: "zulip-icon-inbox",
         css_class_suffix: "inbox",
         tooltip_template_id: "inbox-tooltip-template",
         has_unread_count: true,
@@ -42,7 +41,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         fragment: "recent",
         name: $t({defaultMessage: "Recent conversations"}),
         is_pinned: true,
-        cf_icon: "clock",
+        icon: "zulip-icon-recent",
         css_class_suffix: "recent_view",
         tooltip_template_id: "recent-conversations-tooltip-template",
         has_unread_count: true,
@@ -58,7 +57,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         fragment: "feed",
         name: $t({defaultMessage: "Combined feed"}),
         is_pinned: true,
-        cf_icon: "activity",
+        icon: "zulip-icon-all-messages",
         css_class_suffix: "all_messages",
         tooltip_template_id: "all-message-tooltip-template",
         has_unread_count: true,
@@ -74,7 +73,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         fragment: "narrow/is/mentioned",
         name: $t({defaultMessage: "Mentions"}),
         is_pinned: true,
-        cf_icon: "at-sign",
+        icon: "zulip-icon-at-sign",
         css_class_suffix: "mentions",
         tooltip_template_id: "mentions-tooltip-template",
         has_unread_count: true,
@@ -90,7 +89,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         fragment: "narrow/has/reaction/sender/me",
         name: $t({defaultMessage: "Reactions"}),
         is_pinned: true,
-        cf_icon: "smile",
+        icon: "zulip-icon-smile",
         css_class_suffix: "my_reactions",
         tooltip_template_id: "my-reactions-tooltip-template",
         has_unread_count: false,
@@ -106,7 +105,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         fragment: "narrow/is/starred",
         name: $t({defaultMessage: "Starred messages"}),
         is_pinned: true,
-        cf_icon: "star",
+        icon: "zulip-icon-star",
         css_class_suffix: "starred_messages",
         tooltip_template_id: "starred-message-tooltip-template",
         has_unread_count: true,
@@ -122,7 +121,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         fragment: "hover/search",
         name: $t({defaultMessage: "Search"}),
         is_pinned: true,
-        cf_icon: "search",
+        icon: "zulip-icon-search",
         css_class_suffix: "hover_search",
         tooltip_template_id: "hover-search-tooltip-template",
         has_unread_count: false,
@@ -138,7 +137,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         fragment: "hover/editions",
         name: $t({defaultMessage: "Daily Brief"}),
         is_pinned: true,
-        cf_icon: "sun",
+        icon: "zulip-icon-sun",
         css_class_suffix: "daily_brief",
         tooltip_template_id: "daily-brief-tooltip-template",
         has_unread_count: false,
@@ -154,7 +153,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         fragment: "drafts",
         name: $t({defaultMessage: "Drafts"}),
         is_pinned: true,
-        cf_icon: "file",
+        icon: "zulip-icon-drafts",
         css_class_suffix: "drafts",
         tooltip_template_id: "drafts-tooltip-template",
         has_unread_count: true,
@@ -170,7 +169,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         fragment: "scheduled",
         name: $t({defaultMessage: "Scheduled messages"}),
         is_pinned: true,
-        cf_icon: "calendar",
+        icon: "zulip-icon-calendar-days",
         css_class_suffix: "scheduled_messages",
         tooltip_template_id: "scheduled-tooltip-template",
         has_unread_count: true,
@@ -186,7 +185,7 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
         fragment: "reminders",
         name: $t({defaultMessage: "Reminders"}),
         is_pinned: true,
-        cf_icon: "alarm",
+        icon: "zulip-icon-alarm-clock",
         css_class_suffix: "reminders",
         tooltip_template_id: "reminders-tooltip-template",
         has_unread_count: true,
@@ -279,13 +278,6 @@ export function get_navigation_view_by_fragment(fragment: string): NavigationVie
 export type BuiltInViewMetadata = BuiltInViewBasicMetadata & {
     is_home_view: boolean;
     unread_count?: number;
-    href: string;
-    item_classes: string;
-    main_classes: string;
-    action_classes: string;
-    badge_classes: string;
-    badge_visible: boolean;
-    selected: boolean;
 };
 
 export function get_built_in_views(): BuiltInViewMetadata[] {
@@ -298,20 +290,10 @@ export function get_built_in_views(): BuiltInViewMetadata[] {
         })
         .map((view) => {
             const view_current_data = get_navigation_view_by_fragment(view.fragment);
-            const is_home_view = view.home_view_code === user_settings.web_home_view;
             return {
                 ...view,
-                href: `#${view.fragment}`,
                 is_pinned: view_current_data?.is_pinned ?? view.is_pinned,
-                is_home_view,
-                item_classes: `top_left_${view.css_class_suffix} top_left_row${
-                    view.hidden_for_spectators ? " hidden-for-spectators" : ""
-                }${is_home_view ? " selected-home-view" : ""}`,
-                main_classes: "left-sidebar-navigation-label-container tippy-left-sidebar-tooltip",
-                action_classes: `arrow sidebar-menu-icon ${view.menu_icon_class} hidden-for-spectators`,
-                badge_classes: `unread_count ${view.unread_count_type}`.trim(),
-                badge_visible: false,
-                selected: false,
+                is_home_view: view.home_view_code === user_settings.web_home_view,
             };
         });
 }

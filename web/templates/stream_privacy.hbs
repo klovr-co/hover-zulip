@@ -1,10 +1,10 @@
 {{! This controls whether the swatch next to streams in the left sidebar has a lock icon. }}
 {{~#if is_archived ~}}
-{{> cofounder/components/icon name="archive" compact=true}}
+<i class="zulip-icon zulip-icon-archive" aria-hidden="true"></i>
 {{~else if invite_only ~}}
-{{> cofounder/components/icon name="lock" compact=true}}
+<i class="zulip-icon zulip-icon-lock" aria-hidden="true"></i>
 {{~else if is_web_public ~}}
-{{> cofounder/components/icon name="globe" compact=true}}
+<i class="zulip-icon zulip-icon-globe" aria-hidden="true"></i>
 {{~else~}}
-{{> cofounder/components/icon name="hash" compact=true}}
+<i class="zulip-icon zulip-icon-hashtag" aria-hidden="true"></i>
 {{~/if~}}

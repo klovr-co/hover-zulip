@@ -1,2 +1,13 @@
-{{#> cofounder/components/toast intent="neutral" title=(t "Notification") message="" undo_button_text="" custom_classes="" reserve_title=true has_undo_button=has_undo_button hide_close_button=false}}
-{{/cofounder/components/toast}}
+<div id="feedback-container-content-wrapper">
+    <div class="float-header">
+        <h3 class="no-margin small-line-height float-left feedback_title"></h3>
+        <div class="feedback-button-container">
+            {{#if has_undo_button}}
+                {{> components/action_button intent="neutral" variant="subtle" custom_classes="feedback_undo"}}
+            {{/if}}
+            {{> ./components/icon_button intent="neutral" custom_classes="exit-me" icon="close"}}
+        </div>
+        <div class="float-clear"></div>
+    </div>
+    <p class="n-margin feedback_content"></p>
+</div>

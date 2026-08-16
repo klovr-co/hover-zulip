@@ -103,7 +103,7 @@ export function maybe_show_intro_go_to_conversation_tooltip(): void {
         return;
     }
 
-    if ($("#compose_banners .cf-notice").length > 0) {
+    if ($("#compose_banners .main-view-banner").length > 0) {
         return;
     }
 

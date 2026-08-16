@@ -1,54 +1,35 @@
 {{! Source collections require an explicit boolean in Zulip templates. }}
 {{#if has_sources}}
-    <fieldset
-      class="cf-space-workbench__candidate-list"
-      data-cf-source-results="available"
-      >
+    <fieldset class="hover-source-candidate-list" data-source-results="available">
         <legend>{{t "Permitted Sources"}}</legend>
         {{#each sources}}
-            <div class="cf-space-workbench__candidate">
-                <label
-                  class="cf-space-workbench__candidate-select"
-                  for="cf-source-candidate-{{@index}}"
-                  >
-                    <input
-                      id="cf-source-candidate-{{@index}}"
-                      type="radio"
-                      name="cf_source_candidate"
-                      value="{{source_ref}}"
-                      />
-                    <span class="cf-source-ledger__icon" aria-hidden="true">
-                        {{> cofounder/components/icon name=icon_name compact=true}}
-                    </span>
-                    <span class="cf-space-workbench__candidate-copy">
-                        <strong>{{display_name}}</strong>
-                        <small>{{account_display_name}} · {{source_type}}</small>
-                    </span>
-                </label>
+            <label class="hover-source-candidate">
+                <input
+                    type="radio"
+                    name="hover_source_candidate"
+                    value="{{source_ref}}"
+                />
+                <span class="hover-source-ledger__icon" aria-hidden="true"><i
+                        class="fa fa-whatsapp"
+                    ></i></span>
+                <span class="hover-source-candidate-copy"><strong
+                    >{{display_name}}</strong><small>{{account_display_name}}
+                        ·
+                        {{source_type}}</small></span>
                 <button
-                  type="button"
-                  class="cf-button cf-button--secondary cf-button--compact"
-                  data-cf-space-action="preview-source"
-                  data-cf-source-ref="{{source_ref}}"
-                  aria-label="{{t 'Preview'}}: {{display_name}}"
-                  >
-                    <span class="cf-button__label">{{t "Preview"}}</span>
-                </button>
-            </div>
+                    type="button"
+                    class="button small rounded hover-source-preview-button"
+                    data-source-ref="{{source_ref}}"
+                >{{t "Preview"}}</button>
+            </label>
         {{/each}}
     </fieldset>
-    {{#if has_more}}
-        <button
-          type="button"
-          class="cf-button cf-button--ghost cf-button--compact cf-space-workbench__more-results"
-          data-cf-space-action="more-sources"
-          >
-            <span class="cf-button__label">{{t "Next page"}}</span>
-            {{> cofounder/components/icon name="chevron-right" compact=true}}
-        </button>
-    {{/if}}
+    {{#if has_more}}<button
+            type="button"
+            class="button small rounded hover-source-next-button"
+        >{{t "More results"}}</button>{{/if}}
 {{else}}
-    <div class="cf-space-workbench__empty-state cf-space-workbench__empty-state--compact">
-        {{t "No permitted Sources match this search."}}
-    </div>
+    <div class="hover-source-empty-state hover-source-empty-state-compact">{{t
+            "No permitted Sources match this search."
+        }}</div>
 {{/if}}

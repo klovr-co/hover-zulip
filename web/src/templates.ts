@@ -8,40 +8,14 @@ import {default_html_elements, intl} from "./i18n.ts";
 import {postprocess_content} from "./postprocess_content.ts";
 import {user_settings} from "./user_settings.ts";
 
-type OriginalHandlebarsFunctions = {
-    escape_expression: typeof Handlebars.Utils.escapeExpression;
-    is_empty: typeof Handlebars.Utils.isEmpty;
-    each: NonNullable<(typeof Handlebars.helpers)["each"]>;
-    if: NonNullable<(typeof Handlebars.helpers)["if"]>;
-    unless: NonNullable<(typeof Handlebars.helpers)["unless"]>;
-};
-
-declare global {
-    var zulip_original_handlebars_functions: OriginalHandlebarsFunctions | undefined;
-}
-
-const original_handlebars_functions =
-    globalThis.zulip_original_handlebars_functions ??
-    (() => {
-        const each = Handlebars.helpers["each"];
-        const if_helper = Handlebars.helpers["if"];
-        const unless = Handlebars.helpers["unless"];
-        assert(each !== undefined);
-        assert(if_helper !== undefined);
-        assert(unless !== undefined);
-
-        const originals = {
-            escape_expression: Handlebars.Utils.escapeExpression,
-            is_empty: Handlebars.Utils.isEmpty,
-            each,
-            if: if_helper,
-            unless,
-        };
-        Object.defineProperty(globalThis, "zulip_original_handlebars_functions", {
-            value: originals,
-        });
-        return originals;
-    })();
+const orig_escape_expression = Handlebars.Utils.escapeExpression;
+const orig_is_empty = Handlebars.Utils.isEmpty;
+const orig_each = Handlebars.helpers["each"];
+assert(orig_each !== undefined);
+const orig_if = Handlebars.helpers["if"];
+assert(orig_if !== undefined);
+const orig_unless = Handlebars.helpers["unless"];
+assert(orig_unless !== undefined);
 
 Handlebars.Utils.escapeExpression = (value: unknown): string => {
     /* istanbul ignore if */
@@ -55,7 +29,7 @@ Handlebars.Utils.escapeExpression = (value: unknown): string => {
     }
     // Upstream type annotation incorrectly requires string
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return (original_handlebars_functions.escape_expression as (value: unknown) => string)(value);
+    return (orig_escape_expression as (value: unknown) => string)(value);
 };
 
 Handlebars.Utils.isEmpty = (value: unknown): boolean => {
@@ -71,7 +45,7 @@ Handlebars.Utils.isEmpty = (value: unknown): boolean => {
             `Cannot test a value of type ${typeof value} in a Zulip Handlebars template`,
         );
     }
-    return original_handlebars_functions.is_empty(value);
+    return orig_is_empty(value);
 };
 
 Handlebars.helpers["each"] = function (context, options): unknown {
@@ -81,7 +55,7 @@ Handlebars.helpers["each"] = function (context, options): unknown {
             `Cannot loop over a value of type ${Object.prototype.toString.call(context)} in a Zulip Handlebars template`,
         );
     }
-    return original_handlebars_functions.each.call(this, context, options);
+    return orig_each.call(this, context, options);
 };
 
 Handlebars.helpers["if"] = function (conditional, options): unknown {
@@ -91,7 +65,7 @@ Handlebars.helpers["if"] = function (conditional, options): unknown {
             `Cannot test a value of type ${typeof conditional} in a Zulip Handlebars template`,
         );
     }
-    return original_handlebars_functions.if.call(this, conditional, options);
+    return orig_if.call(this, conditional, options);
 };
 
 Handlebars.helpers["unless"] = function (conditional, options): unknown {
@@ -101,7 +75,7 @@ Handlebars.helpers["unless"] = function (conditional, options): unknown {
             `Cannot test a value of type ${typeof conditional} in a Zulip Handlebars template`,
         );
     }
-    return original_handlebars_functions.unless.call(this, conditional, options);
+    return orig_unless.call(this, conditional, options);
 };
 
 // Below, we register Zulip-specific extensions to the Handlebars API.

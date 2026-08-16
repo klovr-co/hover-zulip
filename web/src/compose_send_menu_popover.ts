@@ -42,7 +42,7 @@ export function open_schedule_message_menu(
     let interval: ReturnType<typeof setTimeout>;
 
     popover_menus.toggle_popover_menu(target, {
-        theme: "cofounder-menu",
+        theme: "popover-menu",
         placement: remind_message_id !== undefined ? "bottom" : "top",
         popperOptions: {
             modifiers: [
@@ -82,7 +82,7 @@ export function open_schedule_message_menu(
             if (remind_message_id !== undefined) {
                 // Maintain the vdots visibility, as when the message
                 // actions menu is open
-                $(instance.reference).closest(".cf-message-item").addClass("has_actions_popover");
+                $(instance.reference).closest(".message_row").addClass("has_actions_popover");
                 popover_menus.focus_first_popover_item(
                     popover_menus.get_popover_items_for_instance(instance),
                 );
@@ -163,9 +163,7 @@ export function open_schedule_message_menu(
         onHidden(instance) {
             if (remind_message_id !== undefined) {
                 // Hide the vdots
-                $(instance.reference)
-                    .closest(".cf-message-item")
-                    .removeClass("has_actions_popover");
+                $(instance.reference).closest(".message_row").removeClass("has_actions_popover");
             }
             clearInterval(interval);
             instance.destroy();
@@ -222,7 +220,7 @@ export function toggle(): void {
 export function initialize(): void {
     tippy.delegate("body", {
         ...popover_menus.default_popover_props,
-        theme: "cofounder-menu",
+        theme: "popover-menu",
         target: "#send_later i",
         onUntrigger() {
             // This is only called when the popover is closed by clicking on `target`.

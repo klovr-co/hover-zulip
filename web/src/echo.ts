@@ -132,8 +132,8 @@ function hide_retry_spinner($row: JQuery): boolean {
 function show_message_failed(message_id: number, _failed_msg: string): void {
     // Failed to send message, so display inline retry/cancel
     message_live_update.update_message_in_all_views(message_id, ($row) => {
-        $row.find(".cf-message-item__pending-indicator").addClass("hidden");
-        const $message_controls = $row.find(".cf-message-actions");
+        $row.find(".slow-send-spinner").addClass("hidden");
+        const $message_controls = $row.find(".message_controls");
         $message_controls.html(render_message_controls_failed_msg());
     });
     // TODO: Show the `_failed_msg` in the UI, describing the reason for the failure.
@@ -143,7 +143,7 @@ function show_failed_message_success(message_id: number): void {
     // Previously failed message succeeded
     const msg = message_store.get(message_id);
     message_live_update.update_message_in_all_views(message_id, ($row) => {
-        const $message_controls = $row.find(".cf-message-actions");
+        const $message_controls = $row.find(".message_controls");
         $message_controls.html(render_message_controls({msg}));
     });
 }
@@ -680,7 +680,7 @@ export function display_slow_send_loading_spinner(message: Message): void {
     const $rows = message_lists.all_rendered_row_for_message_id(message.id);
     if (message.locally_echoed && !message.failed_request) {
         message.show_slow_send_spinner = true;
-        $rows.find(".cf-message-item__pending-indicator").removeClass("hidden");
+        $rows.find(".slow-send-spinner").removeClass("hidden");
         // We don't need to do anything special to ensure this gets
         // cleaned up if the message is delivered, because the
         // message's HTML gets replaced once the message is
@@ -711,7 +711,7 @@ export function initialize({
     ): void {
         $("#main_div").on("click", selector, function (this: HTMLElement, e) {
             e.stopPropagation();
-            const $row = $(this).closest(".cf-message-item");
+            const $row = $(this).closest(".message_row");
             const local_id = rows.local_echo_id($row);
             // Message should be waiting for ack and only have a local id,
             // otherwise send would not have failed

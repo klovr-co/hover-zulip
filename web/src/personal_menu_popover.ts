@@ -3,7 +3,6 @@ import {$} from "jquery";
 import render_navbar_personal_menu_popover from "../templates/popovers/navbar/navbar_personal_menu_popover.hbs";
 
 import * as channel from "./channel.ts";
-import * as cofounder_menu from "./cofounder/components/menu.ts";
 import * as information_density from "./information_density.ts";
 import * as message_view from "./message_view.ts";
 import * as popover_menus from "./popover_menus.ts";
@@ -16,7 +15,7 @@ import * as user_status from "./user_status.ts";
 
 export function initialize(): void {
     popover_menus.register_popover_menu("#personal-menu", {
-        theme: "cofounder-menu",
+        theme: "popover-menu",
         placement: "bottom",
         offset: popover_menus.NAVBAR_POPOVER_OFFSET,
         // The strategy: "fixed"; and eventlisteners modifier option
@@ -39,7 +38,6 @@ export function initialize(): void {
 
             $popper.on("change", "input[name='theme-select']", function () {
                 const new_theme_code = $(this).attr("data-theme-code");
-                cofounder_menu.sync_menuitemradio_checked_state(instance.popper);
                 channel.patch({
                     url: "/json/settings",
                     data: {color_scheme: new_theme_code},
@@ -53,7 +51,6 @@ export function initialize(): void {
                                 .parent()
                                 .find(`input[data-theme-code="${prev_theme_code}"]`)
                                 .prop("checked", true);
-                            cofounder_menu.sync_menuitemradio_checked_state(instance.popper);
                         }, 500);
                     },
                 });
@@ -162,12 +159,12 @@ export function initialize(): void {
         onShow(instance) {
             const args = popover_menus_data.get_personal_menu_content_context();
             instance.setContent(parse_html(render_navbar_personal_menu_popover(args)));
-            $("#personal-menu").addClass("cf-app-header__item--active");
+            $("#personal-menu").addClass("active-navbar-menu");
         },
         onHidden(instance) {
             instance.destroy();
             popover_menus.popover_instances.personal_menu = null;
-            $("#personal-menu").removeClass("cf-app-header__item--active");
+            $("#personal-menu").removeClass("active-navbar-menu");
         },
     });
 }

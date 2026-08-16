@@ -9,7 +9,6 @@ import render_drafts_list from "../templates/drafts_list.hbs";
 
 import * as browser_history from "./browser_history.ts";
 import * as channel from "./channel.ts";
-import * as cofounder_icon from "./cofounder/components/icon.ts";
 import * as compose_actions from "./compose_actions.ts";
 import {show_copied_confirmation} from "./copied_tooltip.ts";
 import type {FormattedDraft, LocalStorageDraft} from "./drafts.ts";
@@ -294,7 +293,7 @@ function fetch_server_rendered_drafts(formatted_drafts: FormattedDraft[]): void 
                     }
                     const data = message_render_response_schema.parse(response_data);
                     const $content_element = $(
-                        `[data-draft-id="${CSS.escape(draft.draft_id)}"] .cf-message-item__content`,
+                        `[data-draft-id="${CSS.escape(draft.draft_id)}"] .message_content`,
                     );
                     if ($content_element.length === 0) {
                         return;
@@ -336,7 +335,7 @@ function render_widgets(
         $(".drafts-tab-pane .no-drafts").hide();
         // Update possible dynamic elements.
         const $rendered_drafts = $drafts_table.find(
-            ".cf-message-item__content.rendered_markdown.restore-overlay-message",
+            ".message_content.rendered_markdown.restore-overlay-message",
         );
         $rendered_drafts.each(function () {
             rendered_markdown.update_elements($(this));
@@ -384,7 +383,7 @@ function setup_event_handlers(): void {
         ".user-group-mention",
         function (this: HTMLElement, e) {
             // We stop the event from propagating because that is what
-            // the main `.cf-message-item__frame .user-group-mention` click handler
+            // the main `.messagebox .user-group-mention` click handler
             // expects us to do for drafts.
             e.stopPropagation();
             if (mouse_drag.is_drag(e)) {
@@ -402,10 +401,9 @@ function setup_event_handlers(): void {
         update_bulk_delete_ui();
     });
 
-    $("#drafts_table .overlay_message_controls .draft-selection-checkbox").on("click", function () {
-        const $checkbox = $(this);
-        const is_checked = is_checkbox_icon_checked($checkbox);
-        toggle_checkbox_icon_state($checkbox, !is_checked);
+    $("#drafts_table .overlay_message_controls .draft-selection-checkbox").on("click", (e) => {
+        const is_checked = is_checkbox_icon_checked($(e.target));
+        toggle_checkbox_icon_state($(e.target), !is_checked);
         update_bulk_delete_ui();
     });
 }
@@ -425,7 +423,7 @@ function setup_bulk_actions_handlers(): void {
 
     $(".delete-selected-drafts-button").on("click", () => {
         const $selected_rows = $(".drafts-list")
-            .find('.draft-selection-checkbox[aria-checked="true"]')
+            .find(".draft-selection-checkbox.fa-check-square")
             .closest(".overlay-message-row");
         remove_drafts($selected_rows);
         update_bulk_delete_ui();
@@ -474,7 +472,7 @@ export function update_bulk_delete_ui(): void {
         return is_checkbox_icon_checked($(this));
     });
     const $select_drafts_button = $(".select-drafts-button");
-    const $select_state_indicator = $select_drafts_button;
+    const $select_state_indicator = $(".select-drafts-button .select-state-indicator");
     const $delete_selected_drafts_button = $(".delete-selected-drafts-button");
 
     if ($checked_checkboxes.length > 0) {
@@ -509,12 +507,16 @@ export function open_overlay(): void {
 }
 
 export function is_checkbox_icon_checked($checkbox: JQuery): boolean {
-    return $checkbox.attr("aria-checked") === "true";
+    return $checkbox.hasClass("fa-check-square");
 }
 
 export function toggle_checkbox_icon_state($checkbox: JQuery, checked: boolean): void {
-    $checkbox.attr("aria-checked", checked.toString());
-    cofounder_icon.replace_icon($checkbox, checked ? "square-check" : "square");
+    $checkbox.parent().attr("aria-checked", checked.toString());
+    if (checked) {
+        $checkbox.removeClass("fa-square-o").addClass("fa-check-square");
+    } else {
+        $checkbox.removeClass("fa-check-square").addClass("fa-square-o");
+    }
 }
 
 export function initialize(): void {
@@ -570,5 +572,5 @@ export function initialize(): void {
         "#draft_overlay_banner_container .draft-delete-banner-undo-button",
         undo_draft_deletion,
     );
-    $("body").on("click", "#draft_overlay_banner_container .cf-banner__close", clear_undo_list);
+    $("body").on("click", "#draft_overlay_banner_container .banner-close-button", clear_undo_list);
 }

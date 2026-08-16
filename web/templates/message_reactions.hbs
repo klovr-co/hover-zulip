@@ -1,11 +1,13 @@
-<div class="cf-message-reactions" role="group" aria-label="{{t 'Message reactions' }}">
+<div class="message_reactions">
     {{#each this/msg/message_reactions}}
         {{> message_reaction . is_archived=../is_archived}}
     {{/each}}
     {{#unless is_archived}}
-        <button type="button" class="cf-message-reactions__add" aria-haspopup="dialog" data-tooltip-template-id="add-emoji-tooltip-template" aria-label="{{t 'Add emoji reaction' }} (:)">
-            {{> cofounder/components/icon name="smile" size="sm"}}
-            <span class="cf-message-reactions__add-label" aria-hidden="true">+</span>
-        </button>
+        <div class="reaction_button" role="button" aria-haspopup="true" data-tooltip-template-id="add-emoji-tooltip-template" aria-label="{{t 'Add emoji reaction' }} (:)">
+            <div class="emoji-message-control-button-container">
+                <i class="zulip-icon zulip-icon-smile" tabindex="0"></i>
+                <div class="message_reaction_count">+</div>
+            </div>
+        </div>
     {{/unless}}
 </div>

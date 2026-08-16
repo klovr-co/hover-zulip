@@ -2,14 +2,12 @@
 # reason not to run it there, it should be there as a comment
 # explaining why.
 
-name: Lightsail CI
+name: Zulip CI
 
-# The production instance uses Ubuntu 24.04. This single job provides the
-# checks for that pinned environment, replacing the broader upstream
-# OS/Python compatibility matrix.
 on:
   push:
-    branches: [main]
+    branches: ["*.x", chat.zulip.org, main]
+    tags: ["*"]
   pull_request:
   workflow_dispatch:
 
@@ -30,15 +28,38 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # This image is built from tools/ci/Dockerfile and matches the
-          # Ubuntu 24.04 Lightsail instance.
-          - docker_image: zulip/ci:noble
-            name: Ubuntu 24.04 (Python 3.12, Lightsail)
-            os: noble
-            # Documentation has its own upstream validation requirements and
-            # is not part of the Lightsail application deployment gate.
+          # Base images are built using `tools/ci/Dockerfile`.
+          # The comments at the top explain how to build and upload these images.
+          # Ubuntu 22.04 ships with Python 3.10.12.
+          - docker_image: zulip/ci:jammy
+            name: Ubuntu 22.04 (Python 3.10, backend + frontend)
+            os: jammy
             include_documentation_tests: false
             include_frontend_tests: true
+          # Debian 12 ships with Python 3.11.2.
+          - docker_image: zulip/ci:bookworm
+            name: Debian 12 (Python 3.11, backend + documentation)
+            os: bookworm
+            include_documentation_tests: true
+            include_frontend_tests: false
+          # Ubuntu 24.04 ships with Python 3.12.2.
+          - docker_image: zulip/ci:noble
+            name: Ubuntu 24.04 (Python 3.12, backend)
+            os: noble
+            include_documentation_tests: false
+            include_frontend_tests: false
+          # Ubuntu 26.04 ships with Python 3.14.4.
+          - docker_image: zulip/ci:resolute
+            name: Ubuntu 26.04 (Python 3.14, backend)
+            os: resolute
+            include_documentation_tests: false
+            include_frontend_tests: false
+          # Debian 13 ships with Python 3.13.5.
+          - docker_image: zulip/ci:trixie
+            name: Debian 13 (Python 3.13, backend)
+            os: trixie
+            include_documentation_tests: false
+            include_frontend_tests: false
 
     runs-on: ubuntu-latest
     name: ${{ matrix.name }}
@@ -121,9 +142,8 @@ jobs:
         if: ${{ matrix.include_frontend_tests }}
         run: |
           source tools/ci/activate-venv
-          # Exercise the application behavior without the upstream coverage
-          # policy, which is unrelated to the Lightsail deployment gate.
-          ./tools/test-js-with-node --parallel=1
+          # Run the node tests first, since they're fast and deterministic
+          ./tools/test-js-with-node --coverage --parallel=1
 
       - name: Run frontend lint
         if: ${{ matrix.include_frontend_tests }}
@@ -213,6 +233,16 @@ jobs:
               printf >&2 "Error: untracked files:\n%s\n" "$untracked"
               exit 1
           fi
+
+      - name: Upload coverage reports
+
+        # Only upload coverage when both frontend and backend
+        # tests are run.
+        if: ${{ matrix.include_frontend_tests }}
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        with:
+          files: var/coverage.xml,var/node-coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Store Puppeteer artifacts
         # Upload these on failure, as well

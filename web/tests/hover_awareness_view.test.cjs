@@ -113,12 +113,8 @@ run_test("For You loads ranked canonical items with accessible actions", ({overr
         ],
     });
 
-    const html = $("#cf-awareness-view").html();
+    const html = $("#hover-awareness-view").html();
     assert.match(html, /For You/);
-    assert.match(html, /cf-awareness-card[^"]*cf-awareness-card--unread/);
-    assert.match(html, /class="cf-awareness-card__content rendered_markdown"/);
-    assert.match(html, /class="cf-source-action cf-source-action--evidence"/);
-    assert.match(html, /data-cf-evidence-url=/);
     assert.match(html, /role="feed"/);
     assert.match(html, /role="article"/);
     assert.match(html, /src="\/avatar\/9"/);
@@ -129,10 +125,6 @@ run_test("For You loads ranked canonical items with accessible actions", ({overr
     assert.match(html, /near\/41/);
     assert.match(html, /View sources/);
     assert.match(html, /aria-label="translated: Unread"/);
-    assert.doesNotMatch(
-        html,
-        /hover-awareness|hover-source-pill|hover-view-evidence|message_content/,
-    );
 });
 
 run_test("Team Pulse exposes an empty state and retryable loading error", ({override}) => {
@@ -146,16 +138,12 @@ run_test("Team Pulse exposes an empty state and retryable loading error", ({over
 
     hover_awareness_view.show("team_pulse");
     requests.at(-1).success({surface: "team_pulse", items: []});
-    assert.match($("#cf-awareness-view").html(), /No important team developments yet/);
+    assert.match($("#hover-awareness-view").html(), /No important team developments yet/);
 
     hover_awareness_view.hide();
     hover_awareness_view.show("team_pulse");
     requests.at(-1).error({}, "error");
-    const html = $("#cf-awareness-view").html();
+    const html = $("#hover-awareness-view").html();
     assert.match(html, /Live awareness could not be loaded/);
-    assert.match(html, /class="cf-awareness-status__message" role="status" aria-live="polite"/);
-    assert.match(html, /<\/span>\s*<button[^>]+id="cf-awareness-retry"/);
-    assert.match(html, /id="cf-awareness-retry"/);
-    assert.match(html, /class="cf-button cf-button--secondary"/);
-    assert.doesNotMatch(html, /class="button rounded small"/);
+    assert.match(html, /id="hover-awareness-retry"/);
 });

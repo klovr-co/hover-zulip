@@ -20,7 +20,7 @@ let composebox_saved_snippets_dropdown_widget = false;
 
 function get_target_textarea($target_element: JQuery<Element>): JQuery<HTMLTextAreaElement> {
     if ($target_element.parents(".message_edit_form").length === 1) {
-        const edit_message_id = rows.id($target_element.parents(".cf-message-item")).toString();
+        const edit_message_id = rows.id($target_element.parents(".message_row")).toString();
         return $(`#edit_form_${CSS.escape(edit_message_id)} .message_edit_content`);
     }
 

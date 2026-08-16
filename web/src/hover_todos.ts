@@ -72,12 +72,12 @@ export function submit(todo_id: number, operation: "assign" | "complete" | "reop
     }
     const request_id = request_ids.get(todo_id) ?? hover_request_id.generate();
     request_ids.set(todo_id, request_id);
-    const $containers = $(`[data-cf-todo-id='${todo_id}']`);
+    const $containers = $(`[data-hover-todo-id='${todo_id}']`);
     $containers.find("button, select").prop("disabled", true);
-    $containers.find("[data-cf-todo-status]").text($t({defaultMessage: "Saving…"}));
+    $containers.find("[data-hover-todo-status]").text($t({defaultMessage: "Saving…"}));
     const assignee_user_id =
         operation === "assign"
-            ? $containers.first().find<HTMLSelectElement>("[data-cf-todo-assignee]").val()
+            ? $containers.first().find<HTMLSelectElement>("[data-hover-todo-assignee]").val()
             : undefined;
     void channel.post({
         url: `/json/hover/spaces/${todo.space.id}/todos/${todo.id}/events`,
@@ -89,7 +89,7 @@ export function submit(todo_id: number, operation: "assign" | "complete" | "reop
         },
         success(raw_data) {
             apply_projection(mutation_response_schema.parse(raw_data).todo);
-            $(`[data-cf-todo-id='${todo_id}']`).first().trigger("focus");
+            $(`[data-hover-todo-id='${todo_id}']`).first().trigger("focus");
         },
         error(xhr) {
             const conflict = conflict_schema.safeParse(xhr.responseJSON);
@@ -100,7 +100,7 @@ export function submit(todo_id: number, operation: "assign" | "complete" | "reop
             }
             $containers.find("button, select").prop("disabled", false);
             $containers
-                .find("[data-cf-todo-status]")
+                .find("[data-hover-todo-status]")
                 .text($t({defaultMessage: "Could not save. Try again."}));
         },
     });
@@ -123,8 +123,8 @@ export function initialize(): void {
     const handle_todo_operation = (event: JQuery.ClickEvent): void => {
         event.stopPropagation();
         const $button = $(event.currentTarget);
-        const todo_id = Number($button.attr("data-cf-todo-id"));
-        const operation = $button.attr("data-cf-todo-operation");
+        const todo_id = Number($button.attr("data-hover-todo-id"));
+        const operation = $button.attr("data-hover-todo-operation");
         if (
             Number.isSafeInteger(todo_id) &&
             (operation === "assign" || operation === "complete" || operation === "reopen")
@@ -132,20 +132,8 @@ export function initialize(): void {
             submit(todo_id, operation);
         }
     };
-    $("#main_div").on("click", "[data-cf-todo-operation]", handle_todo_operation);
-    $("body").on("click", "[data-cf-todo-operation]", handle_todo_operation);
-    const handle_todo_assignee_change = (event: JQuery.ChangeEvent): void => {
-        event.stopPropagation();
-        const $select = $(event.currentTarget);
-        const current_assignee = $select.attr("data-cf-current-assignee") ?? "";
-        const selected_assignee = String($select.val() ?? "");
-        $select
-            .closest("[data-cf-todo-id]")
-            .find("[data-cf-todo-operation='assign']")
-            .prop("disabled", selected_assignee === current_assignee);
-    };
-    $("#main_div").on("change", "[data-cf-todo-assignee]", handle_todo_assignee_change);
-    $("body").on("change", "[data-cf-todo-assignee]", handle_todo_assignee_change);
+    $("#main_div").on("click", "[data-hover-todo-operation]", handle_todo_operation);
+    $("body").on("click", "[data-hover-todo-operation]", handle_todo_operation);
 }
 
 export const event_schema = z.object({

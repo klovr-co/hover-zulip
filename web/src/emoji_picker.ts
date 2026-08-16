@@ -11,7 +11,6 @@ import render_emoji_popover_search_results from "../templates/popovers/emoji/emo
 import render_emoji_showcase from "../templates/popovers/emoji/emoji_showcase.hbs";
 
 import * as blueslip from "./blueslip.ts";
-import type {CofounderIconName} from "./cofounder/components/icon.ts";
 import * as common from "./common.ts";
 import {ComposeIconSession} from "./compose_icon_session.ts";
 import * as composebox_typeahead from "./composebox_typeahead.ts";
@@ -39,14 +38,8 @@ import * as util from "./util.ts";
 type EmojiCatalog = {
     emojis: EmojiDict[];
     name: string;
-    icon: CofounderIconName;
+    icon: string;
 }[];
-
-type EmojiCategory = {
-    name: string;
-    icon: CofounderIconName;
-    translated: string;
-};
 
 export let complete_emoji_catalog: EmojiCatalog = [];
 
@@ -208,32 +201,32 @@ const session_manager = new SessionManager();
 const EMOJI_CATEGORIES = [
     {
         name: "Frequently used",
-        icon: "star",
+        icon: "fa-star-o",
         translated: $t({defaultMessage: "Frequently used"}),
     },
     {
         name: "Smileys & Emotion",
-        icon: "smile",
+        icon: "fa-smile-o",
         translated: $t({defaultMessage: "Smileys & Emotion"}),
     },
     {
         name: "People & Body",
-        icon: "thumbs-up",
+        icon: "fa-thumbs-o-up",
         translated: $t({defaultMessage: "People & Body"}),
     },
     {
         name: "Animals & Nature",
-        icon: "leaf",
+        icon: "fa-leaf",
         translated: $t({defaultMessage: "Animals & Nature"}),
     },
-    {name: "Food & Drink", icon: "utensils", translated: $t({defaultMessage: "Food & Drink"})},
-    {name: "Activities", icon: "ball", translated: $t({defaultMessage: "Activities"})},
-    {name: "Travel & Places", icon: "car", translated: $t({defaultMessage: "Travel & Places"})},
-    {name: "Objects", icon: "lightbulb", translated: $t({defaultMessage: "Objects"})},
-    {name: "Symbols", icon: "hash", translated: $t({defaultMessage: "Symbols"})},
-    {name: "Flags", icon: "flag", translated: $t({defaultMessage: "Flags"})},
-    {name: "Custom", icon: "sliders", translated: $t({defaultMessage: "Custom"})},
-] satisfies EmojiCategory[];
+    {name: "Food & Drink", icon: "fa-cutlery", translated: $t({defaultMessage: "Food & Drink"})},
+    {name: "Activities", icon: "fa-soccer-ball-o", translated: $t({defaultMessage: "Activities"})},
+    {name: "Travel & Places", icon: "fa-car", translated: $t({defaultMessage: "Travel & Places"})},
+    {name: "Objects", icon: "fa-lightbulb-o", translated: $t({defaultMessage: "Objects"})},
+    {name: "Symbols", icon: "fa-hashtag", translated: $t({defaultMessage: "Symbols"})},
+    {name: "Flags", icon: "fa-flag", translated: $t({defaultMessage: "Flags"})},
+    {name: "Custom", icon: "fa-cog", translated: $t({defaultMessage: "Custom"})},
+];
 
 // Does not dictate the layout.
 // It is only used to calculate heights of unpopulated sections to avoid scrollbar jumps.
@@ -802,7 +795,7 @@ function get_default_emoji_popover_options(
     include_frequently_used_category: boolean,
 ): Partial<tippy.Props> {
     return {
-        theme: "cofounder-menu",
+        theme: "popover-menu",
         placement: "top",
         popperOptions: {
             modifiers: [
@@ -1015,7 +1008,7 @@ function register_click_handlers(): void {
 
     $("#main_div").on(
         "click",
-        ".cf-message-actions__reaction-button, .cf-message-reactions__add",
+        ".emoji-message-control-button-container",
         function (this: HTMLElement, e): void {
             e.stopPropagation();
 

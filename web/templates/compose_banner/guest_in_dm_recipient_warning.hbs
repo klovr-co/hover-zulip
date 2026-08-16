@@ -1,5 +1,6 @@
-{{#> ../cofounder/components/notice . intent="warning-style" custom_classes="above_compose_banner"}}
-    <p class="cf-notice__content">
+<div class="above_compose_banner main-view-banner warning-style {{classname}}">
+    <p class="banner_content">
         {{banner_text}}
     </p>
-{{/../cofounder/components/notice}}
+    <a role="button" class="zulip-icon zulip-icon-close main-view-banner-close-button" tabindex="0" aria-label="{{t 'Dismiss' }}"></a>
+</div>

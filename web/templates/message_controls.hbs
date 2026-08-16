@@ -1,26 +1,26 @@
 {{#unless is_archived}}
     {{#if msg/sent_by_me}}
-        <div class="cf-message-actions__edit">
-            <button type="button" class="cf-message-actions__button cf-message-actions__edit-button edit_content_button edit_message_button" aria-label="{{t 'Edit message' }} (e)">
-                {{> cofounder/components/icon name="edit" size="sm"}}
-            </button>
-            <button type="button" class="cf-message-actions__button cf-message-actions__move-button move_message_button edit_message_button" aria-label="{{t 'Move message' }} (m)">
-                {{> cofounder/components/icon name="move" size="sm"}}
-            </button>
+        <div class="edit_content message_control_button">
+            <i class="message-controls-icon zulip-icon zulip-icon-edit edit_content_button edit_message_button" role="button" tabindex="0" aria-label="{{t 'Edit message' }} (e)"></i>
+            <i class="message-controls-icon zulip-icon zulip-icon-move-alt move_message_button edit_message_button" role="button" tabindex="0" aria-label="{{t 'Move message' }} (m)"></i>
         </div>
     {{/if}}
 
     {{#unless msg/sent_by_me}}
-        <button type="button" class="cf-message-actions__button cf-message-actions__reaction-button" data-tooltip-template-id="add-emoji-tooltip-template" aria-label="{{t 'Add emoji reaction' }} (:)" aria-haspopup="dialog">
-            {{> cofounder/components/icon name="smile" size="sm"}}
-        </button>
+        <div class="reaction_button message_control_button" data-tooltip-template-id="add-emoji-tooltip-template">
+            <div class="emoji-message-control-button-container">
+                <i class="message-controls-icon zulip-icon zulip-icon-smile" aria-label="{{t 'Add emoji reaction' }} (:)" role="button" aria-haspopup="true" tabindex="0"></i>
+            </div>
+        </div>
     {{/unless}}
 {{/unless}}
 
-<button type="button" class="cf-message-actions__button cf-message-actions__more-button" data-tooltip-template-id="message-actions-tooltip-template" aria-haspopup="menu" aria-label="{{t 'Message actions' }}">
-    {{> cofounder/components/icon name="more-vertical" size="sm"}}
-</button>
+<div class="actions_hover message_control_button" data-tooltip-template-id="message-actions-tooltip-template" >
+    <i class="message-controls-icon message-actions-menu-button zulip-icon zulip-icon-more-vertical-spread" role="button" aria-haspopup="true" tabindex="0" aria-label="{{t 'Message actions' }}"></i>
+</div>
 
-<button type="button" class="cf-message-actions__button cf-message-actions__star-button{{#if msg/starred}} cf-message-actions__star-button--selected{{/if}}" data-tooltip-template-id="{{#if msg/starred}}unstar{{else}}star{{/if}}-message-tooltip-template" aria-label="{{#if msg/starred}}{{t 'Unstar message' }}{{else}}{{t 'Star message' }}{{/if}}" aria-pressed="{{#if msg/starred}}true{{else}}false{{/if}}" {{#if msg/locally_echoed}}disabled{{/if}}>
-    {{> cofounder/components/icon name="star" size="sm"}}
-</button>
+<div class="star_container message_control_button {{#if msg/starred}}{{else}}empty-star{{/if}}" data-tooltip-template-id="{{#if msg/starred}}unstar{{else}}star{{/if}}-message-tooltip-template">
+    {{#unless msg/locally_echoed}}
+    <i role="button" tabindex="0" class="message-controls-icon star zulip-icon {{#if msg/starred}}zulip-icon-star-filled{{else}}zulip-icon-star{{/if}}" aria-label="{{#if msg/starred}}{{t 'Unstar message' }}{{else}}{{t 'Star message' }}{{/if}}"></i>
+    {{/unless}}
+</div>

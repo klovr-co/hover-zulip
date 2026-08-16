@@ -96,7 +96,7 @@
 
     /* To avoid cutting off the focus ring on links, we set
        padding on first children most likely to take links.
-       We account for this extra space on `.cf-message-item__content`. */
+       We account for this extra space on `.message_content`. */
     & > p:first-child,
     & > ul:first-child,
     & > ol:first-child {
@@ -997,8 +997,8 @@
     }
 }
 
-.cf-message-item--group-mention,
-.cf-message-item--direct-mention {
+.group_mention,
+.direct_mention {
     & .rendered_markdown pre {
         background-color: var(--color-markdown-pre-background-mentions);
         border-color: var(--color-markdown-pre-border-mentions);

@@ -12,7 +12,7 @@ export function initialize(): void {
     popover_menus.register_popover_menu(
         "#add_streams_button",
         {
-            theme: "cofounder-menu",
+            theme: "popover-menu",
             onMount(instance) {
                 popover_menus.focus_popover(instance);
             },
@@ -39,10 +39,10 @@ export function initialize(): void {
                 //  When showing the popover menu, we want the
                 // "Add channels" and the "Filter channels" tooltip
                 //  to appear below the "Add channels" icon.
-                const add_streams_button: tippy.ReferenceElement | undefined =
-                    $("#add_streams_button").get(0);
-                assert(add_streams_button !== undefined);
-                add_streams_button._tippy?.setProps({
+                const streams_inline_icon: tippy.ReferenceElement | undefined =
+                    $("#streams_inline_icon").get(0);
+                assert(streams_inline_icon !== undefined);
+                streams_inline_icon._tippy?.setProps({
                     placement: "bottom",
                 });
 
@@ -56,10 +56,10 @@ export function initialize(): void {
                 //  "Add channels" and the "Filter channels" tooltip
                 //  to appear at it's original position that is
                 //  above the "Add channels" icon.
-                const add_streams_button: tippy.ReferenceElement | undefined =
-                    $("#add_streams_button").get(0);
-                assert(add_streams_button !== undefined);
-                add_streams_button._tippy?.setProps({
+                const streams_inline_icon: tippy.ReferenceElement | undefined =
+                    $("#streams_inline_icon").get(0);
+                assert(streams_inline_icon !== undefined);
+                streams_inline_icon._tippy?.setProps({
                     placement: "top",
                 });
             },

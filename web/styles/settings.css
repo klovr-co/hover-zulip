@@ -405,7 +405,7 @@ select.settings_select {
         border-top: none;
     }
 
-    .cf-tabs {
+    .tab-switcher {
         margin-left: 0;
         margin-top: 1em;
     }
@@ -1471,11 +1471,11 @@ label.preferences-radio-choice-label {
             background-color: var(--color-background-modal-bar);
             border-bottom: 1px solid var(--color-border-modal-bar);
 
-            .cf-tabs {
+            .tab-switcher {
                 display: flex;
                 justify-content: center;
 
-                .cf-tabs__tab {
+                .ind-tab {
                     width: auto;
                     min-width: 6.7857em; /* 95px at 14px em */
                 }
@@ -2204,7 +2204,7 @@ label.preferences-radio-choice-label {
         }
     }
 
-    .cf-tabs.org-user-settings-switcher {
+    .tab-switcher.org-user-settings-switcher {
         gap: 0.5em;
         display: flex;
         flex-wrap: wrap;
@@ -2486,26 +2486,26 @@ input.settings_text_input:disabled {
     }
 }
 
-.cf-tabs.org-user-settings-switcher {
+.tab-switcher.org-user-settings-switcher {
     margin-bottom: 12px;
 }
 
-#admin-user-list .cf-tabs .cf-tabs__tab {
+#admin-user-list .tab-switcher .ind-tab {
     width: auto;
     min-width: 110px;
 }
 
-#admin-user-list .cf-tabs {
+#admin-user-list .tab-switcher {
     margin-left: 0;
 }
 
-#data-exports .cf-tabs .cf-tabs__tab {
+#data-exports .tab-switcher .ind-tab {
     width: auto;
     min-width: 160px;
 }
 
-#admin-bot-list .cf-tabs .cf-tabs__tab,
-#personal-bot-list .cf-tabs .cf-tabs__tab {
+#admin-bot-list .tab-switcher .ind-tab,
+#personal-bot-list .tab-switcher .ind-tab {
     width: auto;
     min-width: 90px;
 }

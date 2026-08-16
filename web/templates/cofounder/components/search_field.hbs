@@ -1,5 +1,0 @@
-<div {{#if wrapper_id}} id="{{wrapper_id}}"{{/if}} class="cf-search-field{{#if custom_classes}} {{custom_classes}}{{/if}}">
-    {{> icon name="search" compact=true custom_classes="cf-search-field__icon"}}
-    <input type="text"{{#if id}} id="{{id}}"{{/if}}{{#if name}} name="{{name}}"{{/if}} class="cf-field__control cf-search-field__control{{#if input_classes}} {{input_classes}}{{/if}}"{{#if value}} value="{{value}}"{{/if}}{{#if placeholder}} placeholder="{{placeholder}}"{{/if}}{{#if aria-label}} aria-label="{{aria-label}}"{{/if}}{{#if autocomplete}} autocomplete="{{autocomplete}}"{{/if}}{{#if disabled}} disabled{{/if}} />
-    {{> icon_button icon="close" intent="neutral" component_classes="cf-search-field__clear" custom_classes=clear_button_classes id=clear_button_id aria-label=clear_button_aria_label omit_legacy_classes=true}}
-</div>

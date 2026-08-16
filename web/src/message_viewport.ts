@@ -344,7 +344,7 @@ export function visible_groups(require_fully_visible: boolean): HTMLElement[] {
         $selected_group,
         75,
         get_row,
-        "cf-message-group",
+        "recipient_row",
         require_fully_visible,
     );
 }
@@ -363,7 +363,7 @@ export function visible_messages(require_fully_visible: boolean): Message[] {
         $selected_row,
         25,
         row_to_id,
-        "cf-message-item",
+        "message_row",
         require_fully_visible,
     );
 }

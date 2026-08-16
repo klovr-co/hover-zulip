@@ -161,7 +161,7 @@ function test(label, f) {
 
 function stub_message_row($textarea) {
     const $stub = $.set_results("message_row_stub", []);
-    $textarea.set_closest_results(".cf-message-item", $stub);
+    $textarea.set_closest_results(".message_row", $stub);
 }
 
 test("initial_state", () => {

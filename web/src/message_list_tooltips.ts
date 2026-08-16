@@ -190,7 +190,7 @@ export function initialize(): void {
     });
 
     // message reaction tooltip showing who reacted.
-    message_list_tooltip(".cf-message-reaction", {
+    message_list_tooltip(".message_reaction", {
         delay: INTERACTIVE_HOVER_DELAY,
         placement: "bottom",
         onShow(instance) {
@@ -211,8 +211,8 @@ export function initialize(): void {
             const target = $elem.parents(".message-list.focused-message-list").get(0);
             assert(target !== undefined);
             const nodes_to_check_for_removal = [
-                $elem.parents(".cf-message-group").get(0)!,
-                $elem.parents(".cf-message-reactions").get(0)!,
+                $elem.parents(".recipient_row").get(0)!,
+                $elem.parents(".message_reactions").get(0)!,
                 $elem.get(0)!,
             ];
             hide_tooltip_if_reference_removed(target, config, instance, nodes_to_check_for_removal);
@@ -223,7 +223,7 @@ export function initialize(): void {
         },
     });
 
-    message_list_tooltip(".cf-message-reactions .cf-message-reactions__add", {
+    message_list_tooltip(".message_reactions .reaction_button", {
         delay: LONG_HOVER_DELAY,
         placement: "bottom",
         onShow(instance) {
@@ -245,8 +245,8 @@ export function initialize(): void {
             const target = $elem.parents(".message-list.focused-message-list").get(0);
             assert(target !== undefined);
             const nodes_to_check_for_removal = [
-                $elem.parents(".cf-message-group").get(0)!,
-                $elem.parents(".cf-message-reactions").get(0)!,
+                $elem.parents(".recipient_row").get(0)!,
+                $elem.parents(".message_reactions").get(0)!,
                 $elem.get(0)!,
             ];
             hide_tooltip_if_reference_removed(target, config, instance, nodes_to_check_for_removal);
@@ -257,7 +257,7 @@ export function initialize(): void {
         },
     });
 
-    message_list_tooltip(".cf-message-actions__button", {
+    message_list_tooltip(".message_control_button", {
         delay: LONG_HOVER_DELAY,
         onShow(instance) {
             // Handle dynamic "starred messages" and "edit" widgets.
@@ -280,13 +280,13 @@ export function initialize(): void {
         },
     });
 
-    message_list_tooltip(".cf-message-item__pending-indicator", {
+    message_list_tooltip(".slow-send-spinner", {
         onShow(instance) {
             const $elem = $(instance.reference);
 
             // We need to check for removal of local class from message_row since
-            // The pending indicator is not removed (hidden) from DOM when the message is sent.
-            const target = $elem.parents(".cf-message-item").get(0);
+            // .slow-send-spinner is not removed (hidden) from DOM when message is sent.
+            const target = $elem.parents(".message_row").get(0);
             assert(target !== undefined);
             const config = {attributes: true, childList: false, subtree: false};
             const nodes_to_check_for_removal = [$elem.get(0)!];
@@ -297,10 +297,10 @@ export function initialize(): void {
         },
     });
 
-    message_list_tooltip(".message-list .cf-message-item__time", {
+    message_list_tooltip(".message-list .message-time", {
         onShow(instance) {
             const $time_elem = $(instance.reference);
-            const $row = $time_elem.closest(".cf-message-item");
+            const $row = $time_elem.closest(".message_row");
             assert(message_lists.current !== undefined);
             const message = message_lists.current.get(rows.id($row))!;
             // Don't show time tooltip for locally echoed message.
@@ -319,7 +319,7 @@ export function initialize(): void {
     message_list_tooltip(".disabled-message-edit-save", {
         onShow(instance) {
             const $elem = $(instance.reference);
-            const $row = $elem.closest(".cf-message-item");
+            const $row = $elem.closest(".message_row");
             assert($row !== undefined);
             instance.setContent(compose_validate.get_disabled_save_tooltip($row));
             return undefined;
@@ -449,7 +449,7 @@ export function initialize(): void {
         },
         onShow(instance) {
             const $elem = $(instance.reference);
-            const message_id = Number($elem.closest(".cf-message-item").attr("data-message-id"));
+            const message_id = Number($elem.closest(".message_row").attr("data-message-id"));
 
             assert(message_lists.current !== undefined);
             const message_container = message_lists.current.view.message_containers.get(message_id);

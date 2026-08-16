@@ -154,17 +154,14 @@ test("user_circle, level", ({override}) => {
 
     set_presence(selma.user_id, "active");
     assert.equal(buddy_data.get_user_circle_class(selma.user_id), "user-circle-active");
-    assert.equal(buddy_data.get_user_presence_label(selma.user_id), "translated: Active now");
     assert.equal(buddy_data.level(selma.user_id), 1);
 
     set_presence(selma.user_id, "idle");
     assert.equal(buddy_data.get_user_circle_class(selma.user_id), "user-circle-idle");
-    assert.equal(buddy_data.get_user_presence_label(selma.user_id), "translated: Idle");
     assert.equal(buddy_data.level(selma.user_id), 2);
 
     set_presence(selma.user_id, "offline");
     assert.equal(buddy_data.get_user_circle_class(selma.user_id), "user-circle-offline");
-    assert.equal(buddy_data.get_user_presence_label(selma.user_id), "translated: Offline");
     assert.equal(buddy_data.level(selma.user_id), 3);
 
     set_presence(me.user_id, "active");
@@ -189,7 +186,6 @@ test("user_circle, level", ({override}) => {
 
     set_presence(fred.user_id, undefined);
     assert.equal(buddy_data.get_user_circle_class(fred.user_id, true), "user-circle-deactivated");
-    assert.equal(buddy_data.get_user_presence_label(fred.user_id, true), "translated: Deactivated");
     assert.equal(buddy_data.level(fred.user_id), 3);
 });
 
@@ -677,9 +673,7 @@ test("get_items_for_users", ({override}) => {
             href: "#narrow/dm/1001-Human-Myself",
             is_current_user: true,
             name: "Human Myself",
-            user_actions_label: "translated: User actions for Human Myself",
             num_unread: 0,
-            presence_label: "translated: Active now",
             profile_picture: "/avatar/1001",
             status_emoji_info,
             status_text: undefined,
@@ -693,9 +687,7 @@ test("get_items_for_users", ({override}) => {
             href: "#narrow/dm/1002-Alice-Smith",
             is_current_user: false,
             name: "Alice Smith",
-            user_actions_label: "translated: User actions for Alice Smith",
             num_unread: 0,
-            presence_label: "translated: Offline",
             profile_picture: "/avatar/1002",
             status_emoji_info,
             status_text: undefined,
@@ -709,9 +701,7 @@ test("get_items_for_users", ({override}) => {
             href: "#narrow/dm/1003-Fred-Flintstone",
             is_current_user: false,
             name: "Fred Flintstone",
-            user_actions_label: "translated: User actions for Fred Flintstone",
             num_unread: 0,
-            presence_label: "translated: Offline",
             profile_picture: "/avatar/1003",
             status_emoji_info,
             status_text: undefined,

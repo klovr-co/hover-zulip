@@ -106,7 +106,7 @@ class ClawerSourceRecord(_ContractModel):
         if self.media is None and not any(
             [self.content.text, self.content.voice_transcript, self.content.media_description]
         ):
-            raise ValueError("record must contain browsable content")
+            raise ValueError("record must contain browseable content")
         if self.reply_context is not None and self.reply_context.timestamp > self.timestamp:
             raise ValueError("reply context cannot be newer than the record")
         return self

@@ -177,8 +177,8 @@ async function search_and_check(
     check: (page: Page) => Promise<void>,
     expected_narrow_title: string,
 ): Promise<void> {
-    await page.click(".cf-app-header__search-icon");
-    await page.waitForSelector(".cf-app-header__search--expanded", {visible: true});
+    await page.click(".search_icon");
+    await page.waitForSelector(".navbar-search.expanded", {visible: true});
     await common.select_item_via_typeahead(page, "#search_query", search_str, item_to_select);
     // Enter to trigger search
     await page.keyboard.press("Enter");
@@ -189,8 +189,8 @@ async function search_and_check(
 }
 
 async function search_silent_user(page: Page, str: string, item: string): Promise<void> {
-    await page.click(".cf-app-header__search-icon");
-    await page.waitForSelector(".cf-app-header__search--expanded", {visible: true});
+    await page.click(".search_icon");
+    await page.waitForSelector(".navbar-search.expanded", {visible: true});
     await common.select_item_via_typeahead(page, "#search_query", str, item);
     // Enter to trigger search
     await page.keyboard.press("Enter");
@@ -468,7 +468,7 @@ async function test_narrow_public_streams(page: Page): Promise<void> {
     await page.goto(`http://zulip.zulipdev.com:9981/#narrow/channel/${stream_id}-Denmark`);
     let message_list_id = await common.get_current_msg_list_id(page, true);
     await page.waitForSelector(
-        `.message-list[data-message-list-id='${message_list_id}'] .cf-message-group ~ .cf-message-group ~ .cf-message-group`,
+        `.message-list[data-message-list-id='${message_list_id}'] .recipient_row ~ .recipient_row ~ .recipient_row`,
     );
     assert.ok(
         (await page.$(
@@ -479,7 +479,7 @@ async function test_narrow_public_streams(page: Page): Promise<void> {
     await page.goto("http://zulip.zulipdev.com:9981/#narrow/channels/public");
     message_list_id = await common.get_current_msg_list_id(page, true);
     await page.waitForSelector(
-        `.message-list[data-message-list-id='${message_list_id}'] .cf-message-group ~ .cf-message-group ~ .cf-message-group`,
+        `.message-list[data-message-list-id='${message_list_id}'] .recipient_row ~ .recipient_row ~ .recipient_row`,
     );
     assert.ok(
         (await page.$(
@@ -493,7 +493,7 @@ async function message_basic_tests(page: Page): Promise<void> {
     await page.click("#left-sidebar-navigation-list .top_left_all_messages");
     const message_list_id = await common.get_current_msg_list_id(page, true);
     await page.waitForSelector(
-        `.message-list[data-message-list-id='${message_list_id}'] .cf-message-item`,
+        `.message-list[data-message-list-id='${message_list_id}'] .message_row`,
         {visible: true},
     );
 

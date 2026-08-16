@@ -1317,7 +1317,6 @@ export function get_sidebar_stream_topic_info(filter: Filter): {
 
 function deselect_stream_items(): void {
     $("ul#stream_filters li").removeClass("active-filter stream-expanded");
-    $("ul#stream_filters .cf-channel-nav__main").removeAttr("aria-current");
 }
 
 export function update_stream_sidebar_for_topic_search(): void {
@@ -1374,10 +1373,7 @@ export function update_stream_sidebar_for_narrow(filter: Filter): JQuery | undef
     }
 
     if (!info.topic_selected && !zoomed_in) {
-        $stream_li
-            .addClass("active-filter")
-            .find(".cf-channel-nav__main")
-            .attr("aria-current", "page");
+        $stream_li.addClass("active-filter");
     }
 
     // Always add 'stream-expanded' class irrespective of whether
@@ -1681,7 +1677,7 @@ export function set_event_handlers({
     $("#stream_filters").on(
         "click",
         // Setup Spaces intentionally have no stream ID and use their own click handler.
-        "li:not(.cf-space-setup) .subscription_block",
+        "li:not(.hover-space-setup-row) .subscription_block",
         (e) => {
             // Left sidebar channel links have an `href` so that the
             // browser will preview the URL and you can middle-click it.

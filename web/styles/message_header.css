@@ -186,29 +186,29 @@
 }
 
 .message-feed {
-    .cf-message-group {
+    .recipient_row {
         /* Browser overlaps extra top padding of message header and
            the bottom border message if this margin is not present. */
         margin-bottom: 1px;
         border-radius: 5px;
 
-        .cf-message-item:last-of-type {
+        .message_row:last-of-type {
             border-radius: var(--last-message-row-border-radius);
             border-bottom: 1px solid var(--color-message-list-border);
 
-            .cf-message-item__unread-fill {
+            .unread-marker-fill {
                 border-radius: 0 0 0 7px;
                 height: calc(100% - 2px);
             }
 
-            .cf-message-item__frame {
+            .messagebox {
                 border-radius: 0 0 7px 7px;
                 padding-bottom: 4px;
             }
         }
 
-        .message_header + .cf-message-item {
-            .cf-message-item__frame {
+        .message_header + .message_row {
+            .messagebox {
                 padding-top: 5px;
             }
         }

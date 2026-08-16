@@ -28,7 +28,7 @@ function get_message_selector(text: string): string {
 }
 
 async function test_send_messages(page: Page): Promise<void> {
-    const initial_msgs_count = (await page.$$(".message-list .cf-message-item")).length;
+    const initial_msgs_count = (await page.$$(".message-list .message_row")).length;
 
     await common.send_multiple_messages(page, [
         {stream_name: "Verona", topic: "Reply test", content: "Compose stream reply test"},
@@ -38,10 +38,10 @@ async function test_send_messages(page: Page): Promise<void> {
     await page.click("#left-sidebar-navigation-list .top_left_all_messages");
     const message_list_id = await common.get_current_msg_list_id(page, true);
     await page.waitForSelector(
-        `.message-list[data-message-list-id='${message_list_id}'] .cf-message-item`,
+        `.message-list[data-message-list-id='${message_list_id}'] .message_row`,
         {visible: true},
     );
-    assert.equal((await page.$$(".message-list .cf-message-item")).length, initial_msgs_count + 2);
+    assert.equal((await page.$$(".message-list .message_row")).length, initial_msgs_count + 2);
 }
 
 async function test_stream_compose_keyboard_shortcut(page: Page): Promise<void> {
@@ -143,12 +143,12 @@ async function test_send_multirecipient_pm_from_cordelia_pm_narrow(page: Page): 
     await page.click("#left-sidebar-navigation-list .top_left_all_messages");
     const message_list_id = await common.get_current_msg_list_id(page, true);
     await page.waitForSelector(
-        `.message-list[data-message-list-id='${message_list_id}'] .cf-message-item`,
+        `.message-list[data-message-list-id='${message_list_id}'] .message_row`,
         {visible: true},
     );
     const pm = await page.waitForSelector(
         `xpath/(//*[${common.has_class_x(
-            "cf-message-item__frame",
+            "messagebox",
         )} and contains(normalize-space(), "${multiple_recipients_pm}") and count(.//*[${common.has_class_x(
             "star",
         )}])>0])[last()]`,
@@ -226,7 +226,7 @@ async function compose_tests(page: Page): Promise<void> {
     await page.click("#left-sidebar-navigation-list .top_left_all_messages");
     const message_list_id = await common.get_current_msg_list_id(page, true);
     await page.waitForSelector(
-        `.message-list[data-message-list-id='${message_list_id}'] .cf-message-item`,
+        `.message-list[data-message-list-id='${message_list_id}'] .message_row`,
         {visible: true},
     );
     await test_send_messages(page);

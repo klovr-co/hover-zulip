@@ -13,40 +13,40 @@ export function next_visible($message_row: JQuery): JQuery {
     if ($message_row === undefined || $message_row.length === 0) {
         return $();
     }
-    const $row = $message_row.next(".cf-message-item");
+    const $row = $message_row.next(".selectable_row");
     if ($row.length > 0) {
         return $row;
     }
     const $recipient_row = get_message_recipient_row($message_row);
-    const $next_recipient_rows = $recipient_row.nextAll(".cf-message-group");
+    const $next_recipient_rows = $recipient_row.nextAll(".recipient_row");
     if ($next_recipient_rows.length === 0) {
         return $();
     }
-    return $(".cf-message-item", $next_recipient_rows[0]).first();
+    return $(".selectable_row", $next_recipient_rows[0]).first();
 }
 
 export function prev_visible($message_row: JQuery): JQuery {
     if ($message_row === undefined || $message_row.length === 0) {
         return $();
     }
-    const $row = $message_row.prev(".cf-message-item");
+    const $row = $message_row.prev(".selectable_row");
     if ($row.length > 0) {
         return $row;
     }
     const $recipient_row = get_message_recipient_row($message_row);
-    const $prev_recipient_rows = $recipient_row.prevAll(".cf-message-group");
+    const $prev_recipient_rows = $recipient_row.prevAll(".recipient_row");
     if ($prev_recipient_rows.length === 0) {
         return $();
     }
-    return $(".cf-message-item", $prev_recipient_rows[0]).last();
+    return $(".selectable_row", $prev_recipient_rows[0]).last();
 }
 
 export function first_visible(): JQuery {
-    return $(".focused-message-list .cf-message-item").first();
+    return $(".focused-message-list .selectable_row").first();
 }
 
 export function last_visible(): JQuery {
-    return $(".focused-message-list .cf-message-item").last();
+    return $(".focused-message-list .selectable_row").last();
 }
 
 export function visible_range(start_id: number, end_id: number): JQuery[] {
@@ -120,7 +120,7 @@ export function get_message_id(elem: HTMLElement): number {
     // Gets the message_id for elem, where elem is a DOM
     // element inside a message.  This is typically used
     // in click handlers for things like the reaction button.
-    const $row = $(elem).closest(".cf-message-item");
+    const $row = $(elem).closest(".message_row");
     const message_id = id($row);
     return message_id;
 }
@@ -129,31 +129,31 @@ export function get_closest_group(element: HTMLElement): JQuery {
     // This gets the closest message row to an element, whether it's
     // a recipient bar or message.  With our current markup,
     // this is the most reliable way to do it.
-    return $(element).closest("div.cf-message-group");
+    return $(element).closest("div.recipient_row");
 }
 
 export function get_closest_row($element: JQuery): JQuery {
-    return $element.closest("div.cf-message-item");
+    return $element.closest("div.message_row");
 }
 
 export function first_message_in_group($message_group: JQuery): JQuery {
-    return $("div.cf-message-item", $message_group).first();
+    return $("div.message_row", $message_group).first();
 }
 
 export function last_message_in_group($message_group: JQuery): JQuery {
-    return $("div.cf-message-item", $message_group).last();
+    return $("div.message_row", $message_group).last();
 }
 
 export function get_message_recipient_row($message_row: JQuery): JQuery {
-    return $message_row.parent(".cf-message-group").expectOne();
+    return $message_row.parent(".recipient_row").expectOne();
 }
 
 export function get_message_recipient_header($message_row: JQuery): JQuery {
-    return $message_row.parent(".cf-message-group").find(".message_header").expectOne();
+    return $message_row.parent(".recipient_row").find(".message_header").expectOne();
 }
 
 export function recipient_from_group($message_group: JQuery): Message | undefined {
-    const message_id = id($message_group.children(".cf-message-item").first().expectOne());
+    const message_id = id($message_group.children(".message_row").first().expectOne());
     return message_store.get(message_id);
 }
 

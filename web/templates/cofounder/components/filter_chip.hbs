@@ -1,6 +1,0 @@
-<button type="button" class="cf-filter-chip{{#if selected}} cf-filter-chip--selected{{/if}}{{#if disabled}} cf-filter-chip--disabled{{/if}}{{#if custom_classes}} {{custom_classes}}{{/if}}" role="checkbox" aria-checked="{{#if selected}}true{{else}}false{{/if}}"{{#if disabled}} aria-disabled="true"{{/if}}{{#if data_filter}} data-filter="{{data_filter}}"{{/if}}>
-    <span class="cf-filter-chip__indicator" aria-hidden="true">
-        {{> icon name="check" compact=true}}
-    </span>
-    <span class="cf-filter-chip__label">{{label}}</span>
-</button>

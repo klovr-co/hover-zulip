@@ -64,7 +64,7 @@
             > .change_visibility_policy
             :is(
                 .recent-view-row-topic-menu,
-                .visibility-status-icon[data-cf-vdots-original-icon-name]
+                .visibility-status-icon[data-vdots-original-icon-class]
             ) {
             opacity: 0;
         }
@@ -73,7 +73,7 @@
             .change_visibility_policy
             :is(
                 .recent-view-row-topic-menu,
-                .visibility-status-icon[data-cf-vdots-original-icon-name]
+                .visibility-status-icon[data-vdots-original-icon-class]
             ) {
             opacity: 0;
         }
@@ -95,7 +95,7 @@
             > .change_visibility_policy
                 :is(
                     .recent-view-row-topic-menu,
-                    .visibility-status-icon[data-cf-vdots-original-icon-name]
+                    .visibility-status-icon[data-vdots-original-icon-class]
                 ) {
                 /* Wrapper focus = direct interaction on the
                    menu button; top of the tier. */
@@ -121,7 +121,7 @@
             .change_visibility_policy
             :is(
                 .recent-view-row-topic-menu,
-                .visibility-status-icon[data-cf-vdots-original-icon-name]
+                .visibility-status-icon[data-vdots-original-icon-class]
             ) {
             opacity: 0.2;
         }
@@ -182,6 +182,13 @@
            .empty-table-message so the load-more text
            and button match normal UI text size. */
         font-size: var(--base-font-size-px);
+    }
+
+    .fa-check-square-o,
+    .fa-square-o {
+        width: 0.7142em; /* Legacy 10px size at 14px/1em. */
+        padding-right: 0.3571em; /* Legacy 5px size at 14px/1em. */
+        padding-left: 0.1428em; /* Legacy 2px size at 14px/1em. */
     }
 
     .table_fix_head {
@@ -257,7 +264,7 @@
         margin-inline: 2px;
     }
 
-    .button-recent-filters:not(.cf-filter-chip) {
+    .button-recent-filters {
         color: var(--color-text-default);
         background-color: var(--color-background-zulip-button);
         border: 1px solid var(--color-border-zulip-button);
@@ -927,7 +934,7 @@
     height: var(--recent-topics-filters-height);
 }
 
-#recent_view_folder_filter_button:not(.cf-icon-button) {
+#recent_view_folder_filter_button {
     font-size: 1.5625em; /* 25px at 16px/1em */
     padding: 0;
 

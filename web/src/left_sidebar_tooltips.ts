@@ -144,7 +144,7 @@ export function initialize(): void {
     });
 
     tippy.delegate("body", {
-        target: "#add_streams_button",
+        target: "#streams_inline_icon",
         onShow(instance) {
             const can_create_streams =
                 settings_data.user_can_create_private_streams() ||
@@ -223,7 +223,7 @@ export function initialize(): void {
     });
 
     tippy.delegate("body", {
-        target: ".cf-app-header__brand-region .cf-app-header__sidebar-toggle, #streamlist-toggle",
+        target: ".header-main .column-left .left-sidebar-toggle-button, #streamlist-toggle",
         delay: LONG_HOVER_DELAY,
         placement: "bottom",
         appendTo: () => document.body,

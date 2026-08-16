@@ -335,7 +335,7 @@ export function set_up_toggler(): void {
 
     toggler = components.toggle(opts);
     const $elem = toggler.get();
-    $elem.addClass("cf-tabs--fill cf-tabs--wrap");
+    $elem.addClass("large allow-overflow");
 
     const modals = opts.values.map((item) => {
         const key = item.key; // e.g. message-formatting

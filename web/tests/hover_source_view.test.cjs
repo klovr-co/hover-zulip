@@ -104,23 +104,13 @@ run_test("renders loading and first-page empty states", () => {
         limit: "30",
         query: '""',
     });
-    assert.match($("#cf-source-view").html(), /Loading Source records/);
-    assert.match($("#cf-source-view").html(), /cf-source-view__loading-indicator/);
-    assert.match($("#cf-source-view").html(), /aria-busy="true"/);
-    assert.match($("#cf-source-view").html(), /Read-only records/);
+    assert.match($("#hover-source-view").html(), /Loading Source records/);
+    assert.match($("#hover-source-view").html(), /Source records · Read-only/);
 
     requests[0].success(response([]));
-    const html = $("#cf-source-view").html();
-    assert.match(html, /aria-busy="false"/);
-    assert.doesNotMatch(html, /cf-source-view__loading-indicator/);
-    assert.match(html, /cf-source-view__status--empty/);
-    assert.match(html, /cf-source-view__empty-indicator/);
+    const html = $("#hover-source-view").html();
     assert.match(html, /This Source has no records in its confirmed history/);
-    assert.match(
-        html,
-        /Records will appear here after the connected Source imports confirmed history/,
-    );
-    assert.doesNotMatch(html, /class="cf-source-record"/);
+    assert.doesNotMatch(html, /class="hover-source-record"/);
 });
 
 run_test("renders records and searches with a no-match state", () => {
@@ -139,7 +129,7 @@ run_test("renders records and searches with a no-match state", () => {
         ),
     );
 
-    const populated_html = $("#cf-source-view").html();
+    const populated_html = $("#hover-source-view").html();
     assert.match(populated_html, /data-record-id="record-1"/);
     assert.match(populated_html, /Alex &lt;Admin&gt;/);
     assert.match(populated_html, /Venue &lt;script&gt;alert\(1\)&lt;\/script&gt; ready/);
@@ -149,14 +139,13 @@ run_test("renders records and searches with a no-match state", () => {
     assert.match(populated_html, /application\/pdf/);
     assert.match(populated_html, /2\.0 KB/);
     assert.match(populated_html, /Unavailable/);
-    assert.match(populated_html, /id="cf-source-load-older"/);
-    assert.doesNotMatch(populated_html, /hover-source-|fa fa-|zulip-icon/);
+    assert.match(populated_html, /id="hover-source-load-older"/);
 
-    $("#cf-source-search").val("  venue   handoff  ");
+    $("#hover-source-search").val("  venue   handoff  ");
     let default_prevented = false;
     $("body").get_on_handler(
         "submit",
-        "#cf-source-search-form",
+        "#hover-source-search-form",
     )({
         preventDefault() {
             default_prevented = true;
@@ -170,12 +159,10 @@ run_test("renders records and searches with a no-match state", () => {
         limit: "30",
         query: '"venue handoff"',
     });
-    assert.doesNotMatch($("#cf-source-view").html(), /record-1/);
+    assert.doesNotMatch($("#hover-source-view").html(), /record-1/);
 
     requests[1].success(response([]));
-    assert.match($("#cf-source-view").html(), /No records match this search/);
-    assert.match($("#cf-source-view").html(), /Try a different search phrase/);
-    assert.match($("#cf-source-view").html(), /cf-source-view__status--empty/);
+    assert.match($("#hover-source-view").html(), /No records match this search/);
 });
 
 run_test("retries a retryable first-page error", () => {
@@ -192,16 +179,12 @@ run_test("retries a retryable first-page error", () => {
         },
         "error",
     );
-    const error_html = $("#cf-source-view").html();
+    const error_html = $("#hover-source-view").html();
     assert.match(error_html, /rate limited/);
     assert.match(error_html, /5 seconds/);
-    assert.match(error_html, /cf-source-view__status--error/);
-    assert.match(error_html, /cf-source-view__error-indicator/);
-    assert.match(error_html, /aria-label="(?:translated: )?Retry loading Source records"/);
-    assert.match(error_html, /aria-busy="false"/);
-    assert.match(error_html, /id="cf-source-retry"/);
+    assert.match(error_html, /id="hover-source-retry"/);
 
-    $("body").get_on_handler("click", "#cf-source-retry")();
+    $("body").get_on_handler("click", "#hover-source-retry")();
     assert.equal(requests.length, 2);
     assert.equal(requests[0].aborted, true);
     assert.deepEqual(requests[1].data, {
@@ -209,14 +192,12 @@ run_test("retries a retryable first-page error", () => {
         limit: "30",
         query: '""',
     });
-    assert.match($("#cf-source-view").html(), /Loading Source records/);
-    assert.doesNotMatch($("#cf-source-view").html(), /cf-source-view__status--error/);
-    assert.match($("#cf-source-view").html(), /aria-busy="true"/);
+    assert.match($("#hover-source-view").html(), /Loading Source records/);
 });
 
 run_test("loads older records and preserves the reading position", () => {
     reset_view();
-    const $view = $("#cf-source-view");
+    const $view = $("#hover-source-view");
     $view[0].scrollHeight = 100;
     $view.scrollTop(25);
     hover_source_view.show(3, 8);
@@ -227,22 +208,22 @@ run_test("loads older records and preserves the reading position", () => {
         }),
     );
 
-    $("body").get_on_handler("click", "#cf-source-load-older")();
+    $("body").get_on_handler("click", "#hover-source-load-older")();
     assert.equal(requests.length, 2);
     assert.deepEqual(requests[1].data, {
         cursor: '"next-page"',
         limit: "30",
         query: '""',
     });
-    assert.match($("#cf-source-view").html(), /Loading older records/);
-    assert.doesNotMatch($("#cf-source-view").html(), /id="cf-source-load-older"/);
+    assert.match($("#hover-source-view").html(), /Loading older records/);
+    assert.doesNotMatch($("#hover-source-view").html(), /id="hover-source-load-older"/);
 
     $view[0].scrollHeight = 180;
     requests[1].success(response([make_record("record-2", "2026-08-09T09:00:00Z", "Older page")]));
     const html = $view.html();
     assert.ok(html.indexOf("Older page") < html.indexOf("First page"));
     assert.equal($view.scrollTop(), 105);
-    assert.doesNotMatch(html, /id="cf-source-load-older"/);
+    assert.doesNotMatch(html, /id="hover-source-load-older"/);
 });
 
 run_test("closes the active Source view when browse permission is revoked", () => {
@@ -251,13 +232,13 @@ run_test("closes the active Source view when browse permission is revoked", () =
     requests[0].success(
         response([make_record("record-1", "2026-08-10T09:00:00Z", "Visible record")]),
     );
-    assert.match($("#cf-source-view").html(), /Visible record/);
+    assert.match($("#hover-source-view").html(), /Visible record/);
 
     space = {...space, attachments: [{...space.attachments[0], can_browse_records: false}]};
     hover_source_view.handle_space_event();
 
     assert.equal(window.location.hash, "");
-    assert.equal($("#cf-source-view").html(), "");
+    assert.equal($("#hover-source-view").html(), "");
     assert.equal(requests[0].aborted, true);
     assert.equal(hover_source_view.show(3, 8), false);
     assert.equal(requests.length, 1);

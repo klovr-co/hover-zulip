@@ -1,36 +1,33 @@
 <section
-  class="cf-feed-controls"
-  data-cf-feed-controls="module"
-  aria-label="{{t 'Filter Module updates'}}"
-  >
-    <div class="cf-feed-controls__heading">
-        <span class="cf-feed-controls__eyebrow">{{space_name}}</span>
-        <span class="cf-feed-controls__title">
-            <strong>{{module_name}}</strong>
-            <small>{{t "Current insights with history on demand"}}</small>
-        </span>
+    class="hover-module-view-filters"
+    aria-label="{{t 'Filter Module updates'}}"
+>
+    <div class="hover-all-view-filters__heading">
+        <span class="hover-all-view-filters__eyebrow">{{space_name}}</span>
+        <strong>{{module_name}}</strong>
+        <span>{{t "Current insights with history on demand"}}</span>
     </div>
     <div
-      class="cf-feed-controls__rail"
-      role="group"
-      aria-label="{{t 'Module history display'}}"
-      >
+        class="hover-module-view-filters__controls"
+        role="group"
+        aria-label="{{t 'Module history display'}}"
+    >
         <button
-          type="button"
-          class="cf-feed-filter cf-feed-filter--selected"
-          data-cf-feed-history="latest"
-          aria-pressed="true"
-          >{{t "Latest insights"}}</button>
+            type="button"
+            class="hover-module-history-filter is-active"
+            data-hover-history="latest"
+            aria-pressed="true"
+        >{{t "Latest insights"}}</button>
         <button
-          type="button"
-          class="cf-feed-filter"
-          data-cf-feed-history="all"
-          aria-pressed="false"
-          >{{t "Full history"}}</button>
+            type="button"
+            class="hover-module-history-filter"
+            data-hover-history="all"
+            aria-pressed="false"
+        >{{t "Full history"}}</button>
     </div>
-    <p class="cf-feed-controls__status" role="status" aria-live="polite">
+    <p class="hover-module-view-filters__status" aria-live="polite">
         {{t
-          "Showing the latest state of each insight. Earlier updates remain in Full history."
-          }}
+            "Showing the latest state of each insight. Earlier updates remain in Full history."
+        }}
     </p>
 </section>

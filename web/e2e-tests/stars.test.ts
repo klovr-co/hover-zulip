@@ -13,9 +13,9 @@ async function stars_count(page: Page): Promise<number> {
 async function toggle_test_star_message(page: Page): Promise<void> {
     const messagebox = await page.waitForSelector(
         `xpath/(//*[${common.has_class_x("message-list")}]//*[${common.has_class_x(
-            "cf-message-item__content",
+            "message_content",
         )} and normalize-space()="${message}"])[last()]/ancestor::*[${common.has_class_x(
-            "cf-message-item__frame",
+            "messagebox",
         )}]`,
         {visible: true},
     );
@@ -36,7 +36,7 @@ async function test_narrow_to_starred_messages(page: Page): Promise<void> {
     await page.click("#left-sidebar-navigation-list .top_left_all_messages");
     const combined_feed_id = await common.get_current_msg_list_id(page, true);
     await page.waitForSelector(
-        `.message-list[data-message-list-id='${combined_feed_id}'] .cf-message-item`,
+        `.message-list[data-message-list-id='${combined_feed_id}'] .message_row`,
         {visible: true},
     );
 }
@@ -46,7 +46,7 @@ async function stars_test(page: Page): Promise<void> {
     await page.click("#left-sidebar-navigation-list .top_left_all_messages");
     let message_list_id = await common.get_current_msg_list_id(page, true);
     await page.waitForSelector(
-        `.message-list[data-message-list-id='${message_list_id}'] .cf-message-item`,
+        `.message-list[data-message-list-id='${message_list_id}'] .message_row`,
         {visible: true},
     );
     // Assert that there is only one message list.

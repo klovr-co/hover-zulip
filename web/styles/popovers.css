@@ -996,7 +996,7 @@ ul.popover-group-menu-member-list {
     }
 }
 
-.popover-menu:not(.cf-menu) {
+.popover-menu {
     margin: 0;
     max-height: 85vh;
     overflow-x: hidden;
@@ -1338,7 +1338,7 @@ ul.popover-group-menu-member-list {
     }
 }
 
-ul.popover-menu-list:not(.cf-menu__list) {
+ul.popover-menu-list {
     list-style: none;
     margin: 0;
     padding: 4px 0;

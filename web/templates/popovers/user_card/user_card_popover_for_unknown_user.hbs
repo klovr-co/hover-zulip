@@ -1,4 +1,4 @@
-<div class="cf-menu popover-menu user-card-popover-actions no-auto-hide-right-sidebar-overlay" id="user_card_popover" data-simplebar data-simplebar-tab-index="-1">
+<div class="popover-menu user-card-popover-actions no-auto-hide-right-sidebar-overlay" id="user_card_popover" data-simplebar data-simplebar-tab-index="-1">
     <div class="popover-menu-user-header">
         <div class="popover-menu-user-avatar-container">
             <img class="popover-menu-user-avatar" src="{{user_avatar}}" />
@@ -9,12 +9,12 @@
             </div>
         </div>
     </div>
-    <ul role="menu" class="cf-menu__list popover-menu-list" data-user-id="{{user_id}}">
-        <li role="separator" class="cf-menu__separator popover-menu-separator hidden-for-spectators"></li>
-        <li role="none" class="cf-menu__item popover-menu-list-item link-item">
-            <a role="menuitem" href="{{ sent_by_url }}" class="narrow_to_messages_sent cf-menu__action popover-menu-link hidden-for-spectators" tabindex="0">
-                {{> ../../cofounder/components/icon name="messages" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
-                <span class="cf-menu__label popover-menu-label">{{t "View messages sent" }}</span>
+    <ul role="menu" class="popover-menu-list" data-user-id="{{user_id}}">
+        <li role="separator" class="popover-menu-separator hidden-for-spectators"></li>
+        <li role="none" class="popover-menu-list-item link-item">
+            <a role="menuitem" href="{{ sent_by_url }}" class="narrow_to_messages_sent popover-menu-link hidden-for-spectators" tabindex="0">
+                <i class="popover-menu-icon zulip-icon zulip-icon-message-square" aria-hidden="true"></i>
+                <span class="popover-menu-label">{{t "View messages sent" }}</span>
             </a>
         </li>
     </ul>

@@ -15,7 +15,6 @@ import * as activity from "./activity.ts";
 import * as blueslip from "./blueslip.ts";
 import * as buddy_data from "./buddy_data.ts";
 import * as channel_folders from "./channel_folders.ts";
-import * as cofounder_icon from "./cofounder/components/icon.ts";
 import * as compose_actions from "./compose_actions.ts";
 import * as compose_closed_ui from "./compose_closed_ui.ts";
 import * as dialog_widget from "./dialog_widget.ts";
@@ -139,33 +138,38 @@ export function set_hide_other_views(callback: () => void): void {
 // Track the row's interaction state so we can swap the
 // `.visibility-status-icon` to a vdots glyph when the row is hovered,
 // keyboard-focused, or has the topic-actions popover open. We swap the
-// typed Cofounder icon name so the same SVG renderer owns both states.
-const ORIGINAL_ICON_NAME_DATA_ATTR = "data-cf-vdots-original-icon-name";
+// underlying icon-font class (rather than overlaying via mask-image)
+// so the rendered glyph matches every other vdots in the app exactly.
+const ORIGINAL_ICON_CLASS_DATA_ATTR = "data-vdots-original-icon-class";
 
 function swap_visibility_icon_to_vdots($icon: JQuery): void {
     if ($icon.hasClass("recent-view-row-topic-menu")) {
         return;
     }
-    if ($icon.attr(ORIGINAL_ICON_NAME_DATA_ATTR) !== undefined) {
+    if ($icon.attr(ORIGINAL_ICON_CLASS_DATA_ATTR) !== undefined) {
         return;
     }
-    const original_name = $icon.attr("data-cf-icon-name");
-    if (original_name === undefined || !cofounder_icon.is_icon_name(original_name)) {
+    const icon_element = $icon.get(0);
+    if (icon_element === undefined) {
         return;
     }
-    $icon.attr(ORIGINAL_ICON_NAME_DATA_ATTR, original_name);
-    $icon.attr("data-cf-icon-name", "more-vertical");
-    cofounder_icon.replace_icon($icon, "more-vertical");
+    const original_class = [...icon_element.classList].find(
+        (cls) => cls.startsWith("zulip-icon-") && cls !== "zulip-icon-more-vertical",
+    );
+    if (original_class === undefined) {
+        return;
+    }
+    $icon.attr(ORIGINAL_ICON_CLASS_DATA_ATTR, original_class);
+    $icon.removeClass(original_class).addClass("zulip-icon-more-vertical");
 }
 
 function restore_visibility_icon($icon: JQuery): void {
-    const original_name = $icon.attr(ORIGINAL_ICON_NAME_DATA_ATTR);
-    if (original_name === undefined || !cofounder_icon.is_icon_name(original_name)) {
+    const original_class = $icon.attr(ORIGINAL_ICON_CLASS_DATA_ATTR);
+    if (original_class === undefined) {
         return;
     }
-    $icon.attr("data-cf-icon-name", original_name);
-    cofounder_icon.replace_icon($icon, original_name);
-    $icon.removeAttr(ORIGINAL_ICON_NAME_DATA_ATTR);
+    $icon.removeClass("zulip-icon-more-vertical").addClass(original_class);
+    $icon.removeAttr(ORIGINAL_ICON_CLASS_DATA_ATTR);
 }
 
 export function update_visibility_icon_swap_state($wrapper: JQuery): void {
@@ -360,7 +364,7 @@ function update_load_more_banner(): void {
     const $button = $container.find(".fetch-messages-button");
     $button.toggleClass("notvisible", false);
     $button.find(".button-label").toggleClass("invisible", false);
-    $button.prop("disabled", false).attr("aria-busy", "false").removeAttr("aria-label");
+    $button.prop("disabled", false);
     loading.destroy_indicator($button.find(".loading-indicator"));
 }
 
@@ -1292,7 +1296,7 @@ function show_selected_filters(): void {
     for (const filter of filters) {
         $("#recent_view_filter_buttons")
             .find(`[data-filter="${CSS.escape(filter)}"]`)
-            .addClass("button-recent-selected cf-filter-chip--selected")
+            .addClass("button-recent-selected")
             .attr("aria-checked", "true");
     }
 
@@ -1338,19 +1342,17 @@ function setup_dropdown_filters_widget(): void {
 function update_recent_view_folder_filter_button(): void {
     const folder_filters = folder_dropdown_widget.FOLDER_FILTERS;
     if (folder_filter_value === folder_filters.ANY_FOLDER_DROPDOWN_OPTION) {
-        $("#recent_view_folder_filter_button").addClass(
-            "cf-icon-button--neutral icon-button-neutral",
-        );
-        $("#recent_view_folder_filter_button").removeClass(
-            "cf-icon-button--brand icon-button-brand",
-        );
-        cofounder_icon.replace_icon($("#recent_view_folder_filter_button"), "folder-chevron");
+        $("#recent_view_folder_filter_button").addClass("icon-button-neutral");
+        $("#recent_view_folder_filter_button").removeClass("icon-button-brand");
+        $("#recent_view_folder_filter_button .zulip-icon")
+            .removeClass("zulip-icon-folder-search")
+            .addClass("zulip-icon-folder-chevron");
     } else {
-        $("#recent_view_folder_filter_button").removeClass(
-            "cf-icon-button--neutral icon-button-neutral",
-        );
-        $("#recent_view_folder_filter_button").addClass("cf-icon-button--brand icon-button-brand");
-        cofounder_icon.replace_icon($("#recent_view_folder_filter_button"), "folder-search");
+        $("#recent_view_folder_filter_button").removeClass("icon-button-neutral");
+        $("#recent_view_folder_filter_button").addClass("icon-button-brand");
+        $("#recent_view_folder_filter_button .zulip-icon")
+            .removeClass("zulip-icon-folder-chevron")
+            .addClass("zulip-icon-folder-search");
     }
     const recent_view_folder_filter_wrapper: tippy.ReferenceElement | undefined = $(
         "#recent_view_folder_filter_container",
@@ -1547,7 +1549,9 @@ function update_unread_sort_header_state(): void {
         // Fall back to time sort, which is the default, when the
         // unread sort column is no longer meaningful.
         $unread_sort_header.removeClass("active descend");
-        $("#recent-view-table-headers .recent-view-last-msg-time-sort").addClass("active descend");
+        $("#recent-view-table-headers .recent-view-last-msg-time-header").addClass(
+            "active descend",
+        );
         topics_widget.set_reverse_mode(true);
         topics_widget.sort("numeric", "last_msg_id");
     }
@@ -2542,10 +2546,7 @@ export function initialize({
         function (this: HTMLElement) {
             const $button = $(this);
             $button.find(".button-label").toggleClass("invisible", true);
-            $button.prop("disabled", true).attr({
-                "aria-busy": "true",
-                "aria-label": $t({defaultMessage: "Loading older messages"}),
-            });
+            $button.prop("disabled", true);
             loading.make_indicator($button.find(".loading-indicator"), {width: 20});
             maybe_load_older_messages(unread.first_unread_unmuted_message_id);
         },

@@ -1,25 +1,25 @@
-<div class="cf-menu popover-menu" id="buddy-list-actions-menu-popover" data-simplebar data-simplebar-tab-index="-1">
-    <ul role="menu" class="cf-menu__list popover-menu-list">
+<div class="popover-menu" id="buddy-list-actions-menu-popover" data-simplebar data-simplebar-tab-index="-1">
+    <ul role="menu" class="popover-menu-list">
         <li role="none" class="link-item">
-            <label class="display-style-selector-header cf-menu__action popover-menu-link" role="menuitem">
-                <span class="cf-menu__label popover-menu-label">
+            <label class="display-style-selector-header popover-menu-link" role="menuitem">
+                <span class="popover-menu-label">
                     {{t 'User list style' }}
                 </span>
             </label>
         </li>
         {{#each (object_values display_style_options)}}
             <li role="none" class="display-style-selector link-item" value="{{this.code}}">
-                <label class="cf-menu__action popover-menu-link" role="menuitem" tabindex="0">
+                <label class="popover-menu-link" role="menuitem" tabindex="0">
                     <input type="radio" class="user_list_style_choice" name="user_list_style" value="{{this.code}}"/>
-                    <span class="cf-menu__label popover-menu-label">{{this.description}}</span>
+                    <span class="popover-menu-label">{{this.description}}</span>
                 </label>
             </li>
         {{/each}}
         {{#if can_invite_users}}
         <li role="none" class="invite-user-link-item link-item">
-            <a class="invite-user-link cf-menu__action popover-menu-link" role="menuitem" tabindex="0">
-                {{> ../cofounder/components/icon name="user-plus" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
-                <span class="cf-menu__label popover-menu-label">
+            <a class="invite-user-link popover-menu-link" role="menuitem" tabindex="0">
+                <i class="popover-menu-icon zulip-icon zulip-icon-user-plus" aria-hidden="true"></i>
+                <span class="popover-menu-label">
                     {{t 'Invite users to organization' }}
                 </span>
             </a>

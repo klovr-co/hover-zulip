@@ -63,20 +63,19 @@ export function update_starred_view(message_id: number, new_value: boolean): voi
     // Avoid a full re-render, but update the star in each message
     // table in which it is visible.
     update_message_in_all_views(message_id, ($row) => {
-        const $star_button = $row.find(".cf-message-actions__star-button");
+        const $elt = $row.find(".star");
+        const $star_container = $row.find(".star_container");
         if (starred) {
-            $star_button
-                .addClass("cf-message-actions__star-button--selected")
-                .attr("aria-pressed", "true");
+            $elt.addClass("zulip-icon-star-filled").removeClass("zulip-icon-star");
+            $star_container.removeClass("empty-star");
         } else {
-            $star_button
-                .removeClass("cf-message-actions__star-button--selected")
-                .attr("aria-pressed", "false");
+            $elt.removeClass("zulip-icon-star-filled").addClass("zulip-icon-star");
+            $star_container.addClass("empty-star");
         }
         const data_template_id = starred
             ? "unstar-message-tooltip-template"
             : "star-message-tooltip-template";
-        $star_button.attr("data-tooltip-template-id", data_template_id);
+        $star_container.attr("data-tooltip-template-id", data_template_id);
     });
 }
 

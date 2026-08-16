@@ -30,7 +30,7 @@ export function notify_unmute(muted_narrow: string, stream_id: number, topic_nam
             topic_name,
             is_empty_string_topic: topic_name === "",
             classname: compose_banner.CLASSNAMES.unmute_topic_notification,
-            banner_type: compose_banner.WARNING,
+            banner_type: "",
             button_text: $t({defaultMessage: "Unmute topic"}),
         }),
     );
@@ -356,9 +356,7 @@ export function maybe_show_one_time_non_interleaved_view_messages_fading_banner(
     }
 
     // Wait to display the banner the first time until there's actually fading.
-    const faded_messages_exist = $(".focused-message-list .cf-message-group").hasClass(
-        "message-fade",
-    );
+    const faded_messages_exist = $(".focused-message-list .recipient_row").hasClass("message-fade");
     if (!faded_messages_exist) {
         return;
     }
@@ -388,9 +386,7 @@ export function maybe_show_one_time_interleaved_view_messages_fading_banner(): v
     }
 
     // Wait to display the banner the first time until there's actually fading.
-    const faded_messages_exist = $(".focused-message-list .cf-message-group").hasClass(
-        "message-fade",
-    );
+    const faded_messages_exist = $(".focused-message-list .recipient_row").hasClass("message-fade");
     if (!faded_messages_exist) {
         return;
     }
@@ -445,7 +441,7 @@ export function initialize(opts: {
             e.preventDefault();
         },
     );
-    $("#compose_banners").on("click", ".sent_scroll_to_view .cf-notice__action", (e) => {
+    $("#compose_banners").on("click", ".sent_scroll_to_view .action-button", (e) => {
         assert(message_lists.current !== undefined);
         const message_id = Number($(e.currentTarget).attr("data-message-id"));
         message_lists.current.select_id(message_id);

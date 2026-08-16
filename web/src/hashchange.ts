@@ -224,7 +224,12 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
                 // TODO: Show possible valid URLs to the user.
                 terms = hash_util.parse_narrow(hash);
             } catch {
-                ui_report.generic_embed_error($t_html({defaultMessage: "Invalid URL"}), 2000);
+                ui_report.error(
+                    $t_html({defaultMessage: "Invalid URL"}),
+                    undefined,
+                    $("#home-error"),
+                    2000,
+                );
             }
             if (terms === undefined) {
                 // If the narrow URL didn't parse,

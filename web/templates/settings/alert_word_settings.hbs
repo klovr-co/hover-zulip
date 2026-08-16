@@ -11,16 +11,16 @@
       id="open-add-alert-word-modal"
       }}
 
-    <div class="cf-data-table__header settings_panel_list_header">
+    <div class="settings_panel_list_header">
         <h3 class="settings-table-title">{{t "Alert words"}}</h3>
     </div>
     <div class="banner-wrapper" id="alert_word_status"></div>
-    <div class="cf-data-table__scroll progressive-table-wrapper" data-simplebar data-simplebar-tab-index="-1">
-        <table class="cf-data-table cf-data-table--settings table table-striped wrapped-table">
+    <div class="progressive-table-wrapper" data-simplebar data-simplebar-tab-index="-1">
+        <table class="table table-striped wrapped-table">
             <thead class="table-sticky-headers">
                 <tr>
                     <th data-sort="alphabetic" data-sort-prop="word">{{t "Word" }}
-                        {{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="table-sortable-arrow"}}
+                        <i class="table-sortable-arrow zulip-icon zulip-icon-sort-arrow-down"></i>
                     </th>
                     <th class="actions">{{t "Actions" }}</th>
                 </tr>

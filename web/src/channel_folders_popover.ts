@@ -117,7 +117,7 @@ export function initialize(): void {
         "#left-sidebar-search .channel-folders-sidebar-menu-icon",
         {
             ...popover_menus.left_sidebar_tippy_options,
-            theme: "cofounder-menu",
+            theme: "popover-menu",
             onMount(instance) {
                 const $popper = $(instance.popper);
                 assert(instance.reference instanceof HTMLElement);
@@ -181,7 +181,7 @@ export function initialize(): void {
 
     popover_menus.register_popover_menu("#inbox-view .channel-folders-inbox-menu-icon", {
         ...popover_menus.left_sidebar_tippy_options,
-        theme: "cofounder-menu",
+        theme: "popover-menu",
         onMount(instance) {
             const $popper = $(instance.popper);
             assert(instance.reference instanceof HTMLElement);
@@ -231,7 +231,7 @@ export function initialize(): void {
             element,
             {
                 ...popover_menus.left_sidebar_tippy_options,
-                theme: "cofounder-menu",
+                theme: "popover-menu",
                 onMount(instance) {
                     popover_menus.popover_instances.folder_actions = instance;
                     const $popper = $(instance.popper);

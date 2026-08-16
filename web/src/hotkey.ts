@@ -514,7 +514,7 @@ function process_escape_key(e: JQuery.KeyDownEvent): boolean {
             }
 
             // Check for errors in compose box; close errors if they exist
-            if ($(".cf-notice").length > 0) {
+            if ($("main-view-banner").length > 0) {
                 compose_banner.clear_all();
                 return true;
             }
@@ -1053,7 +1053,7 @@ function process_hotkey(e: JQuery.KeyDownEvent, hotkey: Hotkey): boolean {
         // we handle this in other functions.
 
         if (event_name === "open_saved_snippet_dropdown") {
-            const $messagebox = $(":focus").parents(".cf-message-item__frame");
+            const $messagebox = $(":focus").parents(".messagebox");
             if ($messagebox.length === 1) {
                 saved_snippets_ui.open_saved_snippets_dropdown_via_hotkey();
             }
@@ -1439,13 +1439,16 @@ function process_hotkey(e: JQuery.KeyDownEvent, hotkey: Hotkey): boolean {
         case "toggle_reactions_popover": {
             const $row = message_lists.current.selected_row();
             const $emoji_icon = $row.find(
-                ".cf-message-actions .cf-message-actions__reaction-button",
+                ".message_controls .emoji-message-control-button-container",
             );
             let emoji_picker_reference;
-            if ($emoji_icon?.length !== 0 && $emoji_icon.css("display") !== "none") {
+            if (
+                $emoji_icon?.length !== 0 &&
+                $emoji_icon.closest(".message_control_button").css("display") !== "none"
+            ) {
                 emoji_picker_reference = util.the($emoji_icon);
             } else {
-                emoji_picker_reference = util.the($row.find(".cf-message-actions__more-button"));
+                emoji_picker_reference = util.the($row.find(".message-actions-menu-button"));
             }
             emoji_picker.start_picker_for_message_reaction(emoji_picker_reference, msg.id);
             return true;
@@ -1535,7 +1538,7 @@ function process_hotkey(e: JQuery.KeyDownEvent, hotkey: Hotkey): boolean {
             const url = msg.url;
             if (url && !msg.locally_echoed) {
                 const $row = message_lists.current.selected_row();
-                const $message_time = $row.find("a.cf-message-item__time");
+                const $message_time = $row.find("a.message-time");
                 void (async () => {
                     await clipboard_handler.copy_link_to_clipboard(url);
                     show_copied_confirmation(util.the($message_time), {

@@ -37,18 +37,18 @@ function register_message_preview_click_handlers(
     // partly from user_card_popover.ts.
 
     $message_preview_container.on("mouseover", ".sender_info_hover", function (this: HTMLElement) {
-        const $row = $(this).closest(".cf-message-item");
+        const $row = $(this).closest(".message_row");
         $row.addClass("sender_info_hovered");
     });
 
     $message_preview_container.on("mouseout", ".sender_info_hover", function (this: HTMLElement) {
-        const $row = $(this).closest(".cf-message-item");
+        const $row = $(this).closest(".message_row");
         $row.removeClass("sender_info_hovered");
     });
 
     $message_preview_container.on(
         "click",
-        ".cf-message-item__sender, .cf-message-item__avatar-frame",
+        ".sender_name, .inline-profile-picture-wrapper",
         function (this: HTMLElement, e) {
             e.stopPropagation();
             toggle_user_card_popover_for_message(this, sender_id, sender_id, true);
@@ -69,9 +69,7 @@ function get_message_group_for_message_preview(message: Message): MessageGroup {
 
 function get_message_container_for_preview(message: Message): MessageContainer {
     const is_hover_generated_update = hover.is_generated_update(message);
-    const hover_source_integrations = hover.normalize_source_integrations(
-        message.hover_generated_item?.sources ?? [],
-    );
+    const hover_source_integrations = message.hover_generated_item?.sources ?? [];
     const computed_variables = {
         include_sender: true,
         // Message report preview will be automatically collapsed
@@ -127,7 +125,7 @@ function get_message_container_for_preview(message: Message): MessageContainer {
 }
 
 function post_process_message_preview($row: JQuery): void {
-    const $content = $row.find(".cf-message-item__content");
+    const $content = $row.find(".message_content");
     update_elements($content);
     const id = rows.id($row);
     render_submessage({
@@ -185,10 +183,10 @@ export function show_message_report_modal(message: Message): void {
             message.sender_id,
         );
 
-        post_process_message_preview($report_message_preview_container.find(".cf-message-item"));
+        post_process_message_preview($report_message_preview_container.find(".message_row"));
         // Condense the message preview, the main motivation is to hide the
         // potentially unpleasant message content.
-        $report_message_preview_container.find(".cf-message-item__content").addClass("collapsed");
+        $report_message_preview_container.find(".message_content").addClass("collapsed");
         condense.show_message_expander(
             $report_message_preview_container,
             null,
@@ -196,7 +194,7 @@ export function show_message_report_modal(message: Message): void {
         );
 
         $report_message_preview_container.on("click", ".message_expander", (e) => {
-            const $content = $report_message_preview_container.find(".cf-message-item__content");
+            const $content = $report_message_preview_container.find(".message_content");
             if ($content.hasClass("collapsed")) {
                 $content.removeClass("collapsed");
                 condense.show_message_condenser(
@@ -210,7 +208,7 @@ export function show_message_report_modal(message: Message): void {
         });
 
         $report_message_preview_container.on("click", ".message_condenser", (e) => {
-            const $content = $report_message_preview_container.find(".cf-message-item__content");
+            const $content = $report_message_preview_container.find(".message_content");
             if (!$content.hasClass("collapsed")) {
                 $content.addClass("collapsed");
                 condense.show_message_expander(

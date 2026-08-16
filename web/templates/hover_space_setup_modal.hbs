@@ -1,42 +1,40 @@
-<form id="cf-space-setup-form" class="cf-space-workbench">
-    <header class="cf-space-workbench__summary">
-        <div class="cf-space-workbench__identity">
-            <h2>{{space.name}}</h2>
-            <div class="cf-space-workbench__category">
-                {{> cofounder/components/icon name="folder-cog" compact=true}}
-                <span>{{space.category.name}}</span>
-            </div>
+<form id="hover_source_attachment_form">
+    <div class="hover-space-setup-summary">
+        <div class="hover-space-setup-kicker">{{t "Private Setup"}}</div>
+        <h2>{{space.name}}</h2>
+        <div class="hover-space-setup-category">
+            <i class="zulip-icon zulip-icon-folder" aria-hidden="true"></i>
+            {{space.category.name}}
         </div>
-        {{#if space.description}}
-            <p class="cf-space-workbench__description">{{space.description}}</p>
-        {{/if}}
-        <p class="cf-space-workbench__setup-note">
-            {{> cofounder/components/icon name="lock" compact=true}}
-            <span>{{t
-                    "This Space has no members or notifications until it is launched."
-                }}</span>
+        {{#if space.description}}<p>{{space.description}}</p>{{/if}}
+        <p class="settings-field-description">
+            {{t
+              "This Space has no members or notifications until it is launched."
+              }}
         </p>
-    </header>
+    </div>
 
     {{! Render attached Source metadata only when the caller confirms it is nonempty. }}
     {{#if has_attachments}}
         <section
-          class="cf-space-workbench__section cf-space-workbench__section--sources"
-          aria-labelledby="cf-space-sources-heading"
+          class="hover-setup-attached-sources"
+          aria-label="{{t 'Attached sources'}}"
           >
-            <div class="cf-space-workbench__section-heading">
-                <h3 id="cf-space-sources-heading">{{t "Sources"}}</h3>
-            </div>
-            <ul class="cf-space-workbench__source-list">
+            <h3>{{t "Sources"}}</h3>
+            <ul>
                 {{#each space.attachments}}
-                    <li class="cf-space-workbench__source-row">
+                    <li>
                         <span
-                          class="cf-source-ledger__icon"
+                          class="hover-source-ledger__icon"
                           aria-hidden="true"
                           >
-                            {{> cofounder/components/icon name=icon_name compact=true}}
+                            {{#if (eq source.provider_key "whatsapp")}}
+                                <i class="fa fa-whatsapp"></i>
+                            {{else}}
+                                <i class="fa fa-plug"></i>
+                            {{/if}}
                         </span>
-                        <span class="cf-space-workbench__row-copy">
+                        <span>
                             <strong>{{source.display_name}}</strong>
                             <small>{{source.account_display_name}}
                                 ·
@@ -48,27 +46,24 @@
         </section>
     {{/if}}
 
-    <section
-      class="cf-space-workbench__section cf-space-workbench__section--modules"
-      data-cf-space-panel="modules"
-      aria-labelledby="cf-space-modules-heading"
-      >
-        <div class="cf-space-workbench__section-heading">
+    <section class="hover-module-setup-panel" aria-label="{{t 'AI Modules'}}">
+        <div class="hover-source-attachment-heading">
             <div>
-                <h3 id="cf-space-modules-heading">{{t "AI Modules"}}</h3>
-                <p>{{t "Pinned automation"}}</p>
+                <p class="hover-space-setup-kicker">
+                    {{t "Pinned automation"}}
+                </p>
+                <h3>{{t "AI Modules"}}</h3>
             </div>
-            {{> cofounder/components/status tone="neutral" icon="pin" label=(t "Version pinned")}}
+            <span class="hover-source-private-badge">
+                <i class="fa fa-thumb-tack" aria-hidden="true"></i>
+                {{t "Version pinned"}}
+            </span>
         </div>
         {{#if has_module_installations}}
-            <div
-              class="cf-space-workbench__installed-list"
-              role="list"
-              aria-label="{{t 'Installed AI Modules'}}"
-              >
+            <div class="hover-module-installed-list">
                 {{#each space.module_installations}}
-                    <div class="cf-space-workbench__installed-row" role="listitem">
-                        <span class="cf-space-workbench__row-copy">
+                    <div class="hover-module-installed-row">
+                        <span>
                             <strong>{{name}}</strong>
                             <small>{{t "Version"}}
                                 {{version}}
@@ -78,40 +73,32 @@
                         {{#unless (eq state "disabled")}}
                             <button
                               type="button"
-                              class="cf-button cf-button--secondary cf-button--compact"
-                              data-cf-space-action="disable-module"
-                              data-cf-installation-id="{{id}}"
-                              aria-label="{{t 'Disable'}}: {{name}}"
-                              >
-                                <span class="cf-button__label">{{t "Disable"}}</span>
-                            </button>
+                              class="button rounded small hover-module-disable-button"
+                              data-installation-id="{{id}}"
+                              >{{t "Disable"}}</button>
                         {{/unless}}
                     </div>
                 {{/each}}
             </div>
         {{/if}}
         {{#if has_module_catalog}}
-            <div
-              class="cf-space-workbench__module-catalog"
-              role="list"
-              aria-label="{{t 'Available AI Modules'}}"
-              >
+            <div class="hover-module-catalog">
                 {{#each module_catalog}}
                     {{#unless is_installed}}
                         <article
-                          class="cf-space-workbench__module"
-                          data-cf-module-card
-                          data-cf-version-id="{{id}}"
-                          role="listitem"
+                          class="hover-module-card"
+                          data-version-id="{{id}}"
                           >
-                            <div class="cf-space-workbench__module-heading">
+                            <div class="hover-module-card__heading">
                                 <span
-                                  class="cf-space-workbench__module-icon"
+                                  class="hover-module-card__icon"
                                   aria-hidden="true"
                                   >
-                                    {{> cofounder/components/icon name=icon_name compact=true}}
+                                    <i
+                                      class="zulip-icon {{navigation_icon}}"
+                                      ></i>
                                 </span>
-                                <span class="cf-space-workbench__row-copy">
+                                <span>
                                     <strong>{{name}}</strong>
                                     <small>{{t "Version"}}
                                         {{version}}
@@ -119,26 +106,25 @@
                                         {{destination_topic}}</small>
                                 </span>
                             </div>
-                            <p class="cf-space-workbench__module-description">{{description}}</p>
-                            <fieldset class="cf-space-workbench__source-bindings">
+                            <p>{{description}}</p>
+                            <fieldset>
                                 <legend>{{t "Bind attached Sources"}}</legend>
                                 {{#each attachments}}
-                                    <label class="cf-space-workbench__check-row">
+                                    <label class="hover-module-source-option">
                                         <input
                                           type="checkbox"
                                           value="{{id}}"
-                                          data-cf-module-attachment
+                                          data-module-attachment
                                           />
                                         <span>{{source.display_name}}</span>
                                     </label>
                                 {{/each}}
                             </fieldset>
-                            <div class="cf-space-workbench__policy-grid">
-                                <label class="cf-field">
-                                    <span class="cf-field__label">{{t "Trigger"}}</span>
+                            <div class="hover-module-policy-grid">
+                                <label>
+                                    {{t "Trigger"}}
                                     <select
-                                      class="cf-field__control"
-                                      data-cf-module-trigger
+                                      class="modal_select hover-module-trigger-select"
                                       >
                                         {{#if supports_manual}}
                                             <option value="manual">{{t "Manual"}}</option>
@@ -151,69 +137,53 @@
                                         {{/if}}
                                     </select>
                                 </label>
-                                <div
-                                  class="cf-space-workbench__debounce hide"
-                                  data-cf-module-debounce
-                                  >
-                                    <span>{{t "Debounce"}}</span>
-                                    <strong>{{t "5 minutes"}}</strong>
-                                </div>
-                                <div
-                                  class="cf-space-workbench__schedule-fields hide"
-                                  data-cf-module-schedule
-                                  >
-                                    <label class="cf-field">
-                                        <span class="cf-field__label">{{t "Cadence"}}</span>
+                                <label class="hover-module-debounce-field hide">
+                                    {{t "Debounce"}}
+                                    <span>{{t "5 minutes"}}</span>
+                                </label>
+                                <div class="hover-module-schedule-fields hide">
+                                    <label>
+                                        {{t "Cadence"}}
                                         <select
-                                          class="cf-field__control"
-                                          data-cf-module-cadence
+                                          class="modal_select hover-module-cadence"
                                           >
                                             <option value="daily">{{t "Daily"}}</option>
                                             <option value="weekly">{{t "Weekly"}}</option>
                                         </select>
                                     </label>
-                                    <label class="cf-field">
-                                        <span class="cf-field__label">{{t "Local time"}}</span>
+                                    <label>
+                                        {{t "Local time"}}
                                         <input
-                                          class="cf-field__control"
+                                          class="hover-module-local-time"
                                           type="time"
                                           value="09:00"
-                                          data-cf-module-local-time
                                           />
                                     </label>
                                 </div>
                             </div>
-                            <details class="cf-space-workbench__backfill">
+                            <details class="hover-module-backfill">
                                 <summary>{{t "Earlier bounded history"}}</summary>
-                                <label class="cf-field">
-                                    <span class="cf-field__label">{{t
-                                            "Start after Source availability"
-                                        }}</span>
+                                <label>
+                                    {{t "Start after Source availability"}}
                                     <input
-                                      class="cf-field__control"
+                                      class="hover-module-backfill-start"
                                       type="datetime-local"
-                                      data-cf-module-backfill-start
                                       />
                                 </label>
-                                <label class="cf-space-workbench__check-row">
+                                <label class="hover-module-confirm-row">
                                     <input
+                                      class="hover-module-backfill-confirm"
                                       type="checkbox"
-                                      data-cf-module-backfill-confirm
                                       />
-                                    <span>{{t
-                                            "I confirm this earlier bounded backfill."
-                                        }}</span>
+                                    <span>
+                                        {{t "I confirm this earlier bounded backfill."}}
+                                    </span>
                                 </label>
                             </details>
                             <button
                               type="button"
-                              class="cf-button cf-button--primary cf-space-workbench__module-action"
-                              data-cf-space-action="install-module"
-                              aria-label="{{t 'Enable Module'}}: {{name}}"
-                              >
-                                {{> cofounder/components/icon name="plus" compact=true}}
-                                <span class="cf-button__label">{{t "Enable Module"}}</span>
-                            </button>
+                              class="button rounded sea-green hover-module-install-button"
+                              >{{t "Enable Module"}}</button>
                         </article>
                     {{/unless}}
                 {{/each}}
@@ -222,37 +192,81 @@
     </section>
 
     <section
-      id="cf-space-membership-panel"
-      class="cf-space-workbench__section cf-space-workbench__section--members"
-      data-cf-space-panel="members"
-      aria-labelledby="cf-space-members-heading"
+      id="hover-space-membership-panel"
+      class="hover-space-membership-panel"
       >
-        <div class="cf-space-workbench__section-heading">
+        <div class="hover-source-attachment-heading">
             <div>
-                <h3 id="cf-space-members-heading">{{t "Teammates"}}</h3>
-                <p>{{t "Access review"}}</p>
+                <p class="hover-space-setup-kicker">{{t "Access review"}}</p>
+                <h3>{{t "Teammates"}}</h3>
             </div>
-            {{> cofounder/components/status tone="neutral" icon="eye-off" label=(t "Admins only in Setup")}}
+            <span class="hover-source-private-badge">
+                <i class="fa fa-eye-slash" aria-hidden="true"></i>
+                {{t "Admins only in Setup"}}
+            </span>
         </div>
 
-        <div
-          class="cf-space-workbench__member-list"
-          role="list"
-          aria-label="{{t 'Teammates'}}"
-          >
-            {{#each space.membership_suggestions}}
-                <div class="cf-space-workbench__member-row" data-cf-member-row role="listitem">
-                    <span class="cf-space-workbench__row-copy">
-                        <strong>{{full_name}}</strong>
-                        <small>{{t "Verified internal match"}}</small>
+        {{#each space.membership_suggestions}}
+            <div class="hover-member-row">
+                <span>
+                    <strong>{{full_name}}</strong>
+                    <small>{{t "Verified internal match"}}</small>
+                </span>
+                <select
+                  class="modal_select hover-member-role-select"
+                  data-user-id="{{user_id}}"
+                  aria-label="{{t 'Role'}}: {{full_name}}"
+                  >
+                    {{#if (eq suggested_role "contributor")}}
+                        <option value="contributor" selected>{{t "Contributor"}}</option>
+                        <option value="subscriber">{{t "Subscriber"}}</option>
+                    {{else}}
+                        <option value="contributor">{{t "Contributor"}}</option>
+                        <option value="subscriber" selected>{{t "Subscriber"}}</option>
+                    {{/if}}
+                </select>
+                <button
+                  type="button"
+                  class="button rounded small"
+                  data-membership-action="confirm-suggestion"
+                  data-user-id="{{user_id}}"
+                  >{{t "Confirm"}}</button>
+                <button
+                  type="button"
+                  class="button rounded small"
+                  data-membership-action="remove"
+                  data-user-id="{{user_id}}"
+                  >{{t "Remove"}}</button>
+            </div>
+        {{/each}}
+
+        {{#each space.memberships}}
+            <div class="hover-member-row">
+                <span>
+                    <strong>{{full_name}}</strong>
+                    <small>
+                        {{#if is_administrator}}
+                            {{t "Space Admin"}}
+                        {{else}}
+                            {{t "Confirmed member"}}
+                        {{/if}}
+                    </small>
+                </span>
+                {{#if is_administrator}}
+                    <span class="hover-member-role">
+                        {{#if (eq role "contributor")}}
+                            {{t "Contributor"}}
+                        {{else}}
+                            {{t "Subscriber"}}
+                        {{/if}}
                     </span>
+                {{else}}
                     <select
-                      class="cf-field__control cf-space-workbench__role-select"
-                      data-cf-member-role
-                      data-cf-user-id="{{user_id}}"
+                      class="modal_select hover-member-role-select"
+                      data-user-id="{{user_id}}"
                       aria-label="{{t 'Role'}}: {{full_name}}"
                       >
-                        {{#if (eq suggested_role "contributor")}}
+                        {{#if (eq role "contributor")}}
                             <option value="contributor" selected>{{t "Contributor"}}</option>
                             <option value="subscriber">{{t "Subscriber"}}</option>
                         {{else}}
@@ -260,253 +274,149 @@
                             <option value="subscriber" selected>{{t "Subscriber"}}</option>
                         {{/if}}
                     </select>
+                {{/if}}
+                {{#unless is_administrator}}
                     <button
                       type="button"
-                      class="cf-button cf-button--secondary cf-button--compact"
-                      data-cf-membership-action="confirm-suggestion"
-                      data-cf-user-id="{{user_id}}"
-                      aria-label="{{t 'Confirm'}}: {{full_name}}"
-                      >
-                        <span class="cf-button__label">{{t "Confirm"}}</span>
-                    </button>
+                      class="button rounded small"
+                      data-membership-action="promote"
+                      data-user-id="{{user_id}}"
+                      >{{t "Make admin"}}</button>
                     <button
                       type="button"
-                      class="cf-button cf-button--ghost cf-button--compact"
-                      data-cf-membership-action="remove"
-                      data-cf-user-id="{{user_id}}"
-                      aria-label="{{t 'Remove'}}: {{full_name}}"
-                      >
-                        <span class="cf-button__label">{{t "Remove"}}</span>
-                    </button>
-                </div>
-            {{/each}}
-
-            {{#each space.memberships}}
-                <div class="cf-space-workbench__member-row" data-cf-member-row role="listitem">
-                    <span class="cf-space-workbench__row-copy">
-                        <strong>{{full_name}}</strong>
-                        <small>
-                            {{#if is_administrator}}
-                                {{t "Space Admin"}}
-                            {{else}}
-                                {{t "Confirmed member"}}
-                            {{/if}}
-                        </small>
-                    </span>
-                    {{#if is_administrator}}
-                        <span class="cf-space-workbench__member-role">
-                            {{#if (eq role "contributor")}}
-                                {{t "Contributor"}}
-                            {{else}}
-                                {{t "Subscriber"}}
-                            {{/if}}
-                        </span>
-                    {{else}}
-                        <select
-                          class="cf-field__control cf-space-workbench__role-select"
-                          data-cf-member-role
-                          data-cf-user-id="{{user_id}}"
-                          aria-label="{{t 'Role'}}: {{full_name}}"
-                          >
-                            {{#if (eq role "contributor")}}
-                                <option value="contributor" selected>{{t "Contributor"}}</option>
-                                <option value="subscriber">{{t "Subscriber"}}</option>
-                            {{else}}
-                                <option value="contributor">{{t "Contributor"}}</option>
-                                <option value="subscriber" selected>{{t "Subscriber"}}</option>
-                            {{/if}}
-                        </select>
-                    {{/if}}
-                    {{#unless is_administrator}}
-                        <button
-                          type="button"
-                          class="cf-button cf-button--secondary cf-button--compact"
-                          data-cf-membership-action="promote"
-                          data-cf-user-id="{{user_id}}"
-                          aria-label="{{t 'Make admin'}}: {{full_name}}"
-                          >
-                            <span class="cf-button__label">{{t "Make admin"}}</span>
-                        </button>
-                        <button
-                          type="button"
-                          class="cf-button cf-button--ghost cf-button--compact"
-                          data-cf-membership-action="remove"
-                          data-cf-user-id="{{user_id}}"
-                          aria-label="{{t 'Remove'}}: {{full_name}}"
-                          >
-                            <span class="cf-button__label">{{t "Remove"}}</span>
-                        </button>
-                    {{/unless}}
-                </div>
-            {{/each}}
-        </div>
+                      class="button rounded small"
+                      data-membership-action="remove"
+                      data-user-id="{{user_id}}"
+                      >{{t "Remove"}}</button>
+                {{/unless}}
+            </div>
+        {{/each}}
 
         {{#if has_eligible_users}}
-            <div class="cf-space-workbench__member-add">
-                <label class="cf-field" for="cf-member-user">
-                    <span class="cf-field__label">{{t "Add an internal teammate"}}</span>
-                    <select id="cf-member-user" class="cf-field__control">
-                        {{#each eligible_users}}
-                            <option value="{{user_id}}">{{full_name}}</option>
-                        {{/each}}
-                    </select>
-                </label>
-                <label class="cf-field" for="cf-member-role">
-                    <span class="cf-field__label">{{t "Role"}}</span>
-                    <select id="cf-member-role" class="cf-field__control">
-                        <option value="contributor">{{t "Contributor"}}</option>
-                        <option value="subscriber">{{t "Subscriber"}}</option>
-                    </select>
-                </label>
+            <div class="hover-member-add-row">
+                <label for="hover_member_user">{{t "Add an internal teammate"}}</label>
+                <select id="hover_member_user" class="modal_select">
+                    {{#each eligible_users}}
+                        <option value="{{user_id}}">
+                            {{full_name}}
+                        </option>
+                    {{/each}}
+                </select>
+                <select
+                  id="hover_member_role"
+                  class="modal_select"
+                  aria-label="{{t 'Role'}}"
+                  >
+                    <option value="contributor">{{t "Contributor"}}</option>
+                    <option value="subscriber">{{t "Subscriber"}}</option>
+                </select>
                 <button
                   type="button"
-                  class="cf-button cf-button--secondary"
-                  data-cf-space-action="add-member"
-                  aria-label="{{t 'Add selected teammate'}}"
-                  >
-                    {{> cofounder/components/icon name="user-plus" compact=true}}
-                    <span class="cf-button__label">{{t "Add teammate"}}</span>
-                </button>
+                  class="button rounded hover-member-add-button"
+                  >{{t "Add teammate"}}</button>
             </div>
         {{/if}}
 
-        <div class="cf-space-workbench__launch-row">
-            <div class="cf-space-workbench__launch-copy">
-                <span class="cf-space-workbench__row-copy">
-                    {{#if launch_ready}}
-                        <strong>{{t "Ready for final launch check"}}</strong>
-                    {{else}}
-                        <strong>{{t "Complete launch requirements"}}</strong>
-                    {{/if}}
-                    <small>{{t "Launch activates this private Space for confirmed members only."}}</small>
-                </span>
-                <ul
-                  id="cf-space-launch-requirements"
-                  class="cf-space-workbench__launch-requirements"
-                  aria-label="{{t 'Launch requirements'}}"
-                  >
-                    {{#each launch_requirements}}
-                        <li data-state="{{#if met}}met{{else}}open{{/if}}">
-                            {{> cofounder/components/icon name=icon_name compact=true}}
-                            <span>{{label}}</span>
-                        </li>
-                    {{/each}}
-                </ul>
-            </div>
+        <div class="hover-space-launch-row">
+            <span>
+                <strong>{{t "Ready to launch?"}}</strong>
+                <small>
+                    {{t "Launch activates this private Space for confirmed members only."}}
+                </small>
+            </span>
             <button
               type="button"
-              class="cf-button cf-button--primary"
-              data-cf-space-action="launch-space"
-              aria-describedby="cf-space-launch-requirements"
-              {{#unless launch_ready}}disabled{{/unless}}
-              >
-                {{> cofounder/components/icon name="rocket" compact=true}}
-                <span class="cf-button__label">
-                    {{#if launch_ready}}
-                        {{t "Run final check & launch"}}
-                    {{else}}
-                        {{t "Launch blocked"}}
-                    {{/if}}
-                </span>
-            </button>
+              class="button rounded sea-green hover-space-launch-button"
+              >{{t "Launch Space"}}</button>
         </div>
     </section>
 
     <section
-      id="cf-source-attachment-panel"
-      class="cf-space-workbench__section cf-space-workbench__section--source-panel"
-      data-cf-space-panel="source"
-      aria-labelledby="cf-source-attachment-heading"
+      id="hover-source-attachment-panel"
+      class="hover-source-attachment-panel"
       >
-        <div class="cf-space-workbench__section-heading">
+        <div class="hover-source-attachment-heading">
             <div>
-                <h3 id="cf-source-attachment-heading">{{t "Attach a Source"}}</h3>
-                <p>{{t "Connected discovery"}}</p>
+                <p class="hover-space-setup-kicker">
+                    {{t "Connected discovery"}}
+                </p>
+                <h3>{{t "Attach a Source"}}</h3>
             </div>
-            {{> cofounder/components/status tone="accent" icon="shield" label=(t "Safe metadata only")}}
+            <span class="hover-source-private-badge">
+                <i class="fa fa-lock" aria-hidden="true"></i>
+                {{t "Safe metadata only"}}
+            </span>
         </div>
         {{! Account collections require an explicit boolean in Zulip templates. }}
         {{#if has_accounts}}
-            <div class="cf-space-workbench__source-controls">
-                <label class="cf-field" for="cf-source-account">
-                    <span class="cf-field__label">{{t "Assigned account"}}</span>
-                    <select id="cf-source-account" class="cf-field__control">
-                        {{#each accounts}}
-                            <option value="{{id}}">
-                                {{provider_name}}
-                                ·
-                                {{display_name}}
-                            </option>
-                        {{/each}}
-                    </select>
-                </label>
-                <div class="cf-field">
-                    <label class="cf-field__label" for="cf-source-query">{{t
-                            "Find a permitted conversation"
-                        }}</label>
-                    <div class="cf-space-workbench__search-row">
-                        <input
-                          id="cf-source-query"
-                          class="cf-field__control"
-                          type="search"
-                          maxlength="100"
-                          autocomplete="off"
-                          placeholder="{{t 'Search by Source name'}}"
-                          />
-                        <button
-                          type="button"
-                          class="cf-button cf-button--secondary"
-                          data-cf-space-action="search-source"
-                          >
-                            {{> cofounder/components/icon name="search" compact=true}}
-                            <span class="cf-button__label">{{t "Search"}}</span>
-                        </button>
-                    </div>
+            <div class="hover-source-discovery-controls">
+                <label for="hover_source_account">{{t "Assigned account"}}</label>
+                <select id="hover_source_account" class="modal_select">
+                    {{#each accounts}}
+                        <option value="{{id}}">
+                            {{provider_name}}
+                            ·
+                            {{display_name}}
+                        </option>
+                    {{/each}}
+                </select>
+                <label for="hover_source_query">{{t "Find a permitted conversation"}}</label>
+                <div class="hover-source-search-row">
+                    <input
+                      id="hover_source_query"
+                      type="search"
+                      maxlength="100"
+                      autocomplete="off"
+                      placeholder="{{t 'Search by Source name'}}"
+                      />
+                    <button
+                      type="button"
+                      class="button rounded hover-source-search-button"
+                      >{{t "Search"}}</button>
                 </div>
             </div>
             <div
-              id="cf-source-discovery-status"
-              class="cf-space-workbench__discovery-status"
-              data-state="ready"
+              id="hover_source_discovery_status"
+              class="hover-source-discovery-status"
               aria-live="polite"
               >
             </div>
-            <div id="cf-source-discovery-results"></div>
+            <div id="hover_source_discovery_results"></div>
             <div
-              id="cf-source-preview"
-              class="cf-space-workbench__source-preview hide"
-              aria-live="polite"
+              id="hover_source_preview"
+              class="hover-source-preview hide"
               >
             </div>
-            <div class="cf-space-workbench__history-grid">
-                <label class="cf-field" for="cf-source-history-window">
-                    <span class="cf-field__label">{{t "History window"}}</span>
-                    <select id="cf-source-history-window" class="cf-field__control">
+            <div class="hover-source-window-grid">
+                <div>
+                    <label for="hover_source_history_window">{{t "History window"}}</label>
+                    <select
+                      id="hover_source_history_window"
+                      class="modal_select"
+                      >
                         <option value="today">{{t "Today"}}</option>
                         <option value="last_30_days">{{t "Last 30 days"}}</option>
                         <option value="custom">{{t "Custom start date"}}</option>
                     </select>
-                    <span class="cf-field__hint">{{t
-                            "History is always bounded. All available history is never selected automatically."
-                        }}</span>
-                </label>
-                <label
-                  class="cf-field hide"
-                  for="cf-source-custom-start-date"
-                  data-cf-source-custom-date
-                  >
-                    <span class="cf-field__label">{{t "Start date"}}</span>
-                    <input
-                      id="cf-source-custom-start-date"
-                      class="cf-field__control"
-                      type="date"
-                      />
-                </label>
+                    <p class="settings-field-description">
+                        {{t
+                          "History is always bounded. All available history is never selected automatically."
+                          }}
+                    </p>
+                </div>
+                <div class="hover-source-custom-date hide">
+                    <label for="hover_source_custom_start_date">{{t "Start date"}}</label>
+                    <input id="hover_source_custom_start_date" type="date" />
+                </div>
             </div>
         {{else}}
-            <div class="cf-space-workbench__empty-state">
-                {{> cofounder/components/icon name="link-alt"}}
-                <p>{{t "You need an approved Connected Account grant before discovering Sources."}}</p>
+            <div class="hover-source-empty-state">
+                <i class="fa fa-plug" aria-hidden="true"></i>
+                <p>
+                    {{t
+                      "You need an approved Connected Account grant before discovering Sources."
+                      }}
+                </p>
             </div>
         {{/if}}
     </section>

@@ -1,6 +1,6 @@
-{{> ../cofounder/components/icon name="users" compact=true }}
+<i class="fa fa-user-o" aria-hidden="true"></i>
 {{#if can_access_subscribers}}
 <span class="subscriber-count-text">{{numberFormat subscriber_count}}</span>
 {{else}}
-{{> ../cofounder/components/icon name="lock" compact=true custom_classes="subscriber-count-lock" }}
+<i class="subscriber-count-lock fa fa-lock" aria-hidden="true"></i>
 {{/if}}

@@ -861,7 +861,7 @@ test("server_rendering_for_backend_only_syntax", ({override, mock_template}) => 
         '<p>Look at this screenshot: <a href="https://user-uploads.zulipdev.org/upload/image.png" target="_blank" rel="noopener noreferrer" title="https://user-uploads.zulipdev.org/upload/image.png"><img src="/thumbnail?url=user_uploads%2Fimage.png&amp;size=thumbnail"></a></p>';
 
     let post_calls = 0;
-    const $content_element = $.create('[data-draft-id="id1"] .cf-message-item__content');
+    const $content_element = $.create('[data-draft-id="id1"] .message_content');
     $content_element.html(locally_rendered_content);
     override(overlays, "drafts_open", () => true);
 

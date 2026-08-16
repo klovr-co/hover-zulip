@@ -1429,10 +1429,6 @@ function filter_should_hide_stream_row({
 export function collapse_or_expand(container_id: string): void {
     const animation_duration = 200; // ms
     const $toggle_container = $(`#${container_id}`);
-    const will_expand = $toggle_container.hasClass("inbox-collapsed-state");
-    $toggle_container
-        .find(".cf-conversation-list__collapse")
-        .attr("aria-expanded", String(will_expand));
     let $all_elements = $(".inbox-header.inbox-folder, .inbox-folder-components");
     const $blocker = $("#inbox-animation-extra-content-blocker");
     $all_elements = $all_elements.add($blocker);

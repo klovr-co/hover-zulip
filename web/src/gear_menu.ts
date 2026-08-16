@@ -4,7 +4,6 @@ import type * as tippy from "tippy.js";
 
 import render_navbar_gear_menu_popover from "../templates/popovers/navbar/navbar_gear_menu_popover.hbs";
 
-import * as cofounder_menu from "./cofounder/components/menu.ts";
 import * as demo_organizations_ui from "./demo_organizations_ui.ts";
 import * as information_density from "./information_density.ts";
 import * as popover_menus from "./popover_menus.ts";
@@ -92,12 +91,12 @@ function render(instance: tippy.Instance): void {
         popover_menus_data.get_gear_menu_content_context(),
     );
     instance.setContent(parse_html(rendered_gear_menu));
-    $("#gear-menu").addClass("cf-app-header__item--active");
+    $("#gear-menu").addClass("active-navbar-menu");
 }
 
 export function initialize(): void {
     popover_menus.register_popover_menu("#gear-menu", {
-        theme: "cofounder-menu",
+        theme: "popover-menu",
         placement: "bottom",
         offset: popover_menus.NAVBAR_POPOVER_OFFSET,
         popperOptions: {
@@ -131,7 +130,6 @@ export function initialize(): void {
 
             $popper.on("change", "input[name='theme-select']", (e) => {
                 const theme_code = Number.parseInt($(e.currentTarget).attr("data-theme-code")!, 10);
-                cofounder_menu.sync_menuitemradio_checked_state(instance.popper);
                 requestAnimationFrame(() => {
                     theme.set_theme_for_spectator(theme_code);
                 });
@@ -168,7 +166,7 @@ export function initialize(): void {
         },
         onShow: render,
         onHidden(instance) {
-            $("#gear-menu").removeClass("cf-app-header__item--active");
+            $("#gear-menu").removeClass("active-navbar-menu");
             instance.destroy();
             popover_menus.popover_instances.gear_menu = null;
         },

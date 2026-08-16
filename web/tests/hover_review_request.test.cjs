@@ -27,10 +27,10 @@ run_test("Review action opens the native composer and preselects its field", ({o
         selected_field = field;
     });
     hover_review_request.initialize();
-    const $button = $(".cf-review-detail__review")
-        .attr("data-cf-review-message-id", "42")
-        .attr("data-cf-review-field-path", "status");
-    const handler = $("#main_div").get_on_handler("click", ".cf-review-detail__review");
+    const $button = $(".hover-dispute-review-button")
+        .attr("data-hover-message-id", "42")
+        .attr("data-hover-field-path", "status");
+    const handler = $("#main_div").get_on_handler("click", ".hover-dispute-review-button");
     handler({preventDefault() {}, currentTarget: $button[0]});
 
     assert.deepEqual(reply_options, {

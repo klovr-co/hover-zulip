@@ -53,8 +53,6 @@ npm-debug.log
 /staticfiles.json
 /webpack-stats-production.json
 zulip-git-version
-/storybook-static
-/storybook-screenshots
 
 # Test / analysis tools
 .coverage

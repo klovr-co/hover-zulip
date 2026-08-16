@@ -1,9 +1,0 @@
-{{#if should_add_guest_user_indicator}}
-<span class="cf-member-row__name">{{name}}</span>
-<span class="cf-member-row__guest">({{t 'guest' }})</span>
-{{else if is_hidden}}
-<span class="cf-member-row__name cf-member-row__name--muted">{{t 'Muted user'}}</span>
-{{else}}
-<span class="cf-member-row__name">{{name}}</span>
-{{/if}}
-{{#if is_current_user}}<span class="cf-member-row__self">{{t '(you)'}}</span>{{/if}}

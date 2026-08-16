@@ -70,7 +70,7 @@ test("config", () => {
     );
     assert.equal(
         upload.compose_config.upload_banner_hide_button("id_2")[0],
-        $("#compose_banners .upload_banner.file_id_2 .cf-notice__close")[0],
+        $("#compose_banners .upload_banner.file_id_2 .main-view-banner-close-button")[0],
     );
     assert.equal(upload.compose_config.file_input_identifier(), "#compose input.file_input");
     assert.equal(upload.compose_config.source(), "compose-file-input");
@@ -110,12 +110,14 @@ test("config", () => {
     );
 
     $(`#edit_form_${CSS.escape(2)} .upload_banner`).set_find_results(
-        ".cf-notice__close",
-        $(".cf-notice__close"),
+        ".main-view-banner-close-button",
+        $(".main-view-banner-close-button"),
     );
     assert.equal(
         upload.edit_config(2).upload_banner_hide_button("id_34")[0],
-        $(`#edit_form_${CSS.escape(2)} .upload_banner.file_id_34 .cf-notice__close`)[0],
+        $(
+            `#edit_form_${CSS.escape(2)} .upload_banner.file_id_34 .main-view-banner-close-button`,
+        )[0],
     );
 
     $(`#edit_form_${CSS.escape(22)} .upload_banner.file_id_234`).set_find_results(
@@ -485,12 +487,6 @@ test("uppy_events", ({override_rewire, mock_template}) => {
     };
     upload.setup_upload(upload.compose_config);
     assert.equal(Object.keys(callbacks).length, 6);
-
-    const on_upload_progress_callback = callbacks["upload-progress"];
-    on_upload_progress_callback(file, {bytesTotal: 400, bytesUploaded: 100});
-    const $progress = $(`${upload.compose_config.upload_banner_identifier(file.id)} .moving_bar`);
-    assert.equal($progress[0].style.getPropertyValue("width"), "25%");
-    assert.equal($progress.attr("aria-valuenow"), "25");
 
     // Simulate tus-js-client having recorded this upload in our
     // InMemoryUrlStorage, which it does while uploading -- keyed by its

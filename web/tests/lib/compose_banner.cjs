@@ -16,17 +16,17 @@ exports.mock_banners = () => {
                 .join(".")}`,
         )[0].remove = noop;
     }
-    $("#compose_banners .cf-notice--warning")[0].remove = noop;
-    $("#compose_banners .cf-notice--error")[0].remove = noop;
-    $("#compose_banners .cf-notice--error:not(.upload_banner)")[0].remove = noop;
+    $("#compose_banners .warning")[0].remove = noop;
+    $("#compose_banners .error")[0].remove = noop;
+    $("#compose_banners .error:not(.upload_banner)")[0].remove = noop;
     $("#compose_banners .upload_banner")[0].remove = noop;
-    $("#compose_banners .upload_banner.cf-notice--error")[0].remove = noop;
+    $("#compose_banners .upload_banner.error")[0].remove = noop;
 
     const $stub = $.set_results("stub_to_remove", []);
     const $cb = $("#compose_banners");
 
     $cb.set_closest_results(".edit_form_banners", $.create("edit-form-banners-stub"));
-    $cb.set_find_results(".upload_banner.cf-notice--error", $stub);
+    $cb.set_find_results(".upload_banner.error", $stub);
     $cb.set_find_results(".no_post_permissions", $stub);
     $cb.set_find_results(".message_too_long", $stub);
     $cb.set_find_results(".wildcards_not_allowed", $stub);

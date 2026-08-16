@@ -227,7 +227,7 @@ export function initialize(): void {
                             // If the popover was opened from the recipient row, we
                             // we pass the recipient row to the toggle_resolve_topic
                             // function to show the loading indicator accordingly.
-                            $recipient_row = $reference.closest(".cf-message-group");
+                            $recipient_row = $reference.closest(".recipient_row");
                         }
                         message_edit.toggle_resolve_topic(
                             message_id,

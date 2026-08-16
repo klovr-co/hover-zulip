@@ -1,11 +1,13 @@
-<div class="icon cf-two-pane-shell__channel-icon" style="background-color: {{color}}">
-    {{#if is_archived}}
-    {{> ../cofounder/components/icon name="archive" compact=true }}
-    {{else if invite_only}}
-    {{> ../cofounder/components/icon name="lock" compact=true }}
-    {{else if is_web_public}}
-    {{> ../cofounder/components/icon name="globe" compact=true }}
-    {{else}}
-    {{> ../cofounder/components/icon name="hash" compact=true }}
-    {{/if}}
+<div class="icon" style="background-color: {{color}}">
+    <div class="flex">
+        {{#if is_archived}}
+        <i class="zulip-icon zulip-icon-archive fa-lg" aria-hidden="true"></i>
+        {{else if invite_only}}
+        <i class="zulip-icon zulip-icon-lock" aria-hidden="true"></i>
+        {{else if is_web_public}}
+        <i class="zulip-icon zulip-icon-globe fa-lg" aria-hidden="true"></i>
+        {{else}}
+        <span class="zulip-icon zulip-icon-hashtag"></span>
+        {{/if}}
+    </div>
 </div>

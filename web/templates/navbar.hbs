@@ -1,64 +1,74 @@
-<div class="header cf-app-header">
-    <nav class="header-main cf-app-header__nav" id="top_navbar" aria-label="{{t 'Application' }}">
-        <div class="column-left cf-app-header__brand-region">
-            <button type="button" class="cf-icon-button cf-icon-button--neutral cf-app-header__sidebar-toggle {{#if embedded}}hide-streamlist-toggle-visibility{{/if}}" aria-label="{{t 'Toggle left sidebar' }}" aria-expanded="true">
-                {{> cofounder/components/icon name="panel-left" compact=true}}
+<div class="header">
+    <nav class="header-main" id="top_navbar">
+        <div class="column-left">
+            <a class="header-button left-sidebar-toggle-button {{#if embedded}}hide-streamlist-toggle-visibility{{/if}}" tabindex="0" role="button" aria-label="{{t 'Toggle left sidebar' }}" aria-expanded="true">
+                <i class="zulip-icon zulip-icon-panel-left-dashed"></i>
+                <i class="zulip-icon zulip-icon-panel-left"></i>
                 <span class="left-sidebar-toggle-unreadcount"></span>
-            </button>
-            <a href="" class="cf-app-header__brand" aria-label="{{t 'Go to home view' }}">
-                <span class="cf-app-header__brand-mark" aria-hidden="true">H</span>
-                <span class="cf-app-header__brand-name">HOVER</span>
-                <img id="realm-navbar-wide-logo" src="{{realm_logo_url}}" alt="{{t 'Workspace logo' }}" class="cf-app-header__realm-logo no-drag"/>
+            </a>
+            <a href="" class="brand no-style" aria-label="{{t 'Go to home view' }}">
+                <img id="realm-navbar-wide-logo" src="" alt="{{t 'Logo for {realm_name}' }}" class="nav-logo no-drag"/>
             </a>
         </div>
-        <div class="column-middle cf-app-header__middle" id="navbar-middle">
-            <div class="column-middle-inner cf-app-header__middle-inner">
+        <div class="column-middle" id="navbar-middle">
+            <div class="column-middle-inner">
                 <div id="streamlist-toggle" class="{{#if embedded}}hide-streamlist-toggle-visibility{{/if}}">
-                    <button type="button" class="cf-icon-button cf-icon-button--neutral cf-app-header__sidebar-toggle" aria-label="{{t 'Toggle left sidebar' }}" aria-expanded="true">
-                        {{> cofounder/components/icon name="panel-left" compact=true}}
+                    <a class="left-sidebar-toggle-button" role="button" tabindex="0" aria-label="{{t 'Toggle left sidebar' }}" aria-expanded="true">
+                        <i class="zulip-icon zulip-icon-panel-left-dashed"></i>
+                        <i class="zulip-icon zulip-icon-panel-left"></i>
                         <span class="left-sidebar-toggle-unreadcount"></span>
-                    </button>
+                    </a>
                 </div>
-                <div class="top-navbar-container cf-app-header__context">
+                <div class="top-navbar-container">
                     <div id="message_view_header" class="notdisplayed">
                     </div>
                     <div id="searchbox">
-                        <form id="searchbox_form" class="cf-app-header__search">
-                            <div id="searchbox-input-container" class="cf-app-header__search-container pill-container" tabindex="0" role="search" aria-label="{{t 'Search' }}">
-                                {{> cofounder/components/icon name="search" compact=true custom_classes="cf-app-header__search-icon"}}
-                                <div class="cf-app-header__search-content">
-                                    <div class="input cf-app-header__search-input" id="search_query" type="text" data-placeholder-text="{{t 'Search' }}"
+                        <form id="searchbox_form" class="navbar-search">
+                            <div id="searchbox-input-container" class="input-append pill-container" tabindex="0" role="search" aria-label="{{t 'Search' }}">
+                                <i class="search_icon zulip-icon zulip-icon-search"></i>
+                                <div class="search-input-and-pills">
+                                    <div class="search-input input" id="search_query" type="text" data-placeholder-text="{{t 'Search' }}"
                                       autocomplete="off" contenteditable="false" aria-label="{{t 'Search input'}}" role="searchbox"></div>
                                 </div>
-                                {{> cofounder/components/icon_button id="search_exit" icon="close" intent="neutral" component_classes="cf-app-header__search-close" aria-label=(t "Exit search") data-tippy-content="Close" omit_legacy_classes=true}}
+                                <button class="search_close_button tippy-zulip-delayed-tooltip" type="button" id="search_exit" aria-label="{{t 'Exit search' }}" data-tippy-content="Close"><i class="zulip-icon zulip-icon-close" aria-hidden="true"></i></button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="column-right cf-app-header__actions">
-            <div class="spectator_login_buttons spectator_narrow_login_button only-visible-for-spectators" data-tippy-content="{{t 'Log in' }}" data-tippy-placement="bottom">
-                <a id="login_button" class="cf-app-header__item cf-app-header__login login_button" tabindex="0" role="button" aria-label="{{t 'Log in' }}">
-                    {{> cofounder/components/icon name="log-in" compact=true custom_classes="cf-app-header__login-icon"}}
-                    <span class="cf-app-header__login-label">{{t 'Log in' }}</span>
+        <div class="column-right">
+            <div class="spectator_login_buttons only-visible-for-spectators">
+                <a id="login_button" class="login_button navbar-item" tabindex="0" role="button">
+                    {{t 'Log in' }}
                 </a>
             </div>
-            <div class="cf-app-header__action-wrap">
-                {{> cofounder/components/icon_button id="help-menu" icon="circle-help" intent="neutral" component_classes="cf-app-header__item" data-tooltip-template-id="help-menu-tooltip-template" aria-label=(t "Help menu") omit_legacy_classes=true}}
+            <div id="help-menu" class="navbar-item">
+                <a class="header-button tippy-zulip-delayed-tooltip" tabindex="0" role="button" data-tooltip-template-id="help-menu-tooltip-template" aria-label="{{t 'Help menu' }}">
+                    <i class="zulip-icon zulip-icon-help-bigger" aria-hidden="true"></i>
+                </a>
             </div>
-            <div class="cf-app-header__action-wrap {{#if embedded}}hide-navbar-buttons-visibility{{/if}}">
-                {{> cofounder/components/icon_button id="gear-menu" icon="settings" intent="neutral" component_classes="cf-app-header__item" data-tooltip-template-id="gear-menu-tooltip-template" aria-label=(t "Main menu") omit_legacy_classes=true}}
+            <div id="gear-menu" class="{{#if embedded}}hide-navbar-buttons-visibility{{/if}} navbar-item">
+                <a id="settings-dropdown" tabindex="0" role="button" class="header-button tippy-zulip-delayed-tooltip" data-tooltip-template-id="gear-menu-tooltip-template" aria-label="{{t 'Main menu' }}">
+                    <i class="zulip-icon zulip-icon-gear" aria-hidden="true"></i>
+                </a>
             </div>
-            <div class="cf-app-header__action-wrap hidden-for-spectators">
-                <button type="button" id="personal-menu" class="cf-icon-button cf-icon-button--neutral cf-app-header__item" data-tooltip-template-id="personal-menu-tooltip-template" aria-label="{{t 'Personal menu' }}">
-                    <span class="cf-app-header__avatar">
-                        <img class="cf-app-header__avatar-image" src="{{user_avatar}}" alt=""/>
-                    </span>
-                </button>
+            <div id="personal-menu" class="hidden-for-spectators navbar-item">
+                <a class="header-button tippy-zulip-delayed-tooltip" tabindex="0" role="button" data-tooltip-template-id="personal-menu-tooltip-template" aria-label="{{t 'Personal menu' }}">
+                    <div class="header-button-avatar">
+                        <img class="header-button-avatar-image" src="{{user_avatar}}"/>
+                    </div>
+                </a>
             </div>
-            <div id="userlist-toggle" class="cf-app-header__action-wrap hidden-for-spectators">
-                {{> cofounder/components/icon_button id="userlist-toggle-button" icon="users" intent="neutral" component_classes="cf-app-header__item" aria-label=(t "Toggle user list") has_expanded_state=true expanded=true omit_legacy_classes=true}}
+            <div class="spectator_narrow_login_button only-visible-for-spectators" data-tippy-content="{{t 'Log in' }}" data-tippy-placement="bottom" aria-label="{{t 'Log in' }}">
+                <a id="login_button" class="header-button login_button navbar-item" tabindex="0">
+                    <i class="zulip-icon zulip-icon-log-in-navbar"></i>
+                </a>
+            </div>
+            <div id="userlist-toggle" class="hidden-for-spectators">
+                <a id="userlist-toggle-button" role="button" class="header-button navbar-item" tabindex="0" aria-label="{{t 'Toggle user list' }}" aria-expanded="true">
+                    <i class="zulip-icon zulip-icon-user-list"></i>
+                </a>
             </div>
         </div>
     </nav>

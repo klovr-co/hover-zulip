@@ -1,24 +1,14 @@
-<details class="cf-revision-trail">
-    <summary>
-        {{> cofounder/components/icon name="edit" compact=true}}
-        <span>{{t "Reviewed interpretation"}}</span>
-        <span class="cf-revision-trail__count">{{revisions.length}} {{t "revision(s)"}}</span>
-        {{> cofounder/components/icon name="chevron-down" compact=true custom_classes="cf-revision-trail__chevron"}}
-    </summary>
-    <ol class="cf-revision-trail__list">
+<details class="hover-revision-history">
+    <summary>{{t "Reviewed interpretation"}} · {{revisions.length}} {{t "revision(s)"}}</summary>
+    <ol>
         {{#each revisions}}
-            <li class="cf-revision-trail__item">
-                <div class="cf-revision-trail__meta">
+            <li>
+                <div class="hover-revision-history__meta">
                     <strong>{{actor.full_name}}</strong>
                     <time datetime="{{timestamp}}">{{timestamp}}</time>
                 </div>
-                <div class="cf-revision-trail__change">
-                    <code>{{field_path}}</code>
-                    <del>{{previous_value_display}}</del>
-                    {{> cofounder/components/icon name="chevron-right" compact=true}}
-                    <ins>{{new_value_display}}</ins>
-                </div>
-                {{#if reason}}<p class="cf-revision-trail__reason">{{reason}}</p>{{/if}}
+                <div><code>{{field_path}}</code>: <del>{{previous_value_display}}</del> <span aria-hidden="true">→</span> <ins>{{new_value_display}}</ins></div>
+                {{#if reason}}<p>{{reason}}</p>{{/if}}
             </li>
         {{/each}}
     </ol>

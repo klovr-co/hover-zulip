@@ -8,16 +8,12 @@ Usage example:
 
 <div {{#if id}}id="{{id}}"{{/if}} class="input-element-wrapper{{#if input_type}} {{input_type}}{{/if}}{{#if custom_classes}} {{custom_classes}}{{/if}}{{#if icon}} has-input-icon{{/if}}{{#if input_button_icon}} has-input-button{{/if}}">
     {{#if icon}}
-        {{#if cofounder}}
-        {{> ../cofounder/components/icon name=icon compact=true custom_classes="input-icon" }}
-        {{else}}
         <i class="input-icon zulip-icon zulip-icon-{{icon}}" aria-hidden="true"></i>
-        {{/if}}
     {{/if}}
     {{> @partial-block .}}
     {{#if input_button_icon}}
         {{#if (eq input_type "filter-input") }}
-            {{> icon_button custom_classes="input-button input-close-filter-button" squared=true icon=input_button_icon intent="neutral" aria-label=input_button_aria_label }}
+            {{> icon_button custom_classes="input-button input-close-filter-button" squared=true icon=input_button_icon intent="neutral" }}
         {{else}}
             {{> icon_button custom_classes="input-button" squared=true icon=input_button_icon intent="neutral" }}
         {{/if}}

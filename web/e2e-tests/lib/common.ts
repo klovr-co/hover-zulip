@@ -504,7 +504,7 @@ export async function get_rendered_messages(
     message_list_id: number,
 ): Promise<[string, string[]][]> {
     const recipient_rows = await page.$$(
-        `.message-list[data-message-list-id='${message_list_id}'] .cf-message-group`,
+        `.message-list[data-message-list-id='${message_list_id}'] .recipient_row`,
     );
     return Promise.all(
         recipient_rows.map(async (element): Promise<[string, string[]]> => {
@@ -522,8 +522,8 @@ export async function get_rendered_messages(
             }
 
             const messages = await Promise.all(
-                (await element.$$(".cf-message-item .cf-message-item__content")).map(
-                    async (message_row) => (await get_element_text(message_row)).trim(),
+                (await element.$$(".message_row .message_content")).map(async (message_row) =>
+                    (await get_element_text(message_row)).trim(),
                 ),
             );
 

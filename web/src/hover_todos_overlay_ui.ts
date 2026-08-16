@@ -16,8 +16,6 @@ type TodoRenderContext = HoverTodo & {
     assignable_options: {user_id: number; full_name: string}[];
     source_hash: string;
     latest_event?: HoverTodo["recent_events"][number];
-    state_label: string;
-    state_tone: "accent" | "success";
 };
 
 function format(todo: HoverTodo): TodoRenderContext {
@@ -31,11 +29,6 @@ function format(todo: HoverTodo): TodoRenderContext {
             (user) => user.user_id !== todo.assignee?.user_id,
         ),
         source_hash: `#near/${todo.generated_item.message_id}`,
-        state_label:
-            todo.state === "active"
-                ? $t({defaultMessage: "Active"})
-                : $t({defaultMessage: "Completed"}),
-        state_tone: todo.state === "active" ? "accent" : "success",
         ...(todo.recent_events[0] !== undefined && {latest_event: todo.recent_events[0]}),
     };
 }
@@ -55,19 +48,19 @@ export function launch(): void {
             browser_history.exit_overlay();
         },
     });
-    $("#reminders-overlay .cf-todo-card").first().trigger("focus");
+    $("#reminders-overlay .hover-todo-card").first().trigger("focus");
 }
 
 export function rerender(): void {
-    if (!overlays.reminders_open() || $("#reminders-overlay").attr("data-cf-todos") !== "true") {
+    if (!overlays.reminders_open() || $("#reminders-overlay").attr("data-hover-todos") !== "true") {
         return;
     }
     const $active_element = document.activeElement === null ? $() : $(document.activeElement);
-    const focused_id = $active_element.closest("[data-cf-todo-id]").attr("data-cf-todo-id");
+    const focused_id = $active_element.closest("[data-hover-todo-id]").attr("data-hover-todo-id");
     const rendered_todos_overlay = render();
     $("#reminders-overlay-container").html(rendered_todos_overlay);
     if (focused_id !== undefined) {
-        $(`#reminders-overlay [data-cf-todo-id='${CSS.escape(focused_id)}']`).trigger("focus");
+        $(`#reminders-overlay [data-hover-todo-id='${CSS.escape(focused_id)}']`).trigger("focus");
     }
 }
 

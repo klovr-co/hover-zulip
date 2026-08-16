@@ -7,7 +7,7 @@ import * as hover_spaces from "./hover_spaces.ts";
 import {$t} from "./i18n.ts";
 import * as narrow_state from "./narrow_state.ts";
 
-let active_filter: {kind: "module" | "source"; key: string} | undefined;
+let active_filter_class: string | undefined;
 let show_module_history = false;
 let observer: MutationObserver | undefined;
 
@@ -36,44 +36,41 @@ function current_context(): HoverViewContext | undefined {
 }
 
 function apply_filter(): void {
-    const $rows = $("#message_feed_container .cf-message-item");
+    const $rows = $("#message_feed_container .message_row");
     const context = current_context();
-    const filter = active_filter;
-    $rows.removeClass("cf-feed-filtered-out");
+    const filter_class = active_filter_class;
+    $rows.removeClass("hover-all-filtered-out");
     if (context?.kind === "module") {
         if (!show_module_history) {
-            $rows.filter("[data-cf-lineage='earlier']").addClass("cf-feed-filtered-out");
+            $rows.filter(".hover-lineage-earlier").addClass("hover-all-filtered-out");
         }
         return;
     }
     if (context?.kind !== "all") {
         return;
     }
-    if (filter === undefined) {
+    if (filter_class === undefined) {
         $rows
-            .filter("[data-cf-source-record], [data-cf-lineage='earlier']")
-            .addClass("cf-feed-filtered-out");
+            .filter(".hover-raw-source-record, .hover-lineage-earlier")
+            .addClass("hover-all-filtered-out");
         return;
     }
     $rows.each((_index, element) => {
-        const matches_filter =
-            filter.kind === "module"
-                ? element.dataset["cfModuleKey"] === filter.key
-                : (element.dataset["cfFilterSourceIds"]?.split(" ").includes(filter.key) ?? false);
         element.classList.toggle(
-            "cf-feed-filtered-out",
-            !matches_filter ||
-                (filter.kind === "module" && element.dataset["cfLineage"] === "earlier"),
+            "hover-all-filtered-out",
+            !element.classList.contains(filter_class) ||
+                (filter_class.startsWith("hover-module--") &&
+                    element.classList.contains("hover-lineage-earlier")),
         );
     });
 }
 
 function refresh(): void {
     const context = current_context();
-    $("[data-cf-feed-controls]").remove();
-    document.body.classList.toggle("cf-space-feed--all", context?.kind === "all");
-    document.body.classList.toggle("cf-space-feed--module", context?.kind === "module");
-    active_filter = undefined;
+    $(".hover-all-view-filters, .hover-module-view-filters").remove();
+    document.body.classList.toggle("hover-space-all-view", context?.kind === "all");
+    document.body.classList.toggle("hover-space-module-view", context?.kind === "module");
+    active_filter_class = undefined;
     show_module_history = false;
     if (context === undefined) {
         return;
@@ -106,19 +103,21 @@ function refresh(): void {
 
 export function initialize(): void {
     $(window).on("hashchange", () => setTimeout(refresh, 0));
-    $("body").on("click", "[data-cf-feed-filter]", (event) => {
+    $("body").on("click", ".hover-all-filter", (event) => {
         const $button = $(event.currentTarget);
-        const kind = $button.attr("data-cf-feed-filter");
-        const key = $button.attr("data-cf-feed-filter-key");
-        active_filter =
-            (kind === "module" || kind === "source") && key !== undefined ? {kind, key} : undefined;
-        $("[data-cf-feed-filter]")
-            .removeClass("cf-feed-filter--selected")
-            .attr("aria-pressed", "false");
-        $button.addClass("cf-feed-filter--selected").attr("aria-pressed", "true");
-        const label = $button.find(".cf-feed-filter__label").text().trim();
-        $("[data-cf-feed-controls='all'] .cf-feed-controls__status").text(
-            active_filter === undefined
+        const kind = $button.attr("data-hover-filter");
+        const key = $button.attr("data-hover-filter-key");
+        active_filter_class =
+            kind === "module" && key !== undefined
+                ? `hover-module--${key}`
+                : kind === "source" && key !== undefined
+                  ? `hover-source-id--${key}`
+                  : undefined;
+        $(".hover-all-filter").removeClass("is-active").attr("aria-pressed", "false");
+        $button.addClass("is-active").attr("aria-pressed", "true");
+        const label = $button.clone().children().remove().end().text().trim();
+        $(".hover-all-view-filters__status").text(
+            active_filter_class === undefined
                 ? $t({
                       defaultMessage:
                           "Showing teammate posts and the latest meaningful state of every enabled Module.",
@@ -133,14 +132,12 @@ export function initialize(): void {
         );
         apply_filter();
     });
-    $("body").on("click", "[data-cf-feed-history]", (event) => {
+    $("body").on("click", ".hover-module-history-filter", (event) => {
         const $button = $(event.currentTarget);
-        show_module_history = $button.attr("data-cf-feed-history") === "all";
-        $("[data-cf-feed-history]")
-            .removeClass("cf-feed-filter--selected")
-            .attr("aria-pressed", "false");
-        $button.addClass("cf-feed-filter--selected").attr("aria-pressed", "true");
-        $("[data-cf-feed-controls='module'] .cf-feed-controls__status").text(
+        show_module_history = $button.attr("data-hover-history") === "all";
+        $(".hover-module-history-filter").removeClass("is-active").attr("aria-pressed", "false");
+        $button.addClass("is-active").attr("aria-pressed", "true");
+        $(".hover-module-view-filters__status").text(
             show_module_history
                 ? $t({
                       defaultMessage:

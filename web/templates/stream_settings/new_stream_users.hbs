@@ -22,15 +22,15 @@
 </div>
 
 <div class="subscriber-list-box">
-    <div class="cf-data-table__scroll subscriber_list_container" data-simplebar data-simplebar-tab-index="-1">
-        <table class="cf-data-table cf-data-table--settings subscriber-list table table-striped">
+    <div class="subscriber_list_container" data-simplebar data-simplebar-tab-index="-1">
+        <table class="subscriber-list table table-striped">
             <thead class="table-sticky-headers">
                 <tr>
                     <th class="panel_user_list" data-sort="alphabetic" data-sort-prop="full_name">{{t "Name" }}
-                        {{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="table-sortable-arrow"}}
+                        <i class="table-sortable-arrow zulip-icon zulip-icon-sort-arrow-down"></i>
                     </th>
                     <th class="settings-email-column" data-sort="email">{{t "Email" }}
-                        {{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="table-sortable-arrow"}}
+                        <i class="table-sortable-arrow zulip-icon zulip-icon-sort-arrow-down"></i>
                     </th>
                     <th class="action-column">{{t "Action" }}</th>
                 </tr>

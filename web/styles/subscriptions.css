@@ -16,6 +16,30 @@
     overflow-wrap: break-word;
 }
 
+.stream-email {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "Source Code Pro", monospace;
+    padding: 10px;
+    font-size: 0.85em; /* 13.6px at 16px/em (previously 0.85rem) */
+    background-color: var(--color-background-stream-email);
+    border: 1px solid hsl(0deg 0% 87%);
+    border-radius: 4px;
+}
+
+.stream-email .email-address {
+    display: block;
+    flex: 0 0 90%;
+    overflow-wrap: break-word;
+    word-break: break-all;
+    white-space: normal;
+}
+
+.stream-email .copy-email-address {
+    font-size: 1.1765em; /* 16px at 13.6px/em */
+}
+
 .sub_setting_checkbox {
     display: flex;
 
@@ -423,11 +447,11 @@
         align-self: start;
     }
 
-    .cf-tabs.stream_sorter_toggle {
+    .tab-switcher.stream_sorter_toggle {
         margin-left: auto;
     }
 
-    .cf-tabs,
+    .tab-switcher,
     #add_new_subscription {
         margin: 0;
         height: var(--settings-overlay-header-button-height);
@@ -626,10 +650,14 @@
     the left sidebar and settings content for the current screen width or not. */
     --column-count: 2;
 
-    .list-toggler-container .cf-tabs .cf-tabs__tab {
+    .list-toggler-container .tab-switcher .ind-tab {
         width: auto;
         display: flex;
         padding: 0 10px;
+
+        .fa {
+            font-size: 1em;
+        }
     }
 
     .two-pane-settings-header {
@@ -733,7 +761,7 @@
             font-size: inherit;
         }
 
-        .cf-notice.group_deactivated {
+        .main-view-banner.group_deactivated {
             margin-bottom: 10px;
         }
     }
@@ -1139,7 +1167,7 @@
 }
 
 .two-pane-settings-overlay {
-    .cf-tabs {
+    .tab-switcher {
         display: flex;
         flex-wrap: nowrap;
         height: var(--settings-overlay-header-button-height);
@@ -1212,11 +1240,11 @@
         margin-left: 18px;
 
         .tab-container {
-            .cf-tabs {
+            .tab-switcher {
                 margin: 0;
             }
 
-            .cf-tabs__tab {
+            .ind-tab {
                 padding: 0 4px;
                 min-width: 5.7142em; /* 80px at 14px/em */
                 width: auto;
@@ -1592,16 +1620,29 @@
 
 #deactivation-confirm-modal {
     .alert {
-        padding: 0;
-        background-color: transparent;
+        padding-right: 14px;
+        background-color: var(--color-background-error-main-view-banner);
     }
 
     .cannot-deactivate-group-banner {
+        border: none;
         margin: 0;
 
         .banner-text {
             margin: 0;
-            padding-inline-end: 4px;
+            padding-right: 4px;
+        }
+
+        .permissions-button {
+            text-wrap: nowrap;
+
+            &:focus {
+                outline: 0;
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--color-outline-focus);
+            }
         }
     }
 }

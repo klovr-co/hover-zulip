@@ -1,117 +1,111 @@
-<div class="cf-global-search__shell">
-    <header class="cf-global-search__header">
+<div class="hover-search-shell">
+    <header class="hover-search-header">
+        <p class="hover-search-eyebrow">{{t "Home"}}</p>
         <h1>{{t "Search"}}</h1>
-        <p class="cf-global-search__description">{{t "Find posts and generated updates first, with authorized Source evidence available below."}}</p>
-        <form id="cf-global-search-form" class="cf-global-search__form" role="search">
-            <label class="cf-field__label" for="cf-global-search-input">{{t "Search Hover knowledge"}}</label>
-            <div class="cf-global-search__controls">
+        <p>{{t
+                "Find posts and generated updates first, with authorized Source evidence available below."
+            }}</p>
+        <form id="hover-global-search-form" role="search">
+            <label for="hover-global-search-input">{{t "Search Hover knowledge"}}</label>
+            <div class="hover-global-search-controls">
                 <input
-                  id="cf-global-search-input"
-                  class="cf-field__control cf-global-search__input"
-                  type="search"
-                  value="{{query}}"
-                  maxlength="100"
-                  autocomplete="off"
-                  placeholder="{{t 'Search your Spaces'}}"
-                  />
-                {{> cofounder/components/button type="submit" variant="primary" label=(t "Search") custom_classes="cf-global-search__submit"}}
+                    id="hover-global-search-input"
+                    type="search"
+                    value="{{query}}"
+                    maxlength="100"
+                    autocomplete="off"
+                    placeholder="{{t 'Search your Spaces'}}"
+                />
+                <button type="submit" class="button rounded">{{t "Search"}}</button>
             </div>
         </form>
-        <div class="cf-global-search__scope-note">
-            {{> cofounder/components/icon name="lock" compact=true}}
+        <div class="hover-search-scope-note">
+            <i class="zulip-icon zulip-icon-lock" aria-hidden="true"></i>
             {{t "Only confirmed Spaces you can access are searched."}}
         </div>
     </header>
 
-    <div
-      class="cf-global-search__status"
-      role="status"
-      aria-live="polite"
-      aria-busy="{{#if searching}}true{{else}}false{{/if}}"
-      tabindex="-1"
-      >
-        {{status}}
-    </div>
+    <div class="hover-search-status" role="status" aria-live="polite">{{status}}</div>
 
-    {{#if searching}}
-        <div class="cf-global-search__loading" aria-hidden="true">
-            <span></span><span></span><span></span>
-        </div>
-    {{else if has_query}}
-        <section class="cf-global-search__section" aria-labelledby="cf-global-search-knowledge-heading">
-            <div class="cf-global-search__section-heading">
-                <h2 id="cf-global-search-knowledge-heading" tabindex="-1">{{t "Knowledge"}}</h2>
-                <span class="cf-global-search__count" aria-label="{{t 'Knowledge result count'}}">{{knowledge_count}}</span>
+    {{#if has_query}}
+        <section class="hover-search-section" aria-labelledby="hover-search-knowledge-heading">
+            <div class="hover-search-section-heading">
+                <div>
+                    <p class="hover-search-eyebrow">{{t "Priority results"}}</p>
+                    <h2 id="hover-search-knowledge-heading">{{t "Knowledge"}}</h2>
+                </div>
+                <span>{{knowledge_count}}</span>
             </div>
             {{#if has_knowledge}}
-                <ol class="cf-global-search__result-list">
+                <ol class="hover-search-result-list">
                     {{#each knowledge}}
-                        <li class="cf-global-search__result cf-global-search__result--knowledge">
-                            <div class="cf-global-search__result-meta">
-                                <span class="cf-global-search__kind">{{kind_label}}</span>
+                        <li class="hover-search-result hover-search-knowledge-result">
+                            <div class="hover-search-result-meta">
+                                <span class="hover-search-kind-badge">{{kind_label}}</span>
                                 <span>{{space.name}}</span>
                                 <span aria-hidden="true">&middot;</span>
                                 <span>{{topic}}</span>
                                 <time datetime="{{timestamp}}">{{display_time}}</time>
                             </div>
-                            <span class="cf-global-search__byline">{{byline}}</span>
-                            <div class="cf-global-search__content">{{{rendered_content_html}}}</div>
-                            <a class="cf-global-search__result-link" href="{{url}}">{{t "Open live post"}}</a>
+                            <span class="hover-search-result-byline">{{byline}}</span>
+                            <div class="hover-search-result-content">{{{rendered_content}}}</div>
+                            <a class="hover-search-result-link" href="{{url}}">{{t
+                                    "Open live post"
+                                }}</a>
                             <button
-                              type="button"
-                              class="cf-button cf-button--ghost cf-button--compact cf-global-search__save"
-                              data-message-id="{{message_id}}"
-                              aria-pressed="{{#if saved}}true{{else}}false{{/if}}"
-                              >
-                                {{> cofounder/components/icon name="star" compact=true}}
-                                <span class="cf-button__label">{{#if saved}}{{t "Remove from Saved"}}{{else}}{{t "Save"}}{{/if}}</span>
+                                type="button"
+                                class="button-reset-style hover-search-save-button"
+                                data-message-id="{{message_id}}"
+                                aria-pressed="{{#if saved}}true{{else}}false{{/if}}"
+                            >
+                                <i class="zulip-icon {{#if saved}}zulip-icon-star-filled{{else}}zulip-icon-star{{/if}}" aria-hidden="true"></i>
+                                {{#if saved}}{{t "Remove from Saved"}}{{else}}{{t "Save"}}{{/if}}
                             </button>
                         </li>
                     {{/each}}
                 </ol>
             {{else}}
-                <p class="cf-global-search__empty">{{t "No human or generated posts match."}}</p>
+                <p class="hover-search-empty">{{t "No human or generated posts match."}}</p>
             {{/if}}
         </section>
 
-        <section class="cf-global-search__section cf-global-search__section--sources" aria-labelledby="cf-global-search-sources-heading">
-            <div class="cf-global-search__section-heading">
-                <h2 id="cf-global-search-sources-heading" tabindex="-1">{{t "Sources"}}</h2>
-                <span class="cf-global-search__count" aria-label="{{t 'Source result count'}}">{{source_count}}</span>
+        <section class="hover-search-section hover-search-sources-section" aria-labelledby="hover-search-sources-heading">
+            <div class="hover-search-section-heading">
+                <div>
+                    <p class="hover-search-eyebrow">{{t "Exact evidence"}}</p>
+                    <h2 id="hover-search-sources-heading">{{t "Sources"}}</h2>
+                </div>
+                <span>{{source_count}}</span>
             </div>
-            <p class="cf-global-search__section-description">{{t "Read-only records from attached Sources. Source evidence cannot be saved in this pilot."}}</p>
+            <p class="hover-search-section-description">{{t
+                    "Read-only records from attached Sources. Source evidence cannot be saved in this pilot."
+                }}</p>
             {{#if has_sources}}
-                <ol class="cf-global-search__result-list">
+                <ol class="hover-search-result-list">
                     {{#each sources}}
-                        <li class="cf-global-search__result cf-global-search__result--source">
-                            <div class="cf-global-search__result-meta">
-                                <span class="cf-global-search__kind">{{t "Source"}}</span>
+                        <li class="hover-search-result hover-search-source-result">
+                            <div class="hover-search-result-meta">
+                                <span class="hover-search-kind-badge">{{t "Source"}}</span>
                                 <span>{{space.name}}</span>
                                 <span aria-hidden="true">&middot;</span>
                                 <span>{{source.display_name}}</span>
                                 <time datetime="{{record.timestamp}}">{{display_time}}</time>
                             </div>
-                            <span class="cf-global-search__byline">{{record.sender_display_name}}</span>
-                            <div class="cf-global-search__content">
-                                {{#if record.content.text}}
-                                    <p>{{record.content.text}}</p>
-                                {{/if}}
-                                {{#if record.content.voice_transcript}}
-                                    <p>{{record.content.voice_transcript}}</p>
-                                {{/if}}
-                                {{#if record.content.media_description}}
-                                    <p>{{record.content.media_description}}</p>
-                                {{/if}}
+                            <span class="hover-search-result-byline">{{record.sender_display_name}}</span>
+                            <div class="hover-search-source-content">
+                                {{#if record.content.text}}<p>{{record.content.text}}</p>{{/if}}
+                                {{#if record.content.voice_transcript}}<p>{{record.content.voice_transcript}}</p>{{/if}}
+                                {{#if record.content.media_description}}<p>{{record.content.media_description}}</p>{{/if}}
                             </div>
-                            <span class="cf-global-search__readonly">
-                                {{> cofounder/components/icon name="lock" compact=true}}
+                            <span class="hover-search-readonly-label">
+                                <i class="zulip-icon zulip-icon-lock" aria-hidden="true"></i>
                                 {{t "Read-only evidence"}}
                             </span>
                         </li>
                     {{/each}}
                 </ol>
             {{else}}
-                <p class="cf-global-search__empty">{{t "No Source records match."}}</p>
+                <p class="hover-search-empty">{{t "No Source records match."}}</p>
             {{/if}}
         </section>
     {{/if}}

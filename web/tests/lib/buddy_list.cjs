@@ -8,7 +8,7 @@ exports.buddy_list_add_user_matching_view = (user_id, $stub) => {
         $stub.attr("data-user-id", user_id);
     }
     users_matching_view.push(user_id);
-    const sel = `li.cf-member-row[data-user-id='${CSS.escape(user_id)}']`;
+    const sel = `li.user_sidebar_entry[data-user-id='${CSS.escape(user_id)}']`;
     $("#buddy_list_wrapper").set_find_results(sel, $stub);
 };
 
@@ -18,7 +18,7 @@ exports.buddy_list_add_other_user = (user_id, $stub) => {
         $stub.attr("data-user-id", user_id);
     }
     other_users.push(user_id);
-    const sel = `li.cf-member-row[data-user-id='${CSS.escape(user_id)}']`;
+    const sel = `li.user_sidebar_entry[data-user-id='${CSS.escape(user_id)}']`;
     $("#buddy_list_wrapper").set_find_results(sel, $stub);
 };
 
@@ -39,10 +39,10 @@ exports.stub_buddy_list_elements = () => {
     $.set_results("#buddy-list-users-matching-view .empty-list-message", []);
     $.reset_selector("#buddy-list-other-users .empty-list-message");
     $.set_results("#buddy-list-other-users .empty-list-message", []);
-    $.reset_selector("#buddy-list-other-users-container .cf-people-sidebar__all-users-link");
-    $.set_results("#buddy-list-other-users-container .cf-people-sidebar__all-users-link", []);
+    $.reset_selector("#buddy-list-other-users-container .view-all-users-link");
+    $.set_results("#buddy-list-other-users-container .view-all-users-link", []);
 
     // Simulate no avatar images for clear_avatar_preload_backgrounds.
-    $.reset_selector("#user-list .cf-member-row__avatar--loading img");
-    $.set_results("#user-list .cf-member-row__avatar--loading img", []);
+    $.reset_selector("#user-list .avatar-preload-background img");
+    $.set_results("#user-list .avatar-preload-background img", []);
 };

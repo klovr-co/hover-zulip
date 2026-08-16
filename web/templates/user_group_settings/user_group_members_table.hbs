@@ -1,13 +1,13 @@
-<div class="cf-data-table__scroll member_list_container" data-simplebar data-simplebar-tab-index="-1">
+<div class="member_list_container" data-simplebar data-simplebar-tab-index="-1">
     <div class="member_list_loading_indicator"></div>
-    <table class="cf-data-table cf-data-table--settings member-list table table-striped">
+    <table class="member-list table table-striped">
         <thead class="table-sticky-headers">
             <tr>
                 <th class="panel_user_list" data-sort="name">{{t "Name" }}
-                    {{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="table-sortable-arrow"}}
+                    <i class="table-sortable-arrow zulip-icon zulip-icon-sort-arrow-down"></i>
                 </th>
                 <th class="settings-email-column" data-sort="email">{{t "Email" }}
-                    {{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="table-sortable-arrow"}}
+                    <i class="table-sortable-arrow zulip-icon zulip-icon-sort-arrow-down"></i>
                 </th>
                 {{#if can_remove_members}}
                 <th class="remove-button-column"></th>

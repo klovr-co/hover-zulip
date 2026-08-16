@@ -1,8 +1,4 @@
-<button id="{{widget_name}}_widget" class="dropdown-widget-button{{#if cofounder}} cf-dropdown-trigger{{/if}} {{#if custom_classes}}{{custom_classes}}{{/if}}" type="button"{{#if aria-label}} aria-label="{{aria-label}}"{{/if}}{{#if aria_hidden}} aria-hidden="true"{{/if}} {{#if is_setting_disabled}}disabled{{/if}} {{#if disable_keyboard_focus}}tabindex="-1"{{/if}} name="{{widget_name}}">
+<button id="{{widget_name}}_widget" class="dropdown-widget-button {{#if custom_classes}}{{custom_classes}}{{/if}}" type="button" {{#if is_setting_disabled}}disabled{{/if}} {{#if disable_keyboard_focus}}tabindex="-1"{{/if}} name="{{widget_name}}">
     <span class="dropdown_widget_value">{{#if default_text}}{{default_text}}{{/if}}</span>
-    {{#if cofounder}}
-    {{> cofounder/components/icon name="chevron-down" compact=true }}
-    {{else}}
     <i class="zulip-icon zulip-icon-chevron-down"></i>
-    {{/if}}
 </button>

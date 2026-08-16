@@ -433,7 +433,7 @@ export function show_from_selected_message(): void {
     // date elements.
     while ($media.length === 0) {
         if ($message.prev().length === 0) {
-            const $prev_message_group = $message.parent().prevAll(".cf-message-group").first();
+            const $prev_message_group = $message.parent().prevAll(".recipient_row").first();
             if ($prev_message_group.length === 0) {
                 $prev_traverse = true;
                 $message = $message_selected;
@@ -450,7 +450,7 @@ export function show_from_selected_message(): void {
     if ($prev_traverse) {
         while ($media.length === 0) {
             if ($message.next().length === 0) {
-                const $next_message_group = $message.parent().nextAll(".cf-message-group").first();
+                const $next_message_group = $message.parent().nextAll(".recipient_row").first();
                 if ($next_message_group.length === 0) {
                     break;
                 }
@@ -734,11 +734,11 @@ export function initialize(): void {
         // we capture the first of these
         if (is_video) {
             $original_media_element = $<HTMLMediaElement>(
-                `.cf-message-item a[href='${CSS.escape($(this).attr("data-url")!)}'] video`,
+                `.message_row a[href='${CSS.escape($(this).attr("data-url")!)}'] video`,
             )?.first();
         } else {
             $original_media_element = $<HTMLImageElement>(
-                `.cf-message-item a[href='${CSS.escape($(this).attr("data-url")!)}'] img`,
+                `.message_row a[href='${CSS.escape($(this).attr("data-url")!)}'] img`,
             )?.first();
         }
 

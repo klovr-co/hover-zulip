@@ -1,26 +1,26 @@
 <div id="attachments-settings" class="settings-section" data-name="uploaded-files">
     <div id="attachment-stats-holder" class="banner-wrapper"></div>
-    <div class="cf-data-table__header settings_panel_list_header">
+    <div class="settings_panel_list_header">
         <h3 class="settings-table-title">{{t "Your uploads"}}</h3>
         {{> filter_text_input id="upload_file_search" placeholder=(t 'Filter') aria_label=(t 'Filter uploads')}}
     </div>
     <div class="clear-float"></div>
     <div class="alert" id="delete-upload-status"></div>
-    <div class="cf-data-table__scroll progressive-table-wrapper" data-simplebar data-simplebar-tab-index="-1">
-        <table class="cf-data-table cf-data-table--settings table table-striped wrapped-table">
+    <div class="progressive-table-wrapper" data-simplebar data-simplebar-tab-index="-1">
+        <table class="table table-striped wrapped-table">
             <thead class="table-sticky-headers">
                 <tr>
                     <th data-sort="alphabetic" data-sort-prop="name" class="upload-file-name">{{t "File" }}
-                        {{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="table-sortable-arrow"}}
+                        <i class="table-sortable-arrow zulip-icon zulip-icon-sort-arrow-down"></i>
                     </th>
                     <th class="active upload-date" data-sort="numeric" data-sort-prop="create_time">{{t "Date uploaded" }}
-                        {{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="table-sortable-arrow"}}
+                        <i class="table-sortable-arrow zulip-icon zulip-icon-sort-arrow-down"></i>
                     </th>
                     <th class="upload-mentioned-in" data-sort="mentioned_in">{{t "Mentioned in" }}
-                        {{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="table-sortable-arrow"}}
+                        <i class="table-sortable-arrow zulip-icon zulip-icon-sort-arrow-down"></i>
                     </th>
                     <th class="upload-size" data-sort="numeric" data-sort-prop="size">{{t "Size" }}
-                        {{> ../cofounder/components/icon name="chevron-down" compact=true custom_classes="table-sortable-arrow"}}
+                        <i class="table-sortable-arrow zulip-icon zulip-icon-sort-arrow-down"></i>
                     </th>
                     <th class="upload-actions actions">{{t "Actions" }}</th>
                 </tr>

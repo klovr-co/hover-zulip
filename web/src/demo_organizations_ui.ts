@@ -6,7 +6,7 @@ import render_convert_demo_organization_form from "../templates/settings/convert
 import render_demo_organization_warning_container from "../templates/settings/demo_organization_warning.hbs";
 
 import * as banners from "./banners.ts";
-import type {BannerAction} from "./banners.ts";
+import type {ActionButton} from "./buttons.ts";
 import * as channel from "./channel.ts";
 import * as dialog_widget from "./dialog_widget.ts";
 import {$t} from "./i18n.ts";
@@ -31,9 +31,9 @@ export function insert_demo_organization_warning(): void {
         .find(".settings-section")
         .prepend($(demo_organization_warning_container));
     const days_remaining = get_demo_organization_deadline_days_remaining();
-    let buttons: BannerAction[] = [
+    let buttons: ActionButton[] = [
         {
-            variant: "ghost",
+            variant: "text",
             label: $t({defaultMessage: "Learn more"}),
             custom_classes: "demo-organizations-help",
         },
@@ -42,7 +42,7 @@ export function insert_demo_organization_warning(): void {
         buttons = [
             ...buttons,
             {
-                variant: "secondary",
+                variant: "subtle",
                 label: $t({defaultMessage: "Convert"}),
                 custom_classes: "convert-demo-organization",
             },
@@ -74,7 +74,7 @@ export function show_configure_email_banner(): void {
             label: $t({defaultMessage: "Add your email to access this feature."}),
             buttons: [
                 {
-                    variant: "primary",
+                    variant: "solid",
                     label: $t({defaultMessage: "Add"}),
                     custom_classes: "demo-organization-add-email",
                 },

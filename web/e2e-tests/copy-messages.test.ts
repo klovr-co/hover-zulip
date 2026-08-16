@@ -23,9 +23,9 @@ async function copy_messages(
             partial_selection_config?: PartialSelectionConfig,
         ) => {
             function get_message_node(message: string): Element {
-                return [
-                    ...document.querySelectorAll(".message-list .cf-message-item__content"),
-                ].find((node) => node.textContent?.trim() === message)!;
+                return [...document.querySelectorAll(".message-list .message_content")].find(
+                    (node) => node.textContent?.trim() === message,
+                )!;
             }
 
             // select messages from start_message to end_message

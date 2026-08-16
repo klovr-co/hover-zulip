@@ -687,59 +687,32 @@ export async function build_move_topic_to_stream_popover(
         const warning_banner = render_unsubscribed_participants_warning_banner(context);
         $("#move_topic_modal .simplebar-content").prepend($(warning_banner));
 
-        $("#move_topic_modal .unsubscribed-participants-warning .cf-notice__action").on(
-            "click",
-            (event) => {
-                event.preventDefault();
+        $(
+            "#move_topic_modal .unsubscribed-participants-warning .main-view-banner-action-button",
+        ).on("click", (event) => {
+            event.preventDefault();
 
-                if (!(event.currentTarget instanceof HTMLButtonElement)) {
-                    return;
-                }
-                const $action_button = $(event.currentTarget);
-                if ($action_button.attr("aria-busy") === "true") {
-                    return;
-                }
-                const $status_box = $("#move_topic_modal #dialog_error").expectOne();
-                $action_button.attr({"aria-busy": "true", "aria-disabled": "true"});
+            function success(): void {
+                $(event.target).parents(".main-view-banner").remove();
+            }
 
-                function success(): void {
-                    $action_button.closest(".cf-notice").remove();
-                    $status_box.attr({
-                        "aria-atomic": "true",
-                        "aria-live": "polite",
-                        role: "status",
-                    });
-                    ui_report.success(
-                        $t_html({defaultMessage: "Participants subscribed to the channel"}),
-                        $status_box,
-                    );
-                    $("#move_topic_modal .dialog_submit_button").trigger("focus");
-                }
-
-                function xhr_failure(xhr: JQuery.jqXHR): void {
-                    $action_button.attr({"aria-busy": "false", "aria-disabled": "false"});
-                    $status_box.attr({
-                        "aria-atomic": "true",
-                        "aria-live": "assertive",
-                        role: "alert",
-                    });
-                    ui_report.error(
-                        $t_html({defaultMessage: "Failed to subscribe participants"}),
-                        xhr,
-                        $status_box,
-                    );
-                    $action_button.trigger("focus");
-                }
-
-                subscriber_api.add_user_ids_to_stream(
-                    unsubscribed_participant_ids,
-                    destination_stream,
-                    true,
-                    success,
-                    xhr_failure,
+            function xhr_failure(xhr: JQuery.jqXHR): void {
+                $(event.target).parents(".main-view-banner").remove();
+                ui_report.error(
+                    $t_html({defaultMessage: "Failed to subscribe participants"}),
+                    xhr,
+                    $("#move_topic_modal #dialog_error"),
                 );
-            },
-        );
+            }
+
+            subscriber_api.add_user_ids_to_stream(
+                unsubscribed_participant_ids,
+                destination_stream,
+                true,
+                success,
+                xhr_failure,
+            );
+        });
     }
 
     function move_topic(): void {

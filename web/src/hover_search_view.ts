@@ -67,7 +67,6 @@ let response: SearchResponse = {
     source_unavailable_count: 0,
 };
 let status = "";
-let searching = false;
 let visible = false;
 let request: JQuery.jqXHR<unknown> | undefined;
 let request_generation = 0;
@@ -96,13 +95,12 @@ function filter_unauthorized_results(search_response: SearchResponse): SearchRes
     };
 }
 
-function render({focus_target}: {focus_target?: string} = {}): void {
+function render(): void {
     if (!visible) {
         return;
     }
     const knowledge = response.knowledge.map((result) => ({
         ...result,
-        rendered_content_html: result.rendered_content,
         display_time: display_time(result.timestamp),
         kind_label:
             result.kind === "generated"
@@ -117,11 +115,10 @@ function render({focus_target}: {focus_target?: string} = {}): void {
         ...result,
         display_time: display_time(result.record.timestamp),
     }));
-    $("#cf-global-search-view").html(
+    $("#hover-search-view").html(
         render_hover_search_view({
             query: response.query,
             status,
-            searching,
             has_query: response.query !== "",
             knowledge,
             sources,
@@ -131,9 +128,6 @@ function render({focus_target}: {focus_target?: string} = {}): void {
             has_sources: sources.length > 0,
         }),
     );
-    if (focus_target !== undefined) {
-        $(focus_target).trigger("focus");
-    }
 }
 
 function search(query: string): void {
@@ -148,8 +142,7 @@ function search(query: string): void {
             source_unavailable_count: 0,
         };
         status = "";
-        searching = false;
-        render({focus_target: "#cf-global-search-input"});
+        render();
         return;
     }
     const generation = request_generation;
@@ -160,8 +153,7 @@ function search(query: string): void {
         source_unavailable_count: 0,
     };
     status = $t({defaultMessage: "Searching confirmed Spaces…"});
-    searching = true;
-    render({focus_target: ".cf-global-search__status"});
+    render();
     request = channel.post({
         url: "/json/hover/search",
         data: {query: JSON.stringify(normalized)},
@@ -173,25 +165,16 @@ function search(query: string): void {
             status = response.source_unavailable_count
                 ? $t({defaultMessage: "Some Source evidence is temporarily unavailable."})
                 : response.knowledge.length + response.sources.length === 0
-                  ? $t({
-                        defaultMessage: "No results found. Try a different name, topic, or phrase.",
-                    })
+                  ? $t({defaultMessage: "No results found."})
                   : "";
-            searching = false;
-            render({
-                focus_target:
-                    response.knowledge.length + response.sources.length === 0
-                        ? ".cf-global-search__status"
-                        : "#cf-global-search-knowledge-heading",
-            });
+            render();
         },
         error(_xhr, error_type) {
             if (generation !== request_generation || error_type === "abort") {
                 return;
             }
             status = $t({defaultMessage: "Search could not be completed. Try again."});
-            searching = false;
-            render({focus_target: ".cf-global-search__status"});
+            render();
         },
     });
 }
@@ -200,8 +183,8 @@ export function show(): void {
     visible = true;
     inbox_ui.hide();
     recent_view_ui.hide();
-    $("#message_feed_container, #compose, #cf-source-view").hide();
-    $("#cf-global-search-view").show();
+    $("#message_feed_container, #compose, #hover-source-view").hide();
+    $("#hover-search-view").show();
     left_sidebar_navigation_area.select_top_left_corner_item(".top_left_hover_search");
     render();
 }
@@ -213,7 +196,7 @@ export function hide(): void {
     visible = false;
     request?.abort();
     request_generation += 1;
-    $("#cf-global-search-view").hide();
+    $("#hover-search-view").hide();
     $("#message_feed_container, #compose").show();
 }
 
@@ -227,11 +210,11 @@ export function handle_space_event(): void {
 }
 
 export function initialize(): void {
-    $("body").on("submit", "#cf-global-search-form", (event) => {
+    $("body").on("submit", "#hover-global-search-form", (event) => {
         event.preventDefault();
-        search(String($("#cf-global-search-input").val() ?? ""));
+        search(String($("#hover-global-search-input").val() ?? ""));
     });
-    $("body").on("click", ".cf-global-search__save", (event) => {
+    $("body").on("click", ".hover-search-save-button", (event) => {
         const message_id = Number($(event.currentTarget).attr("data-message-id"));
         const result = response.knowledge.find((item) => item.message_id === message_id);
         if (result === undefined) {

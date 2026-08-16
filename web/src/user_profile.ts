@@ -789,8 +789,8 @@ export function show_user_profile(user_id: number, default_tab_key = "profile-ta
                     break;
             }
             setTimeout(() => {
-                $(".modal__container .cf-tabs__tab").attr("tabindex", "-1");
-                $(".modal__container .cf-tabs__tab--selected").attr("tabindex", "0");
+                $(".modal__container .ind-tab").attr("tabindex", "-1");
+                $(".modal__container .ind-tab.selected").attr("tabindex", "0");
             }, 0);
         },
     };
@@ -810,11 +810,11 @@ export function show_user_profile(user_id: number, default_tab_key = "profile-ta
 
     toggler = components.toggle(opts);
     const $elem = toggler.get();
-    $elem.addClass("cf-tabs--fill cf-tabs--wrap");
+    $elem.addClass("large allow-overflow");
     const $tab_switcher_container = $("#user-profile-modal .modal__tab-switcher-container");
     $tab_switcher_container.append($elem);
     setTimeout(() => {
-        $(".cf-tabs__tab--selected").trigger("focus");
+        $(".ind-tab.selected").trigger("focus");
     }, 0);
 }
 

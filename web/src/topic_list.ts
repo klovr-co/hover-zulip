@@ -425,7 +425,7 @@ export class TopicListWidget {
         // Installed Hover modules are native topics presented in their own
         // navigator, so avoid rendering a duplicate standard topic list
         // immediately above it.
-        if (!this.for_modal && this.$stream_li.find(".cf-module-nav").length > 0) {
+        if (!this.for_modal && this.$stream_li.find(".hover-ai-modules").length > 0) {
             this.remove();
             this.prior_dom = undefined;
             return;

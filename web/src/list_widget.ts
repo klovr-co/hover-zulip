@@ -523,17 +523,6 @@ export function create<Key, Item = Key>(
                         handle_sort($(this), widget, opts.$parent_container);
                     },
                 );
-                opts.$parent_container.on(
-                    "keydown.list_widget_sort",
-                    "th[data-sort]",
-                    function (this: HTMLElement, event: JQuery.KeyDownEvent) {
-                        if (event.key !== "Enter" && event.key !== " ") {
-                            return;
-                        }
-                        event.preventDefault();
-                        handle_sort($(this), widget, opts.$parent_container);
-                    },
-                );
             }
 
             opts.filter?.$element?.on("input.list_widget_filter", function () {
@@ -556,7 +545,6 @@ export function create<Key, Item = Key>(
 
             if (opts.$parent_container) {
                 opts.$parent_container.off("click.list_widget_sort", "[data-sort]");
-                opts.$parent_container.off("keydown.list_widget_sort", "th[data-sort]");
                 opts.filter?.$element?.siblings(".clear-filter").off("click");
             }
 
@@ -688,10 +676,6 @@ export function create<Key, Item = Key>(
         opts.$simplebar_container.find(".active").addClass("descend");
     }
 
-    if (opts.$parent_container) {
-        sync_sort_header_accessibility(opts.$parent_container);
-    }
-
     widget.clean_redraw();
 
     // Save the instance for potential future retrieval if a name is provided.
@@ -700,22 +684,6 @@ export function create<Key, Item = Key>(
     }
 
     return widget;
-}
-
-function sync_sort_header_accessibility($parent_container: JQuery): void {
-    const $sortable_headers = $parent_container.find("th[data-sort]");
-    $sortable_headers.attr({"aria-sort": "none", tabindex: "0"});
-    const $active_header = $sortable_headers.filter(".active");
-    if ($active_header.length > 0) {
-        $active_header.attr(
-            "aria-sort",
-            $active_header.hasClass("descend") ? "descending" : "ascending",
-        );
-    }
-
-    const $sort_buttons = $parent_container.find("button[data-sort]");
-    $sort_buttons.attr("aria-pressed", "false");
-    $sort_buttons.filter(".active").attr("aria-pressed", "true");
 }
 
 export function handle_sort<Key, Item>(
@@ -760,10 +728,6 @@ export function handle_sort<Key, Item>(
     }
 
     list.set_reverse_mode($th.hasClass("descend"));
-
-    if ($parent_container) {
-        sync_sort_header_accessibility($parent_container);
-    }
 
     // if `prop_name` is defined, it will trigger the generic sort functions,
     // and not if it is undefined.

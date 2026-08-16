@@ -28,10 +28,6 @@ export function mobile_deactivate_section(): void {
     const $settings_overlay_container = $("#settings_overlay_container");
     $settings_overlay_container.find(".right").removeClass("show");
     $settings_overlay_container.find(".settings-header.mobile").removeClass("slide-left");
-    const current = [
-        ...$settings_overlay_container.find(".cf-settings-nav__item[aria-current='page']"),
-    ].find((element) => element.getClientRects().length > 0);
-    current?.focus();
 }
 
 export function mobile_activate_section(): void {
@@ -52,7 +48,7 @@ function two_column_mode(): boolean {
 }
 
 function set_settings_header($elem: JQuery, key: string): void {
-    const selected_tab_key = $("#settings_page .cf-tabs__tab--selected").attr("data-tab-key");
+    const selected_tab_key = $("#settings_page .tab-switcher .selected").attr("data-tab-key");
     let header_prefix = $t_html({defaultMessage: "Personal settings"});
     if (selected_tab_key === "organization") {
         header_prefix = $t_html({defaultMessage: "Organization settings"});
@@ -89,8 +85,6 @@ export class SettingsPanelMenu {
         this.hash_prefix = opts.hash_prefix;
         this.base = opts.hash_prefix === "settings/" ? "settings" : "organization";
         this.$curr_li = this.$main_elem.children("li").eq(0);
-        this.$main_elem.children("li").attr("tabindex", "-1");
-        this.$curr_li.attr("tabindex", "0");
         this.current_tab = this.$curr_li.attr("data-section")!;
         this.current_user_settings_tab = "active";
         this.current_bot_settings_tab = {
@@ -181,7 +175,7 @@ export class SettingsPanelMenu {
     }
 
     show_org_user_settings_toggler(): void {
-        if ($("#admin-user-list").find(".cf-tabs").length === 0) {
+        if ($("#admin-user-list").find(".tab-switcher").length === 0) {
             const toggler_html = util.the(this.org_user_settings_toggler.get());
             $("#admin-user-list .tab-container").html(toggler_html);
             update_imported_users_tab(true);
@@ -194,14 +188,14 @@ export class SettingsPanelMenu {
     }
 
     show_bot_settings_toggler(toggler: Toggle, $container: JQuery): void {
-        if ($container.find(".cf-tabs").length === 0) {
+        if ($container.find(".tab-switcher").length === 0) {
             const toggler_html = util.the(toggler.get());
             $container.find(".tab-container").html(toggler_html);
 
             // We need to re-register these handlers since they are
             // destroyed once the settings modal closes.
             toggler.register_event_handlers();
-            this.set_key_handlers(toggler, $container.find(".cf-tabs"));
+            this.set_key_handlers(toggler, $container.find(".tab-switcher"));
         }
     }
 
@@ -316,12 +310,8 @@ export class SettingsPanelMenu {
             this.$curr_li = $li_for_section;
         }
 
-        this.$main_elem
-            .children("li")
-            .removeClass("active")
-            .removeAttr("aria-current")
-            .attr("tabindex", "-1");
-        this.$curr_li.addClass("active").attr({"aria-current": "page", tabindex: "0"});
+        this.$main_elem.children("li").removeClass("active");
+        this.$curr_li.addClass("active");
         this.set_current_tab(section);
 
         if (section !== "users" && section !== "bots") {

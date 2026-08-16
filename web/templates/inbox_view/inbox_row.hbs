@@ -1,41 +1,41 @@
 {{#if is_stream}}
     {{> inbox_stream_header_row .}}
 {{else}}
-    <div id="inbox-row-conversation-{{conversation_key}}" class="cf-conversation-list__row{{#unless (or (eq unread_count undefined) (eq unread_count 0))}} cf-conversation-list__row--unread{{/unless}} inbox-row {{#if is_hidden}}hidden_by_filters{{/if}}" tabindex="0" data-col-index="{{ column_indexes.FULL_ROW }}">
+    <div id="inbox-row-conversation-{{conversation_key}}" class="inbox-row {{#if is_hidden}}hidden_by_filters{{/if}}" tabindex="0" data-col-index="{{ column_indexes.FULL_ROW }}">
         <div class="inbox-focus-border">
             <div class="inbox-left-part-wrapper">
                 <div class="inbox-left-part">
                     {{#if is_direct}}
-                        <a class="cf-conversation-list__link recipients_info {{#unless user_circle_class}}inbox-group-or-bot-dm{{/unless}}" href="{{dm_url}}" tabindex="-1">
+                        <a class="recipients_info {{#unless user_circle_class}}inbox-group-or-bot-dm{{/unless}}" href="{{dm_url}}" tabindex="-1">
                             <span class="user_block">
                                 {{#if is_bot}}
-                                <span class="cf-conversation-list__identity-icon" aria-hidden="true">{{> ../cofounder/components/icon name="bot" compact=true}}</span>
+                                <span class="zulip-icon zulip-icon-bot" aria-hidden="true"></span>
                                 {{else if is_group}}
-                                <span class="cf-conversation-list__identity-icon conversation-partners-icon" aria-hidden="true">{{> ../cofounder/components/icon name="users" compact=true}}</span>
+                                <span class="conversation-partners-icon zulip-icon zulip-icon-dm-groups-3" aria-hidden="true"></span>
                                 {{else}}
-                                <span class="cf-presence-dot cf-presence-dot--{{user_circle_class}} {{user_circle_class}} user-circle" data-presence-indicator-user-id="{{user_ids_string}}" aria-hidden="true"></span>
+                                <span class="zulip-icon zulip-icon-{{user_circle_class}} {{user_circle_class}} user-circle" data-presence-indicator-user-id="{{user_ids_string}}"></span>
                                 {{/if}}
                                 <span class="recipients_name">{{{rendered_dm_with_html}}}</span>
                             </span>
                         </a>
-                        <span class="cf-conversation-list__mention unread_mention_info tippy-zulip-tooltip
+                        <span class="unread_mention_info tippy-zulip-tooltip
                           {{#unless has_unread_mention}}hidden{{/unless}}"
                           data-tippy-content="{{t 'You have unread mentions' }}">@</span>
                         <div class="unread-count-focus-outline" tabindex="0" data-col-index="{{ column_indexes.UNREAD_COUNT }}">
-                            <span class="cf-conversation-list__badge unread_count tippy-zulip-delayed-tooltip on_hover_dm_read"
+                            <span class="unread_count tippy-zulip-delayed-tooltip on_hover_dm_read"
                               data-user-ids-string="{{user_ids_string}}" data-tippy-content="{{t 'Mark as read' }}"
                               aria-label="{{t 'Mark as read' }}">{{unread_count}}</span>
                         </div>
                     {{else if is_topic}}
                         <div class="inbox-topic-name">
-                            <a class="cf-conversation-list__link{{#if is_empty_string_topic}} empty-topic-display{{/if}}" tabindex="-1" href="{{topic_url}}">{{topic_display_name}}</a>
+                            <a tabindex="-1" href="{{topic_url}}" {{#if is_empty_string_topic}}class="empty-topic-display"{{/if}}>{{topic_display_name}}</a>
                         </div>
-                        <span class="cf-conversation-list__mention unread_mention_info tippy-zulip-tooltip
+                        <span class="unread_mention_info tippy-zulip-tooltip
                           {{#unless mention_in_unread}}hidden{{/unless}}"
                           data-tippy-content="{{t 'You have unread mentions'}}">@</span>
                         {{#unless (or (eq unread_count undefined) (eq unread_count 0))}}
                         <div class="unread-count-focus-outline" tabindex="0" data-col-index="{{ column_indexes.UNREAD_COUNT }}">
-                            <span class="cf-conversation-list__badge unread_count tippy-zulip-delayed-tooltip on_hover_topic_read"
+                            <span class="unread_count tippy-zulip-delayed-tooltip on_hover_topic_read"
                               data-stream-id="{{stream_id}}" data-topic-name="{{topic_name}}"
                               data-tippy-content="{{t 'Mark as read' }}" aria-label="{{t 'Mark as read' }}">
                                 {{unread_count}}
@@ -52,21 +52,25 @@
                         <span class="visibility-policy-indicator change_visibility_policy hidden-for-spectators{{#if (eq visibility_policy all_visibility_policies.INHERIT)}} inbox-row-visibility-policy-inherit{{/if}}"
                           data-stream-id="{{stream_id}}" data-topic-name="{{topic_name}}" tabindex="0" data-col-index="{{ column_indexes.TOPIC_VISIBILITY }}">
                             {{#if (eq visibility_policy all_visibility_policies.FOLLOWED)}}
-                                {{> ../cofounder/components/icon name="follow" compact=true custom_classes="recipient_bar_icon"}}
+                                <i class="zulip-icon zulip-icon-follow recipient_bar_icon" data-tippy-content="{{t 'You follow this topic.'}}"
+                                  role="button" aria-haspopup="true" aria-label="{{t 'You follow this topic.' }}"></i>
                             {{else if (eq visibility_policy all_visibility_policies.UNMUTED)}}
-                                {{> ../cofounder/components/icon name="unmute" compact=true custom_classes="recipient_bar_icon"}}
+                                <i class="zulip-icon zulip-icon-unmute recipient_bar_icon" data-tippy-content="{{t 'You have unmuted this topic.'}}"
+                                  role="button" aria-haspopup="true" aria-label="{{t 'You have unmuted this topic.' }}"></i>
                             {{else if (eq visibility_policy all_visibility_policies.MUTED)}}
-                                {{> ../cofounder/components/icon name="mute" compact=true custom_classes="recipient_bar_icon"}}
+                                <i class="zulip-icon zulip-icon-mute recipient_bar_icon" data-tippy-content="{{t 'You have muted this topic.'}}"
+                                  role="button" aria-haspopup="true" aria-label="{{t 'You have muted this topic.' }}"></i>
                             {{else if (eq visibility_policy all_visibility_policies.INHERIT)}}
-                                {{> ../cofounder/components/icon name="inherit" compact=true custom_classes="recipient_bar_icon"}}
+                                <i class="zulip-icon zulip-icon-inherit recipient_bar_icon"
+                                  role="button" aria-haspopup="true" aria-label="{{t 'Notifications are based on your configuration for this channel.' }}"></i>
                             {{/if}}
                         </span>
                     {{/if}}
-                    <button type="button" class="cf-conversation-list__action inbox-action-button inbox-topic-menu" aria-label="{{t 'Topic actions'}}"
+                    <div class="inbox-action-button inbox-topic-menu"
                       {{#if is_topic}}data-stream-id="{{stream_id}}" data-topic-name="{{topic_name}}"
                       data-topic-url="{{topic_url}}"{{/if}} tabindex="0" data-col-index="{{ column_indexes.ACTION_MENU }}">
-                        {{> ../cofounder/components/icon name="more-vertical" compact=true}}
-                    </button>
+                        <i class="zulip-icon zulip-icon-more-vertical" aria-hidden="true"></i>
+                    </div>
                 </div>
             </div>
             {{/unless}}

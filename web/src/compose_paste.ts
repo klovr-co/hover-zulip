@@ -898,7 +898,7 @@ export function paste_handler(
                     // Using focus({focusVisible: true}) here ensures that :focus-visible
                     // activates in Chrome.
                     $banner
-                        .find(".cf-notice__action.paste-to-compose")[0]
+                        .find(".main-view-banner-action-button.paste-to-compose")[0]
                         ?.focus({focusVisible: true});
                 }
             }, 0);

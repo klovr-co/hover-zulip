@@ -1322,7 +1322,7 @@ function empty_right_panel(): void {
 function open_right_panel_empty(): void {
     empty_right_panel();
     const tab_key = $("#groups_overlay .two-pane-settings-container")
-        .find(".cf-tabs__tab--selected")
+        .find("div.ind-tab.selected")
         .first()
         .attr("data-tab-key");
     assert(tab_key !== undefined);
@@ -1445,7 +1445,7 @@ export function is_group_already_present(group: UserGroup): boolean {
 
 export function get_active_data(): ActiveData {
     const $active_tabs = $("#groups_overlay .two-pane-settings-container").find(
-        ".cf-tabs__tab--selected",
+        "div.ind-tab.selected",
     );
     const active_group_id = user_group_components.active_group_id;
     let $row;
@@ -2136,19 +2136,6 @@ export function initialize(): void {
     });
 
     $("#groups_overlay_container").on(
-        "keydown",
-        ".cf-two-pane-shell__row-main",
-        function (this: HTMLElement, event) {
-            if (event.key !== "Enter" && event.key !== " ") {
-                return;
-            }
-            event.preventDefault();
-            event.stopPropagation();
-            this.closest<HTMLElement>(".group-row")?.click();
-        },
-    );
-
-    $("#groups_overlay_container").on(
         "click",
         ".open-group-info-button",
         function (this: HTMLElement, e) {
@@ -2273,11 +2260,7 @@ export function initialize(): void {
                             $("#dialog_error .permissions-button").on("click", () => {
                                 select_tab = "permissions";
                                 update_toggler_for_group_setting(user_group);
-                                dialog_widget.close(() => {
-                                    $(
-                                        '#user_group_settings .cf-tabs__tab[data-tab-key="permissions"]',
-                                    ).trigger("focus");
-                                });
+                                dialog_widget.close();
                             });
                         } else {
                             ui_report.error(
@@ -2386,7 +2369,7 @@ export function initialize(): void {
 
     $("#groups_overlay_container").on("click", ".group-row", show_right_section);
 
-    $("#groups_overlay_container").on("click", ".cf-two-pane-shell__back", () => {
+    $("#groups_overlay_container").on("click", ".fa-chevron-left", () => {
         $(".right").removeClass("show");
         $("#groups_overlay_container .two-pane-settings-header").removeClass("slide-left");
         resize.resize_settings_overlay_subheader($("#groups_overlay_container"));
@@ -2493,7 +2476,7 @@ export function initialize(): void {
 
     $("#groups_overlay_container").on(
         "click",
-        ".group-reactivation-error-banner .cf-notice__close",
+        ".group-reactivation-error-banner .main-view-banner-close-button",
         () => {
             $(
                 "#user_group_settings .group-reactivation-error-banner .group-reactivation-error",

@@ -22,7 +22,6 @@ if [ "$#" -eq 0 ]; then
             ':!tools/setup/emoji/emoji_map.json' \
             ':!tools/setup/emoji/emoji_names.py' \
             ':!pnpm-lock.yaml' \
-            ':!.ua/knowledge-graph.json' \
             ':!zerver/management/data/unified_reactions.json'
     )"
     mapfile -t FILES_TO_BE_CHECKED <<<"$FILES_TO_BE_CHECKED"

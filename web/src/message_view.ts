@@ -779,9 +779,7 @@ export let show = (raw_terms: NarrowTerm[], show_opts: ShowMessageViewOpts): voi
             assert(message_lists.current !== undefined);
             message_lists.current.resume_reading();
             // Reset the collapsed status of messages rows.
-            condense.condense_and_collapse(
-                message_lists.current.view.$list.find(".cf-message-item"),
-            );
+            condense.condense_and_collapse(message_lists.current.view.$list.find(".message_row"));
             message_edit.restore_edit_state_after_message_view_change();
             submessage.render_widget_rows_in_list(message_lists.current);
             message_feed_top_notices.update_top_of_narrow_notices(msg_list);

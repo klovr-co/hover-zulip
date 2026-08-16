@@ -1,70 +1,61 @@
 {{#if loading}}
-    <div
-      class="cf-evidence-loading"
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
-      tabindex="-1"
-      data-cf-evidence-result
-      >
-        <p>{{t "Resolving the exact source messages…"}}</p>
-        <div class="cf-evidence-loading__placeholder" aria-hidden="true">
-            <span></span>
-            <span></span>
-        </div>
-    </div>
+    <p role="status" aria-live="polite">{{t
+            "Resolving the exact source messages…"
+        }}</p>
 {{else if error}}
     {{#if retryable}}
-        <div class="cf-notice cf-notice--warning cf-evidence-result" role="alert" tabindex="-1" data-cf-evidence-result>
-            <div class="cf-notice__body">
-                <p class="cf-notice__content">{{t "Sources are temporarily unavailable. Please try again."}}</p>
-                <div class="cf-notice__actions">
-                    {{> cofounder/components/button variant="secondary" label=(t "Retry") cf_evidence_retry_url=evidence_url}}
-                </div>
-            </div>
+        <div
+            class="alert alert-warning show"
+            role="alert"
+            tabindex="-1"
+            data-hover-evidence-result
+        >
+            {{t "Sources are temporarily unavailable. Please try again."}}
+            <button
+                type="button"
+                class="button rounded small hover-evidence-retry"
+                data-evidence-url="{{evidence_url}}"
+            >
+                {{t "Retry"}}
+            </button>
         </div>
     {{else}}
-        <div class="cf-notice cf-notice--danger cf-evidence-result" role="alert" tabindex="-1" data-cf-evidence-result>
-            <div class="cf-notice__body">
-                <p class="cf-notice__content">{{t "These sources are no longer available."}}</p>
-            </div>
+        <div
+            class="alert alert-error show"
+            role="alert"
+            tabindex="-1"
+            data-hover-evidence-result
+        >
+            {{t "These sources are no longer available."}}
         </div>
     {{/if}}
 {{else if empty}}
-    <p
-      class="cf-evidence-empty"
-      role="status"
-      aria-live="polite"
-      tabindex="-1"
-      data-cf-evidence-result
-      >
+    <p tabindex="-1" data-hover-evidence-result>
         {{t "No exact source messages are available for this update."}}
     </p>
 {{else}}
-    <ol class="cf-evidence-list" tabindex="-1" data-cf-evidence-result>
+    <ol class="hover-evidence-list" tabindex="-1" data-hover-evidence-result>
         {{#each evidence}}
             <li>
-                <div>
-                    <strong>{{sender.display_name}}</strong>
+                <div><strong>{{sender.display_name}}</strong>
                     ·
-                    <time datetime="{{timestamp}}">{{display_timestamp}}</time>
-                </div>
-                {{#if content.text}}
-                    <p>{{content.text}}</p>
-                {{/if}}
-                {{#if content.voice_transcript}}
-                    <p>{{content.voice_transcript}}</p>
-                {{/if}}
-                {{#if content.media_description}}
-                    <p>{{content.media_description}}</p>
-                {{/if}}
+                    <time
+                        datetime="{{timestamp}}"
+                    >{{display_timestamp}}</time></div>
+                {{#if content.text}}<p>{{content.text}}</p>{{/if}}
+                {{#if content.voice_transcript}}<p
+                    >{{content.voice_transcript}}</p>{{/if}}
+                {{#if content.media_description}}<p
+                    >{{content.media_description}}</p>{{/if}}
                 {{#if media}}
-                    {{#unless content.media_description}}
-                        <p><em>{{t "Media evidence"}} · {{media.type}}</em></p>
-                    {{/unless}}
-                    {{#unless media.available}}
-                        <p><em>{{t "Media is no longer available."}}</em></p>
-                    {{/unless}}
+                    {{#unless content.media_description}}<p><em>{{t
+                                    "Media evidence"
+                                }}
+                                ·
+                                {{media.type}}</em></p>{{/unless}}
+                    {{#unless media.available}}<p><em>{{t
+                                    "Media is no longer available."
+                                }}</em></p>{{/unless}}
                 {{/if}}
             </li>
         {{/each}}

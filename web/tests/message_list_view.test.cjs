@@ -435,7 +435,7 @@ test("muted_message_vars", () => {
         assert.equal(result[2].include_sender, false);
 
         // Additionally test that the message with a mention is marked as such.
-        assert.equal(result[1].mention_classname, "cf-message-item--group-mention");
+        assert.equal(result[1].mention_classname, "group_mention");
 
         // Now, mute the sender.
         muted_users.add_muted_user(10);
@@ -474,7 +474,7 @@ test("muted_message_vars", () => {
         assert.equal(result[0].small_avatar_url, "fake/small/avatar/url");
 
         // Additionally test that the message with a mention is marked as such.
-        assert.equal(result[1].mention_classname, "cf-message-item--group-mention");
+        assert.equal(result[1].mention_classname, "group_mention");
 
         // Now test rehiding muted user's message
         is_revealed = false;
@@ -565,6 +565,7 @@ test("hover_generated_update_vars", () => {
                         id: null,
                         key: "whatsapp",
                         name: "WhatsApp",
+                        icon_class: "fa fa-whatsapp",
                         count: 1,
                         url: "",
                     },
@@ -572,6 +573,7 @@ test("hover_generated_update_vars", () => {
                         id: null,
                         key: "github",
                         name: "GitHub",
+                        icon_class: "fa fa-github",
                         count: 1,
                         url: "",
                     },
@@ -579,6 +581,7 @@ test("hover_generated_update_vars", () => {
                         id: null,
                         key: "instagram",
                         name: "Instagram",
+                        icon_class: "fa fa-instagram",
                         count: 1,
                         url: "",
                     },
@@ -624,7 +627,6 @@ test("hover_generated_update_vars", () => {
     assert.equal(hover_update.has_hover_revisions, true);
     assert.equal(hover_update.has_hover_disputed_details, true);
     assert.equal(hover_update.hover_disputed_details[0].state_label, "translated: Needs review");
-    assert.equal(hover_update.hover_disputed_details[0].state_tone, "warning");
     assert.equal(hover_update.hover_disputed_details[0].show_review_action, true);
     assert.equal(hover_update.hover_revisions[0].previous_value_display, '"Launch likely"');
     assert.equal(human_post.is_hover_generated_update, false);
@@ -665,14 +667,14 @@ test("native integration messages keep normal chrome and show Source provenance"
             id: 81,
             key: "instagram",
             name: "Instagram: AIMTO Instagram",
+            icon_class: "zulip-icon zulip-icon-link",
             count: 1,
             url: "https://www.instagram.com/aimto.my/",
         },
     ]);
     assert.equal(message.hover_module_name, undefined);
     assert.equal(message.has_hover_source_provenance, true);
-    assert.equal(message.cf_is_source_record, true);
-    assert.equal(message.cf_filter_source_ids, "81");
+    assert.equal(message.hover_filter_classes.includes("hover-raw-source-record"), true);
     assert.equal(message.hover_source_context, undefined);
 });
 
@@ -691,12 +693,14 @@ test("hover_generated_update_renders_native_card_chrome", () => {
             {
                 key: "whatsapp",
                 name: "WhatsApp",
+                icon_class: "fa fa-whatsapp",
                 count: 3,
                 url: "",
             },
             {
                 key: "github",
                 name: "GitHub",
+                icon_class: "fa fa-github",
                 count: 1,
                 url: "https://github.com/ashvinpraveen/learnaimto",
             },
@@ -711,7 +715,7 @@ test("hover_generated_update_renders_native_card_chrome", () => {
             locally_echoed: false,
             message_reactions: [
                 {
-                    selected: true,
+                    class: "message_reaction reacted",
                     count: 1,
                     emoji_alt_code: false,
                     emoji_code: "1f44d",
@@ -728,25 +732,24 @@ test("hover_generated_update_renders_native_card_chrome", () => {
         },
     });
 
-    assert.match(html, /class="[^"]*cf-message-item--generated-update[^"]*"/);
-    assert.match(html, /data-cf-module-key="progress_tracker"/);
+    assert.match(html, /class="[^"]*hover-generated-update[^"]*"/);
+    assert.match(html, /class="[^"]*hover-module--progress_tracker[^"]*"/);
     assert.match(html, />Progress Tracker<\/span>/);
     assert.match(html, />Across 4 sources</);
     assert.match(html, /Event readiness update/);
+    assert.match(html, /fa-whatsapp/);
+    assert.match(html, /fa-github/);
     assert.match(html, />3</);
     assert.match(html, /href="https:\/\/github.com\/ashvinpraveen\/learnaimto"/);
     assert.match(html, /View sources/);
-    assert.match(html, /class="cf-source-action cf-source-action--evidence"/);
-    assert.match(html, /data-cf-evidence-url=/);
-    assert.match(html, /class="cf-icon cf-icon--compact cf-source-action__icon"/);
-    assert.doesNotMatch(html, /hover-source-pill|hover-view-evidence/);
-    assert.doesNotMatch(html, /fa-whatsapp|fa-github/);
-    assert.match(html, /class="cf-message-feedback"/);
-    assert.match(html, /class="cf-message-reactions"/);
+    assert.match(html, /class="hover-source-pill hover-view-evidence"/);
+    assert.doesNotMatch(html, /class="message_reaction hover-view-evidence"/);
+    assert.match(html, /class="hover-message-reactions"/);
+    assert.match(html, /class="message_reactions"/);
     assert.match(html, /emoji-1f44d/);
 });
 
-test("Cofounder generated update visual fixture compares generated and ordinary messages", () => {
+test("hover generated update visual fixture compares generated and ordinary messages", () => {
     const list = new MessageListView({id: 1}, true, true);
     assert.ok(list);
     const base_context = {
@@ -764,7 +767,7 @@ test("Cofounder generated update visual fixture compares generated and ordinary 
             url: "/#narrow/channel/42/topic/Project-status/near/42",
         },
     };
-    const html = require("../templates/cofounder_generated_update_visual_fixture.hbs")({
+    const html = require("../templates/hover_generated_update_visual_fixture.hbs")({
         generated: {
             ...base_context,
             is_hover_generated_update: true,
@@ -776,12 +779,14 @@ test("Cofounder generated update visual fixture compares generated and ordinary 
                 {
                     key: "whatsapp",
                     name: "WhatsApp",
+                    icon_class: "fa fa-whatsapp",
                     count: 1,
                     url: "",
                 },
                 {
                     key: "github",
                     name: "GitHub",
+                    icon_class: "fa fa-github",
                     count: 1,
                     url: "https://github.com/example/project",
                 },
@@ -792,16 +797,13 @@ test("Cofounder generated update visual fixture compares generated and ordinary 
 
     assert.match(html, /data-visual-regression-fixture="generated-update-comparison"/);
     assert.equal(
-        (
-            html.match(/class="cf-message-item[^"]*\bcf-message-item--generated-update\b[^"]*"/g) ??
-            []
-        ).length,
+        (html.match(/class="message_row[^"]*\bhover-generated-update\b[^"]*"/g) ?? []).length,
         1,
     );
     assert.match(html, /Approved generated update/);
     assert.match(html, /Ordinary native message/);
-    assert.equal((html.match(/class="cf-source-actions"/g) ?? []).length, 1);
-    assert.doesNotMatch(html, /fa-whatsapp|fa-github/);
+    assert.match(html, /fa-whatsapp/);
+    assert.match(html, /fa-github/);
 });
 
 test("merge_message_groups", ({mock_template}) => {

@@ -1,12 +1,12 @@
-<div class="cf-message-reaction-wrap">
-    <button type="button" class="cf-message-reaction{{#if this.selected}} cf-message-reaction--selected{{/if}}" aria-label="{{this.label}}" aria-pressed="{{#if this.selected}}true{{else}}false{{/if}}" data-reaction-id="{{this.local_id}}" {{#if is_archived}}disabled{{/if}}>
+<div class="message_reaction_container {{#if is_archived}}disabled{{/if}}">
+    <div class="{{this.class}} {{#if is_archived}}disabled{{/if}}" aria-label="{{this.label}}" data-reaction-id="{{this.local_id}}">
         {{#if this.emoji_alt_code}}
-            <span class="cf-message-reaction__emoji-code">:{{this.emoji_name}}:</span>
+            <div class="emoji_alt_code">&nbsp;:{{this.emoji_name}}:</div>
         {{else if this.is_realm_emoji}}
-            <img src="{{this.url}}" class="emoji cf-message-reaction__emoji" alt="" />
+            <img src="{{this.url}}" class="emoji" />
         {{else}}
-            <span class="emoji emoji-{{this.emoji_code}} cf-message-reaction__emoji" aria-hidden="true"></span>
+            <div class="emoji emoji-{{this.emoji_code}}"></div>
         {{/if}}
-        <span class="cf-message-reaction__count">{{this.vote_text}}</span>
-    </button>
+        <div class="message_reaction_count">{{this.vote_text}}</div>
+    </div>
 </div>

@@ -21,7 +21,10 @@
                         <div class="delete-selected-drafts-button-container">
                             {{> ./components/icon_button intent="danger" custom_classes="delete-selected-drafts-button" icon="trash" disabled=true  }}
                         </div>
-                        {{> ./cofounder/components/button variant="secondary" label=(t "Select all drafts") icon="square" custom_classes="select-drafts-button" role="checkbox" has_checked_state=true checked=false}}
+                        <button class="action-button action-button-subtle-neutral select-drafts-button" role="checkbox" aria-checked="false">
+                            <span>{{t "Select all drafts" }}</span>
+                            <i class="fa fa-square-o select-state-indicator" aria-hidden="true"></i>
+                        </button>
                     </div>
                 </div>
             </div>

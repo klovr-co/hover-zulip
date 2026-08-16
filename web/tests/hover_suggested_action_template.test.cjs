@@ -15,8 +15,6 @@ run_test("renders an assigned Todo without treating its numeric user ID as a con
         is_pending: false,
         is_approved: true,
         is_not_action: false,
-        state_label: "Active Todo",
-        state_tone: "accent",
         todo_id: 7,
         todo_is_active: true,
         todo_is_completed: false,
@@ -28,13 +26,6 @@ run_test("renders an assigned Todo without treating its numeric user ID as a con
 
     assert.match(html, /value="10"/);
     assert.match(html, />\s*King Hamlet\s*<\/option>/);
-    assert.match(html, /role="region"/);
-    assert.match(html, /aria-labelledby="cf-suggested-action-todo-heading-7"/);
-    assert.match(html, /<h4 id="cf-suggested-action-todo-heading-7"/);
-    assert.match(html, /aria-label="translated: Assign to Todo"/);
-    assert.match(html, /data-cf-current-assignee="10"/);
-    assert.match(html, /data-cf-todo-operation="assign"[\s\S]*disabled/);
-    assert.match(html, /data-cf-todo-status[\s\S]*aria-atomic="true"/);
 });
 
 run_test("labels a completed Todo with its current state", () => {
@@ -46,8 +37,6 @@ run_test("labels a completed Todo with its current state", () => {
         is_pending: false,
         is_approved: true,
         is_not_action: false,
-        state_label: "Completed Todo",
-        state_tone: "success",
         todo_id: 7,
         todo_is_active: false,
         todo_is_completed: true,
@@ -57,9 +46,8 @@ run_test("labels a completed Todo with its current state", () => {
         todo_assignable_users: [],
     });
 
-    assert.match(html, />Completed Todo</);
-    assert.match(html, /cf-suggested-action--completed/);
-    assert.doesNotMatch(html, />Active Todo</);
+    assert.match(html, /translated: Completed Todo/);
+    assert.doesNotMatch(html, /translated: Active Todo/);
 });
 
 run_test("renders approval refinements from the current reviewed projection", () => {
@@ -75,20 +63,14 @@ run_test("renders approval refinements from the current reviewed projection", ()
         is_pending: true,
         is_approved: false,
         is_not_action: false,
-        state_label: "Awaiting confirmation",
-        state_tone: "warning",
     });
 
-    assert.match(html, /data-cf-action-wording/);
-    assert.match(html, /aria-labelledby="cf-suggested-action-heading-42"/);
-    assert.match(html, /<h3 id="cf-suggested-action-heading-42"/);
+    assert.match(html, /data-hover-action-wording/);
     assert.match(html, /Publish the reviewed briefing agenda/);
-    assert.match(html, /data-cf-action-assignee/);
-    assert.match(html, /aria-label="translated: Assign to Suggested Action assignee"/);
+    assert.match(html, /data-hover-action-assignee/);
     assert.match(html, /value="">\s*translated: Unassigned\s*<\/option>/);
     assert.match(html, /value="10" selected/);
     assert.match(html, /value="11"/);
-    assert.match(html, /data-cf-action-due-date/);
+    assert.match(html, /data-hover-action-due-date/);
     assert.match(html, /value="2026-08-19"/);
-    assert.match(html, /data-cf-action-status[\s\S]*aria-atomic="true"/);
 });

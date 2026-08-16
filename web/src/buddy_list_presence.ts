@@ -10,8 +10,8 @@ export function update_indicators(): void {
         const is_deactivated = !people.is_active_user_or_system_bot(user_id || 0);
         assert(!Number.isNaN(user_id));
         const user_circle_class = buddy_data.get_user_circle_class(user_id, is_deactivated);
-        const $indicator = $(this);
-        $indicator
+        const user_circle_class_with_icon = `${user_circle_class} zulip-icon-${user_circle_class}`;
+        $(this)
             .removeClass(
                 `
                 user-circle-active zulip-icon-user-circle-active
@@ -19,15 +19,6 @@ export function update_indicators(): void {
                 user-circle-offline zulip-icon-user-circle-offline
             `,
             )
-            .addClass(user_circle_class);
-        if (!$indicator.hasClass("cf-presence-dot")) {
-            $indicator.addClass(`zulip-icon-${user_circle_class}`);
-        }
-        if ($indicator.attr("aria-hidden") !== "true") {
-            $indicator.attr(
-                "aria-label",
-                buddy_data.get_user_presence_label(user_id, is_deactivated),
-            );
-        }
+            .addClass(user_circle_class_with_icon);
     });
 }

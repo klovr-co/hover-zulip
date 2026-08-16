@@ -3,24 +3,13 @@ import {$} from "jquery";
 
 import render_banner from "../templates/components/banner.hbs";
 
-import type {CofounderButtonVariant} from "./cofounder/components/button.ts";
+import type {ActionButton} from "./buttons.ts";
 import type {ComponentIntent} from "./types.ts";
-
-export type BannerAction = {
-    variant: CofounderButtonVariant;
-    label?: string;
-    icon?: string;
-    id?: string;
-    custom_classes?: string;
-    hidden?: boolean;
-    disabled?: boolean;
-    "aria-label"?: string;
-};
 
 export type Banner = {
     intent: ComponentIntent;
     label: string | Handlebars.SafeString;
-    buttons: BannerAction[];
+    buttons: ActionButton[];
     close_button: boolean;
     custom_classes?: string;
 };
@@ -59,10 +48,10 @@ export function close($banner: JQuery): void {
 }
 
 export function initialize(): void {
-    $("body").on("click", ".cf-banner .cf-banner__close", function (this: HTMLElement, e) {
+    $("body").on("click", ".banner .banner-close-action", function (this: HTMLElement, e) {
         e.preventDefault();
         e.stopPropagation();
-        const $banner = $(this).closest(".cf-banner");
+        const $banner = $(this).closest(".banner");
         close($banner);
     });
 }

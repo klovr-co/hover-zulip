@@ -378,7 +378,7 @@ export function end_if_focused_on_inline_topic_edit(): void {
     const $focused_elem = $(".topic_edit").find(":focus");
     if ($focused_elem.length === 1) {
         $focused_elem.trigger("blur");
-        const $recipient_row = $focused_elem.closest(".cf-message-group");
+        const $recipient_row = $focused_elem.closest(".recipient_row");
         end_inline_topic_edit($recipient_row);
     }
 }
@@ -387,7 +387,7 @@ export function end_if_focused_on_message_row_edit(): void {
     const $focused_elem = $(".message_edit").find(":focus");
     if ($focused_elem.length === 1) {
         $focused_elem.trigger("blur");
-        const $row = $focused_elem.closest(".cf-message-item");
+        const $row = $focused_elem.closest(".message_row");
         end_message_row_edit($row);
     }
 }
@@ -407,7 +407,7 @@ function handle_message_edit_enter(
 ): void {
     // Pressing Enter to save edits is coupled with Enter to send
     if (composebox_typeahead.should_enter_send(e)) {
-        const $row = $message_edit_content.closest(".cf-message-item");
+        const $row = $message_edit_content.closest(".message_row");
         const $message_edit_save_button = $row.find(".message_edit_save");
         if ($message_edit_save_button.prop("disabled")) {
             // In cases when the save button is disabled
@@ -448,7 +448,7 @@ function handle_inline_topic_edit_keydown(
             // Accepting a suggestion from the typeahead should not trigger a save.
             return;
         }
-        const $recipient_row = $form.closest(".cf-message-group");
+        const $recipient_row = $form.closest(".recipient_row");
         try_save_inline_topic_edit($recipient_row);
     } else if (e.key === "Escape") {
         // Handle Escape key event in the inline topic edit UI.

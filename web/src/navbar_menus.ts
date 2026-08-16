@@ -15,11 +15,11 @@ export function is_navbar_menus_displayed(): boolean {
 }
 
 export function any_focused(): boolean {
-    return $(".cf-app-header__item:focus").length > 0;
+    return $(".navbar-item:focus").length > 0;
 }
 
 export function blur_focused(): void {
-    $(".cf-app-header__item:focus").trigger("blur");
+    $(".navbar-item:focus").trigger("blur");
 }
 
 export function handle_keyboard_events(event_name: string): boolean {
@@ -33,7 +33,7 @@ export function handle_keyboard_events(event_name: string): boolean {
         gear_menu.toggle();
         return true;
     }
-    const $current_navbar_menu = $(".cf-app-header__item--active, .cf-app-header__item:focus");
+    const $current_navbar_menu = $(".navbar-item.active-navbar-menu, .navbar-item:focus");
     const target_menu = get_target_navbar_menu(event_name, $current_navbar_menu);
 
     if (!target_menu) {
@@ -68,7 +68,7 @@ function get_target_navbar_menu(
     event_name: string,
     $current_navbar_menu: JQuery,
 ): string | undefined {
-    const $navbar_menus = $(".cf-app-header__item");
+    const $navbar_menus = $(".navbar-item");
     const index = $navbar_menus.index($current_navbar_menu);
     if (event_name === "left_arrow" && index !== -1) {
         return [...$navbar_menus].slice(0, index).findLast((menu) => menu.getClientRects().length)

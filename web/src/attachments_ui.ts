@@ -7,7 +7,7 @@ import render_uploaded_files_list from "../templates/settings/uploaded_files_lis
 
 import {attachment_api_response_schema} from "./attachments.ts";
 import * as banners from "./banners.ts";
-import type {BannerAction} from "./banners.ts";
+import type {ActionButton} from "./buttons.ts";
 import * as channel from "./channel.ts";
 import * as dialog_widget from "./dialog_widget.ts";
 import {$t, $t_html} from "./i18n.ts";
@@ -84,14 +84,14 @@ function set_upload_space_stats(): void {
         return;
     }
 
-    let buttons: BannerAction[] = [];
+    let buttons: ActionButton[] = [];
     if (show_upgrade_message) {
         buttons = [
             ...buttons,
             {
                 label: $t({defaultMessage: "Upgrade"}),
                 custom_classes: "request-upgrade",
-                variant: "secondary",
+                variant: "subtle",
             },
         ];
     }

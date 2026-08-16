@@ -1,36 +1,67 @@
 {{! Stream sidebar rows }}
-{{#> cofounder/components/channel_nav_item .}}
+<li {{#if for_modal}}id="more-topics-modal" {{/if}}class="narrow-filter{{#if is_muted}} out_of_home_view{{/if}}" data-stream-id="{{id}}">
+    <div class="bottom_left_row channel-header">
+        <a href="{{url}}" class="subscription_block selectable_sidebar_block" draggable="false">
+
+            <span class="stream-privacy-original-color-{{id}} stream-privacy filter-icon" style="color: {{color}}">
+                {{> stream_privacy . }}
+            </span>
+
+            <span class="stream-name">{{name}}</span>
+
+            <div class="left-sidebar-controls">
+                <div class="channel-search-topics-button" tabindex="0" data-tippy-content="{{t 'Search topics' }}" data-stream-id="{{id}}">
+                    <i class="zulip-icon zulip-icon-search" aria-hidden="true"></i>
+                </div>
+                {{#if can_post_messages}}
+                <div class="channel-new-topic-button hidden-for-spectators auto-hide-left-sidebar-overlay" tabindex="0"  data-tippy-content="{{#if (or is_empty_topic_only_channel cannot_create_topics_in_channel)}}{{t 'New message'}}{{else}}{{t 'Start a new topic'}}{{/if}}" data-stream-id="{{id}}">
+                    <i class="channel-new-topic-icon zulip-icon zulip-icon-square-plus" aria-hidden="true"></i>
+                </div>
+                {{/if}}
+            </div>
+
+            <div class="stream-markers-and-unreads">
+                <span class="unread_mention_info"></span>
+                <span class="unread_count normal-count"></span>
+                <span class="masked_unread_count">
+                    <i class="zulip-icon zulip-icon-masked-unread"></i>
+                </span>
+            </div>
+
+            <span class="sidebar-menu-icon stream-sidebar-menu-icon" tabindex="0"><i class="zulip-icon zulip-icon-more-vertical" aria-hidden="true"></i></span>
+        </a>
+    </div>
     {{#if is_hover_space}}
     {{#if has_hover_ai_modules}}
-    <section class="cf-module-nav" aria-label="{{t 'AI Modules' }}">
-        <div class="cf-module-nav__header">{{t "AI Modules"}}</div>
-        <ul class="cf-module-nav__list">
+    <section class="hover-ai-modules" aria-label="{{t 'AI Modules' }}">
+        <div class="hover-ai-modules__header">{{t "AI Modules"}}</div>
+        <ul class="hover-ai-modules__list">
             {{#each hover_ai_modules}}
                 <li>
-                    <a class="cf-module-nav__item" href="{{url}}" data-cf-module-key="{{key}}">
-                        {{> cofounder/components/icon name=icon_name compact=true custom_classes="cf-module-nav__icon"}}
-                        <span class="cf-module-nav__name">{{name}}</span>
-                        {{#if has_count}}<span class="cf-module-nav__count">{{count}}</span>{{/if}}
+                    <a class="hover-ai-modules__item hover-ai-modules__item--{{key}}" href="{{url}}" data-hover-module-key="{{key}}">
+                        <i class="zulip-icon {{icon}} hover-ai-modules__icon" aria-hidden="true"></i>
+                        <span class="hover-ai-modules__name">{{name}}</span>
+                        {{#if has_count}}<span class="hover-ai-modules__count">{{count}}</span>{{/if}}
                     </a>
                 </li>
             {{/each}}
         </ul>
     </section>
     {{/if}}
-    <section class="cf-source-ledger" aria-label="{{t 'Attached sources' }}">
-        <div class="cf-source-ledger__header">
+    <section class="hover-source-ledger" aria-label="{{t 'Attached sources' }}">
+        <div class="hover-source-ledger__header">
             <span>{{t "Sources"}}</span>
         </div>
-        <ul class="cf-source-ledger__list">
+        <ul class="hover-source-ledger__list">
             {{#each hover_attached_sources}}
                 <li>
-                    <a class="cf-source-ledger__item" href="{{url}}" data-cf-source-key="{{source_key}}" {{#if is_external}}target="_blank" rel="noopener noreferrer"{{/if}}>
-                        <span class="cf-source-ledger__icon" aria-hidden="true">{{> cofounder/components/icon name=icon_name compact=true}}</span>
-                        <span class="cf-source-ledger__copy">
-                            <span class="cf-source-ledger__name">{{name}}</span>
-                            <span class="cf-source-ledger__detail">{{detail}}</span>
+                    <a class="hover-source-ledger__item hover-source-ledger__item--{{key}}" href="{{url}}" data-hover-source-key="{{source_key}}" {{#if is_external}}target="_blank" rel="noopener noreferrer"{{/if}}>
+                        <span class="hover-source-ledger__icon" aria-hidden="true"><i class="{{icon_class}}"></i></span>
+                        <span class="hover-source-ledger__copy">
+                            <span class="hover-source-ledger__name">{{name}}</span>
+                            <span class="hover-source-ledger__detail">{{detail}}</span>
                         </span>
-                        {{#if is_external}}{{> cofounder/components/icon name="external-link" compact=true custom_classes="cf-source-ledger__external"}}{{/if}}
+                        {{#if is_external}}<i class="zulip-icon zulip-icon-external-link hover-source-ledger__external" aria-hidden="true"></i>{{/if}}
                     </a>
                 </li>
             {{/each}}
@@ -38,4 +69,4 @@
     </section>
     {{/if}}
     {{#if for_modal}}<div class="topic-list-scroll-container" data-simplebar data-simplebar-tab-index="-1"></div>{{/if}}
-{{/cofounder/components/channel_nav_item}}
+</li>

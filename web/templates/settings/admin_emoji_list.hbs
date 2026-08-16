@@ -3,7 +3,7 @@
     <td>
         <span class="emoji_name">{{display_name}}</span>
         {{#if is_overriding_default}}
-            <span class="tippy-zulip-tooltip emoji-override-warning" data-tippy-content="{{t 'This custom emoji overrides a default emoji with the same name.' }}" aria-label="{{t 'This custom emoji overrides a default emoji with the same name.' }}">{{> ../cofounder/components/icon name="warning" compact=true}}</span>
+            <i class="zulip-icon zulip-icon-exclamation-circle tippy-zulip-tooltip emoji-override-warning" data-tippy-content="{{t 'This custom emoji overrides a default emoji with the same name.' }}"></i>
         {{/if}}
     </td>
     <td>

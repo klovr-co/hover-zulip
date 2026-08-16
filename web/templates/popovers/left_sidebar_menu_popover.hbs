@@ -1,60 +1,60 @@
-<div class="cf-menu popover-menu" id="left-sidebar-menu-popover" data-simplebar data-simplebar-tab-index="-1">
-    <ul role="menu" class="cf-menu__list popover-menu-list">
+<div class="popover-menu" id="left-sidebar-menu-popover" data-simplebar data-simplebar-tab-index="-1">
+    <ul role="menu" class="popover-menu-list">
         {{#if show_collapse_expand_all_options }}
-        <li role="none" class="link-item cf-menu__item popover-menu-list-item">
-            <a role="menuitem" id="left_sidebar_expand_all" class="cf-menu__action popover-menu-link" tabindex="0">
-                {{> ../cofounder/components/icon name="expand" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
-                <span class="cf-menu__label popover-menu-label">{{t "Expand all sections" }}</span>
+        <li role="none" class="link-item popover-menu-list-item">
+            <a role="menuitem" id="left_sidebar_expand_all" class="popover-menu-link" tabindex="0">
+                <i class="popover-menu-icon zulip-icon zulip-icon-expand" aria-hidden="true"></i>
+                <span class="popover-menu-label">{{t "Expand all sections" }}</span>
             </a>
         </li>
-        <li role="none" class="link-item cf-menu__item popover-menu-list-item">
-            <a role="menuitem" id="left_sidebar_collapse_all" class="cf-menu__action popover-menu-link" tabindex="0">
-                {{> ../cofounder/components/icon name="minimize" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
-                <span class="cf-menu__label popover-menu-label">{{t "Collapse all sections" }}</span>
+        <li role="none" class="link-item popover-menu-list-item">
+            <a role="menuitem" id="left_sidebar_collapse_all" class="popover-menu-link" tabindex="0">
+                <i class="popover-menu-icon zulip-icon zulip-icon-collapse" aria-hidden="true"></i>
+                <span class="popover-menu-label">{{t "Collapse all sections" }}</span>
             </a>
         </li>
         {{/if}}
-        <li role="none" class="link-item cf-menu__item popover-menu-list-item">
-            <a role="menuitem" id="{{channel_folders_id}}" class="cf-menu__action popover-menu-link" tabindex="0">
-                {{> ../cofounder/components/icon name="folder-chevron" compact=true custom_classes="cf-menu__icon popover-menu-icon"}}
+        <li role="none" class="link-item popover-menu-list-item">
+            <a role="menuitem" id="{{channel_folders_id}}" class="popover-menu-link" tabindex="0">
+                <i class="popover-menu-icon zulip-icon zulip-icon-folder" aria-hidden="true"></i>
                 {{#if show_channel_folders}}
-                <span class="cf-menu__label popover-menu-label">{{t "Don't group channels by folder" }}</span>
+                <span class="popover-menu-label">{{t "Don't group channels by folder" }}</span>
                 {{else}}
-                <span class="cf-menu__label popover-menu-label">{{t "Group channels by folder" }}</span>
+                <span class="popover-menu-label">{{t "Group channels by folder" }}</span>
                 {{/if}}
             </a>
         </li>
         {{#if show_channel_display_options}}
-        <li role="separator" class="cf-menu__separator popover-menu-separator"></li>
+        <li role="separator" class="popover-menu-separator"></li>
         <li role="none" class="link-item">
-            <label class="display-style-selector-header cf-menu__action popover-menu-link" role="menuitem">
-                <span class="cf-menu__label popover-menu-label">
+            <label class="display-style-selector-header popover-menu-link" role="menuitem">
+                <span class="popover-menu-label">
                     {{t "Show unread counts for"}}
                 </span>
             </label>
         </li>
         {{#each (object_values web_stream_unreads_count_display_policy_values)}}
             <li role="none" class="web_stream_unreads_count_display_policy_selector link-item" value="{{this.code}}">
-                <label class="cf-menu__action popover-menu-link" role="menuitem" tabindex="0">
+                <label class="popover-menu-link" role="menuitem" tabindex="0">
                     <input type="radio" class="web_stream_unreads_count_display_policy_choice" name="web_stream_unreads_count_display_policy_values" value="{{this.code}}" {{#if (eq this.code ../web_stream_unreads_count_display_policy)}}checked{{/if}}/>
-                    <span class="cf-menu__label popover-menu-label">{{this.description}}</span>
+                    <span class="popover-menu-label">{{this.description}}</span>
                 </label>
             </li>
         {{/each}}
 
-        <li role="separator" class="cf-menu__separator popover-menu-separator"></li>
+        <li role="separator" class="popover-menu-separator"></li>
         <li role="none" class="link-item">
-            <label class="display-style-selector-header cf-menu__action popover-menu-link" role="menuitem">
-                <span class="cf-menu__label popover-menu-label">
+            <label class="display-style-selector-header popover-menu-link" role="menuitem">
+                <span class="popover-menu-label">
                     {{t "Clicking on a channel navigates to"}}
                 </span>
             </label>
         </li>
         {{#each (object_values web_channel_default_view_values)}}
             <li role="none" class="web_channel_default_view_selector link-item" value="{{this.code}}">
-                <label class="cf-menu__action popover-menu-link" role="menuitem" tabindex="0">
+                <label class="popover-menu-link" role="menuitem" tabindex="0">
                     <input type="radio" class="web_channel_default_view_choice" name="web_channel_default_view_values" value="{{this.code}}" {{#if (eq this.code ../web_channel_default_view)}}checked{{/if}}/>
-                    <span class="cf-menu__label popover-menu-label">{{this.description}}</span>
+                    <span class="popover-menu-label">{{this.description}}</span>
                 </label>
             </li>
         {{/each}}

@@ -175,15 +175,3 @@ outreach/index
 
 Index <https://zulip.readthedocs.io/en/latest/>
 ```
-
-## Hover project documentation
-
-```{toctree}
----
-maxdepth: 2
----
-
-adr/index
-agents/index
-hover/index
-```
