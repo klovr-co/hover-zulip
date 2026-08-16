@@ -7,6 +7,7 @@ import django.core.validators
 import django.db.models.deletion
 import django.utils.timezone
 from django.conf import settings
+from django.contrib.postgres.operations import AddIndexConcurrently
 from django.db import migrations, models
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.migrations.state import StateApps
@@ -107,6 +108,8 @@ def backfill_suggested_actions(apps: StateApps, schema_editor: BaseDatabaseSchem
 
 
 class Migration(migrations.Migration):
+    atomic = False
+
     dependencies = [
         ("hover", "0012_material_review_requests"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
@@ -188,7 +191,7 @@ class Migration(migrations.Migration):
                 ),
             ],
         ),
-        migrations.AddIndex(
+        AddIndexConcurrently(
             model_name="suggestedaction",
             index=models.Index(fields=["space", "state"], name="hover_action_space_state"),
         ),
@@ -250,7 +253,7 @@ class Migration(migrations.Migration):
                 ),
             ],
         ),
-        migrations.AddIndex(
+        AddIndexConcurrently(
             model_name="todo",
             index=models.Index(fields=["space", "state"], name="hover_todo_space_state"),
         ),
@@ -408,5 +411,9 @@ class Migration(migrations.Migration):
             ],
             options={"ordering": ["date_created", "id"]},
         ),
-        migrations.RunPython(backfill_suggested_actions, migrations.RunPython.noop),
+        migrations.RunPython(
+            backfill_suggested_actions,
+            migrations.RunPython.noop,
+            atomic=True,
+        ),
     ]

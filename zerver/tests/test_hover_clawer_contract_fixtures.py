@@ -10,7 +10,6 @@ from pydantic import ValidationError
 from hover.publication_contracts import ClawerPublication, DigestPayload
 from hover.source_record_contracts import ClawerSourceRecordPage
 
-
 FIXTURE_DIR = Path(__file__).parent / "fixtures" / "hover" / "clawer_contract"
 
 
@@ -68,9 +67,7 @@ class HoverClawerContractFixtureTest(TestCase):
 
     def test_shared_fixtures_cross_hover_transport_boundaries(self) -> None:
         digest = orjson.loads((FIXTURE_DIR / "whatsapp_digest_v1.json").read_bytes())
-        operational = orjson.loads(
-            (FIXTURE_DIR / "operational_publications_v1.json").read_bytes()
-        )
+        operational = orjson.loads((FIXTURE_DIR / "operational_publications_v1.json").read_bytes())
         modules = orjson.loads((FIXTURE_DIR / "module_publications_v1.json").read_bytes())
         suggested = orjson.loads((FIXTURE_DIR / "suggested_actions_v1.json").read_bytes())
 
@@ -83,7 +80,8 @@ class HoverClawerContractFixtureTest(TestCase):
             {**modules["topic_analysis"]["output"], "sentiment": None},
             modules["negative_sentiment_output"],
         ]
-        parsed_action = ET.fromstring(f"<root>{suggested['complete']}</root>").find(
+        # This parses a version-controlled test fixture, not untrusted input.
+        parsed_action = ET.fromstring(f"<root>{suggested['complete']}</root>").find(  # noqa: S314
             ".//suggested_action"
         )
         assert parsed_action is not None
@@ -116,15 +114,15 @@ class HoverClawerContractFixtureTest(TestCase):
             },
         )
 
-        source_records = orjson.loads(
-            (FIXTURE_DIR / "source_records_v1.json").read_bytes()
-        )
+        source_records = orjson.loads((FIXTURE_DIR / "source_records_v1.json").read_bytes())
         self.assertGreater(
             len(ClawerSourceRecordPage.model_validate(source_records["response"]).records),
             0,
         )
         self.assertGreater(
-            len(ClawerSourceRecordPage.model_validate(source_records["search"]["response"]).records),
+            len(
+                ClawerSourceRecordPage.model_validate(source_records["search"]["response"]).records
+            ),
             0,
         )
         invalid_source_page = {
@@ -141,9 +139,7 @@ class HoverClawerContractFixtureTest(TestCase):
             ClawerSourceRecordPage.model_validate(invalid_source_page)
 
     def test_personal_edition_fixture_builds_a_strict_digest(self) -> None:
-        personal = orjson.loads(
-            (FIXTURE_DIR / "personal_editions_v1.json").read_bytes()
-        )
+        personal = orjson.loads((FIXTURE_DIR / "personal_editions_v1.json").read_bytes())
         group = personal["groups"][0]
         payload = DigestPayload.model_validate(
             {

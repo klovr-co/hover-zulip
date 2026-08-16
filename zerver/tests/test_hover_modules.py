@@ -116,7 +116,9 @@ class HoverModulesTest(ZulipTestCase):
         self.assertEqual(marketing["requirements"][0]["maximum_count"], 1)
         self.assertNotIn("runtime_key", marketing)
         self.assertNotIn("prompt_key", marketing)
-        signal_monitor = next(item for item in modules if item["definition_key"] == "signal_monitor")
+        signal_monitor = next(
+            item for item in modules if item["definition_key"] == "signal_monitor"
+        )
         self.assertEqual(signal_monitor["supported_triggers"], ["manual", "new_source", "schedule"])
 
         self.version.destination_topic = "Changed"

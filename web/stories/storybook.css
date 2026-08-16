@@ -7,6 +7,11 @@ body {
     width: min(100%, 760px);
 }
 
+.storybook-popover-menu {
+    width: max-content;
+    padding: 24px;
+}
+
 .storybook-demo-email-modal {
     max-width: 560px;
     padding: 24px;

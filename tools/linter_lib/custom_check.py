@@ -540,6 +540,12 @@ prose_style_rules: list["Rule"] = [
     },
     {
         "pattern": r"""[^\n\/\-\."'\_\=\>]([gG]ithub)[^\n\.\-\_"\<]""",  # exclude usage in hrefs/divs
+        "exclude_line": {
+            (
+                "docs/hover/aimto-demo-pipelines.md",
+                "| `github`             | LearnAIMTO repository                            | Public product and delivery context.                                          |",
+            ),
+        },
         "description": "github should be spelled GitHub",
     },
     {

@@ -19,13 +19,13 @@ is the only deployed environment.
 
 ## Estimated recurring cost
 
-| Item | Expected monthly cost |
-| --- | ---: |
-| Lightsail 4 GiB bundle | $24 |
-| S3 backup storage and requests | $1-5 initially |
-| Route 53 hosted zone | ~$0.50 |
-| Domain and email | Provider dependent |
-| **AWS total** | **~$26-35 before domain/email** |
+| Item                           |           Expected monthly cost |
+| ------------------------------ | ------------------------------: |
+| Lightsail 4 GiB bundle         |                             $24 |
+| S3 backup storage and requests |                  $1-5 initially |
+| Route 53 hosted zone           |                          ~$0.50 |
+| Domain and email               |              Provider dependent |
+| **AWS total**                  | **~$26-35 before domain/email** |
 
 Do not choose the 2 GiB bundle. The upstream production requirements specify
 2 GiB only as a minimum and recommend 4 GiB for an installation with 25 or
