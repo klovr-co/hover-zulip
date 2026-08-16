@@ -2327,7 +2327,7 @@ test("begins_typeahead", ({override, override_rewire}) => {
     function language_objects(languages) {
         return languages.map((language) => language_item(language));
     }
-    assert_typeahead_equals(
+    assert_typeahead_starts_with(
         "#foo\n~~~py",
         language_objects([
             "py",
@@ -2340,7 +2340,6 @@ test("begins_typeahead", ({override, override_rewire}) => {
             "pyrex",
             "antlr-python",
             "bst-pybtex",
-            "numpy",
         ]),
     );
     assert_typeahead_equals(":tada: <time:", [

@@ -157,7 +157,6 @@ run_test("update user with event", ({override}) => {
     // verify that they run. Fortunately, the run_test()
     // wrapper will tell us if we override a method that
     // doesn't get called!
-    override(activity_ui, "redraw", noop);
     override(message_live_update, "update_user_full_name", noop);
     override(pm_list, "update_private_messages", noop);
     override(settings_users, "update_user_data", noop);

@@ -684,7 +684,6 @@ run_test("realm settings", ({override}) => {
     override(settings_bots, "update_bot_permissions_ui", noop);
     override(settings_emoji, "update_custom_emoji_ui", noop);
     override(settings_invites, "update_invite_user_panel", noop);
-    override(sidebar_ui, "update_invite_user_option", noop);
     override(gear_menu, "rerender", noop);
     override(narrow_title, "redraw_title", noop);
     override(navbar_alerts, "toggle_organization_profile_incomplete_banner", noop);
