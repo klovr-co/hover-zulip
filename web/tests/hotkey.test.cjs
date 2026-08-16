@@ -74,9 +74,6 @@ const overlays = mock_esm("../src/overlays", {
     message_edit_history_open: () => false,
 });
 const popovers = mock_esm("../src/user_card_popover", {
-    user_sidebar: {
-        is_open: () => false,
-    },
     message_user_card: {
         is_open: () => false,
     },
