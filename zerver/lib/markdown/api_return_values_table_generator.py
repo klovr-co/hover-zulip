@@ -148,6 +148,15 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
             + description
         )
 
+    def render_data_type(self, schema: Mapping[str, Any]) -> str:
+        if "oneOf" in schema:
+            return " | ".join(self.render_data_type(item) for item in schema["oneOf"])
+        if "items" in schema:
+            return f"({self.render_data_type(schema['items'])})[]"
+        if "type" not in schema:
+            return "any"
+        return generate_data_type(schema)
+
     def render_oneof_block(self, object_schema: dict[str, Any], spacing: int) -> list[str]:
         ans = []
         block_spacing = spacing
@@ -159,7 +168,7 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
                 spacing -= 4
             else:
                 # Add the specialized description of the oneOf element.
-                data_type = generate_data_type(element)
+                data_type = self.render_data_type(element)
                 ans.append(self.render_desc(element["description"], spacing, data_type))
             # If the oneOf element is an object schema then render the documentation
             # of its keys.
@@ -184,7 +193,7 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
         if not isinstance(additional_properties, dict):
             return []
 
-        data_type = generate_data_type(additional_properties)
+        data_type = self.render_data_type(additional_properties)
         ans = [
             self.render_desc(
                 additional_properties.get("description", "Additional properties."),
@@ -213,7 +222,7 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
                 # description of the endpoint. Then for each element of oneOf there is a
                 # specialized description for that particular case. The description used
                 # right below is the main description.
-                data_type = generate_data_type(schema)
+                data_type = self.render_data_type(schema)
                 ans.append(
                     self.render_desc(
                         schema.get("description", f"The `{return_value}` value."),
@@ -225,7 +234,7 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
                 ans += self.render_oneof_block(schema, spacing + 4)
                 continue
             description = schema.get("description", f"The `{return_value}` value.")
-            data_type = generate_data_type(schema)
+            data_type = self.render_data_type(schema)
             check_deprecated_consistency(schema.get("deprecated", False), description)
             ans.append(self.render_desc(description, spacing, data_type, return_value))
             if "properties" in schema:

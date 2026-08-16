@@ -3,6 +3,7 @@
 const assert = require("node:assert/strict");
 
 const {clock, mock_esm, zrequire} = require("./lib/namespace.cjs");
+const {make_stub} = require("./lib/stub.cjs");
 const {run_test} = require("./lib/test.cjs");
 const {$} = require("./lib/zjquery.cjs");
 
@@ -403,23 +404,19 @@ run_test("ignores invalid controls and supports button carousel navigation", () 
     tab_handler({currentTarget: $invalid_tab[0]});
 
     const key_handler = $("body").get_on_handler("keydown", ".hover-edition-tab");
-    let prevented = false;
+    const prevent_default_stub = make_stub();
     key_handler({
         currentTarget: $invalid_tab[0],
         key: "ArrowRight",
-        preventDefault() {
-            prevented = true;
-        },
+        preventDefault: prevent_default_stub.f,
     });
     const $morning_tab = $(".unhandled-key-tab").attr("data-edition", "morning");
     key_handler({
         currentTarget: $morning_tab[0],
         key: "PageDown",
-        preventDefault() {
-            prevented = true;
-        },
+        preventDefault: prevent_default_stub.f,
     });
-    assert.equal(prevented, false);
+    assert.equal(prevent_default_stub.num_calls, 0);
 
     hover_editions_view.show();
     request.success(edition_response());
