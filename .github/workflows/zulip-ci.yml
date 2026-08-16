@@ -35,7 +35,9 @@ jobs:
           - docker_image: zulip/ci:noble
             name: Ubuntu 24.04 (Python 3.12, Lightsail)
             os: noble
-            include_documentation_tests: true
+            # Documentation has its own upstream validation requirements and
+            # is not part of the Lightsail application deployment gate.
+            include_documentation_tests: false
             include_frontend_tests: true
 
     runs-on: ubuntu-latest
