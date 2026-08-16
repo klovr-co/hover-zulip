@@ -1,4 +1,4 @@
-<li{{#if for_modal}} id="more-topics-modal"{{/if}} class="cf-channel-nav narrow-filter{{#if is_muted}} cf-channel-nav--muted out_of_home_view{{/if}}{{#if custom_classes}} {{custom_classes}}{{/if}}" data-stream-id="{{id}}">
+<li {{#if for_modal}} id="more-topics-modal"{{/if}} class="cf-channel-nav narrow-filter{{#if is_muted}} cf-channel-nav--muted out_of_home_view{{/if}}{{#if custom_classes}} {{custom_classes}}{{/if}}" data-stream-id="{{id}}">
     <div class="cf-channel-nav__header bottom_left_row channel-header">
         <a href="{{url}}" class="cf-channel-nav__main subscription_block selectable_sidebar_block" draggable="false"{{#if (lookup . "selected")}} aria-current="page"{{/if}}>
             <span class="cf-channel-nav__icon stream-privacy-original-color-{{id}} stream-privacy filter-icon" style="color: {{color}}">

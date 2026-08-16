@@ -2,11 +2,11 @@
     <span class="cf-source-actions__label">{{t "Sources"}}</span>
     {{#if evidence_url}}
         <button
-            type="button"
-            class="cf-source-action cf-source-action--evidence"
-            data-cf-evidence-url="{{evidence_url}}"
-            aria-haspopup="dialog"
-        >
+          type="button"
+          class="cf-source-action cf-source-action--evidence"
+          data-cf-evidence-url="{{evidence_url}}"
+          aria-haspopup="dialog"
+          >
             {{t "View sources"}}
         </button>
     {{/if}}
@@ -14,13 +14,13 @@
         <span class="cf-source-action-wrap">
             {{#if url}}
                 <a
-                    class="cf-source-action cf-source-action--integration cf-source-action--{{key}}"
-                    href="{{url}}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="{{name}}: {{count}}"
-                    title="{{name}}"
-                >
+                  class="cf-source-action cf-source-action--integration cf-source-action--{{key}}"
+                  href="{{url}}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="{{name}}: {{count}}"
+                  title="{{name}}"
+                  >
                     {{#if (eq key "whatsapp")}}
                         {{> icon name="phone" compact=true custom_classes="cf-source-action__icon"}}
                     {{else if (eq key "github")}}
@@ -34,12 +34,12 @@
                 </a>
             {{else}}
                 <span
-                    class="cf-source-action cf-source-action--integration cf-source-action--{{key}}
-                        cf-source-action--static"
-                    role="img"
-                    aria-label="{{name}}: {{count}}"
-                    title="{{name}}"
-                >
+                  class="cf-source-action cf-source-action--integration cf-source-action--{{key}}
+                  cf-source-action--static"
+                  role="img"
+                  aria-label="{{name}}: {{count}}"
+                  title="{{name}}"
+                  >
                     {{#if (eq key "whatsapp")}}
                         {{> icon name="phone" compact=true custom_classes="cf-source-action__icon"}}
                     {{else if (eq key "github")}}

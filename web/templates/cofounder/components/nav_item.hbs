@@ -1,5 +1,5 @@
 <li class="cf-nav-item{{#if selected}} cf-nav-item--selected{{/if}}{{#if disabled}} cf-nav-item--disabled{{/if}}{{#if item_classes}} {{item_classes}}{{/if}}"{{#if data_key}} data-key="{{data_key}}"{{/if}}>
-    <a{{#unless disabled}} href="{{href}}"{{/unless}} class="cf-nav-item__main{{#if main_classes}} {{main_classes}}{{/if}}"{{#if tooltip_template_id}} data-tooltip-template-id="{{tooltip_template_id}}"{{/if}}{{#if selected}} aria-current="page"{{/if}}{{#if disabled}} aria-disabled="true" tabindex="-1"{{/if}}>
+    <a {{#unless disabled}} href="{{href}}"{{/unless}} class="cf-nav-item__main{{#if main_classes}} {{main_classes}}{{/if}}"{{#if tooltip_template_id}} data-tooltip-template-id="{{tooltip_template_id}}"{{/if}}{{#if selected}} aria-current="page"{{/if}}{{#if disabled}} aria-disabled="true" tabindex="-1"{{/if}}>
         <span class="cf-nav-item__icon">
             {{> icon name=icon compact=true}}
         </span>

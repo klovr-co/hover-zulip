@@ -1,27 +1,29 @@
 <tr>
     <td
-        class="cf-data-table__cell cf-data-table__empty empty-table-message"
-        colspan="{{column_count}}"
-    >
+      class="cf-data-table__cell cf-data-table__empty empty-table-message"
+      colspan="{{column_count}}"
+      >
         <p
-            class="cf-data-table__empty-message"
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-        >{{empty_list_message}}</p>
+          class="cf-data-table__empty-message"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          >
+            {{empty_list_message}}
+        </p>
         <div
-            class="cf-load-more cf-load-more--empty recent-view-empty-load-more notvisible"
-        >
+          class="cf-load-more cf-load-more--empty recent-view-empty-load-more notvisible"
+          >
             <p class="cf-load-more__message last-fetched-message"></p>
             <button
-                type="button"
-                class="cf-button cf-button--secondary fetch-messages-button notvisible"
-                aria-busy="false"
-            >
+              type="button"
+              class="cf-button cf-button--secondary fetch-messages-button notvisible"
+              aria-busy="false"
+              >
                 <span class="loading-indicator"></span>
                 <span
-                    class="cf-button__label button-label"
-                >{{load_more_button_text}}</span>
+                  class="cf-button__label button-label"
+                  >{{load_more_button_text}}</span>
             </button>
         </div>
     </td>

@@ -1,6 +1,6 @@
 <li role="none" class="cf-menu__item{{#if item_classes}} {{item_classes}}{{/if}}">
     {{#if href}}
-    <a{{#unless disabled}} href="{{href}}"{{#if target}} target="{{target}}"{{/if}}{{#if rel}} rel="{{rel}}"{{/if}}{{/unless}} role="menuitem" class="cf-menu__action{{#if danger}} cf-menu__action--danger{{/if}}{{#if selected}} cf-menu__action--selected{{/if}}{{#if custom_classes}} {{custom_classes}}{{/if}}"{{#if selected}} aria-current="page"{{/if}}{{#if disabled}} aria-disabled="true" tabindex="-1"{{else}} tabindex="0"{{/if}}>
+    <a role="menuitem" class="cf-menu__action{{#if danger}} cf-menu__action--danger{{/if}}{{#if selected}} cf-menu__action--selected{{/if}}{{#if custom_classes}} {{custom_classes}}{{/if}}"{{#if selected}} aria-current="page"{{/if}}{{#if disabled}} aria-disabled="true" tabindex="-1"{{else}} tabindex="0" href="{{href}}"{{#if target}} target="{{target}}"{{/if}}{{#if rel}} rel="{{rel}}"{{/if}}{{/if}}>
         {{#if icon}}{{> icon name=icon compact=true custom_classes="cf-menu__icon" }}{{/if}}
         <span class="cf-menu__label">{{label}}</span>
         {{#if shortcut}}<span class="cf-menu__shortcut"><kbd class="cf-menu__shortcut-key">{{shortcut}}</kbd></span>{{/if}}

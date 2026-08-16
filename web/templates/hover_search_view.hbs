@@ -29,7 +29,9 @@
       aria-live="polite"
       aria-busy="{{#if searching}}true{{else}}false{{/if}}"
       tabindex="-1"
-      >{{status}}</div>
+      >
+        {{status}}
+    </div>
 
     {{#if searching}}
         <div class="cf-global-search__loading" aria-hidden="true">

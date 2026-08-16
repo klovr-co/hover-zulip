@@ -1,5 +1,5 @@
 <article class="cf-message-item cf-message-item--preview{{#if is_own}} cf-message-item--own{{/if}}" role="listitem">
-    <img class="cf-message-item__avatar" src="{{avatar_url}}" alt="">
+    <img class="cf-message-item__avatar" src="{{avatar_url}}" alt="" />
     <div class="cf-message-item__body">
         <header class="cf-message-item__header">
             <button class="cf-message-item__sender" type="button">{{sender}}</button>
@@ -10,10 +10,10 @@
         {{#if has_reactions}}
         <div class="cf-message-item__reactions" aria-label="{{t 'Reactions' }}">
             {{#each reactions}}
-            <button class="cf-message-item__reaction{{#if selected}} cf-message-item__reaction--selected{{/if}}" type="button" aria-label="{{label}}" aria-pressed="{{#if selected}}true{{else}}false{{/if}}">
-                <span aria-hidden="true">{{emoji}}</span>
-                <span>{{count}}</span>
-            </button>
+                <button class="cf-message-item__reaction{{#if selected}} cf-message-item__reaction--selected{{/if}}" type="button" aria-label="{{label}}" aria-pressed="{{#if selected}}true{{else}}false{{/if}}">
+                    <span aria-hidden="true">{{emoji}}</span>
+                    <span>{{count}}</span>
+                </button>
             {{/each}}
             <button class="cf-message-item__add-reaction" type="button" aria-label="{{t 'Add reaction' }}">{{> icon name="plus" compact=true}}</button>
         </div>

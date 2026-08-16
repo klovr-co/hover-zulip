@@ -1,4 +1,4 @@
-<div{{#if process}} data-process="{{process}}"{{/if}} role="{{#if (or (eq intent "danger") (eq intent "warning"))}}alert{{else}}status{{/if}}" aria-atomic="true" class="cf-banner cf-banner--{{intent}}{{#if custom_classes}} {{custom_classes}}{{/if}}">
+<div {{#if process}}data-process="{{process}}" {{/if}}role="{{#if (or (eq intent "danger") (eq intent "warning"))}}alert{{else}}status{{/if}}" aria-atomic="true" class="cf-banner cf-banner--{{intent}}{{#if custom_classes}} {{custom_classes}}{{/if}}">
     <div class="cf-banner__content">
         <div class="cf-banner__label">
             {{#if label}}

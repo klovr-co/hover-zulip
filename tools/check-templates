@@ -28,6 +28,8 @@ EXCLUDED_FILES = [
     "web/icons/template.hbs",
     # Template checker recommends very hard to read indentation.
     "web/templates/bookend.hbs",
+    # Static Stitch design references are not Django templates.
+    "designs/stitch/cofounder-inspired-web-design",
 ]
 
 
