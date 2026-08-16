@@ -8,9 +8,9 @@ import * as channel from "./channel.ts";
 import * as hover_awareness_state from "./hover_awareness_state.ts";
 import {$t} from "./i18n.ts";
 import * as inbox_ui from "./inbox_ui.ts";
+import {hover_generated_item_schema} from "./message_store.ts";
 import * as message_view_header from "./message_view_header.ts";
 import * as people from "./people.ts";
-import {hover_generated_item_schema} from "./message_store.ts";
 import * as recent_view_ui from "./recent_view_ui.ts";
 
 const surface_schema = z.enum(["for_you", "team_pulse"]);
@@ -223,3 +223,18 @@ export function initialize(): void {
         load();
     });
 }
+
+export const test = {
+    render,
+    reset(): void {
+        request?.abort();
+        refresh_after_realtime_change.cancel();
+        current_surface = undefined;
+        request = undefined;
+        request_generation = 0;
+        status = "";
+        show_retry = false;
+        items = [];
+        hover_awareness_state.clear();
+    },
+};
