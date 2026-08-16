@@ -75,6 +75,13 @@ resource "aws_lightsail_instance" "hover" {
     domain_name         = var.domain_name
     release_tarball_url = var.release_tarball_url
   })
+
+  # cloud-init is intentionally a first-boot operation. Changing its rendered
+  # contents cannot reconfigure an existing Zulip host, and must not cause
+  # state-recovery drift or a replacement of a production instance.
+  lifecycle {
+    ignore_changes = [user_data]
+  }
 }
 
 resource "aws_lightsail_static_ip" "hover" {
@@ -85,6 +92,29 @@ resource "aws_lightsail_static_ip" "hover" {
 resource "aws_lightsail_static_ip_attachment" "hover" {
   static_ip_name = aws_lightsail_static_ip.hover.name
   instance_name  = aws_lightsail_instance.hover.name
+}
+
+# Keep both the primary Zulip hostname and every tenant realm hostname bound to
+# the same static IP. This makes a host replacement a normal Terraform change
+# instead of a separate, error-prone DNS procedure.
+resource "cloudflare_dns_record" "zulip" {
+  zone_id = var.cloudflare_zone_id
+  name    = var.domain_name
+  type    = "A"
+  content = aws_lightsail_static_ip.hover.ip_address
+  ttl     = 300
+  proxied = false
+  comment = "Primary Hover Zulip host; managed by Terraform"
+}
+
+resource "cloudflare_dns_record" "zulip_realms" {
+  zone_id = var.cloudflare_zone_id
+  name    = "*.${var.domain_name}"
+  type    = "A"
+  content = aws_lightsail_static_ip.hover.ip_address
+  ttl     = 300
+  proxied = false
+  comment = "Hover Zulip organization subdomains; managed by Terraform"
 }
 
 resource "aws_lightsail_instance_public_ports" "hover" {

@@ -49,9 +49,11 @@ more daily active users.
    terraform apply
    ```
 
-4. Create an `A` record for `app.hover.team` at the DNS provider that manages
-   `hover.team`, using the `instance_public_ip` output. Do this before running
-   the Zulip installer: its Certbot step verifies that DNS points to this host.
+4. Set `cloudflare_zone_id` in `terraform.tfvars` and configure a Cloudflare
+   API token with DNS edit access as `CLOUDFLARE_API_TOKEN`. Terraform manages
+   both the `A` record for `domain_name` and `*.${domain_name}`, pointing them
+   at the Lightsail static IP. Do this before running the Zulip installer: its
+   Certbot step verifies that the primary hostname points to this host.
 5. In IAM, create an access key for the emitted `backup_iam_user_name` and
    install it only on the server as the backup user. Do **not** create that key
    in Terraform: Terraform state would contain its secret.
@@ -91,8 +93,38 @@ ports.
 
 ## State
 
-This starter configuration uses local Terraform state to avoid creating a
-second always-on dependency. Keep the state encrypted in a restricted team
-password manager or private storage. Before a second operator or production
-change workflow is introduced, migrate state to a dedicated encrypted S3
-Terraform-state bucket with locking.
+Terraform state is stored remotely in a dedicated, encrypted S3 bucket with
+versioning enabled. A DynamoDB table locks state changes, which is compatible
+with the Terraform 1.5.x version currently used for this deployment. Restrict
+access to both resources to production infrastructure operators.
+
+## Cloudflare DNS adoption
+
+The production DNS records may predate this Terraform configuration. Import
+them once before the first apply; Terraform will then update both records when
+the static IP changes during a migration:
+
+```sh
+terraform import cloudflare_dns_record.zulip '<zone-id>/<primary-record-id>'
+terraform import cloudflare_dns_record.zulip_realms '<zone-id>/<wildcard-record-id>'
+terraform plan
+```
+
+The tenant wildcard is deliberately DNS-only for now. Do not switch it to
+proxied in Terraform until the Zulip origin serves a certificate for
+`*.${domain_name}` and Cloudflare has a browser-facing certificate covering
+that hostname. At that point, change `proxied` to `true`, use automatic TTL,
+and set the zone SSL/TLS mode to Full (strict).
+
+For the DNS-only, no-cost configuration, install a publicly trusted wildcard
+certificate directly on the existing Zulip server using the operator script:
+
+```sh
+source ~/.config/zsh/cloudflare-certbot.env
+./infra/scripts/install-wildcard-certificate.sh
+```
+
+The script uses an AWS-issued temporary SSH certificate, installs Certbot's
+Cloudflare DNS plugin, and configures a renewal hook to update the certificate
+files nginx serves. The Cloudflare token is stored only in
+`/etc/letsencrypt/cloudflare-dns.ini` with root-only permissions.
