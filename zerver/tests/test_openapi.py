@@ -3,12 +3,16 @@ from collections.abc import Callable, Mapping
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+import markdown
 import yaml
 from django.http import HttpResponse
 from django.urls import URLPattern
 from django.utils import regex_helper
 from pydantic import TypeAdapter
 
+from zerver.lib.markdown.api_return_values_table_generator import (
+    APIReturnValuesTablePreprocessor,
+)
 from zerver.lib.request import arguments_map
 from zerver.lib.rest import rest_dispatch
 from zerver.lib.test_classes import ZulipTestCase
@@ -71,6 +75,32 @@ class OpenAPIToolsTest(ZulipTestCase):
     These tools are mostly dedicated to fetching parts of the -already parsed-
     specification, and comparing them to objects returned by our REST API.
     """
+
+    def test_return_values_table_handles_sparse_nested_schemas(self) -> None:
+        preprocessor = APIReturnValuesTablePreprocessor(markdown.Markdown(), {})
+        rendered = preprocessor.render_table(
+            {
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "source_id": {"type": "integer"},
+                        "details": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string",
+                            },
+                        },
+                    },
+                }
+            },
+            0,
+        )
+
+        self.assertIn("The `metadata` value.", rendered[0])
+        self.assertIn("The `source_id` value.", rendered[1])
+        self.assertIn("The `details` value.", rendered[2])
+        self.assertIn("Additional properties.", rendered[3])
 
     def test_get_openapi_fixture(self) -> None:
         actual = get_openapi_fixture(TEST_ENDPOINT, TEST_METHOD, TEST_RESPONSE_BAD_REQ)[0]["value"]
