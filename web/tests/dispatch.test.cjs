@@ -1075,30 +1075,8 @@ run_test("realm_domains", ({override}) => {
     assert_same(realm.realm_domains, []);
 });
 
-run_test("add_realm_user_redraw_logic", ({override}) => {
-    presence.presence_info.set(999, {status: "active"});
-
-    override(settings_account, "maybe_update_deactivate_account_button", noop);
-    override(settings_exports, "update_export_consent_data_and_redraw", noop);
-    override(pm_list, "update_private_messages", noop);
-
-    const check_should_redraw_new_user_stub = make_stub();
-    // make_stub().f returns true by default, so it's already doing what we want.
-    override(activity_ui, "check_should_redraw_new_user", check_should_redraw_new_user_stub.f);
-    const redraw_user_stub = make_stub();
-    override(activity_ui, "redraw_user", redraw_user_stub.f);
-
-    const event = event_fixtures.realm_user__add;
-    event.person.user_id = 999;
-    dispatch(event);
-
-    assert.equal(redraw_user_stub.num_calls, 1);
-    assert.equal(redraw_user_stub.get_args("user_id").user_id, 999);
-});
-
 run_test("realm_user", ({override}) => {
     override(settings_account, "maybe_update_deactivate_account_button", noop);
-    override(activity_ui, "check_should_redraw_new_user", noop);
     override(settings_exports, "update_export_consent_data_and_redraw", noop);
     const pm_list_stub = make_stub();
     override(pm_list, "update_private_messages", pm_list_stub.f);
@@ -1466,7 +1444,6 @@ run_test("user_settings", ({override}) => {
         event = event_fixtures.user_settings__emojiset;
         called = false;
         override(settings_preferences, "report_emojiset_change", stub.f);
-        override(activity_ui, "build_user_sidebar", noop);
         override(user_settings, "emojiset", "text");
         dispatch(event);
         assert.equal(stub.num_calls, 1);
@@ -1534,13 +1511,9 @@ run_test("user_settings", ({override}) => {
     }
 
     {
-        const stub = make_stub();
         event = event_fixtures.user_settings__user_list_style;
-        override(settings_preferences, "report_user_list_style_change", stub.f);
         override(user_settings, "user_list_style", 1);
-        override(activity_ui, "build_user_sidebar", stub.f);
         dispatch(event);
-        assert.equal(stub.num_calls, 2);
         assert_same(user_settings.user_list_style, 2);
     }
 
@@ -1551,13 +1524,12 @@ run_test("user_settings", ({override}) => {
 
     event = event_fixtures.user_settings__presence_disabled;
     override(user_settings, "presence_enabled", true);
-    override(activity_ui, "redraw_user", noop);
+    override(pm_list, "update_private_messages", noop);
     override(settings_account, "update_privacy_settings_box", noop);
     dispatch(event);
     assert_same(user_settings.presence_enabled, false);
 
     event = event_fixtures.user_settings__presence_enabled;
-    override(activity_ui, "redraw_user", noop);
     dispatch(event);
     assert_same(user_settings.presence_enabled, true);
 
@@ -1746,15 +1718,10 @@ run_test("delete_message_private_not_cached", ({override}) => {
 run_test("user_status", ({override}) => {
     let event = event_fixtures.user_status__set_status_emoji;
     {
-        const stub = make_stub();
-        override(activity_ui, "redraw_user", stub.f);
         override(compose_pm_pill, "get_user_ids", () => [event.user_id]);
         override(pm_list, "update_private_messages", noop);
         override(compose_recipient, "update_compose_area_placeholder_text", noop);
         dispatch(event);
-        assert.equal(stub.num_calls, 2);
-        const args = stub.get_args("user_id");
-        assert_same(args.user_id, test_user.user_id);
         const emoji_info = user_status.get_status_emoji(test_user.user_id);
         assert.deepEqual(emoji_info, {
             emoji_name: "smiley",
@@ -1767,13 +1734,8 @@ run_test("user_status", ({override}) => {
 
     event = event_fixtures.user_status__set_status_text;
     {
-        const stub = make_stub();
-        override(activity_ui, "redraw_user", stub.f);
         override(compose_pm_pill, "get_user_ids", () => [event.user_id]);
         dispatch(event);
-        assert.equal(stub.num_calls, 1);
-        const args = stub.get_args("user_id");
-        assert_same(args.user_id, test_user.user_id);
         const status_text = user_status.get_status_text(test_user.user_id);
         assert.equal(status_text, "out to lunch");
     }

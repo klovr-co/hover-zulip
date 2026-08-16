@@ -156,10 +156,6 @@ export function set_up(settings_panel: SettingsPanel): void {
         .find(`.setting_emojiset_choice[value="${CSS.escape(settings_object.emojiset)}"]`)
         .prop("checked", true);
     $container
-        .find(`.setting_user_list_style_choice[value=${settings_object.user_list_style}]`)
-        .prop("checked", true);
-
-    $container
         .find(".setting_web_animate_image_previews")
         .val(settings_object.web_animate_image_previews);
     $container
@@ -278,31 +274,6 @@ export function set_up(settings_panel: SettingsPanel): void {
         });
     });
 
-    $container.find(".setting_user_list_style_choice").on("click", function () {
-        const data = {user_list_style: $(this).val()};
-        const current_user_list_style = settings_object.user_list_style;
-        if (current_user_list_style === data.user_list_style) {
-            return;
-        }
-        const $spinner = $container.find(".information-settings-status").expectOne();
-        loading.make_indicator($spinner, {text: settings_ui.strings.saving});
-
-        void channel.patch({
-            url: "/json/settings",
-            data,
-            success() {
-                // We don't launch any success report, since it is
-                // currently handled by report_user_list_style_change.
-            },
-            error(xhr) {
-                ui_report.error(
-                    settings_ui.strings.failure_html,
-                    xhr,
-                    $container.find(".information-settings-status").expectOne(),
-                );
-            },
-        });
-    });
 
     render_language_dropdown_widget();
 }
@@ -329,34 +300,6 @@ export async function report_emojiset_change(settings_panel: SettingsPanel): Pro
     }
 }
 
-export function report_user_list_style_change(settings_panel: SettingsPanel): void {
-    // TODO: Clean up how this works so we can use
-    // change_display_setting.  The challenge is that we don't want to
-    // report success before the server_events request returns that
-    // causes the actual sprite sheet to change.  The current
-    // implementation is wrong, though, in that it displays the UI
-    // update in all active browser windows.
-    const $spinner = $(settings_panel.container).find(".information-settings-status");
-    if ($spinner.length > 0) {
-        loading.destroy_indicator($spinner);
-        ui_report.success(
-            $t_html({defaultMessage: "User list style changed successfully!"}),
-            $spinner.expectOne(),
-            1000,
-        );
-        $spinner.expectOne();
-        settings_ui.display_checkmark($spinner);
-    }
-}
-
-export function update_user_list_style_preview_name(full_name: string): void {
-    $(".user_list_style_values .preview .user-name").text(full_name);
-}
-
-export function update_user_list_style_preview_avatar(avatar_url: string): void {
-    $(".user_list_style_values .preview .user-profile-picture img").attr("src", avatar_url);
-}
-
 export function update_page(property: UserSettingsProperty): void {
     if (!overlays.settings_open()) {
         return;
@@ -366,7 +309,7 @@ export function update_page(property: UserSettingsProperty): void {
 
     // settings_org.set_input_element_value doesn't support radio
     // button widgets like these.
-    if (property === "emojiset" || property === "user_list_style") {
+    if (property === "emojiset") {
         $container.find(`input[value=${CSS.escape(value.toString())}]`).prop("checked", true);
         return;
     }

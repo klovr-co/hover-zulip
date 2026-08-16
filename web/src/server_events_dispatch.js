@@ -8,7 +8,6 @@ import * as audible_notifications from "./audible_notifications.ts";
 import * as blueslip from "./blueslip.ts";
 import * as bot_data from "./bot_data.ts";
 import * as browser_history from "./browser_history.ts";
-import {buddy_list} from "./buddy_list.ts";
 import * as channel from "./channel.ts";
 import * as channel_folders from "./channel_folders.ts";
 import {compose_call_session_manager} from "./compose_call_session.ts";
@@ -503,7 +502,6 @@ export function dispatch_normal_event(event) {
                                     case "create_multiuse_invite_group":
                                     case "can_invite_users_group":
                                         settings_invites.update_invite_user_panel();
-                                        sidebar_ui.update_invite_user_option();
                                         gear_menu.rerender();
                                         break;
                                     case "direct_message_initiator_group":
@@ -709,20 +707,10 @@ export function dispatch_normal_event(event) {
         case "realm_user":
             switch (event.op) {
                 case "add": {
-                    // There may be presence data we already received from the server
-                    // before getting this event. Check if we need to redraw.
-                    const should_redraw = activity_ui.check_should_redraw_new_user(
-                        event.person.user_id,
-                    );
-
                     people.add_active_user(event.person, "server_events");
                     settings_account.maybe_update_deactivate_account_button();
                     if (event.person.is_bot) {
                         settings_bots.redraw_all_bots_list();
-                    }
-
-                    if (should_redraw) {
-                        activity_ui.redraw_user(event.person.user_id);
                     }
 
                     // The user may already appear in direct message
@@ -748,7 +736,6 @@ export function dispatch_normal_event(event) {
                 case "remove": {
                     const user_id = event.person.user_id;
                     people.remove_inaccessible_user(user_id);
-                    buddy_list.maybe_remove_user_id({user_id});
                     message_live_update.update_user_full_name(
                         user_id,
                         people.INACCESSIBLE_USER_NAME,
@@ -1044,7 +1031,7 @@ export function dispatch_normal_event(event) {
                 user_settings[event.property] = event.value;
                 settings_account.update_privacy_settings_box(event.property);
                 if (event.property === "presence_enabled") {
-                    activity_ui.redraw_user(current_user.user_id);
+                    pm_list.update_private_messages();
                 } else if (event.property === "allow_private_data_export") {
                     settings_exports.refresh_allow_private_data_export_banner();
                 }
@@ -1139,10 +1126,8 @@ export function dispatch_normal_event(event) {
                     stream_list.build_stream_list(true);
                     break;
                 case "user_list_style":
-                    settings_preferences.report_user_list_style_change(
-                        settings_preferences.user_settings_panel,
-                    );
-                    activity_ui.build_user_sidebar();
+                    // Kept as a recognized server preference for compatibility;
+                    // the global user list UI no longer exists.
                     break;
                 case "web_font_size_px":
                 case "web_line_height_percent":
@@ -1191,8 +1176,6 @@ export function dispatch_normal_event(event) {
                     for (const msg_list of message_lists.all_rendered_message_lists()) {
                         msg_list.rerender();
                     }
-                    // Rerender buddy list status emoji
-                    activity_ui.build_user_sidebar();
                     break;
                 case "display_emoji_reaction_users":
                     message_live_update.rerender_messages_view();
@@ -1317,8 +1300,6 @@ export function dispatch_normal_event(event) {
                     user_id: event.user_id,
                     status_text: event.status_text,
                 });
-                activity_ui.redraw_user(event.user_id);
-
                 // Update the status text in compose box placeholder when opened to self.
                 if (compose_pm_pill.get_user_ids().includes(event.user_id)) {
                     compose_recipient.update_compose_area_placeholder_text();
@@ -1327,7 +1308,6 @@ export function dispatch_normal_event(event) {
 
             if (event.emoji_name !== undefined) {
                 user_status.set_status_emoji(event);
-                activity_ui.redraw_user(event.user_id);
                 pm_list.update_private_messages();
                 message_live_update.update_user_status_emoji(
                     event.user_id,

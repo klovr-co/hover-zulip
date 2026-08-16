@@ -672,9 +672,9 @@ body.has-overlay-scrollbar {
     }
 }
 
-.column-middle,
+.app-main .column-middle,
 #compose-content {
-    margin-right: var(--right-sidebar-width);
+    margin-right: 7px;
     margin-left: calc(
         var(--left-sidebar-width) + var(--left-sidebar-padding-left)
     );

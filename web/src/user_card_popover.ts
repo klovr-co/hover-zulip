@@ -23,7 +23,6 @@ import * as dialog_widget from "./dialog_widget.ts";
 import {is_overlay_hash} from "./hash_parser.ts";
 import * as hash_util from "./hash_util.ts";
 import {$t, $t_html} from "./i18n.ts";
-import * as keydown_util from "./keydown_util.ts";
 import * as message_lists from "./message_lists.ts";
 import {user_can_send_direct_message} from "./message_util.ts";
 import * as message_view from "./message_view.ts";
@@ -39,7 +38,6 @@ import {hide_all} from "./popovers.ts";
 import * as presence from "./presence.ts";
 import * as rows from "./rows.ts";
 import * as settings_panel_menu from "./settings_panel_menu.ts";
-import * as sidebar_ui from "./sidebar_ui.ts";
 import {current_user, realm} from "./state_data.ts";
 import * as timerender from "./timerender.ts";
 import * as ui_report from "./ui_report.ts";
@@ -51,8 +49,6 @@ import {user_settings} from "./user_settings.ts";
 import * as user_status from "./user_status.ts";
 import * as user_status_ui from "./user_status_ui.ts";
 import {the} from "./util.ts";
-
-let current_user_sidebar_user_id: number | undefined;
 
 export function confirm_mute_user(user_id: number): void {
     function on_click(): void {
@@ -104,7 +100,6 @@ class PopoverMenu {
     }
 }
 
-export const user_sidebar = new PopoverMenu();
 export const message_user_card = new PopoverMenu();
 export const user_card = new PopoverMenu();
 
@@ -126,10 +121,9 @@ function popover_items_handle_keyboard_with_overrides(key: string, $items: JQuer
 }
 
 function get_popover_classname(
-    popover: "user_sidebar" | "message_user_card" | "user_card",
+    popover: "message_user_card" | "user_card",
 ): string {
     const popovers = {
-        user_sidebar: "user-sidebar-popover-root",
         message_user_card: "message-user-card-popover-root",
         user_card: "user-card-popover-root",
     };
@@ -137,13 +131,7 @@ function get_popover_classname(
     return popovers[popover];
 }
 
-user_sidebar.hide = function () {
-    PopoverMenu.prototype.hide.call(this);
-    current_user_sidebar_user_id = undefined;
-};
-
 const user_card_popovers = {
-    user_sidebar,
     message_user_card,
     user_card,
 };
@@ -414,7 +402,7 @@ function show_user_card_popover(
     is_sender_popover: boolean,
     has_message_context: boolean,
     private_msg_class: string,
-    template_class: "user_sidebar" | "message_user_card" | "user_card",
+    template_class: "message_user_card" | "user_card",
     popover_placement: tippy.Placement,
     show_as_overlay = false,
     on_mount?: (instance: tippy.Instance) => void,
@@ -492,13 +480,6 @@ function show_user_card_popover(
         {
             show_as_overlay_on_mobile: true,
             show_as_overlay_always: show_as_overlay,
-            get_focus_return_element(reference) {
-                const $entry = $(reference).closest(".user_sidebar_entry");
-                if ($entry.length === 0) {
-                    return undefined;
-                }
-                return the($entry.find(".user-presence-link"));
-            },
         },
     );
 }
@@ -681,41 +662,6 @@ function get_user_card_popover_for_message_items(): JQuery | undefined {
     return $(".link-item .popover-menu-link", $popover);
 }
 
-// Functions related to the user card popover in the user sidebar.
-
-function toggle_sidebar_user_card_popover($target: JQuery): void {
-    const user_id = elem_to_user_id($target);
-    const user = people.get_by_user_id(user_id);
-
-    // Hiding popovers may mutate current_user_sidebar_user_id.
-    const previous_user_sidebar_id = current_user_sidebar_user_id;
-
-    // Hide popovers
-    hide_all();
-
-    if (previous_user_sidebar_id === user_id) {
-        // If the popover is already shown, clicking again should toggle it.
-        return;
-    }
-
-    show_user_card_popover(
-        user,
-        $target,
-        false,
-        false,
-        "compose_private_message",
-        "user_sidebar",
-        "left",
-        false,
-        (instance) => {
-            /* See comment in get_props_for_popover_centering for explanation of this. */
-            $(instance.popper).find(".tippy-box").addClass("show-when-reference-hidden");
-        },
-    );
-
-    current_user_sidebar_user_id = user.user_id;
-}
-
 function register_click_handlers(): void {
     $("#main_div").on(
         "click",
@@ -867,8 +813,6 @@ function register_click_handlers(): void {
         const name = people.get_full_name(user_id);
         const mention = people.get_mention_syntax(name, user_id);
         compose_ui.insert_syntax_and_focus(mention);
-        user_sidebar.hide();
-        sidebar_ui.hide_userlist_sidebar();
         e.stopPropagation();
         e.preventDefault();
     });
@@ -935,36 +879,6 @@ function register_click_handlers(): void {
     }
 
     $("body").on("click", ".update_status_text", open_user_status_modal);
-
-    // Clicking on one's own status emoji should open the user status modal.
-    $(".buddy-list-section").on(
-        "click",
-        ".user_sidebar_entry_me .status-emoji",
-        open_user_status_modal,
-    );
-
-    $(".buddy-list-section").on("click", ".user-list-sidebar-menu-icon", (e) => {
-        e.stopPropagation();
-        const $target = $(e.currentTarget).closest("li");
-
-        toggle_sidebar_user_card_popover($target);
-    });
-
-    $(".buddy-list-section").on("keydown", ".user-list-sidebar-menu-icon", (e) => {
-        if (keydown_util.is_enter_event(e)) {
-            e.stopPropagation();
-            const $target = $(e.currentTarget).closest(".user_sidebar_entry");
-
-            toggle_sidebar_user_card_popover($target);
-        }
-    });
-
-    $(".buddy-list-section").on("click", ".user-profile-picture", (e) => {
-        e.stopPropagation();
-        const $target = $(e.currentTarget).closest("li");
-
-        toggle_sidebar_user_card_popover($target);
-    });
 
     $("body").on("click", ".sidebar-popover-mute-user", function (e) {
         const user_id = elem_to_user_id($(this).parents("ul"));

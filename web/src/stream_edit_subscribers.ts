@@ -5,7 +5,6 @@ import * as z from "zod/mini";
 import render_subscription_banner from "../templates/components/subscription_banner.hbs";
 import render_unsubscribe_private_stream_modal from "../templates/confirm_dialog/confirm_unsubscribe_private_stream.hbs";
 import render_decorated_channel_name from "../templates/decorated_channel_name.hbs";
-import render_stream_member_list_entry from "../templates/stream_settings/stream_member_list_entry.hbs";
 import render_stream_members_table from "../templates/stream_settings/stream_members_table.hbs";
 
 import * as add_subscribers_pill from "./add_subscribers_pill.ts";
@@ -14,9 +13,9 @@ import * as buttons from "./buttons.ts";
 import * as confirm_dialog from "./confirm_dialog.ts";
 import * as hash_parser from "./hash_parser.ts";
 import {$t, $t_html} from "./i18n.ts";
-import * as ListWidget from "./list_widget.ts";
 import type {ListWidget as ListWidgetType} from "./list_widget.ts";
 import * as loading from "./loading.ts";
+import * as member_list from "./member_list.ts";
 import * as peer_data from "./peer_data.ts";
 import * as people from "./people.ts";
 import type {User} from "./people.ts";
@@ -30,7 +29,6 @@ import type {StreamSubscription} from "./sub_store.ts";
 import * as subscriber_api from "./subscriber_api.ts";
 import type {CombinedPillContainer} from "./typeahead_helper.ts";
 import * as user_groups from "./user_groups.ts";
-import * as user_sort from "./user_sort.ts";
 
 const remove_user_id_api_response_schema = z.object({
     removed: z.array(z.string()),
@@ -45,19 +43,6 @@ const add_user_ids_api_response_schema = z.object({
 export let pill_widget: CombinedPillContainer;
 let current_stream_id: number;
 let subscribers_list_widget: ListWidgetType<User, User>;
-
-function format_member_list_elem(person: User, user_can_remove_subscribers: boolean): string {
-    return render_stream_member_list_entry({
-        name: person.full_name,
-        user_id: person.user_id,
-        is_current_user: person.user_id === current_user.user_id,
-        email: person.delivery_email,
-        can_remove_subscribers: user_can_remove_subscribers,
-        for_user_group_members: false,
-        img_src: people.small_avatar_url_for_person(person),
-        is_bot: person.is_bot,
-    });
-}
 
 function get_sub(stream_id: number): StreamSubscription | undefined {
     const sub = sub_store.get(stream_id);
@@ -221,36 +206,18 @@ function make_list_widget({
     user_ids: number[];
     user_can_remove_subscribers: boolean;
 }): ListWidgetType<User, User> {
-    const users = people.get_users_from_ids(user_ids);
-    people.sort_but_pin_current_user_on_top(users);
-
     const $list_container = $parent_container.find(".subscriber_table");
-    $list_container.empty();
-
     const $simplebar_container = $parent_container.find(".subscriber_list_container");
 
-    return ListWidget.create($list_container, users, {
-        name,
-        get_item: ListWidget.default_get_item,
-        modifier_html(item) {
-            return format_member_list_elem(item, user_can_remove_subscribers);
-        },
-        filter: {
-            $element: $parent_container.find<HTMLInputElement>("input.search"),
-            predicate(person, value) {
-                const matcher = people.build_person_matcher(value);
-                const match = matcher(person);
-
-                return match;
-            },
-        },
+    return member_list.create({
+        $container: $list_container,
+        $scroll_container: $simplebar_container,
+        $filter: $parent_container.find<HTMLInputElement>("input.search"),
         $parent_container: $("#stream_members_list").expectOne(),
-        sort_fields: {
-            email: user_sort.sort_email,
-            id: user_sort.sort_user_id,
-            ...ListWidget.generic_sort_functions("alphabetic", ["full_name"]),
-        },
-        $simplebar_container,
+        user_ids,
+        name,
+        can_remove: user_can_remove_subscribers,
+        removal_action: "unsubscribe",
     });
 }
 

@@ -24,7 +24,6 @@ set_global("document", {
     },
 });
 
-const activity_ui = mock_esm("../src/activity_ui");
 const narrow_state = mock_esm("../src/narrow_state");
 const stream_data = mock_esm("../src/stream_data");
 
@@ -54,8 +53,7 @@ const {set_current_user} = zrequire("state_data");
 const current_user = {};
 set_current_user(current_user);
 
-run_test("basics", ({override}) => {
-    override(activity_ui, "rerender_user_sidebar_participants", noop);
+run_test("basics", () => {
     const filter = new Filter([]);
 
     const list = new MessageList({
@@ -533,9 +531,7 @@ run_test("bookend", ({override}) => {
     }
 });
 
-run_test("add_remove_rerender", ({override}) => {
-    override(activity_ui, "rerender_user_sidebar_participants", noop);
-
+run_test("add_remove_rerender", () => {
     const filter = new Filter([]);
     const list = new MessageList({
         data: new MessageListData({

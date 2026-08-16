@@ -58,10 +58,6 @@ const user_group_edit = mock_esm("../src/user_group_edit");
 const user_profile = mock_esm("../src/user_profile");
 
 const {Filter} = zrequire("../src/filter");
-const activity_ui = mock_esm("../src/activity_ui", {
-    build_user_sidebar: noop,
-    set_cursor_and_filter: noop,
-});
 const compose_state = zrequire("compose_state");
 zrequire("narrow_state");
 const peer_data = zrequire("peer_data");
@@ -484,8 +480,6 @@ test("marked_subscribed (normal)", ({override, override_rewire}) => {
     const sub = {...frontend};
     stream_data.add_sub_for_tests(sub);
     override(stream_color_events, "update_stream_color", noop);
-    activity_ui.set_cursor_and_filter();
-
     narrow_to_frontend();
 
     let list_updated = false;
@@ -663,10 +657,6 @@ test("process_subscriber_update", ({override}) => {
     const subsStub = make_stub();
     stream_settings_ui.update_subscribers_ui = subsStub.f;
 
-    let build_user_sidebar_called = false;
-    override(activity_ui, "build_user_sidebar", () => {
-        build_user_sidebar_called = true;
-    });
     override(user_profile, "update_user_profile_streams_list_for_users", noop);
     // Sample user IDs
     const userIds = [104, 2, 3];
@@ -690,14 +680,10 @@ test("process_subscriber_update", ({override}) => {
     // Assert that update_subscribers_ui is called for each stream ID
     assert.equal(subsStub.num_calls, streamIds.length);
 
-    assert.ok(!build_user_sidebar_called);
-
-    // For a stream the user is currently viewing, we rebuild the user sidebar
-    // when someone subscribes to that stream.
+    // The currently viewed channel uses the same subscriber settings update.
     const filter = new Filter([{operator: "channel", operand: "1"}]);
     message_lists.current = {data: {filter}};
     stream_events.process_subscriber_update(userIds, streamIds);
-    assert.ok(build_user_sidebar_called);
     message_lists.current = undefined;
 });
 

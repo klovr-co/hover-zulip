@@ -422,9 +422,6 @@ export function initialize_kitchen_sink_stuff() {
 }
 
 function initialize_unread_ui() {
-    unread_ui.register_update_unread_counts_hook((counts) =>
-        activity_ui.update_dom_with_unread_counts(counts),
-    );
     unread_ui.register_update_unread_counts_hook((counts, skip_animations) =>
         left_sidebar_navigation_area.update_dom_with_unread_counts(counts, skip_animations),
     );
@@ -525,10 +522,7 @@ export async function initialize_everything(state_data) {
 
     realm_user_settings_defaults.initialize(state_data.realm_settings_defaults);
 
-    // The user_group must be initialized before right sidebar
-    // module, so that we can tell whether user is member of
-    // user_group whose members are allowed to create multiuse
-    // invite. The user_group module must also be initialized
+    // The user_group module must be initialized
     // before people module, so that can_access_all_users_group
     // setting group can be used to check whether the user
     // has permission to access all other users.
@@ -542,8 +536,6 @@ export async function initialize_everything(state_data) {
     // bot to show the lock icon for "Bots" panel
     bot_data.initialize(state_data.bot);
 
-    // The emoji module must be initialized before the right sidebar
-    // module, so that we can display custom emoji in statuses.
     emoji.initialize({
         ...state_data.emoji,
         emoji_codes: generated_emoji_codes,
@@ -573,7 +565,6 @@ export async function initialize_everything(state_data) {
     // modules were migrated from Django templates to Handlebars).
     initialize_bottom_whitespace();
     sidebar_ui.initialize_left_sidebar();
-    sidebar_ui.initialize_right_sidebar();
     initialize_compose_box();
     settings.initialize();
     initialize_navbar();
@@ -761,21 +752,9 @@ export async function initialize_everything(state_data) {
             activity.set_received_new_messages(false);
         }
     });
-    activity_ui.initialize({
-        narrow_by_user_id(user_id) {
-            message_view.show(
-                [
-                    {
-                        operator: "dm",
-                        operand: [user_id],
-                    },
-                ],
-                {trigger: "sidebar"},
-            );
-        },
-    });
+    activity_ui.initialize();
 
-    // All overlays, and also activity_ui, must be initialized before hashchange.ts
+    // Presence polling must be initialized before hashchange.ts.
     hashchange.initialize();
 
     emoji_picker.initialize();
@@ -815,8 +794,7 @@ export async function initialize_everything(state_data) {
     });
     drafts.initialize_ui();
     drafts_overlay_ui.initialize();
-    // This needs to happen after activity_ui.initialize, so that user_filter
-    // is defined. Also, must happen after people.initialize()
+    // This must happen after people.initialize().
     onboarding_steps.initialize(state_data.onboarding_steps, {
         show_message_view: message_view.show,
         update_recipient_row_attention_level:

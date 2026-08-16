@@ -4,7 +4,6 @@ import {$} from "jquery";
 import assert from "minimalistic-assert";
 import * as z from "zod/mini";
 
-import * as activity_ui from "./activity_ui.ts";
 import * as blueslip from "./blueslip.ts";
 import * as browser_history from "./browser_history.ts";
 import * as channel from "./channel.ts";
@@ -1757,7 +1756,6 @@ function handle_post_view_change(
     stream_list.handle_narrow_activated(filter, opts.change_hash, opts.show_more_topics);
     pm_list.handle_narrow_activated(filter);
     // This also builds the user sidebar.
-    activity_ui.clear_search();
 }
 
 export function rerender_combined_feed(combined_feed_msg_list: MessageList): void {

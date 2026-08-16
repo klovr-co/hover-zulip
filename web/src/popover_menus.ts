@@ -33,7 +33,6 @@ type PopoverName =
     | "personal_menu"
     | "gear_menu"
     | "help_menu"
-    | "buddy_list"
     | "stream_actions_popover"
     | "color_picker_popover"
     | "show_folders_sidebar"
@@ -59,7 +58,6 @@ export const popover_instances: Record<PopoverName, tippy.Instance | null> = {
     personal_menu: null,
     gear_menu: null,
     help_menu: null,
-    buddy_list: null,
     stream_actions_popover: null,
     color_picker_popover: null,
     show_folders_sidebar: null,

@@ -2,7 +2,6 @@ import {$} from "jquery";
 import assert from "minimalistic-assert";
 import * as tippy from "tippy.js";
 
-import render_buddy_list_title_tooltip from "../templates/buddy_list/title_tooltip.hbs";
 import render_change_visibility_policy_button_tooltip from "../templates/change_visibility_policy_button_tooltip.hbs";
 import render_information_density_update_button_tooltip from "../templates/information_density_update_button_tooltip.hbs";
 import render_org_logo_tooltip from "../templates/org_logo_tooltip.hbs";
@@ -13,7 +12,6 @@ import * as compose_state from "./compose_state.ts";
 import * as compose_validate from "./compose_validate.ts";
 import {$t} from "./i18n.ts";
 import * as information_density from "./information_density.ts";
-import * as people from "./people.ts";
 import * as settings_config from "./settings_config.ts";
 import {realm} from "./state_data.ts";
 import * as stream_data from "./stream_data.ts";
@@ -727,37 +725,6 @@ export function initialize(): void {
             return false;
         },
         appendTo: () => document.body,
-    });
-
-    tippy.delegate("body", {
-        target: "#userlist-header-search",
-        delay: LONG_HOVER_DELAY,
-        placement: "top",
-        appendTo: () => document.body,
-        onShow(instance) {
-            const total_user_count = people.get_active_human_count();
-            instance.setContent(
-                ui_util.parse_html(render_buddy_list_title_tooltip({total_user_count})),
-            );
-        },
-    });
-
-    tippy.delegate("body", {
-        target: "#userlist-toggle-button",
-        delay: LONG_HOVER_DELAY,
-        placement: "bottom",
-        appendTo: () => document.body,
-        onShow(instance) {
-            let template = "show-userlist-tooltip-template";
-            if ($("#right-sidebar-container").css("display") !== "none") {
-                template = "hide-userlist-tooltip-template";
-            }
-            $(instance.reference).attr("data-tooltip-template-id", template);
-            instance.setContent(get_tooltip_content(instance.reference));
-        },
-        onHidden(instance) {
-            instance.destroy();
-        },
     });
 
     tippy.delegate("body", {

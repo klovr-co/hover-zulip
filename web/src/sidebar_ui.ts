@@ -3,12 +3,8 @@ import _ from "lodash";
 import assert from "minimalistic-assert";
 
 import render_left_sidebar from "../templates/left_sidebar.hbs";
-import render_buddy_list_popover from "../templates/popovers/buddy_list_popover.hbs";
-import render_right_sidebar from "../templates/right_sidebar.hbs";
 
 import * as blueslip from "./blueslip.ts";
-import {buddy_list} from "./buddy_list.ts";
-import * as channel from "./channel.ts";
 import * as compose_ui from "./compose_ui.ts";
 import {$t} from "./i18n.ts";
 import * as keydown_util from "./keydown_util.ts";
@@ -20,14 +16,11 @@ import * as message_lists from "./message_lists.ts";
 import * as message_reminder from "./message_reminder.ts";
 import {page_params} from "./page_params.ts";
 import * as pm_list from "./pm_list.ts";
-import * as popover_menus from "./popover_menus.ts";
 import * as popovers from "./popovers.ts";
 import * as resize from "./resize.ts";
 import * as scheduled_messages from "./scheduled_messages.ts";
 import * as scroll_util from "./scroll_util.ts";
-import * as settings_config from "./settings_config.ts";
 import * as settings_data from "./settings_data.ts";
-import * as settings_preferences from "./settings_preferences.ts";
 import * as spectators from "./spectators.ts";
 import {current_user, realm} from "./state_data.ts";
 import * as stream_list from "./stream_list.ts";
@@ -61,12 +54,6 @@ function toggle_sidebar_preserving_selected_row_offset(classname: string): void 
 function save_sidebar_toggle_status(): void {
     const ls = localstorage();
     ls.set("left-sidebar", $("body").hasClass("hide-left-sidebar"));
-
-    if (!page_params.is_spectator) {
-        // The right sidebar is never shown in the spectator mode;
-        // avoid interacting with local storage state for it.
-        ls.set("right-sidebar", $("body").hasClass("hide-right-sidebar"));
-    }
 }
 
 export function restore_sidebar_toggle_status(): void {
@@ -75,16 +62,9 @@ export function restore_sidebar_toggle_status(): void {
         $("body").addClass("hide-left-sidebar");
     }
 
-    if (!page_params.is_spectator && ls.get("right-sidebar")) {
-        // The right sidebar is never shown in the spectator mode;
-        // avoid processing local storage state for hiding the right
-        // sidebar.
-        $("body").addClass("hide-right-sidebar");
-    }
 }
 
 export let left_sidebar_expanded_as_overlay = false;
-export let right_sidebar_expanded_as_overlay = false;
 
 export function update_sidebar_aria_expanded(): void {
     // Reflect current sidebar visibility on the toggle buttons. State is
@@ -94,55 +74,12 @@ export function update_sidebar_aria_expanded(): void {
     const left_expanded = ui_util.matches_viewport_state("gte_md_min")
         ? !$("body").hasClass("hide-left-sidebar")
         : left_sidebar_expanded_as_overlay;
-    const right_expanded = ui_util.matches_viewport_state("gte_xl_min")
-        ? !$("body").hasClass("hide-right-sidebar")
-        : right_sidebar_expanded_as_overlay;
     $(".left-sidebar-toggle-button").attr("aria-expanded", String(left_expanded));
-    $("#userlist-toggle-button").attr("aria-expanded", String(right_expanded));
-}
-
-export function hide_userlist_sidebar(): void {
-    const $userlist_sidebar = $(".app-main .column-right");
-    $userlist_sidebar.removeClass("expanded topmost-overlay");
-    right_sidebar_expanded_as_overlay = false;
-    update_sidebar_aria_expanded();
-}
-
-export function show_userlist_sidebar(): void {
-    const $streamlist_sidebar = $(".app-main .column-left");
-    const $userlist_sidebar = $(".app-main .column-right");
-    if ($userlist_sidebar.css("display") !== "none") {
-        // Return early if the right sidebar is already visible.
-        return;
-    }
-
-    if (ui_util.matches_viewport_state("gte_xl_min")) {
-        $("body").removeClass("hide-right-sidebar");
-        fix_invite_user_button_flicker();
-        update_sidebar_aria_expanded();
-        return;
-    }
-
-    $userlist_sidebar.addClass("expanded");
-    if (left_sidebar_expanded_as_overlay) {
-        $userlist_sidebar.addClass("topmost-overlay");
-        $streamlist_sidebar.removeClass("topmost-overlay");
-    }
-    fix_invite_user_button_flicker();
-    resize.resize_page_components();
-    right_sidebar_expanded_as_overlay = true;
-    update_sidebar_aria_expanded();
 }
 
 export function show_streamlist_sidebar(): void {
-    const $userlist_sidebar = $(".app-main .column-right");
-    const $streamlist_sidebar = $(".app-main .column-left");
     // Left sidebar toggle icon is attached to middle column.
     $(".app-main .column-left, #navbar-middle").addClass("expanded");
-    if (right_sidebar_expanded_as_overlay) {
-        $streamlist_sidebar.addClass("topmost-overlay");
-        $userlist_sidebar.removeClass("topmost-overlay");
-    }
     resize.resize_stream_filters_container();
     left_sidebar_expanded_as_overlay = true;
     update_sidebar_aria_expanded();
@@ -173,35 +110,11 @@ export function hide_streamlist_sidebar(): void {
 }
 
 export function any_sidebar_expanded_as_overlay(): boolean {
-    return left_sidebar_expanded_as_overlay || right_sidebar_expanded_as_overlay;
-}
-
-export function update_invite_user_option(): void {
-    if (
-        !settings_data.user_can_invite_users_by_email() &&
-        !settings_data.user_can_create_multiuse_invite()
-    ) {
-        $("#right-sidebar .invite-user-link").hide();
-    } else {
-        $("#right-sidebar .invite-user-link").show();
-    }
+    return left_sidebar_expanded_as_overlay;
 }
 
 export function hide_all(): void {
     hide_streamlist_sidebar();
-    hide_userlist_sidebar();
-}
-
-function fix_invite_user_button_flicker(): void {
-    // Keep right sidebar hidden after browser renders it to avoid
-    // flickering of "Invite more users" button. Since the user list
-    // is a complex component browser takes time for it to render
-    // causing the invite button to render first.
-    $("body").addClass("hide-right-sidebar-by-visibility");
-    // Show the right sidebar after the browser has completed the above render.
-    setTimeout(() => {
-        $("body").removeClass("hide-right-sidebar-by-visibility");
-    }, 0);
 }
 
 export function initialize(): void {
@@ -217,33 +130,6 @@ export function initialize(): void {
             e.stopPropagation();
             window.location.assign(spectators.build_login_link());
         }
-    });
-
-    $("#userlist-toggle-button").on("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (ui_util.matches_viewport_state("gte_xl_min")) {
-            toggle_sidebar_preserving_selected_row_offset("hide-right-sidebar");
-            if (!$("body").hasClass("hide-right-sidebar")) {
-                fix_invite_user_button_flicker();
-            }
-            // We recheck the scrolling-button status of the compose
-            // box, which may change for users who've chosen to
-            // use full width on wide screens.
-            compose_ui.maybe_show_scrolling_formatting_buttons(
-                "#message-formatting-controls-container",
-            );
-            save_sidebar_toggle_status();
-            update_sidebar_aria_expanded();
-            return;
-        }
-
-        if (right_sidebar_expanded_as_overlay) {
-            hide_userlist_sidebar();
-            return;
-        }
-        show_userlist_sidebar();
     });
 
     $(".left-sidebar-toggle-button").on("click", (e) => {
@@ -275,11 +161,11 @@ export function initialize(): void {
     // depends on viewport and restored localStorage settings.
     update_sidebar_aria_expanded();
 
-    // Hide left / right sidebar on click outside.
+    // Hide the left sidebar overlay on click outside.
     document.addEventListener(
         "click",
         (e) => {
-            if (!(left_sidebar_expanded_as_overlay || right_sidebar_expanded_as_overlay)) {
+            if (!left_sidebar_expanded_as_overlay) {
                 return;
             }
 
@@ -288,11 +174,8 @@ export function initialize(): void {
             }
 
             const $elt = $(e.target);
-            // Since sidebar toggle buttons have their own click handlers, don't handle them here.
-            if (
-                $elt.closest(".left-sidebar-toggle-button").length > 0 ||
-                $elt.closest("#userlist-toggle-button").length > 0
-            ) {
+            // Since the sidebar toggle button has its own click handler, don't handle it here.
+            if ($elt.closest(".left-sidebar-toggle-button").length > 0) {
                 return;
             }
 
@@ -319,17 +202,6 @@ export function initialize(): void {
                 }
             }
 
-            if (
-                right_sidebar_expanded_as_overlay &&
-                $elt.closest(".no-auto-hide-right-sidebar-overlay").length === 0
-            ) {
-                const $right_column = $(".app-main .column-right");
-                const click_outside_right_sidebar = $elt.closest($right_column).length === 0;
-
-                if (click_outside_right_sidebar) {
-                    hide_userlist_sidebar();
-                }
-            }
         },
         {capture: true},
     );
@@ -404,142 +276,6 @@ export function focus_topic_search_filter(): void {
     show_left_sidebar();
     const $filter = $("#topic_filter_query");
     $filter.trigger("focus");
-}
-
-export function initialize_right_sidebar(): void {
-    const rendered_sidebar = render_right_sidebar();
-
-    $("#right-sidebar-container").html(rendered_sidebar);
-
-    buddy_list.initialize_tooltips();
-
-    update_invite_user_option();
-
-    $("#buddy-list-users-matching-view").on("mouseenter", ".user_sidebar_entry", (e) => {
-        const $status_emoji = $(e.target).closest(".user_sidebar_entry").find("img.status-emoji");
-        if ($status_emoji.length > 0) {
-            const animated_url = $status_emoji.attr("data-animated-url");
-            if (animated_url) {
-                $status_emoji.attr("src", animated_url);
-            }
-        }
-    });
-
-    $("#buddy-list-users-matching-view").on("mouseleave", ".user_sidebar_entry", (e) => {
-        const $status_emoji = $(e.target).closest(".user_sidebar_entry").find("img.status-emoji");
-        if ($status_emoji.length > 0) {
-            const still_url = $status_emoji.attr("data-still-url");
-            if (still_url) {
-                $status_emoji.attr("src", still_url);
-            }
-        }
-    });
-
-    $("#buddy-list-users-matching-view-container").on(
-        "click",
-        ".buddy-list-subsection-header",
-        (e) => {
-            e.stopPropagation();
-            buddy_list.toggle_users_matching_view_section();
-        },
-    );
-
-    $("#buddy-list-users-matching-view-container").on(
-        "keydown",
-        ".buddy-list-section-toggle",
-        (e) => {
-            if (keydown_util.is_enter_event(e)) {
-                e.stopPropagation();
-                buddy_list.toggle_users_matching_view_section();
-            }
-        },
-    );
-
-    $("#buddy-list-participants-container").on("click", ".buddy-list-subsection-header", (e) => {
-        e.stopPropagation();
-        buddy_list.toggle_participants_section();
-    });
-
-    $("#buddy-list-participants-container").on("keydown", ".buddy-list-section-toggle", (e) => {
-        if (keydown_util.is_enter_event(e)) {
-            e.stopPropagation();
-            buddy_list.toggle_participants_section();
-        }
-    });
-
-    $("#buddy-list-other-users-container").on("click", ".buddy-list-subsection-header", (e) => {
-        e.stopPropagation();
-        buddy_list.toggle_other_users_section();
-    });
-
-    $("#buddy-list-other-users-container").on("keydown", ".buddy-list-section-toggle", (e) => {
-        if (keydown_util.is_enter_event(e)) {
-            e.stopPropagation();
-            buddy_list.toggle_other_users_section();
-        }
-    });
-
-    function close_buddy_list_popover(): void {
-        if (popover_menus.popover_instances.buddy_list !== null) {
-            popover_menus.popover_instances.buddy_list.destroy();
-            popover_menus.popover_instances.buddy_list = null;
-        }
-    }
-
-    popover_menus.register_popover_menu(
-        "#buddy-list-menu-icon",
-        {
-            theme: "popover-menu",
-            placement: "right",
-            onCreate(instance) {
-                popover_menus.popover_instances.buddy_list = instance;
-                instance.setContent(
-                    ui_util.parse_html(
-                        render_buddy_list_popover({
-                            display_style_options: settings_config.user_list_style_values,
-                            can_invite_users:
-                                settings_data.user_can_invite_users_by_email() ||
-                                settings_data.user_can_create_multiuse_invite(),
-                        }),
-                    ),
-                );
-            },
-            onMount() {
-                const current_user_list_style =
-                    settings_preferences.user_settings_panel.settings_object.user_list_style;
-                $("#buddy-list-actions-menu-popover")
-                    .find(`.user_list_style_choice[value=${current_user_list_style}]`)
-                    .prop("checked", true);
-            },
-            onHidden() {
-                close_buddy_list_popover();
-            },
-        },
-        {also_trigger_on_enter: true},
-    );
-
-    $("body").on(
-        "click",
-        "#buddy-list-actions-menu-popover .display-style-selector",
-        function (this: HTMLElement) {
-            const data = {user_list_style: $(this).val()};
-            const current_user_list_style =
-                settings_preferences.user_settings_panel.settings_object.user_list_style;
-
-            if (current_user_list_style === data.user_list_style) {
-                close_buddy_list_popover();
-                return;
-            }
-
-            void channel.patch({
-                url: "/json/settings",
-                data,
-                success() {
-                    close_buddy_list_popover();
-                },
-            });
-        },
-    );
 }
 
 function get_header_rows_selectors(): string {

@@ -3,7 +3,6 @@ import assert from "minimalistic-assert";
 
 import render_first_stream_created_modal from "../templates/stream_settings/first_stream_created_modal.hbs";
 
-import * as activity_ui from "./activity_ui.ts";
 import * as blueslip from "./blueslip.ts";
 import * as browser_history from "./browser_history.ts";
 import * as channel_folders_ui from "./channel_folders_ui.ts";
@@ -347,7 +346,6 @@ export function mark_subscribed(
             force_rerender: true,
             trigger: "subscription confirmed refresh",
         });
-        activity_ui.build_user_sidebar();
     }
 
     // The new stream in sidebar might need its unread counts
@@ -381,7 +379,6 @@ export function mark_unsubscribed(sub: StreamSubscription): void {
         // disappear whenever no unread messages remain.
         unread_ui.hide_unread_banner();
 
-        activity_ui.build_user_sidebar();
     }
 
     // Unread messages in the now-unsubscribe stream need to be
@@ -419,6 +416,5 @@ export function process_subscriber_update(user_ids: number[], stream_ids: number
     user_profile.update_user_profile_streams_list_for_users(user_ids);
     const narrow_stream_id = narrow_state.stream_id();
     if (narrow_stream_id && stream_ids.includes(narrow_stream_id)) {
-        activity_ui.build_user_sidebar();
     }
 }

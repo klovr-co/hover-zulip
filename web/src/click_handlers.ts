@@ -8,7 +8,6 @@ import * as z from "zod/mini";
 import render_buddy_list_tooltip_content from "../templates/buddy_list_tooltip_content.hbs";
 import render_scroll_to_time_popover from "../templates/popovers/scroll_to_time_popover.hbs";
 
-import * as activity_ui from "./activity_ui.ts";
 import * as browser_history from "./browser_history.ts";
 import * as buddy_data from "./buddy_data.ts";
 import * as compose_actions from "./compose_actions.ts";
@@ -32,10 +31,8 @@ import * as popover_menus_data from "./popover_menus_data.ts";
 import * as reactions from "./reactions.ts";
 import * as recent_view_ui from "./recent_view_ui.ts";
 import * as rows from "./rows.ts";
-import * as settings_config from "./settings_config.ts";
 import * as settings_panel_menu from "./settings_panel_menu.ts";
 import * as settings_toggle from "./settings_toggle.ts";
-import * as sidebar_ui from "./sidebar_ui.ts";
 import * as spectators from "./spectators.ts";
 import * as starred_messages_ui from "./starred_messages_ui.ts";
 import * as stream_list from "./stream_list.ts";
@@ -43,7 +40,6 @@ import * as stream_popover from "./stream_popover.ts";
 import * as topic_list from "./topic_list.ts";
 import * as ui_util from "./ui_util.ts";
 import {parse_html} from "./ui_util.ts";
-import {user_settings} from "./user_settings.ts";
 import * as util from "./util.ts";
 
 export function initialize(): void {
@@ -597,29 +593,6 @@ export function initialize(): void {
         });
     });
 
-    $(".buddy-list-section").on("click", ".selectable_sidebar_block", (e) => {
-        if (e.metaKey || e.ctrlKey || e.shiftKey) {
-            return;
-        }
-        if ($(e.target).parents(".user-profile-picture").length === 1) {
-            return;
-        }
-        if (mouse_drag.is_drag(e)) {
-            // To avoid the click behavior if a user name or status text is
-            // selected.
-            e.preventDefault();
-            return;
-        }
-
-        const $li = $(e.target).parents("li");
-
-        activity_ui.narrow_for_user({$li});
-
-        e.preventDefault();
-        e.stopPropagation();
-        sidebar_ui.hide_userlist_sidebar();
-    });
-
     // Doesn't show tooltip on touch devices.
     function do_render_buddy_list_tooltip(
         $elem: JQuery,
@@ -641,14 +614,9 @@ export function initialize(): void {
             placement = "auto";
         }
         tippy.default(util.the($elem), {
-            // Quickly display and hide right sidebar tooltips
-            // so that they don't stick and overlap with
-            // each other.
+            // Quickly display and hide presence tooltips so they do not overlap.
             delay: 0,
-            // Don't show tooltip on touch devices (99% mobile) since touch pressing on users in the left or right
-            // sidebar leads to narrow being changed and the sidebar is hidden. So, there is no user displayed
-            // to show tooltip for. It is safe to show the tooltip on long press but it not worth
-            // the inconvenience of having a tooltip hanging around on a small mobile screen if anything going wrong.
+            // Avoid sticky tooltips on touch devices.
             touch: false,
             content: () => parse_html(render_buddy_list_tooltip_content(title_data)),
             arrow: true,
@@ -689,73 +657,6 @@ export function initialize(): void {
             appendTo: () => parent_element_to_append ?? document.body,
         });
     }
-
-    // BUDDY LIST TOOLTIPS (not displayed on touch devices)
-    $(".buddy-list-section").on(
-        "mouseenter",
-        ".user_sidebar_entry",
-        function (this: HTMLElement, e) {
-            e.stopPropagation();
-            const $elem = $(this);
-
-            const is_compact_mode =
-                user_settings.user_list_style ===
-                settings_config.user_list_style_values.compact.code;
-            const status_el = is_compact_mode ? null : util.the($elem.find(".status-text"));
-            const is_truncated = status_el ? status_el.scrollWidth > status_el.clientWidth : false;
-            const should_show_status = is_compact_mode || is_truncated;
-
-            const user_id_string = $elem.attr("data-user-id")!;
-            const title_data = buddy_data.get_title_data(user_id_string, false, should_show_status);
-
-            // `target_node` is the `ul` element since it stays in DOM even after updates.
-            function get_target_node(): HTMLElement {
-                return util.the($(e.target).parents(".buddy-list-section"));
-            }
-
-            function check_reference_removed(
-                mutation: MutationRecord,
-                instance: tippy.Instance,
-            ): boolean {
-                return Array.prototype.includes.call(mutation.removedNodes, instance.reference);
-            }
-
-            do_render_buddy_list_tooltip(
-                $elem,
-                title_data,
-                get_target_node,
-                check_reference_removed,
-            );
-
-            /*
-            The following implements a little tooltip giving the name for status emoji
-            when hovering them in the right sidebar. This requires special logic, to avoid
-            conflicting with the main tooltip or showing duplicate tooltips.
-            */
-            $(".user_sidebar_entry .status-emoji-name").off("mouseenter").off("mouseleave");
-            $(".user_sidebar_entry .status-emoji-name").on("mouseenter", () => {
-                const element: tippy.ReferenceElement = util.the($elem);
-                const instance = element._tippy;
-                // We make sure instance is of buddy list since we don't want to
-                // close any other tippy instances.
-                if (
-                    instance?.state.isVisible &&
-                    instance.reference.classList.contains("user_sidebar_entry") &&
-                    instance.popper.classList.contains("buddy-list-tooltip-root")
-                ) {
-                    instance.destroy();
-                }
-            });
-            $(".user_sidebar_entry .status-emoji-name").on("mouseleave", () => {
-                do_render_buddy_list_tooltip(
-                    $elem,
-                    title_data,
-                    get_target_node,
-                    check_reference_removed,
-                );
-            });
-        },
-    );
 
     // DIRECT MESSAGE LIST TOOLTIPS (not displayed on touch devices)
     $("body").on("mouseenter", ".dm-user-status", function (this: HTMLElement, e) {

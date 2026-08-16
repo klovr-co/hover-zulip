@@ -98,7 +98,6 @@ run_test("add users with event", ({override}) => {
     // We need to override a stub here before dispatching the event.
     // Keep reading to see how overriding works!
     override(settings_bots, "redraw_all_bots_list", noop);
-    override(activity_ui, "check_should_redraw_new_user", noop);
     override(pm_list, "update_private_messages", noop);
     // Let's simulate dispatching our event!
     server_events_dispatch.dispatch_normal_event(event);
