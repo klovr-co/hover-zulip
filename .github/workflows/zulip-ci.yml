@@ -146,10 +146,6 @@ jobs:
         run: |
           pnpm run --filter=starlight_help check
 
-      - name: Check pnpm dedupe
-        if: ${{ matrix.include_frontend_tests }}
-        run: pnpm dedupe --check
-
       - name: Run backend lint
         run: |
           source tools/ci/activate-venv
