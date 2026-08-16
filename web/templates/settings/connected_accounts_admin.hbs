@@ -1,15 +1,15 @@
 {{#if is_admin}}
     <div
-        id="connected-account-settings"
-        class="settings-section hover-connected-account-settings-entry {{#unless realm_hover_enabled}}hide{{/unless}}"
-        data-name="connected-account-settings"
-    >
+      id="connected-account-settings"
+      class="settings-section hover-connected-account-settings-entry {{#unless realm_hover_enabled}}hide{{/unless}}"
+      data-name="connected-account-settings"
+      >
         <div class="hover-connected-account-heading">
             <div>
                 <p class="hover-settings-kicker">
                     {{t
-                        "Hover access boundary"
-                    }}
+                      "Hover access boundary"
+                      }}
                 </p>
                 <h3 class="settings-table-title">{{t "Connected Accounts"}}</h3>
             </div>
@@ -20,15 +20,15 @@
         </div>
         <p class="settings-field-description hover-connected-account-intro">
             {{t
-                "Approve accounts, then grant teammates either specific source selectors or explicit access to all selectors. Empty selector grants deny access. Provider tokens, routing details, and private phone identifiers never appear here."
-            }}
+              "Approve accounts, then grant teammates either specific source selectors or explicit access to all selectors. Empty selector grants deny access. Provider tokens, routing details, and private phone identifiers never appear here."
+              }}
         </p>
         <div class="alert-notification" id="connected-account-status"></div>
         <div
-            id="hover-connected-accounts-list"
-            class="hover-connected-accounts-list"
-            data-empty="{{t 'No Connected Accounts are available.'}}"
-        >
+          id="hover-connected-accounts-list"
+          class="hover-connected-accounts-list"
+          data-empty="{{t 'No Connected Accounts are available.'}}"
+          >
         </div>
     </div>
 {{/if}}

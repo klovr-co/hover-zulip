@@ -13,8 +13,8 @@
                 }}</span>
             {{#if source.is_history_retained}}
                 <span
-                    class="hover-source-retained-badge"
-                >{{t "History retained"}}</span>
+                  class="hover-source-retained-badge"
+                  >{{t "History retained"}}</span>
             {{/if}}
         </div>
         <div class="hover-source-metadata">
@@ -24,19 +24,19 @@
         </div>
         <p>
             {{t
-                "These records came from the connected Source. Replies and other actions are unavailable here."
-            }}
+              "These records came from the connected Source. Replies and other actions are unavailable here."
+              }}
         </p>
         <form id="hover-source-search-form" role="search">
             <label for="hover-source-search">{{t "Search this Source"}}</label>
             <div class="hover-source-search-controls">
                 <input
-                    id="hover-source-search"
-                    type="search"
-                    value="{{query}}"
-                    maxlength="100"
-                    autocomplete="off"
-                />
+                  id="hover-source-search"
+                  type="search"
+                  value="{{query}}"
+                  maxlength="100"
+                  autocomplete="off"
+                  />
                 <button type="submit" class="button rounded">{{t
                         "Search"
                     }}</button>
@@ -44,18 +44,18 @@
         </form>
     </header>
     <div
-        class="hover-source-status"
-        role="status"
-        aria-live="polite"
-    >
+      class="hover-source-status"
+      role="status"
+      aria-live="polite"
+      >
         {{status}}
     </div>
     {{#if show_load_older}}
         <button
-            id="hover-source-load-older"
-            type="button"
-            class="button rounded"
-        >{{t "Load older"}}</button>
+          id="hover-source-load-older"
+          type="button"
+          class="button rounded"
+          >{{t "Load older"}}</button>
     {{/if}}
     {{#if show_retry}}
         <button id="hover-source-retry" type="button" class="button rounded">{{t
@@ -63,10 +63,10 @@
             }}</button>
     {{/if}}
     <div
-        class="hover-source-record-list"
-        role="list"
-        aria-label="{{t 'Source records'}}"
-    >
+      class="hover-source-record-list"
+      role="list"
+      aria-label="{{t 'Source records'}}"
+      >
         {{#each date_groups}}
             <section class="hover-source-date-group">
                 <h2>{{date_label}}</h2>

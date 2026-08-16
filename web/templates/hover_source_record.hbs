@@ -5,25 +5,25 @@
     </header>
     {{#if reply_context}}
         <blockquote
-            class="hover-source-reply"
-            aria-label="{{t 'Quoted reply'}}"
-        >
+          class="hover-source-reply"
+          aria-label="{{t 'Quoted reply'}}"
+          >
             <strong>{{reply_context.sender_display_name}}</strong>
             <span>{{reply_context.excerpt}}</span>
         </blockquote>
     {{/if}}
     {{#if content.text}}
         <p
-            class="hover-source-record-text"
-        >
+          class="hover-source-record-text"
+          >
             {{content.text}}
         </p>
     {{/if}}
     {{#if content.voice_transcript}}
         <div
-            class="hover-source-transcript"
-            aria-label="{{t 'Voice transcript'}}"
-        >
+          class="hover-source-transcript"
+          aria-label="{{t 'Voice transcript'}}"
+          >
             <span class="hover-source-content-label">{{t
                     "Voice transcript"
                 }}</span>
@@ -45,8 +45,8 @@
                 {{/if}}</span>
             {{#unless media.available}}
                 <span
-                    class="hover-source-media-unavailable"
-                >{{t "Unavailable"}}</span>
+                  class="hover-source-media-unavailable"
+                  >{{t "Unavailable"}}</span>
             {{/unless}}
         </div>
     {{/if}}

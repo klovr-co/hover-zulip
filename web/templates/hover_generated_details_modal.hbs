@@ -1,16 +1,16 @@
 <section
-    class="hover-generated-details"
-    tabindex="-1"
-    data-hover-generated-details
->
+  class="hover-generated-details"
+  tabindex="-1"
+  data-hover-generated-details
+  >
     <header class="hover-generated-details__summary">
         <span
-            class="hover-generated-update-label__chip"
-        >{{presentation.label}}</span>
+          class="hover-generated-update-label__chip"
+          >{{presentation.label}}</span>
         {{#if presentation.state}}
             <span
-                class="hover-generated-update-state hover-generated-update-state--{{presentation.state}}"
-            >{{presentation.state}}</span>
+              class="hover-generated-update-state hover-generated-update-state--{{presentation.state}}"
+              >{{presentation.state}}</span>
         {{/if}}
         <strong>{{module.name}}</strong>
     </header>
@@ -32,8 +32,8 @@
                     </span>
                     {{#if is_current}}
                         <span
-                            class="hover-generated-history__current"
-                        >{{t "This update"}}</span>
+                          class="hover-generated-history__current"
+                          >{{t "This update"}}</span>
                     {{/if}}
                 </li>
             {{/each}}
@@ -83,8 +83,8 @@
         </dl>
         <p class="hover-generated-details__note">
             {{t
-                "This presentation references the original native Space message; it does not create a copy."
-            }}
+              "This presentation references the original native Space message; it does not create a copy."
+              }}
         </p>
     {{/if}}
 </section>

@@ -5,10 +5,10 @@
         {{#each sources}}
             <label class="hover-source-candidate">
                 <input
-                    type="radio"
-                    name="hover_source_candidate"
-                    value="{{source_ref}}"
-                />
+                  type="radio"
+                  name="hover_source_candidate"
+                  value="{{source_ref}}"
+                  />
                 <span class="hover-source-ledger__icon" aria-hidden="true"><i
                         class="fa fa-whatsapp"
                     ></i></span>
@@ -17,23 +17,23 @@
                         ·
                         {{source_type}}</small></span>
                 <button
-                    type="button"
-                    class="button small rounded hover-source-preview-button"
-                    data-source-ref="{{source_ref}}"
-                >{{t "Preview"}}</button>
+                  type="button"
+                  class="button small rounded hover-source-preview-button"
+                  data-source-ref="{{source_ref}}"
+                  >{{t "Preview"}}</button>
             </label>
         {{/each}}
     </fieldset>
     {{#if has_more}}
         <button
-            type="button"
-            class="button small rounded hover-source-next-button"
-        >{{t "More results"}}</button>
+          type="button"
+          class="button small rounded hover-source-next-button"
+          >{{t "More results"}}</button>
     {{/if}}
 {{else}}
     <div class="hover-source-empty-state hover-source-empty-state-compact">
         {{t
-            "No permitted Sources match this search."
-        }}
+          "No permitted Sources match this search."
+          }}
     </div>
 {{/if}}
