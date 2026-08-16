@@ -10,7 +10,6 @@ const fixture = {
     "realm_name": "Realm name",
     "realm_url": "#storybook",
     "is_self_hosted": true,
-    "version_display_string": "Version display string",
     "server_needs_upgrade": "Server needs upgrade",
     "is_demo_organization": true,
     "is_plan_limited": true,
