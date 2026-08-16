@@ -308,7 +308,6 @@ run_test("test_is_overlay_hash", () => {
         "#keyboard-shortcuts",
         "#message-formatting",
         "#search-operators",
-        "#about-zulip",
         "#scheduled",
         "#reminders",
         "#user/12345",
@@ -361,7 +360,6 @@ run_test("test_is_spectator_compatible", () => {
     assert.equal(hash_parser.is_spectator_compatible("#keyboard-shortcuts"), true);
     assert.equal(hash_parser.is_spectator_compatible("#message-formatting"), true);
     assert.equal(hash_parser.is_spectator_compatible("#search-operators"), true);
-    assert.equal(hash_parser.is_spectator_compatible("#about-zulip"), true);
     assert.equal(hash_parser.is_spectator_compatible("#topics"), true);
 
     // Narrow hashes with allowed operators.
