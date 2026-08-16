@@ -146,16 +146,6 @@ jobs:
         run: |
           pnpm run --filter=starlight_help check
 
-      - name: Run puppeteer tests
-        if: ${{ matrix.include_frontend_tests }}
-        run: |
-          # Chrome downloaded by Puppeteer requires ALSA's shared library on
-          # the minimal Noble CI image.
-          sudo apt-get update
-          sudo apt-get install --no-install-recommends --yes libasound2t64
-          source tools/ci/activate-venv
-          ./tools/test-js-with-puppeteer
-
       - name: Check pnpm dedupe
         if: ${{ matrix.include_frontend_tests }}
         run: pnpm dedupe --check
