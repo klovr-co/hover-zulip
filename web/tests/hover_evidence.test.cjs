@@ -2,11 +2,33 @@
 
 const assert = require("node:assert/strict");
 
-const {mock_esm, zrequire} = require("./lib/namespace.cjs");
+const {mock_esm, set_global, zrequire} = require("./lib/namespace.cjs");
 const {run_test} = require("./lib/test.cjs");
 const {$} = require("./lib/zjquery.cjs");
 
 const channel = mock_esm("../src/channel");
+const dialog_widget = mock_esm("../src/dialog_widget");
+
+let body_click_handler;
+class FakeElement {
+    constructor(closest_result) {
+        this.closest_result = closest_result;
+    }
+
+    closest() {
+        return this.closest_result;
+    }
+}
+set_global("Element", FakeElement);
+set_global("document", {
+    body: {
+        addEventListener(event, handler, options) {
+            assert.equal(event, "click");
+            assert.deepEqual(options, {capture: true});
+            body_click_handler = handler;
+        },
+    },
+});
 
 const hover_evidence = zrequire("hover_evidence");
 
@@ -100,4 +122,72 @@ run_test("updates the visible SimpleBar content after the modal opens", ({overri
     hover_evidence.load_evidence($content, "/json/hover/evidence/4");
     assert.match($simplebar_content.html(), /temporarily unavailable/);
     assert.match($simplebar_content.html(), /hover-evidence-retry/);
+});
+
+run_test("opens the evidence modal and starts loading its URL", ({override}) => {
+    const $content = $("#evidence-modal .modal__content");
+    $content.set_find_results(".simplebar-content", []);
+    let launch_options;
+    override(dialog_widget, "launch", (options) => {
+        launch_options = options;
+        return "evidence-modal";
+    });
+    override(channel, "post", ({url}) => {
+        assert.equal(url, "/json/hover/evidence/5");
+    });
+
+    hover_evidence.show_evidence("/json/hover/evidence/5");
+
+    assert.equal(launch_options.modal_title_text, "translated: Sources");
+    assert.equal(launch_options.modal_submit_button_text, "translated: Close");
+    assert.equal(launch_options.on_click(), undefined);
+});
+
+run_test("routes evidence and retry clicks while ignoring unrelated targets", ({override}) => {
+    const $content = $("#evidence-modal .modal__content");
+    $content.set_find_results(".simplebar-content", []);
+    let post_count = 0;
+    override(dialog_widget, "launch", () => "evidence-modal");
+    override(channel, "post", () => {
+        post_count += 1;
+    });
+    hover_evidence.initialize();
+
+    body_click_handler({target: {}, preventDefault() {}, stopPropagation() {}});
+    body_click_handler({
+        target: new FakeElement(null),
+        preventDefault() {},
+        stopPropagation() {},
+    });
+    body_click_handler({
+        target: new FakeElement({dataset: {}}),
+        preventDefault() {},
+        stopPropagation() {},
+    });
+
+    let prevented = false;
+    let stopped = false;
+    body_click_handler({
+        target: new FakeElement({dataset: {evidenceUrl: "/json/hover/evidence/6"}}),
+        preventDefault() {
+            prevented = true;
+        },
+        stopPropagation() {
+            stopped = true;
+        },
+    });
+    assert.equal(prevented, true);
+    assert.equal(stopped, true);
+    assert.equal(post_count, 1);
+
+    const retry_handler = $("body").get_on_handler("click", ".hover-evidence-retry");
+    const $retry = $("#retry");
+    const $retry_modal = $("#retry-modal");
+    $retry_modal.set_find_results(".simplebar-content", []);
+    $retry.set_closest_results(".modal__content", $retry_modal);
+    retry_handler({preventDefault() {}, currentTarget: $retry[0]});
+    assert.equal(post_count, 1);
+    $retry.attr("data-evidence-url", "/json/hover/evidence/7");
+    retry_handler({preventDefault() {}, currentTarget: $retry[0]});
+    assert.equal(post_count, 2);
 });
