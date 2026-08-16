@@ -23,9 +23,11 @@
                 {{#if empty}}
                     <div class="no-overlay-messages">
                         <strong>{{t "No Todos yet."}}</strong>
-                        <p>{{t
+                        <p>
+                            {{t
                                 "Approved Suggested Actions will appear here."
-                            }}</p>
+                            }}
+                        </p>
                     </div>
                 {{/if}}
                 {{#each todos}}
@@ -53,10 +55,12 @@
                         </dl>
                         {{#if latest_event}}
                             <p class="hover-todo-card__history">
-                                {{#tr}}Last changed by
+                                {{#tr}}
+                                    Last changed by
                                     {{latest_event.actor.full_name}}
                                     at
-                                    {{latest_event.occurred_at}}{{/tr}}
+                                    {{latest_event.occurred_at}}
+                                {{/tr}}
                             </p>
                         {{/if}}
                         <div class="hover-todo-card__links">
@@ -82,16 +86,22 @@
                                         {{#if assignee}}
                                             <option
                                                 value="{{assignee.user_id}}"
-                                            >{{assignee.full_name}}</option>
+                                            >
+                                                {{assignee.full_name}}
+                                            </option>
                                         {{else}}
-                                            <option value="">{{t
+                                            <option value="">
+                                                {{t
                                                     "Choose a teammate"
-                                                }}</option>
+                                                }}
+                                            </option>
                                         {{/if}}
                                         {{#each assignable_options}}
                                             <option
                                                 value="{{this.user_id}}"
-                                            >{{this.full_name}}</option>
+                                            >
+                                                {{this.full_name}}
+                                            </option>
                                         {{/each}}
                                     </select>
                                 </label>

@@ -221,10 +221,23 @@ class HoverPilotCausalScenarioTest(ZulipTestCase):
             publications=[publication], next_cursor="memory:scenario", has_more=False
         )
 
-        sync_space_attachment(
-            attachment_id=self.attachment.id,
-            assistant=self.assistant,
-            clawer_sync=self.adapter,
+        with self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry:
+            sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=self.adapter,
+            )
+        self.assertEqual(
+            telemetry.output,
+            [
+                (
+                    "INFO:zulip.hover.telemetry:Hover telemetry event=publication_sync "
+                    f"outcome=success attachment_id={self.attachment.id} "
+                    "created_count_bucket=one lag_bucket=over_1d "
+                    "publication_count_bucket=one "
+                    f"realm_id={self.realm.id} replayed_count_bucket=zero retryable=false"
+                )
+            ],
         )
         generated_item = GeneratedItem.objects.get(publication_id=publication.publication_id)
         action = SuggestedAction.objects.get(generated_item=generated_item)

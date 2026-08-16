@@ -36,7 +36,9 @@
                                 <strong>{{sender_name}}</strong>
                                 <time
                                     datetime="{{timestamp}}"
-                                >{{display_time}}</time>
+                                >
+                                    {{display_time}}
+                                </time>
                             </header>
                             <div class="hover-generated-update-label">
                                 <span
@@ -82,10 +84,13 @@
                             {{#if todo_status}}
                                 <div class="hover-awareness-todo">
                                     <strong>{{t "Todo"}}</strong>
-                                    <span>{{todo_status}}{{#if todo_due_date}}
+                                    <span>{{todo_status}}
+                                        {{#if todo_due_date}}
                                             ·
                                             {{#tr}}Due
-                                                {{todo_due_date}}{{/tr}}{{/if}}</span>
+                                                {{todo_due_date}}{{/tr}}
+                                        {{/if}}
+                                    </span>
                                 </div>
                             {{/if}}
                             <div

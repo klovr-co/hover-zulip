@@ -1,7 +1,9 @@
 {{#if loading}}
-    <p role="status" aria-live="polite">{{t
+    <p role="status" aria-live="polite">
+        {{t
             "Resolving the exact source messages…"
-        }}</p>
+        }}
+    </p>
 {{else if error}}
     {{#if retryable}}
         <div
@@ -37,25 +39,45 @@
     <ol class="hover-evidence-list" tabindex="-1" data-hover-evidence-result>
         {{#each evidence}}
             <li>
-                <div><strong>{{sender.display_name}}</strong>
+                <div>
+                    <strong>{{sender.display_name}}</strong>
                     ·
                     <time
                         datetime="{{timestamp}}"
-                    >{{display_timestamp}}</time></div>
-                {{#if content.text}}<p>{{content.text}}</p>{{/if}}
-                {{#if content.voice_transcript}}<p
-                    >{{content.voice_transcript}}</p>{{/if}}
-                {{#if content.media_description}}<p
-                    >{{content.media_description}}</p>{{/if}}
+                    >
+                        {{display_timestamp}}
+                    </time>
+                </div>
+                {{#if content.text}}
+                    <p>{{content.text}}</p>
+                {{/if}}
+                {{#if content.voice_transcript}}
+                    <p>{{content.voice_transcript}}</p>
+                {{/if}}
+                {{#if content.media_description}}
+                    <p>{{content.media_description}}</p>
+                {{/if}}
                 {{#if media}}
-                    {{#unless content.media_description}}<p><em>{{t
+                    {{#unless content.media_description}}
+                        <p>
+                            <em>
+                                {{t
                                     "Media evidence"
                                 }}
                                 ·
-                                {{media.type}}</em></p>{{/unless}}
-                    {{#unless media.available}}<p><em>{{t
+                                {{media.type}}
+                            </em>
+                        </p>
+                    {{/unless}}
+                    {{#unless media.available}}
+                        <p>
+                            <em>
+                                {{t
                                     "Media is no longer available."
-                                }}</em></p>{{/unless}}
+                                }}
+                            </em>
+                        </p>
+                    {{/unless}}
                 {{/if}}
             </li>
         {{/each}}

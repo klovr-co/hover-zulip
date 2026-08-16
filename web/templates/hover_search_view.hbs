@@ -2,9 +2,11 @@
     <header class="hover-search-header">
         <p class="hover-search-eyebrow">{{t "Home"}}</p>
         <h1>{{t "Search"}}</h1>
-        <p>{{t
+        <p>
+            {{t
                 "Find posts and generated updates first, with authorized Source evidence available below."
-            }}</p>
+            }}
+        </p>
         <form id="hover-global-search-form" role="search">
             <label for="hover-global-search-input">{{t "Search Hover knowledge"}}</label>
             <div class="hover-global-search-controls">
@@ -48,7 +50,7 @@
                                 <time datetime="{{timestamp}}">{{display_time}}</time>
                             </div>
                             <span class="hover-search-result-byline">{{byline}}</span>
-                            <div class="hover-search-result-content">{{{rendered_content}}}</div>
+                            <div class="hover-search-result-content">{{{rendered_content_html}}}</div>
                             <a class="hover-search-result-link" href="{{url}}">{{t
                                     "Open live post"
                                 }}</a>
@@ -77,9 +79,11 @@
                 </div>
                 <span>{{source_count}}</span>
             </div>
-            <p class="hover-search-section-description">{{t
+            <p class="hover-search-section-description">
+                {{t
                     "Read-only records from attached Sources. Source evidence cannot be saved in this pilot."
-                }}</p>
+                }}
+            </p>
             {{#if has_sources}}
                 <ol class="hover-search-result-list">
                     {{#each sources}}

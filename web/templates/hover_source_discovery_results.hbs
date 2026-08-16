@@ -24,12 +24,16 @@
             </label>
         {{/each}}
     </fieldset>
-    {{#if has_more}}<button
+    {{#if has_more}}
+        <button
             type="button"
             class="button small rounded hover-source-next-button"
-        >{{t "More results"}}</button>{{/if}}
+        >{{t "More results"}}</button>
+    {{/if}}
 {{else}}
-    <div class="hover-source-empty-state hover-source-empty-state-compact">{{t
+    <div class="hover-source-empty-state hover-source-empty-state-compact">
+        {{t
             "No permitted Sources match this search."
-        }}</div>
+        }}
+    </div>
 {{/if}}

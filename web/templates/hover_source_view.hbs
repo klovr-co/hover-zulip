@@ -1,26 +1,32 @@
 <div class="hover-source-shell">
     <header class="hover-source-header">
-        <div class="hover-source-breadcrumb">{{space_name}}
+        <div class="hover-source-breadcrumb">
+            {{space_name}}
             <span aria-hidden="true">/</span>
-            {{t "Sources"}}</div>
+            {{t "Sources"}}
+        </div>
         <div class="hover-source-title-row">
             <i class="{{icon_class}}" aria-hidden="true"></i>
             <h1>{{source.display_name}}</h1>
             <span class="hover-source-readonly-badge">{{t
                     "Source records · Read-only"
                 }}</span>
-            {{#if source.is_history_retained}}<span
+            {{#if source.is_history_retained}}
+                <span
                     class="hover-source-retained-badge"
-                >{{t "History retained"}}</span>{{/if}}
+                >{{t "History retained"}}</span>
+            {{/if}}
         </div>
         <div class="hover-source-metadata">
             <span>{{source.account_display_name}}</span>
             <span aria-hidden="true">&middot;</span>
             <span>{{source.source_type}}</span>
         </div>
-        <p>{{t
+        <p>
+            {{t
                 "These records came from the connected Source. Replies and other actions are unavailable here."
-            }}</p>
+            }}
+        </p>
         <form id="hover-source-search-form" role="search">
             <label for="hover-source-search">{{t "Search this Source"}}</label>
             <div class="hover-source-search-controls">
@@ -41,7 +47,9 @@
         class="hover-source-status"
         role="status"
         aria-live="polite"
-    >{{status}}</div>
+    >
+        {{status}}
+    </div>
     {{#if show_load_older}}
         <button
             id="hover-source-load-older"

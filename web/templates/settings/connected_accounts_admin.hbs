@@ -6,9 +6,11 @@
     >
         <div class="hover-connected-account-heading">
             <div>
-                <p class="hover-settings-kicker">{{t
+                <p class="hover-settings-kicker">
+                    {{t
                         "Hover access boundary"
-                    }}</p>
+                    }}
+                </p>
                 <h3 class="settings-table-title">{{t "Connected Accounts"}}</h3>
             </div>
             <span class="hover-secret-safe-badge"><i
@@ -16,14 +18,17 @@
                     aria-hidden="true"
                 ></i>{{t "Credentials stay private"}}</span>
         </div>
-        <p class="settings-field-description hover-connected-account-intro">{{t
+        <p class="settings-field-description hover-connected-account-intro">
+            {{t
                 "Approve accounts, then grant teammates either specific source selectors or explicit access to all selectors. Empty selector grants deny access. Provider tokens, routing details, and private phone identifiers never appear here."
-            }}</p>
+            }}
+        </p>
         <div class="alert-notification" id="connected-account-status"></div>
         <div
             id="hover-connected-accounts-list"
             class="hover-connected-accounts-list"
             data-empty="{{t 'No Connected Accounts are available.'}}"
-        ></div>
+        >
+        </div>
     </div>
 {{/if}}
