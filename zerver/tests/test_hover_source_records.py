@@ -1,5 +1,7 @@
 import hashlib
+from collections.abc import Callable
 from datetime import date, datetime, timezone
+from functools import wraps
 from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
@@ -31,6 +33,26 @@ if TYPE_CHECKING:
 
 SOURCE_REF = "src_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 SOURCE_RECORD_FIXTURE = Path(__file__).parent / "fixtures" / "hover" / "source_records_v1.json"
+
+
+def capture_hover_telemetry(
+    test_method: Callable[["HoverSourceRecordsTest"], None],
+) -> Callable[["HoverSourceRecordsTest"], None]:
+    @wraps(test_method)
+    def wrapped(self: "HoverSourceRecordsTest") -> None:
+        with self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry:
+            test_method(self)
+        for line in telemetry.output:
+            self.assertRegex(
+                line,
+                (
+                    r"^INFO:zulip\.hover\.telemetry:Hover telemetry "
+                    r"event=source_records outcome=[a-z_]+"
+                    r"(?: [a-z_]+=(?:[a-z0-9_]+|[0-9]+|true|false))*$"
+                ),
+            )
+
+    return wrapped
 
 
 def source_record_page(*, has_more: bool = True) -> ClawerSourceRecordPage:
@@ -159,6 +181,7 @@ class HoverSourceRecordsTest(ZulipTestCase):
             self.url, {key: orjson.dumps(value).decode() for key, value in data.items()}
         )
 
+    @capture_hover_telemetry
     def test_authorized_browse_is_sanitized_read_only_and_cursor_bound(self) -> None:
         message_count = Message.objects.count()
         user_message_count = UserMessage.objects.count()
@@ -181,6 +204,7 @@ class HoverSourceRecordsTest(ZulipTestCase):
             changed_query = self.post(cursor=cursor, query="different")
         self.assert_json_error(changed_query, "Invalid Source record cursor.")
 
+    @capture_hover_telemetry
     def test_denials_are_uniform_and_do_not_call_studio(self) -> None:
         self.login_user(self.other)
         with patch("hover.views_source_records.get_clawer_sync", return_value=self.adapter):
@@ -225,6 +249,7 @@ class HoverSourceRecordsTest(ZulipTestCase):
         self.assert_json_error(pending, "Source not found.", status_code=404)
         self.assertEqual(self.adapter.source_record_calls, [])
 
+    @capture_hover_telemetry
     def test_detached_history_remains_browseable(self) -> None:
         self.attachment.state = SpaceAttachment.State.DETACHED
         self.attachment.detached_at = datetime(2026, 8, 11, tzinfo=timezone.utc)
@@ -237,6 +262,7 @@ class HoverSourceRecordsTest(ZulipTestCase):
         self.assertEqual(projected["state"], "detached")
         self.assertTrue(projected["can_browse_records"])
 
+    @capture_hover_telemetry
     def test_retryable_failure_telemetry_uses_fixed_class_without_request_details(self) -> None:
         private_request_sentinel = "PRIVATE_UPSTREAM_REQUEST_SENTINEL"
         error = ClawerSyncError(
@@ -258,6 +284,7 @@ class HoverSourceRecordsTest(ZulipTestCase):
         self.assertIn("event=source_records outcome=retryable_failure", joined)
         self.assertNotIn(private_request_sentinel, joined)
 
+    @capture_hover_telemetry
     def test_permanent_evidence_deletion_is_separate_confirmed_org_admin_action(self) -> None:
         assert self.space.stream is not None
         self.subscribe(self.member, self.space.stream.name, invite_only=True)
@@ -339,6 +366,7 @@ class HoverSourceRecordsTest(ZulipTestCase):
         self.assertEqual(denied_browse.status_code, 404)
         self.assert_json_error(denied_browse, "Source not found.", status_code=404)
 
+    @capture_hover_telemetry
     def test_membership_revocation_during_remote_call_fails_closed(self) -> None:
         adapter = self.adapter
         original = adapter.browse_source_records
