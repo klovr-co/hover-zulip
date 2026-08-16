@@ -1,35 +1,31 @@
 <form id="connected_account_grant_form">
-    <p class="settings-field-description">{{t
-            "Grant access beneath the organization-level selector ceiling enforced by the connector service. No credential or routing data is shared."
-        }}</p>
+    <p class="settings-field-description">
+        {{t "Grant access beneath the organization-level selector ceiling enforced by the connector service. No credential or routing data is shared."}}
+    </p>
     <div class="input-group">
         <label for="connected_account_grantee">{{t "Teammate"}}</label>
         <select id="connected_account_grantee" class="modal_select">
-            {{#each users}}<option
-                    value="{{user_id}}"
-                >{{full_name}}</option>{{/each}}
+            {{#each users}}
+                <option value="{{user_id}}">{{full_name}}</option>
+            {{/each}}
         </select>
     </div>
     <div class="input-group">
-        <label for="connected_account_grant_scope">{{t
-                "Selector access"
-            }}</label>
+        <label for="connected_account_grant_scope">{{t "Selector access"}}</label>
         <select id="connected_account_grant_scope" class="modal_select">
             <option value="restricted">{{t "Only listed selectors"}}</option>
             <option value="all">{{t "All selectors (explicit)"}}</option>
         </select>
     </div>
     <div class="input-group connected-account-selector-input">
-        <label for="connected_account_selectors">{{t
-                "Allowed selectors"
-            }}</label>
+        <label for="connected_account_selectors">{{t "Allowed selectors"}}</label>
         <textarea
-            id="connected_account_selectors"
-            class="modal-textarea"
-            placeholder="whatsapp_group | src_0123456789abcdef0123456789abcdef | Leadership group"
-        >{{selector_lines}}</textarea>
-        <p class="settings-field-description">{{t
-                "One per line: selector type | opaque source reference | display name. Leave empty to deny all selectors."
-            }}</p>
+          id="connected_account_selectors"
+          class="modal-textarea"
+          placeholder="whatsapp_group | src_0123456789abcdef0123456789abcdef | Leadership group"
+          >{{selector_lines}}</textarea>
+        <p class="settings-field-description">
+            {{t "One per line: selector type | opaque source reference | display name. Leave empty to deny all selectors."}}
+        </p>
     </div>
 </form>

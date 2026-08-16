@@ -3,11 +3,10 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/narrow_tooltip.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "content": "Content"
+    content: "Content",
 };
 
 const meta = {

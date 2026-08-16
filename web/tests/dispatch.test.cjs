@@ -167,7 +167,6 @@ const hover_spaces = zrequire("hover_spaces");
 const message_store = zrequire("message_store");
 const people = zrequire("people");
 const pm_conversations = zrequire("pm_conversations");
-const presence = zrequire("presence");
 const user_status = zrequire("user_status");
 const onboarding_steps = zrequire("onboarding_steps");
 const user_groups = zrequire("user_groups");

@@ -3,17 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/convert_demo_organization_form.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "user_has_email_set": "User has email set",
-    "realm_domain": "Realm domain"
+    user_has_email_set: "User has email set",
+    realm_domain: "Realm domain",
 };
 
 const meta = {
     title: "Catalogue/Settings/Convert Demo Organization Form",
-    render: () => render_template_story("settings/convert_demo_organization_form.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/convert_demo_organization_form.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

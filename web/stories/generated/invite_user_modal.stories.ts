@@ -3,40 +3,39 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/invite_user_modal.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "user_has_email_set": "User has email set",
-    "development_environment": "Development environment",
-    "expires_in_options": "Expires in options",
-    "default": true,
-    "value": "Value",
-    "description": "Description",
-    "time_choices": "Time choices",
-    "name": "Name",
-    "invite_as_options": {
-        "guest": {
-            "code": "Code"
+    user_has_email_set: "User has email set",
+    development_environment: "Development environment",
+    expires_in_options: "Expires in options",
+    default: true,
+    value: "Value",
+    description: "Description",
+    time_choices: "Time choices",
+    name: "Name",
+    invite_as_options: {
+        guest: {
+            code: "Code",
         },
-        "member": {
-            "code": "Code"
+        member: {
+            code: "Code",
         },
-        "moderator": {
-            "code": "Code"
+        moderator: {
+            code: "Code",
         },
-        "admin": {
-            "code": "Code"
+        admin: {
+            code: "Code",
         },
-        "owner": {
-            "code": "Code"
-        }
+        owner: {
+            code: "Code",
+        },
     },
-    "is_admin": true,
-    "is_owner": true,
-    "show_select_default_streams_option": true,
-    "show_group_pill_container": true,
-    "default_welcome_message_custom_text": true
+    is_admin: true,
+    is_owner: true,
+    show_select_default_streams_option: true,
+    show_group_pill_container: true,
+    default_welcome_message_custom_text: true,
 };
 
 const meta = {

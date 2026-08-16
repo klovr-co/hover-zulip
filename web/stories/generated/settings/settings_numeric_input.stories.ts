@@ -3,25 +3,25 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/settings_numeric_input.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "render_only": "Render only",
-    "is_disabled": true,
-    "prefix": "Prefix",
-    "setting_name": "Setting name",
-    "label": "Label",
-    "label_parens_text": "Label parens text",
-    "help_link": "#storybook",
-    "help_icon_tooltip_text": "Help icon tooltip text",
-    "hide_tooltip": "Hide tooltip",
-    "setting_value": "Setting value"
+    render_only: "Render only",
+    is_disabled: true,
+    prefix: "Prefix",
+    setting_name: "Setting name",
+    label: "Label",
+    label_parens_text: "Label parens text",
+    help_link: "#storybook",
+    help_icon_tooltip_text: "Help icon tooltip text",
+    hide_tooltip: "Hide tooltip",
+    setting_value: "Setting value",
 };
 
 const meta = {
     title: "Catalogue/Settings/Settings Numeric Input",
-    render: () => render_template_story("settings/settings_numeric_input.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/settings_numeric_input.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -143,7 +143,7 @@ run_test("set_hover_enabled", () => {
     assert.equal(built_in_views_meta_data.mentions.name, "translated: Mentions");
     assert.equal(built_in_views_meta_data.mentions.icon, "zulip-icon-at-sign");
     assert.ok(
-        !navigation_views.get_built_in_views().some((view) => view.fragment === "hover/search"),
+        navigation_views.get_built_in_views().every((view) => view.fragment !== "hover/search"),
     );
 });
 

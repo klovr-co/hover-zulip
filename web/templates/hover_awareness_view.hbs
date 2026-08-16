@@ -3,10 +3,10 @@
         {{status}}
         {{#if show_retry}}
             <button
-                id="hover-awareness-retry"
-                type="button"
-                class="button rounded small"
-            >
+              id="hover-awareness-retry"
+              type="button"
+              class="button rounded small"
+              >
                 {{t "Try again"}}
             </button>
         {{/if}}
@@ -14,63 +14,63 @@
 
     {{#if has_items}}
         <section
-            class="hover-awareness-feed"
-            role="feed"
-            aria-label="{{title}}"
-        >
+          class="hover-awareness-feed"
+          role="feed"
+          aria-label="{{title}}"
+          >
             {{#each items}}
                 <article
-                    class="{{card_class}}"
-                    role="article"
-                    aria-labelledby="hover-awareness-item-{{message_id}}"
-                    data-hover-awareness-message-id="{{message_id}}"
-                >
+                  class="{{card_class}}"
+                  role="article"
+                  aria-labelledby="hover-awareness-item-{{message_id}}"
+                  data-hover-awareness-message-id="{{message_id}}"
+                  >
                     <div class="hover-awareness-card__body">
                         <img
-                            class="hover-awareness-avatar"
-                            src="{{avatar_url}}"
-                            alt=""
-                        />
+                          class="hover-awareness-avatar"
+                          src="{{avatar_url}}"
+                          alt=""
+                          />
                         <div class="hover-awareness-card__main">
                             <header class="hover-awareness-card__meta">
                                 <strong>{{sender_name}}</strong>
-                                <time
-                                    datetime="{{timestamp}}"
-                                >{{display_time}}</time>
+                                <time datetime="{{timestamp}}">
+                                    {{display_time}}
+                                </time>
                             </header>
                             <div class="hover-generated-update-label">
                                 <span
-                                    class="hover-generated-update-label__chip"
-                                >{{output_label}}</span>
+                                  class="hover-generated-update-label__chip"
+                                  >{{output_label}}</span>
                                 <span
-                                    class="hover-generated-update-label__context"
-                                >{{source_summary}}</span>
+                                  class="hover-generated-update-label__context"
+                                  >{{source_summary}}</span>
                                 <span
-                                    class="hover-generated-update-importance hover-generated-update-importance--{{importance}}"
-                                >{{importance}}</span>
+                                  class="hover-generated-update-importance hover-generated-update-importance--{{importance}}"
+                                  >{{importance}}</span>
                                 {{#if is_unread}}
                                     <span
-                                        class="hover-awareness-unread"
-                                        aria-label="{{t 'Unread'}}"
-                                    >{{t "Unread"}}</span>
+                                      class="hover-awareness-unread"
+                                      aria-label="{{t 'Unread'}}"
+                                      >{{t "Unread"}}</span>
                                 {{/if}}
                             </div>
                             {{#if has_reasons}}
                                 <div
-                                    class="hover-awareness-card__reasons"
-                                    aria-label="{{t 'Why this is here'}}"
-                                >
+                                  class="hover-awareness-card__reasons"
+                                  aria-label="{{t 'Why this is here'}}"
+                                  >
                                     {{#each reason_labels}}
                                         <span
-                                            class="hover-awareness-reason"
-                                        >{{this}}</span>
+                                          class="hover-awareness-reason"
+                                          >{{this}}</span>
                                     {{/each}}
                                 </div>
                             {{/if}}
                             <div
-                                id="hover-awareness-item-{{message_id}}"
-                                class="hover-awareness-card__content message_content rendered_markdown"
-                            >
+                              id="hover-awareness-item-{{message_id}}"
+                              class="hover-awareness-card__content message_content rendered_markdown"
+                              >
                                 {{rendered_markdown rendered_content}}
                             </div>
                             {{#if reviewed_summary}}
@@ -82,26 +82,31 @@
                             {{#if todo_status}}
                                 <div class="hover-awareness-todo">
                                     <strong>{{t "Todo"}}</strong>
-                                    <span>{{todo_status}}{{#if todo_due_date}}
+                                    <span>
+                                        {{todo_status}}
+                                        {{#if todo_due_date}}
                                             ·
-                                            {{#tr}}Due
-                                                {{todo_due_date}}{{/tr}}{{/if}}</span>
+                                            {{#tr}}
+                                                Due {{todo_due_date}}
+                                            {{/tr}}
+                                        {{/if}}
+                                    </span>
                                 </div>
                             {{/if}}
                             <div
-                                class="hover-source-reactions"
-                                aria-label="{{t 'Knowledge sources'}}"
-                            >
+                              class="hover-source-reactions"
+                              aria-label="{{t 'Knowledge sources'}}"
+                              >
                                 <span class="hover-source-reactions__label">{{t
                                         "Sources"
                                     }}</span>
                                 {{#if evidence_url}}
                                     <button
-                                        type="button"
-                                        class="hover-source-pill hover-view-evidence"
-                                        data-evidence-url="{{evidence_url}}"
-                                        aria-haspopup="dialog"
-                                    >
+                                      type="button"
+                                      class="hover-source-pill hover-view-evidence"
+                                      data-evidence-url="{{evidence_url}}"
+                                      aria-haspopup="dialog"
+                                      >
                                         {{t "View sources"}}
                                     </button>
                                 {{/if}}
@@ -109,36 +114,36 @@
                                     <div class="message_reaction_container">
                                         {{#if url}}
                                             <a
-                                                class="hover-source-pill hover-source-reaction hover-source-reaction--{{key}}"
-                                                href="{{url}}"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                aria-label="{{name}}"
-                                                title="{{name}}"
-                                            >
+                                              class="hover-source-pill hover-source-reaction hover-source-reaction--{{key}}"
+                                              href="{{url}}"
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              aria-label="{{name}}"
+                                              title="{{name}}"
+                                              >
                                                 <i
-                                                    class="{{icon_class}}
-                                                        hover-source-reaction__icon"
-                                                    aria-hidden="true"
-                                                ></i>
+                                                  class="{{icon_class}}
+                                                  hover-source-reaction__icon"
+                                                  aria-hidden="true"
+                                                  ></i>
                                                 <span
-                                                    class="message_reaction_count"
-                                                >{{count}}</span>
+                                                  class="message_reaction_count"
+                                                  >{{count}}</span>
                                             </a>
                                         {{else}}
                                             <span
-                                                class="hover-source-pill hover-source-reaction hover-source-reaction--{{key}}"
-                                                aria-label="{{name}}"
-                                                title="{{name}}"
-                                            >
+                                              class="hover-source-pill hover-source-reaction hover-source-reaction--{{key}}"
+                                              aria-label="{{name}}"
+                                              title="{{name}}"
+                                              >
                                                 <i
-                                                    class="{{icon_class}}
-                                                        hover-source-reaction__icon"
-                                                    aria-hidden="true"
-                                                ></i>
+                                                  class="{{icon_class}}
+                                                  hover-source-reaction__icon"
+                                                  aria-hidden="true"
+                                                  ></i>
                                                 <span
-                                                    class="message_reaction_count"
-                                                >{{count}}</span>
+                                                  class="message_reaction_count"
+                                                  >{{count}}</span>
                                             </span>
                                         {{/if}}
                                     </div>

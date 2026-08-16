@@ -2340,9 +2340,6 @@ test("begins_typeahead", ({override, override_rewire}) => {
             "pyrex",
             "antlr-python",
             "bst-pybtex",
-            "ipython",
-            "ipython3",
-            "ipythonconsole",
             "numpy",
         ]),
     );

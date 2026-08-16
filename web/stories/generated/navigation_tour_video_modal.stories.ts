@@ -3,17 +3,17 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/navigation_tour_video_modal.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "poster_src": "Poster src",
-    "video_src": "Video src"
+    poster_src: "Poster src",
+    video_src: "Video src",
 };
 
 const meta = {
     title: "Catalogue/Navigation Tour Video Modal",
-    render: () => render_template_story("navigation_tour_video_modal.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("navigation_tour_video_modal.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

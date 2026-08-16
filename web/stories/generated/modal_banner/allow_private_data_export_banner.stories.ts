@@ -3,14 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/modal_banner/allow_private_data_export_banner.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Modal Banner/Allow Private Data Export Banner",
-    render: () => render_template_story("modal_banner/allow_private_data_export_banner.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "modal_banner/allow_private_data_export_banner.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

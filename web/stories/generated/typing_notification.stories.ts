@@ -3,11 +3,10 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/typing_notification.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "email": "ava@example.com"
+    email: "ava@example.com",
 };
 
 const meta = {

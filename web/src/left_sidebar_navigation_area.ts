@@ -3,9 +3,9 @@ import _ from "lodash";
 
 import * as drafts from "./drafts.ts";
 import type {Filter} from "./filter.ts";
+import * as hover_todos from "./hover_todos.ts";
 import {localstorage} from "./localstorage.ts";
 import * as message_reminder from "./message_reminder.ts";
-import * as hover_todos from "./hover_todos.ts";
 import * as navigation_views from "./navigation_views.ts";
 import {page_params} from "./page_params.ts";
 import * as people from "./people.ts";

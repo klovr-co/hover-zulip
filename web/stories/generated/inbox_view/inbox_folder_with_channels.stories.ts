@@ -3,38 +3,42 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/inbox_view/inbox_folder_with_channels.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "stream_rows": [
+    stream_rows: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "stream_key": "Stream key",
-            "topic_rows": [
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            stream_key: "Stream key",
+            topic_rows: [
                 {
-                    "custom_classes": "",
-                    "disabled": false,
-                    "icon": "check",
-                    "intent": "primary",
-                    "label": "Sample action",
-                    "name": "Sample name",
-                    "variant": "primary"
-                }
-            ]
-        }
-    ]
+                    custom_classes: "",
+                    disabled: false,
+                    icon: "check",
+                    intent: "primary",
+                    label: "Sample action",
+                    name: "Sample name",
+                    variant: "primary",
+                },
+            ],
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Inbox View/Inbox Folder With Channels",
-    render: () => render_template_story("inbox_view/inbox_folder_with_channels.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "inbox_view/inbox_folder_with_channels.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

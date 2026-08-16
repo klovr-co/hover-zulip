@@ -414,7 +414,4 @@ export function process_subscriber_update(user_ids: number[], stream_ids: number
         stream_settings_ui.update_subscribers_ui(sub);
     }
     user_profile.update_user_profile_streams_list_for_users(user_ids);
-    const narrow_stream_id = narrow_state.stream_id();
-    if (narrow_stream_id && stream_ids.includes(narrow_stream_id)) {
-    }
 }
