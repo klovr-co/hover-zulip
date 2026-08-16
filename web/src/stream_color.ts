@@ -23,12 +23,10 @@ export function update_stream_recipient_color($stream_header: JQuery, color?: st
             $stream_privacy_icon.css("color", get_stream_privacy_icon_color(stream_color));
         }
 
-        $stream_header
-            .find(".message-header-contents")
-            .css({
-                "--cf-conversation-accent": recipient_bar_color,
-                "background-color": recipient_bar_color,
-            });
+        $stream_header.find(".message-header-contents").css({
+            "--cf-conversation-accent": recipient_bar_color,
+            "background-color": recipient_bar_color,
+        });
     }
 }
 
