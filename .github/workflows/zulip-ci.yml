@@ -2,13 +2,12 @@
 # reason not to run it there, it should be there as a comment
 # explaining why.
 
-name: Zulip CI
+name: "Deprecated: Zulip CI (manual only)"
 
+# This upstream OS/Python compatibility matrix does not cover the pinned AWS
+# Lightsail deployment environment. Run it manually only when investigating an
+# upstream compatibility or packaging issue.
 on:
-  push:
-    branches: ["*.x", chat.zulip.org, main]
-    tags: ["*"]
-  pull_request:
   workflow_dispatch:
 
 concurrency:
