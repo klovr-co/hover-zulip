@@ -74,7 +74,7 @@ const overlays = mock_esm("../src/overlays", {
 });
 const popovers = mock_esm("../src/user_card_popover", {
     user_sidebar: {
-        is_open: () => false,
+        is_open: /* istanbul ignore next */ () => false,
     },
     message_user_card: {
         is_open: () => false,

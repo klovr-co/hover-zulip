@@ -2,11 +2,12 @@
 
 const assert = require("node:assert/strict");
 
-const {zrequire} = require("./lib/namespace.cjs");
+const {mock_esm, zrequire} = require("./lib/namespace.cjs");
 const {run_test, noop} = require("./lib/test.cjs");
 const blueslip = require("./lib/zblueslip.cjs");
 const {$} = require("./lib/zjquery.cjs");
 
+const scroll_util = mock_esm("../src/scroll_util");
 const {ListCursor} = zrequire("list_cursor");
 
 function basic_conf({first_key, prev_key, next_key}) {
@@ -32,7 +33,6 @@ run_test("misc errors", ({override}) => {
         prev_key: /* istanbul ignore next */ () => undefined,
         next_key: /* istanbul ignore next */ () => undefined,
     });
-
     const cursor = new ListCursor(conf);
 
     // Test that we just ignore empty
@@ -158,4 +158,26 @@ run_test("multiple item list", ({override}) => {
     assert.equal(cursor.get_key(), undefined);
     cursor.redraw();
     assert.ok(!list_items[1].hasClass("highlight"));
+});
+
+run_test("reset selects the first row and scrolls it into view", ({override}) => {
+    const $row = $.create("reset row");
+    const conf = basic_conf({
+        first_key: () => 1,
+        prev_key: noop,
+        next_key: noop,
+    });
+    conf.list.scroll_container_selector = "#whatever";
+    override(conf.list, "find_li", () => $row);
+    let scrolled;
+    override(scroll_util, "scroll_element_into_container", ($element, $container) => {
+        scrolled = {$element, $container};
+    });
+    const cursor = new ListCursor(conf);
+    cursor.set_is_highlight_visible(true);
+
+    cursor.reset();
+    assert.equal(cursor.get_key(), 1);
+    assert.equal(scrolled.$element[0], $row[0]);
+    assert.equal(scrolled.$container[0], $("#whatever")[0]);
 });

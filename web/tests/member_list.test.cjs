@@ -25,7 +25,7 @@ mock_esm("../src/list_widget", {
         create_options = options;
         return list_widget_result;
     },
-    default_get_item(item) {
+    /* istanbul ignore next */ default_get_item(item) {
         return item;
     },
     generic_sort_functions() {
@@ -53,8 +53,8 @@ mock_esm("../src/state_data", {
     current_user: {user_id: 1},
 });
 
-const email_sort = () => 0;
-const user_id_sort = () => 0;
+const email_sort = /* istanbul ignore next */ () => 0;
+const user_id_sort = /* istanbul ignore next */ () => 0;
 mock_esm("../src/user_sort", {
     sort_email: email_sort,
     sort_user_id: user_id_sort,

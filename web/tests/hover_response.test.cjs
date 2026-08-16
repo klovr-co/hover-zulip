@@ -60,6 +60,12 @@ run_test("an ambiguous Review omits patch metadata and clear removes linkage", (
     assert.equal($("#hover-response-controls").prop("hidden"), true);
 });
 
+run_test("messages without a stream Generated Item cannot configure a response", () => {
+    hover_response.configure_for_reply(undefined);
+    hover_response.configure_for_reply({...generated_message(), type: "private"});
+    assert.deepEqual(hover_response.get_request_data(), {});
+});
+
 run_test("preselects the exact disputed field for a Review", () => {
     hover_response.configure_for_reply(generated_message());
     hover_response.preselect_review_field("venue");
@@ -70,6 +76,19 @@ run_test("preselects the exact disputed field for a Review", () => {
         hover_review_field: "venue",
         hover_review_value: '"Hall C"',
     });
+});
+
+run_test("delegates response type selection", () => {
+    hover_response.configure_for_reply(generated_message());
+    hover_response.initialize();
+    const handler = $("body").get_on_handler("click", ".hover-response-type__button");
+    const $review = $.create("review").attr("data-hover-response-type", "review");
+    handler({currentTarget: $review[0]});
+    assert.equal(hover_response.get_request_data().hover_response_type, "review");
+
+    const $invalid = $.create("invalid").attr("data-hover-response-type", "invalid");
+    handler({currentTarget: $invalid[0]});
+    assert.equal(hover_response.get_request_data().hover_response_type, "review");
 });
 
 run_test("realtime messages without an applicable Hover response do not rerender", ({disallow}) => {
@@ -153,4 +172,33 @@ run_test("realtime resolution also converges the native Review request", ({overr
     assert.equal(request.hover_review_request.state, "resolved");
     assert.deepEqual(request.hover_review_request.generated_item, updated_item);
     assert.deepEqual(rerendered_ids, [42, 44]);
+});
+
+run_test("realtime disputed details tolerate absent review requests", ({override}) => {
+    const root = generated_message();
+    roots.set(root.id, root);
+    const updated_item = {
+        ...root.hover_generated_item,
+        disputed_details: [
+            {state: "open", review_request: null},
+            {state: "open", review_request: {message_id: 404, state: "open"}},
+        ],
+    };
+    let rerendered_ids;
+    override(message_live_update, "rerender_messages_view_by_message_ids", (ids) => {
+        rerendered_ids = ids;
+    });
+
+    hover_response.apply_realtime_responses([
+        {
+            id: 45,
+            hover_response: {
+                type: "review",
+                clarification_required: false,
+                root_message_id: root.id,
+                generated_item: updated_item,
+            },
+        },
+    ]);
+    assert.deepEqual(rerendered_ids, [root.id]);
 });

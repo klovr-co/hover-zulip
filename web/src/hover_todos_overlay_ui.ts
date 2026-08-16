@@ -55,8 +55,10 @@ export function rerender(): void {
     if (!overlays.reminders_open() || $("#reminders-overlay").attr("data-hover-todos") !== "true") {
         return;
     }
-    const $active_element = document.activeElement === null ? $() : $(document.activeElement);
-    const focused_id = $active_element.closest("[data-hover-todo-id]").attr("data-hover-todo-id");
+    const focused_id =
+        document.activeElement === null
+            ? undefined
+            : $(document.activeElement).closest("[data-hover-todo-id]").attr("data-hover-todo-id");
     const rendered_todos_overlay = render();
     $("#reminders-overlay-container").html(rendered_todos_overlay);
     if (focused_id !== undefined) {

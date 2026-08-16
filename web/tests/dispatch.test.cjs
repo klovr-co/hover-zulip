@@ -34,12 +34,20 @@ const theme = mock_esm("../src/theme");
 const emoji_frequency = mock_esm("../src/emoji_frequency");
 const emoji_picker = mock_esm("../src/emoji_picker");
 const gear_menu = mock_esm("../src/gear_menu");
-mock_esm("../src/hover_awareness_view", {handle_realtime_change: noop});
+const hover_awareness_view = mock_esm("../src/hover_awareness_view", {
+    handle_realtime_change: noop,
+});
+const hover_editions_view = mock_esm("../src/hover_editions_view", {handle_access_change: noop});
 mock_esm("../src/inbox_ui", {
     complete_rerender: noop,
 });
 const information_density = mock_esm("../src/information_density");
-mock_esm("../src/hover_search_view", {handle_space_event: noop});
+const hover_search_view = mock_esm("../src/hover_search_view", {handle_space_event: noop});
+const hover_source_view = mock_esm("../src/hover_source_view", {handle_space_event: noop});
+const hover_suggested_actions = mock_esm("../src/hover_suggested_actions", {
+    apply_projection: noop,
+});
+const hover_todos = mock_esm("../src/hover_todos", {apply_projection: noop});
 const linkifiers = mock_esm("../src/linkifiers");
 const compose_recipient = mock_esm("../src/compose_recipient");
 mock_esm("../src/compose_validate", {
@@ -166,7 +174,6 @@ const hover_spaces = zrequire("hover_spaces");
 const message_store = zrequire("message_store");
 const people = zrequire("people");
 const pm_conversations = zrequire("pm_conversations");
-const presence = zrequire("presence");
 const user_status = zrequire("user_status");
 const onboarding_steps = zrequire("onboarding_steps");
 const user_groups = zrequire("user_groups");
@@ -1776,6 +1783,59 @@ run_test("hover connected account events", () => {
     dispatch({type: "hover_connected_account", op: "grant_upsert", grant});
     assert.equal(hover_connected_accounts.get_account(account.id), account);
     assert.deepEqual(hover_connected_accounts.get_grants_for_account(account.id), [grant]);
+});
+
+run_test("Hover Space and work-item events update projections and views", ({override}) => {
+    const calls = [];
+    override(stream_list, "update_streams_sidebar", (force) => {
+        calls.push(["sidebar", force]);
+    });
+    override(hover_source_view, "handle_space_event", () => {
+        calls.push(["source"]);
+    });
+    override(hover_awareness_view, "handle_realtime_change", () => {
+        calls.push(["awareness"]);
+    });
+    override(hover_editions_view, "handle_access_change", () => {
+        calls.push(["editions"]);
+    });
+    override(hover_search_view, "handle_space_event", () => {
+        calls.push(["search"]);
+    });
+    override(hover_suggested_actions, "apply_projection", (message_id, item) => {
+        calls.push(["suggested", message_id, item]);
+    });
+    override(hover_todos, "apply_projection", (todo) => {
+        calls.push(["todo", todo]);
+    });
+    const space = {id: 71, name: "Action lab", stream_id: 72};
+    const generated_item = {id: 73};
+    const todo = {id: 74};
+    hover_spaces.initialize({hover_spaces: []});
+
+    dispatch({type: "hover_space", op: "upsert", space});
+    assert.equal(hover_spaces.get_by_id(space.id), space);
+    dispatch({type: "hover_space", op: "delete", space_id: space.id});
+    assert.equal(hover_spaces.get_by_id(space.id), undefined);
+    dispatch({type: "hover_suggested_action", message_id: 75, generated_item});
+    dispatch({type: "hover_todo", todo});
+
+    assert.deepEqual(calls, [
+        ["sidebar", true],
+        ["source"],
+        ["awareness"],
+        ["editions"],
+        ["search"],
+        ["sidebar", true],
+        ["source"],
+        ["awareness"],
+        ["editions"],
+        ["search"],
+        ["suggested", 75, generated_item],
+        ["awareness"],
+        ["todo", todo],
+        ["awareness"],
+    ]);
 });
 
 run_test("realm_export", ({override}) => {

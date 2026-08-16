@@ -2,6 +2,8 @@
 
 const assert = require("node:assert/strict");
 
+const z = require("zod/mini");
+
 const {mock_esm, zrequire} = require("./lib/namespace.cjs");
 const {run_test} = require("./lib/test.cjs");
 const {$} = require("./lib/zjquery.cjs");
@@ -10,6 +12,7 @@ const messages = new Map();
 const channel = mock_esm("../src/channel");
 const message_live_update = mock_esm("../src/message_live_update");
 mock_esm("../src/message_store", {
+    hover_todo_schema: z.any(),
     get(id) {
         return messages.get(id);
     },
@@ -70,8 +73,49 @@ run_test("Home sorts active Todos first and counts only active work", () => {
     );
 });
 
+run_test("unknown Todo submissions are ignored", ({disallow}) => {
+    hover_todos.todos.clear();
+    disallow(channel, "post");
+    hover_todos.submit(404, "complete");
+});
+
+run_test("Todo mutations handle assignment, success, conflict, and errors", ({override}) => {
+    hover_todos.todos.clear();
+    hover_todos.apply_projection(todo(6, 1));
+    let request;
+    override(channel, "post", (options) => {
+        request = options;
+    });
+    const $containers = $("[data-hover-todo-id='6']");
+    const $controls = $.create("controls");
+    const $status = $.create("status");
+    const $assignee = $.create("assignee").val("21");
+    $containers.set_find_results("button, select", $controls);
+    $containers.set_find_results("[data-hover-todo-status]", $status);
+    $containers.set_find_results("[data-hover-todo-assignee]", $assignee);
+
+    hover_todos.submit(6, "assign");
+    assert.equal(request.url, "/json/hover/spaces/3/todos/6/events");
+    assert.equal(request.data.assignee_user_id, "21");
+    request.success({changed: true, todo: todo(6, 2)});
+    assert.equal(hover_todos.todos.get(6).version, 2);
+
+    hover_todos.submit(6, "complete");
+    assert.equal("assignee_user_id" in request.data, false);
+    request.error({status: 409, responseJSON: {todo: todo(6, 3, "completed")}});
+    assert.equal(hover_todos.todos.get(6).state, "completed");
+
+    hover_todos.submit(6, "reopen");
+    request.error({status: 500, responseJSON: {}});
+    assert.equal($controls.prop("disabled"), false);
+    assert.equal($status.text(), "translated: Could not save. Try again.");
+});
+
 run_test("delegates Todo actions from both message and overlay roots", ({override}) => {
-    override(channel, "get", () => {});
+    let get_request;
+    override(channel, "get", (options) => {
+        get_request = options;
+    });
 
     hover_todos.initialize();
 
@@ -83,4 +127,35 @@ run_test("delegates Todo actions from both message and overlay roots", ({overrid
         typeof $("body").get_on_handler("click", "[data-hover-todo-operation]"),
         "function",
     );
+
+    get_request.success({todos: [todo(8, 1)]});
+    assert.equal(hover_todos.todos.get(8).id, 8);
+
+    let post_request;
+    override(channel, "post", (options) => {
+        post_request = options;
+    });
+    const $containers = $("[data-hover-todo-id='8']");
+    $containers.set_find_results("button, select", $.create("delegated todo controls"));
+    $containers.set_find_results("[data-hover-todo-status]", $.create("delegated todo status"));
+    const handler = $("#main_div").get_on_handler("click", "[data-hover-todo-operation]");
+    let propagation_stopped = false;
+    const $valid = $.create("valid todo button")
+        .attr("data-hover-todo-id", "8")
+        .attr("data-hover-todo-operation", "complete");
+    handler({
+        currentTarget: $valid[0],
+        stopPropagation() {
+            propagation_stopped = true;
+        },
+    });
+    assert.equal(propagation_stopped, true);
+    assert.equal(post_request.data.operation, "complete");
+
+    const previous_request = post_request;
+    const $invalid = $.create("invalid todo button")
+        .attr("data-hover-todo-id", "invalid")
+        .attr("data-hover-todo-operation", "complete");
+    handler({currentTarget: $invalid[0], stopPropagation() {}});
+    assert.equal(post_request, previous_request);
 });
