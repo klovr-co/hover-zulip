@@ -57,7 +57,7 @@
                         </dl>
                         {{#if latest_event}}
                             <p class="hover-todo-card__history">
-                                {{#tr}}Last changed by {{latest_event.actor.full_name}} at {{latest_event.occurred_at}}{{/tr}}
+                                {{#tr}}Last changed by {latest_event_actor_name} at {latest_event_occurred_at}{{/tr}}
                             </p>
                         {{/if}}
                         <div class="hover-todo-card__links">
@@ -68,7 +68,7 @@
                                   class="button small rounded hover-view-evidence"
                                   data-evidence-url="{{generated_item.evidence_url}}"
                                   >
-                                    {{#tr}}View sources ({{generated_item.evidence_count}}){{/tr}}
+                                    {{#tr}}View sources ({evidence_count}){{/tr}}
                                 </button>
                             {{/if}}
                         </div>
