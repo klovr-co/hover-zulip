@@ -384,7 +384,6 @@ class HoverPersonalEditionsTest(ZulipTestCase):
 
     def test_cached_edition_survives_retryable_sync_failure(self) -> None:
         self.set_page(self.publication(edition="end_of_day"))
-        self.assert_json_success(self.get_editions())
         error = ClawerSyncError(
             error_code="clawer_unavailable",
             operation="personal_edition_sync",
@@ -395,6 +394,7 @@ class HoverPersonalEditionsTest(ZulipTestCase):
             patch.object(self.adapter, "sync_personal_editions", side_effect=error),
             self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
         ):
+            self.assert_json_success(self.get_editions())
             response = self.get_editions()
         payload = self.assert_json_success(response)
         self.assertEqual(payload["sync_status"], "degraded")

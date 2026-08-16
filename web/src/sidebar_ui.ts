@@ -61,7 +61,6 @@ export function restore_sidebar_toggle_status(): void {
     if (ls.get("left-sidebar")) {
         $("body").addClass("hide-left-sidebar");
     }
-
 }
 
 export let left_sidebar_expanded_as_overlay = false;
@@ -201,7 +200,6 @@ export function initialize(): void {
                     hide_streamlist_sidebar();
                 }
             }
-
         },
         {capture: true},
     );
@@ -612,7 +610,9 @@ export function focus_pm_search_filter(): void {
 export function set_event_handlers(): void {
     const $search_input = $(".left-sidebar-search-input").expectOne();
 
-    $("#add_hover_space_button").on("click", () => { hover_spaces_ui.open_create_space(); });
+    $("#add_hover_space_button").on("click", () => {
+        hover_spaces_ui.open_create_space();
+    });
     $("#stream_filters").on("click", ".hover-space-setup-row a", (event) => {
         event.preventDefault();
         const space_id = Number($(event.currentTarget).closest("li").attr("data-hover-space-id"));

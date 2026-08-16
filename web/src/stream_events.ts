@@ -378,7 +378,6 @@ export function mark_unsubscribed(sub: StreamSubscription): void {
         // This update would likely be better implemented by having it
         // disappear whenever no unread messages remain.
         unread_ui.hide_unread_banner();
-
     }
 
     // Unread messages in the now-unsubscribe stream need to be

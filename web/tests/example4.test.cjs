@@ -57,7 +57,6 @@ const {$} = require("./lib/zjquery.cjs");
 */
 
 // We are going to use mock versions of some of our libraries.
-const activity_ui = mock_esm("../src/activity_ui");
 const message_live_update = mock_esm("../src/message_live_update");
 const pm_list = mock_esm("../src/pm_list");
 const settings_bots = mock_esm("../src/settings_bots");

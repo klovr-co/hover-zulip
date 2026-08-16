@@ -73,11 +73,14 @@ export function get_account(account_id: number): ConnectedAccount | undefined {
 }
 
 export function get_accounts(): ConnectedAccount[] {
-    return accounts_by_id.values().toArray().toSorted(
-        (a, b) =>
-            a.provider_name.localeCompare(b.provider_name) ||
-            a.display_name.localeCompare(b.display_name),
-    );
+    return accounts_by_id
+        .values()
+        .toArray()
+        .toSorted(
+            (a, b) =>
+                a.provider_name.localeCompare(b.provider_name) ||
+                a.display_name.localeCompare(b.display_name),
+        );
 }
 
 export function get_grants_for_account(account_id: number): ConnectedAccountGrant[] {

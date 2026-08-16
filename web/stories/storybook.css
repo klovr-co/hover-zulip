@@ -158,3 +158,8 @@ body {
     color: hsl(210deg 12% 48%);
     font-size: 12px;
 }
+
+.storybook-popover-menu {
+    padding: 24px;
+    width: max-content;
+}
