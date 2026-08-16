@@ -57,7 +57,7 @@ export function get_user_circle_class(user_id: number, use_deactivated_circle = 
 }
 
 export function level(user_id: number): number {
-    // Put current user at the top, unless we're in a user search view.
+    // Put the current user at the top.
     if (people.is_my_user_id(user_id)) {
         return 0;
     }
