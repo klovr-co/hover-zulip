@@ -235,20 +235,28 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
                     )
                 elif "oneOf" in additional_properties:
                     ans += self.render_oneof_block(additional_properties, spacing + 8)
-                elif additional_properties.get("additionalProperties", False):
-                    data_type = generate_data_type(additional_properties["additionalProperties"])
+                elif isinstance(additional_properties.get("additionalProperties"), dict):
+                    nested_additional_properties = additional_properties["additionalProperties"]
+                    data_type = generate_data_type(nested_additional_properties)
                     ans.append(
                         self.render_desc(
-                            additional_properties["additionalProperties"]["description"],
+                            nested_additional_properties.get(
+                                "description", "Additional properties."
+                            ),
                             spacing + 8,
                             data_type,
                         )
                     )
-
-                    ans += self.render_table(
-                        additional_properties["additionalProperties"]["properties"],
-                        spacing + 12,
-                    )
+                    if "properties" in nested_additional_properties:
+                        ans += self.render_table(
+                            nested_additional_properties["properties"],
+                            spacing + 12,
+                        )
+                    elif "oneOf" in nested_additional_properties:
+                        ans += self.render_oneof_block(
+                            nested_additional_properties,
+                            spacing + 12,
+                        )
             if "items" in schema:
                 if "properties" in schema["items"]:
                     ans += self.render_table(schema["items"]["properties"], spacing + 4)

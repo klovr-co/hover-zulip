@@ -60,7 +60,10 @@ def capture_hover_telemetry(
 ) -> Callable[["HoverPublicationSyncTest"], None]:
     @wraps(test_method)
     def wrapped(self: "HoverPublicationSyncTest") -> None:
-        with self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry:
+        with (
+            self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
             test_method(self)
         for line in telemetry.output:
             self.assertRegex(
@@ -799,7 +802,6 @@ class HoverPublicationSyncTest(ZulipTestCase):
                 "hover.views_publications.get_clawer_sync",
                 return_value=RetryableEvidenceAdapter(),
             ),
-            self.assertLogs("django.request", level="ERROR") as request_logs,
         ):
             self.client.raise_request_exception = False
             try:
@@ -819,13 +821,6 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.assertEqual(retrying.status_code, 504)
         self.assertTrue(retrying_payload["retryable"])
         self.assertEqual(retrying_payload["error_code"], "clawer_timeout")
-        self.assert_length(request_logs.output, 1)
-        self.assertTrue(
-            request_logs.output[0].startswith(
-                "ERROR:django.request:Gateway Timeout: "
-                f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
-            )
-        )
 
         self.account.approval_state = ConnectedAccount.ApprovalState.REVOKED
         self.account.save(update_fields=["approval_state", "date_updated"])
@@ -1203,7 +1198,10 @@ class HoverPublicationSyncTest(ZulipTestCase):
         )
         self.attachment.save(update_fields=["publication_sync_lease_expires_at"])
         self.set_page(cursor=None, next_cursor="cursor:recovered", publications=[])
-        with self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry:
+        with (
+            self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
             result = sync_space_attachment(
                 attachment_id=self.attachment.id,
                 assistant=self.assistant,

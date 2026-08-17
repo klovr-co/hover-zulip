@@ -40,7 +40,10 @@ def capture_hover_telemetry(
 ) -> Callable[["HoverSourceRecordsTest"], None]:
     @wraps(test_method)
     def wrapped(self: "HoverSourceRecordsTest") -> None:
-        with self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry:
+        with (
+            self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
             test_method(self)
         for line in telemetry.output:
             self.assertRegex(
