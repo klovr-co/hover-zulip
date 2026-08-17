@@ -140,7 +140,8 @@ run_test("opens the evidence modal and starts loading its URL", ({override}) => 
 
     assert.equal(launch_options.modal_title_text, "translated: Sources");
     assert.equal(launch_options.modal_submit_button_text, "translated: Close");
-    assert.equal(launch_options.on_click(), undefined);
+    assert.equal(launch_options.single_footer_button, true);
+    assert.equal(launch_options.close_on_submit, true);
 });
 
 run_test("routes evidence and retry clicks while ignoring unrelated targets", ({override}) => {

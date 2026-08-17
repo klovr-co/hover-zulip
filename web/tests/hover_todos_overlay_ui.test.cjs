@@ -85,8 +85,8 @@ run_test(
         assert.equal(context.todos[1].due_label, "translated: No due date");
         assert.equal(context.todos[1].assignee_label, "translated: Unassigned");
         assert.equal(context.todos[1].latest_event.id, 9);
-        assert.equal(context.todos[1].latest_event_actor, "Grace");
-        assert.equal(context.todos[1].latest_event_time, "2026-08-17T09:30:00Z");
+        assert.equal(context.todos[1].latest_event_actor_name, "Grace");
+        assert.equal(context.todos[1].latest_event_occurred_at, "2026-08-17T09:30:00Z");
         assert.equal(context.todos[1].evidence_count, 1);
         assert.equal(context.todos[0].source_hash, "#near/42");
         open_options.on_close();
