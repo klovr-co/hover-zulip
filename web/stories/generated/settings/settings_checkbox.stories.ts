@@ -3,23 +3,22 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/settings_checkbox.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "render_only": "Render only",
-    "is_disabled": true,
-    "tooltip_message": "Tooltip message",
-    "setting_name": "Setting name",
-    "skip_prop_element": "Skip prop element",
-    "prefix": "Prefix",
-    "is_checked": true,
-    "label": "Label",
-    "label_parens_text": "Label parens text",
-    "help_link": "#storybook",
-    "help_icon_tooltip_text": "Help icon tooltip text",
-    "hide_tooltip": "Hide tooltip",
-    "show_reset_button": true
+    render_only: "Render only",
+    is_disabled: true,
+    tooltip_message: "Tooltip message",
+    setting_name: "Setting name",
+    skip_prop_element: "Skip prop element",
+    prefix: "Prefix",
+    is_checked: true,
+    label: "Label",
+    label_parens_text: "Label parens text",
+    help_link: "#storybook",
+    help_icon_tooltip_text: "Help icon tooltip text",
+    hide_tooltip: "Hide tooltip",
+    show_reset_button: true,
 };
 
 const meta = {

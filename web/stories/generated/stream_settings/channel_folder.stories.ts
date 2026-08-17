@@ -3,17 +3,17 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/stream_settings/channel_folder.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "channel_folder_widget_name": "Channel folder widget name",
-    "is_admin": true
+    channel_folder_widget_name: "Channel folder widget name",
+    is_admin: true,
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Channel Folder",
-    render: () => render_template_story("stream_settings/channel_folder.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("stream_settings/channel_folder.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

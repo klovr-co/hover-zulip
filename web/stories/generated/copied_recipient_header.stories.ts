@@ -3,12 +3,11 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/copied_recipient_header.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "recipient_text": "Recipient text",
-    "date_text": "Date text"
+    recipient_text: "Recipient text",
+    date_text: "Date text",
 };
 
 const meta = {

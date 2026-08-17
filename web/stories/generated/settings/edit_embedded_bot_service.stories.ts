@@ -3,22 +3,22 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/edit_embedded_bot_service.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "service": {
-        "config_data": "Config data"
+    service: {
+        config_data: "Config data",
     },
-    "entry": {
+    entry: {
         "0": "0",
-        "1": "1"
-    }
+        "1": "1",
+    },
 };
 
 const meta = {
     title: "Catalogue/Settings/Edit Embedded Bot Service",
-    render: () => render_template_story("settings/edit_embedded_bot_service.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/edit_embedded_bot_service.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

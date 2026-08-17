@@ -124,7 +124,7 @@ def _canonical_hash(payload: dict[str, Any]) -> str:
     ).hexdigest()
 
 
-@transaction.atomic
+@transaction.atomic(savepoint=False)
 def ensure_prebuilt_module_catalog(realm: Realm) -> None:
     for item in PREBUILT_MODULES:
         definition, _ = ModuleDefinition.objects.get_or_create(
@@ -398,8 +398,41 @@ def _send_space_update(space: Space) -> None:
     )
 
 
-@transaction.atomic
+@transaction.atomic(durable=True)
 def do_install_module(
+    *,
+    acting_user: UserProfile,
+    space: Space,
+    version_id: int,
+    attachment_ids: list[int],
+    trigger_kind: str,
+    activation_timezone: str,
+    cadence: str | None = None,
+    local_time: time | None = None,
+    debounce_seconds: int | None = None,
+    backfill_start_at: datetime | None = None,
+    backfill_confirmed: bool = False,
+    predecessor: ModuleInstallation | None = None,
+    allow_archived_version: bool = False,
+) -> tuple[ModuleInstallation, bool]:
+    return _do_install_module(
+        acting_user=acting_user,
+        space=space,
+        version_id=version_id,
+        attachment_ids=attachment_ids,
+        trigger_kind=trigger_kind,
+        activation_timezone=activation_timezone,
+        cadence=cadence,
+        local_time=local_time,
+        debounce_seconds=debounce_seconds,
+        backfill_start_at=backfill_start_at,
+        backfill_confirmed=backfill_confirmed,
+        predecessor=predecessor,
+        allow_archived_version=allow_archived_version,
+    )
+
+
+def _do_install_module(
     *,
     acting_user: UserProfile,
     space: Space,
@@ -582,7 +615,7 @@ def do_upgrade_module(
     current.state = ModuleInstallation.State.DISABLED
     current.disabled_by = acting_user
     current.save(update_fields=["state", "disabled_by", "date_updated"])
-    return do_install_module(
+    return _do_install_module(
         acting_user=acting_user,
         space=locked_space,
         version_id=version_id,
@@ -591,7 +624,7 @@ def do_upgrade_module(
     )
 
 
-@transaction.atomic
+@transaction.atomic(savepoint=False)
 def pause_installations_for_attachment(attachment: SpaceAttachment) -> None:
     installations = list(
         ModuleInstallation.objects.select_for_update(no_key=True).filter(
@@ -642,7 +675,7 @@ def do_rebind_resume_module(
     current.state = ModuleInstallation.State.DISABLED
     current.disabled_by = acting_user
     current.save(update_fields=["state", "disabled_by", "date_updated"])
-    successor, created = do_install_module(
+    successor, created = _do_install_module(
         acting_user=acting_user,
         space=locked_space,
         version_id=current.version_id,

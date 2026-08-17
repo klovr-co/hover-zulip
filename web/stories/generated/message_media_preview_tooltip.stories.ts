@@ -3,16 +3,16 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/message_media_preview_tooltip.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "title": "Title"
+    title: "Title",
 };
 
 const meta = {
     title: "Catalogue/Message Media Preview Tooltip",
-    render: () => render_template_story("message_media_preview_tooltip.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("message_media_preview_tooltip.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

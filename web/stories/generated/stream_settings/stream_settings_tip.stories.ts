@@ -3,16 +3,16 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/stream_settings/stream_settings_tip.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "can_change_stream_permissions_requiring_metadata_access": true
+    can_change_stream_permissions_requiring_metadata_access: true,
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Stream Settings Tip",
-    render: () => render_template_story("stream_settings/stream_settings_tip.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("stream_settings/stream_settings_tip.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

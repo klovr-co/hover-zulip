@@ -3,26 +3,25 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/markdown_help.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "markdown_help_rows": [
+    markdown_help_rows: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "note_html": "Note html",
-            "markdown": "Markdown",
-            "usage_html": "Usage html",
-            "output_html": "Output html",
-            "effect_html": "Effect html"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            note_html: "Note html",
+            markdown: "Markdown",
+            usage_html: "Usage html",
+            output_html: "Output html",
+            effect_html: "Effect html",
+        },
+    ],
 };
 
 const meta = {

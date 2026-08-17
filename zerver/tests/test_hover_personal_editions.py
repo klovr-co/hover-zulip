@@ -394,6 +394,7 @@ class HoverPersonalEditionsTest(ZulipTestCase):
         with (
             patch.object(self.adapter, "sync_personal_editions", side_effect=error),
             self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
+            self.captureOnCommitCallbacks(execute=True),
         ):
             response = self.get_editions()
         payload = self.assert_json_success(response)

@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Literal
 
@@ -83,6 +84,29 @@ def prepare_response(
         new_value=new_value,
         has_explicit_patch=has_explicit_patch,
     )
+
+
+def validate_response_destination(
+    prepared: PreparedResponse,
+    *,
+    recipient_type_name: str,
+    message_to: Sequence[int] | Sequence[str],
+    topic_name: str | None,
+) -> None:
+    generated_item = prepared.generated_item
+    assert generated_item.attachment is not None
+    stream = generated_item.attachment.space.stream
+    assert stream is not None
+    if recipient_type_name != "stream" or len(message_to) != 1:
+        raise JsonableError(_("Hover responses must be sent beneath their generated update."))
+    stream_indicator = message_to[0]
+    matches_stream = (
+        stream_indicator == stream.id
+        if isinstance(stream_indicator, int)
+        else stream_indicator.casefold() == stream.name.casefold()
+    )
+    if not matches_stream or topic_name != generated_item.message.topic_name():
+        raise JsonableError(_("Hover responses must be sent beneath their generated update."))
 
 
 def create_response(

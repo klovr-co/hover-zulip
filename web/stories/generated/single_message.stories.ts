@@ -3,27 +3,26 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/single_message.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "message_list_id": 7,
-    "msg": {
-        "id": 7,
-        "is_stream": true,
-        "unread": 3,
-        "locally_echoed": "Locally echoed",
-        "historical": "Historical"
+    message_list_id: 7,
+    msg: {
+        id: 7,
+        is_stream: true,
+        unread: 3,
+        locally_echoed: "Locally echoed",
+        historical: "Historical",
     },
-    "include_sender": "Include sender",
-    "mention_classname": "Mention classname",
-    "is_hidden": true,
-    "is_hover_generated_update": true,
-    "hover_module_key": "Hover module key",
-    "want_subscription_status_divider": "Want subscription status divider",
-    "want_date_divider": "Want date divider",
-    "date_divider_html": "Date divider html",
-    "status_message": "Status message"
+    include_sender: "Include sender",
+    mention_classname: "Mention classname",
+    is_hidden: true,
+    is_hover_generated_update: true,
+    hover_module_key: "Hover module key",
+    want_subscription_status_divider: "Want subscription status divider",
+    want_date_divider: "Want date divider",
+    date_divider_html: "Date divider html",
+    status_message: "Status message",
 };
 
 const meta = {

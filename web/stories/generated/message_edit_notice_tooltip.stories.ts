@@ -3,21 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/message_edit_notice_tooltip.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "edit_history_access": "Edit history access",
-    "edited": "Edited",
-    "moved": "Moved",
-    "message_moved_and_move_history_access": "Message moved and move history access",
-    "widget_edited": "Widget edited",
-    "edited_time_string": "Edited time string"
+    edit_history_access: "Edit history access",
+    edited: "Edited",
+    moved: "Moved",
+    message_moved_and_move_history_access: "Message moved and move history access",
+    widget_edited: "Widget edited",
+    edited_time_string: "Edited time string",
 };
 
 const meta = {
     title: "Catalogue/Message Edit Notice Tooltip",
-    render: () => render_template_story("message_edit_notice_tooltip.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("message_edit_notice_tooltip.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

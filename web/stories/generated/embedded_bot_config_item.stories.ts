@@ -3,13 +3,12 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/embedded_bot_config_item.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "botname": "Botname",
-    "key": "Key",
-    "value": "Value"
+    botname: "Botname",
+    key: "Key",
+    value: "Value",
 };
 
 const meta = {

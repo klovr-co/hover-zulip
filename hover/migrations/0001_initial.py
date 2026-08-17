@@ -13,7 +13,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="GeneratedItem",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 (
                     "output_type",
                     models.TextField(
@@ -39,13 +44,23 @@ class Migration(migrations.Migration):
                         to="zerver.message",
                     ),
                 ),
-                ("realm", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="zerver.realm")),
+                (
+                    "realm",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="zerver.realm"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
             name="EvidenceLink",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("position", models.PositiveIntegerField()),
                 ("provider_key", models.TextField()),
                 ("provider_name", models.TextField()),
@@ -59,7 +74,12 @@ class Migration(migrations.Migration):
                         to="hover.generateditem",
                     ),
                 ),
-                ("realm", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="zerver.realm")),
+                (
+                    "realm",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="zerver.realm"
+                    ),
+                ),
             ],
             options={"ordering": ["position"]},
         ),

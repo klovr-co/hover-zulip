@@ -3,18 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/stream_settings/new_stream_user.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "user_id": 7,
-    "email": "ava@example.com",
-    "soft_removed": "Soft removed"
+    user_id: 7,
+    email: "ava@example.com",
+    soft_removed: "Soft removed",
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/New Stream User",
-    render: () => render_template_story("stream_settings/new_stream_user.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("stream_settings/new_stream_user.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

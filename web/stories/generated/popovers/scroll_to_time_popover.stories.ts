@@ -3,27 +3,27 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/popovers/scroll_to_time_popover.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "suggested_dates": [
+    suggested_dates: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "iso_date_string": "Iso date string"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            iso_date_string: "Iso date string",
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Popovers/Scroll To Time Popover",
-    render: () => render_template_story("popovers/scroll_to_time_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("popovers/scroll_to_time_popover.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -3,13 +3,12 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/buddy_list/section_header.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_collapsed": true,
-    "id": 7,
-    "header_text": "Header text"
+    is_collapsed: true,
+    id: 7,
+    header_text: "Header text",
 };
 
 const meta = {

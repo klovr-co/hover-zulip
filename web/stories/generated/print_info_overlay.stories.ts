@@ -3,12 +3,11 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/print_info_overlay.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "title": "Title",
-    "body_html": "Body html"
+    title: "Title",
+    body_html: "Body html",
 };
 
 const meta = {

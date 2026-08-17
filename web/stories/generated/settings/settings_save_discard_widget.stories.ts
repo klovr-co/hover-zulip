@@ -3,17 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/settings_save_discard_widget.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "show_save_discard_buttons": true,
-    "section_name": "Section name"
+    show_save_discard_buttons: true,
+    section_name: "Section name",
 };
 
 const meta = {
     title: "Catalogue/Settings/Settings Save Discard Widget",
-    render: () => render_template_story("settings/settings_save_discard_widget.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/settings_save_discard_widget.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

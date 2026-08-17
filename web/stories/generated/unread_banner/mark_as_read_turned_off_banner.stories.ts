@@ -3,14 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/unread_banner/mark_as_read_turned_off_banner.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Unread Banner/Mark As Read Turned Off Banner",
-    render: () => render_template_story("unread_banner/mark_as_read_turned_off_banner.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "unread_banner/mark_as_read_turned_off_banner.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

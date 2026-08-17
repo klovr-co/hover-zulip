@@ -3,13 +3,12 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/message_history_overlay.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "move_history_only": "Move history only",
-    "edited": "Edited",
-    "moved": "Moved"
+    move_history_only: "Move history only",
+    edited: "Edited",
+    moved: "Moved",
 };
 
 const meta = {

@@ -3,29 +3,29 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/popovers/message_actions_popover.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "should_display_quote_message": true,
-    "message_id": 7,
-    "editability_menu_item": "Editability menu item",
-    "move_message_menu_item": "Move message menu item",
-    "should_display_delete_option": true,
-    "should_display_message_report_option": true,
-    "should_display_add_reaction_option": true,
-    "should_display_mark_as_unread": 3,
-    "should_display_remind_me_option": true,
-    "should_display_collapse": true,
-    "should_display_uncollapse": true,
-    "view_source_menu_item": "View source menu item",
-    "should_display_read_receipts_option": true,
-    "conversation_time_url": "#storybook"
+    should_display_quote_message: true,
+    message_id: 7,
+    editability_menu_item: "Editability menu item",
+    move_message_menu_item: "Move message menu item",
+    should_display_delete_option: true,
+    should_display_message_report_option: true,
+    should_display_add_reaction_option: true,
+    should_display_mark_as_unread: 3,
+    should_display_remind_me_option: true,
+    should_display_collapse: true,
+    should_display_uncollapse: true,
+    view_source_menu_item: "View source menu item",
+    should_display_read_receipts_option: true,
+    conversation_time_url: "#storybook",
 };
 
 const meta = {
     title: "Catalogue/Popovers/Message Actions Popover",
-    render: () => render_template_story("popovers/message_actions_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("popovers/message_actions_popover.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

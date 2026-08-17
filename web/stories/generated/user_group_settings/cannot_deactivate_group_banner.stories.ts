@@ -3,16 +3,20 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/user_group_settings/cannot_deactivate_group_banner.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "group_used_for_permissions": "Group used for permissions"
+    group_used_for_permissions: "Group used for permissions",
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/Cannot Deactivate Group Banner",
-    render: () => render_template_story("user_group_settings/cannot_deactivate_group_banner.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/cannot_deactivate_group_banner.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;
