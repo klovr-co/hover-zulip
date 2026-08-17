@@ -14,44 +14,44 @@ domain_name="${ZULIP_DOMAIN_NAME:-app.hover.team}"
 work_dir="$(mktemp -d)"
 
 cleanup() {
-  aws lightsail close-instance-public-ports \
-    --instance-name "$instance_name" \
-    --port-info fromPort=22,toPort=22,protocol=tcp \
-    --region "$aws_region" \
-    --profile "$aws_profile" >/dev/null 2>&1 || true
-  rm -rf "$work_dir"
+    aws lightsail close-instance-public-ports \
+        --instance-name "$instance_name" \
+        --port-info fromPort=22,toPort=22,protocol=tcp \
+        --region "$aws_region" \
+        --profile "$aws_profile" >/dev/null 2>&1 || true
+    rm -rf "$work_dir"
 }
 trap cleanup EXIT
 
 aws lightsail open-instance-public-ports \
-  --instance-name "$instance_name" \
-  --port-info fromPort=22,toPort=22,protocol=tcp,cidrs=0.0.0.0/0 \
-  --region "$aws_region" \
-  --profile "$aws_profile" >/dev/null
+    --instance-name "$instance_name" \
+    --port-info fromPort=22,toPort=22,protocol=tcp,cidrs=0.0.0.0/0 \
+    --region "$aws_region" \
+    --profile "$aws_profile" >/dev/null
 
 aws lightsail get-instance-access-details \
-  --instance-name "$instance_name" \
-  --protocol ssh \
-  --region "$aws_region" \
-  --profile "$aws_profile" > "$work_dir/access.json"
-jq -r '.accessDetails.privateKey' "$work_dir/access.json" > "$work_dir/lightsail-key"
-jq -r '.accessDetails.certKey' "$work_dir/access.json" > "$work_dir/lightsail-key-cert.pub"
+    --instance-name "$instance_name" \
+    --protocol ssh \
+    --region "$aws_region" \
+    --profile "$aws_profile" >"$work_dir/access.json"
+jq -r '.accessDetails.privateKey' "$work_dir/access.json" >"$work_dir/lightsail-key"
+jq -r '.accessDetails.certKey' "$work_dir/access.json" >"$work_dir/lightsail-key-cert.pub"
 chmod 600 "$work_dir/lightsail-key" "$work_dir/lightsail-key-cert.pub"
 
 ssh_options=(
-  -o BatchMode=yes
-  -o ConnectTimeout=30
-  -o StrictHostKeyChecking=accept-new
-  -o UserKnownHostsFile="$work_dir/known_hosts"
-  -i "$work_dir/lightsail-key"
-  -o CertificateFile="$work_dir/lightsail-key-cert.pub"
+    -o BatchMode=yes
+    -o ConnectTimeout=30
+    -o StrictHostKeyChecking=accept-new
+    -o UserKnownHostsFile="$work_dir/known_hosts"
+    -i "$work_dir/lightsail-key"
+    -o CertificateFile="$work_dir/lightsail-key-cert.pub"
 )
 
 # A DNS-01 credential must be available for every renewal. The Cloudflare token
 # has only DNS edit/read access for hover.team and is readable solely by root.
 printf 'dns_cloudflare_api_token = %s\n' "$CLOUDFLARE_CERTBOT_API_TOKEN" \
-  | ssh "${ssh_options[@]}" "ubuntu@$instance_ip" \
-      'sudo install -d -m 700 /etc/letsencrypt && sudo tee /etc/letsencrypt/cloudflare-dns.ini >/dev/null && sudo chmod 600 /etc/letsencrypt/cloudflare-dns.ini'
+    | ssh "${ssh_options[@]}" "ubuntu@$instance_ip" \
+        'sudo install -d -m 700 /etc/letsencrypt && sudo tee /etc/letsencrypt/cloudflare-dns.ini >/dev/null && sudo chmod 600 /etc/letsencrypt/cloudflare-dns.ini'
 
 ssh "${ssh_options[@]}" "ubuntu@$instance_ip" "sudo bash -s -- '$domain_name'" <<'REMOTE_SCRIPT'
 set -euo pipefail
