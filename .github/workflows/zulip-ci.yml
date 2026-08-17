@@ -1,5 +1,6 @@
-# Keep pull-request feedback fast and parallel. Coverage, documentation, and
-# development-database validation run after merge (or when manually requested).
+# Keep pull-request feedback focused and avoid provisioning the same environment
+# multiple times. Coverage, documentation, and development-database validation
+# run after merge (or when manually requested).
 
 name: Zulip CI
 
@@ -25,8 +26,8 @@ env:
   HOME: /home/github/
 
 jobs:
-  checks:
-    name: Lint, types, and consistency checks
+  tests:
+    name: Lint and tests
     runs-on: ubuntu-latest
     container: zulip/ci:noble
 
@@ -93,35 +94,6 @@ jobs:
           ./scripts/lib/check-database-compatibility
           chmod 755 static/generated web/generated
 
-  frontend-tests:
-    name: Frontend tests
-    runs-on: ubuntu-latest
-    container: zulip/ci:noble
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Create cache directories
-        run: |
-          sudo mkdir -p /srv/zulip-emoji-cache
-          sudo chown -R github /srv/zulip-emoji-cache
-
-      - name: Restore dependency caches
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        # zizmor: ignore[cache-poisoning]
-        with:
-          path: |
-            /__w/.pnpm-store
-            ~/.cache/uv
-            /srv/zulip-emoji-cache
-          key: dev-noble-${{ hashFiles('pnpm-lock.yaml', 'uv.lock', 'tools/setup/emoji/emoji_map.json', 'tools/setup/emoji/build_emoji', 'tools/setup/emoji/emoji_setup_utils.py', 'tools/setup/emoji/emoji_names.py') }}
-          restore-keys: dev-noble-
-
-      - name: Install dependencies
-        run: ./tools/ci/setup-backend --skip-dev-db-build
-
       - name: Run frontend tests
         env:
           COLLECT_COVERAGE: ${{ github.event_name != 'pull_request' }}
@@ -140,35 +112,6 @@ jobs:
           files: var/node-coverage/lcov.info
           flags: frontend
           token: ${{ secrets.CODECOV_TOKEN }}
-
-  backend-tests:
-    name: Backend tests
-    runs-on: ubuntu-latest
-    container: zulip/ci:noble
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Create cache directories
-        run: |
-          sudo mkdir -p /srv/zulip-emoji-cache
-          sudo chown -R github /srv/zulip-emoji-cache
-
-      - name: Restore dependency caches
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        # zizmor: ignore[cache-poisoning]
-        with:
-          path: |
-            /__w/.pnpm-store
-            ~/.cache/uv
-            /srv/zulip-emoji-cache
-          key: dev-noble-${{ hashFiles('pnpm-lock.yaml', 'uv.lock', 'tools/setup/emoji/emoji_map.json', 'tools/setup/emoji/build_emoji', 'tools/setup/emoji/emoji_setup_utils.py', 'tools/setup/emoji/emoji_names.py') }}
-          restore-keys: dev-noble-
-
-      - name: Install dependencies
-        run: ./tools/ci/setup-backend --skip-dev-db-build
 
       - name: Run backend tests
         env:
@@ -242,9 +185,7 @@ jobs:
     name: Required jobs
     if: always()
     needs:
-      - checks
-      - frontend-tests
-      - backend-tests
+      - tests
       - deep-checks
     runs-on: ubuntu-slim
     steps:
