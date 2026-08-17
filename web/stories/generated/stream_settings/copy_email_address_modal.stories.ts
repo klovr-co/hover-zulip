@@ -3,28 +3,32 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/stream_settings/copy_email_address_modal.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "tags": [
+    tags: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "description": "Description"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            description: "Description",
+        },
     ],
-    "email_address": "Email address"
+    email_address: "Email address",
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Copy Email Address Modal",
-    render: () => render_template_story("stream_settings/copy_email_address_modal.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/copy_email_address_modal.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

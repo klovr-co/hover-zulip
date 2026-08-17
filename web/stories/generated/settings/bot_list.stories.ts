@@ -3,13 +3,12 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/bot_list.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "section_title": "Section title",
-    "prefix": "Prefix",
-    "section_name": "Section name"
+    section_title: "Section title",
+    prefix: "Prefix",
+    section_name: "Section name",
 };
 
 const meta = {

@@ -3,16 +3,15 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/status_emoji_selector.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "selected_emoji": {
-        "emoji_alt_code": "Emoji alt code",
-        "emoji_name": "Emoji name",
-        "url": "#storybook",
-        "emoji_code": "Emoji code"
-    }
+    selected_emoji: {
+        emoji_alt_code: "Emoji alt code",
+        emoji_name: "Emoji name",
+        url: "#storybook",
+        emoji_code: "Emoji code",
+    },
 };
 
 const meta = {

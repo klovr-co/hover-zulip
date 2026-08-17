@@ -3,14 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/user_group_settings/group_permissions.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/User Group Settings/Group Permissions",
-    render: () => render_template_story("user_group_settings/group_permissions.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/group_permissions.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

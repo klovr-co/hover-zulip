@@ -3,12 +3,11 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/topic_typeahead_hint.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "contains_dm": "Contains dm",
-    "can_create_new_topics_in_stream": true
+    contains_dm: "Contains dm",
+    can_create_new_topics_in_stream: true,
 };
 
 const meta = {

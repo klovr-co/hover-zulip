@@ -3,14 +3,14 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/user_notification_settings.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/User Notification Settings",
-    render: () => render_template_story("settings/user_notification_settings.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/user_notification_settings.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -3,19 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/channel_list_item.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "stream": {
-        "stream_id": 7,
-        "color": "#4f8394",
-        "name": "Name"
+    stream: {
+        stream_id: 7,
+        color: "#4f8394",
+        name: "Name",
     },
-    "show_unsubscribe_button": true,
-    "show_private_stream_unsub_tooltip": true,
-    "show_last_user_in_private_stream_unsub_tooltip": true,
-    "can_manage_folder": true
+    show_unsubscribe_button: true,
+    show_private_stream_unsub_tooltip: true,
+    show_last_user_in_private_stream_unsub_tooltip: true,
+    can_manage_folder: true,
 };
 
 const meta = {

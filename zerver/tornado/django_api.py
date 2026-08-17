@@ -251,11 +251,11 @@ def send_event_on_commit(
         try:
             event_dict = orjson.loads(orjson.dumps(event_dict))
         except TypeError:
-            print(event_dict)
+            print("Event is not JSON-serializable")
             raise
 
     def send_event() -> None:
-        if isinstance(message_realm_id, int):
+        if realm.hover_enabled and isinstance(message_realm_id, int):
             # Import lazily to avoid a module cycle through Hover action modules.
             from hover.lib import add_hover_metadata_to_message_event
 

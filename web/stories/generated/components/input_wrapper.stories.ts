@@ -3,15 +3,14 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/components/input_wrapper.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "id": 7,
-    "input_type": "Input type",
-    "custom_classes": "Custom classes",
-    "icon": "Icon",
-    "input_button_icon": "Input button icon"
+    id: 7,
+    input_type: "Input type",
+    custom_classes: "Custom classes",
+    icon: "Icon",
+    input_button_icon: "Input button icon",
 };
 
 const meta = {

@@ -101,6 +101,7 @@ function render(): void {
     }
     const knowledge = response.knowledge.map((result) => ({
         ...result,
+        rendered_content_html: result.rendered_content,
         display_time: display_time(result.timestamp),
         kind_label:
             result.kind === "generated"

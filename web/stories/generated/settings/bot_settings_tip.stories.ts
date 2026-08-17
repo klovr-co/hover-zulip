@@ -3,12 +3,11 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/bot_settings_tip.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "can_create_any_bots": true,
-    "can_create_incoming_webhooks": true
+    can_create_any_bots: true,
+    can_create_incoming_webhooks: true,
 };
 
 const meta = {

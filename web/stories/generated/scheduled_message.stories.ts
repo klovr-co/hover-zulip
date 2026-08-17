@@ -3,31 +3,30 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/scheduled_message.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "scheduled_messages_data": [
+    scheduled_messages_data: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "scheduled_message_id": 7,
-            "is_stream": true,
-            "recipient_bar_color": "#4f8394",
-            "stream_id": 7,
-            "stream_privacy_icon_color": "#4f8394",
-            "stream_name": "Stream name",
-            "is_empty_string_topic": true,
-            "topic_display_name": "Topic display name",
-            "is_dm_with_self": true,
-            "rendered_content": "Rendered content"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            scheduled_message_id: 7,
+            is_stream: true,
+            recipient_bar_color: "#4f8394",
+            stream_id: 7,
+            stream_privacy_icon_color: "#4f8394",
+            stream_name: "Stream name",
+            is_empty_string_topic: true,
+            topic_display_name: "Topic display name",
+            is_dm_with_self: true,
+            rendered_content: "Rendered content",
+        },
+    ],
 };
 
 const meta = {

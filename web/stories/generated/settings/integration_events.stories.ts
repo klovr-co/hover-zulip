@@ -3,28 +3,28 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/integration_events.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "events": [
+    events: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "event_id": 7,
-            "event": "Event"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            event_id: 7,
+            event: "Event",
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Settings/Integration Events",
-    render: () => render_template_story("settings/integration_events.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/integration_events.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

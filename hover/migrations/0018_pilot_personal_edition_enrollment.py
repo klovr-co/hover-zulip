@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("hover", "0017_participant_selector_reconciliation"),
         ("zerver", "0809_alter_realm_can_create_spaces_group"),

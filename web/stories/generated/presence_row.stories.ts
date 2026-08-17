@@ -3,24 +3,23 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/presence_row.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "user_id": 7,
-    "name": "Name",
-    "user_list_style": {
-        "WITH_AVATAR": "WITH AVATAR",
-        "WITH_STATUS": "WITH STATUS"
+    user_id: 7,
+    name: "Name",
+    user_list_style: {
+        WITH_AVATAR: "WITH AVATAR",
+        WITH_STATUS: "WITH STATUS",
     },
-    "has_status_text": true,
-    "is_current_user": true,
-    "faded": "Faded",
-    "user_circle_class": "User circle class",
-    "href": "#storybook",
-    "status_text": "Status text",
-    "profile_picture": "Profile picture",
-    "num_unread": 3
+    has_status_text: true,
+    is_current_user: true,
+    faded: "Faded",
+    user_circle_class: "User circle class",
+    href: "#storybook",
+    status_text: "Status text",
+    profile_picture: "Profile picture",
+    num_unread: 3,
 };
 
 const meta = {

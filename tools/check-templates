@@ -28,6 +28,8 @@ EXCLUDED_FILES = [
     "web/icons/template.hbs",
     # Template checker recommends very hard to read indentation.
     "web/templates/bookend.hbs",
+    # Static design references are not application templates.
+    "designs/stitch",
 ]
 
 

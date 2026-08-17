@@ -3,18 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/admin_linkifier_list.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "linkifier": "Linkifier",
-    "can_modify": true,
-    "can_drag": true
+    linkifier: "Linkifier",
+    can_modify: true,
+    can_drag: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Admin Linkifier List",
-    render: () => render_template_story("settings/admin_linkifier_list.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/admin_linkifier_list.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

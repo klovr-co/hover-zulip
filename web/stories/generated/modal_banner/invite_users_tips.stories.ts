@@ -3,18 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/modal_banner/invite_users_tips.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "realm_has_description": "Realm has description",
-    "realm_has_user_set_icon": "Realm has user set icon",
-    "realm_has_custom_profile_fields": "Realm has custom profile fields"
+    realm_has_description: "Realm has description",
+    realm_has_user_set_icon: "Realm has user set icon",
+    realm_has_custom_profile_fields: "Realm has custom profile fields",
 };
 
 const meta = {
     title: "Catalogue/Modal Banner/Invite Users Tips",
-    render: () => render_template_story("modal_banner/invite_users_tips.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("modal_banner/invite_users_tips.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

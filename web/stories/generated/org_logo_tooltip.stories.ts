@@ -3,12 +3,11 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/org_logo_tooltip.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "home_view": "Home view",
-    "escape_navigates_to_home_view": "Escape navigates to home view"
+    home_view: "Home view",
+    escape_navigates_to_home_view: "Escape navigates to home view",
 };
 
 const meta = {

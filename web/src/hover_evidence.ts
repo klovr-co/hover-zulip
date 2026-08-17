@@ -33,7 +33,7 @@ const error_response_schema = z.object({retryable: z.optional(z.boolean())});
 
 function present_evidence(
     response: unknown,
-): Array<z.infer<typeof evidence_schema> & {display_timestamp: string}> {
+): (z.infer<typeof evidence_schema> & {display_timestamp: string})[] {
     const {evidence} = evidence_response_schema.parse(response);
     return evidence.map((item) => ({
         ...item,
@@ -45,7 +45,7 @@ function present_evidence(
 }
 
 function focus_result($content: JQuery): void {
-    $content.find<HTMLElement>("[data-hover-evidence-result]").trigger("focus");
+    $content.find("[data-hover-evidence-result]").trigger("focus");
 }
 
 function replace_content($content: JQuery, html: string): void {
@@ -98,7 +98,6 @@ export function show_evidence(url: string): void {
         modal_submit_button_text: $t({defaultMessage: "Close"}),
         single_footer_button: true,
         close_on_submit: true,
-        on_click() {},
     });
     const $content = $(`#${CSS.escape(modal_id)} .modal__content`);
     load_evidence($content, url);

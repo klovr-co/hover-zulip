@@ -3,19 +3,23 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../../templates/popovers/left_sidebar/left_sidebar_all_messages_popover.hbs";
-
 import {render_template_story} from "../../../template_story_utils.ts";
 
 const fixture = {
-    "is_home_view": true,
-    "unread_messages_present": "Unread messages present",
-    "show_unread_count": 3,
-    "view_code": "View code"
+    is_home_view: true,
+    unread_messages_present: "Unread messages present",
+    show_unread_count: 3,
+    view_code: "View code",
 };
 
 const meta = {
     title: "Catalogue/Popovers/Left Sidebar/Left Sidebar All Messages Popover",
-    render: () => render_template_story("popovers/left_sidebar/left_sidebar_all_messages_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "popovers/left_sidebar/left_sidebar_all_messages_popover.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

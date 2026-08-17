@@ -6,9 +6,9 @@ import render_left_sidebar from "../templates/left_sidebar.hbs";
 
 import * as blueslip from "./blueslip.ts";
 import * as compose_ui from "./compose_ui.ts";
+import * as hover_spaces_ui from "./hover_spaces_ui.ts";
 import {$t} from "./i18n.ts";
 import * as keydown_util from "./keydown_util.ts";
-import * as hover_spaces_ui from "./hover_spaces_ui.ts";
 import * as left_sidebar_navigation_area from "./left_sidebar_navigation_area.ts";
 import {ListCursor} from "./list_cursor.ts";
 import {localstorage} from "./localstorage.ts";
@@ -61,7 +61,6 @@ export function restore_sidebar_toggle_status(): void {
     if (ls.get("left-sidebar")) {
         $("body").addClass("hide-left-sidebar");
     }
-
 }
 
 export let left_sidebar_expanded_as_overlay = false;
@@ -201,7 +200,6 @@ export function initialize(): void {
                     hide_streamlist_sidebar();
                 }
             }
-
         },
         {capture: true},
     );
@@ -612,7 +610,9 @@ export function focus_pm_search_filter(): void {
 export function set_event_handlers(): void {
     const $search_input = $(".left-sidebar-search-input").expectOne();
 
-    $("#add_hover_space_button").on("click", () => hover_spaces_ui.open_create_space());
+    $("#add_hover_space_button").on("click", () => {
+        hover_spaces_ui.open_create_space();
+    });
     $("#stream_filters").on("click", ".hover-space-setup-row a", (event) => {
         event.preventDefault();
         const space_id = Number($(event.currentTarget).closest("li").attr("data-hover-space-id"));

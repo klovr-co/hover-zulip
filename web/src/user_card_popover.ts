@@ -120,9 +120,7 @@ function popover_items_handle_keyboard_with_overrides(key: string, $items: JQuer
     popover_menus.popover_items_handle_keyboard(key, $items);
 }
 
-function get_popover_classname(
-    popover: "message_user_card" | "user_card",
-): string {
+function get_popover_classname(popover: "message_user_card" | "user_card"): string {
     const popovers = {
         message_user_card: "message-user-card-popover-root",
         user_card: "user-card-popover-root",

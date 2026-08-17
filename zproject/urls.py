@@ -627,49 +627,83 @@ v1_api_and_json_patterns = [
     rest_path("channel_folders/create", POST=create_channel_folder),
     rest_path("channel_folders", GET=get_channel_folders, PATCH=reorder_realm_channel_folders),
     rest_path("channel_folders/<int:channel_folder_id>", PATCH=update_channel_folder),
-    rest_path("hover/spaces", GET=list_spaces, POST=create_space),
+    rest_path(
+        "hover/spaces",
+        GET=(list_spaces, {"intentionally_undocumented"}),
+        POST=(create_space, {"intentionally_undocumented"}),
+    ),
     rest_path("hover/awareness", GET=get_awareness),
     rest_path("hover/search", POST=hover_search),
     rest_path("hover/personal-editions", GET=personal_editions),
-    rest_path("hover/spaces/<int:space_id>", GET=get_space),
-    rest_path("hover/spaces/<int:space_id>/members", POST=confirm_space_member),
-    rest_path("hover/spaces/<int:space_id>/members/<int:user_id>", DELETE=remove_space_member),
-    rest_path("hover/spaces/<int:space_id>/launch", POST=launch_space),
-    rest_path("hover/modules", GET=list_module_catalog),
-    rest_path("hover/spaces/<int:space_id>/modules", POST=install_module),
-    rest_path("hover/module-installations/<int:installation_id>/disable", POST=disable_module),
-    rest_path("hover/module-installations/<int:installation_id>/upgrade", POST=upgrade_module),
+    rest_path("hover/spaces/<int:space_id>", GET=(get_space, {"intentionally_undocumented"})),
+    rest_path(
+        "hover/spaces/<int:space_id>/members",
+        POST=(confirm_space_member, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/members/<int:user_id>",
+        DELETE=(remove_space_member, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/launch",
+        POST=(launch_space, {"intentionally_undocumented"}),
+    ),
+    rest_path("hover/modules", GET=(list_module_catalog, {"intentionally_undocumented"})),
+    rest_path(
+        "hover/spaces/<int:space_id>/modules",
+        POST=(install_module, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/module-installations/<int:installation_id>/disable",
+        POST=(disable_module, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/module-installations/<int:installation_id>/upgrade",
+        POST=(upgrade_module, {"intentionally_undocumented"}),
+    ),
     rest_path(
         "hover/module-installations/<int:installation_id>/rebind-resume",
-        POST=rebind_resume_module,
+        POST=(rebind_resume_module, {"intentionally_undocumented"}),
     ),
-    rest_path("hover/spaces/<int:space_id>/admins", POST=add_space_administrator),
+    rest_path(
+        "hover/spaces/<int:space_id>/admins",
+        POST=(add_space_administrator, {"intentionally_undocumented"}),
+    ),
     rest_path(
         "hover/spaces/<int:space_id>/admins/<int:user_id>",
-        DELETE=remove_space_administrator,
+        DELETE=(remove_space_administrator, {"intentionally_undocumented"}),
     ),
     rest_path(
         "hover/spaces/<int:space_id>/sources/discover",
-        POST=discover_sources,
+        POST=(discover_sources, {"intentionally_undocumented"}),
     ),
     rest_path(
         "hover/spaces/<int:space_id>/sources/preview",
-        POST=preview_source,
+        POST=(preview_source, {"intentionally_undocumented"}),
     ),
-    rest_path("hover/spaces/<int:space_id>/sources", POST=attach_source),
-    rest_path("hover/spaces/<int:space_id>/sources/<int:attachment_id>", DELETE=detach_source),
+    rest_path(
+        "hover/spaces/<int:space_id>/sources",
+        POST=(attach_source, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/sources/<int:attachment_id>",
+        DELETE=(detach_source, {"intentionally_undocumented"}),
+    ),
     rest_path(
         "hover/spaces/<int:space_id>/sources/<int:attachment_id>/evidence",
-        DELETE=delete_source_evidence,
+        DELETE=(delete_source_evidence, {"intentionally_undocumented"}),
     ),
-    rest_path("hover/spaces/<int:space_id>/integration-routes", POST=associate_integration_route),
+    rest_path(
+        "hover/spaces/<int:space_id>/integration-routes",
+        POST=(associate_integration_route, {"intentionally_undocumented"}),
+    ),
     rest_path(
         "hover/spaces/<int:space_id>/integration-routes/<int:route_id>",
-        DELETE=detach_integration_route,
+        DELETE=(detach_integration_route, {"intentionally_undocumented"}),
     ),
     rest_path(
         "hover/spaces/<int:space_id>/sources/<int:attachment_id>/records/browse",
-        POST=browse_source_records,
+        POST=(browse_source_records, {"intentionally_undocumented"}),
     ),
     rest_path(
         "hover/spaces/<int:space_id>/generated-items/<int:generated_item_id>/evidence",
@@ -679,7 +713,7 @@ v1_api_and_json_patterns = [
         "hover/spaces/<int:space_id>/generated-items/<int:generated_item_id>/disputed-details/"
         "<int:disputed_detail_id>/evidence",
         GET=resolve_disputed_detail_evidence,
-        POST=resolve_disputed_detail_evidence,
+        POST=(resolve_disputed_detail_evidence, {"intentionally_undocumented"}),
     ),
     rest_path(
         "hover/spaces/<int:space_id>/generated-items/<int:generated_item_id>/suggested-action/decisions",
@@ -690,19 +724,22 @@ v1_api_and_json_patterns = [
         "hover/spaces/<int:space_id>/todos/<int:todo_id>/events",
         POST=mutate_todo_view,
     ),
-    rest_path("hover/connected_accounts", GET=list_connected_accounts),
+    rest_path(
+        "hover/connected_accounts",
+        GET=(list_connected_accounts, {"intentionally_undocumented"}),
+    ),
     rest_path(
         "hover/connected_accounts/<int:account_id>",
-        GET=get_connected_account,
-        PATCH=update_connected_account,
+        GET=(get_connected_account, {"intentionally_undocumented"}),
+        PATCH=(update_connected_account, {"intentionally_undocumented"}),
     ),
     rest_path(
         "hover/connected_accounts/<int:account_id>/grants",
-        POST=upsert_connected_account_grant,
+        POST=(upsert_connected_account_grant, {"intentionally_undocumented"}),
     ),
     rest_path(
         "hover/connected_accounts/<int:account_id>/grants/<int:grant_id>",
-        DELETE=revoke_connected_account_grant,
+        DELETE=(revoke_connected_account_grant, {"intentionally_undocumented"}),
     ),
     # topic-muting -> zerver.views.user_topics
     # (deprecated and will be removed once clients are migrated to use '/user_topics')

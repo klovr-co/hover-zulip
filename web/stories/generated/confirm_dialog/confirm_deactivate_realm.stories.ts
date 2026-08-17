@@ -3,43 +3,47 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/confirm_dialog/confirm_deactivate_realm.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "can_set_data_deletion": true,
-    "delete_in_options": [
+    can_set_data_deletion: true,
+    delete_in_options: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "default": true,
-            "value": "Value",
-            "description": "Description"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            default: true,
+            value: "Value",
+            description: "Description",
+        },
     ],
-    "custom_deletion_input_label": "Custom deletion input label",
-    "time_choices": [
+    custom_deletion_input_label: "Custom deletion input label",
+    time_choices: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "description": "Description"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            description: "Description",
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Deactivate Realm",
-    render: () => render_template_story("confirm_dialog/confirm_deactivate_realm.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "confirm_dialog/confirm_deactivate_realm.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

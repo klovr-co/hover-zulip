@@ -3,20 +3,19 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/navbar_icon_and_title.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "zulip_icon": "Zulip icon",
-    "icon": "Icon",
-    "title": "Title",
-    "title_html": "Title html",
-    "stream": {
-        "color": "#4f8394",
-        "name": "design",
-        "stream_id": 7,
-        "is_archived": true
-    }
+    zulip_icon: "Zulip icon",
+    icon: "Icon",
+    title: "Title",
+    title_html: "Title html",
+    stream: {
+        color: "#4f8394",
+        name: "design",
+        stream_id: 7,
+        is_archived: true,
+    },
 };
 
 const meta = {

@@ -3,25 +3,24 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/left_sidebar.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "is_spectator": true,
-    "LEFT_SIDEBAR_NAVIGATION_AREA_TITLE": "LEFT SIDEBAR NAVIGATION AREA TITLE",
-    "primary_condensed_views": [
+    is_spectator: true,
+    LEFT_SIDEBAR_NAVIGATION_AREA_TITLE: "LEFT SIDEBAR NAVIGATION AREA TITLE",
+    primary_condensed_views: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
     ],
-    "LEFT_SIDEBAR_DIRECT_MESSAGES_TITLE": "LEFT SIDEBAR DIRECT MESSAGES TITLE",
-    "is_guest": true
+    LEFT_SIDEBAR_DIRECT_MESSAGES_TITLE: "LEFT SIDEBAR DIRECT MESSAGES TITLE",
+    is_guest: true,
 };
 
 const meta = {

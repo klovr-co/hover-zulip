@@ -102,7 +102,8 @@ export function apply_realtime_responses(messages: Message[]): void {
         }
         root.hover_generated_item = response.generated_item;
         root_message_ids.add(root.id);
-        for (const detail of response.generated_item.disputed_details ?? []) {
+        const disputed_details = response.generated_item.disputed_details ?? [];
+        for (const detail of disputed_details) {
             const request_metadata = detail.review_request;
             if (request_metadata === null) {
                 continue;
@@ -116,7 +117,9 @@ export function apply_realtime_responses(messages: Message[]): void {
             root_message_ids.add(request_message.id);
         }
     }
-    message_live_update.rerender_messages_view_by_message_ids([...root_message_ids]);
+    if (root_message_ids.size > 0) {
+        message_live_update.rerender_messages_view_by_message_ids([...root_message_ids]);
+    }
 }
 
 export const _testing = {
