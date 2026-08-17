@@ -133,12 +133,20 @@ def ensure_prebuilt_module_catalog(realm: Realm) -> None:
             defaults={"name": item["name"], "description": item["description"]},
         )
         contract = {
-            "stable_key": item["key"],
+            "definition_key": item["key"],
             "version": "1.0.0",
             "output_type": item["output_type"],
             "runtime_key": f"hover.{item['key']}.v1",
             "prompt_key": f"hover.{item['key']}.v1",
+            "input_contract": {"kind": "attached_sources", "record_type": "message"},
+            "lookback_seconds": 30 * 24 * 60 * 60,
+            "integration_keys": [],
             "destination_topic": item["topic"],
+            "output_template": {
+                "format": "hover_generated_update",
+                "title": item["name"],
+            },
+            "maximum_runtime_seconds": 300,
             "navigation_icon": item["icon"],
             "navigation_order": item["order"],
             "requirements": [
@@ -149,7 +157,7 @@ def ensure_prebuilt_module_catalog(realm: Realm) -> None:
                     "maximum_count": item["maximum_count"],
                 }
             ],
-            "triggers": list(item["triggers"]),
+            "supported_triggers": sorted(item["triggers"]),
         }
         version, created = ModuleVersion.objects.get_or_create(
             definition=definition,
@@ -158,7 +166,13 @@ def ensure_prebuilt_module_catalog(realm: Realm) -> None:
                 "output_type": item["output_type"],
                 "runtime_key": contract["runtime_key"],
                 "prompt_key": contract["prompt_key"],
+                "input_contract": contract["input_contract"],
+                "lookback_seconds": contract["lookback_seconds"],
+                "integration_keys": contract["integration_keys"],
                 "destination_topic": item["topic"],
+                "output_template": contract["output_template"],
+                "maximum_runtime_seconds": contract["maximum_runtime_seconds"],
+                "is_sealed": False,
                 "navigation_icon": item["icon"],
                 "navigation_order": item["order"],
                 "content_hash": _canonical_hash(contract),
@@ -168,8 +182,12 @@ def ensure_prebuilt_module_catalog(realm: Realm) -> None:
             requirement = contract["requirements"][0]
             ModuleSourceRequirement.objects.create(version=version, **requirement)
             ModuleSupportedTrigger.objects.bulk_create(
-                [ModuleSupportedTrigger(version=version, kind=kind) for kind in item["triggers"]]
+                [
+                    ModuleSupportedTrigger(version=version, kind=kind)
+                    for kind in contract["supported_triggers"]
+                ]
             )
+            ModuleVersion.objects.filter(id=version.id, is_sealed=False).update(is_sealed=True)
 
 
 def module_version_data(version: ModuleVersion) -> dict[str, Any]:
@@ -180,7 +198,9 @@ def module_version_data(version: ModuleVersion) -> dict[str, Any]:
         "description": version.definition.description,
         "version": version.version,
         "output_type": version.output_type,
+        "lookback_days": version.lookback_seconds // (24 * 60 * 60),
         "destination_topic": version.destination_topic,
+        "maximum_runtime_seconds": version.maximum_runtime_seconds,
         "navigation_icon": version.navigation_icon,
         "navigation_order": version.navigation_order,
         "content_hash": version.content_hash,
@@ -202,7 +222,11 @@ def module_version_data(version: ModuleVersion) -> dict[str, Any]:
 def get_module_catalog(realm: Realm) -> list[dict[str, Any]]:
     ensure_prebuilt_module_catalog(realm)
     versions = (
-        ModuleVersion.objects.filter(definition__realm=realm)
+        ModuleVersion.objects.filter(
+            definition__realm=realm,
+            definition__archive_record__isnull=True,
+            archive_record__isnull=True,
+        )
         .select_related("definition")
         .prefetch_related("requirements", "supported_triggers")
         .order_by("navigation_order", "id")
@@ -389,6 +413,7 @@ def do_install_module(
     backfill_start_at: datetime | None = None,
     backfill_confirmed: bool = False,
     predecessor: ModuleInstallation | None = None,
+    allow_archived_version: bool = False,
 ) -> tuple[ModuleInstallation, bool]:
     return _do_install_module(
         acting_user=acting_user,
@@ -403,6 +428,7 @@ def do_install_module(
         backfill_start_at=backfill_start_at,
         backfill_confirmed=backfill_confirmed,
         predecessor=predecessor,
+        allow_archived_version=allow_archived_version,
     )
 
 
@@ -420,17 +446,18 @@ def _do_install_module(
     backfill_start_at: datetime | None = None,
     backfill_confirmed: bool = False,
     predecessor: ModuleInstallation | None = None,
+    allow_archived_version: bool = False,
 ) -> tuple[ModuleInstallation, bool]:
     locked_space = Space.objects.select_for_update(no_key=True).get(id=space.id)
     _assert_module_administrator(acting_user, locked_space)
     _validate_timezone(activation_timezone)
     try:
-        version = (
+        versions = (
             ModuleVersion.objects.select_for_update(no_key=True, of=("self",))
             .select_related("definition")
             .prefetch_related("requirements", "supported_triggers")
-            .get(id=version_id, definition__realm=locked_space.realm)
         )
+        version = versions.get(id=version_id, definition__realm=locked_space.realm)
     except ModuleVersion.DoesNotExist:
         raise JsonableError(_("Invalid Module version."))
     requirements, attachments = _validate_bindings(
@@ -485,6 +512,10 @@ def _do_install_module(
         raise ModuleConfigurationConflictError(
             _("This Space already has a different current configuration for that Module.")
         )
+    if not allow_archived_version and (
+        hasattr(version.definition, "archive_record") or hasattr(version, "archive_record")
+    ):
+        raise JsonableError(_("Invalid Module version."))
     activated_at = configured_at if locked_space.state == Space.State.LAUNCHED else None
     installation = ModuleInstallation.objects.create(
         realm=locked_space.realm,
@@ -566,7 +597,12 @@ def do_upgrade_module(
         new_version = (
             ModuleVersion.objects.select_for_update(no_key=True, of=("self",))
             .select_related("definition")
-            .get(id=version_id, definition__realm=locked_space.realm)
+            .get(
+                id=version_id,
+                definition__realm=locked_space.realm,
+                definition__archive_record__isnull=True,
+                archive_record__isnull=True,
+            )
         )
     except ModuleVersion.DoesNotExist:
         raise JsonableError(_("Invalid Module version."))
@@ -652,6 +688,7 @@ def do_rebind_resume_module(
         backfill_start_at=(current.processing_start_at if current.backfill_confirmed else None),
         backfill_confirmed=current.backfill_confirmed,
         predecessor=current,
+        allow_archived_version=True,
     )
     assert created
     return successor

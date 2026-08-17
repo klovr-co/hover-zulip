@@ -284,6 +284,20 @@ class HoverModulesTest(ZulipTestCase):
         self.assertIsNotNone(installation.activated_at)
         self.assertEqual(installation.processing_start_at, installation.activated_at)
 
+        self.login_user(self.example_user("iago"))
+        archived = self.client_post(
+            f"/json/hover/pipeline-library/versions/{self.version.id}/archive"
+        )
+        self.assert_json_success(archived)
+        self.login_user(self.creator)
+        self.assertNotIn(
+            self.version.id,
+            {
+                item["id"]
+                for item in orjson.loads(self.client_get("/json/hover/modules").content)["modules"]
+            },
+        )
+
         detached = self.client_delete(
             f"/json/hover/spaces/{self.space.id}/sources/{self.attachment.id}"
         )
@@ -364,6 +378,7 @@ class HoverModulesTest(ZulipTestCase):
             navigation_order=self.version.navigation_order,
             content_hash="2" * 64,
             published_by=self.creator,
+            is_sealed=False,
         )
         requirement = self.version.requirements.get()
         ModuleSourceRequirement.objects.create(
@@ -376,6 +391,7 @@ class HoverModulesTest(ZulipTestCase):
         ModuleSupportedTrigger.objects.create(
             version=version2, kind=ModuleSupportedTrigger.Kind.MANUAL
         )
+        ModuleVersion.objects.filter(id=version2.id).update(is_sealed=True)
         result = self.client_post(
             f"/json/hover/module-installations/{predecessor_id}/upgrade",
             self.install_data(version_id=orjson.dumps(version2.id).decode()),

@@ -6,6 +6,7 @@ import render_left_sidebar from "../templates/left_sidebar.hbs";
 
 import * as blueslip from "./blueslip.ts";
 import * as compose_ui from "./compose_ui.ts";
+import * as hover_pipeline_library_ui from "./hover_pipeline_library_ui.ts";
 import * as hover_spaces_ui from "./hover_spaces_ui.ts";
 import {$t} from "./i18n.ts";
 import * as keydown_util from "./keydown_util.ts";
@@ -612,6 +613,9 @@ export function set_event_handlers(): void {
 
     $("#add_hover_space_button").on("click", () => {
         hover_spaces_ui.open_create_space();
+    });
+    $("#open_hover_pipeline_library_button").on("click", () => {
+        hover_pipeline_library_ui.open();
     });
     $("#stream_filters").on("click", ".hover-space-setup-row a", (event) => {
         event.preventDefault();

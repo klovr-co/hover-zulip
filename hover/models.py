@@ -734,6 +734,50 @@ module_key_validator = RegexValidator(
     message="Module keys must start with a letter and contain only lowercase letters, digits, and underscores.",
 )
 
+MAX_PIPELINE_RUNTIME_SECONDS = 3600
+
+
+class PipelineCreatorAssignment(models.Model):
+    """An auditable grant of the realm-scoped Pipeline Creator capability."""
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="pipeline_creator_assignments")
+    user = models.ForeignKey(
+        UserProfile, on_delete=CASCADE, related_name="hover_pipeline_creator_assignments"
+    )
+    granted_by = models.ForeignKey(
+        UserProfile, null=True, on_delete=SET_NULL, related_name="granted_pipeline_creator_roles"
+    )
+    granted_at = models.DateTimeField(default=timezone_now)
+    revoked_by = models.ForeignKey(
+        UserProfile,
+        null=True,
+        on_delete=SET_NULL,
+        related_name="revoked_pipeline_creator_roles",
+    )
+    revoked_at = models.DateTimeField(null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["realm", "user"],
+                condition=Q(revoked_at__isnull=True),
+                name="hover_pipeline_creator_unique_active",
+            ),
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        user = self.user
+        if user.realm_id != self.realm_id or user.is_bot or user.is_guest:
+            raise ValidationError({"user": "Pipeline Creators must be human organization members."})
+        for field_name in ("granted_by", "revoked_by"):
+            actor = getattr(self, field_name)
+            if actor is not None and actor.realm_id != self.realm_id:
+                raise ValidationError({field_name: "Role actors must share the organization."})
+        if self.revoked_at is None and self.revoked_by_id is not None:
+            raise ValidationError({"revoked_by": "A revoking actor requires a revocation time."})
+
 
 class ModuleDefinition(models.Model):
     """The stable, realm-scoped identity of a reusable Hover Module."""
@@ -785,7 +829,13 @@ class ModuleVersion(models.Model):
     output_type = models.CharField(max_length=32)
     runtime_key = models.CharField(max_length=100)
     prompt_key = models.CharField(max_length=100)
+    input_contract = models.JSONField(default=dict)
+    lookback_seconds = models.PositiveIntegerField(default=86400)
+    integration_keys = models.JSONField(default=list)
     destination_topic = models.CharField(max_length=60)
+    output_template = models.JSONField(default=dict)
+    maximum_runtime_seconds = models.PositiveSmallIntegerField(default=300)
+    is_sealed = models.BooleanField(default=True)
     navigation_icon = models.CharField(max_length=64, default="zulip-icon-sparkles")
     navigation_order = models.PositiveSmallIntegerField()
     content_hash = models.CharField(max_length=64)
@@ -801,6 +851,17 @@ class ModuleVersion(models.Model):
             ),
             models.UniqueConstraint(
                 fields=["definition", "content_hash"], name="hover_module_version_unique_hash"
+            ),
+            models.CheckConstraint(
+                condition=Q(lookback_seconds__gte=1),
+                name="hover_module_version_positive_lookback",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(maximum_runtime_seconds__gte=1)
+                    & Q(maximum_runtime_seconds__lte=MAX_PIPELINE_RUNTIME_SECONDS)
+                ),
+                name="hover_module_version_runtime_under_cap",
             ),
         ]
 
@@ -838,6 +899,162 @@ class ModuleVersion(models.Model):
             )
 
 
+class ModuleDraft(models.Model):
+    """A private mutable authoring workspace for one future immutable version."""
+
+    class State(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        PUBLISHED = "published", "Published"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_module_drafts")
+    definition = models.ForeignKey(
+        ModuleDefinition,
+        null=True,
+        on_delete=RESTRICT,
+        related_name="drafts",
+    )
+    based_on_version = models.ForeignKey(
+        ModuleVersion,
+        null=True,
+        on_delete=RESTRICT,
+        related_name="successor_drafts",
+    )
+    published_version = models.OneToOneField(
+        ModuleVersion,
+        null=True,
+        on_delete=RESTRICT,
+        related_name="originating_draft",
+    )
+    author = models.ForeignKey(
+        UserProfile,
+        on_delete=RESTRICT,
+        related_name="authored_hover_module_drafts",
+    )
+    stable_key = models.CharField(max_length=64, validators=[module_key_validator])
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=1024, default="")
+    version = models.CharField(max_length=32)
+    state = models.TextField(choices=State.choices, default=State.DRAFT)
+    revision = models.PositiveIntegerField(default=1)
+    output_type = models.CharField(max_length=32)
+    runtime_key = models.CharField(max_length=100)
+    prompt_key = models.CharField(max_length=100)
+    input_contract = models.JSONField(default=dict)
+    lookback_seconds = models.PositiveIntegerField(default=86400)
+    integration_keys = models.JSONField(default=list)
+    destination_topic = models.CharField(max_length=60)
+    navigation_icon = models.CharField(max_length=64, default="zulip-icon-sparkles")
+    navigation_order = models.PositiveSmallIntegerField(default=100)
+    output_template = models.JSONField(default=dict)
+    maximum_runtime_seconds = models.PositiveSmallIntegerField(default=300)
+    requirements = models.JSONField(default=list)
+    supported_triggers = models.JSONField(default=list)
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["author", "based_on_version"],
+                condition=Q(state="draft", based_on_version__isnull=False),
+                name="hover_module_draft_unique_author_successor",
+            ),
+            models.UniqueConstraint(
+                fields=["realm", "stable_key"],
+                condition=Q(definition__isnull=True, state="draft"),
+                name="hover_module_draft_unique_new_key",
+            ),
+            models.CheckConstraint(
+                condition=Q(lookback_seconds__gte=1),
+                name="hover_module_draft_positive_lookback",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(maximum_runtime_seconds__gte=1)
+                    & Q(maximum_runtime_seconds__lte=MAX_PIPELINE_RUNTIME_SECONDS)
+                ),
+                name="hover_module_draft_runtime_under_cap",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(state="draft", published_version__isnull=True)
+                    | Q(state="published", published_version__isnull=False)
+                ),
+                name="hover_module_draft_publication_matches_state",
+            ),
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        related_realm_ids = {self.realm_id}
+        if self.definition_id is not None:
+            definition = self.definition
+            assert definition is not None
+            related_realm_ids.add(definition.realm_id)
+        if self.based_on_version_id is not None:
+            based_on_version = self.based_on_version
+            assert based_on_version is not None
+            related_realm_ids.add(based_on_version.definition.realm_id)
+            if self.definition_id != based_on_version.definition_id:
+                raise ValidationError(
+                    {"based_on_version": "Successor drafts must use their base definition."}
+                )
+        if self.published_version_id is not None:
+            published_version = self.published_version
+            assert published_version is not None
+            related_realm_ids.add(published_version.definition.realm_id)
+        if self.author_id is not None:
+            related_realm_ids.add(self.author.realm_id)
+        if related_realm_ids != {self.realm_id}:
+            raise ValidationError("Module drafts must share one organization.")
+
+
+class ModuleDraftCollaborator(models.Model):
+    draft = models.ForeignKey(ModuleDraft, on_delete=CASCADE, related_name="collaborators")
+    user = models.ForeignKey(
+        UserProfile, on_delete=CASCADE, related_name="collaborating_hover_module_drafts"
+    )
+    added_by = models.ForeignKey(
+        UserProfile, null=True, on_delete=SET_NULL, related_name="added_module_draft_collaborators"
+    )
+    date_added = models.DateTimeField(default=timezone_now)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["draft", "user"], name="hover_module_draft_unique_collaborator"
+            )
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.user.realm_id != self.draft.realm_id:
+            raise ValidationError({"user": "Draft collaborators must share the organization."})
+        added_by = self.added_by
+        if added_by is not None and added_by.realm_id != self.draft.realm_id:
+            raise ValidationError({"added_by": "Collaborator actors must share the organization."})
+
+
+class ModuleDefinitionArchive(models.Model):
+    definition = models.OneToOneField(
+        ModuleDefinition, on_delete=RESTRICT, related_name="archive_record"
+    )
+    archived_by = models.ForeignKey(
+        UserProfile, null=True, on_delete=SET_NULL, related_name="archived_module_definitions"
+    )
+    archived_at = models.DateTimeField(default=timezone_now)
+
+
+class ModuleVersionArchive(models.Model):
+    version = models.OneToOneField(ModuleVersion, on_delete=RESTRICT, related_name="archive_record")
+    archived_by = models.ForeignKey(
+        UserProfile, null=True, on_delete=SET_NULL, related_name="archived_module_versions"
+    )
+    archived_at = models.DateTimeField(default=timezone_now)
+
+
 class ModuleSourceRequirement(models.Model):
     version = models.ForeignKey(ModuleVersion, on_delete=RESTRICT, related_name="requirements")
     key = models.CharField(max_length=64, validators=[module_key_validator])
@@ -865,6 +1082,8 @@ class ModuleSourceRequirement(models.Model):
         using: str | None = None,
         update_fields: Iterable[str] | None = None,
     ) -> None:
+        if self._state.adding and self.version.is_sealed:
+            raise ValidationError("Published Module requirements cannot be extended.")
         if not self._state.adding:
             raise ValidationError("Published Module requirements are immutable.")
         super().save(
@@ -908,6 +1127,8 @@ class ModuleSupportedTrigger(models.Model):
         using: str | None = None,
         update_fields: Iterable[str] | None = None,
     ) -> None:
+        if self._state.adding and self.version.is_sealed:
+            raise ValidationError("Published Module triggers cannot be extended.")
         if not self._state.adding:
             raise ValidationError("Published Module triggers are immutable.")
         super().save(

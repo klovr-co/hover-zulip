@@ -68,11 +68,18 @@
         {{#if hover_enabled}}
             <div class="hover-spaces-heading">
                 <h4 class="left-sidebar-title">{{t "Spaces"}}</h4>
-                {{#if can_create_spaces}}
-                    <button id="add_hover_space_button" class="button-reset-style" type="button" aria-label="{{t 'Create Space' }}" data-tippy-content="{{t 'Create Space' }}">
-                        <i class="zulip-icon zulip-icon-square-plus" aria-hidden="true"></i>
-                    </button>
-                {{/if}}
+                <div class="hover-spaces-heading__actions">
+                    {{#unless is_guest}}
+                        <button id="open_hover_pipeline_library_button" class="button-reset-style" type="button" aria-label="{{t 'Pipeline Library' }}" data-tippy-content="{{t 'Pipeline Library' }}">
+                            <i class="zulip-icon zulip-icon-bot" aria-hidden="true"></i>
+                        </button>
+                    {{/unless}}
+                    {{#if can_create_spaces}}
+                        <button id="add_hover_space_button" class="button-reset-style" type="button" aria-label="{{t 'Create Space' }}" data-tippy-content="{{t 'Create Space' }}">
+                            <i class="zulip-icon zulip-icon-square-plus" aria-hidden="true"></i>
+                        </button>
+                    {{/if}}
+                </div>
             </div>
         {{/if}}
         <div id="streams_list">
