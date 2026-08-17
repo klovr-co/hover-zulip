@@ -28,6 +28,8 @@ export const connected_account_schema = z.object({
     approval_state: z.enum(["pending", "approved", "revoked"]),
     health_status: z.enum(["unknown", "healthy", "degraded", "unavailable"]),
     health_checked_at: z.nullable(z.string()),
+    link_state: z.enum(["none", "pending", "linked", "expired", "failed"]),
+    link_expires_at: z.nullable(z.string()),
 });
 
 export const connected_accounts_response_schema = z.object({

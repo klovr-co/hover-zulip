@@ -42,6 +42,8 @@ function account(overrides = {}) {
         approval_state: "approved",
         health_status: "healthy",
         health_checked_at: "2026-08-11T00:00:00+00:00",
+        link_state: "linked",
+        link_expires_at: null,
         ...overrides,
     };
 }
@@ -174,6 +176,22 @@ run_test("approval controls patch accounts and report errors", ({override}) => {
         .call($button[0]);
     confirmation.on_click();
     assert.equal(patched.data.approval_state, '"revoked"');
+});
+
+run_test("admin starts WhatsApp linking through Hover's own server route", ({override}) => {
+    settings_connected_accounts.reset();
+    override(hover_connected_accounts, "get_accounts", () => []);
+    let request;
+    override(channel, "post", (options) => {
+        request = options;
+    });
+    settings_connected_accounts.set_up();
+
+    $("#connected-account-settings")
+        .get_on_handler("click.hover-connected-accounts", ".link-whatsapp-account")
+        .call();
+
+    assert.equal(request.url, "/json/hover/connected_accounts/whatsapp/link");
 });
 
 run_test("grant controls validate, save, edit, and revoke grants", ({mock_template, override}) => {
