@@ -30,6 +30,36 @@ detached attachment can retain its bounded history for authorized, read-only
 browsing without continuing to represent an active connection.
 _Avoid_: Import, sync run, all history
 
+**Space Document**:
+A Space-owned collaborative content object that inherits the Space's confirmed
+membership permissions and can be opened in Document View or Canvas View
+without conversion or duplication. Hover owns its identity, lifecycle, files,
+evidence references, checkpoints, and audit history; BlockSuite supplies its
+editable block and canvas content model.
+_Avoid_: AFFiNE Page, separate whiteboard, workspace document
+
+**Document View**:
+The linear rich-text presentation of a Space Document. Canvas-only shapes and
+connectors remain in the same Space Document but need not appear inline.
+_Avoid_: Notion page, separate document, page record
+
+**Canvas View**:
+The spatial presentation of the same Space Document, where document blocks can
+be arranged as notes alongside canvas-only shapes, connectors, and drawings.
+_Avoid_: Miro board, separate whiteboard, edgeless document
+
+**Document File**:
+A Hover-owned file associated with a Space Document and authorized through the
+document's Space. The term distinguishes editor files from a Space Attachment,
+which always associates an external Source.
+_Avoid_: Space Attachment, BlockSuite blob, AFFiNE attachment
+
+**Document Checkpoint**:
+A named, durable snapshot of a Space Document created by a Space Administrator
+for meaningful review or recovery. Continuous collaborative edits remain
+ordinary update history rather than audit events.
+_Avoid_: Autosave, every keystroke revision, AFFiNE history
+
 **Source Record**:
 A transient, read-only projection of a record fetched from an attached Source
 within its approved history boundary. Hover exposes only safe display fields

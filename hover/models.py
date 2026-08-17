@@ -155,6 +155,115 @@ class SpaceMembership(models.Model):
             )
 
 
+class SpaceDocument(models.Model):
+    MAX_TITLE_LENGTH = 120
+
+    class State(models.TextChoices):
+        ACTIVE = "active", "Active"
+        ARCHIVED = "archived", "Archived"
+
+    class View(models.TextChoices):
+        DOCUMENT = "document", "Document"
+        CANVAS = "canvas", "Canvas"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_space_documents")
+    space = models.ForeignKey(Space, on_delete=CASCADE, related_name="documents")
+    title = models.CharField(max_length=MAX_TITLE_LENGTH)
+    state = models.TextField(choices=State.choices, default=State.ACTIVE)
+    default_view = models.TextField(choices=View.choices, default=View.DOCUMENT)
+    created_by = models.ForeignKey(
+        UserProfile, null=True, on_delete=SET_NULL, related_name="created_hover_space_documents"
+    )
+    archived_by = models.ForeignKey(
+        UserProfile,
+        null=True,
+        blank=True,
+        on_delete=SET_NULL,
+        related_name="archived_hover_space_documents",
+    )
+    archived_at = models.DateTimeField(null=True, blank=True)
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["space", "state", "date_updated"])]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(state="active", archived_at__isnull=True, archived_by__isnull=True)
+                    | Q(state="archived", archived_at__isnull=False)
+                ),
+                name="hover_document_archive_matches_state",
+            )
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.realm_id != self.space.realm_id:
+            raise ValidationError({"space": "Space Documents must share the Space organization."})
+        for field_name in ("created_by", "archived_by"):
+            user = getattr(self, field_name)
+            if user is not None and self.realm_id != user.realm_id:
+                raise ValidationError(
+                    {field_name: "Space Document actors must share the Space organization."}
+                )
+
+
+class SpaceDocumentContent(models.Model):
+    document = models.OneToOneField(
+        SpaceDocument, on_delete=CASCADE, related_name="content_state"
+    )
+    version = models.PositiveBigIntegerField(default=0)
+    yjs_state = models.BinaryField(default=bytes)
+    text_projection = models.TextField(default="")
+    updated_by = models.ForeignKey(
+        UserProfile,
+        null=True,
+        on_delete=SET_NULL,
+        related_name="updated_hover_space_document_content",
+    )
+    date_updated = models.DateTimeField(auto_now=True)
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.updated_by is not None and self.document.realm_id != self.updated_by.realm_id:
+            raise ValidationError(
+                {"updated_by": "Space Document editors must share the document organization."}
+            )
+
+
+class SpaceDocumentCheckpoint(models.Model):
+    MAX_NAME_LENGTH = 120
+
+    document = models.ForeignKey(
+        SpaceDocument, on_delete=CASCADE, related_name="checkpoints"
+    )
+    name = models.CharField(max_length=MAX_NAME_LENGTH)
+    content_version = models.PositiveBigIntegerField()
+    yjs_state = models.BinaryField(default=bytes)
+    text_projection = models.TextField(default="")
+    created_by = models.ForeignKey(
+        UserProfile,
+        null=True,
+        on_delete=SET_NULL,
+        related_name="created_hover_space_document_checkpoints",
+    )
+    date_created = models.DateTimeField(default=timezone_now)
+
+    class Meta:
+        ordering = ["-date_created", "-id"]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.created_by is not None and self.document.realm_id != self.created_by.realm_id:
+            raise ValidationError(
+                {"created_by": "Document Checkpoint actors must share the document organization."}
+            )
+
+
 class SpaceMembershipSuggestion(models.Model):
     class State(models.TextChoices):
         PENDING = "pending", "Pending review"

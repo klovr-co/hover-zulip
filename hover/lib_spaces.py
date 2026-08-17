@@ -10,6 +10,7 @@ from hover.models import (
     ModuleInstallation,
     Space,
     SpaceAdministrator,
+    SpaceDocument,
     SpaceMembership,
     SpaceMembershipSuggestion,
 )
@@ -47,6 +48,12 @@ def space_projection_queryset() -> QuerySet[Space]:
                 "triggers__supported_trigger",
             )
             .order_by("version__navigation_order", "id"),
+        ),
+        Prefetch(
+            "documents",
+            queryset=SpaceDocument.objects.select_related("created_by").order_by(
+                "state", "-date_updated", "id"
+            ),
         ),
     )
 
@@ -107,6 +114,7 @@ def get_space_data(space: Space) -> dict[str, Any]:
         "administrator_assignments",
         "membership_suggestions",
         "module_installations",
+        "documents",
     }
     prefetch_cache = getattr(space, "_prefetched_objects_cache", {})
     if not required_prefetches.issubset(prefetch_cache):
@@ -180,8 +188,29 @@ def get_space_data(space: Space) -> dict[str, Any]:
         ],
         "module_installations": installations,
         "module_catalog": get_module_catalog(space.realm),
+        "documents": [
+            {
+                "id": document.id,
+                "title": document.title,
+                "state": document.state,
+                "default_view": document.default_view,
+                "created_by_id": document.created_by_id,
+                "date_updated": document.date_updated.isoformat(),
+            }
+            for document in space.documents.all()
+        ],
     }
 
 
 def user_is_space_administrator(user_profile: UserProfile, space: Space) -> bool:
     return SpaceAdministrator.objects.filter(space=space, user=user_profile).exists()
+
+
+def user_can_edit_space_documents(user_profile: UserProfile, space: Space) -> bool:
+    if user_is_space_administrator(user_profile, space):
+        return True
+    return SpaceMembership.objects.filter(
+        space=space,
+        user=user_profile,
+        role=SpaceMembership.Role.CONTRIBUTOR,
+    ).exists()
