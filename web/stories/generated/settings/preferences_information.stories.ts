@@ -6,13 +6,19 @@ import render_template from "../../../templates/settings/preferences_information
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "for_realm_settings": "For realm settings",
-    "prefix": "Prefix"
+    for_realm_settings: "For realm settings",
+    prefix: "Prefix",
+    user_list_style_values: "User list style values",
+    code: "Code",
+    description: "Description",
+    full_name: "Full name",
+    profile_picture: "Profile picture",
 };
 
 const meta = {
     title: "Catalogue/Settings/Preferences Information",
-    render: () => render_template_story("settings/preferences_information.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/preferences_information.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -6,34 +6,39 @@ import render_template from "../../../../templates/popovers/emoji/emoji_popover_
 import {render_template_story} from "../../../template_story_utils.ts";
 
 const fixture = {
-    "emoji_categories": [
+    emoji_categories: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "translated": "Translated",
-            "emojis": [
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            translated: "Translated",
+            emojis: [
                 {
-                    "custom_classes": "",
-                    "disabled": false,
-                    "icon": "check",
-                    "intent": "primary",
-                    "label": "Sample action",
-                    "name": "Sample name",
-                    "variant": "primary"
-                }
-            ]
-        }
-    ]
+                    custom_classes: "",
+                    disabled: false,
+                    icon: "check",
+                    intent: "primary",
+                    label: "Sample action",
+                    name: "Sample name",
+                    variant: "primary",
+                },
+            ],
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Popovers/Emoji/Emoji Popover Emoji Map",
-    render: () => render_template_story("popovers/emoji/emoji_popover_emoji_map.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "popovers/emoji/emoji_popover_emoji_map.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

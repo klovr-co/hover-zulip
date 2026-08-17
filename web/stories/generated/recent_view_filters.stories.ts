@@ -6,12 +6,12 @@ import render_template from "../../templates/recent_view_filters.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "show_folder_filter": true,
-    "folder_filter_tooltip": "Folder filter tooltip",
-    "is_spectator": true,
-    "filter_pm": "Filter pm",
-    "filter_unread": 3,
-    "filter_participated": "Filter participated"
+    show_folder_filter: true,
+    folder_filter_tooltip: "Folder filter tooltip",
+    is_spectator: true,
+    filter_pm: "Filter pm",
+    filter_unread: 3,
+    filter_participated: "Filter participated",
 };
 
 const meta = {

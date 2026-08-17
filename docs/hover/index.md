@@ -1,12 +1,10 @@
-# Hover product documentation
+# Hover architecture
 
 ```{toctree}
 ---
-maxdepth: 2
+maxdepth: 1
+glob: true
 ---
 
-wayfinding
-aimto-demo-pipelines
-aimto-first-implementation-plan
-aimto-pilot-rollout
+*
 ```

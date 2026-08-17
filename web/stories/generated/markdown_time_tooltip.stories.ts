@@ -6,7 +6,7 @@ import render_template from "../../templates/markdown_time_tooltip.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "tz_offset_str": "Tz offset str"
+    tz_offset_str: "Tz offset str",
 };
 
 const meta = {

@@ -6,21 +6,21 @@ import render_template from "../../../templates/stream_settings/user_links.hbs";
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "users": [
+    users: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "user": {
-                "user_id": 7,
-                "full_name": "Full name"
-            }
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            user: {
+                user_id: 7,
+                full_name: "Full name",
+            },
+        },
+    ],
 };
 
 const meta = {

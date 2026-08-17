@@ -6,23 +6,28 @@ import render_template from "../../../templates/settings/add_new_custom_profile_
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "custom_profile_field_types": [
+    custom_profile_field_types: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "id": 7
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            id: 7,
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Settings/Add New Custom Profile Field Form",
-    render: () => render_template_story("settings/add_new_custom_profile_field_form.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/add_new_custom_profile_field_form.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

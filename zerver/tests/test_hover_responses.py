@@ -231,6 +231,16 @@ class HoverResponseTest(ZulipTestCase):
             ],
         )
         response_data = self.assert_json_success(result)
+        self.assertEqual(
+            telemetry.output,
+            [
+                (
+                    "INFO:zulip.hover.telemetry:Hover telemetry event=review outcome=success "
+                    f"material=false realm_id={self.realm.id} space_id={self.space.id} "
+                    "target_count_bucket=zero"
+                )
+            ],
+        )
 
         fetched = self.get_events(
             {
@@ -319,3 +329,33 @@ class HoverResponseTest(ZulipTestCase):
         )
         self.assertEqual(Message.objects.count(), before_count)
         self.assertFalse(Response.objects.exists())
+
+    def test_response_metadata_must_be_complete_and_cannot_be_forged(self) -> None:
+        self.login_user(self.reviewer)
+        base_data: dict[str, Any] = {
+            "type": "channel",
+            "to": orjson.dumps(self.space.stream_id).decode(),
+            "topic": "Event plan",
+            "content": "Invalid response metadata",
+        }
+        incomplete_metadata_cases: list[dict[str, Any]] = [
+            {"hover_generated_item_id": self.item.id},
+            {"hover_response_type": "reply"},
+        ]
+        for incomplete_metadata in incomplete_metadata_cases:
+            with self.subTest(incomplete_metadata=incomplete_metadata):
+                result = self.client_post("/json/messages", base_data | incomplete_metadata)
+                self.assert_json_error(result, "Invalid Hover response metadata.")
+
+        self.reviewer.can_forge_sender = True
+        self.reviewer.save(update_fields=["can_forge_sender"])
+        forged = self.client_post(
+            "/json/messages",
+            base_data
+            | {
+                "forged": "true",
+                "hover_generated_item_id": self.item.id,
+                "hover_response_type": "reply",
+            },
+        )
+        self.assert_json_error(forged, "Hover responses cannot be forged.")

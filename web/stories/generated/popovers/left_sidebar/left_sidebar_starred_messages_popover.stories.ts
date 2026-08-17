@@ -6,13 +6,18 @@ import render_template from "../../../../templates/popovers/left_sidebar/left_si
 import {render_template_story} from "../../../template_story_utils.ts";
 
 const fixture = {
-    "show_unstar_all_button": true,
-    "starred_message_counts": "Starred message counts"
+    show_unstar_all_button: true,
+    starred_message_counts: "Starred message counts",
 };
 
 const meta = {
     title: "Catalogue/Popovers/Left Sidebar/Left Sidebar Starred Messages Popover",
-    render: () => render_template_story("popovers/left_sidebar/left_sidebar_starred_messages_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "popovers/left_sidebar/left_sidebar_starred_messages_popover.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/User Notification Settings",
-    render: () => render_template_story("settings/user_notification_settings.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/user_notification_settings.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

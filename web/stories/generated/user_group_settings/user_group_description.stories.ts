@@ -6,12 +6,17 @@ import render_template from "../../../templates/user_group_settings/user_group_d
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "rendered_description": "Rendered description"
+    rendered_description: "Rendered description",
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/User Group Description",
-    render: () => render_template_story("user_group_settings/user_group_description.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/user_group_description.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

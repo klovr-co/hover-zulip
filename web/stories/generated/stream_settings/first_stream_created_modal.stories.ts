@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Stream Settings/First Stream Created Modal",
-    render: () => render_template_story("stream_settings/first_stream_created_modal.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/first_stream_created_modal.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

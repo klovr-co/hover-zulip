@@ -4,9 +4,7 @@
   data-hover-generated-details
   >
     <header class="hover-generated-details__summary">
-        <span
-          class="hover-generated-update-label__chip"
-          >{{presentation.label}}</span>
+        <span class="hover-generated-update-label__chip">{{presentation.label}}</span>
         {{#if presentation.state}}
             <span
               class="hover-generated-update-state hover-generated-update-state--{{presentation.state}}"
@@ -42,8 +40,7 @@
         <dl class="hover-generated-technical-details">
             <div>
                 <dt>{{t "Producing Module"}}</dt>
-                <dd>
-                    {{module.name}}
+                <dd>{{module.name}}
                     ·
                     {{module.version}}
                 </dd>
@@ -82,9 +79,7 @@
             {{/if}}
         </dl>
         <p class="hover-generated-details__note">
-            {{t
-              "This presentation references the original native Space message; it does not create a copy."
-              }}
+            {{t "This presentation references the original native Space message; it does not create a copy."}}
         </p>
     {{/if}}
 </section>

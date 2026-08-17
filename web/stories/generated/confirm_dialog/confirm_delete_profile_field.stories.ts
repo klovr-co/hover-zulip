@@ -6,12 +6,17 @@ import render_template from "../../../templates/confirm_dialog/confirm_delete_pr
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "count": 3
+    count: 3,
 };
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Delete Profile Field",
-    render: () => render_template_story("confirm_dialog/confirm_delete_profile_field.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "confirm_dialog/confirm_delete_profile_field.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

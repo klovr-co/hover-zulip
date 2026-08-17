@@ -73,9 +73,6 @@ const overlays = mock_esm("../src/overlays", {
     message_edit_history_open: () => false,
 });
 const popovers = mock_esm("../src/user_card_popover", {
-    user_sidebar: {
-        is_open: /* istanbul ignore next */ () => false,
-    },
     message_user_card: {
         is_open: () => false,
     },
@@ -87,7 +84,6 @@ const reactions = mock_esm("../src/reactions");
 const read_receipts = mock_esm("../src/read_receipts");
 const search = mock_esm("../src/search");
 const settings_data = mock_esm("../src/settings_data");
-const sidebar_ui = mock_esm("../src/sidebar_ui");
 const stream_popover = mock_esm("../src/stream_popover");
 const stream_settings_ui = mock_esm("../src/stream_settings_ui");
 const user_status_ui = mock_esm("../src/user_status_ui");
@@ -456,10 +452,8 @@ test_while_not_editing_text("streams", ({override}) => {
 });
 
 test_while_not_editing_text("basic mappings", () => {
-    assert_mapping("?", browser_history, "go_to_location");
+    assert_mapping("?", browser_history, "go_to_location", true);
     assert_mapping("/", search, "initiate_search");
-    assert_unmapped("w");
-    assert_mapping("q", sidebar_ui, "initiate_search");
 
     assert_mapping("A", message_view, "stream_cycle_backward", true);
     assert_mapping("D", message_view, "stream_cycle_forward", true);

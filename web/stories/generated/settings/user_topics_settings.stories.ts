@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/User Topics Settings",
-    render: () => render_template_story("settings/user_topics_settings.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/user_topics_settings.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

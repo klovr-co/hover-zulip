@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Stream Settings/New Channel Members Title",
-    render: () => render_template_story("stream_settings/new_channel_members_title.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/new_channel_members_title.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

@@ -6,16 +6,21 @@ import render_template from "../../../templates/settings/group_setting_value_pil
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "setting_name": "Setting name",
-    "label": "Label",
-    "label_parens_text": "Label parens text",
-    "help_link": "#storybook",
-    "prefix": "Prefix"
+    setting_name: "Setting name",
+    label: "Label",
+    label_parens_text: "Label parens text",
+    help_link: "#storybook",
+    prefix: "Prefix",
 };
 
 const meta = {
     title: "Catalogue/Settings/Group Setting Value Pill Input",
-    render: () => render_template_story("settings/group_setting_value_pill_input.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/group_setting_value_pill_input.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

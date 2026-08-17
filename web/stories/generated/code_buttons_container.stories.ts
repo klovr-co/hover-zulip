@@ -6,7 +6,7 @@ import render_template from "../../templates/code_buttons_container.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "show_playground_button": true
+    show_playground_button: true,
 };
 
 const meta = {

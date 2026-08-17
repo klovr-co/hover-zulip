@@ -6,13 +6,18 @@ import render_template from "../../../templates/settings/generate_integration_ur
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "max_topic_length": "Max topic length",
-    "default_url_message": true
+    max_topic_length: "Max topic length",
+    default_url_message: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Generate Integration Url Modal",
-    render: () => render_template_story("settings/generate_integration_url_modal.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/generate_integration_url_modal.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

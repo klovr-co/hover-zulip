@@ -6,14 +6,15 @@ import render_template from "../../../templates/popovers/send_later_popover.hbs"
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "enter_sends_true": "Enter sends true",
-    "formatted_send_later_time": "10:45 AM",
-    "show_compose_new_message": true
+    enter_sends_true: "Enter sends true",
+    formatted_send_later_time: "10:45 AM",
+    show_compose_new_message: true,
 };
 
 const meta = {
     title: "Catalogue/Popovers/Send Later Popover",
-    render: () => render_template_story("popovers/send_later_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("popovers/send_later_popover.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

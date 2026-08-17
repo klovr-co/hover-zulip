@@ -5261,6 +5261,12 @@ paths:
                                             **Changes**: New in Zulip 9.0 (feature level 266). Previously
                                             `realm_create_private_stream_policy` field used to control the
                                             permission to create private channels.
+                                    can_create_spaces_group:
+                                      allOf:
+                                        - $ref: "#/components/schemas/GroupSettingValue"
+                                        - description: |
+                                            A [group-setting value](/api/group-setting-values) defining
+                                            the set of users who may create Hover Spaces.
                                     can_create_web_public_channel_group:
                                       allOf:
                                         - $ref: "#/components/schemas/GroupSettingValue"
@@ -6651,6 +6657,8 @@ paths:
                                       "administrators": [],
                                       "memberships": [],
                                       "membership_suggestions": [],
+                                      "module_installations": [],
+                                      "module_catalog": [],
                                     },
                                 }
                             - type: object
@@ -9399,12 +9407,17 @@ paths:
                       hover_response:
                         type: object
                         additionalProperties: false
+                        description: |
+                          Present when the sent message was recorded as a native
+                          response beneath a Hover-generated root.
                         properties:
                           type:
                             type: string
                             enum: [reply, review]
+                            description: Whether Hover recorded the response as discussion or Review.
                           clarification_required:
                             type: boolean
+                            description: Whether the submitted Review requires clarification.
                         required: [type, clarification_required]
                     example:
                       {
@@ -19550,27 +19563,16 @@ paths:
                           $ref: "#/components/schemas/HoverConnectedAccount"
                         description: |
                           Present if `hover_connected_account` is present in
-                          `fetch_event_types`.
-
-                          Contains the sanitized Connected Accounts visible to the
-                          current user. Organization administrators can see every
-                          account; other users see only accounts that they created,
-                          own, or have been granted access to.
-
-                          **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+                          `fetch_event_types`. Contains the Connected Accounts visible
+                          to the current user.
                       hover_connected_account_grants:
                         type: array
                         items:
                           $ref: "#/components/schemas/HoverConnectedAccountGrant"
                         description: |
                           Present if `hover_connected_account` is present in
-                          `fetch_event_types`.
-
-                          Contains the account grants visible to the current user.
-                          Organization administrators can see every grant for a
-                          visible account; other users see only their own grants.
-
-                          **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+                          `fetch_event_types`. Contains the current user's visible
+                          grants for Connected Accounts.
                       unread_msgs:
                         type: object
                         description: |
@@ -20804,11 +20806,8 @@ paths:
                           - description: |
                               Present if `realm` is present in `fetch_event_types`.
 
-                              A [group-setting value](/api/group-setting-values)
-                              defining the set of users who have permission to create
-                              Hover Spaces in this organization.
-
-                              **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
+                              A [group-setting value](/api/group-setting-values) defining
+                              the set of users who may create Hover Spaces.
                       realm_can_create_web_public_channel_group:
                         allOf:
                           - $ref: "#/components/schemas/GroupSettingValue"
@@ -21212,6 +21211,12 @@ paths:
                           **Changes**: New in Zulip 5.0 (feature level 109).
 
                           [server-settings]: https://zulip.readthedocs.io/en/stable/production/settings.html
+                      realm_hover_enabled:
+                        type: boolean
+                        description: |
+                          Present if `realm` is present in `fetch_event_types`.
+
+                          Whether Hover features are enabled for this organization.
                       realm_want_advertise_in_communities_directory:
                         type: boolean
                         description: |
@@ -21493,14 +21498,6 @@ paths:
 
                           - "G" means generated by Gravatar (the default).
                           - "U" means uploaded by an organization administrator.
-                      realm_hover_enabled:
-                        type: boolean
-                        description: |
-                          Present if `realm` is present in `fetch_event_types`.
-
-                          Whether Hover features are enabled for this organization.
-
-                          **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
                       realm_workplace_users_group:
                         allOf:
                           - $ref: "#/components/schemas/GroupSettingValue"
@@ -27695,11 +27692,20 @@ paths:
                               - $ref: "#/components/schemas/HoverMorningEdition"
                               - type: object
                                 nullable: true
+                                additionalProperties: false
                           end_of_day:
                             anyOf:
                               - $ref: "#/components/schemas/HoverEndOfDayEdition"
                               - type: object
                                 nullable: true
+                                additionalProperties: false
+                    example:
+                      {
+                        "result": "success",
+                        "msg": "",
+                        "sync_status": "empty",
+                        "editions": {"morning": null, "end_of_day": null},
+                      }
 
   /hover/search:
     post:
@@ -27724,6 +27730,7 @@ paths:
                   description: Search text, normalized to single spaces.
                   type: string
                   maxLength: 100
+                  example: venue handoff
               required: [query]
             encoding:
               query:
@@ -27759,6 +27766,15 @@ paths:
                       - knowledge
                       - sources
                       - source_unavailable_count
+                    example:
+                      {
+                        "result": "success",
+                        "msg": "",
+                        "query": "launch",
+                        "knowledge": [],
+                        "sources": [],
+                        "source_unavailable_count": 0,
+                      }
 
   /hover/todos:
     get:
@@ -27789,6 +27805,7 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/HoverTodo"
+                    example: {"result": "success", "msg": "", "todos": []}
 
   /hover/spaces/{space_id}/todos/{todo_id}/events:
     post:
@@ -27805,10 +27822,14 @@ paths:
         - name: space_id
           in: path
           required: true
+          description: The ID of the Hover Space containing the To-do.
+          example: 2
           schema: {type: integer}
         - name: todo_id
           in: path
           required: true
+          description: The ID of the To-do whose event should be appended.
+          example: 1
           schema: {type: integer}
       requestBody:
         required: true
@@ -27820,27 +27841,32 @@ paths:
               required: [operation, request_id, expected_version]
               properties:
                 operation:
-                  description: The Todo state transition to append.
                   type: string
                   enum: [assign, complete, reopen]
+                  description: The Todo state transition to append.
+                  example: assign
                 request_id:
-                  description: A UUID identifying this idempotent mutation.
                   type: string
                   format: uuid
+                  description: A unique idempotency key for this Todo command.
+                  example: 4f437c7e-03a9-4c3b-8246-c770bdf1efc7
                 expected_version:
-                  description: The current positive Todo version as a decimal string.
                   type: string
-                  pattern: "^[1-9][0-9]*$"
+                  pattern: ^[1-9][0-9]*$
+                  description: The current Todo version expected by the caller.
+                  example: "1"
                 assignee_user_id:
                   type: string
-                  pattern: "^[1-9][0-9]*$"
+                  pattern: ^[1-9][0-9]*$
                   nullable: true
                   description: Required only for `assign`.
+                  example: "9"
                 reason:
-                  description: Optional explanation for the transition.
                   type: string
                   nullable: true
                   maxLength: 1000
+                  description: Optional audit reason for the transition.
+                  example: Assigning the venue follow-up.
       responses:
         "200":
           description: Success, including an idempotent replay.
@@ -27858,19 +27884,82 @@ paths:
                       changed: {type: boolean}
                       todo:
                         $ref: "#/components/schemas/HoverTodo"
+                    example:
+                      {
+                        "result": "success",
+                        "msg": "",
+                        "changed": true,
+                        "todo":
+                          {
+                            "id": 1,
+                            "state": "active",
+                            "version": 1,
+                            "wording": "Confirm venue",
+                            "due_date": null,
+                            "completed_at": null,
+                            "assignee": null,
+                            "space": {"id": 2, "name": "Launch"},
+                            "generated_item":
+                              {
+                                "id": 3,
+                                "message_id": 4,
+                                "evidence_count": 0,
+                                "evidence_url": null,
+                              },
+                            "approval": null,
+                            "assignable_users": [],
+                            "history_count": 1,
+                            "recent_events": [],
+                          },
+                      }
         "409":
           description: The expected version or requested transition is stale.
           content:
             application/json:
               schema:
+                description: The current To-do returned after a stale transition request.
                 type: object
                 additionalProperties: false
                 required: [result, msg, todo]
                 properties:
-                  result: {type: string, enum: [error]}
-                  msg: {type: string}
+                  result:
+                    type: string
+                    enum: [error]
+                    description: Indicates that the transition was rejected.
+                  msg:
+                    type: string
+                    description: A human-readable explanation of the stale request.
                   todo:
-                    $ref: "#/components/schemas/HoverTodo"
+                    description: The current To-do state the caller should reconcile.
+                    allOf:
+                      - $ref: "#/components/schemas/HoverTodo"
+                example:
+                  {
+                    "result": "error",
+                    "msg": "The Todo has changed.",
+                    "todo":
+                      {
+                        "id": 1,
+                        "state": "active",
+                        "version": 2,
+                        "wording": "Confirm venue",
+                        "due_date": null,
+                        "completed_at": null,
+                        "assignee": null,
+                        "space": {"id": 2, "name": "Launch"},
+                        "generated_item":
+                          {
+                            "id": 3,
+                            "message_id": 4,
+                            "evidence_count": 0,
+                            "evidence_url": null,
+                          },
+                        "approval": null,
+                        "assignable_users": [],
+                        "history_count": 1,
+                        "recent_events": [],
+                      },
+                  }
 
   /hover/spaces/{space_id}/generated-items/{generated_item_id}/suggested-action/decisions:
     post:
@@ -27889,10 +27978,14 @@ paths:
         - name: space_id
           in: path
           required: true
+          description: The ID of the Hover Space containing the generated item.
+          example: 2
           schema: {type: integer}
         - name: generated_item_id
           in: path
           required: true
+          description: The ID of the generated item whose suggested action should be decided.
+          example: 3
           schema: {type: integer}
       requestBody:
         required: true
@@ -27904,37 +27997,44 @@ paths:
               required: [decision, request_id, expected_version]
               properties:
                 decision:
-                  description: The Suggested Action decision to record.
                   type: string
                   enum: [approve, not_action, restore]
+                  description: The decision to apply to the Suggested Action.
+                  example: approve
                 request_id:
-                  description: A UUID identifying this idempotent decision.
                   type: string
                   format: uuid
+                  description: A unique idempotency key for this decision.
+                  example: e3437e2d-a109-4676-a3f6-6d45ea16e131
                 expected_version:
-                  description: The current positive Suggested Action version as a decimal string.
                   type: string
-                  pattern: "^[1-9][0-9]*$"
+                  pattern: ^[1-9][0-9]*$
+                  description: The current Suggested Action version expected by the caller.
+                  example: "1"
                 reason:
                   type: string
                   nullable: true
                   maxLength: 1000
                   description: Optional only for `not_action`.
+                  example: Already handled by the venue team.
                 wording:
                   type: string
                   nullable: true
                   maxLength: 50000
                   description: Reviewed wording to confirm with `approve`.
+                  example: Confirm the venue booking.
                 assignee_user_id:
                   type: string
                   nullable: true
-                  pattern: "^(?:|[1-9][0-9]*)$"
-                  description: Confirmed Space member to assign, or an empty string to clear.
+                  pattern: ^(?:|[1-9][0-9]*)$
+                  description: Confirmed Space member to assign, or null to leave unassigned.
+                  example: "9"
                 due_date:
                   type: string
+                  format: date
                   nullable: true
-                  pattern: "^(?:|[0-9]{4}-[0-9]{2}-[0-9]{2})$"
-                  description: ISO date to confirm with `approve`, or an empty string to clear.
+                  description: Due date to confirm with `approve`, or null to clear it.
+                  example: "2026-08-31"
       responses:
         "200":
           description: Success, including an idempotent replay.
@@ -27952,11 +28052,36 @@ paths:
                       changed: {type: boolean}
                       suggested_action:
                         $ref: "#/components/schemas/HoverSuggestedAction"
+                    example:
+                      {
+                        "result": "success",
+                        "msg": "",
+                        "changed": true,
+                        "suggested_action":
+                          {
+                            "id": 1,
+                            "state": "pending",
+                            "version": 1,
+                            "wording": "Confirm venue",
+                            "source_proposal":
+                              {
+                                "assignee_ref": null,
+                                "assignee_display_name": null,
+                              },
+                            "assignee": null,
+                            "assignable_users": [],
+                            "due_date": null,
+                            "history_count": 0,
+                            "recent_transitions": [],
+                            "todo": null,
+                          },
+                      }
         "409":
           description: The expected version or transition is stale.
           content:
             application/json:
               schema:
+                description: The current Suggested Action returned after a stale decision request.
                 type: object
                 additionalProperties: false
                 required: [result, msg, suggested_action]
@@ -27964,9 +28089,34 @@ paths:
                   result:
                     type: string
                     enum: [error]
-                  msg: {type: string}
+                    description: Indicates that the decision was rejected.
+                  msg:
+                    type: string
+                    description: A human-readable explanation of the stale request.
                   suggested_action:
-                    $ref: "#/components/schemas/HoverSuggestedAction"
+                    description: The current Suggested Action state the caller should reconcile.
+                    allOf:
+                      - $ref: "#/components/schemas/HoverSuggestedAction"
+                example:
+                  {
+                    "result": "error",
+                    "msg": "The Suggested Action has changed.",
+                    "suggested_action":
+                      {
+                        "id": 1,
+                        "state": "pending",
+                        "version": 2,
+                        "wording": "Confirm venue",
+                        "source_proposal":
+                          {"assignee_ref": null, "assignee_display_name": null},
+                        "assignee": null,
+                        "assignable_users": [],
+                        "due_date": null,
+                        "history_count": 0,
+                        "recent_transitions": [],
+                        "todo": null,
+                      },
+                  }
 
   /hover/awareness:
     get:
@@ -27991,6 +28141,7 @@ paths:
               schema:
                 type: string
                 enum: [for_you, team_pulse]
+                example: for_you
       responses:
         "200":
           description: Success.
@@ -28013,6 +28164,13 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/HoverAwarenessItem"
+                    example:
+                      {
+                        "result": "success",
+                        "msg": "",
+                        "surface": "for_you",
+                        "items": [],
+                      }
 
   /hover/spaces/{space_id}/generated-items/{generated_item_id}/evidence:
     post:
@@ -28034,12 +28192,14 @@ paths:
           in: path
           required: true
           description: The ID of the Hover Space containing the generated item.
+          example: 2
           schema:
             type: integer
         - name: generated_item_id
           in: path
           required: true
           description: The ID of the generated item whose evidence should be resolved.
+          example: 3
           schema:
             type: integer
       responses:
@@ -28100,16 +28260,22 @@ paths:
         - name: space_id
           in: path
           required: true
+          description: The ID of the Hover Space containing the generated item.
+          example: 2
           schema:
             type: integer
         - name: generated_item_id
           in: path
           required: true
+          description: The ID of the generated item containing the disputed detail.
+          example: 3
           schema:
             type: integer
         - name: disputed_detail_id
           in: path
           required: true
+          description: The ID of the disputed detail whose evidence should be fetched.
+          example: 4
           schema:
             type: integer
       responses:
@@ -28131,6 +28297,7 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/HoverResolvedEvidence"
+                    example: {"result": "success", "msg": "", "evidence": []}
 
 components:
   #######################
@@ -29983,8 +30150,10 @@ components:
           properties:
             id:
               type: integer
+              description: The unique ID of the generated Hover item.
             output_type:
               type: string
+              description: The presentation contract emitted by the Module.
               enum:
                 - feed_update
                 - digest
@@ -29995,21 +30164,27 @@ components:
             module:
               type: object
               additionalProperties: false
+              description: The exact Module version that generated the item.
               properties:
                 key:
                   type: string
+                  description: The stable key identifying the Module.
                 name:
                   type: string
+                  description: The display name of the Module.
                 version:
                   type: string
+                  description: The pinned version of the Module.
               required:
                 - key
                 - name
                 - version
             source_summary:
               type: string
+              description: A human-readable summary of the supporting Sources.
             evidence_available:
               type: boolean
+              description: Whether the current user may request supporting evidence.
             evidence_url:
               type: string
               nullable: true
@@ -30018,6 +30193,7 @@ components:
                 or `null` when no evidence is available.
             sources:
               type: array
+              description: Sanitized summaries of the Sources supporting the item.
               items:
                 type: object
                 additionalProperties: false
@@ -30028,15 +30204,20 @@ components:
                     description: The stable Source ID, when retained.
                   key:
                     type: string
+                    description: The stable key for this Source summary.
                   name:
                     type: string
+                    description: The display name of the Source.
                   icon_class:
                     type: string
+                    description: The CSS class used for the Source icon.
                   count:
                     type: integer
                     minimum: 1
+                    description: The number of supporting records from this Source.
                   url:
                     type: string
+                    description: The authorized URL for browsing this Source's evidence.
                 required:
                   - id
                   - key
@@ -30051,26 +30232,33 @@ components:
               properties:
                 label:
                   type: string
+                  description: The human-readable label for the generated item.
                 importance:
                   type: string
+                  description: The Module-assigned importance level.
                   enum: [low, normal, high, urgent]
                 state:
                   type: string
                   nullable: true
+                  description: The Module-defined state, when applicable.
                 occurred_at:
                   type: string
                   format: date-time
                   nullable: true
+                  description: When the underlying event occurred, when known.
                 generated_at:
                   type: string
                   format: date-time
                   nullable: true
+                  description: When Hover generated the item, when known.
                 published_at:
                   type: string
                   format: date-time
                   nullable: true
+                  description: When Hover published the native message, when known.
                 run_reference:
                   type: string
+                  description: The safe Module-run reference used for diagnostics.
               required:
                 - label
                 - importance
@@ -30086,28 +30274,36 @@ components:
               properties:
                 is_latest:
                   type: boolean
+                  description: Whether this is the latest item in its lineage.
                 history_count:
                   type: integer
                   minimum: 0
+                  description: The number of earlier material versions.
                 history:
                   type: array
+                  description: Earlier material versions in the same Space lineage.
                   items:
                     type: object
                     additionalProperties: false
                     properties:
                       message_id:
                         type: integer
+                        description: The native message ID for this historical version.
                       title:
                         type: string
+                        description: The display title of the historical version.
                       state:
                         type: string
                         nullable: true
+                        description: The Module-defined state of the historical version.
                       occurred_at:
                         type: string
                         format: date-time
                         nullable: true
+                        description: When the historical version's underlying event occurred.
                       is_current:
                         type: boolean
+                        description: Whether this entry represents the current message.
                     required:
                       - message_id
                       - title
@@ -30124,32 +30320,61 @@ components:
               description: The current interpretation after applied Reviews.
             revisions:
               type: array
+              description: Reviews that changed the generated item's interpreted payload.
               items:
                 type: object
                 additionalProperties: false
                 properties:
                   id:
                     type: integer
+                    description: The unique ID of the revision.
                   field_path:
                     type: string
-                  previous_value: {}
-                  new_value: {}
+                    description: The reviewed payload field changed by the revision.
+                  previous_value:
+                    description: The field value before the Review was applied.
+                    oneOf:
+                      - type: string
+                      - type: number
+                      - type: boolean
+                      - type: array
+                        items: {}
+                      - type: object
+                        nullable: true
+                        additionalProperties: true
+                  new_value:
+                    description: The field value after the Review was applied.
+                    oneOf:
+                      - type: string
+                      - type: number
+                      - type: boolean
+                      - type: array
+                        items: {}
+                      - type: object
+                        nullable: true
+                        additionalProperties: true
                   actor:
                     type: object
                     additionalProperties: false
+                    description: The user who submitted the applied Review.
                     properties:
                       id:
                         type: integer
+                        description: The reviewer's user ID.
                       full_name:
                         type: string
+                        description: The reviewer's full name.
                     required: [id, full_name]
                   timestamp:
                     type: string
                     format: date-time
+                    description: When the Review was applied.
                   reason:
                     type: string
+                    description: The optional reason supplied with the Review.
                   review_message_id:
                     type: integer
+                    description: The native message ID containing the Review.
                 required:
                   - id
                   - field_path
@@ -30168,67 +30393,88 @@ components:
                 properties:
                   id:
                     type: integer
+                    description: The unique ID of the disputed detail.
                   field_path:
                     type: string
+                    description: The reviewed payload field whose evidence conflicts.
                   summary:
                     type: string
+                    description: A safe summary of the evidence conflict.
                   material:
                     type: boolean
+                    description: Whether the conflict can materially change the output.
                   state:
                     type: string
                     enum: [needs_review, resolved]
+                    description: Whether the conflict still needs Review.
                   evidence_count:
                     type: integer
                     minimum: 2
+                    description: The number of conflicting evidence records.
                   evidence_url:
                     type: string
                     nullable: true
+                    description: The authorized URL for inspecting the conflicting evidence.
                   review_request:
                     type: object
                     nullable: true
                     additionalProperties: false
+                    description: The Review request opened for this conflict, when present.
                     properties:
                       id:
                         type: integer
+                        description: The unique ID of the Review request.
                       state:
                         type: string
                         enum: [open, resolved]
+                        description: Whether the Review request remains open.
                       message_id:
                         type: integer
+                        description: The native message ID of the Review request.
                       targets:
                         type: array
+                        description: The users selected to review the conflict.
                         items:
                           type: object
                           additionalProperties: false
                           properties:
                             user_id:
                               type: integer
+                              description: The target reviewer's user ID.
                             full_name:
                               type: string
+                              description: The target reviewer's full name.
                             reason:
                               type: string
                               enum: [involved_teammate, space_admin_fallback]
+                              description: Why this user was selected as a reviewer.
                           required: [user_id, full_name, reason]
                     required: [id, state, message_id, targets]
                   resolution:
                     type: object
                     nullable: true
                     additionalProperties: false
+                    description: The applied revision that resolved this conflict, when present.
                     properties:
                       revision_id:
                         type: integer
+                        description: The unique ID of the resolving revision.
                       reviewer:
                         type: object
                         additionalProperties: false
+                        description: The user who resolved the conflict.
                         properties:
                           id:
                             type: integer
+                            description: The reviewer's user ID.
                           full_name:
                             type: string
+                            description: The reviewer's full name.
                         required: [id, full_name]
                       timestamp:
                         type: string
                         format: date-time
+                        description: When the conflict was resolved.
                     required: [revision_id, reviewer, timestamp]
                 required:
                   - id
@@ -30241,10 +30487,12 @@ components:
                   - review_request
                   - resolution
             suggested_action:
+              description: The governed Suggested Action, when this item proposes one.
               anyOf:
                 - $ref: "#/components/schemas/HoverSuggestedAction"
                 - type: object
                   nullable: true
+                  additionalProperties: false
           required:
             - id
             - output_type
@@ -30269,12 +30517,17 @@ components:
             type:
               type: string
               enum: [reply, review]
+              description: Whether the message is discussion or a structured Review.
             clarification_required:
               type: boolean
+              description: Whether the submitted Review needs clarification.
             root_message_id:
               type: integer
+              description: The native message ID of the generated root being answered.
             generated_item:
-              $ref: "#/components/schemas/MessagesBase/properties/hover_generated_item"
+              allOf:
+                - $ref: "#/components/schemas/MessagesBase/properties/hover_generated_item"
+              description: The current generated-item projection for the root message.
           required:
             - type
             - clarification_required
@@ -30287,17 +30540,24 @@ components:
           properties:
             id:
               type: integer
+              description: The unique ID of the Review request.
             root_message_id:
               type: integer
+              description: The native message ID of the generated root under Review.
             generated_item:
-              $ref: "#/components/schemas/MessagesBase/properties/hover_generated_item"
+              allOf:
+                - $ref: "#/components/schemas/MessagesBase/properties/hover_generated_item"
+              description: The current generated-item projection for the root message.
             field_path:
               type: string
+              description: The reviewed payload field requiring confirmation.
             state:
               type: string
               enum: [open, resolved]
+              description: Whether the Review request still needs a response.
             target_user_ids:
               type: array
+              description: The users asked to review the disputed field.
               items:
                 type: integer
           required:
@@ -30318,20 +30578,27 @@ components:
             captured_at:
               type: string
               format: date-time
+              description: When Hover captured the immutable provenance metadata.
             source:
               type: object
               additionalProperties: false
+              description: Sanitized metadata for the Source that produced the message.
               properties:
                 id:
                   type: integer
+                  description: The unique ID of the Source.
                 provider_key:
                   type: string
+                  description: The stable key for the Source provider.
                 provider_name:
                   type: string
+                  description: The display name of the Source provider.
                 source_type:
                   type: string
+                  description: The provider-specific Source type.
                 display_name:
                   type: string
+                  description: The display name of the Source.
                 external_url:
                   type: string
                   description: An HTTPS Source link, or an empty string.
@@ -31316,134 +31583,6 @@ components:
           type: boolean
           description: |
             Whether the channel folder is archived or not.
-    HoverConnectedAccount:
-      type: object
-      additionalProperties: false
-      required:
-        - id
-        - provider_key
-        - provider_name
-        - external_account_id
-        - display_name
-        - connection_kind
-        - incoming_webhook_bot_id
-        - created_by_id
-        - owner_id
-        - approval_state
-        - health_status
-        - health_checked_at
-      description: |
-        The sanitized server projection of a Hover Connected Account visible to
-        the requesting user. It contains no provider credentials, bearer tokens,
-        Studio or Clawer endpoints, or raw provider error details.
-
-        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
-      properties:
-        id:
-          type: integer
-          description: The internal ID of the Connected Account.
-        provider_key:
-          type: string
-          description: The stable key identifying the account's provider type.
-        provider_name:
-          type: string
-          description: The human-readable name of the provider.
-        external_account_id:
-          type: string
-          format: uuid
-          description: An opaque Studio-assigned identifier for the account.
-        display_name:
-          type: string
-          description: The account name displayed to users.
-        connection_kind:
-          type: string
-          enum:
-            - remote_studio
-            - native_integration
-        incoming_webhook_bot_id:
-          type: integer
-          nullable: true
-          description: The internal user ID of the account's incoming webhook bot.
-        created_by_id:
-          type: integer
-          nullable: true
-          description: The internal ID of the user who created the account.
-        owner_id:
-          type: integer
-          nullable: true
-          description: The internal ID of the user who owns the account.
-        approval_state:
-          type: string
-          enum:
-            - pending
-            - approved
-            - revoked
-        health_status:
-          type: string
-          enum:
-            - unknown
-            - healthy
-            - degraded
-            - unavailable
-        health_checked_at:
-          type: string
-          format: date-time
-          nullable: true
-          description: When Studio last reported the account's health status.
-    HoverConnectedAccountSelector:
-      type: object
-      additionalProperties: false
-      required:
-        - selector_type
-        - source_ref
-        - display_name
-      description: |
-        A sanitized selector limiting a Connected Account grant to a provider
-        resource. The reference is opaque to Hover and cannot be used as a
-        provider credential.
-
-        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
-      properties:
-        selector_type:
-          type: string
-        source_ref:
-          type: string
-        display_name:
-          type: string
-    HoverConnectedAccountGrant:
-      type: object
-      additionalProperties: false
-      required:
-        - id
-        - account_id
-        - user_id
-        - state
-        - all_selectors
-        - selectors
-      description: |
-        The requesting user's authorized view of a teammate-level Connected
-        Account grant. Studio remains authoritative for the organization's
-        provider-side access ceiling.
-
-        **Changes**: New in Zulip 12.0 (feature level ZF-82baeb).
-      properties:
-        id:
-          type: integer
-        account_id:
-          type: integer
-        user_id:
-          type: integer
-        state:
-          type: string
-          enum:
-            - active
-            - revoked
-        all_selectors:
-          type: boolean
-        selectors:
-          type: array
-          items:
-            $ref: "#/components/schemas/HoverConnectedAccountSelector"
     HoverSpace:
       type: object
       additionalProperties: false
@@ -31459,6 +31598,8 @@ components:
         - administrators
         - memberships
         - membership_suggestions
+        - module_installations
+        - module_catalog
       description: |
         The sanitized server projection of a Hover Space. It includes only Source
         metadata and internal-user identity matches that the requesting user is
@@ -31468,17 +31609,22 @@ components:
       properties:
         id:
           type: integer
+          description: The unique ID of the Space.
         name:
           type: string
+          description: The display name of the Space.
         description:
           type: string
+          description: The user-provided purpose of the Space.
         state:
           type: string
+          description: Whether the Space is being configured or has been launched.
           enum:
             - setup
             - launched
         category:
           type: object
+          description: The category selected for the Space.
           additionalProperties: false
           required:
             - id
@@ -31486,16 +31632,21 @@ components:
           properties:
             id:
               type: integer
+              description: The unique ID of the category.
             name:
               type: string
+              description: The display name of the category.
         created_by_id:
           type: integer
           nullable: true
+          description: The user ID of the Space creator, if the user still exists.
         stream_id:
           type: integer
           nullable: true
+          description: The channel ID created when the Space is launched.
         attachments:
           type: array
+          description: The Sources attached to the Space.
           items:
             type: object
             additionalProperties: false
@@ -31511,24 +31662,30 @@ components:
             properties:
               id:
                 type: integer
+                description: The unique ID of the Source attachment.
               state:
                 type: string
+                description: Whether the attachment is active or detached.
                 enum:
                   - active
                   - detached
               history_window:
                 type: string
+                description: The configured historical-data window.
                 enum:
                   - today
                   - last_30_days
                   - custom
               history_timezone:
                 type: string
+                description: The timezone used to interpret the history window.
               history_start_at:
                 type: string
+                description: The calculated inclusive start of the history window.
               custom_start_date:
                 type: string
                 nullable: true
+                description: The custom local start date, when one was selected.
               can_browse_records:
                 type: boolean
                 description: |
@@ -31536,6 +31693,7 @@ components:
                   record browser. This is false during Space setup.
               source:
                 type: object
+                description: Sanitized metadata for the attached Source.
                 additionalProperties: false
                 required:
                   - id
@@ -31547,18 +31705,25 @@ components:
                 properties:
                   id:
                     type: integer
+                    description: The unique ID of the Source.
                   provider_key:
                     type: string
+                    description: The stable key for the Source provider.
                   source_type:
                     type: string
+                    description: The provider-specific Source type.
                   display_name:
                     type: string
+                    description: The display name of the Source.
                   account_id:
                     type: integer
+                    description: The Connected Account ID backing the Source.
                   account_display_name:
                     type: string
+                    description: The display name of the Connected Account.
         administrators:
           type: array
+          description: The users who administer the Space.
           items:
             type: object
             additionalProperties: false
@@ -31568,10 +31733,13 @@ components:
             properties:
               user_id:
                 type: integer
+                description: The administrator's user ID.
               full_name:
                 type: string
+                description: The administrator's full name.
         memberships:
           type: array
+          description: The confirmed members of the Space.
           items:
             type: object
             additionalProperties: false
@@ -31584,19 +31752,25 @@ components:
             properties:
               id:
                 type: integer
+                description: The unique ID of the membership.
               user_id:
                 type: integer
+                description: The member's user ID.
               full_name:
                 type: string
+                description: The member's full name.
               role:
                 type: string
+                description: The member's role in the Space.
                 enum:
                   - contributor
                   - subscriber
               is_administrator:
                 type: boolean
+                description: Whether the member also administers the Space.
         membership_suggestions:
           type: array
+          description: Pending membership suggestions inferred from attached Sources.
           items:
             type: object
             additionalProperties: false
@@ -31610,24 +31784,53 @@ components:
             properties:
               id:
                 type: integer
+                description: The unique ID of the membership suggestion.
               user_id:
                 type: integer
+                description: The suggested member's user ID.
               full_name:
                 type: string
+                description: The suggested member's full name.
               suggested_role:
                 type: string
+                description: The role suggested for the user.
                 enum:
                   - contributor
                   - subscriber
               state:
                 type: string
+                description: The review state of the suggestion.
                 enum:
                   - pending
               match_basis:
                 type: string
+                description: The verified identity field that produced the match.
                 enum:
                   - verified_email
                   - verified_phone
+        module_installations:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: |
+            Installed module projections for this Space, including their pinned
+            versions, Source bindings, triggers, and current lifecycle state.
+        module_catalog:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: |
+            The realm-scoped module versions available to install in this Space.
+    HoverConnectedAccount:
+      type: object
+      description: A sanitized external account that Hover may use as a Source.
+      additionalProperties: true
+    HoverConnectedAccountGrant:
+      type: object
+      description: A user's selector-scoped access grant for a Connected Account.
+      additionalProperties: true
     HoverSuggestedAction:
       type: object
       additionalProperties: false
@@ -31727,6 +31930,7 @@ components:
             - $ref: "#/components/schemas/HoverTodo"
             - type: object
               nullable: true
+              additionalProperties: false
     HoverTodoPerson:
       type: object
       additionalProperties: false
@@ -31765,6 +31969,7 @@ components:
             - $ref: "#/components/schemas/HoverTodoPerson"
             - type: object
               nullable: true
+              additionalProperties: false
         space:
           type: object
           additionalProperties: false
@@ -31829,11 +32034,13 @@ components:
                   - $ref: "#/components/schemas/HoverTodoPerson"
                   - type: object
                     nullable: true
+                    additionalProperties: false
               new_assignee:
                 anyOf:
                   - $ref: "#/components/schemas/HoverTodoPerson"
                   - type: object
                     nullable: true
+                    additionalProperties: false
               reason: {type: string}
               notification_message_id: {type: integer, nullable: true}
     HoverAwarenessItem:

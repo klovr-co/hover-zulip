@@ -6,26 +6,31 @@ import render_template from "../../../../templates/popovers/user_card/user_card_
 import {render_template_story} from "../../../template_story_utils.ts";
 
 const fixture = {
-    "profile_fields": [
+    profile_fields: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "is_long_text": true,
-            "type": "Type",
-            "id": 7,
-            "value": "Value"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            is_long_text: true,
+            type: "Type",
+            id: 7,
+            value: "Value",
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Popovers/User Card/User Card Popover Custom Fields",
-    render: () => render_template_story("popovers/user_card/user_card_popover_custom_fields.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "popovers/user_card/user_card_popover_custom_fields.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

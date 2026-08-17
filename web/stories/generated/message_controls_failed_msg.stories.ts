@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Message Controls Failed Msg",
-    render: () => render_template_story("message_controls_failed_msg.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("message_controls_failed_msg.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

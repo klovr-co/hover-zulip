@@ -6,58 +6,63 @@ import render_template from "../../../templates/settings/organization_permission
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "user_has_email_set": "User has email set",
-    "is_owner": true,
-    "realm_waiting_period_threshold": "Realm waiting period threshold",
-    "realm_allow_message_editing": "Realm allow message editing",
-    "msg_edit_limit_dropdown_values": [
+    user_has_email_set: "User has email set",
+    is_owner: true,
+    realm_waiting_period_threshold: "Realm waiting period threshold",
+    realm_allow_message_editing: "Realm allow message editing",
+    msg_edit_limit_dropdown_values: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "value": "Value",
-            "text": "Text"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            value: "Value",
+            text: "Text",
+        },
     ],
-    "realm_message_content_edit_limit_minutes": "Realm message content edit limit minutes",
-    "msg_move_limit_dropdown_values": [
+    realm_message_content_edit_limit_minutes: "Realm message content edit limit minutes",
+    msg_move_limit_dropdown_values: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "value": "Value",
-            "text": "Text"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            value: "Value",
+            text: "Text",
+        },
     ],
-    "msg_delete_limit_dropdown_values": [
+    msg_delete_limit_dropdown_values: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "value": "Value",
-            "text": "Text"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            value: "Value",
+            text: "Text",
+        },
     ],
-    "realm_message_content_delete_limit_minutes": "Realm message content delete limit minutes",
-    "server_can_summarize_topics": "Server can summarize topics",
-    "is_plan_self_hosted": true
+    realm_message_content_delete_limit_minutes: "Realm message content delete limit minutes",
+    server_can_summarize_topics: "Server can summarize topics",
+    is_plan_self_hosted: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Organization Permissions Admin",
-    render: () => render_template_story("settings/organization_permissions_admin.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/organization_permissions_admin.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

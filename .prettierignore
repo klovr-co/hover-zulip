@@ -1,6 +1,7 @@
 pnpm-lock.yaml
 /.ua
 /api_docs/**/*.md
+/.ua
 /corporate/tests/stripe_fixtures
 /help/**/*.md
 /locale

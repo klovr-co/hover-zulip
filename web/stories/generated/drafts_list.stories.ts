@@ -6,29 +6,29 @@ import render_template from "../../templates/drafts_list.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "narrow_drafts_header": "Narrow drafts header",
-    "narrow_drafts": [
+    narrow_drafts_header: "Narrow drafts header",
+    narrow_drafts: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
     ],
-    "other_drafts": [
+    other_drafts: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
+    ],
 };
 
 const meta = {

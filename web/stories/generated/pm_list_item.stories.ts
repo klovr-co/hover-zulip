@@ -6,17 +6,17 @@ import render_template from "../../templates/pm_list_item.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "is_active": true,
-    "is_zero": true,
-    "user_ids_string": "User ids string",
-    "url": "#storybook",
-    "is_group": true,
-    "user_circle_class": "User circle class",
-    "recipients": "Recipients",
-    "is_current_user": true,
-    "is_bot": true,
-    "has_unread_mention": true,
-    "unread": 3
+    is_active: true,
+    is_zero: true,
+    user_ids_string: "User ids string",
+    url: "#storybook",
+    is_group: true,
+    user_circle_class: "User circle class",
+    recipients: "Recipients",
+    is_current_user: true,
+    is_bot: true,
+    has_unread_mention: true,
+    unread: 3,
 };
 
 const meta = {

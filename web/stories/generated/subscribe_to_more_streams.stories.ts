@@ -6,9 +6,9 @@ import render_template from "../../templates/subscribe_to_more_streams.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "exactly_one_unsubscribed_stream": "Exactly one unsubscribed stream",
-    "can_subscribe_stream_count": 3,
-    "can_create_streams": true
+    exactly_one_unsubscribed_stream: "Exactly one unsubscribed stream",
+    can_subscribe_stream_count: 3,
+    can_create_streams: true,
 };
 
 const meta = {

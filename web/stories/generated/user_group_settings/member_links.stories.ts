@@ -6,31 +6,32 @@ import render_template from "../../../templates/user_group_settings/member_links
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "members": [
+    members: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "member": {
-                "type": "Type",
-                "user": {
-                    "user_id": 7,
-                    "full_name": "Full name"
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            member: {
+                type: "Type",
+                user: {
+                    user_id: 7,
+                    full_name: "Full name",
                 },
-                "id": 7,
-                "name": "Name"
-            }
-        }
-    ]
+                id: 7,
+                name: "Name",
+            },
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/Member Links",
-    render: () => render_template_story("user_group_settings/member_links.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("user_group_settings/member_links.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

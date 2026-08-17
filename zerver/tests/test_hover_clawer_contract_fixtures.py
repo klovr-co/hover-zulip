@@ -1,10 +1,10 @@
 import hashlib
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 from unittest import TestCase
 
 import orjson
+from defusedxml import ElementTree as ET  # noqa: N817
 from pydantic import ValidationError
 
 from hover.publication_contracts import ClawerPublication, DigestPayload
@@ -81,7 +81,7 @@ class HoverClawerContractFixtureTest(TestCase):
             modules["negative_sentiment_output"],
         ]
         # This parses a version-controlled test fixture, not untrusted input.
-        parsed_action = ET.fromstring(f"<root>{suggested['complete']}</root>").find(  # noqa: S314
+        parsed_action = ET.fromstring(f"<root>{suggested['complete']}</root>").find(
             ".//suggested_action"
         )
         assert parsed_action is not None

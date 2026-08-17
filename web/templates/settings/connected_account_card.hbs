@@ -4,30 +4,30 @@
   >
     <header class="hover-connected-account-card-header">
         <div>
-            <div
-              class="hover-connected-account-provider"
-              >
-                {{account.provider_name}}
-            </div>
+            <div class="hover-connected-account-provider">{{account.provider_name}}</div>
             <h4>{{account.display_name}}</h4>
-            <div class="hover-connected-account-owner">{{t "Owner"}}:
-                {{account.owner_name}}</div>
+            <div class="hover-connected-account-owner">{{t "Owner"}}: {{account.owner_name}}</div>
         </div>
         <div class="hover-connected-account-badges">
-            <span
-              class="hover-account-state hover-account-state-{{account.approval_state}}"
-              >{{account.approval_label}}</span>
-            <span
-              class="hover-account-health hover-account-health-{{account.health_status}}"
-              ><span aria-hidden="true">●</span> {{account.health_label}}</span>
+            <span class="hover-account-state hover-account-state-{{account.approval_state}}">{{account.approval_label}}</span>
+            <span class="hover-account-health hover-account-health-{{account.health_status}}">
+                <span aria-hidden="true">●</span> {{account.health_label}}
+            </span>
         </div>
     </header>
     <dl class="hover-connected-account-facts">
-        <div><dt>{{t "External account ID"}}</dt><dd><code>{{account.external_account_id}}</code></dd></div>
-        <div><dt>{{t "Connected by"}}</dt><dd
-            >{{account.creator_name}}</dd></div>
-        <div><dt>{{t "Health checked"}}</dt><dd
-            >{{account.health_checked_label}}</dd></div>
+        <div>
+            <dt>{{t "External account ID"}}</dt>
+            <dd><code>{{account.external_account_id}}</code></dd>
+        </div>
+        <div>
+            <dt>{{t "Connected by"}}</dt>
+            <dd>{{account.creator_name}}</dd>
+        </div>
+        <div>
+            <dt>{{t "Health checked"}}</dt>
+            <dd>{{account.health_checked_label}}</dd>
+        </div>
     </dl>
     <div class="hover-connected-account-actions">
         {{#if account.is_pending}}
@@ -65,9 +65,7 @@
                     <li data-connected-account-grant-id="{{id}}">
                         <div>
                             <strong>{{user_name}}</strong>
-                            <span
-                              class="hover-connected-account-grant-summary"
-                              >{{scope_label}}</span>
+                            <span class="hover-connected-account-grant-summary">{{scope_label}}</span>
                             {{#if is_revoked}}
                                 <span
                                   class="hover-account-state hover-account-state-revoked"
@@ -78,13 +76,7 @@
                             <button
                               type="button"
                               class="button small rounded edit-connected-account-grant"
-                              >
-                                {{#if is_revoked}}
-                                    {{t "Restore"}}
-                                {{else}}
-                                    {{t "Restrict"}}
-                                {{/if}}
-                            </button>
+                              >{{#if is_revoked}}{{t "Restore"}}{{else}}{{t "Restrict"}}{{/if}}</button>
                             {{#unless is_revoked}}
                                 <button
                                   type="button"
@@ -96,11 +88,7 @@
                 {{/each}}
             </ul>
         {{else}}
-            <p class="hover-connected-account-empty-grants">
-                {{t
-                  "No teammates have access."
-                  }}
-            </p>
+            <p class="hover-connected-account-empty-grants">{{t "No teammates have access."}}</p>
         {{/if}}
     </section>
 </article>

@@ -6,12 +6,12 @@ import render_template from "../../templates/compose_control_buttons.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "file_upload_enabled": "File upload enabled",
-    "tenor_enabled": "Tenor enabled",
-    "giphy_enabled": "Giphy enabled",
-    "klipy_enabled": "Klipy enabled",
-    "message_id": 7,
-    "preview_mode_on": "Preview mode on"
+    file_upload_enabled: "File upload enabled",
+    tenor_enabled: "Tenor enabled",
+    giphy_enabled: "Giphy enabled",
+    klipy_enabled: "Klipy enabled",
+    message_id: 7,
+    preview_mode_on: "Preview mode on",
 };
 
 const meta = {

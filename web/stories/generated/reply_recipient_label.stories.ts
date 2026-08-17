@@ -6,7 +6,7 @@ import render_template from "../../templates/reply_recipient_label.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "is_dm_with_self": true
+    is_dm_with_self: true,
 };
 
 const meta = {

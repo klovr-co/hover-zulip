@@ -6,12 +6,17 @@ import render_template from "../../templates/dropdown_current_value_not_in_optio
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "name": "Name"
+    name: "Name",
 };
 
 const meta = {
     title: "Catalogue/Dropdown Current Value Not In Options",
-    render: () => render_template_story("dropdown_current_value_not_in_options.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "dropdown_current_value_not_in_options.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

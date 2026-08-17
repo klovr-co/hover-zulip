@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Inbox View/Inbox No Unreads",
-    render: () => render_template_story("inbox_view/inbox_no_unreads.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("inbox_view/inbox_no_unreads.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

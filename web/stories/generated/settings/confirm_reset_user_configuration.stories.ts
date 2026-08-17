@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/Confirm Reset User Configuration",
-    render: () => render_template_story("settings/confirm_reset_user_configuration.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/confirm_reset_user_configuration.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

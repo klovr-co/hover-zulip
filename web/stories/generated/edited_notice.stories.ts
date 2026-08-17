@@ -6,11 +6,11 @@ import render_template from "../../templates/edited_notice.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "modified": "Modified",
-    "msg": {
-        "local_edit_timestamp": "Local edit timestamp"
+    modified: "Modified",
+    msg: {
+        local_edit_timestamp: "Local edit timestamp",
     },
-    "edited": "Edited"
+    edited: "Edited",
 };
 
 const meta = {

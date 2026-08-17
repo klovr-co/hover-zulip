@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/User Group Settings/Nothing Selected Title",
-    render: () => render_template_story("user_group_settings/nothing_selected_title.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/nothing_selected_title.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

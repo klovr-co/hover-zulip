@@ -6,17 +6,22 @@ import render_template from "../../../templates/settings/info_density_control_bu
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "property": "Property",
-    "for_settings_ui": "For settings ui",
-    "default_icon_class": true,
-    "display_value": "Display value",
-    "prefix": "Prefix",
-    "property_value": "Property value"
+    property: "Property",
+    for_settings_ui: "For settings ui",
+    default_icon_class: true,
+    display_value: "Display value",
+    prefix: "Prefix",
+    property_value: "Property value",
 };
 
 const meta = {
     title: "Catalogue/Settings/Info Density Control Button Group",
-    render: () => render_template_story("settings/info_density_control_button_group.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/info_density_control_button_group.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

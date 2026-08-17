@@ -6,9 +6,9 @@ import render_template from "../../templates/notification_sound_sources.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "audio_element_id": 7,
-    "audio_file_ogg": "Audio file ogg",
-    "audio_file_mp3": "Audio file mp3"
+    audio_element_id: 7,
+    audio_file_ogg: "Audio file ogg",
+    audio_file_mp3: "Audio file mp3",
 };
 
 const meta = {

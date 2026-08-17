@@ -6,9 +6,9 @@ import render_template from "../../templates/dropdown_list_container.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "widget_name": "Widget name",
-    "hide_search_box": "Hide search box",
-    "sticky_bottom_option": "Sticky bottom option"
+    widget_name: "Widget name",
+    hide_search_box: "Hide search box",
+    sticky_bottom_option: "Sticky bottom option",
 };
 
 const meta = {

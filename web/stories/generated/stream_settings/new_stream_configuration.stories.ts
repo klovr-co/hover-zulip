@@ -6,12 +6,17 @@ import render_template from "../../../templates/stream_settings/new_stream_confi
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "ask_to_announce_stream": "Ask to announce stream"
+    ask_to_announce_stream: "Ask to announce stream",
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/New Stream Configuration",
-    render: () => render_template_story("stream_settings/new_stream_configuration.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/new_stream_configuration.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Guest Visible Users Message",
-    render: () => render_template_story("guest_visible_users_message.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("guest_visible_users_message.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/Realm Topics Policy Label",
-    render: () => render_template_story("settings/realm_topics_policy_label.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/realm_topics_policy_label.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

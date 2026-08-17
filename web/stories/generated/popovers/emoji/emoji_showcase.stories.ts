@@ -6,12 +6,13 @@ import render_template from "../../../../templates/popovers/emoji/emoji_showcase
 import {render_template_story} from "../../../template_story_utils.ts";
 
 const fixture = {
-    "emoji_dict": "Emoji dict"
+    emoji_dict: "Emoji dict",
 };
 
 const meta = {
     title: "Catalogue/Popovers/Emoji/Emoji Showcase",
-    render: () => render_template_story("popovers/emoji/emoji_showcase.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("popovers/emoji/emoji_showcase.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

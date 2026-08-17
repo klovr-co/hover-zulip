@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Deactivate Custom Emoji",
-    render: () => render_template_story("confirm_dialog/confirm_deactivate_custom_emoji.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "confirm_dialog/confirm_deactivate_custom_emoji.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

@@ -6,13 +6,13 @@ import render_template from "../../../templates/settings/profile_settings.hbs";
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "user_can_change_name": "User can change name",
-    "current_user": {
-        "full_name": "Full name"
+    user_can_change_name: "User can change name",
+    current_user: {
+        full_name: "Full name",
     },
-    "max_user_name_length": "Max user name length",
-    "user_role_text": "User role text",
-    "date_joined_text": "Date joined text"
+    max_user_name_length: "Max user name length",
+    user_role_text: "User role text",
+    date_joined_text: "Date joined text",
 };
 
 const meta = {

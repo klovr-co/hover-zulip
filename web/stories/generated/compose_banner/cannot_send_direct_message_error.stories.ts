@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Compose Banner/Cannot Send Direct Message Error",
-    render: () => render_template_story("compose_banner/cannot_send_direct_message_error.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "compose_banner/cannot_send_direct_message_error.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

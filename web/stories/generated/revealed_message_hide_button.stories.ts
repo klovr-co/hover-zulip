@@ -6,13 +6,14 @@ import render_template from "../../templates/revealed_message_hide_button.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "is_inline_hide_button": true,
-    "message_id": 7
+    is_inline_hide_button: true,
+    message_id: 7,
 };
 
 const meta = {
     title: "Catalogue/Revealed Message Hide Button",
-    render: () => render_template_story("revealed_message_hide_button.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("revealed_message_hide_button.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

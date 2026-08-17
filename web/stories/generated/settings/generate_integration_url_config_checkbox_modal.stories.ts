@@ -6,13 +6,18 @@ import render_template from "../../../templates/settings/generate_integration_ur
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "key": "Key",
-    "label": "Label"
+    key: "Key",
+    label: "Label",
 };
 
 const meta = {
     title: "Catalogue/Settings/Generate Integration Url Config Checkbox Modal",
-    render: () => render_template_story("settings/generate_integration_url_config_checkbox_modal.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/generate_integration_url_config_checkbox_modal.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

@@ -6,59 +6,59 @@ import render_template from "../../templates/blueslip_stacktrace.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "errors": [
+    errors: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "message": {
-                "content": "A representative message for this UI state.",
-                "id": 7,
-                "message_reactions": [],
-                "reminders": [],
-                "sender_full_name": "Ava Rodriguez",
-                "sender_id": 7,
-                "url": "#narrow/near/7"
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            message: {
+                content: "A representative message for this UI state.",
+                id: 7,
+                message_reactions: [],
+                reminders: [],
+                sender_full_name: "Ava Rodriguez",
+                sender_id: 7,
+                url: "#narrow/near/7",
             },
-            "more_info": "More info",
-            "stackframes": [
+            more_info: "More info",
+            stackframes: [
                 {
-                    "custom_classes": "",
-                    "disabled": false,
-                    "icon": "check",
-                    "intent": "primary",
-                    "label": "Sample action",
-                    "name": "Sample name",
-                    "variant": "primary",
-                    "full_path": "Full path",
-                    "line_number": 3,
-                    "function_name": {
-                        "scope": "Scope",
-                        "name": "Name"
+                    custom_classes: "",
+                    disabled: false,
+                    icon: "check",
+                    intent: "primary",
+                    label: "Sample action",
+                    name: "Sample name",
+                    variant: "primary",
+                    full_path: "Full path",
+                    line_number: 3,
+                    function_name: {
+                        scope: "Scope",
+                        name: "Name",
                     },
-                    "show_path": true,
-                    "context": [
+                    show_path: true,
+                    context: [
                         {
-                            "custom_classes": "",
-                            "disabled": false,
-                            "icon": "check",
-                            "intent": "primary",
-                            "label": "Sample action",
-                            "name": "Sample name",
-                            "variant": "primary",
-                            "focus": "Focus",
-                            "line_number": 3,
-                            "line": "Line"
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+                            custom_classes: "",
+                            disabled: false,
+                            icon: "check",
+                            intent: "primary",
+                            label: "Sample action",
+                            name: "Sample name",
+                            variant: "primary",
+                            focus: "Focus",
+                            line_number: 3,
+                            line: "Line",
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
 };
 
 const meta = {

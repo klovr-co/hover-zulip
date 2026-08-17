@@ -6,10 +6,10 @@ import render_template from "../../templates/user_full_name.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "should_add_guest_user_indicator": true,
-    "name": "Name",
-    "is_hidden": true,
-    "is_current_user": true
+    should_add_guest_user_indicator: true,
+    name: "Name",
+    is_hidden: true,
+    is_current_user: true,
 };
 
 const meta = {

@@ -6,10 +6,10 @@ import render_template from "../../templates/dropdown_widget_with_label.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "widget_name": "Widget name",
-    "label": "Label",
-    "help_link": "#storybook",
-    "value_type": "Value type"
+    widget_name: "Widget name",
+    label: "Label",
+    help_link: "#storybook",
+    value_type: "Value type",
 };
 
 const meta = {

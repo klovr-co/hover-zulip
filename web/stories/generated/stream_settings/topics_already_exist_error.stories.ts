@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Stream Settings/Topics Already Exist Error",
-    render: () => render_template_story("stream_settings/topics_already_exist_error.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/topics_already_exist_error.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

@@ -6,18 +6,23 @@ import render_template from "../../../templates/stream_settings/browse_streams_l
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "stream_id": 7,
-    "name": "Name",
-    "subscribed": "Subscribed",
-    "should_display_subscription_button": true,
-    "rendered_description": "Rendered description",
-    "is_old_stream": true,
-    "stream_weekly_traffic": "Stream weekly traffic"
+    stream_id: 7,
+    name: "Name",
+    subscribed: "Subscribed",
+    should_display_subscription_button: true,
+    rendered_description: "Rendered description",
+    is_old_stream: true,
+    stream_weekly_traffic: "Stream weekly traffic",
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Browse Streams List Item",
-    render: () => render_template_story("stream_settings/browse_streams_list_item.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/browse_streams_list_item.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

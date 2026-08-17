@@ -6,15 +6,20 @@ import render_template from "../../../templates/stream_settings/selected_stream_
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "preview_url": "#storybook",
-    "sub": {
-        "name": "Name"
-    }
+    preview_url: "#storybook",
+    sub: {
+        name: "Name",
+    },
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Selected Stream Title",
-    render: () => render_template_story("stream_settings/selected_stream_title.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/selected_stream_title.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

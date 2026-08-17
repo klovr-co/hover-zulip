@@ -6,12 +6,17 @@ import render_template from "../../../templates/stream_settings/announce_stream_
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "new_stream_announcements_stream_sub": "New stream announcements stream sub"
+    new_stream_announcements_stream_sub: "New stream announcements stream sub",
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Announce Stream Checkbox",
-    render: () => render_template_story("stream_settings/announce_stream_checkbox.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/announce_stream_checkbox.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

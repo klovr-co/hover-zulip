@@ -6,13 +6,18 @@ import render_template from "../../templates/change_visibility_policy_button_too
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "should_render_privacy_icon": true,
-    "current_visibility_policy_str": true
+    should_render_privacy_icon: true,
+    current_visibility_policy_str: true,
 };
 
 const meta = {
     title: "Catalogue/Change Visibility Policy Button Tooltip",
-    render: () => render_template_story("change_visibility_policy_button_tooltip.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "change_visibility_policy_button_tooltip.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

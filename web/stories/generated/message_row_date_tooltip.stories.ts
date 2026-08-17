@@ -6,7 +6,7 @@ import render_template from "../../templates/message_row_date_tooltip.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "formal_time_str": "Formal time str"
+    formal_time_str: "Formal time str",
 };
 
 const meta = {

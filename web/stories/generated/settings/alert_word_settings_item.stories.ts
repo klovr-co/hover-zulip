@@ -6,12 +6,13 @@ import render_template from "../../../templates/settings/alert_word_settings_ite
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "alert_word": "Alert word"
+    alert_word: "Alert word",
 };
 
 const meta = {
     title: "Catalogue/Settings/Alert Word Settings Item",
-    render: () => render_template_story("settings/alert_word_settings_item.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/alert_word_settings_item.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

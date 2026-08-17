@@ -6,12 +6,13 @@ import render_template from "../../../templates/stream_settings/add_subscribers_
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "hide_add_button": "Hide add button"
+    hide_add_button: "Hide add button",
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Add Subscribers Form",
-    render: () => render_template_story("stream_settings/add_subscribers_form.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("stream_settings/add_subscribers_form.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

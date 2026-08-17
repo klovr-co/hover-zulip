@@ -6,9 +6,9 @@ import render_template from "../../templates/gif_picker_gif.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "preview_url": "#storybook",
-    "insert_url": "#storybook",
-    "gif_index": "Gif index"
+    preview_url: "#storybook",
+    insert_url: "#storybook",
+    gif_index: "Gif index",
 };
 
 const meta = {

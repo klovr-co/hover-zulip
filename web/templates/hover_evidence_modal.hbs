@@ -42,11 +42,7 @@
                 <div>
                     <strong>{{sender.display_name}}</strong>
                     ·
-                    <time
-                      datetime="{{timestamp}}"
-                      >
-                        {{display_timestamp}}
-                    </time>
+                    <time datetime="{{timestamp}}">{{display_timestamp}}</time>
                 </div>
                 {{#if content.text}}
                     <p>{{content.text}}</p>
@@ -61,22 +57,14 @@
                     {{#unless content.media_description}}
                         <p>
                             <em>
-                                {{t
-                                  "Media evidence"
-                                  }}
+                                {{t "Media evidence"}}
                                 ·
                                 {{media.type}}
                             </em>
                         </p>
                     {{/unless}}
                     {{#unless media.available}}
-                        <p>
-                            <em>
-                                {{t
-                                  "Media is no longer available."
-                                  }}
-                            </em>
-                        </p>
+                        <p><em>{{t "Media is no longer available."}}</em></p>
                     {{/unless}}
                 {{/if}}
             </li>

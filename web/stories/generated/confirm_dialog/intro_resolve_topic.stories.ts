@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Intro Resolve Topic",
-    render: () => render_template_story("confirm_dialog/intro_resolve_topic.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("confirm_dialog/intro_resolve_topic.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

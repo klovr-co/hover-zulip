@@ -1,11 +1,10 @@
-# Agent workflow
+# Agent guidance
 
 ```{toctree}
 ---
-maxdepth: 2
+maxdepth: 1
+glob: true
 ---
 
-domain
-issue-tracker
-triage-labels
+*
 ```

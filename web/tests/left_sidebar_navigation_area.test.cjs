@@ -15,9 +15,9 @@ const {Filter} = zrequire("../src/filter");
 const left_sidebar_navigation_area = zrequire("left_sidebar_navigation_area");
 const scheduled_messages = zrequire("scheduled_messages");
 const message_reminder = zrequire("message_reminder");
-const {set_realm} = zrequire("state_data");
+const state_data = zrequire("state_data");
 
-set_realm(make_realm({realm_hover_enabled: false}));
+state_data.set_realm(make_realm());
 
 run_test("narrowing", ({override_rewire}) => {
     override_rewire(

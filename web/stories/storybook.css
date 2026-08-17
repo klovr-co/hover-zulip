@@ -7,11 +7,6 @@ body {
     width: min(100%, 760px);
 }
 
-.storybook-popover-menu {
-    width: max-content;
-    padding: 24px;
-}
-
 .storybook-demo-email-modal {
     max-width: 560px;
     padding: 24px;
@@ -46,7 +41,7 @@ body {
 .storybook-conversation-screen {
     border: 1px solid hsl(210deg 15% 84%);
     border-radius: 8px;
-    box-shadow: 0 8px 28px hsl(203deg 29% 19% / 12%);
+    box-shadow: 0 8px 28px hsl(204deg 29% 19% / 12%);
     color: hsl(210deg 20% 20%);
     min-width: 980px;
     overflow: hidden;
@@ -162,4 +157,9 @@ body {
 .storybook-right-sidebar .right-sidebar-header span {
     color: hsl(210deg 12% 48%);
     font-size: 12px;
+}
+
+.storybook-popover-menu {
+    padding: 24px;
+    width: max-content;
 }

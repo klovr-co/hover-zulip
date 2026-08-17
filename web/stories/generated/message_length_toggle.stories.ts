@@ -6,9 +6,9 @@ import render_template from "../../templates/message_length_toggle.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "toggle_type": "Toggle type",
-    "tooltip_template_id": 7,
-    "label_text": "Label text"
+    toggle_type: "Toggle type",
+    tooltip_template_id: 7,
+    label_text: "Label text",
 };
 
 const meta = {

@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Stream Settings/Stream Topics Policy Label",
-    render: () => render_template_story("stream_settings/stream_topics_policy_label.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/stream_topics_policy_label.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

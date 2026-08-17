@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/View Bottom Loading Indicator",
-    render: () => render_template_story("view_bottom_loading_indicator.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("view_bottom_loading_indicator.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

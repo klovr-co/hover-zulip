@@ -148,15 +148,6 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
             + description
         )
 
-    def render_data_type(self, schema: Mapping[str, Any]) -> str:
-        if "oneOf" in schema:
-            return " | ".join(self.render_data_type(item) for item in schema["oneOf"])
-        if "items" in schema:
-            return f"({self.render_data_type(schema['items'])})[]"
-        if "type" not in schema:
-            return "any"
-        return generate_data_type(schema)
-
     def render_oneof_block(self, object_schema: dict[str, Any], spacing: int) -> list[str]:
         ans = []
         block_spacing = spacing
@@ -168,7 +159,7 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
                 spacing -= 4
             else:
                 # Add the specialized description of the oneOf element.
-                data_type = self.render_data_type(element)
+                data_type = generate_data_type(element)
                 ans.append(self.render_desc(element["description"], spacing, data_type))
             # If the oneOf element is an object schema then render the documentation
             # of its keys.
@@ -182,32 +173,20 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
                     # This block is for completeness.
                     ans += self.render_oneof_block(element["items"], spacing + 4)
 
-            ans += self.render_additional_properties(
-                element.get("additionalProperties"), spacing + 4
-            )
-        return ans
-
-    def render_additional_properties(
-        self, additional_properties: object, spacing: int
-    ) -> list[str]:
-        if not isinstance(additional_properties, dict):
-            return []
-
-        data_type = self.render_data_type(additional_properties)
-        ans = [
-            self.render_desc(
-                additional_properties.get("description", "Additional properties."),
-                spacing,
-                data_type,
-            )
-        ]
-        if "properties" in additional_properties:
-            ans += self.render_table(additional_properties["properties"], spacing + 4)
-        if "oneOf" in additional_properties:
-            ans += self.render_oneof_block(additional_properties, spacing + 4)
-        ans += self.render_additional_properties(
-            additional_properties.get("additionalProperties"), spacing + 4
-        )
+            if isinstance(element.get("additionalProperties"), dict):
+                additional_properties = element["additionalProperties"]
+                if "description" in additional_properties:
+                    data_type = generate_data_type(additional_properties)
+                    ans.append(
+                        self.render_desc(
+                            additional_properties["description"], spacing + 4, data_type
+                        )
+                    )
+                if "properties" in additional_properties:
+                    ans += self.render_table(
+                        additional_properties["properties"],
+                        spacing + 8,
+                    )
         return ans
 
     def render_table(self, return_values: dict[str, Any], spacing: int) -> list[str]:
@@ -222,7 +201,7 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
                 # description of the endpoint. Then for each element of oneOf there is a
                 # specialized description for that particular case. The description used
                 # right below is the main description.
-                data_type = self.render_data_type(schema)
+                data_type = generate_data_type(schema)
                 ans.append(
                     self.render_desc(
                         schema.get("description", f"The `{return_value}` value."),
@@ -234,14 +213,42 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
                 ans += self.render_oneof_block(schema, spacing + 4)
                 continue
             description = schema.get("description", f"The `{return_value}` value.")
-            data_type = self.render_data_type(schema)
+            data_type = generate_data_type(schema)
             check_deprecated_consistency(schema.get("deprecated", False), description)
             ans.append(self.render_desc(description, spacing, data_type, return_value))
             if "properties" in schema:
                 ans += self.render_table(schema["properties"], spacing + 4)
-            ans += self.render_additional_properties(
-                schema.get("additionalProperties"), spacing + 4
-            )
+            additional_properties = schema.get("additionalProperties", False)
+            if isinstance(additional_properties, dict):
+                data_type = generate_data_type(additional_properties)
+                ans.append(
+                    self.render_desc(
+                        additional_properties.get("description", "Additional properties."),
+                        spacing + 4,
+                        data_type,
+                    )
+                )
+                if "properties" in additional_properties:
+                    ans += self.render_table(
+                        additional_properties["properties"],
+                        spacing + 8,
+                    )
+                elif "oneOf" in additional_properties:
+                    ans += self.render_oneof_block(additional_properties, spacing + 8)
+                elif additional_properties.get("additionalProperties", False):
+                    data_type = generate_data_type(additional_properties["additionalProperties"])
+                    ans.append(
+                        self.render_desc(
+                            additional_properties["additionalProperties"]["description"],
+                            spacing + 8,
+                            data_type,
+                        )
+                    )
+
+                    ans += self.render_table(
+                        additional_properties["additionalProperties"]["properties"],
+                        spacing + 12,
+                    )
             if "items" in schema:
                 if "properties" in schema["items"]:
                     ans += self.render_table(schema["items"]["properties"], spacing + 4)

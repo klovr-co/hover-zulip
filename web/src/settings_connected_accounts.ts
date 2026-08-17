@@ -42,7 +42,6 @@ function approval_label(state: ConnectedAccount["approval_state"]): string {
         case "revoked":
             return $t({defaultMessage: "Revoked"});
     }
-    /* istanbul ignore next */
     throw new Error("Unknown approval state");
 }
 
@@ -57,7 +56,6 @@ function health_label(status: ConnectedAccount["health_status"]): string {
         case "unavailable":
             return $t({defaultMessage: "Unavailable"});
     }
-    /* istanbul ignore next */
     throw new Error("Unknown health status");
 }
 
@@ -115,8 +113,8 @@ export function rerender(): void {
             );
         return;
     }
-    const cards_html = accounts.map((account) => card_html(account)).join("");
-    $list.html(cards_html);
+    const rendered_account_cards_html = accounts.map((account) => card_html(account)).join("");
+    $list.html(rendered_account_cards_html);
 }
 
 function parse_selector_lines():

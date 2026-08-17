@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Unstar All Messages In Topic",
-    render: () => render_template_story("confirm_dialog/confirm_unstar_all_messages_in_topic.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "confirm_dialog/confirm_unstar_all_messages_in_topic.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

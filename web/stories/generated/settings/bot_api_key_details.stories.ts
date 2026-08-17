@@ -6,13 +6,14 @@ import render_template from "../../../templates/settings/bot_api_key_details.hbs
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "api_key": "Api key",
-    "bot_id": 7
+    api_key: "Api key",
+    bot_id: 7,
 };
 
 const meta = {
     title: "Catalogue/Settings/Bot Api Key Details",
-    render: () => render_template_story("settings/bot_api_key_details.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/bot_api_key_details.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Compose Banner/Unmute Topic Banner",
-    render: () => render_template_story("compose_banner/unmute_topic_banner.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("compose_banner/unmute_topic_banner.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

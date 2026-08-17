@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/Admin Linkifier Add Form",
-    render: () => render_template_story("settings/admin_linkifier_add_form.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/admin_linkifier_add_form.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -6,13 +6,14 @@ import render_template from "../../../templates/stream_settings/stream_creation_
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "max_stream_name_length": "Max stream name length",
-    "max_stream_description_length": "Max stream description length"
+    max_stream_name_length: "Max stream name length",
+    max_stream_description_length: "Max stream description length",
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Stream Creation Form",
-    render: () => render_template_story("stream_settings/stream_creation_form.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("stream_settings/stream_creation_form.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

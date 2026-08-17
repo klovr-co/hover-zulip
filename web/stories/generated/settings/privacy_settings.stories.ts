@@ -6,9 +6,9 @@ import render_template from "../../../templates/settings/privacy_settings.hbs";
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "for_realm_settings": "For realm settings",
-    "prefix": "Prefix",
-    "user_has_email_set": "User has email set"
+    for_realm_settings: "For realm settings",
+    prefix: "Prefix",
+    user_has_email_set: "User has email set",
 };
 
 const meta = {

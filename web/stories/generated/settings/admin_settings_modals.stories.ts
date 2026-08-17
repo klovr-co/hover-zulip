@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/Admin Settings Modals",
-    render: () => render_template_story("settings/admin_settings_modals.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/admin_settings_modals.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

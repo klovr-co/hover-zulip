@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/User Group Settings/New User Group Users",
-    render: () => render_template_story("user_group_settings/new_user_group_users.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/new_user_group_users.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

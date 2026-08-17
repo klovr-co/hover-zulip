@@ -15,10 +15,8 @@ type TodoRenderContext = HoverTodo & {
     assignee_label: string;
     assignable_options: {user_id: number; full_name: string}[];
     source_hash: string;
-    evidence_count: number;
-    latest_event?: HoverTodo["recent_events"][number];
-    latest_event_actor?: string;
-    latest_event_time?: string;
+    latest_event_actor_name?: string;
+    latest_event_occurred_at?: string;
 };
 
 function format(todo: HoverTodo): TodoRenderContext {
@@ -32,11 +30,9 @@ function format(todo: HoverTodo): TodoRenderContext {
             (user) => user.user_id !== todo.assignee?.user_id,
         ),
         source_hash: `#near/${todo.generated_item.message_id}`,
-        evidence_count: todo.generated_item.evidence_count,
         ...(todo.recent_events[0] !== undefined && {
-            latest_event: todo.recent_events[0],
-            latest_event_actor: todo.recent_events[0].actor.full_name,
-            latest_event_time: todo.recent_events[0].occurred_at,
+            latest_event_actor_name: todo.recent_events[0].actor.full_name,
+            latest_event_occurred_at: todo.recent_events[0].occurred_at,
         }),
     };
 }
@@ -63,10 +59,8 @@ export function rerender(): void {
     if (!overlays.reminders_open() || $("#reminders-overlay").attr("data-hover-todos") !== "true") {
         return;
     }
-    const focused_id =
-        document.activeElement === null
-            ? undefined
-            : $(document.activeElement).closest("[data-hover-todo-id]").attr("data-hover-todo-id");
+    const $active_element = document.activeElement === null ? $() : $(document.activeElement);
+    const focused_id = $active_element.closest("[data-hover-todo-id]").attr("data-hover-todo-id");
     const rendered_todos_overlay = render();
     $("#reminders-overlay-container").html(rendered_todos_overlay);
     if (focused_id !== undefined) {

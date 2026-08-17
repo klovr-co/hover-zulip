@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Compose Banner/Stream Does Not Exist Error",
-    render: () => render_template_story("compose_banner/stream_does_not_exist_error.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "compose_banner/stream_does_not_exist_error.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

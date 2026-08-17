@@ -6,7 +6,7 @@ import render_template from "../../templates/read_receipts_modal.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "message_id": 7
+    message_id: 7,
 };
 
 const meta = {

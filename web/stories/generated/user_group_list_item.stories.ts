@@ -6,11 +6,11 @@ import render_template from "../../templates/user_group_list_item.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "group_id": 7,
-    "name": "Name",
-    "can_remove_members": true,
-    "is_direct_member": true,
-    "is_me": true
+    group_id: 7,
+    name: "Name",
+    can_remove_members: true,
+    is_direct_member: true,
+    is_me: true,
 };
 
 const meta = {

@@ -6,10 +6,10 @@ import render_template from "../../templates/favicon.svg.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "favicon_font_url_html": "Favicon font url html",
-    "count_long": "Count long",
-    "count": 3,
-    "have_pm": "Have pm"
+    favicon_font_url_html: "Favicon font url html",
+    count_long: "Count long",
+    count: 3,
+    have_pm: "Have pm",
 };
 
 const meta = {

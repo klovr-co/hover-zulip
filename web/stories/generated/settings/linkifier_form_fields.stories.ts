@@ -6,15 +6,16 @@ import render_template from "../../../templates/settings/linkifier_form_fields.h
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "example_input": "Example input",
-    "pattern": "Pattern",
-    "url_template": "Url template",
-    "reverse_template": "Reverse template"
+    example_input: "Example input",
+    pattern: "Pattern",
+    url_template: "Url template",
+    reverse_template: "Reverse template",
 };
 
 const meta = {
     title: "Catalogue/Settings/Linkifier Form Fields",
-    render: () => render_template_story("settings/linkifier_form_fields.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/linkifier_form_fields.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

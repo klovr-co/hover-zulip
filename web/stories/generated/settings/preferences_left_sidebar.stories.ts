@@ -6,13 +6,14 @@ import render_template from "../../../templates/settings/preferences_left_sideba
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "for_realm_settings": "For realm settings",
-    "prefix": "Prefix"
+    for_realm_settings: "For realm settings",
+    prefix: "Prefix",
 };
 
 const meta = {
     title: "Catalogue/Settings/Preferences Left Sidebar",
-    render: () => render_template_story("settings/preferences_left_sidebar.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/preferences_left_sidebar.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

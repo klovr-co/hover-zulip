@@ -6,20 +6,25 @@ import render_template from "../../../templates/popovers/change_visibility_polic
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "all_visibility_policies": {
-        "MUTED": "MUTED",
-        "INHERIT": "INHERIT",
-        "UNMUTED": "UNMUTED",
-        "FOLLOWED": "FOLLOWED"
+    all_visibility_policies: {
+        MUTED: "MUTED",
+        INHERIT: "INHERIT",
+        UNMUTED: "UNMUTED",
+        FOLLOWED: "FOLLOWED",
     },
-    "visibility_policy": "Visibility policy",
-    "stream_muted": "Stream muted",
-    "topic_unmuted": "Topic unmuted"
+    visibility_policy: "Visibility policy",
+    stream_muted: "Stream muted",
+    topic_unmuted: "Topic unmuted",
 };
 
 const meta = {
     title: "Catalogue/Popovers/Change Visibility Policy Popover",
-    render: () => render_template_story("popovers/change_visibility_policy_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "popovers/change_visibility_policy_popover.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

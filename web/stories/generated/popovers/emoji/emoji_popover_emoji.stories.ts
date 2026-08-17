@@ -6,15 +6,16 @@ import render_template from "../../../../templates/popovers/emoji/emoji_popover_
 import {render_template_story} from "../../../template_story_utils.ts";
 
 const fixture = {
-    "emoji_dict": "Emoji dict",
-    "type": "Type",
-    "section": "Section",
-    "index": "Index"
+    emoji_dict: "Emoji dict",
+    type: "Type",
+    section: "Section",
+    index: "Index",
 };
 
 const meta = {
     title: "Catalogue/Popovers/Emoji/Emoji Popover Emoji",
-    render: () => render_template_story("popovers/emoji/emoji_popover_emoji.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("popovers/emoji/emoji_popover_emoji.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

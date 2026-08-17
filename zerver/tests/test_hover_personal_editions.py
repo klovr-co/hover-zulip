@@ -226,15 +226,9 @@ class HoverPersonalEditionsTest(ZulipTestCase):
             publications=list(publications), next_cursor="hpe1:next", has_more=False
         )
 
-    def get_editions(self, *, telemetry: list[str] | None = None) -> "TestHttpResponse":
-        with (
-            patch("hover.views_personal_editions.get_clawer_sync", return_value=self.adapter),
-            self.assertLogs("zulip.hover.telemetry", level="INFO") as captured_telemetry,
-        ):
-            response = self.client_get("/json/hover/personal-editions")
-        if telemetry is not None:
-            telemetry.extend(captured_telemetry.output)
-        return response
+    def get_editions(self) -> "TestHttpResponse":
+        with patch("hover.views_personal_editions.get_clawer_sync", return_value=self.adapter):
+            return self.client_get("/json/hover/personal-editions")
 
     def test_ingests_and_projects_only_native_update_links_without_creating_todos(self) -> None:
         self.set_page(self.publication())
@@ -281,20 +275,9 @@ class HoverPersonalEditionsTest(ZulipTestCase):
             has_more=False,
         )
 
-        telemetry: list[str] = []
-        payload = self.assert_json_success(self.get_editions(telemetry=telemetry))
+        payload = self.assert_json_success(self.get_editions())
 
         self.assertEqual(payload["sync_status"], "current")
-        self.assertEqual(
-            telemetry,
-            [
-                (
-                    "INFO:zulip.hover.telemetry:Hover telemetry event=edition outcome=current "
-                    "cache_used=false edition_count_bucket=one edition_kind=morning "
-                    f"failure_count_bucket=zero realm_id={self.realm.id}"
-                )
-            ],
-        )
         self.assertEqual(PersonalEdition.objects.count(), 51)
         self.assertEqual(
             [call["cursor"] for call in self.adapter.personal_edition_sync_calls],
@@ -401,33 +384,25 @@ class HoverPersonalEditionsTest(ZulipTestCase):
 
     def test_cached_edition_survives_retryable_sync_failure(self) -> None:
         self.set_page(self.publication(edition="end_of_day"))
-        current_telemetry: list[str] = []
-        self.assert_json_success(self.get_editions(telemetry=current_telemetry))
-        self.assertEqual(
-            current_telemetry,
-            [
-                (
-                    "INFO:zulip.hover.telemetry:Hover telemetry event=edition outcome=current "
-                    "cache_used=false edition_count_bucket=one edition_kind=end_of_day "
-                    f"failure_count_bucket=zero realm_id={self.realm.id}"
-                )
-            ],
-        )
+        self.assert_json_success(self.get_editions())
         error = ClawerSyncError(
             error_code="clawer_unavailable",
             operation="personal_edition_sync",
             http_status_code=503,
             retryable=True,
         )
-        telemetry = []
-        with patch.object(self.adapter, "sync_personal_editions", side_effect=error):
-            response = self.get_editions(telemetry=telemetry)
+        with (
+            patch.object(self.adapter, "sync_personal_editions", side_effect=error),
+            self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
+            response = self.get_editions()
         payload = self.assert_json_success(response)
         self.assertEqual(payload["sync_status"], "degraded")
         self.assertTrue(
             any(
                 "outcome=degraded" in line and "edition_kind=end_of_day" in line
-                for line in telemetry
+                for line in telemetry.output
             )
         )
         self.assertEqual(

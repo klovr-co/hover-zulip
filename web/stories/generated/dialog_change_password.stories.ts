@@ -6,9 +6,9 @@ import render_template from "../../templates/dialog_change_password.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "password_min_length": "Password min length",
-    "password_min_guesses": "Password min guesses",
-    "password_max_length": "Password max length"
+    password_min_length: "Password min length",
+    password_min_guesses: "Password min guesses",
+    password_max_length: "Password max length",
 };
 
 const meta = {

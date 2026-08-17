@@ -6,9 +6,9 @@ import render_template from "../../templates/more_topics.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "more_topics_unreads": "More topics unreads",
-    "more_topics_unread_count_muted": "More topics unread count muted",
-    "more_topics_have_unread_mention_messages": "More topics have unread mention messages"
+    more_topics_unreads: "More topics unreads",
+    more_topics_unread_count_muted: "More topics unread count muted",
+    more_topics_have_unread_mention_messages: "More topics have unread mention messages",
 };
 
 const meta = {

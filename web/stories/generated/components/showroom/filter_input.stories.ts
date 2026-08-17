@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Components/Showroom/Filter Input",
-    render: () => render_template_story("components/showroom/filter_input.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("components/showroom/filter_input.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

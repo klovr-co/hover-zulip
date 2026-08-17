@@ -6,15 +6,20 @@ import render_template from "../../../templates/stream_settings/channel_name_con
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_archived": true,
-    "can_view_channel": true,
-    "show_rename": true,
-    "stream_id": 7
+    is_archived: true,
+    can_view_channel: true,
+    show_rename: true,
+    stream_id: 7,
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Channel Name Conflict Error",
-    render: () => render_template_story("stream_settings/channel_name_conflict_error.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/channel_name_conflict_error.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

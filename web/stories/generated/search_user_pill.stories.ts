@@ -6,25 +6,25 @@ import render_template from "../../templates/search_user_pill.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "negated": "Negated",
-    "operator": "Operator",
-    "users": [
+    negated: "Negated",
+    operator: "Operator",
+    users: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "deactivated": "Deactivated",
-            "user_id": 7,
-            "img_src": "Img src",
-            "full_name": "Full name",
-            "should_add_guest_user_indicator": true,
-            "status_emoji_info": "Status emoji info"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            deactivated: "Deactivated",
+            user_id: 7,
+            img_src: "Img src",
+            full_name: "Full name",
+            should_add_guest_user_indicator: true,
+            status_emoji_info: "Status emoji info",
+        },
+    ],
 };
 
 const meta = {

@@ -6,24 +6,24 @@ import render_template from "../../templates/set_status_overlay.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "default_status_messages_and_emoji_info": [
+    default_status_messages_and_emoji_info: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "emoji": {
-                "emoji_alt_code": "Emoji alt code",
-                "emoji_name": "Emoji name",
-                "url": "#storybook",
-                "emoji_code": "Emoji code"
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            emoji: {
+                emoji_alt_code: "Emoji alt code",
+                emoji_name: "Emoji name",
+                url: "#storybook",
+                emoji_code: "Emoji code",
             },
-            "status_text": "Status text"
-        }
-    ]
+            status_text: "Status text",
+        },
+    ],
 };
 
 const meta = {

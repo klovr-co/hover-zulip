@@ -6,7 +6,7 @@ import render_template from "../../templates/compose_limit_indicator.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "remaining_characters": "Remaining characters"
+    remaining_characters: "Remaining characters",
 };
 
 const meta = {

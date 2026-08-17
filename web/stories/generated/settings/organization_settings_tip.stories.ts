@@ -6,12 +6,13 @@ import render_template from "../../../templates/settings/organization_settings_t
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_admin": true
+    is_admin: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Organization Settings Tip",
-    render: () => render_template_story("settings/organization_settings_tip.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/organization_settings_tip.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -6,51 +6,52 @@ import render_template from "../../../../templates/popovers/user_card/user_card_
 import {render_template_story} from "../../../template_story_utils.ts";
 
 const fixture = {
-    "is_active": true,
-    "user_is_guest": "User is guest",
-    "user_avatar": "User avatar",
-    "is_bot": true,
-    "user_circle_class": "User circle class",
-    "user_id": 7,
-    "user_full_name": "User full name",
-    "is_system_bot": true,
-    "user_type": "User type",
-    "status_content_available": "Status content available",
-    "status_emoji_info": {
-        "emoji_alt_code": "Emoji alt code",
-        "emoji_name": "Emoji name",
-        "url": "#storybook",
-        "emoji_code": "Emoji code"
+    is_active: true,
+    user_is_guest: "User is guest",
+    user_avatar: "User avatar",
+    is_bot: true,
+    user_circle_class: "User circle class",
+    user_id: 7,
+    user_full_name: "User full name",
+    is_system_bot: true,
+    user_type: "User type",
+    status_content_available: "Status content available",
+    status_emoji_info: {
+        emoji_alt_code: "Emoji alt code",
+        emoji_name: "Emoji name",
+        url: "#storybook",
+        emoji_code: "Emoji code",
     },
-    "show_placeholder_for_status_text": true,
-    "status_text": "Status text",
-    "is_me": true,
-    "invisible_mode": "Invisible mode",
-    "show_last_active_status": true,
-    "user_last_seen_time_status": "User last seen time status",
-    "user_time": "10:45 AM",
-    "is_imported_stub": true,
-    "spectator_view": true,
-    "bot_owner": {
-        "full_name": "Full name"
+    show_placeholder_for_status_text: true,
+    status_text: "Status text",
+    is_me: true,
+    invisible_mode: "Invisible mode",
+    show_last_active_status: true,
+    user_last_seen_time_status: "User last seen time status",
+    user_time: "10:45 AM",
+    is_imported_stub: true,
+    spectator_view: true,
+    bot_owner: {
+        full_name: "Full name",
     },
-    "user_email": "ava@example.com",
-    "can_send_private_message": true,
-    "private_message_class": "Private message class",
-    "is_sender_popover": true,
-    "has_message_context": true,
-    "user_mention_syntax": "User mention syntax",
-    "pm_with_url": "#storybook",
-    "sent_by_url": "#storybook",
-    "show_manage_section": true,
-    "can_mute": true,
-    "can_unmute": true,
-    "can_manage_user": true
+    user_email: "ava@example.com",
+    can_send_private_message: true,
+    private_message_class: "Private message class",
+    is_sender_popover: true,
+    has_message_context: true,
+    user_mention_syntax: "User mention syntax",
+    pm_with_url: "#storybook",
+    sent_by_url: "#storybook",
+    show_manage_section: true,
+    can_mute: true,
+    can_unmute: true,
+    can_manage_user: true,
 };
 
 const meta = {
     title: "Catalogue/Popovers/User Card/User Card Popover",
-    render: () => render_template_story("popovers/user_card/user_card_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("popovers/user_card/user_card_popover.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

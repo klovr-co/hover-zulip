@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/Realm Domains Modal",
-    render: () => render_template_story("settings/realm_domains_modal.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/realm_domains_modal.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

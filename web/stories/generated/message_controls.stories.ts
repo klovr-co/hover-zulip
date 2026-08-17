@@ -6,12 +6,12 @@ import render_template from "../../templates/message_controls.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "is_archived": true,
-    "msg": {
-        "sent_by_me": "Sent by me",
-        "starred": "Starred",
-        "locally_echoed": "Locally echoed"
-    }
+    is_archived: true,
+    msg: {
+        sent_by_me: "Sent by me",
+        starred: "Starred",
+        locally_echoed: "Locally echoed",
+    },
 };
 
 const meta = {

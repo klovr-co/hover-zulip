@@ -23,11 +23,7 @@
                 {{#if empty}}
                     <div class="no-overlay-messages">
                         <strong>{{t "No Todos yet."}}</strong>
-                        <p>
-                            {{t
-                              "Approved Suggested Actions will appear here."
-                              }}
-                        </p>
+                        <p>{{t "Approved Suggested Actions will appear here."}}</p>
                     </div>
                 {{/if}}
                 {{#each todos}}
@@ -38,29 +34,30 @@
                       aria-label="{{wording}}"
                       >
                         <div class="hover-todo-card__heading">
-                            <span
-                              class="hover-todo-card__space"
-                              >{{space.name}}</span>
+                            <span class="hover-todo-card__space">{{space.name}}</span>
                             <span class="hover-todo-card__state">
-                                {{#if is_active}}{{t "Active"}}{{/if}}
-                                {{#if is_completed}}{{t "Completed"}}{{/if}}
+                                {{#if is_active}}
+                                    {{t "Active"}}
+                                {{/if}}
+                                {{#if is_completed}}
+                                    {{t "Completed"}}
+                                {{/if}}
                             </span>
                         </div>
                         <h2>{{wording}}</h2>
                         <dl class="hover-todo-card__facts">
-                            <div><dt>{{t "Assignee"}}</dt><dd
-                                >{{assignee_label}}</dd></div>
-                            <div><dt>{{t "Due"}}</dt><dd
-                                >{{due_label}}</dd></div>
+                            <div>
+                                <dt>{{t "Assignee"}}</dt>
+                                <dd>{{assignee_label}}</dd>
+                            </div>
+                            <div>
+                                <dt>{{t "Due"}}</dt>
+                                <dd>{{due_label}}</dd>
+                            </div>
                         </dl>
                         {{#if latest_event}}
                             <p class="hover-todo-card__history">
-                                {{#tr}}
-                                    Last changed by
-                                    {latest_event_actor}
-                                    at
-                                    {latest_event_time}
-                                {{/tr}}
+                                {{#tr}}Last changed by {latest_event_actor_name} at {latest_event_occurred_at}{{/tr}}
                             </p>
                         {{/if}}
                         <div class="hover-todo-card__links">
@@ -84,24 +81,12 @@
                                       aria-label="{{t 'Assign Todo'}}"
                                       >
                                         {{#if assignee}}
-                                            <option
-                                              value="{{assignee.user_id}}"
-                                              >
-                                                {{assignee.full_name}}
-                                            </option>
+                                            <option value="{{assignee.user_id}}">{{assignee.full_name}}</option>
                                         {{else}}
-                                            <option value="">
-                                                {{t
-                                                  "Choose a teammate"
-                                                  }}
-                                            </option>
+                                            <option value="">{{t "Choose a teammate"}}</option>
                                         {{/if}}
                                         {{#each assignable_options}}
-                                            <option
-                                              value="{{this.user_id}}"
-                                              >
-                                                {{this.full_name}}
-                                            </option>
+                                            <option value="{{this.user_id}}">{{this.full_name}}</option>
                                         {{/each}}
                                     </select>
                                 </label>

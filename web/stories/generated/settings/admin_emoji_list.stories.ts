@@ -6,7 +6,7 @@ import render_template from "../../../templates/settings/admin_emoji_list.hbs";
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "emoji": "Emoji"
+    emoji: "Emoji",
 };
 
 const meta = {

@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Reset Stream Notifications",
-    render: () => render_template_story("confirm_dialog/confirm_reset_stream_notifications.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "confirm_dialog/confirm_reset_stream_notifications.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

@@ -6,26 +6,26 @@ import render_template from "../../templates/empty_feed_notice.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "title_html": "Title html",
-    "title": "Title",
-    "search_data": {
-        "has_stop_word": true,
-        "query_words": [
+    title_html: "Title html",
+    title: "Title",
+    search_data: {
+        has_stop_word: true,
+        query_words: [
             {
-                "custom_classes": "",
-                "disabled": false,
-                "icon": "check",
-                "intent": "primary",
-                "label": "Sample action",
-                "name": "Sample name",
-                "variant": "primary",
-                "is_stop_word": true,
-                "query_word": "Query word"
-            }
-        ]
+                custom_classes: "",
+                disabled: false,
+                icon: "check",
+                intent: "primary",
+                label: "Sample action",
+                name: "Sample name",
+                variant: "primary",
+                is_stop_word: true,
+                query_word: "Query word",
+            },
+        ],
     },
-    "notice_html": "Notice html",
-    "show_action": true
+    notice_html: "Notice html",
+    show_action: true,
 };
 
 const meta = {

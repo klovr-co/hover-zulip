@@ -6,12 +6,13 @@ import render_template from "../../../templates/settings/admin_channel_folders.h
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_admin": true
+    is_admin: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Admin Channel Folders",
-    render: () => render_template_story("settings/admin_channel_folders.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/admin_channel_folders.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

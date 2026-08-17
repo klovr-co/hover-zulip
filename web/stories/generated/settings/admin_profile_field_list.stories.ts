@@ -6,13 +6,14 @@ import render_template from "../../../templates/settings/admin_profile_field_lis
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "profile_field": "Profile field",
-    "can_modify": true
+    profile_field: "Profile field",
+    can_modify: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Admin Profile Field List",
-    render: () => render_template_story("settings/admin_profile_field_list.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/admin_profile_field_list.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

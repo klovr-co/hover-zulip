@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/Dev Env Email Access",
-    render: () => render_template_story("settings/dev_env_email_access.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/dev_env_email_access.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

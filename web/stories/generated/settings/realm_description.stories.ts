@@ -6,9 +6,9 @@ import render_template from "../../../templates/settings/realm_description.hbs";
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_admin": true,
-    "realm_description_text": "Realm description text",
-    "realm_description_html": "Realm description html"
+    is_admin: true,
+    realm_description_text: "Realm description text",
+    realm_description_html: "Realm description html",
 };
 
 const meta = {

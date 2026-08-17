@@ -6,17 +6,22 @@ import render_template from "../../../templates/stream_settings/edit_channel_fol
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "max_channel_folder_name_length": "Max channel folder name length",
-    "name": "Name",
-    "can_manage_folder": true,
-    "max_channel_folder_description_length": "Max channel folder description length",
-    "description": "Description",
-    "folder_id": 7
+    max_channel_folder_name_length: "Max channel folder name length",
+    name: "Name",
+    can_manage_folder: true,
+    max_channel_folder_description_length: "Max channel folder description length",
+    description: "Description",
+    folder_id: 7,
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Edit Channel Folder Modal",
-    render: () => render_template_story("stream_settings/edit_channel_folder_modal.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/edit_channel_folder_modal.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Widgets/Todo Widget Example",
-    render: () => render_template_story("widgets/todo_widget_example.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("widgets/todo_widget_example.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

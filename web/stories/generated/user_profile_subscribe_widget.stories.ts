@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/User Profile Subscribe Widget",
-    render: () => render_template_story("user_profile_subscribe_widget.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("user_profile_subscribe_widget.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -6,24 +6,24 @@ import render_template from "../../templates/search_description.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "parts": [
+    parts: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "type": "Type",
-            "content": "Content",
-            "is_empty_string_topic": true,
-            "topic_display_name": "Topic display name",
-            "prefix_for_operator": "Prefix for operator",
-            "operand": "Operand",
-            "verb": "Verb"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            type: "Type",
+            content: "Content",
+            is_empty_string_topic: true,
+            topic_display_name: "Topic display name",
+            prefix_for_operator: "Prefix for operator",
+            operand: "Operand",
+            verb: "Verb",
+        },
+    ],
 };
 
 const meta = {

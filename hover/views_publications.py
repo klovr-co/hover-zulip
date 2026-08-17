@@ -11,7 +11,7 @@ from hover.telemetry import (
     HoverTelemetryEvent,
     HoverTelemetryOutcome,
     count_bucket,
-    emit_hover_telemetry,
+    emit_hover_telemetry_on_commit,
 )
 from zerver.decorator import require_non_guest_user
 from zerver.lib.exceptions import JsonableError
@@ -32,7 +32,7 @@ class EvidenceResolutionError(JsonableError):
 
 
 def _evidence_unavailable(*, realm_id: int, space_id: int, reference_count: int) -> NoReturn:
-    emit_hover_telemetry(
+    emit_hover_telemetry_on_commit(
         HoverTelemetryEvent.EVIDENCE_RESOLUTION,
         HoverTelemetryOutcome.PERMANENT_FAILURE,
         dimensions={
@@ -56,7 +56,7 @@ def _resolve_evidence(
             refs=refs,
         )
     except ClawerSyncError as error:
-        emit_hover_telemetry(
+        emit_hover_telemetry_on_commit(
             HoverTelemetryEvent.EVIDENCE_RESOLUTION,
             (
                 HoverTelemetryOutcome.RETRYABLE_FAILURE
@@ -71,7 +71,7 @@ def _resolve_evidence(
             },
         )
         raise
-    emit_hover_telemetry(
+    emit_hover_telemetry_on_commit(
         HoverTelemetryEvent.EVIDENCE_RESOLUTION,
         HoverTelemetryOutcome.SUCCESS,
         dimensions={

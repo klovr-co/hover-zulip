@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/Attachments Settings",
-    render: () => render_template_story("settings/attachments_settings.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/attachments_settings.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

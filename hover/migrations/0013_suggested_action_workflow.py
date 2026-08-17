@@ -109,7 +109,6 @@ def backfill_suggested_actions(apps: StateApps, schema_editor: BaseDatabaseSchem
 
 class Migration(migrations.Migration):
     atomic = False
-
     dependencies = [
         ("hover", "0012_material_review_requests"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
@@ -411,9 +410,5 @@ class Migration(migrations.Migration):
             ],
             options={"ordering": ["date_created", "id"]},
         ),
-        migrations.RunPython(
-            backfill_suggested_actions,
-            migrations.RunPython.noop,
-            atomic=True,
-        ),
+        migrations.RunPython(backfill_suggested_actions, migrations.RunPython.noop),
     ]

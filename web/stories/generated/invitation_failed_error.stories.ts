@@ -6,23 +6,23 @@ import render_template from "../../templates/invitation_failed_error.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "error_message": "Error message",
-    "daily_limit_reached": "Daily limit reached",
-    "error_list": [
+    error_message: "Error message",
+    daily_limit_reached: "Daily limit reached",
+    error_list: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
     ],
-    "is_invitee_deactivated": true,
-    "is_admin": true,
-    "license_limit_reached": "License limit reached",
-    "has_billing_access": true
+    is_invitee_deactivated: true,
+    is_admin: true,
+    license_limit_reached: "License limit reached",
+    has_billing_access: true,
 };
 
 const meta = {

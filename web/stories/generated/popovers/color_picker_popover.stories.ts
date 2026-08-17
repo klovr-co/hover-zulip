@@ -6,39 +6,40 @@ import render_template from "../../../templates/popovers/color_picker_popover.hb
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "stream_id": 7,
-    "recipient_bar_color": "#4f8394",
-    "stream_privacy_icon_color": "#4f8394",
-    "stream_name": "Stream name",
-    "stream_color_palette": [
+    stream_id: 7,
+    recipient_bar_color: "#4f8394",
+    stream_privacy_icon_color: "#4f8394",
+    stream_name: "Stream name",
+    stream_color_palette: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "row": [
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            row: [
                 {
-                    "custom_classes": "",
-                    "disabled": false,
-                    "icon": "check",
-                    "intent": "primary",
-                    "label": "Sample action",
-                    "name": "Sample name",
-                    "variant": "primary",
-                    "hex_color": "#4f8394"
-                }
-            ]
-        }
+                    custom_classes: "",
+                    disabled: false,
+                    icon: "check",
+                    intent: "primary",
+                    label: "Sample action",
+                    name: "Sample name",
+                    variant: "primary",
+                    hex_color: "#4f8394",
+                },
+            ],
+        },
     ],
-    "stream_color": "#4f8394"
+    stream_color: "#4f8394",
 };
 
 const meta = {
     title: "Catalogue/Popovers/Color Picker Popover",
-    render: () => render_template_story("popovers/color_picker_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("popovers/color_picker_popover.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

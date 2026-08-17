@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Compose Banner/Wildcard Mention Not Allowed Error",
-    render: () => render_template_story("compose_banner/wildcard_mention_not_allowed_error.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "compose_banner/wildcard_mention_not_allowed_error.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

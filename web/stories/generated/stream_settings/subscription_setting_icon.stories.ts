@@ -6,15 +6,20 @@ import render_template from "../../../templates/stream_settings/subscription_set
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "color": "#4f8394",
-    "is_archived": true,
-    "invite_only": "Invite only",
-    "is_web_public": true
+    color: "#4f8394",
+    is_archived: true,
+    invite_only: "Invite only",
+    is_web_public: true,
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Subscription Setting Icon",
-    render: () => render_template_story("stream_settings/subscription_setting_icon.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/subscription_setting_icon.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

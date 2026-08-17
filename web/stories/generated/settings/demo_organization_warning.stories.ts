@@ -6,12 +6,13 @@ import render_template from "../../../templates/settings/demo_organization_warni
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_demo_organization": true
+    is_demo_organization: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Demo Organization Warning",
-    render: () => render_template_story("settings/demo_organization_warning.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/demo_organization_warning.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

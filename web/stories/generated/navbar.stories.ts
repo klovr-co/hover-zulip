@@ -6,8 +6,8 @@ import render_template from "../../templates/navbar.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "embedded": true,
-    "user_avatar": "User avatar"
+    embedded: true,
+    user_avatar: "User avatar",
 };
 
 const meta = {

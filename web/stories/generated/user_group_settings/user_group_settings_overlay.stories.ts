@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/User Group Settings/User Group Settings Overlay",
-    render: () => render_template_story("user_group_settings/user_group_settings_overlay.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/user_group_settings_overlay.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

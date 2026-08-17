@@ -6,7 +6,7 @@ import render_template from "../../templates/markdown_timestamp.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "text": "Text"
+    text: "Text",
 };
 
 const meta = {

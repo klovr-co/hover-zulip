@@ -6,13 +6,13 @@ import render_template from "../../templates/creator_details.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "group": {
-        "id": 7,
-        "name": "Design team",
-        "is_system_group": true
+    group: {
+        id: 7,
+        name: "Design team",
+        is_system_group: true,
     },
-    "stream_id": 7,
-    "group_id": 7
+    stream_id: 7,
+    group_id: 7,
 };
 
 const meta = {

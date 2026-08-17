@@ -6,26 +6,26 @@ import render_template from "../../templates/user_custom_profile_fields.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "profile_fields": [
+    profile_fields: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "type": "Type",
-            "id": 7,
-            "is_link": "#storybook",
-            "value": "Value",
-            "is_external_account": 3,
-            "link": "#storybook",
-            "is_user_field": true,
-            "rendered_value": "Rendered value"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            type: "Type",
+            id: 7,
+            is_link: "#storybook",
+            value: "Value",
+            is_external_account: 3,
+            link: "#storybook",
+            is_user_field: true,
+            rendered_value: "Rendered value",
+        },
     ],
-    "for_user_card_popover": "For user card popover"
+    for_user_card_popover: "For user card popover",
 };
 
 const meta = {

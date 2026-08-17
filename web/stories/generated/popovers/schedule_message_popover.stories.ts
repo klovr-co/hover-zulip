@@ -6,23 +6,24 @@ import render_template from "../../../templates/popovers/schedule_message_popove
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_reminder": true,
-    "max_reminder_note_length": "Max reminder note length",
-    "possible_send_later_today": "Possible send later today",
-    "entry": {
+    is_reminder: true,
+    max_reminder_note_length: "Max reminder note length",
+    possible_send_later_today: "Possible send later today",
+    entry: {
         "0": "0",
         "1": {
-            "stamp": "Stamp",
-            "text": "Text"
-        }
+            stamp: "Stamp",
+            text: "Text",
+        },
     },
-    "send_later_tomorrow": "Send later tomorrow",
-    "possible_send_later_monday": "Possible send later monday"
+    send_later_tomorrow: "Send later tomorrow",
+    possible_send_later_monday: "Possible send later monday",
 };
 
 const meta = {
     title: "Catalogue/Popovers/Schedule Message Popover",
-    render: () => render_template_story("popovers/schedule_message_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("popovers/schedule_message_popover.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

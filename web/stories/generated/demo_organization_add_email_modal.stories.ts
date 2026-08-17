@@ -6,16 +6,17 @@ import render_template from "../../templates/demo_organization_add_email_modal.h
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "delivery_email": "ava@example.com",
-    "email_address_visibility_values": "Email address visibility values",
-    "code": "Code",
-    "description": "Description",
-    "full_name": "Full name"
+    delivery_email: "ava@example.com",
+    email_address_visibility_values: "Email address visibility values",
+    code: "Code",
+    description: "Description",
+    full_name: "Full name",
 };
 
 const meta = {
     title: "Catalogue/Demo Organization Add Email Modal",
-    render: () => render_template_story("demo_organization_add_email_modal.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("demo_organization_add_email_modal.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

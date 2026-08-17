@@ -6,20 +6,20 @@ import render_template from "../../templates/message_reactions.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "msg": {
-        "message_reactions": [
+    msg: {
+        message_reactions: [
             {
-                "custom_classes": "",
-                "disabled": false,
-                "icon": "check",
-                "intent": "primary",
-                "label": "Sample action",
-                "name": "Sample name",
-                "variant": "primary"
-            }
-        ]
+                custom_classes: "",
+                disabled: false,
+                icon: "check",
+                intent: "primary",
+                label: "Sample action",
+                name: "Sample name",
+                variant: "primary",
+            },
+        ],
     },
-    "is_archived": true
+    is_archived: true,
 };
 
 const meta = {

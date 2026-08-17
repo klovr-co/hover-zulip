@@ -6,21 +6,21 @@ import render_template from "../../../templates/widgets/todo_widget_tasks.hbs";
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "all_tasks": [
+    all_tasks: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "key": "Key",
-            "completed": "Completed",
-            "task": "Task",
-            "desc": "Desc"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            key: "Key",
+            completed: "Completed",
+            task: "Task",
+            desc: "Desc",
+        },
+    ],
 };
 
 const meta = {

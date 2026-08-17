@@ -6,11 +6,11 @@ import render_template from "../../templates/buddy_list_tooltip_content.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "first_line": "First line",
-    "show_you": true,
-    "second_line": "Second line",
-    "is_deactivated": true,
-    "third_line": "Third line"
+    first_line: "First line",
+    show_you: true,
+    second_line: "Second line",
+    is_deactivated: true,
+    third_line: "Third line",
 };
 
 const meta = {

@@ -2,29 +2,26 @@
 
 import type {Meta, StoryObj} from "@storybook/html";
 
-import render_template from "../../templates/create_hover_space_modal.hbs";
+import render_template from "../../templates/presence_rows.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "max_name_length": "Max name length",
-    "categories": [
+    presence_rows: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "id": 7
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
     ],
-    "max_description_length": "Max description length"
 };
 
 const meta = {
-    title: "Catalogue/Create Hover Space Modal",
-    render: () => render_template_story("create_hover_space_modal.hbs", render_template, fixture),
+    title: "Catalogue/Presence Rows",
+    render: () => render_template_story("presence_rows.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

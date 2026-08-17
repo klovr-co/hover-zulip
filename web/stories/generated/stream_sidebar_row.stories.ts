@@ -6,49 +6,48 @@ import render_template from "../../templates/stream_sidebar_row.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "for_modal": "For modal",
-    "is_muted": true,
-    "id": 7,
-    "url": "#storybook",
-    "color": "#4f8394",
-    "name": "Name",
-    "can_post_messages": true,
-    "is_empty_topic_only_channel": true,
-    "cannot_create_topics_in_channel": "Cannot create topics in channel",
-    "is_hover_space": true,
-    "has_hover_ai_modules": true,
-    "hover_ai_modules": [
+    for_modal: "For modal",
+    is_muted: true,
+    id: 7,
+    url: "#storybook",
+    color: "#4f8394",
+    name: "Name",
+    can_post_messages: true,
+    is_empty_topic_only_channel: true,
+    cannot_create_topics_in_channel: "Cannot create topics in channel",
+    is_hover_aimto_space: true,
+    hover_ai_modules: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "key": "Key",
-            "url": "#storybook",
-            "has_count": 3,
-            "count": 3
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            key: "Key",
+            url: "#storybook",
+            has_count: 3,
+            count: 3,
+        },
     ],
-    "hover_attached_sources": [
+    hover_attached_sources: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "key": "Key",
-            "url": "#storybook",
-            "source_key": "Source key",
-            "is_external": true,
-            "icon_class": "Icon class",
-            "detail": "Detail"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            key: "Key",
+            url: "#storybook",
+            source_key: "Source key",
+            is_external: true,
+            icon_class: "Icon class",
+            detail: "Detail",
+        },
+    ],
 };
 
 const meta = {

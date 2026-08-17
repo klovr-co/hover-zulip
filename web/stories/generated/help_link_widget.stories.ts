@@ -6,7 +6,7 @@ import render_template from "../../templates/help_link_widget.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "link": "#storybook"
+    link: "#storybook",
 };
 
 const meta = {

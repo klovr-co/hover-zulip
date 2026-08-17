@@ -6,12 +6,13 @@ import render_template from "../../../templates/stream_settings/stream_members_t
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "can_remove_subscribers": true
+    can_remove_subscribers: true,
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Stream Members Table",
-    render: () => render_template_story("stream_settings/stream_members_table.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("stream_settings/stream_members_table.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

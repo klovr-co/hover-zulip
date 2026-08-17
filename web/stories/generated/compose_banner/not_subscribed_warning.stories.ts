@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Compose Banner/Not Subscribed Warning",
-    render: () => render_template_story("compose_banner/not_subscribed_warning.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "compose_banner/not_subscribed_warning.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

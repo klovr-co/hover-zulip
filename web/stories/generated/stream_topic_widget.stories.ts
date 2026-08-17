@@ -6,9 +6,9 @@ import render_template from "../../templates/stream_topic_widget.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "stream_name": "Stream name",
-    "is_empty_string_topic": true,
-    "topic_display_name": "Topic display name"
+    stream_name: "Stream name",
+    is_empty_string_topic: true,
+    topic_display_name: "Topic display name",
 };
 
 const meta = {

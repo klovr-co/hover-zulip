@@ -6,12 +6,13 @@ import render_template from "../../../templates/settings/admin_realm_domains_lis
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "realm_domain": "Realm domain"
+    realm_domain: "Realm domain",
 };
 
 const meta = {
     title: "Catalogue/Settings/Admin Realm Domains List",
-    render: () => render_template_story("settings/admin_realm_domains_list.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/admin_realm_domains_list.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

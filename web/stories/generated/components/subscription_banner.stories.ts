@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Components/Subscription Banner",
-    render: () => render_template_story("components/subscription_banner.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("components/subscription_banner.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

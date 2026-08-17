@@ -6,58 +6,63 @@ import render_template from "../../../templates/user_group_settings/group_permis
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "group_has_no_realm_permissions": "Group has no realm permissions",
-    "group_assigned_realm_permissions": [
+    group_has_no_realm_permissions: "Group has no realm permissions",
+    group_assigned_realm_permissions: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "subsection_key": "Subsection key",
-            "assigned_permissions": [
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            subsection_key: "Subsection key",
+            assigned_permissions: [
                 {
-                    "custom_classes": "",
-                    "disabled": false,
-                    "icon": "check",
-                    "intent": "primary",
-                    "label": "Sample action",
-                    "name": "Sample name",
-                    "variant": "primary"
-                }
+                    custom_classes: "",
+                    disabled: false,
+                    icon: "check",
+                    intent: "primary",
+                    label: "Sample action",
+                    name: "Sample name",
+                    variant: "primary",
+                },
             ],
-            "subsection_heading": "Subsection heading"
-        }
+            subsection_heading: "Subsection heading",
+        },
     ],
-    "group_assigned_stream_permissions": [
+    group_assigned_stream_permissions: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
     ],
-    "group_assigned_user_group_permissions": [
+    group_assigned_user_group_permissions: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/Group Permission Settings",
-    render: () => render_template_story("user_group_settings/group_permission_settings.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/group_permission_settings.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

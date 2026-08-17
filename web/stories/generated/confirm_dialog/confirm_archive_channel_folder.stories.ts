@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Archive Channel Folder",
-    render: () => render_template_story("confirm_dialog/confirm_archive_channel_folder.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "confirm_dialog/confirm_archive_channel_folder.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

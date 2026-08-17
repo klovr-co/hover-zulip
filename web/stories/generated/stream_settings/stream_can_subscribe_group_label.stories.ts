@@ -6,12 +6,17 @@ import render_template from "../../../templates/stream_settings/stream_can_subsc
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_invite_only": true
+    is_invite_only: true,
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Stream Can Subscribe Group Label",
-    render: () => render_template_story("stream_settings/stream_can_subscribe_group_label.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/stream_can_subscribe_group_label.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

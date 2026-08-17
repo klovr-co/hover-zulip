@@ -6,11 +6,11 @@ import render_template from "../../templates/status_emoji.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "emoji_alt_code": "Emoji alt code",
-    "emoji_name": "Emoji name",
-    "still_url": "#storybook",
-    "url": "#storybook",
-    "emoji_code": "Emoji code"
+    emoji_alt_code: "Emoji alt code",
+    emoji_name: "Emoji name",
+    still_url: "#storybook",
+    url: "#storybook",
+    emoji_code: "Emoji code",
 };
 
 const meta = {

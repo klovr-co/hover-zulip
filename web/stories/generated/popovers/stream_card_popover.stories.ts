@@ -6,16 +6,17 @@ import render_template from "../../../templates/popovers/stream_card_popover.hbs
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "stream": {
-        "stream_id": 7,
-        "color": "#4f8394",
-        "name": "Name"
-    }
+    stream: {
+        stream_id: 7,
+        color: "#4f8394",
+        name: "Name",
+    },
 };
 
 const meta = {
     title: "Catalogue/Popovers/Stream Card Popover",
-    render: () => render_template_story("popovers/stream_card_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("popovers/stream_card_popover.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

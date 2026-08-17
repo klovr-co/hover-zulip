@@ -6,31 +6,31 @@ import render_template from "../../templates/message_edit_history.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "edited_messages": [
+    edited_messages: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "timestamp": "Timestamp",
-            "is_stream": true,
-            "recipient_bar_color": "#4f8394",
-            "edited_by_notice": "Edited by notice",
-            "initial_entry_for_move_history": "Initial entry for move history",
-            "new_stream": "New stream",
-            "is_empty_string_new_topic": true,
-            "new_topic_display_name": "New topic display name",
-            "stream_changed": "Stream changed",
-            "prev_stream": "Prev stream",
-            "topic_edited": "Topic edited",
-            "is_empty_string_prev_topic": true,
-            "prev_topic_display_name": "Prev topic display name",
-            "body_to_render": "Body to render"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            timestamp: "Timestamp",
+            is_stream: true,
+            recipient_bar_color: "#4f8394",
+            edited_by_notice: "Edited by notice",
+            initial_entry_for_move_history: "Initial entry for move history",
+            new_stream: "New stream",
+            is_empty_string_new_topic: true,
+            new_topic_display_name: "New topic display name",
+            stream_changed: "Stream changed",
+            prev_stream: "Prev stream",
+            topic_edited: "Topic edited",
+            is_empty_string_prev_topic: true,
+            prev_topic_display_name: "Prev topic display name",
+            body_to_render: "Body to render",
+        },
+    ],
 };
 
 const meta = {

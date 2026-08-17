@@ -6,7 +6,7 @@ import render_template from "../../templates/add_saved_snippet_modal.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "prepopulated_content": "Prepopulated content"
+    prepopulated_content: "Prepopulated content",
 };
 
 const meta = {

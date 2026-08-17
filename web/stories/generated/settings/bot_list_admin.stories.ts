@@ -6,7 +6,7 @@ import render_template from "../../../templates/settings/bot_list_admin.hbs";
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "prefix": "Prefix"
+    prefix: "Prefix",
 };
 
 const meta = {

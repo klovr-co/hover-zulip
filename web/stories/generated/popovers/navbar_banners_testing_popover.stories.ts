@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Popovers/Navbar Banners Testing Popover",
-    render: () => render_template_story("popovers/navbar_banners_testing_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "popovers/navbar_banners_testing_popover.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Compose Banner/Unknown Zoom User Error",
-    render: () => render_template_story("compose_banner/unknown_zoom_user_error.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "compose_banner/unknown_zoom_user_error.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

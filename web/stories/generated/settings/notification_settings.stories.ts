@@ -6,127 +6,129 @@ import render_template from "../../../templates/settings/notification_settings.h
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "for_realm_settings": "For realm settings",
-    "realm_push_notifications_enabled": "Realm push notifications enabled",
-    "general_settings": [
+    for_realm_settings: "For realm settings",
+    realm_push_notifications_enabled: "Realm push notifications enabled",
+    general_settings: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "help_link": "#storybook",
-            "notification_settings": [
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            help_link: "#storybook",
+            notification_settings: [
                 {
-                    "custom_classes": "",
-                    "disabled": false,
-                    "icon": "check",
-                    "intent": "primary",
-                    "label": "Sample action",
-                    "name": "Sample name",
-                    "variant": "primary"
-                }
-            ]
-        }
+                    custom_classes: "",
+                    disabled: false,
+                    icon: "check",
+                    intent: "primary",
+                    label: "Sample action",
+                    name: "Sample name",
+                    variant: "primary",
+                },
+            ],
+        },
     ],
-    "custom_stream_specific_notification_settings": [
+    custom_stream_specific_notification_settings: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
     ],
-    "prefix": "Prefix",
-    "settings_label": {
-        "automatically_follow_topics_policy": "Automatically follow topics policy",
-        "automatically_unmute_topics_in_muted_streams_policy": "Automatically unmute topics in muted streams policy",
-        "desktop_icon_count_display": "Desktop icon count display",
-        "realm_name_in_email_notifications_policy": "Realm name in email notifications policy"
+    prefix: "Prefix",
+    settings_label: {
+        automatically_follow_topics_policy: "Automatically follow topics policy",
+        automatically_unmute_topics_in_muted_streams_policy:
+            "Automatically unmute topics in muted streams policy",
+        desktop_icon_count_display: "Desktop icon count display",
+        realm_name_in_email_notifications_policy: "Realm name in email notifications policy",
     },
-    "notification_settings": {
-        "desktop_notification_settings": [
+    notification_settings: {
+        desktop_notification_settings: [
             {
-                "custom_classes": "",
-                "disabled": false,
-                "icon": "check",
-                "intent": "primary",
-                "label": "Sample action",
-                "name": "Sample name",
-                "variant": "primary"
-            }
+                custom_classes: "",
+                disabled: false,
+                icon: "check",
+                intent: "primary",
+                label: "Sample action",
+                name: "Sample name",
+                variant: "primary",
+            },
         ],
-        "mobile_notification_settings": [
+        mobile_notification_settings: [
             {
-                "custom_classes": "",
-                "disabled": false,
-                "icon": "check",
-                "intent": "primary",
-                "label": "Sample action",
-                "name": "Sample name",
-                "variant": "primary"
-            }
+                custom_classes: "",
+                disabled: false,
+                icon: "check",
+                intent: "primary",
+                label: "Sample action",
+                name: "Sample name",
+                variant: "primary",
+            },
         ],
-        "email_message_notification_settings": [
+        email_message_notification_settings: [
             {
-                "custom_classes": "",
-                "disabled": false,
-                "icon": "check",
-                "intent": "primary",
-                "label": "Sample action",
-                "name": "Sample name",
-                "variant": "primary"
-            }
+                custom_classes: "",
+                disabled: false,
+                icon: "check",
+                intent: "primary",
+                label: "Sample action",
+                name: "Sample name",
+                variant: "primary",
+            },
         ],
-        "other_email_settings": [
+        other_email_settings: [
             {
-                "custom_classes": "",
-                "disabled": false,
-                "icon": "check",
-                "intent": "primary",
-                "label": "Sample action",
-                "name": "Sample name",
-                "variant": "primary"
-            }
-        ]
+                custom_classes: "",
+                disabled: false,
+                icon: "check",
+                intent: "primary",
+                label: "Sample action",
+                name: "Sample name",
+                variant: "primary",
+            },
+        ],
     },
-    "enable_sound_select": true,
-    "settings_object": {
-        "available_notification_sounds": [
+    enable_sound_select: true,
+    settings_object: {
+        available_notification_sounds: [
             {
-                "custom_classes": "",
-                "disabled": false,
-                "icon": "check",
-                "intent": "primary",
-                "label": "Sample action",
-                "name": "Sample name",
-                "variant": "primary"
-            }
-        ]
+                custom_classes: "",
+                disabled: false,
+                icon: "check",
+                intent: "primary",
+                label: "Sample action",
+                name: "Sample name",
+                variant: "primary",
+            },
+        ],
     },
-    "email_notifications_batching_period_values": [
+    email_notifications_batching_period_values: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "value": "Value",
-            "description": "Description"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            value: "Value",
+            description: "Description",
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Settings/Notification Settings",
-    render: () => render_template_story("settings/notification_settings.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/notification_settings.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

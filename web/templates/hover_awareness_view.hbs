@@ -34,9 +34,7 @@
                         <div class="hover-awareness-card__main">
                             <header class="hover-awareness-card__meta">
                                 <strong>{{sender_name}}</strong>
-                                <time
-                                  datetime="{{timestamp}}"
-                                  >
+                                <time datetime="{{timestamp}}">
                                     {{display_time}}
                                 </time>
                             </header>
@@ -84,11 +82,13 @@
                             {{#if todo_status}}
                                 <div class="hover-awareness-todo">
                                     <strong>{{t "Todo"}}</strong>
-                                    <span>{{todo_status}}
+                                    <span>
+                                        {{todo_status}}
                                         {{#if todo_due_date}}
                                             ·
-                                            {{#tr}}Due
-                                                {todo_due_date}{{/tr}}
+                                            {{#tr}}
+                                                Due {todo_due_date}
+                                            {{/tr}}
                                         {{/if}}
                                     </span>
                                 </div>

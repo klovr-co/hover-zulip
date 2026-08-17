@@ -275,10 +275,16 @@ class HoverSourceRecordsTest(ZulipTestCase):
             patch.object(self.adapter, "browse_source_records", side_effect=error),
             patch("hover.views_source_records.get_clawer_sync", return_value=self.adapter),
             self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
+            self.assertLogs("django.request", level="ERROR") as request_logs,
+            self.captureOnCommitCallbacks(execute=True),
         ):
             response = self.post()
 
         self.assertEqual(response.status_code, 503)
+        self.assertEqual(
+            request_logs.output,
+            [f"ERROR:django.request:Service Unavailable: {self.url}"],
+        )
         joined = "\n".join(telemetry.output)
         self.assertIn("event=source_records outcome=retryable_failure", joined)
         self.assertNotIn(private_request_sentinel, joined)

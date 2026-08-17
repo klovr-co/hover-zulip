@@ -6,15 +6,15 @@ import render_template from "../../templates/channel_message_link.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "is_empty_string_topic": true,
-    "href": "#storybook",
-    "stream": {
-        "color": "#4f8394",
-        "name": "design",
-        "stream_id": 7
+    is_empty_string_topic: true,
+    href: "#storybook",
+    stream: {
+        color: "#4f8394",
+        name: "design",
+        stream_id: 7,
     },
-    "channel_name": "Channel name",
-    "topic_display_name_html": "Topic display name html"
+    channel_name: "Channel name",
+    topic_display_name_html: "Topic display name html",
 };
 
 const meta = {

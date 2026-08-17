@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Unread Banner/Mark As Read Only In Conversation View",
-    render: () => render_template_story("unread_banner/mark_as_read_only_in_conversation_view.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "unread_banner/mark_as_read_only_in_conversation_view.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

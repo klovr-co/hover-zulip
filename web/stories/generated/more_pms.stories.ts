@@ -6,7 +6,7 @@ import render_template from "../../templates/more_pms.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "more_conversations_unread_count": 3
+    more_conversations_unread_count: 3,
 };
 
 const meta = {

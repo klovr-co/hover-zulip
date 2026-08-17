@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Popovers/Left Sidebar/Left Sidebar Stream Setting Popover",
-    render: () => render_template_story("popovers/left_sidebar/left_sidebar_stream_setting_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "popovers/left_sidebar/left_sidebar_stream_setting_popover.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

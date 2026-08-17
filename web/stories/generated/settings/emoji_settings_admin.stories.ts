@@ -6,12 +6,13 @@ import render_template from "../../../templates/settings/emoji_settings_admin.hb
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "can_add_emojis": true
+    can_add_emojis: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Emoji Settings Admin",
-    render: () => render_template_story("settings/emoji_settings_admin.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/emoji_settings_admin.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

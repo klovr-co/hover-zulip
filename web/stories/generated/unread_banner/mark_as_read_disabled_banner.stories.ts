@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Unread Banner/Mark As Read Disabled Banner",
-    render: () => render_template_story("unread_banner/mark_as_read_disabled_banner.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "unread_banner/mark_as_read_disabled_banner.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

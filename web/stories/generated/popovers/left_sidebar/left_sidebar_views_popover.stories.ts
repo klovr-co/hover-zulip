@@ -6,25 +6,30 @@ import render_template from "../../../../templates/popovers/left_sidebar/left_si
 import {render_template_story} from "../../../template_story_utils.ts";
 
 const fixture = {
-    "views": [
+    views: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
     ],
-    "is_home_view_active": true,
-    "unread_messages_present": "Unread messages present",
-    "show_unread_count": 3
+    is_home_view_active: true,
+    unread_messages_present: "Unread messages present",
+    show_unread_count: 3,
 };
 
 const meta = {
     title: "Catalogue/Popovers/Left Sidebar/Left Sidebar Views Popover",
-    render: () => render_template_story("popovers/left_sidebar/left_sidebar_views_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "popovers/left_sidebar/left_sidebar_views_popover.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

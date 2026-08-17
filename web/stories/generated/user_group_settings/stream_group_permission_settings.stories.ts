@@ -6,25 +6,30 @@ import render_template from "../../../templates/user_group_settings/stream_group
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "stream": {
-        "stream_id": 7
+    stream: {
+        stream_id: 7,
     },
-    "assigned_permissions": [
+    assigned_permissions: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/Stream Group Permission Settings",
-    render: () => render_template_story("user_group_settings/stream_group_permission_settings.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/stream_group_permission_settings.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

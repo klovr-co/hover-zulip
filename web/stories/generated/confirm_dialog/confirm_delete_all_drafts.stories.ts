@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Delete All Drafts",
-    render: () => render_template_story("confirm_dialog/confirm_delete_all_drafts.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "confirm_dialog/confirm_delete_all_drafts.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

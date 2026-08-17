@@ -6,23 +6,24 @@ import render_template from "../../../templates/popovers/playground_links_popove
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "playground_info": [
+    playground_info: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "playground_url": "#storybook"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            playground_url: "#storybook",
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Popovers/Playground Links Popover",
-    render: () => render_template_story("popovers/playground_links_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("popovers/playground_links_popover.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Mute User",
-    render: () => render_template_story("confirm_dialog/confirm_mute_user.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("confirm_dialog/confirm_mute_user.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -6,24 +6,29 @@ import render_template from "../../../templates/confirm_dialog/confirm_delete_de
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "realm_message_edit_history_is_visible": "Realm message edit history is visible",
-    "attachments_list": [
+    realm_message_edit_history_is_visible: "Realm message edit history is visible",
+    attachments_list: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "path_id": 7
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            path_id: 7,
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Delete Detached Attachments",
-    render: () => render_template_story("confirm_dialog/confirm_delete_detached_attachments.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "confirm_dialog/confirm_delete_detached_attachments.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

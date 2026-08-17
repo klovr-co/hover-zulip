@@ -6,13 +6,18 @@ import render_template from "../../../templates/confirm_dialog/confirm_unsubscri
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "unsubscribing_other_user": "Unsubscribing other user",
-    "organization_will_lose_content_access": "Organization will lose content access"
+    unsubscribing_other_user: "Unsubscribing other user",
+    organization_will_lose_content_access: "Organization will lose content access",
 };
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Unsubscribe Private Stream",
-    render: () => render_template_story("confirm_dialog/confirm_unsubscribe_private_stream.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "confirm_dialog/confirm_unsubscribe_private_stream.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

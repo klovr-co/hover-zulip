@@ -6,22 +6,22 @@ import render_template from "../../../templates/components/banner.hbs";
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "process": "Process",
-    "custom_classes": "Custom classes",
-    "intent": "Intent",
-    "label": "Label",
-    "buttons": [
+    process: "Process",
+    custom_classes: "Custom classes",
+    intent: "Intent",
+    label: "Label",
+    buttons: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
     ],
-    "close_button": "Close button"
+    close_button: "Close button",
 };
 
 const meta = {

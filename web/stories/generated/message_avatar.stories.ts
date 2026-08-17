@@ -6,14 +6,14 @@ import render_template from "../../templates/message_avatar.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "msg": {
-        "sender_id": 7
+    msg: {
+        sender_id: 7,
     },
-    "sender_is_bot": "Sender is bot",
-    "sender_is_guest": "Sender is guest",
-    "sender_is_deactivated": "Sender is deactivated",
-    "is_hidden": true,
-    "small_avatar_url": "#storybook"
+    sender_is_bot: "Sender is bot",
+    sender_is_guest: "Sender is guest",
+    sender_is_deactivated: "Sender is deactivated",
+    is_hidden: true,
+    small_avatar_url: "#storybook",
 };
 
 const meta = {

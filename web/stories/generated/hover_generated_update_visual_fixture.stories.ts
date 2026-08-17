@@ -2,14 +2,14 @@
 
 import type {Meta, StoryObj} from "@storybook/html";
 
-import render_template from "../../templates/hover_generated_update_visual_fixture.hbs";
+import render_template from "../../templates/right_sidebar.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
-    title: "Catalogue/Hover Generated Update Visual Fixture",
-    render: () => render_template_story("hover_generated_update_visual_fixture.hbs", render_template, fixture),
+    title: "Catalogue/Right Sidebar",
+    render: () => render_template_story("right_sidebar.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

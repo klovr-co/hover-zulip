@@ -6,13 +6,18 @@ import render_template from "../../../templates/confirm_dialog/confirm_moving_me
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "messages_allowed_to_move_text": "Messages allowed to move text",
-    "messages_not_allowed_to_move_text": "Messages not allowed to move text"
+    messages_allowed_to_move_text: "Messages allowed to move text",
+    messages_not_allowed_to_move_text: "Messages not allowed to move text",
 };
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Moving Messages",
-    render: () => render_template_story("confirm_dialog/confirm_moving_messages.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "confirm_dialog/confirm_moving_messages.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

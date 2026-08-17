@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/Add Default Streams",
-    render: () => render_template_story("settings/add_default_streams.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/add_default_streams.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

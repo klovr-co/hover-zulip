@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Go To Channel List Of Topics Tooltip",
-    render: () => render_template_story("go_to_channel_list_of_topics_tooltip.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("go_to_channel_list_of_topics_tooltip.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

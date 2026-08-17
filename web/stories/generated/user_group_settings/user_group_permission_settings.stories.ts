@@ -6,24 +6,29 @@ import render_template from "../../../templates/user_group_settings/user_group_p
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "group_id": 7,
-    "group_name": "Group name",
-    "assigned_permissions": [
+    group_id: 7,
+    group_name: "Group name",
+    assigned_permissions: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/User Group Permission Settings",
-    render: () => render_template_story("user_group_settings/user_group_permission_settings.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/user_group_permission_settings.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

@@ -6,37 +6,38 @@ import render_template from "../../../templates/stream_settings/stream_settings.
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "sub": {
-        "stream_id": 7,
-        "color": "#4f8394"
+    sub: {
+        stream_id: 7,
+        color: "#4f8394",
     },
-    "other_settings": [
+    other_settings: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
     ],
-    "notification_settings": [
+    notification_settings: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Stream Settings",
-    render: () => render_template_story("stream_settings/stream_settings.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("stream_settings/stream_settings.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

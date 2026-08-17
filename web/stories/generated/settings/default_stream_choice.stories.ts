@@ -6,12 +6,13 @@ import render_template from "../../../templates/settings/default_stream_choice.h
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "value": "Value"
+    value: "Value",
 };
 
 const meta = {
     title: "Catalogue/Settings/Default Stream Choice",
-    render: () => render_template_story("settings/default_stream_choice.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/default_stream_choice.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

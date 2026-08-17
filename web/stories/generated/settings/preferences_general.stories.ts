@@ -6,30 +6,31 @@ import render_template from "../../../templates/settings/preferences_general.hbs
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "for_realm_settings": "For realm settings",
-    "prefix": "Prefix",
-    "settings_label": {
-        "twenty_four_hour_time": "10:45 AM"
+    for_realm_settings: "For realm settings",
+    prefix: "Prefix",
+    settings_label: {
+        twenty_four_hour_time: "10:45 AM",
     },
-    "twenty_four_hour_time_values": "Twenty four hour time values",
-    "value": "Value",
-    "description": "Description",
-    "color_scheme_values": {
-        "automatic": {
-            "code": "Code"
+    twenty_four_hour_time_values: "Twenty four hour time values",
+    value: "Value",
+    description: "Description",
+    color_scheme_values: {
+        automatic: {
+            code: "Code",
         },
-        "light": {
-            "code": "Code"
+        light: {
+            code: "Code",
         },
-        "dark": {
-            "code": "Code"
-        }
-    }
+        dark: {
+            code: "Code",
+        },
+    },
 };
 
 const meta = {
     title: "Catalogue/Settings/Preferences General",
-    render: () => render_template_story("settings/preferences_general.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/preferences_general.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

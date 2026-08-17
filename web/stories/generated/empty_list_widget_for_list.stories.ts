@@ -6,7 +6,7 @@ import render_template from "../../templates/empty_list_widget_for_list.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "empty_list_message": "Empty list message"
+    empty_list_message: "Empty list message",
 };
 
 const meta = {

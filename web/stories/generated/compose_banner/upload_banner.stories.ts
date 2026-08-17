@@ -6,15 +6,16 @@ import render_template from "../../../templates/compose_banner/upload_banner.hbs
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "file_id": 7,
-    "banner_type": "Banner type",
-    "banner_text": "Banner text",
-    "is_upload_process_tracker": true
+    file_id: 7,
+    banner_type: "Banner type",
+    banner_text: "Banner text",
+    is_upload_process_tracker: true,
 };
 
 const meta = {
     title: "Catalogue/Compose Banner/Upload Banner",
-    render: () => render_template_story("compose_banner/upload_banner.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("compose_banner/upload_banner.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

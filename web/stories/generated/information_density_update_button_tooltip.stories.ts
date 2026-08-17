@@ -6,13 +6,18 @@ import render_template from "../../templates/information_density_update_button_t
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "tooltip_first_line": "Tooltip first line",
-    "tooltip_second_line": "Tooltip second line"
+    tooltip_first_line: "Tooltip first line",
+    tooltip_second_line: "Tooltip second line",
 };
 
 const meta = {
     title: "Catalogue/Information Density Update Button Tooltip",
-    render: () => render_template_story("information_density_update_button_tooltip.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "information_density_update_button_tooltip.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

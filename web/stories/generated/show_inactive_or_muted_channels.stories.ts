@@ -6,12 +6,13 @@ import render_template from "../../templates/show_inactive_or_muted_channels.hbs
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "button_text": "Button text"
+    button_text: "Button text",
 };
 
 const meta = {
     title: "Catalogue/Show Inactive Or Muted Channels",
-    render: () => render_template_story("show_inactive_or_muted_channels.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("show_inactive_or_muted_channels.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

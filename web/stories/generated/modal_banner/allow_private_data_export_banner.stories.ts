@@ -9,7 +9,12 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Modal Banner/Allow Private Data Export Banner",
-    render: () => render_template_story("modal_banner/allow_private_data_export_banner.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "modal_banner/allow_private_data_export_banner.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

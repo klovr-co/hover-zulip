@@ -6,7 +6,7 @@ import render_template from "../../templates/feedback_container.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "has_undo_button": true
+    has_undo_button: true,
 };
 
 const meta = {

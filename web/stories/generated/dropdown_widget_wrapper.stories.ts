@@ -6,7 +6,7 @@ import render_template from "../../templates/dropdown_widget_wrapper.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "widget_name": "Widget name"
+    widget_name: "Widget name",
 };
 
 const meta = {

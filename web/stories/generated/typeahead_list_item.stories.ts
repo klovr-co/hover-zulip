@@ -6,32 +6,32 @@ import render_template from "../../templates/typeahead_list_item.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "is_emoji": true,
-    "has_image": true,
-    "img_src": "Img src",
-    "emoji_code": "Emoji code",
-    "is_person": true,
-    "user_circle_class": "User circle class",
-    "is_user_group": true,
-    "is_stream_topic": true,
-    "is_empty_string_topic": true,
-    "topic_display_name": "Topic display name",
-    "has_secondary_html": true,
-    "is_default_language": true,
-    "stream": {
-        "color": "#4f8394",
-        "name": "design",
-        "stream_id": 7
+    is_emoji: true,
+    has_image: true,
+    img_src: "Img src",
+    emoji_code: "Emoji code",
+    is_person: true,
+    user_circle_class: "User circle class",
+    is_user_group: true,
+    is_stream_topic: true,
+    is_empty_string_topic: true,
+    topic_display_name: "Topic display name",
+    has_secondary_html: true,
+    is_default_language: true,
+    stream: {
+        color: "#4f8394",
+        name: "design",
+        stream_id: 7,
     },
-    "primary": "Primary",
-    "is_bot": true,
-    "should_add_guest_user_indicator": true,
-    "has_status": true,
-    "has_pronouns": true,
-    "pronouns": "Pronouns",
-    "has_secondary": true,
-    "secondary_html": "Secondary html",
-    "secondary": "Secondary"
+    primary: "Primary",
+    is_bot: true,
+    should_add_guest_user_indicator: true,
+    has_status: true,
+    has_pronouns: true,
+    pronouns: "Pronouns",
+    has_secondary: true,
+    secondary_html: "Secondary html",
+    secondary: "Secondary",
 };
 
 const meta = {

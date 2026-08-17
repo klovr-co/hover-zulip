@@ -1,6 +1,6 @@
 "use strict";
 
-const {strict: assert} = require("node:assert");
+const assert = require("node:assert/strict");
 
 const {zrequire} = require("./lib/namespace.cjs");
 

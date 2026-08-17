@@ -6,15 +6,20 @@ import render_template from "../../../templates/user_group_settings/selected_gro
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "group_name": "Group name",
-    "is_system_group": true,
-    "group_id": 7,
-    "is_direct_member": true
+    group_name: "Group name",
+    is_system_group: true,
+    group_id: 7,
+    is_direct_member: true,
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/Selected Group Title",
-    render: () => render_template_story("user_group_settings/selected_group_title.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/selected_group_title.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

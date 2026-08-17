@@ -6,13 +6,14 @@ import render_template from "../../../templates/settings/upgrade_tip_widget.hbs"
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_guest": true,
-    "zulip_plan_is_not_limited": "Zulip plan is not limited"
+    is_guest: true,
+    zulip_plan_is_not_limited: "Zulip plan is not limited",
 };
 
 const meta = {
     title: "Catalogue/Settings/Upgrade Tip Widget",
-    render: () => render_template_story("settings/upgrade_tip_widget.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/upgrade_tip_widget.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -98,7 +98,6 @@ export function show_evidence(url: string): void {
         modal_submit_button_text: $t({defaultMessage: "Close"}),
         single_footer_button: true,
         close_on_submit: true,
-        on_click: () => undefined,
     });
     const $content = $(`#${CSS.escape(modal_id)} .modal__content`);
     load_evidence($content, url);

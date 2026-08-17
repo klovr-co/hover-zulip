@@ -6,23 +6,24 @@ import render_template from "../../templates/left_sidebar_expanded_view_item.hbs
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "css_class_suffix": "Css class suffix",
-    "hidden_for_spectators": "Hidden for spectators",
-    "is_home_view": true,
-    "fragment": "Fragment",
-    "tooltip_template_id": 7,
-    "icon": "Icon",
-    "name": "Name",
-    "unread_count_type": "Unread count type",
-    "unread_count": 3,
-    "supports_masked_unread": 3,
-    "menu_icon_class": "Menu icon class",
-    "menu_aria_label": "Menu aria label"
+    css_class_suffix: "Css class suffix",
+    hidden_for_spectators: "Hidden for spectators",
+    is_home_view: true,
+    fragment: "Fragment",
+    tooltip_template_id: 7,
+    icon: "Icon",
+    name: "Name",
+    unread_count_type: "Unread count type",
+    unread_count: 3,
+    supports_masked_unread: 3,
+    menu_icon_class: "Menu icon class",
+    menu_aria_label: "Menu aria label",
 };
 
 const meta = {
     title: "Catalogue/Left Sidebar Expanded View Item",
-    render: () => render_template_story("left_sidebar_expanded_view_item.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("left_sidebar_expanded_view_item.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

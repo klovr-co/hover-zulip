@@ -6,12 +6,13 @@ import render_template from "../../templates/narrow_tooltip_list_of_topics.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "content": "Content"
+    content: "Content",
 };
 
 const meta = {
     title: "Catalogue/Narrow Tooltip List Of Topics",
-    render: () => render_template_story("narrow_tooltip_list_of_topics.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("narrow_tooltip_list_of_topics.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

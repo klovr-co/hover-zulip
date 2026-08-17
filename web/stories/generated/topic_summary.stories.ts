@@ -6,7 +6,7 @@ import render_template from "../../templates/topic_summary.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "summary_markdown": "Summary markdown"
+    summary_markdown: "Summary markdown",
 };
 
 const meta = {

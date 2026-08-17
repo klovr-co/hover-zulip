@@ -6,7 +6,7 @@ import render_template from "../../templates/muted_user_ui_row.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "muted_user": true
+    muted_user: true,
 };
 
 const meta = {

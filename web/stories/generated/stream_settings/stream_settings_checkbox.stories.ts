@@ -6,18 +6,23 @@ import render_template from "../../../templates/stream_settings/stream_settings_
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "setting_name": "Setting name",
-    "disabled_realm_setting": true,
-    "notification_setting": "Notification setting",
-    "stream_id": 7,
-    "is_checked": true,
-    "is_disabled": true,
-    "label": "Label"
+    setting_name: "Setting name",
+    disabled_realm_setting: true,
+    notification_setting: "Notification setting",
+    stream_id: 7,
+    is_checked: true,
+    is_disabled: true,
+    label: "Label",
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Stream Settings Checkbox",
-    render: () => render_template_story("stream_settings/stream_settings_checkbox.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/stream_settings_checkbox.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

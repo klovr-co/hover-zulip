@@ -6,7 +6,7 @@ import render_template from "../../../templates/settings/admin_export_list.hbs";
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "realm_export": "Realm export"
+    realm_export: "Realm export",
 };
 
 const meta = {

@@ -313,7 +313,7 @@ class HoverConnectedAccountTest(ZulipTestCase):
         other_admin.realm.save(update_fields=["hover_enabled"])
         self.login_user(other_admin)
 
-        with self.assertLogs(level="WARNING") as warning_logs:
+        with self.assertLogs(level="WARNING") as logs:
             missing = self.client_get("/json/hover/connected_accounts/999999")
             cross_realm = self.client_get(f"/json/hover/connected_accounts/{account.id}")
             missing_grant = self.client_delete(
@@ -323,12 +323,13 @@ class HoverConnectedAccountTest(ZulipTestCase):
                 f"/json/hover/connected_accounts/{account.id}/grants/{grant.id}"
             )
 
-        self.assert_length(warning_logs.output, 4)
-        for warning in warning_logs.output:
-            self.assertIn("attempted to access API on wrong subdomain", warning)
+        self.assert_length(logs.output, 4)
+        for log in logs.output:
+            self.assertIn("attempted to access API on wrong subdomain", log)
 
         self.assertEqual(missing.status_code, cross_realm.status_code)
         self.assertEqual(missing.content, cross_realm.content)
+
         self.assertEqual(missing_grant.status_code, cross_realm_grant.status_code)
         self.assertEqual(missing_grant.content, cross_realm_grant.content)
 

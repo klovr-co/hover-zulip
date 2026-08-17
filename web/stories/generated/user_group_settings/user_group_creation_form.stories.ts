@@ -6,12 +6,17 @@ import render_template from "../../../templates/user_group_settings/user_group_c
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "max_user_group_name_length": "Max user group name length"
+    max_user_group_name_length: "Max user group name length",
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/User Group Creation Form",
-    render: () => render_template_story("user_group_settings/user_group_creation_form.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/user_group_creation_form.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

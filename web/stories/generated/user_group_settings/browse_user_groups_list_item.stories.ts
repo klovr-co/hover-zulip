@@ -6,20 +6,25 @@ import render_template from "../../../templates/user_group_settings/browse_user_
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "deactivated": "Deactivated",
-    "is_system_group": true,
-    "id": 7,
-    "name": "Name",
-    "is_member": true,
-    "can_leave": true,
-    "is_direct_member": true,
-    "can_join": true,
-    "description": "Description"
+    deactivated: "Deactivated",
+    is_system_group: true,
+    id: 7,
+    name: "Name",
+    is_member: true,
+    can_leave: true,
+    is_direct_member: true,
+    can_join: true,
+    description: "Description",
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/Browse User Groups List Item",
-    render: () => render_template_story("user_group_settings/browse_user_groups_list_item.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/browse_user_groups_list_item.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

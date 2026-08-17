@@ -6,16 +6,21 @@ import render_template from "../../../templates/user_group_settings/user_group_s
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "group": {
-        "id": 7,
-        "is_system_group": true
+    group: {
+        id: 7,
+        is_system_group: true,
     },
-    "group_has_no_permissions": "Group has no permissions"
+    group_has_no_permissions: "Group has no permissions",
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/User Group Settings",
-    render: () => render_template_story("user_group_settings/user_group_settings.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/user_group_settings.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

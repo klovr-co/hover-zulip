@@ -6,13 +6,13 @@ import render_template from "../../templates/decorated_channel_name.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "inline_with_text": "Inline with text",
-    "show_colored_icon": true,
-    "stream": {
-        "stream_id": 7,
-        "color": "#4f8394",
-        "name": "Name"
-    }
+    inline_with_text: "Inline with text",
+    show_colored_icon: true,
+    stream: {
+        stream_id: 7,
+        color: "#4f8394",
+        name: "Name",
+    },
 };
 
 const meta = {

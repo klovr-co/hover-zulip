@@ -6,13 +6,14 @@ import render_template from "../../../templates/settings/deactivated_users_admin
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "allow_sorting_deactivated_users_list_by_email": true,
-    "is_admin": true
+    allow_sorting_deactivated_users_list_by_email: true,
+    is_admin: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Deactivated Users Admin",
-    render: () => render_template_story("settings/deactivated_users_admin.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/deactivated_users_admin.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

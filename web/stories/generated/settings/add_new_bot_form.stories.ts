@@ -6,32 +6,32 @@ import render_template from "../../../templates/settings/add_new_bot_form.hbs";
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "user_has_email_set": "User has email set",
-    "bot_types": [
+    user_has_email_set: "User has email set",
+    bot_types: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "type_id": 7
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            type_id: 7,
+        },
     ],
-    "realm_embedded_bots": [
+    realm_embedded_bots: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "config": "Config"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            config: "Config",
+        },
     ],
-    "realm_bot_domain": "Realm bot domain"
+    realm_bot_domain: "Realm bot domain",
 };
 
 const meta = {

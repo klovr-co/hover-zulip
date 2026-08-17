@@ -40,9 +40,9 @@ The documentation here is organized into the following sections:
 - {ref}`Writing documentation <writing-documentation>`
 - {ref}`Translating Zulip <translating>`
 - {ref}`Outreach programs <outreach>`
-- {ref}`Hover product documentation <hover-product-documentation>`
-- {ref}`Hover architecture decisions <hover-architecture-decisions>`
-- {ref}`Agent workflow <agent-workflow>`
+- {doc}`Hover architecture <hover/index>`
+- {doc}`Architecture decisions <adr/index>`
+- {doc}`Agent guidance <agents/index>`
 
 ## Documentation index
 
@@ -179,32 +179,14 @@ outreach/index
 Index <https://zulip.readthedocs.io/en/latest/>
 ```
 
-(hover-product-documentation)=
+(hover-architecture)=
 
 ```{toctree}
 ---
-maxdepth: 3
+maxdepth: 2
 ---
 
 hover/index
-```
-
-(hover-architecture-decisions)=
-
-```{toctree}
----
-maxdepth: 3
----
-
 adr/index
-```
-
-(agent-workflow)=
-
-```{toctree}
----
-maxdepth: 3
----
-
 agents/index
 ```

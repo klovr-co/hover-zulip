@@ -6,8 +6,8 @@ import render_template from "../../templates/topic_edit_form.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "max_topic_length": "Max topic length",
-    "is_mandatory_topics": true
+    max_topic_length: "Max topic length",
+    is_mandatory_topics: true,
 };
 
 const meta = {

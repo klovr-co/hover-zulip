@@ -6,7 +6,7 @@ import render_template from "../../templates/topic_list_new_topic.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "stream_id": 7
+    stream_id: 7,
 };
 
 const meta = {

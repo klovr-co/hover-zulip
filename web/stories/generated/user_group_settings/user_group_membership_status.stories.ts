@@ -6,16 +6,21 @@ import render_template from "../../../templates/user_group_settings/user_group_m
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_direct_member": true,
-    "group": {
-        "is_system_group": true
+    is_direct_member: true,
+    group: {
+        is_system_group: true,
     },
-    "is_member": true
+    is_member: true,
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/User Group Membership Status",
-    render: () => render_template_story("user_group_settings/user_group_membership_status.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/user_group_membership_status.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

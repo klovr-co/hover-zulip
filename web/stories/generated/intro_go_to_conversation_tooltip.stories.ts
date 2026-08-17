@@ -9,7 +9,8 @@ const fixture = {};
 
 const meta = {
     title: "Catalogue/Intro Go To Conversation Tooltip",
-    render: () => render_template_story("intro_go_to_conversation_tooltip.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("intro_go_to_conversation_tooltip.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

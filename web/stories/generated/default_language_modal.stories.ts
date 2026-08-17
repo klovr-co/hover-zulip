@@ -6,20 +6,20 @@ import render_template from "../../templates/default_language_modal.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "language_list": [
+    language_list: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "code": "Code",
-            "selected": "Selected",
-            "name_with_percent": "Name with percent"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            code: "Code",
+            selected: "Selected",
+            name_with_percent: "Name with percent",
+        },
+    ],
 };
 
 const meta = {

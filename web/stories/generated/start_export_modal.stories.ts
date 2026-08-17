@@ -6,20 +6,20 @@ import render_template from "../../templates/start_export_modal.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "export_type_values": [
+    export_type_values: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "default": true,
-            "slug": "Slug",
-            "description": "Description"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            default: true,
+            slug: "Slug",
+            description: "Description",
+        },
+    ],
 };
 
 const meta = {

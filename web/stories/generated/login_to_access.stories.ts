@@ -6,9 +6,9 @@ import render_template from "../../templates/login_to_access.hbs";
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "empty_narrow": "Empty narrow",
-    "signup_link": "#storybook",
-    "login_link": "#storybook"
+    empty_narrow: "Empty narrow",
+    signup_link: "#storybook",
+    login_link: "#storybook",
 };
 
 const meta = {
