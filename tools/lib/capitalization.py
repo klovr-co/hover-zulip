@@ -76,6 +76,8 @@ IGNORED_PHRASES = [
     r"Sources",
     r"Module",
     r"Modules",
+    r"Pipeline",
+    r"Pipelines",
     r"Connected Account",
     r"Connected Accounts",
     r"Todo",
