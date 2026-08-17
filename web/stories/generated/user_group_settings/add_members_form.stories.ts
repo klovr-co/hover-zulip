@@ -3,16 +3,16 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/user_group_settings/add_members_form.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "hide_add_button": "Hide add button"
+    hide_add_button: "Hide add button",
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/Add Members Form",
-    render: () => render_template_story("user_group_settings/add_members_form.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("user_group_settings/add_members_form.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

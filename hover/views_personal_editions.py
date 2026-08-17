@@ -7,7 +7,7 @@ from hover.telemetry import (
     HoverTelemetryEvent,
     HoverTelemetryOutcome,
     count_bucket,
-    emit_hover_telemetry,
+    emit_hover_telemetry_on_commit,
 )
 from zerver.decorator import require_non_guest_user
 from zerver.lib.response import json_success
@@ -37,7 +37,7 @@ def personal_editions(request: HttpRequest, user_profile: UserProfile) -> HttpRe
         else:
             assert edition_kind is None
             edition_bucket = HoverTelemetryBucket.UNKNOWN
-        emit_hover_telemetry(
+        emit_hover_telemetry_on_commit(
             HoverTelemetryEvent.EDITION,
             {
                 "current": HoverTelemetryOutcome.CURRENT,

@@ -3,20 +3,19 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/message_reaction.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "is_archived": true,
-    "class": "Class",
-    "label": "Label",
-    "local_id": 7,
-    "emoji_alt_code": "Emoji alt code",
-    "emoji_name": "Emoji name",
-    "is_realm_emoji": true,
-    "url": "#storybook",
-    "emoji_code": "Emoji code",
-    "vote_text": "Vote text"
+    is_archived: true,
+    class: "Class",
+    label: "Label",
+    local_id: 7,
+    emoji_alt_code: "Emoji alt code",
+    emoji_name: "Emoji name",
+    is_realm_emoji: true,
+    url: "#storybook",
+    emoji_code: "Emoji code",
+    vote_text: "Vote text",
 };
 
 const meta = {

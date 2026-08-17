@@ -3,18 +3,17 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/settings_overlay.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "is_guest": true,
-    "can_create_new_bots": true,
-    "can_manage_bot": true,
-    "show_uploaded_files_section": true,
-    "is_admin": true,
-    "show_emoji_settings_lock": true,
-    "can_edit_user_panel": true,
-    "is_owner": true
+    is_guest: true,
+    can_create_new_bots: true,
+    can_manage_bot: true,
+    show_uploaded_files_section: true,
+    is_admin: true,
+    show_emoji_settings_lock: true,
+    can_edit_user_panel: true,
+    is_owner: true,
 };
 
 const meta = {

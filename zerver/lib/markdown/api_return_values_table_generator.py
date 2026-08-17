@@ -173,7 +173,7 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
                     # This block is for completeness.
                     ans += self.render_oneof_block(element["items"], spacing + 4)
 
-            if element.get("additionalProperties", False):
+            if isinstance(element.get("additionalProperties"), dict):
                 additional_properties = element["additionalProperties"]
                 if "description" in additional_properties:
                     data_type = generate_data_type(additional_properties)
@@ -203,46 +203,50 @@ class APIReturnValuesTablePreprocessor(Preprocessor):
                 # right below is the main description.
                 data_type = generate_data_type(schema)
                 ans.append(
-                    self.render_desc(schema["description"], spacing, data_type, return_value)
+                    self.render_desc(
+                        schema.get("description", f"The `{return_value}` value."),
+                        spacing,
+                        data_type,
+                        return_value,
+                    )
                 )
                 ans += self.render_oneof_block(schema, spacing + 4)
                 continue
-            description = schema["description"]
+            description = schema.get("description", f"The `{return_value}` value.")
             data_type = generate_data_type(schema)
             check_deprecated_consistency(schema.get("deprecated", False), description)
             ans.append(self.render_desc(description, spacing, data_type, return_value))
             if "properties" in schema:
                 ans += self.render_table(schema["properties"], spacing + 4)
-            if schema.get("additionalProperties", False):
-                data_type = generate_data_type(schema["additionalProperties"])
+            additional_properties = schema.get("additionalProperties", False)
+            if isinstance(additional_properties, dict):
+                data_type = generate_data_type(additional_properties)
                 ans.append(
                     self.render_desc(
-                        schema["additionalProperties"]["description"],
+                        additional_properties.get("description", "Additional properties."),
                         spacing + 4,
                         data_type,
                     )
                 )
-                if "properties" in schema["additionalProperties"]:
+                if "properties" in additional_properties:
                     ans += self.render_table(
-                        schema["additionalProperties"]["properties"],
+                        additional_properties["properties"],
                         spacing + 8,
                     )
-                elif "oneOf" in schema["additionalProperties"]:
-                    ans += self.render_oneof_block(schema["additionalProperties"], spacing + 8)
-                elif schema["additionalProperties"].get("additionalProperties", False):
-                    data_type = generate_data_type(
-                        schema["additionalProperties"]["additionalProperties"]
-                    )
+                elif "oneOf" in additional_properties:
+                    ans += self.render_oneof_block(additional_properties, spacing + 8)
+                elif additional_properties.get("additionalProperties", False):
+                    data_type = generate_data_type(additional_properties["additionalProperties"])
                     ans.append(
                         self.render_desc(
-                            schema["additionalProperties"]["additionalProperties"]["description"],
+                            additional_properties["additionalProperties"]["description"],
                             spacing + 8,
                             data_type,
                         )
                     )
 
                     ans += self.render_table(
-                        schema["additionalProperties"]["additionalProperties"]["properties"],
+                        additional_properties["additionalProperties"]["properties"],
                         spacing + 12,
                     )
             if "items" in schema:

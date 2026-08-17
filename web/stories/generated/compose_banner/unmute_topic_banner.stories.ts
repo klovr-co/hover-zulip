@@ -3,14 +3,14 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/compose_banner/unmute_topic_banner.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Compose Banner/Unmute Topic Banner",
-    render: () => render_template_story("compose_banner/unmute_topic_banner.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("compose_banner/unmute_topic_banner.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

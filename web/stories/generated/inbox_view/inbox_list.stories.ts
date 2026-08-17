@@ -3,22 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/inbox_view/inbox_list.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "dms_dict": "Dms dict",
-    "folders_with_stream_rows": [
+    dms_dict: "Dms dict",
+    folders_with_stream_rows: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
+    ],
 };
 
 const meta = {

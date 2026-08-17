@@ -3,21 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/admin_default_streams_list.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "stream": {
-        "color": "#4f8394",
-        "name": "design",
-        "stream_id": 7
+    stream: {
+        color: "#4f8394",
+        name: "design",
+        stream_id: 7,
     },
-    "can_modify": true
+    can_modify: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Admin Default Streams List",
-    render: () => render_template_story("settings/admin_default_streams_list.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/admin_default_streams_list.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

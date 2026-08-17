@@ -3,27 +3,26 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/team/contributor_count.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "contributor_count": 3,
-    "hundred_plus_contributor_count": 3,
-    "repos": [
+    contributor_count: 3,
+    hundred_plus_contributor_count: 3,
+    repos: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "repo": {
-                "url": "#storybook",
-                "name": "Name"
-            }
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            repo: {
+                url: "#storybook",
+                name: "Name",
+            },
+        },
+    ],
 };
 
 const meta = {

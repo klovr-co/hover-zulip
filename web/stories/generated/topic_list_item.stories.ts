@@ -3,23 +3,22 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/topic_list_item.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "is_active_topic": true,
-    "is_zero": true,
-    "is_muted": true,
-    "is_unmuted_or_followed": true,
-    "topic_name": "Topic name",
-    "url": "#storybook",
-    "topic_resolved_prefix": "Topic resolved prefix",
-    "is_empty_string_topic": true,
-    "topic_display_name": "Topic display name",
-    "stream_id": 7,
-    "contains_unread_mention": "Contains unread mention",
-    "is_followed": true,
-    "unread": 3
+    is_active_topic: true,
+    is_zero: true,
+    is_muted: true,
+    is_unmuted_or_followed: true,
+    topic_name: "Topic name",
+    url: "#storybook",
+    topic_resolved_prefix: "Topic resolved prefix",
+    is_empty_string_topic: true,
+    topic_display_name: "Topic display name",
+    stream_id: 7,
+    contains_unread_mention: "Contains unread mention",
+    is_followed: true,
+    unread: 3,
 };
 
 const meta = {

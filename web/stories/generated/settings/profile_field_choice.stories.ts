@@ -3,19 +3,19 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/profile_field_choice.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "value": "Value",
-    "new_empty_choice_row": "New empty choice row",
-    "text": "Text",
-    "is_existing_choice": true
+    value: "Value",
+    new_empty_choice_row: "New empty choice row",
+    text: "Text",
+    is_existing_choice: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Profile Field Choice",
-    render: () => render_template_story("settings/profile_field_choice.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/profile_field_choice.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

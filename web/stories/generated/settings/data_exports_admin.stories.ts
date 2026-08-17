@@ -3,16 +3,16 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/data_exports_admin.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_admin": true
+    is_admin: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Data Exports Admin",
-    render: () => render_template_story("settings/data_exports_admin.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/data_exports_admin.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

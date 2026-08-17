@@ -3,18 +3,22 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/recent_view_empty_list_widget_for_table.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "column_count": 3,
-    "empty_list_message": "Empty list message",
-    "load_more_button_text": "Load more button text"
+    column_count: 3,
+    empty_list_message: "Empty list message",
+    load_more_button_text: "Load more button text",
 };
 
 const meta = {
     title: "Catalogue/Recent View Empty List Widget For Table",
-    render: () => render_template_story("recent_view_empty_list_widget_for_table.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "recent_view_empty_list_widget_for_table.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

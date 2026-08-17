@@ -3,12 +3,11 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/introduce_zulip_view_modal.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "zulip_view": "Zulip view",
-    "current_home_view_and_escape_navigation_enabled": true
+    zulip_view: "Zulip view",
+    current_home_view_and_escape_navigation_enabled: true,
 };
 
 const meta = {

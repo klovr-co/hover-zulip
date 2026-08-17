@@ -3,16 +3,16 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/default_external_account_icon.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "subtype": "Subtype"
+    subtype: "Subtype",
 };
 
 const meta = {
     title: "Catalogue/Default External Account Icon",
-    render: () => render_template_story("default_external_account_icon.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("default_external_account_icon.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

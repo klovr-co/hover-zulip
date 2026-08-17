@@ -2,20 +2,20 @@
     <header class="hover-search-header">
         <p class="hover-search-eyebrow">{{t "Home"}}</p>
         <h1>{{t "Search"}}</h1>
-        <p>{{t
-                "Find posts and generated updates first, with authorized Source evidence available below."
-            }}</p>
+        <p>
+            {{t "Find posts and generated updates first, with authorized Source evidence available below."}}
+        </p>
         <form id="hover-global-search-form" role="search">
             <label for="hover-global-search-input">{{t "Search Hover knowledge"}}</label>
             <div class="hover-global-search-controls">
                 <input
-                    id="hover-global-search-input"
-                    type="search"
-                    value="{{query}}"
-                    maxlength="100"
-                    autocomplete="off"
-                    placeholder="{{t 'Search your Spaces'}}"
-                />
+                  id="hover-global-search-input"
+                  type="search"
+                  value="{{query}}"
+                  maxlength="100"
+                  autocomplete="off"
+                  placeholder="{{t 'Search your Spaces'}}"
+                  />
                 <button type="submit" class="button rounded">{{t "Search"}}</button>
             </div>
         </form>
@@ -48,18 +48,25 @@
                                 <time datetime="{{timestamp}}">{{display_time}}</time>
                             </div>
                             <span class="hover-search-result-byline">{{byline}}</span>
-                            <div class="hover-search-result-content">{{{rendered_content}}}</div>
-                            <a class="hover-search-result-link" href="{{url}}">{{t
-                                    "Open live post"
-                                }}</a>
+                            <div class="hover-search-result-content">{{{rendered_content_html}}}</div>
+                            <a class="hover-search-result-link" href="{{url}}">
+                                {{t "Open live post"}}
+                            </a>
                             <button
-                                type="button"
-                                class="button-reset-style hover-search-save-button"
-                                data-message-id="{{message_id}}"
-                                aria-pressed="{{#if saved}}true{{else}}false{{/if}}"
-                            >
-                                <i class="zulip-icon {{#if saved}}zulip-icon-star-filled{{else}}zulip-icon-star{{/if}}" aria-hidden="true"></i>
-                                {{#if saved}}{{t "Remove from Saved"}}{{else}}{{t "Save"}}{{/if}}
+                              type="button"
+                              class="button-reset-style hover-search-save-button"
+                              data-message-id="{{message_id}}"
+                              aria-pressed="{{#if saved}}true{{else}}false{{/if}}"
+                              >
+                                <i
+                                  class="zulip-icon {{#if saved}}zulip-icon-star-filled{{else}}zulip-icon-star{{/if}}"
+                                  aria-hidden="true"
+                                  ></i>
+                                {{#if saved}}
+                                    {{t "Remove from Saved"}}
+                                {{else}}
+                                    {{t "Save"}}
+                                {{/if}}
                             </button>
                         </li>
                     {{/each}}
@@ -77,9 +84,9 @@
                 </div>
                 <span>{{source_count}}</span>
             </div>
-            <p class="hover-search-section-description">{{t
-                    "Read-only records from attached Sources. Source evidence cannot be saved in this pilot."
-                }}</p>
+            <p class="hover-search-section-description">
+                {{t "Read-only records from attached Sources. Source evidence cannot be saved in this pilot."}}
+            </p>
             {{#if has_sources}}
                 <ol class="hover-search-result-list">
                     {{#each sources}}
@@ -93,9 +100,15 @@
                             </div>
                             <span class="hover-search-result-byline">{{record.sender_display_name}}</span>
                             <div class="hover-search-source-content">
-                                {{#if record.content.text}}<p>{{record.content.text}}</p>{{/if}}
-                                {{#if record.content.voice_transcript}}<p>{{record.content.voice_transcript}}</p>{{/if}}
-                                {{#if record.content.media_description}}<p>{{record.content.media_description}}</p>{{/if}}
+                                {{#if record.content.text}}
+                                    <p>{{record.content.text}}</p>
+                                {{/if}}
+                                {{#if record.content.voice_transcript}}
+                                    <p>{{record.content.voice_transcript}}</p>
+                                {{/if}}
+                                {{#if record.content.media_description}}
+                                    <p>{{record.content.media_description}}</p>
+                                {{/if}}
                             </div>
                             <span class="hover-search-readonly-label">
                                 <i class="zulip-icon zulip-icon-lock" aria-hidden="true"></i>

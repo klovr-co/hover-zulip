@@ -3,19 +3,23 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/user_group_settings/change_user_group_info_modal.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "group_name": "Group name",
-    "max_user_group_name_length": "Max user group name length",
-    "allow_editing_description": true,
-    "group_description": "Group description"
+    group_name: "Group name",
+    max_user_group_name_length: "Max user group name length",
+    allow_editing_description: true,
+    group_description: "Group description",
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/Change User Group Info Modal",
-    render: () => render_template_story("user_group_settings/change_user_group_info_modal.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/change_user_group_info_modal.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

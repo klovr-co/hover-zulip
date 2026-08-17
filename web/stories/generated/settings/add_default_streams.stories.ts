@@ -3,14 +3,14 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/add_default_streams.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/Add Default Streams",
-    render: () => render_template_story("settings/add_default_streams.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/add_default_streams.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -3,21 +3,25 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/notification_settings_checkboxes.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_mobile_checkbox": true,
-    "push_notifications_disabled": "Push notifications disabled",
-    "setting_name": "Setting name",
-    "prefix": "Prefix",
-    "is_disabled": true,
-    "is_checked": true
+    is_mobile_checkbox: true,
+    push_notifications_disabled: "Push notifications disabled",
+    setting_name: "Setting name",
+    prefix: "Prefix",
+    is_disabled: true,
+    is_checked: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Notification Settings Checkboxes",
-    render: () => render_template_story("settings/notification_settings_checkboxes.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/notification_settings_checkboxes.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

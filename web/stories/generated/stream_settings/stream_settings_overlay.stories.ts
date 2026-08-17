@@ -3,18 +3,22 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/stream_settings/stream_settings_overlay.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "can_create_streams": true,
-    "realm_has_archived_channels": "Realm has archived channels",
-    "can_view_all_streams": true
+    can_create_streams: true,
+    realm_has_archived_channels: "Realm has archived channels",
+    can_view_all_streams: true,
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Stream Settings Overlay",
-    render: () => render_template_story("stream_settings/stream_settings_overlay.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/stream_settings_overlay.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;
