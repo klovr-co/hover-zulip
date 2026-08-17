@@ -97,6 +97,18 @@ class OpenAPIToolsTest(ZulipTestCase):
                                 "additionalProperties": True,
                             },
                         },
+                        "union_map": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "object",
+                                "additionalProperties": {
+                                    "oneOf": [
+                                        {"type": "string", "description": "A text value."},
+                                        {"type": "integer", "description": "A numeric value."},
+                                    ]
+                                },
+                            },
+                        },
                         "previous_value": {},
                     },
                 }
@@ -111,8 +123,11 @@ class OpenAPIToolsTest(ZulipTestCase):
         self.assertIn("Additional properties.", rendered[4])
         self.assertIn("The `boolean_map` value.", rendered[5])
         self.assertIn("Additional properties.", rendered[6])
-        self.assertIn("The `previous_value` value.", rendered[7])
-        self.assertIn('<span class="api-field-type">unknown</span>', rendered[7])
+        rendered_text = "\n".join(rendered)
+        self.assertIn("A text value.", rendered_text)
+        self.assertIn("A numeric value.", rendered_text)
+        self.assertIn("The `previous_value` value.", rendered_text)
+        self.assertIn('<span class="api-field-type">unknown</span>', rendered_text)
 
     def test_get_openapi_fixture(self) -> None:
         actual = get_openapi_fixture(TEST_ENDPOINT, TEST_METHOD, TEST_RESPONSE_BAD_REQ)[0]["value"]
