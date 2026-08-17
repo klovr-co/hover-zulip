@@ -279,11 +279,9 @@ export async function log_in(
 
 export async function log_out(page: Page): Promise<void> {
     await page.goto(realm_url);
-    const menu_selector = "#personal-menu";
     const logout_selector = ".personal-menu-actions a.logout_button";
     console.log("Logging out");
-    await page.waitForSelector(menu_selector, {visible: true});
-    await page.click(menu_selector);
+    await open_personal_menu(page);
     await page.waitForSelector(logout_selector);
     await Promise.all([page.waitForNavigation(), page.click(logout_selector)]);
 
@@ -564,15 +562,19 @@ export async function open_streams_modal(page: Page): Promise<void> {
 }
 
 export async function open_personal_menu(page: Page): Promise<void> {
-    const menu_selector = "#personal-menu";
+    const menu_selector = "#personal-menu .header-button";
     await page.waitForSelector(menu_selector, {visible: true});
-    await page.click(menu_selector);
+    await page.focus(menu_selector);
+    await page.keyboard.press("Enter");
 }
 
 export async function manage_organization(page: Page): Promise<void> {
     const menu_selector = "#settings-dropdown";
     await page.waitForSelector(menu_selector, {visible: true});
-    await page.click(menu_selector);
+    // Use the button's accessible keyboard interaction because the desktop
+    // search hit area can overlap its pointer coordinates in the test viewport.
+    await page.focus(menu_selector);
+    await page.keyboard.press("Enter");
 
     const organization_settings = '.link-item a[href="#organization"]';
     await page.waitForSelector(organization_settings, {visible: true});

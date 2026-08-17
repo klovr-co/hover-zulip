@@ -161,3 +161,5 @@ export function initialize(): void {
     }
     setTimeout(refresh, 0);
 }
+
+export const test = {refresh};

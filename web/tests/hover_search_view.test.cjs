@@ -93,6 +93,12 @@ function response() {
     };
 }
 
+run_test("empty searches reset state without rendering a hidden view", () => {
+    hover_search_view.test.search(" ".repeat(3));
+    assert.equal(request, undefined);
+    assert.equal($("#hover-search-view").html(), "never-been-set");
+});
+
 run_test("knowledge ranks before read-only Sources and uses native starred state", () => {
     hover_search_view.initialize();
     hover_search_view.show();
@@ -123,6 +129,8 @@ run_test("knowledge ranks before read-only Sources and uses native starred state
     assert.deepEqual(flag_updates.at(-1), [[42], "starred", "remove"]);
     assert.deepEqual(starred_removes, [[42]]);
     assert.match($("#hover-search-view").html(), /aria-pressed="false"/);
+    const $unknown_button = $("#unknown-search-result").attr("data-message-id", "404");
+    handler({currentTarget: $unknown_button[0]});
 
     authorized_spaces = [];
     hover_search_view.handle_space_event();
@@ -145,4 +153,37 @@ run_test("later searches replace stale requests", () => {
     // An old success is ignored by the request generation guard.
     first_request.success(response());
     assert.match($("#hover-search-view").html(), /value="second"/);
+});
+
+run_test("submit and request errors preserve request ordering", () => {
+    hover_search_view.initialize();
+    hover_search_view.show();
+    $("#hover-global-search-input").val("  network   issue ");
+    const submit_handler = $("body").get_on_handler("submit", "#hover-global-search-form");
+    let prevented = false;
+    submit_handler({
+        preventDefault() {
+            prevented = true;
+        },
+    });
+    assert.equal(prevented, true);
+    assert.equal(JSON.parse(request.data.query), "network issue");
+
+    request.error({}, "abort");
+    request.error({}, "error");
+    assert.match($("#hover-search-view").html(), /Search could not be completed/);
+
+    const stale_request = request;
+    hover_search_view.test.search("replacement");
+    stale_request.error({}, "error");
+    assert.match($("#hover-search-view").html(), /value="replacement"/);
+});
+
+run_test("hide aborts active searches and is idempotent", () => {
+    hover_search_view.show();
+    hover_search_view.test.search("hide me");
+    const previous_abort_count = abort_count;
+    hover_search_view.hide();
+    assert.equal(abort_count, previous_abort_count + 1);
+    hover_search_view.hide();
 });

@@ -3,12 +3,14 @@ from collections.abc import Callable, Mapping
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+import markdown
 import yaml
 from django.http import HttpResponse
 from django.urls import URLPattern
 from django.utils import regex_helper
 from pydantic import TypeAdapter
 
+from zerver.lib.markdown.api_return_values_table_generator import APIReturnValuesTablePreprocessor
 from zerver.lib.request import arguments_map
 from zerver.lib.rest import rest_dispatch
 from zerver.lib.test_classes import ZulipTestCase
@@ -71,6 +73,61 @@ class OpenAPIToolsTest(ZulipTestCase):
     These tools are mostly dedicated to fetching parts of the -already parsed-
     specification, and comparing them to objects returned by our REST API.
     """
+
+    def test_return_values_table_handles_sparse_nested_schemas(self) -> None:
+        preprocessor = APIReturnValuesTablePreprocessor(markdown.Markdown(), {})
+        rendered = preprocessor.render_table(
+            {
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "source_id": {"type": "integer"},
+                        "details": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "object",
+                                "additionalProperties": {"type": "string"},
+                            },
+                        },
+                        "boolean_map": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "object",
+                                "additionalProperties": True,
+                            },
+                        },
+                        "union_map": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "object",
+                                "additionalProperties": {
+                                    "oneOf": [
+                                        {"type": "string", "description": "A text value."},
+                                        {"type": "integer", "description": "A numeric value."},
+                                    ]
+                                },
+                            },
+                        },
+                        "previous_value": {},
+                    },
+                }
+            },
+            0,
+        )
+
+        self.assertIn("The `metadata` value.", rendered[0])
+        self.assertIn("The `source_id` value.", rendered[1])
+        self.assertIn("The `details` value.", rendered[2])
+        self.assertIn("Additional properties.", rendered[3])
+        self.assertIn("Additional properties.", rendered[4])
+        self.assertIn("The `boolean_map` value.", rendered[5])
+        self.assertIn("Additional properties.", rendered[6])
+        rendered_text = "\n".join(rendered)
+        self.assertIn("A text value.", rendered_text)
+        self.assertIn("A numeric value.", rendered_text)
+        self.assertIn("The `previous_value` value.", rendered_text)
+        self.assertIn('<span class="api-field-type">unknown</span>', rendered_text)
 
     def test_get_openapi_fixture(self) -> None:
         actual = get_openapi_fixture(TEST_ENDPOINT, TEST_METHOD, TEST_RESPONSE_BAD_REQ)[0]["value"]
@@ -1036,6 +1093,16 @@ class APIDocsSidebarTest(ZulipTestCase):
             # This is rendered on the "Outgoing webhooks" page and hence is not
             # linked in the sidebar.
             "zulip-outgoing-webhooks",
+            # Hover's documented endpoints are consumed by the web app and are
+            # not part of the public API documentation navigation.
+            "get-hover-personal-editions",
+            "hover-search",
+            "list-hover-todos",
+            "update-hover-todo",
+            "decide-hover-suggested-action",
+            "get-hover-awareness",
+            "resolve-hover-generated-item-evidence",
+            "resolve-hover-disputed-detail-evidence",
         }
         sidebar_path = "api_docs/sidebar_index.md"
         rest_endpoints_path = "api_docs/include/rest-endpoints.md"

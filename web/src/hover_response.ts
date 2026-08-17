@@ -121,9 +121,3 @@ export function apply_realtime_responses(messages: Message[]): void {
         message_live_update.rerender_messages_view_by_message_ids([...root_message_ids]);
     }
 }
-
-export const _testing = {
-    get_generated_item_id(): number | undefined {
-        return generated_item_id;
-    },
-};

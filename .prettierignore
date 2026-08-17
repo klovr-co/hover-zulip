@@ -12,6 +12,7 @@ pnpm-lock.yaml
 !/web/third/marked/lib
 /web/third/marked/lib/*
 !/web/third/marked/lib/marked.d.cts
+/web/stories/generated
 /zerver/tests/fixtures
 /zerver/webhooks/*/doc.md
 /zerver/webhooks/github/githubsponsors.md
