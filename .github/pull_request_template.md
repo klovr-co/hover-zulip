@@ -29,6 +29,8 @@ Communicate decisions, questions, and potential concerns.
 - [ ] Highlights technical choices and bugs encountered.
 - [ ] Calls out remaining decisions and concerns.
 - [ ] Automated tests verify logic where appropriate.
+- [ ] Ran relevant local lint checks before pushing. For backend or shell-script
+      changes: `source .venv/bin/activate && ./tools/lint --groups=backend --skip=gitlint,mypy`.
 
 Individual commits are ready for review (see [commit discipline](https://zulip.readthedocs.io/en/latest/contributing/commit-discipline.html)).
 
