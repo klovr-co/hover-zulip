@@ -3,20 +3,24 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/stream_settings/stream_subscription_request_result.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "error_message": "Error message",
-    "subscribed_users_count": 3,
-    "ignored_deactivated_users_count": 3,
-    "is_total_subscriber_more_than_five": true,
-    "already_subscribed_users_count": 3
+    error_message: "Error message",
+    subscribed_users_count: 3,
+    ignored_deactivated_users_count: 3,
+    is_total_subscriber_more_than_five: true,
+    already_subscribed_users_count: 3,
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Stream Subscription Request Result",
-    render: () => render_template_story("stream_settings/stream_subscription_request_result.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/stream_subscription_request_result.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

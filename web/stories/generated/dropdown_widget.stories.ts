@@ -3,15 +3,14 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/dropdown_widget.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "widget_name": "Widget name",
-    "custom_classes": "Custom classes",
-    "is_setting_disabled": true,
-    "disable_keyboard_focus": "Disable keyboard focus",
-    "default_text": true
+    widget_name: "Widget name",
+    custom_classes: "Custom classes",
+    is_setting_disabled: true,
+    disable_keyboard_focus: "Disable keyboard focus",
+    default_text: true,
 };
 
 const meta = {

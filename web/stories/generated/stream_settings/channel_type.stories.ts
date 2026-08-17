@@ -3,14 +3,14 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/stream_settings/channel_type.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Stream Settings/Channel Type",
-    render: () => render_template_story("stream_settings/channel_type.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("stream_settings/channel_type.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

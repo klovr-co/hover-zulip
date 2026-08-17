@@ -3,14 +3,14 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/widgets/poll_widget_example.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Widgets/Poll Widget Example",
-    render: () => render_template_story("widgets/poll_widget_example.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("widgets/poll_widget_example.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

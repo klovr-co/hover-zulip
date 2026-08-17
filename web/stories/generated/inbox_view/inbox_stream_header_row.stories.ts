@@ -3,31 +3,31 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/inbox_view/inbox_stream_header_row.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "stream_id": 7,
-    "is_hidden": true,
-    "is_collapsed": true,
-    "column_indexes": {
-        "FULL_ROW": "FULL ROW",
-        "UNREAD_COUNT": "UNREAD COUNT",
-        "TOPIC_VISIBILITY": "TOPIC VISIBILITY",
-        "ACTION_MENU": "ACTION MENU"
+    stream_id: 7,
+    is_hidden: true,
+    is_collapsed: true,
+    column_indexes: {
+        FULL_ROW: "FULL ROW",
+        UNREAD_COUNT: "UNREAD COUNT",
+        TOPIC_VISIBILITY: "TOPIC VISIBILITY",
+        ACTION_MENU: "ACTION MENU",
     },
-    "stream_header_color": "#4f8394",
-    "stream_color": "#4f8394",
-    "stream_name": "Stream name",
-    "is_archived": true,
-    "mention_in_unread": 3,
-    "unread_count": 3,
-    "is_muted": true
+    stream_header_color: "#4f8394",
+    stream_color: "#4f8394",
+    stream_name: "Stream name",
+    is_archived: true,
+    mention_in_unread: 3,
+    unread_count: 3,
+    is_muted: true,
 };
 
 const meta = {
     title: "Catalogue/Inbox View/Inbox Stream Header Row",
-    render: () => render_template_story("inbox_view/inbox_stream_header_row.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("inbox_view/inbox_stream_header_row.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

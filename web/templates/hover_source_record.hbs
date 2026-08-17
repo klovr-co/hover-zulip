@@ -5,39 +5,47 @@
     </header>
     {{#if reply_context}}
         <blockquote
-            class="hover-source-reply"
-            aria-label="{{t 'Quoted reply'}}"
-        >
+          class="hover-source-reply"
+          aria-label="{{t 'Quoted reply'}}"
+          >
             <strong>{{reply_context.sender_display_name}}</strong>
             <span>{{reply_context.excerpt}}</span>
         </blockquote>
     {{/if}}
-    {{#if content.text}}<p
-            class="hover-source-record-text"
-        >{{content.text}}</p>{{/if}}
+    {{#if content.text}}
+        <p class="hover-source-record-text">{{content.text}}</p>
+    {{/if}}
     {{#if content.voice_transcript}}
         <div
-            class="hover-source-transcript"
-            aria-label="{{t 'Voice transcript'}}"
-        >
-            <span class="hover-source-content-label">{{t
-                    "Voice transcript"
-                }}</span>
+          class="hover-source-transcript"
+          aria-label="{{t 'Voice transcript'}}"
+          >
+            <span class="hover-source-content-label">{{t "Voice transcript"}}</span>
             <p>{{content.voice_transcript}}</p>
         </div>
     {{/if}}
-    {{#if content.media_description}}<p>{{content.media_description}}</p>{{/if}}
+    {{#if content.media_description}}
+        <p>{{content.media_description}}</p>
+    {{/if}}
     {{#if media}}
         <div class="hover-source-media" aria-label="{{t 'Media attachment'}}">
             <i class="fa fa-paperclip" aria-hidden="true"></i>
-            <span>{{media.type}}{{#if media.mime_type}}
+            <span>
+                {{media.type}}
+                {{#if media.mime_type}}
                     ·
-                    {{media.mime_type}}{{/if}}{{#if media.display_size}}
+                    {{media.mime_type}}
+                {{/if}}
+                {{#if media.display_size}}
                     ·
-                    {{media.display_size}}{{/if}}</span>
-            {{#unless media.available}}<span
-                    class="hover-source-media-unavailable"
-                >{{t "Unavailable"}}</span>{{/unless}}
+                    {{media.display_size}}
+                {{/if}}
+            </span>
+            {{#unless media.available}}
+                <span
+                  class="hover-source-media-unavailable"
+                  >{{t "Unavailable"}}</span>
+            {{/unless}}
         </div>
     {{/if}}
 </article>

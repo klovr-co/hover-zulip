@@ -3,14 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/generate_integration_url_filter_branches_modal.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/Generate Integration Url Filter Branches Modal",
-    render: () => render_template_story("settings/generate_integration_url_filter_branches_modal.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/generate_integration_url_filter_branches_modal.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

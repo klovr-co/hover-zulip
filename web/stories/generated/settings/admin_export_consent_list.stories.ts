@@ -3,16 +3,16 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/admin_export_consent_list.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "export_consent": "Export consent"
+    export_consent: "Export consent",
 };
 
 const meta = {
     title: "Catalogue/Settings/Admin Export Consent List",
-    render: () => render_template_story("settings/admin_export_consent_list.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/admin_export_consent_list.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

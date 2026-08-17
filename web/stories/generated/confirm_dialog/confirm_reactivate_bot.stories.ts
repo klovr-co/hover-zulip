@@ -3,16 +3,20 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/confirm_dialog/confirm_reactivate_bot.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "original_owner_deactivated": "Original owner deactivated"
+    original_owner_deactivated: "Original owner deactivated",
 };
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Reactivate Bot",
-    render: () => render_template_story("confirm_dialog/confirm_reactivate_bot.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "confirm_dialog/confirm_reactivate_bot.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

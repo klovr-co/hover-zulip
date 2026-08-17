@@ -3,27 +3,26 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/preferences_emoji.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "for_realm_settings": "For realm settings",
-    "prefix": "Prefix",
-    "settings_object": {
-        "emojiset_choices": [
+    for_realm_settings: "For realm settings",
+    prefix: "Prefix",
+    settings_object: {
+        emojiset_choices: [
             {
-                "custom_classes": "",
-                "disabled": false,
-                "icon": "check",
-                "intent": "primary",
-                "label": "Sample action",
-                "name": "Sample name",
-                "variant": "primary",
-                "key": "Key",
-                "text": "Text"
-            }
-        ]
-    }
+                custom_classes: "",
+                disabled: false,
+                icon: "check",
+                intent: "primary",
+                label: "Sample action",
+                name: "Sample name",
+                variant: "primary",
+                key: "Key",
+                text: "Text",
+            },
+        ],
+    },
 };
 
 const meta = {

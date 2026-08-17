@@ -3,22 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/components/action_button.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "type": "Type",
-    "id": 7,
-    "custom_classes": "Custom classes",
-    "variant": "Variant",
-    "intent": "Intent",
-    "hidden": "Hidden",
+    type: "Type",
+    id: 7,
+    custom_classes: "Custom classes",
+    variant: "Variant",
+    intent: "Intent",
+    hidden: "Hidden",
     "data-tippy-content": "Data-tippy-content",
     "data-tooltip-template-id": "Data-tooltip-template-id",
     "aria-label": "Aria-label",
-    "disabled": true,
-    "icon": "Icon",
-    "label": "Label"
+    disabled: true,
+    icon: "Icon",
+    label: "Label",
 };
 
 const meta = {

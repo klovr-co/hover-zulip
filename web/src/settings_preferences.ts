@@ -274,7 +274,6 @@ export function set_up(settings_panel: SettingsPanel): void {
         });
     });
 
-
     render_language_dropdown_widget();
 }
 

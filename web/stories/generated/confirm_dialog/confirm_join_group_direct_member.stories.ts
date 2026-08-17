@@ -3,16 +3,20 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/confirm_dialog/confirm_join_group_direct_member.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "associated_subgroup_names": "Associated subgroup names"
+    associated_subgroup_names: "Associated subgroup names",
 };
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Join Group Direct Member",
-    render: () => render_template_story("confirm_dialog/confirm_join_group_direct_member.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "confirm_dialog/confirm_join_group_direct_member.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

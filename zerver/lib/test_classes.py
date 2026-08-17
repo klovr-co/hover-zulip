@@ -1455,9 +1455,6 @@ Output:
     def assert_length(self, items: Collection[Any] | QuerySet[Any, Any], count: int) -> None:
         actual_count = len(items)
         if actual_count != count:  # nocoverage
-            print("\nITEMS:\n")
-            for item in items:
-                print(item)
             print(f"\nexpected length: {count}\nactual length: {actual_count}")
             raise AssertionError(
                 f"{type(items)} is of unexpected size! Expected count: {count}, actual count: {actual_count}."
@@ -2812,6 +2809,12 @@ class MigrationsTestCase(ZulipTransactionTestCase):  # nocoverage
 
     def setUpBeforeMigration(self, apps: StateApps) -> None:
         pass  # nocoverage
+
+    @override
+    def tearDown(self) -> None:
+        executor = MigrationExecutor(connection)
+        executor.migrate(executor.loader.graph.leaf_nodes())
+        super().tearDown()
 
 
 def get_topic_messages(user_profile: UserProfile, stream: Stream, topic_name: str) -> list[Message]:

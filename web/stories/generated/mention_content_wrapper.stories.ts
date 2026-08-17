@@ -3,12 +3,11 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/mention_content_wrapper.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "mention_text": "Mention text",
-    "is_bot": true
+    mention_text: "Mention text",
+    is_bot: true,
 };
 
 const meta = {

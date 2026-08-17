@@ -3,24 +3,23 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/team/contributors.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "contributors": [
+    contributors: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "profile_url": "#storybook",
-            "avatar": "Avatar",
-            "commits": "Commits"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            profile_url: "#storybook",
+            avatar: "Avatar",
+            commits: "Commits",
+        },
+    ],
 };
 
 const meta = {

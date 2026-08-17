@@ -92,12 +92,10 @@ _ALLOWED_DIMENSIONS: Mapping[HoverTelemetryEvent, frozenset[str]] = {
     | {"space_id", "reference_count_bucket", "retryable"},
     HoverTelemetryEvent.REVIEW: _COMMON_DIMENSIONS
     | {"space_id", "material", "target_count_bucket"},
-    HoverTelemetryEvent.SUGGESTED_ACTION: _COMMON_DIMENSIONS
-    | {"space_id", "replay", "version"},
+    HoverTelemetryEvent.SUGGESTED_ACTION: _COMMON_DIMENSIONS | {"space_id", "replay", "version"},
     HoverTelemetryEvent.TODO: _COMMON_DIMENSIONS
     | {"space_id", "replay", "version", "notification_emitted"},
-    HoverTelemetryEvent.NOTIFICATION: _COMMON_DIMENSIONS
-    | {"space_id", "notification_kind"},
+    HoverTelemetryEvent.NOTIFICATION: _COMMON_DIMENSIONS | {"space_id", "notification_kind"},
     HoverTelemetryEvent.EDITION: _COMMON_DIMENSIONS
     | {"edition_kind", "edition_count_bucket", "failure_count_bucket", "cache_used"},
     HoverTelemetryEvent.SOURCE_RECORDS: _COMMON_DIMENSIONS
@@ -233,12 +231,8 @@ def _serialize_dimensions(
     return " ".join(serialized)
 
 
-def _validate_event_outcome(
-    event: object, outcome: object
-) -> None:
-    if not isinstance(event, HoverTelemetryEvent) or not isinstance(
-        outcome, HoverTelemetryOutcome
-    ):
+def _validate_event_outcome(event: object, outcome: object) -> None:
+    if not isinstance(event, HoverTelemetryEvent) or not isinstance(outcome, HoverTelemetryOutcome):
         raise TypeError("Hover telemetry requires fixed event and outcome enums")
     if outcome not in _ALLOWED_OUTCOMES[event]:
         raise ValueError("Hover telemetry outcome is not valid for this event")

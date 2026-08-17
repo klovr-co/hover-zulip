@@ -3,14 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/compose_banner/cannot_send_direct_message_error.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Compose Banner/Cannot Send Direct Message Error",
-    render: () => render_template_story("compose_banner/cannot_send_direct_message_error.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "compose_banner/cannot_send_direct_message_error.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

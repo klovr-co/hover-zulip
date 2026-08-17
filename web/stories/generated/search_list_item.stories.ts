@@ -3,25 +3,24 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/search_list_item.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "pills": [
+    pills: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "operator": "Operator",
-            "description_html": "Description html",
-            "type": "Type"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            operator: "Operator",
+            description_html: "Description html",
+            type: "Type",
+        },
     ],
-    "description_html": "Description html"
+    description_html: "Description html",
 };
 
 const meta = {

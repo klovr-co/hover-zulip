@@ -3,12 +3,11 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/markdown_audio.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "audio_src": "Audio src",
-    "audio_title": "Audio title"
+    audio_src: "Audio src",
+    audio_title: "Audio title",
 };
 
 const meta = {

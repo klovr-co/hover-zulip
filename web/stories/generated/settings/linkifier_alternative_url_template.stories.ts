@@ -3,17 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/linkifier_alternative_url_template.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "show_placeholder": true,
-    "value": "Value"
+    show_placeholder: true,
+    value: "Value",
 };
 
 const meta = {
     title: "Catalogue/Settings/Linkifier Alternative Url Template",
-    render: () => render_template_story("settings/linkifier_alternative_url_template.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/linkifier_alternative_url_template.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

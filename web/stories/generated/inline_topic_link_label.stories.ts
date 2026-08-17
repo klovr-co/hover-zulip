@@ -3,12 +3,11 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/inline_topic_link_label.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "is_empty_string_topic": true,
-    "topic_display_name": "Topic display name"
+    is_empty_string_topic: true,
+    topic_display_name: "Topic display name",
 };
 
 const meta = {

@@ -4,27 +4,27 @@
                 "Space name"
             }}</label>
         <input
-            id="new_hover_space_name"
-            class="modal_text_input"
-            name="name"
-            type="text"
-            maxlength="{{max_name_length}}"
-            required
-        />
+          id="new_hover_space_name"
+          class="modal_text_input"
+          name="name"
+          type="text"
+          maxlength="{{max_name_length}}"
+          required
+          />
     </div>
     <div>
         <label for="new_hover_space_category" class="modal-field-label">{{t
                 "Category"
             }}</label>
         <select
-            id="new_hover_space_category"
-            class="modal_select"
-            name="category_id"
-            required
-        >
-            {{#each categories}}<option
-                    value="{{id}}"
-                >{{name}}</option>{{/each}}
+          id="new_hover_space_category"
+          class="modal_select"
+          name="category_id"
+          required
+          >
+            {{#each categories}}
+                <option value="{{id}}">{{name}}</option>
+            {{/each}}
         </select>
     </div>
     <div>
@@ -32,13 +32,15 @@
                 "Description"
             }}</label>
         <textarea
-            id="new_hover_space_description"
-            class="modal-textarea"
-            name="description"
-            maxlength="{{max_description_length}}"
-        ></textarea>
+          id="new_hover_space_description"
+          class="modal-textarea"
+          name="description"
+          maxlength="{{max_description_length}}"
+          ></textarea>
     </div>
-    <p class="settings-field-description">{{t
-            "Only you and explicitly added Space Admins can see this Space while it is in Setup."
-        }}</p>
+    <p class="settings-field-description">
+        {{t
+          "Only you and explicitly added Space Admins can see this Space while it is in Setup."
+          }}
+    </p>
 </form>

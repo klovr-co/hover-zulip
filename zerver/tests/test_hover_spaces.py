@@ -143,6 +143,7 @@ class HoverSpacesTest(ZulipTestCase):
         self.realm.refresh_from_db()
         self.assertEqual(self.realm.can_create_spaces_group_id, members.id)
         self.assertTrue(self.creator.can_create_hover_spaces(self.realm))
+        self.assertTrue(self.creator.can_create_hover_spaces())
 
         self.realm.hover_enabled = True
         self.realm.can_create_spaces_group = get_system_user_group_by_name(
@@ -234,6 +235,20 @@ class HoverSpacesTest(ZulipTestCase):
         )
         self.assertEqual(state["hover_spaces"], fresh_state["hover_spaces"])
         self.assertEqual(state["hover_spaces"][0]["id"], space.id)
+
+        apply_events(
+            self.creator,
+            state=state,
+            events=[{"type": "hover_space", "op": "delete", "space_id": space.id}],
+            fetch_event_types={"hover_space"},
+            client_gravatar=False,
+            slim_presence=False,
+            include_subscribers=False,
+            linkifier_url_template=False,
+            user_list_incomplete=False,
+            include_deactivated_groups=False,
+        )
+        self.assertEqual(state["hover_spaces"], [])
 
     def test_disable_enable_cycle_retains_authorized_state_for_convergence(self) -> None:
         space = self.create_space()

@@ -3,21 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/compose_banner/message_sent_banner.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "classname": "Classname",
-    "banner_text": "Banner text",
-    "message_recipient": "Message recipient",
-    "above_composebox_narrow_url": "#storybook",
-    "link_msg_id": 7,
-    "action_button_text": "Action button text"
+    classname: "Classname",
+    banner_text: "Banner text",
+    message_recipient: "Message recipient",
+    above_composebox_narrow_url: "#storybook",
+    link_msg_id: 7,
+    action_button_text: "Action button text",
 };
 
 const meta = {
     title: "Catalogue/Compose Banner/Message Sent Banner",
-    render: () => render_template_story("compose_banner/message_sent_banner.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("compose_banner/message_sent_banner.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

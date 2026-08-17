@@ -3,17 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/compose_banner/success_message_scheduled_banner.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "scheduled_message_id": 7,
-    "minimum_scheduled_message_delay_minutes_note": "Minimum scheduled message delay minutes note"
+    scheduled_message_id: 7,
+    minimum_scheduled_message_delay_minutes_note: "Minimum scheduled message delay minutes note",
 };
 
 const meta = {
     title: "Catalogue/Compose Banner/Success Message Scheduled Banner",
-    render: () => render_template_story("compose_banner/success_message_scheduled_banner.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "compose_banner/success_message_scheduled_banner.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

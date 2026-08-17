@@ -3,14 +3,14 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/topics_required_error_message.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Topics Required Error Message",
-    render: () => render_template_story("topics_required_error_message.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("topics_required_error_message.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

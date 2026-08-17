@@ -3,16 +3,16 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/narrow_to_compose_recipients_tooltip.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "display_current_view": "Display current view"
+    display_current_view: "Display current view",
 };
 
 const meta = {
     title: "Catalogue/Narrow To Compose Recipients Tooltip",
-    render: () => render_template_story("narrow_to_compose_recipients_tooltip.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("narrow_to_compose_recipients_tooltip.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

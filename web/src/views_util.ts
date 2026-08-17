@@ -129,7 +129,6 @@ export function show(opts: {
     opts.complete_rerender(true);
     compose_actions.on_show_navigation_view();
     popup_banners.close_found_missing_unreads_banner();
-
 }
 
 export function hide(opts: {$view: JQuery; set_visible: (value: boolean) => void}): void {

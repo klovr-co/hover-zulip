@@ -3,19 +3,23 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/admin_channel_folder_list_item.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "id": 7,
-    "is_admin": true,
-    "folder_name": "Folder name",
-    "rendered_description": "Rendered description"
+    id: 7,
+    is_admin: true,
+    folder_name: "Folder name",
+    rendered_description: "Rendered description",
 };
 
 const meta = {
     title: "Catalogue/Settings/Admin Channel Folder List Item",
-    render: () => render_template_story("settings/admin_channel_folder_list_item.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/admin_channel_folder_list_item.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

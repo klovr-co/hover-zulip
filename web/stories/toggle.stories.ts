@@ -15,7 +15,7 @@ const values = [
 function render_toggle(args: ToggleArgs): HTMLElement {
     const wrapper = globalThis.document.createElement("div");
     const toggle = components.toggle({selected: args.selected, values});
-    wrapper.append(toggle.get().get(0));
+    wrapper.append(toggle.get().get(0)!);
     return wrapper;
 }
 

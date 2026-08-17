@@ -3,22 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/account_settings.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "user_has_email_set": "User has email set",
-    "user_can_change_email": "ava@example.com",
-    "current_user": {
-        "delivery_email": "ava@example.com"
+    user_has_email_set: "User has email set",
+    user_can_change_email: "ava@example.com",
+    current_user: {
+        delivery_email: "ava@example.com",
     },
-    "page_params": {
-        "two_fa_enabled": "Two fa enabled",
-        "two_fa_enabled_user": "Two fa enabled user"
+    page_params: {
+        two_fa_enabled: "Two fa enabled",
+        two_fa_enabled_user: "Two fa enabled user",
     },
-    "user_can_change_password": "User can change password",
-    "user_is_only_organization_owner": "User is only organization owner",
-    "owner_is_only_user_in_organization": true
+    user_can_change_password: "User can change password",
+    user_is_only_organization_owner: "User is only organization owner",
+    owner_is_only_user_in_organization: true,
 };
 
 const meta = {

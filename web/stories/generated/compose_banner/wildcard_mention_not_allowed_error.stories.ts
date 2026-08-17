@@ -3,14 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/compose_banner/wildcard_mention_not_allowed_error.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Compose Banner/Wildcard Mention Not Allowed Error",
-    render: () => render_template_story("compose_banner/wildcard_mention_not_allowed_error.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "compose_banner/wildcard_mention_not_allowed_error.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

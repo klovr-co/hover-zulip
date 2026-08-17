@@ -164,9 +164,7 @@ class HoverAwarenessTest(ZulipTestCase):
         self.assertIn("important", projection[1]["reasons"])
 
     def test_team_pulse_is_shared_and_permission_filtered(self) -> None:
-        attachment, space = self.make_space(
-            "Shared work", role=SpaceMembership.Role.CONTRIBUTOR
-        )
+        attachment, space = self.make_space("Shared work", role=SpaceMembership.Role.CONTRIBUTOR)
         routine = self.make_item(attachment, title="Routine update")
         important = self.make_item(attachment, title="Shared blocker", importance="urgent")
         mention_row = UserMessage.objects.get(
@@ -187,12 +185,12 @@ class HoverAwarenessTest(ZulipTestCase):
 
         SpaceMembership.objects.filter(space=space, user=self.viewer).delete()
         self.assertEqual(get_awareness_projection(self.viewer, surface="team_pulse"), [])
-        self.assertFalse(any(item["message_id"] == routine.message_id for item in viewer_projection))
+        self.assertFalse(
+            any(item["message_id"] == routine.message_id for item in viewer_projection)
+        )
 
     def test_linked_development_projects_latest_reviewed_state_and_native_read_state(self) -> None:
-        attachment, _ = self.make_space(
-            "Lineage work", role=SpaceMembership.Role.CONTRIBUTOR
-        )
+        attachment, _ = self.make_space("Lineage work", role=SpaceMembership.Role.CONTRIBUTOR)
         earlier = self.make_item(
             attachment, title="Original plan", importance="high", lineage_key="plan", minutes=1
         )
@@ -226,9 +224,7 @@ class HoverAwarenessTest(ZulipTestCase):
         self.assertTrue(projected["is_unread"])
 
     def test_todo_assignment_and_suggested_action_ownership_are_live_inputs(self) -> None:
-        attachment, _ = self.make_space(
-            "Action work", role=SpaceMembership.Role.CONTRIBUTOR
-        )
+        attachment, _ = self.make_space("Action work", role=SpaceMembership.Role.CONTRIBUTOR)
         assigned_item = self.make_item(
             attachment,
             title="Deliver the venue plan",
