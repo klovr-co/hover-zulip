@@ -245,8 +245,9 @@ def validate_draft_spec(spec: ModuleDraftSpec) -> ModuleDraftSpec:
     _validate_output_template(spec.output_template, pipeline_name=name)
     if not 1 <= spec.maximum_runtime_seconds <= MAX_PIPELINE_RUNTIME_SECONDS:
         raise JsonableError(
-            _("Maximum runtime must be between 1 and %(cap)s seconds.")
-            % {"cap": MAX_PIPELINE_RUNTIME_SECONDS}
+            _("Maximum runtime must be between 1 and {cap} seconds.").format(
+                cap=MAX_PIPELINE_RUNTIME_SECONDS
+            )
         )
     if not requirements:
         raise JsonableError(_("At least one Source requirement is required."))
@@ -527,7 +528,7 @@ def do_revoke_pipeline_creator(*, acting_user: UserProfile, target: UserProfile)
     if target.realm_id != acting_user.realm_id:
         raise JsonableError(_("Invalid user ID"))
     assignment = (
-        PipelineCreatorAssignment.objects.select_for_update()
+        PipelineCreatorAssignment.objects.select_for_update(no_key=True)
         .filter(realm=acting_user.realm, user=target, revoked_at__isnull=True)
         .first()
     )
@@ -615,7 +616,7 @@ def do_update_module_draft(
 ) -> ModuleDraft:
     try:
         draft = (
-            ModuleDraft.objects.select_for_update(of=("self",))
+            ModuleDraft.objects.select_for_update(of=("self",), no_key=True)
             .select_related("definition")
             .get(id=draft_id, realm=acting_user.realm)
         )
@@ -656,7 +657,9 @@ def do_add_module_draft_collaborator(
     *, acting_user: UserProfile, draft_id: int, target: UserProfile
 ) -> tuple[ModuleDraft, bool]:
     try:
-        draft = ModuleDraft.objects.select_for_update().get(id=draft_id, realm=acting_user.realm)
+        draft = ModuleDraft.objects.select_for_update(no_key=True).get(
+            id=draft_id, realm=acting_user.realm
+        )
     except ModuleDraft.DoesNotExist:
         raise JsonableError(_("Invalid Pipeline draft."))
     _assert_can_manage_draft_collaborators(acting_user, draft)
@@ -683,7 +686,9 @@ def do_remove_module_draft_collaborator(
     *, acting_user: UserProfile, draft_id: int, target: UserProfile
 ) -> tuple[ModuleDraft, bool]:
     try:
-        draft = ModuleDraft.objects.select_for_update().get(id=draft_id, realm=acting_user.realm)
+        draft = ModuleDraft.objects.select_for_update(no_key=True).get(
+            id=draft_id, realm=acting_user.realm
+        )
     except ModuleDraft.DoesNotExist:
         raise JsonableError(_("Invalid Pipeline draft."))
     _assert_can_manage_draft_collaborators(acting_user, draft)
@@ -725,7 +730,7 @@ def do_publish_module_draft(
 ) -> tuple[ModuleDraft, bool]:
     try:
         draft = (
-            ModuleDraft.objects.select_for_update(of=("self",))
+            ModuleDraft.objects.select_for_update(of=("self",), no_key=True)
             .select_related("definition", "based_on_version", "published_version")
             .get(id=draft_id, realm=acting_user.realm)
         )
@@ -752,7 +757,7 @@ def do_publish_module_draft(
     else:
         definition_id = draft.definition_id
         assert definition_id is not None
-        definition = ModuleDefinition.objects.select_for_update().get(id=definition_id)
+        definition = ModuleDefinition.objects.select_for_update(no_key=True).get(id=definition_id)
         if hasattr(definition, "archive_record"):
             raise JsonableError(_("Archived Pipeline definitions cannot publish new versions."))
     expected_version = _next_version(
@@ -883,7 +888,7 @@ def do_archive_module_definition(
 ) -> tuple[ModuleDefinition, bool]:
     _assert_realm_admin(acting_user)
     try:
-        definition = ModuleDefinition.objects.select_for_update().get(
+        definition = ModuleDefinition.objects.select_for_update(no_key=True).get(
             id=definition_id, realm=acting_user.realm
         )
     except ModuleDefinition.DoesNotExist:
@@ -908,7 +913,7 @@ def do_archive_module_version(
     _assert_realm_admin(acting_user)
     try:
         version = (
-            ModuleVersion.objects.select_for_update()
+            ModuleVersion.objects.select_for_update(no_key=True)
             .select_related("definition")
             .get(id=version_id, definition__realm=acting_user.realm)
         )

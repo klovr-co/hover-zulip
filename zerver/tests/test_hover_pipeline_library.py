@@ -275,7 +275,7 @@ class HoverPipelineLibraryTest(ZulipTestCase):
         version.output_template = {"mutated": True}
         with self.assertRaisesRegex(ValidationError, "immutable"):
             version.save()
-        with self.assertRaises(DatabaseError), transaction.atomic():
+        with self.assertRaises(DatabaseError), transaction.atomic(savepoint=False):
             ModuleSourceRequirement.objects.bulk_create(
                 [
                     ModuleSourceRequirement(
@@ -287,9 +287,9 @@ class HoverPipelineLibraryTest(ZulipTestCase):
                     )
                 ]
             )
-        with self.assertRaises(DatabaseError), transaction.atomic():
+        with self.assertRaises(DatabaseError), transaction.atomic(savepoint=False):
             ModuleSupportedTrigger.objects.filter(version=version).delete()
-        with self.assertRaises(DatabaseError), transaction.atomic():
+        with self.assertRaises(DatabaseError), transaction.atomic(savepoint=False):
             ModuleVersion.objects.filter(id=version.id).update(runtime_key="changed.runtime")
         ModuleVersion.objects.filter(id=version.id).update(published_by=None)
         version.refresh_from_db()
