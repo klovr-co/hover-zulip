@@ -87,7 +87,6 @@ import * as settings_profile_fields from "./settings_profile_fields.ts";
 import * as settings_realm_domains from "./settings_realm_domains.ts";
 import * as settings_realm_user_settings_defaults from "./settings_realm_user_settings_defaults.ts";
 import * as settings_streams from "./settings_streams.ts";
-import * as sidebar_ui from "./sidebar_ui.ts";
 import * as starred_messages from "./starred_messages.ts";
 import * as starred_messages_ui from "./starred_messages_ui.ts";
 import {current_user, realm} from "./state_data.ts";

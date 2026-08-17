@@ -3,18 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/user_group_display_only_pill.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "group_id": 7,
-    "strikethrough": "Strikethrough",
-    "display_value": "Display value"
+    group_id: 7,
+    strikethrough: "Strikethrough",
+    display_value: "Display value",
 };
 
 const meta = {
     title: "Catalogue/User Group Display Only Pill",
-    render: () => render_template_story("user_group_display_only_pill.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("user_group_display_only_pill.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

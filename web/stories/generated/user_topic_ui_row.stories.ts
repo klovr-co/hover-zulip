@@ -3,15 +3,14 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/user_topic_ui_row.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "user_topic": "User topic",
-    "is_empty_string_topic": true,
-    "topic_display_name": "Topic display name",
-    "user_topic_visibility_policy_values": "User topic visibility policy values",
-    "visibility_policy": "Visibility policy"
+    user_topic: "User topic",
+    is_empty_string_topic: true,
+    topic_display_name: "Topic display name",
+    user_topic_visibility_policy_values: "User topic visibility policy values",
+    visibility_policy: "Visibility policy",
 };
 
 const meta = {

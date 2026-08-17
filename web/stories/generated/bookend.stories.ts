@@ -3,16 +3,15 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/bookend.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "is_trailing_bookend": true,
-    "is_spectator": true,
-    "deactivated": "Deactivated",
-    "subscribed": "Subscribed",
-    "just_unsubscribed": "Just unsubscribed",
-    "can_subscribe": true
+    is_trailing_bookend: true,
+    is_spectator: true,
+    deactivated: "Deactivated",
+    subscribed: "Subscribed",
+    just_unsubscribed: "Just unsubscribed",
+    can_subscribe: true,
 };
 
 const meta = {

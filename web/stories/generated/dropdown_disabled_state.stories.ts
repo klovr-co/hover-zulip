@@ -3,11 +3,10 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/dropdown_disabled_state.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "name": "Name"
+    name: "Name",
 };
 
 const meta = {

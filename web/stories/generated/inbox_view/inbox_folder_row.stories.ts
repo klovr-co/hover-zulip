@@ -3,22 +3,22 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/inbox_view/inbox_folder_row.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "header_id": 7,
-    "is_header_visible": true,
-    "is_collapsed": true,
-    "is_dm_header": true,
-    "name": "Name",
-    "has_unread_mention": true,
-    "unread_count": 3
+    header_id: 7,
+    is_header_visible: true,
+    is_collapsed: true,
+    is_dm_header: true,
+    name: "Name",
+    has_unread_mention: true,
+    unread_count: 3,
 };
 
 const meta = {
     title: "Catalogue/Inbox View/Inbox Folder Row",
-    render: () => render_template_story("inbox_view/inbox_folder_row.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("inbox_view/inbox_folder_row.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -3,13 +3,12 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/filter_text_input.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "id": 7,
-    "placeholder": "Placeholder",
-    "aria_label": "Aria label"
+    id: 7,
+    placeholder: "Placeholder",
+    aria_label: "Aria label",
 };
 
 const meta = {

@@ -3,25 +3,24 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/hover_source_reactions.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "integrations": [
+    integrations: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "url": "#storybook",
-            "key": "Key",
-            "icon_class": "Icon class",
-            "count": 3
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            url: "#storybook",
+            key: "Key",
+            icon_class: "Icon class",
+            count: 3,
+        },
+    ],
 };
 
 const meta = {

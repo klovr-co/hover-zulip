@@ -3,19 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/move_topic_to_stream.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "only_topic_edit": "Only topic edit",
-    "topic_name": "Topic name",
-    "disable_topic_input": "Disable topic input",
-    "max_topic_length": "Max topic length",
-    "current_stream_id": 7,
-    "from_message_actions_popover": "From message actions popover",
-    "message_placement": "Message placement",
-    "notify_new_thread": "Notify new thread",
-    "notify_old_thread": "Notify old thread"
+    only_topic_edit: "Only topic edit",
+    topic_name: "Topic name",
+    disable_topic_input: "Disable topic input",
+    max_topic_length: "Max topic length",
+    current_stream_id: 7,
+    from_message_actions_popover: "From message actions popover",
+    message_placement: "Message placement",
+    notify_new_thread: "Notify new thread",
+    notify_old_thread: "Notify old thread",
 };
 
 const meta = {

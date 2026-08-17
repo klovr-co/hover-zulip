@@ -1,25 +1,25 @@
 <section class="hover-disputed-details" aria-label="{{t 'Disputed details'}}">
     {{#each details}}
-    <article class="hover-disputed-detail hover-disputed-detail--{{state_class}}">
-        <div class="hover-disputed-detail__heading">
-            <span class="hover-disputed-detail__state">{{state_label}}</span>
-            <strong class="hover-disputed-detail__field">{{field_label}}</strong>
-        </div>
-        <p>{{summary}}</p>
-        {{#if target_label}}<p class="hover-disputed-detail__target">{{target_label}}</p>{{/if}}
-        {{#if resolution_label}}<p class="hover-disputed-detail__resolution" role="status">{{resolution_label}}</p>{{/if}}
-        <div class="hover-disputed-detail__actions">
-            {{#if evidence_url}}
-            <button type="button" class="hover-view-evidence" data-evidence-url="{{evidence_url}}">
-                {{#tr}}View conflicting sources ({{evidence_count}}){{/tr}}
-            </button>
-            {{/if}}
-            {{#if show_review_action}}
-            <button type="button" class="hover-dispute-review-button" data-hover-message-id="{{../message_id}}" data-hover-field-path="{{field_path}}">
-                {{t "Review"}}
-            </button>
-            {{/if}}
-        </div>
-    </article>
+        <article class="hover-disputed-detail hover-disputed-detail--{{state_class}}">
+            <div class="hover-disputed-detail__heading">
+                <span class="hover-disputed-detail__state">{{state_label}}</span>
+                <strong class="hover-disputed-detail__field">{{field_label}}</strong>
+            </div>
+            <p>{{summary}}</p>
+            {{#if target_label}}<p class="hover-disputed-detail__target">{{target_label}}</p>{{/if}}
+            {{#if resolution_label}}<p class="hover-disputed-detail__resolution" role="status">{{resolution_label}}</p>{{/if}}
+            <div class="hover-disputed-detail__actions">
+                {{#if evidence_url}}
+                <button type="button" class="hover-view-evidence" data-evidence-url="{{evidence_url}}">
+                    {{#tr}}View conflicting sources ({evidence_count}){{/tr}}
+                </button>
+                {{/if}}
+                {{#if show_review_action}}
+                <button type="button" class="hover-dispute-review-button" data-hover-message-id="{{../message_id}}" data-hover-field-path="{{field_path}}">
+                    {{t "Review"}}
+                </button>
+                {{/if}}
+            </div>
+        </article>
     {{/each}}
 </section>

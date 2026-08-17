@@ -3,16 +3,20 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/user_group_settings/user_group_members_table.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "can_remove_members": true
+    can_remove_members: true,
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/User Group Members Table",
-    render: () => render_template_story("user_group_settings/user_group_members_table.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/user_group_members_table.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

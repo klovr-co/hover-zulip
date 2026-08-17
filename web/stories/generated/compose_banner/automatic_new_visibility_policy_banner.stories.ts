@@ -3,14 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/compose_banner/automatic_new_visibility_policy_banner.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Compose Banner/Automatic New Visibility Policy Banner",
-    render: () => render_template_story("compose_banner/automatic_new_visibility_policy_banner.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "compose_banner/automatic_new_visibility_policy_banner.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

@@ -3,17 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/edit_custom_profile_field_form.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "profile_field_info": "Profile field info",
-    "realm_default_external_accounts": "Realm default external accounts"
+    profile_field_info: "Profile field info",
+    realm_default_external_accounts: "Realm default external accounts",
 };
 
 const meta = {
     title: "Catalogue/Settings/Edit Custom Profile Field Form",
-    render: () => render_template_story("settings/edit_custom_profile_field_form.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/edit_custom_profile_field_form.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

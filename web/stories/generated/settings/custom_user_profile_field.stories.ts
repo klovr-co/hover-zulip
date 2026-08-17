@@ -3,48 +3,48 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/custom_user_profile_field.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "field": {
-        "name": "Name",
-        "id": 7,
-        "required": "Required",
-        "hint": "Hint"
+    field: {
+        name: "Name",
+        id: 7,
+        required: "Required",
+        hint: "Hint",
     },
-    "is_empty_required_field": true,
-    "editable_by_user": "Editable by user",
-    "is_date_field": true,
-    "is_long_text_field": true,
-    "for_manage_user_modal": "For manage user modal",
-    "field_value": {
-        "value": "Value"
+    is_empty_required_field: true,
+    editable_by_user: "Editable by user",
+    is_date_field: true,
+    is_long_text_field: true,
+    for_manage_user_modal: "For manage user modal",
+    field_value: {
+        value: "Value",
     },
-    "is_dropdown_field": true,
-    "field_choices": [
+    is_dropdown_field: true,
+    field_choices: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "value": "Value",
-            "selected": "Selected",
-            "text": "Text"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            value: "Value",
+            selected: "Selected",
+            text: "Text",
+        },
     ],
-    "is_user_field": true,
-    "is_url_field": true,
-    "field_type": "Field type",
-    "is_pronouns_field": true
+    is_user_field: true,
+    is_url_field: true,
+    field_type: "Field type",
+    is_pronouns_field: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Custom User Profile Field",
-    render: () => render_template_story("settings/custom_user_profile_field.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/custom_user_profile_field.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

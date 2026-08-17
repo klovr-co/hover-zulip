@@ -3,19 +3,23 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/stream_settings/change_stream_info_modal.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "stream_name": "Stream name",
-    "max_stream_name_length": "Max stream name length",
-    "max_stream_description_length": "Max stream description length",
-    "stream_description": "Stream description"
+    stream_name: "Stream name",
+    max_stream_name_length: "Max stream name length",
+    max_stream_description_length: "Max stream description length",
+    stream_description: "Stream description",
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Change Stream Info Modal",
-    render: () => render_template_story("stream_settings/change_stream_info_modal.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "stream_settings/change_stream_info_modal.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;
