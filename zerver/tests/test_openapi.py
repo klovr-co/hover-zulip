@@ -1078,6 +1078,16 @@ class APIDocsSidebarTest(ZulipTestCase):
             # This is rendered on the "Outgoing webhooks" page and hence is not
             # linked in the sidebar.
             "zulip-outgoing-webhooks",
+            # Hover's documented endpoints are consumed by the web app and are
+            # not part of the public API documentation navigation.
+            "get-hover-personal-editions",
+            "hover-search",
+            "list-hover-todos",
+            "update-hover-todo",
+            "decide-hover-suggested-action",
+            "get-hover-awareness",
+            "resolve-hover-generated-item-evidence",
+            "resolve-hover-disputed-detail-evidence",
         }
         sidebar_path = "api_docs/sidebar_index.md"
         rest_endpoints_path = "api_docs/include/rest-endpoints.md"

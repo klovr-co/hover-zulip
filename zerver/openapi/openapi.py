@@ -503,7 +503,7 @@ def validate_test_response(request: Request, response: Response) -> bool:
     return True
 
 
-def validate_schema(schema: dict[str, Any]) -> None:
+def validate_schema(schema: bool | dict[str, Any]) -> None:
     """Check if opaque objects are present in the OpenAPI spec; this is an
     important part of our policy for ensuring every detail of Zulip's
     API responses is correct.
@@ -511,6 +511,9 @@ def validate_schema(schema: dict[str, Any]) -> None:
     This is done by checking for the presence of the
     `additionalProperties` attribute for all objects (dictionaries).
     """
+    if isinstance(schema, bool):
+        return
+
     if "oneOf" in schema:
         for subschema in schema["oneOf"]:
             validate_schema(subschema)

@@ -374,7 +374,7 @@ def _send_space_update(space: Space) -> None:
     )
 
 
-@transaction.atomic(savepoint=False)
+@transaction.atomic
 def do_install_module(
     *,
     acting_user: UserProfile,

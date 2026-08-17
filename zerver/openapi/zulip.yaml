@@ -8393,29 +8393,6 @@ paths:
 
                     **Changes**: New in Zulip 8.0 (feature level 236).
                   example: true
-                hover_generated_item_id:
-                  type: integer
-                  description: |
-                    The generated Hover root being answered. This internal
-                    extension is accepted only from a confirmed Space member
-                    posting beneath that root.
-                hover_response_type:
-                  type: string
-                  enum: [reply, review]
-                  description: |
-                    Whether the native human-authored message is discussion or
-                    a Review of Hover's interpretation.
-                hover_review_field:
-                  type: string
-                  description: |
-                    An existing top-level reviewed-payload field to revise.
-                    Used only with `hover_response_type=review`.
-                hover_review_value:
-                  type: string
-                  description: |
-                    The new field value encoded as JSON. A Review with no valid
-                    field/value pair is recorded as requiring clarification and
-                    does not mutate current state.
               required:
                 - type
                 - to
@@ -9340,6 +9317,29 @@ paths:
 
                     **Changes**: New in Zulip 8.0 (feature level 236).
                   example: true
+                hover_generated_item_id:
+                  type: integer
+                  description: |
+                    The generated Hover root being answered. This internal
+                    extension is accepted only from a confirmed Space member
+                    posting beneath that root.
+                hover_response_type:
+                  type: string
+                  enum: [reply, review]
+                  description: |
+                    Whether the native human-authored message is discussion or
+                    a Review of Hover's interpretation.
+                hover_review_field:
+                  type: string
+                  description: |
+                    An existing top-level reviewed-payload field to revise.
+                    Used only with `hover_response_type=review`.
+                hover_review_value:
+                  type: string
+                  description: |
+                    The new field value encoded as JSON. A Review with no valid
+                    field/value pair is recorded as requiring clarification and
+                    does not mutate current state.
               required:
                 - type
                 - to
@@ -27725,6 +27725,9 @@ paths:
                   type: string
                   maxLength: 100
               required: [query]
+            encoding:
+              query:
+                contentType: application/json
       responses:
         "200":
           description: Authorized Hover search results.
@@ -27817,20 +27820,24 @@ paths:
               required: [operation, request_id, expected_version]
               properties:
                 operation:
+                  description: The Todo state transition to append.
                   type: string
                   enum: [assign, complete, reopen]
                 request_id:
+                  description: A UUID identifying this idempotent mutation.
                   type: string
                   format: uuid
                 expected_version:
-                  type: integer
-                  minimum: 1
+                  description: The current positive Todo version as a decimal string.
+                  type: string
+                  pattern: "^[1-9][0-9]*$"
                 assignee_user_id:
-                  type: integer
-                  minimum: 1
+                  type: string
+                  pattern: "^[1-9][0-9]*$"
                   nullable: true
                   description: Required only for `assign`.
                 reason:
+                  description: Optional explanation for the transition.
                   type: string
                   nullable: true
                   maxLength: 1000
@@ -27897,14 +27904,17 @@ paths:
               required: [decision, request_id, expected_version]
               properties:
                 decision:
+                  description: The Suggested Action decision to record.
                   type: string
                   enum: [approve, not_action, restore]
                 request_id:
+                  description: A UUID identifying this idempotent decision.
                   type: string
                   format: uuid
                 expected_version:
-                  type: integer
-                  minimum: 1
+                  description: The current positive Suggested Action version as a decimal string.
+                  type: string
+                  pattern: "^[1-9][0-9]*$"
                 reason:
                   type: string
                   nullable: true
@@ -27916,15 +27926,15 @@ paths:
                   maxLength: 50000
                   description: Reviewed wording to confirm with `approve`.
                 assignee_user_id:
-                  type: integer
+                  type: string
                   nullable: true
-                  minimum: 1
-                  description: Confirmed Space member to assign, or null to leave unassigned.
+                  pattern: "^(?:|[1-9][0-9]*)$"
+                  description: Confirmed Space member to assign, or an empty string to clear.
                 due_date:
                   type: string
-                  format: date
                   nullable: true
-                  description: Due date to confirm with `approve`, or null to clear it.
+                  pattern: "^(?:|[0-9]{4}-[0-9]{2}-[0-9]{2})$"
+                  description: ISO date to confirm with `approve`, or an empty string to clear.
       responses:
         "200":
           description: Success, including an idempotent replay.

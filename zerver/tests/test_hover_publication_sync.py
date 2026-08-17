@@ -1307,7 +1307,6 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.assertEqual(GeneratedItem.objects.count(), 0)
         self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 0)
 
-    @capture_hover_telemetry
     def test_materialization_batch_limit_is_stricter_than_transport_limit(self) -> None:
         with self.assertRaisesRegex(PublicationSyncError, "invalid_publication_batch_limit"):
             sync_space_attachment(

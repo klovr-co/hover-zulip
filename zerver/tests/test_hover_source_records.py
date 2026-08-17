@@ -262,7 +262,6 @@ class HoverSourceRecordsTest(ZulipTestCase):
         self.assertEqual(projected["state"], "detached")
         self.assertTrue(projected["can_browse_records"])
 
-    @capture_hover_telemetry
     def test_retryable_failure_telemetry_uses_fixed_class_without_request_details(self) -> None:
         private_request_sentinel = "PRIVATE_UPSTREAM_REQUEST_SENTINEL"
         error = ClawerSyncError(
