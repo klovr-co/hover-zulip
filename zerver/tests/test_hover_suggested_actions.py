@@ -47,6 +47,7 @@ class HoverSuggestedActionTest(ZulipTestCase):
     @override
     def setUp(self) -> None:
         super().setUp()
+        self.hover_telemetry = self.enterContext(patch("hover.telemetry.logger.info"))
         self.creator = self.example_user("hamlet")
         self.subscriber = self.example_user("othello")
         self.outsider = self.example_user("cordelia")
@@ -260,6 +261,15 @@ class HoverSuggestedActionTest(ZulipTestCase):
                 self.decide("approve", request_id=request_id, expected_version=1)
             )
         self.assertFalse(replay["changed"])
+        self.assertEqual(
+            [call.args[1:3] for call in self.hover_telemetry.call_args_list],
+            [
+                ("todo", "approved"),
+                ("notification", "suppressed"),
+                ("suggested_action", "approved"),
+                ("suggested_action", "approved"),
+            ],
+        )
         self.assertEqual(Todo.objects.count(), 1)
         self.assertEqual(TodoEvent.objects.count(), 1)
         self.assertEqual(SuggestedActionTransition.objects.count(), 1)

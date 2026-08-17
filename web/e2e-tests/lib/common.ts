@@ -571,8 +571,11 @@ export async function open_personal_menu(page: Page): Promise<void> {
 
 export async function manage_organization(page: Page): Promise<void> {
     const menu_selector = "#settings-dropdown";
-    await page.waitForSelector(menu_selector, {visible: true});
-    await page.click(menu_selector);
+    // The post-login navbar can still be settling after `#inbox-main`
+    // becomes visible.  A Locator waits for the button's bounding box to be
+    // stable before clicking, avoiding a stale click position in the search
+    // box when the navbar columns finish laying out.
+    await page.locator(menu_selector).click();
 
     const organization_settings = '.link-item a[href="#organization"]';
     await page.waitForSelector(organization_settings, {visible: true});
