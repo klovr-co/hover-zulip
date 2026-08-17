@@ -268,6 +268,8 @@ class HoverConnectedAccount(BaseModel):
     approval_state: Literal["pending", "approved", "revoked"]
     health_status: Literal["unknown", "healthy", "degraded", "unavailable"]
     health_checked_at: str | None
+    link_state: Literal["none", "pending", "linked", "expired", "failed"]
+    link_expires_at: str | None
 
 
 class HoverConnectedAccountSelector(BaseModel):

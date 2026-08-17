@@ -13,6 +13,7 @@
             <span class="hover-account-health hover-account-health-{{account.health_status}}">
                 <span aria-hidden="true">●</span> {{account.health_label}}
             </span>
+            <span class="hover-account-state hover-account-state-{{account.link_state}}">{{account.link_label}}</span>
         </div>
     </header>
     <dl class="hover-connected-account-facts">
@@ -51,6 +52,12 @@
               type="button"
               class="button rounded small restore-connected-account"
               >{{t "Restore approval"}}</button>
+        {{/if}}
+        {{#if account.is_whatsapp}}
+            <button
+              type="button"
+              class="button rounded small retry-whatsapp-account-link"
+              >{{t "Relink"}}</button>
         {{/if}}
     </div>
     <section
