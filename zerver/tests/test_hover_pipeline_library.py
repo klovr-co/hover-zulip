@@ -3,7 +3,7 @@ import json
 
 import orjson
 from django.core.exceptions import ValidationError
-from django.db import DatabaseError, transaction
+from django.db import DatabaseError
 from typing_extensions import override
 
 from hover.actions_modules import ensure_prebuilt_module_catalog
@@ -275,7 +275,7 @@ class HoverPipelineLibraryTest(ZulipTestCase):
         version.output_template = {"mutated": True}
         with self.assertRaisesRegex(ValidationError, "immutable"):
             version.save()
-        with self.assertRaises(DatabaseError), transaction.atomic(savepoint=False):
+        with self.assertRaises(DatabaseError), self.artificial_transaction_savepoint():
             ModuleSourceRequirement.objects.bulk_create(
                 [
                     ModuleSourceRequirement(
@@ -287,9 +287,9 @@ class HoverPipelineLibraryTest(ZulipTestCase):
                     )
                 ]
             )
-        with self.assertRaises(DatabaseError), transaction.atomic(savepoint=False):
+        with self.assertRaises(DatabaseError), self.artificial_transaction_savepoint():
             ModuleSupportedTrigger.objects.filter(version=version).delete()
-        with self.assertRaises(DatabaseError), transaction.atomic(savepoint=False):
+        with self.assertRaises(DatabaseError), self.artificial_transaction_savepoint():
             ModuleVersion.objects.filter(id=version.id).update(runtime_key="changed.runtime")
         ModuleVersion.objects.filter(id=version.id).update(published_by=None)
         version.refresh_from_db()
