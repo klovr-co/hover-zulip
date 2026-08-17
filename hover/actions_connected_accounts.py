@@ -181,6 +181,39 @@ def do_set_connected_account_approval_state(
 
 
 @transaction.atomic(durable=True)
+def do_update_connected_account_link_state(
+    account: ConnectedAccount,
+    *,
+    link_state: str,
+    link_expires_at: datetime | None,
+    acting_user: UserProfile,
+) -> None:
+    """Persist only the safe lifecycle projection from Studio's link contract."""
+    _check_actor_is_realm_administrator(account, acting_user)
+    if link_state not in ConnectedAccount.LinkState.values:
+        raise JsonableError(_("Invalid Connected Account link state."))
+    if account.link_state == link_state and account.link_expires_at == link_expires_at:
+        return
+    update_fields = ["link_state", "link_expires_at", "date_updated"]
+    account.link_state = link_state
+    account.link_expires_at = link_expires_at
+    # The linking administrator is already authorized to connect organization
+    # infrastructure. A successfully linked account is usable immediately,
+    # while pending/expired/failed links remain unavailable to teammates.
+    if link_state == ConnectedAccount.LinkState.LINKED:
+        account.approval_state = ConnectedAccount.ApprovalState.APPROVED
+        update_fields.append("approval_state")
+    account.save(update_fields=update_fields)
+    _create_audit_log(
+        account=account,
+        acting_user=acting_user,
+        event_type=AuditLogEventType.HOVER_CONNECTED_ACCOUNT_LINK_CHANGED,
+        extra_data={"link_state": link_state},
+    )
+    _notify_account(account, op="account_update")
+
+
+@transaction.atomic(durable=True)
 def do_update_connected_account_health(
     account: ConnectedAccount,
     *,

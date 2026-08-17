@@ -763,6 +763,8 @@ run_test("realm settings", ({override}) => {
         approval_state: "pending",
         health_status: "unknown",
         health_checked_at: null,
+        link_state: "none",
+        link_expires_at: null,
     };
     override(navigation_views, "set_hover_enabled", noop);
     override(stream_list, "update_streams_sidebar", noop);
@@ -1760,6 +1762,8 @@ run_test("hover connected account events", () => {
         approval_state: "approved",
         health_status: "healthy",
         health_checked_at: null,
+        link_state: "linked",
+        link_expires_at: null,
     };
     const grant = {
         id: 91,

@@ -1,6 +1,9 @@
+from datetime import timedelta
+from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 import orjson
+from django.utils.timezone import now as timezone_now
 from typing_extensions import override
 
 from hover.actions_connected_accounts import (
@@ -12,6 +15,7 @@ from hover.actions_connected_accounts import (
 )
 from hover.lib_connected_accounts import user_can_use_connected_account
 from hover.models import ConnectedAccount, ConnectedAccountGrant
+from hover.whatsapp_link import WhatsAppLinkStatus
 from zerver.lib.events import apply_events, fetch_initial_state_data
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.test_classes import ZulipTestCase
@@ -421,6 +425,78 @@ class HoverConnectedAccountTest(ZulipTestCase):
             do_update_connected_account_health(
                 account, health_status="raw_error_text", checked_at=checked_at
             )
+
+    @patch("hover.views_connected_accounts.get_whatsapp_link")
+    def test_admin_can_link_retry_and_retain_a_whatsapp_account(
+        self, mock_get_link: MagicMock
+    ) -> None:
+        link = mock_get_link.return_value
+        expires_at = timezone_now() + timedelta(minutes=8)
+        link.start.return_value = WhatsAppLinkStatus(
+            state="pending", expires_at=expires_at, qr_image="aGVsbG8="
+        )
+        self.login_user(self.admin)
+        payload = self.assert_json_success(
+            self.client_post("/json/hover/connected_accounts/whatsapp/link", {})
+        )
+        account_id = payload["connected_account"]["id"]
+        self.assertEqual(
+            payload["link"],
+            {
+                "status": "pending",
+                "expires_at": expires_at.isoformat(),
+                "qr_image": "aGVsbG8=",
+            },
+        )
+        account = ConnectedAccount.objects.get(id=account_id)
+        self.assertEqual(account.link_state, ConnectedAccount.LinkState.PENDING)
+        self.assertFalse(any("qr" in field.name for field in account._meta.fields))
+
+        link.status.return_value = WhatsAppLinkStatus(
+            state="expired", expires_at=None, qr_image=None
+        )
+        payload = self.assert_json_success(
+            self.client_get(f"/json/hover/connected_accounts/{account.id}/link")
+        )
+        self.assertEqual(
+            payload["link"],
+            {
+                "status": "expired",
+                "expires_at": None,
+                "qr_image": None,
+            },
+        )
+
+        link.retry.return_value = WhatsAppLinkStatus(state="linked", expires_at=None, qr_image=None)
+        payload = self.assert_json_success(
+            self.client_post(f"/json/hover/connected_accounts/{account.id}/link/retry", {})
+        )
+        self.assertEqual(payload["link"]["status"], "linked")
+        account.refresh_from_db()
+        self.assertEqual(account.link_state, ConnectedAccount.LinkState.LINKED)
+        self.assertEqual(account.approval_state, ConnectedAccount.ApprovalState.APPROVED)
+
+        self.admin.is_active = False
+        self.admin.save(update_fields=["is_active"])
+        self.assertTrue(ConnectedAccount.objects.filter(id=account.id).exists())
+        audit = RealmAuditLog.objects.filter(
+            event_type=AuditLogEventType.HOVER_CONNECTED_ACCOUNT_LINK_CHANGED
+        )
+        serialized = orjson.dumps([item.extra_data for item in audit]).decode()
+        self.assertNotIn(str(account.external_account_id), serialized)
+        self.assertNotIn("qr", serialized.lower())
+
+    def test_non_admin_cannot_start_or_relink_whatsapp_accounts(self) -> None:
+        account = self.create_account()
+        self.login_user(self.grantee)
+        self.assert_json_error(
+            self.client_post("/json/hover/connected_accounts/whatsapp/link", {}),
+            "Must be an organization administrator",
+        )
+        self.assert_json_error(
+            self.client_post(f"/json/hover/connected_accounts/{account.id}/link/retry", {}),
+            "Must be an organization administrator",
+        )
 
     def test_duplicate_external_account_and_invalid_grantees_are_rejected(self) -> None:
         self.create_account()

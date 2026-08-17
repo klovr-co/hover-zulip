@@ -20,6 +20,8 @@ const account = {
     approval_state: "approved",
     health_status: "healthy",
     health_checked_at: "2026-08-11T00:00:00+00:00",
+    link_state: "linked",
+    link_expires_at: null,
 };
 
 const grant = {

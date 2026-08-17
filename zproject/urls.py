@@ -17,8 +17,11 @@ from django.views.generic import RedirectView
 from hover.views_awareness import get_awareness
 from hover.views_connected_accounts import (
     get_connected_account,
+    get_whatsapp_account_link,
     list_connected_accounts,
+    retry_whatsapp_account_link,
     revoke_connected_account_grant,
+    start_whatsapp_account_link,
     update_connected_account,
     upsert_connected_account_grant,
 )
@@ -784,6 +787,10 @@ v1_api_and_json_patterns = [
         GET=(list_connected_accounts, {"intentionally_undocumented"}),
     ),
     rest_path(
+        "hover/connected_accounts/whatsapp/link",
+        POST=(start_whatsapp_account_link, {"intentionally_undocumented"}),
+    ),
+    rest_path(
         "hover/connected_accounts/<int:account_id>",
         GET=(get_connected_account, {"intentionally_undocumented"}),
         PATCH=(update_connected_account, {"intentionally_undocumented"}),
@@ -791,6 +798,14 @@ v1_api_and_json_patterns = [
     rest_path(
         "hover/connected_accounts/<int:account_id>/grants",
         POST=(upsert_connected_account_grant, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/connected_accounts/<int:account_id>/link",
+        GET=(get_whatsapp_account_link, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/connected_accounts/<int:account_id>/link/retry",
+        POST=(retry_whatsapp_account_link, {"intentionally_undocumented"}),
     ),
     rest_path(
         "hover/connected_accounts/<int:account_id>/grants/<int:grant_id>",

@@ -99,6 +99,10 @@ def get_connected_account_data(account: ConnectedAccount) -> dict[str, Any]:
         "health_checked_at": (
             account.health_checked_at.isoformat() if account.health_checked_at is not None else None
         ),
+        "link_state": account.link_state,
+        "link_expires_at": (
+            account.link_expires_at.isoformat() if account.link_expires_at is not None else None
+        ),
     }
 
 
@@ -153,6 +157,16 @@ def user_can_use_connected_account(
         not user_profile.realm.hover_enabled
         or account.realm_id != user_profile.realm_id
         or account.approval_state != ConnectedAccount.ApprovalState.APPROVED
+        or (
+            account.provider_key == "whatsapp"
+            and account.connection_kind == ConnectedAccount.ConnectionKind.REMOTE_STUDIO
+            and account.link_state
+            in {
+                ConnectedAccount.LinkState.PENDING,
+                ConnectedAccount.LinkState.EXPIRED,
+                ConnectedAccount.LinkState.FAILED,
+            }
+        )
     ):
         return False
 

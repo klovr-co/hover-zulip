@@ -254,6 +254,13 @@ class ConnectedAccount(models.Model):
         REMOTE_STUDIO = "remote_studio", "Remote Studio"
         NATIVE_INTEGRATION = "native_integration", "Native integration"
 
+    class LinkState(models.TextChoices):
+        NONE = "none", "Not linked"
+        PENDING = "pending", "Pending"
+        LINKED = "linked", "Linked"
+        EXPIRED = "expired", "Expired"
+        FAILED = "failed", "Failed"
+
     realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_connected_accounts")
     provider_key = models.CharField(max_length=32, validators=[provider_key_validator])
     provider_name = models.CharField(max_length=MAX_PROVIDER_NAME_LENGTH)
@@ -284,6 +291,8 @@ class ConnectedAccount(models.Model):
     approval_state = models.TextField(choices=ApprovalState.choices, default=ApprovalState.PENDING)
     health_status = models.TextField(choices=HealthStatus.choices, default=HealthStatus.UNKNOWN)
     health_checked_at = models.DateTimeField(null=True, blank=True)
+    link_state = models.TextField(choices=LinkState.choices, default=LinkState.NONE)
+    link_expires_at = models.DateTimeField(null=True, blank=True)
     date_created = models.DateTimeField(default=timezone_now)
     date_updated = models.DateTimeField(auto_now=True)
 

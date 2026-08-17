@@ -21,6 +21,14 @@ const account_response_schema = z.object({
 const grant_response_schema = z.object({
     connected_account_grant: hover_connected_accounts.connected_account_grant_schema,
 });
+const link_response_schema = z.object({
+    connected_account: hover_connected_accounts.connected_account_schema,
+    link: z.object({
+        status: z.enum(["pending", "linked", "expired", "failed"]),
+        expires_at: z.nullable(z.string()),
+        qr_image: z.nullable(z.string()),
+    }),
+});
 const source_ref_pattern = /^src_[0-9a-f]{32}$/;
 const selector_type_pattern = /^[a-z][a-z0-9_]{0,63}$/;
 
@@ -59,6 +67,22 @@ function health_label(status: ConnectedAccount["health_status"]): string {
     throw new Error("Unknown health status");
 }
 
+function link_label(state: ConnectedAccount["link_state"]): string {
+    switch (state) {
+        case "none":
+            return $t({defaultMessage: "Not linked"});
+        case "pending":
+            return $t({defaultMessage: "Waiting to link"});
+        case "linked":
+            return $t({defaultMessage: "Linked"});
+        case "expired":
+            return $t({defaultMessage: "QR expired"});
+        case "failed":
+            return $t({defaultMessage: "Link unavailable"});
+    }
+    throw new Error("Unknown link state");
+}
+
 function scope_label(grant: ConnectedAccountGrant): string {
     if (grant.all_selectors) {
         return $t({defaultMessage: "All selectors"});
@@ -90,9 +114,77 @@ function card_html(account: ConnectedAccount): string {
             is_pending: account.approval_state === "pending",
             is_approved: account.approval_state === "approved",
             is_revoked: account.approval_state === "revoked",
+            is_whatsapp:
+                account.provider_key === "whatsapp" && account.connection_kind === "remote_studio",
+            link_label: link_label(account.link_state),
         },
         grants,
         has_grants: grants.length > 0,
+    });
+}
+
+function render_link_status(account: ConnectedAccount, link: z.output<typeof link_response_schema>["link"]): void {
+    const $status = $("#connected-account-status").empty();
+    const messages = {
+        pending: $t({defaultMessage: "Scan this QR code in WhatsApp Linked Devices."}),
+        linked: $t({defaultMessage: "WhatsApp account linked."}),
+        expired: $t({defaultMessage: "This QR code expired. Select Relink to try again."}),
+        failed: $t({defaultMessage: "WhatsApp linking is temporarily unavailable. Select Relink to try again."}),
+    };
+    $status.append($("p").text(messages[link.status]));
+    if (link.qr_image !== null) {
+        // QR bytes are intentionally kept only in this DOM node, not in any
+        // client-side account store or browser persistence layer.
+        $status.append(
+            $("img", {
+                alt: $t({defaultMessage: "WhatsApp linking QR code"}),
+                src: `data:image/png;base64,${link.qr_image}`,
+            }).addClass("hover-whatsapp-link-qr"),
+        );
+    }
+    if (link.status === "pending") {
+        setTimeout(() => {
+            void channel.get({
+                url: `/json/hover/connected_accounts/${account.id}/link`,
+                success(raw_data) {
+                    const response = link_response_schema.parse(raw_data);
+                    hover_connected_accounts.upsert_account(response.connected_account);
+                    rerender();
+                    render_link_status(response.connected_account, response.link);
+                },
+            });
+        }, 5000);
+    }
+}
+
+function start_whatsapp_link(): void {
+    void channel.post({
+        url: "/json/hover/connected_accounts/whatsapp/link",
+        success(raw_data) {
+            const response = link_response_schema.parse(raw_data);
+            hover_connected_accounts.upsert_account(response.connected_account);
+            rerender();
+            render_link_status(response.connected_account, response.link);
+        },
+        error(xhr) {
+            ui_report.error(
+                $t_html({defaultMessage: "Could not start WhatsApp linking."}),
+                xhr,
+                $("#connected-account-status"),
+            );
+        },
+    });
+}
+
+function retry_whatsapp_link(account: ConnectedAccount): void {
+    void channel.post({
+        url: `/json/hover/connected_accounts/${account.id}/link/retry`,
+        success(raw_data) {
+            const response = link_response_schema.parse(raw_data);
+            hover_connected_accounts.upsert_account(response.connected_account);
+            rerender();
+            render_link_status(response.connected_account, response.link);
+        },
     });
 }
 
@@ -282,6 +374,14 @@ export function set_up(): void {
         ".approve-connected-account",
         function (this: HTMLElement) {
             update_approval(account_from_button(this), "approved");
+        },
+    );
+    $section.on("click.hover-connected-accounts", ".link-whatsapp-account", start_whatsapp_link);
+    $section.on(
+        "click.hover-connected-accounts",
+        ".retry-whatsapp-account-link",
+        function (this: HTMLElement) {
+            retry_whatsapp_link(account_from_button(this));
         },
     );
     $section.on(
