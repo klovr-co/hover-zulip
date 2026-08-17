@@ -4,15 +4,28 @@ on:
   push:
     branches: ["*.x", chat.zulip.org, main]
     tags: ["*"]
-  pull_request:
     paths:
       - .github/workflows/production-suite.yml
       - "**/migrations/**"
       - manage.py
       - pnpm-lock.yaml
       - puppet/**
-      - scripts/**
-      - tools/**
+      - scripts/lib/build-pgroonga
+      - scripts/lib/create-production-venv
+      - scripts/lib/install
+      - scripts/lib/install-node
+      - scripts/lib/install-uv
+      - scripts/lib/setup-*
+      - scripts/lib/supported-os
+      - scripts/lib/unpack-zulip
+      - scripts/lib/upgrade-zulip*
+      - scripts/setup/**
+      - tools/build-release-tarball
+      - tools/ci/Dockerfile*
+      - tools/ci/production-*
+      - tools/lib/provision.py
+      - tools/lib/provision_inner.py
+      - tools/provision
       - uv.lock
       - web/babel.config.js
       - web/postcss.config.js
@@ -80,23 +93,23 @@ jobs:
         # zizmor: ignore[cache-poisoning]
         with:
           path: /__w/.pnpm-store
-          key: v1-pnpm-store-jammy-${{ hashFiles('pnpm-lock.yaml') }}
+          key: v1-pnpm-store-noble-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Restore uv cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         # zizmor: ignore[cache-poisoning]
         with:
           path: ~/.cache/uv
-          key: uv-jammy-${{ hashFiles('uv.lock') }}
-          restore-keys: uv-jammy-
+          key: uv-noble-${{ hashFiles('uv.lock') }}
+          restore-keys: uv-noble-
 
       - name: Restore emoji cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         # zizmor: ignore[cache-poisoning]
         with:
           path: /srv/zulip-emoji-cache
-          key: v1-emoji-jammy-${{ hashFiles('tools/setup/emoji/emoji_map.json') }}-${{ hashFiles('tools/setup/emoji/build_emoji') }}-${{ hashFiles('tools/setup/emoji/emoji_setup_utils.py') }}-${{ hashFiles('tools/setup/emoji/emoji_names.py') }}-${{ hashFiles('package.json') }}
-          restore-keys: v1-emoji-jammy
+          key: v1-emoji-noble-${{ hashFiles('tools/setup/emoji/emoji_map.json') }}-${{ hashFiles('tools/setup/emoji/build_emoji') }}-${{ hashFiles('tools/setup/emoji/emoji_setup_utils.py') }}-${{ hashFiles('tools/setup/emoji/emoji_names.py') }}-${{ hashFiles('package.json') }}
+          restore-keys: v1-emoji-noble
 
       - name: Build production tarball
         run: ./tools/ci/production-build
@@ -120,7 +133,7 @@ jobs:
       - name: Generate failure report string
         id: failure_report_string
         if: ${{ failure() && github.repository == 'zulip/zulip' && github.event_name == 'push' }}
-        run: tools/ci/generate-failure-message >> $GITHUB_OUTPUT
+        run: tools/ci/generate-failure-message >> "$GITHUB_OUTPUT"
 
       - name: Report status to CZO
         if: ${{ failure() && github.repository == 'zulip/zulip' && github.event_name == 'push' }}
@@ -208,7 +221,7 @@ jobs:
       - name: Generate failure report string
         id: failure_report_string
         if: ${{ failure() && github.repository == 'zulip/zulip' && github.event_name == 'push' }}
-        run: /tmp/generate-failure-message >> $GITHUB_OUTPUT
+        run: /tmp/generate-failure-message >> "$GITHUB_OUTPUT"
 
       - name: Report status to CZO
         if: ${{ failure() && github.repository == 'zulip/zulip' && github.event_name == 'push' }}
@@ -305,7 +318,7 @@ jobs:
       - name: Generate failure report string
         id: failure_report_string
         if: ${{ failure() && github.repository == 'zulip/zulip' && github.event_name == 'push' }}
-        run: /tmp/generate-failure-message >> $GITHUB_OUTPUT
+        run: /tmp/generate-failure-message >> "$GITHUB_OUTPUT"
 
       - name: Report status to CZO
         if: ${{ failure() && github.repository == 'zulip/zulip' && github.event_name == 'push' }}

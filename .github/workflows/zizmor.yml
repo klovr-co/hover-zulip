@@ -4,7 +4,14 @@ on:
   push:
     branches:
       - main
-  pull_request: {}
+    paths:
+      - .github/actions/**
+      - .github/workflows/**
+  pull_request:
+    paths:
+      - .github/actions/**
+      - .github/workflows/**
+  workflow_dispatch:
 
 permissions: {}
 
