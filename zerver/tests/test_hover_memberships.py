@@ -520,5 +520,5 @@ class HoverMembershipsTest(ZulipTestCase):
             do_launch_space(self.space, acting_user=self.creator)
         do_remove_space_member(self.space, self.member, acting_user=self.creator)
         create_stream_if_needed(self.realm, "LAUNCH READINESS")
-        with self.assertRaisesRegex(JsonableError, "already uses this Space name"):
+        with self.assertRaisesRegex(JsonableError, "Another Space already uses this name"):
             do_launch_space(self.space, acting_user=self.creator)

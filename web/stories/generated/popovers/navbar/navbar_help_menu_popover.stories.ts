@@ -3,18 +3,22 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../../templates/popovers/navbar/navbar_help_menu_popover.hbs";
-
 import {render_template_story} from "../../../template_story_utils.ts";
 
 const fixture = {
-    "corporate_enabled": "Corporate enabled",
-    "is_admin": true,
-    "is_owner": true
+    corporate_enabled: "Corporate enabled",
+    is_admin: true,
+    is_owner: true,
 };
 
 const meta = {
     title: "Catalogue/Popovers/Navbar/Navbar Help Menu Popover",
-    render: () => render_template_story("popovers/navbar/navbar_help_menu_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "popovers/navbar/navbar_help_menu_popover.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

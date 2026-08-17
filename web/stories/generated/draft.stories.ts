@@ -3,22 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/draft.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "draft_id": 7,
-    "is_stream": true,
-    "recipient_bar_color": "#4f8394",
-    "stream_id": 7,
-    "stream_privacy_icon_color": "#4f8394",
-    "stream_name": "Stream name",
-    "is_empty_string_topic": true,
-    "topic_display_name": "Topic display name",
-    "time_stamp": "Time stamp",
-    "is_dm_with_self": true,
-    "has_recipient_data": true,
-    "content": "Content"
+    draft_id: 7,
+    is_stream: true,
+    recipient_bar_color: "#4f8394",
+    stream_id: 7,
+    stream_privacy_icon_color: "#4f8394",
+    stream_name: "Stream name",
+    is_empty_string_topic: true,
+    topic_display_name: "Topic display name",
+    time_stamp: "Time stamp",
+    is_dm_with_self: true,
+    has_recipient_data: true,
+    content: "Content",
 };
 
 const meta = {

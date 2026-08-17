@@ -3,17 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/compose_banner/guest_in_dm_recipient_warning.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "classname": "Classname",
-    "banner_text": "Banner text"
+    classname: "Classname",
+    banner_text: "Banner text",
 };
 
 const meta = {
     title: "Catalogue/Compose Banner/Guest In Dm Recipient Warning",
-    render: () => render_template_story("compose_banner/guest_in_dm_recipient_warning.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "compose_banner/guest_in_dm_recipient_warning.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

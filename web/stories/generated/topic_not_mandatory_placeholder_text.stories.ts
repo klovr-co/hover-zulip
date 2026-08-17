@@ -3,14 +3,14 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/topic_not_mandatory_placeholder_text.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Topic Not Mandatory Placeholder Text",
-    render: () => render_template_story("topic_not_mandatory_placeholder_text.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("topic_not_mandatory_placeholder_text.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -1,7 +1,6 @@
 @font-face {
     font-family: "SaansMono Local";
-    src:
-        local("SaansMono"), local("Saans Mono");
+    src: local("SaansMono"), local("Saans Mono");
     font-style: normal;
     font-weight: 400;
     font-display: swap;
@@ -17,7 +16,8 @@
 
 :root {
     /* The first two faces mirror the Stitch export; Source Sans 3 is bundled. */
-    --font-saans: "Be Vietnam Pro", "Avenir Next", "Source Sans 3 VF", sans-serif;
+    --font-saans:
+        "Be Vietnam Pro", "Avenir Next", "Source Sans 3 VF", sans-serif;
     --font-headline: "Manrope", "Avenir Next", "Source Sans 3 VF", sans-serif;
     --font-saans-mono: "SaansMono Local", "SaansMono Fallback", monospace;
     --type-display-xl-size: 72px;

@@ -11,7 +11,7 @@ from hover.telemetry import (
     HoverTelemetryOutcome,
     count_bucket,
     duration_bucket,
-    emit_hover_telemetry,
+    emit_hover_telemetry_on_commit,
 )
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.response import json_response_from_error, json_success
@@ -57,7 +57,7 @@ def browse_source_records(
         telemetry_outcome = HoverTelemetryOutcome.DENIED
         response = json_response_from_error(error)
     finally:
-        emit_hover_telemetry(
+        emit_hover_telemetry_on_commit(
             HoverTelemetryEvent.SOURCE_RECORDS,
             telemetry_outcome,
             dimensions={

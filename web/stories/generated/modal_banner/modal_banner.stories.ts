@@ -3,16 +3,15 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/modal_banner/modal_banner.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "banner_type": "Banner type",
-    "classname": "Classname",
-    "banner_text": "Banner text",
-    "button_text": "Button text",
-    "button_link": "#storybook",
-    "hide_close_button": "Hide close button"
+    banner_type: "Banner type",
+    classname: "Classname",
+    banner_text: "Banner text",
+    button_text: "Button text",
+    button_link: "#storybook",
+    hide_close_button: "Hide close button",
 };
 
 const meta = {

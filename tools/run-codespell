@@ -11,12 +11,14 @@ if [ "$#" -eq 0 ]; then
     echo "No argument specified. Checking on the entire repo..."
     FILES_TO_BE_CHECKED="$(
         git ls-files -- \
+            ':!.ua' \
             ':!*.asc' \
             ':!*.svg' \
             ':!*/fixtures/*' \
             ':!docs/THIRDPARTY' \
             ':!docs/translating' \
             ':!locale' \
+            ':!.ua/knowledge-graph.json' \
             ':!postgresql.conf.template.erb' \
             ':!tools/build-demo-organization-wordlist' \
             ':!tools/setup/emoji/emoji_map.json' \

@@ -3,31 +3,31 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/widgets/poll_widget_results.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "options": [
+    options: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "current_user_vote": true,
-            "key": "Key",
-            "count": 3,
-            "option": "Option",
-            "names": "Names"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            current_user_vote: true,
+            key: "Key",
+            count: 3,
+            option: "Option",
+            names: "Names",
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Widgets/Poll Widget Results",
-    render: () => render_template_story("widgets/poll_widget_results.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("widgets/poll_widget_results.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

@@ -143,6 +143,16 @@ class HoverIntegrationProvenanceTest(ZulipTestCase):
         )
         self.assertFalse(replay["created"])
 
+        detached = self.assert_json_success(
+            self.client_delete(
+                f"/json/hover/spaces/{self.space.id}/integration-routes/{route['id']}"
+            )
+        )
+        self.assertEqual(
+            detached["integration_route"]["state"], IntegrationRouteAssociation.State.DETACHED
+        )
+        self.assertEqual(detached["space"]["attachments"][0]["integration_routes"], [])
+
         non_admin = self.example_user("othello")
         SpaceMembership.objects.create(
             realm=self.realm,

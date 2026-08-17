@@ -3,16 +3,16 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/uploaded_files_list.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "attachment": "Attachment"
+    attachment: "Attachment",
 };
 
 const meta = {
     title: "Catalogue/Settings/Uploaded Files List",
-    render: () => render_template_story("settings/uploaded_files_list.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/uploaded_files_list.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

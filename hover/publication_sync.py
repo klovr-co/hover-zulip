@@ -43,7 +43,7 @@ from hover.telemetry import (
     HoverTelemetryEvent,
     HoverTelemetryOutcome,
     count_bucket,
-    emit_hover_telemetry,
+    emit_hover_telemetry_on_commit,
     lag_bucket,
 )
 from zerver.actions.message_send import internal_send_stream_message
@@ -269,7 +269,7 @@ def _record_failure(
         outcome = HoverTelemetryOutcome.RETRYABLE_FAILURE
     else:
         outcome = HoverTelemetryOutcome.PERMANENT_FAILURE
-    emit_hover_telemetry(
+    emit_hover_telemetry_on_commit(
         HoverTelemetryEvent.PUBLICATION_SYNC,
         outcome,
         dimensions={
@@ -591,13 +591,13 @@ def sync_space_attachment(
         "replayed_count_bucket": count_bucket(replayed),
         "retryable": False,
     }
-    emit_hover_telemetry(
+    emit_hover_telemetry_on_commit(
         HoverTelemetryEvent.PUBLICATION_SYNC,
         HoverTelemetryOutcome.SUCCESS,
         dimensions=dimensions,
     )
     if replayed:
-        emit_hover_telemetry(
+        emit_hover_telemetry_on_commit(
             HoverTelemetryEvent.PUBLICATION_SYNC,
             HoverTelemetryOutcome.DUPLICATE_REPLAYED,
             dimensions=dimensions,

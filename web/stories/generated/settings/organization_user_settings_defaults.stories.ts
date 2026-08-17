@@ -3,16 +3,20 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/organization_user_settings_defaults.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "is_admin": true
+    is_admin: true,
 };
 
 const meta = {
     title: "Catalogue/Settings/Organization User Settings Defaults",
-    render: () => render_template_story("settings/organization_user_settings_defaults.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "settings/organization_user_settings_defaults.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

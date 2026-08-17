@@ -1025,6 +1025,7 @@ class GroupSettingUpdateData(GroupSettingUpdateDataCore):
     can_create_groups: int | UserGroupMembersDict | None = None
     can_create_public_channel_group: int | UserGroupMembersDict | None = None
     can_create_private_channel_group: int | UserGroupMembersDict | None = None
+    can_create_spaces_group: int | UserGroupMembersDict | None = None
     can_create_web_public_channel_group: int | UserGroupMembersDict | None = None
     can_create_write_only_bots_group: int | UserGroupMembersDict | None = None
     can_delete_any_message_group: int | UserGroupMembersDict | None = None

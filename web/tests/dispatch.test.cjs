@@ -93,7 +93,6 @@ const settings_realm_user_settings_defaults = mock_esm(
 );
 const settings_realm_domains = mock_esm("../src/settings_realm_domains");
 const settings_streams = mock_esm("../src/settings_streams");
-const sidebar_ui = mock_esm("../src/sidebar_ui");
 const stream_data = mock_esm("../src/stream_data");
 const stream_list = mock_esm("../src/stream_list", {
     update_collapsed_state_on_show_channel_folders_change: noop,
@@ -167,7 +166,6 @@ const hover_spaces = zrequire("hover_spaces");
 const message_store = zrequire("message_store");
 const people = zrequire("people");
 const pm_conversations = zrequire("pm_conversations");
-const presence = zrequire("presence");
 const user_status = zrequire("user_status");
 const onboarding_steps = zrequire("onboarding_steps");
 const user_groups = zrequire("user_groups");
@@ -685,7 +683,6 @@ run_test("realm settings", ({override}) => {
     override(settings_bots, "update_bot_permissions_ui", noop);
     override(settings_emoji, "update_custom_emoji_ui", noop);
     override(settings_invites, "update_invite_user_panel", noop);
-    override(sidebar_ui, "update_invite_user_option", noop);
     override(gear_menu, "rerender", noop);
     override(narrow_title, "redraw_title", noop);
     override(navbar_alerts, "toggle_organization_profile_incomplete_banner", noop);

@@ -116,7 +116,9 @@ class HoverModulesTest(ZulipTestCase):
         self.assertEqual(marketing["requirements"][0]["maximum_count"], 1)
         self.assertNotIn("runtime_key", marketing)
         self.assertNotIn("prompt_key", marketing)
-        signal_monitor = next(item for item in modules if item["definition_key"] == "signal_monitor")
+        signal_monitor = next(
+            item for item in modules if item["definition_key"] == "signal_monitor"
+        )
         self.assertEqual(signal_monitor["supported_triggers"], ["manual", "new_source", "schedule"])
 
         self.version.destination_topic = "Changed"
@@ -169,6 +171,16 @@ class HoverModulesTest(ZulipTestCase):
             ),
         )
         self.assertEqual(conflict.status_code, 409)
+
+        disabled = self.assert_json_success(
+            self.client_post(f"/json/hover/module-installations/{installation.id}/disable")
+        )
+        self.assertTrue(disabled["changed"])
+        self.assertEqual(disabled["installation"]["state"], ModuleInstallation.State.DISABLED)
+        replayed_disable = self.assert_json_success(
+            self.client_post(f"/json/hover/module-installations/{installation.id}/disable")
+        )
+        self.assertFalse(replayed_disable["changed"])
 
     def test_initial_state_and_module_installation_event_converge(self) -> None:
         state = fetch_initial_state_data(

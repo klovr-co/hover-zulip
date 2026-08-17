@@ -3,18 +3,17 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/admin_human_form.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "user_id": 7,
-    "full_name": "Full name",
-    "max_user_name_length": "Max user name length",
-    "email": "ava@example.com",
-    "hide_deactivate_button": "Hide deactivate button",
-    "user_is_only_organization_owner": "User is only organization owner",
-    "is_active": true,
-    "is_deleted": true
+    user_id: 7,
+    full_name: "Full name",
+    max_user_name_length: "Max user name length",
+    email: "ava@example.com",
+    hide_deactivate_button: "Hide deactivate button",
+    user_is_only_organization_owner: "User is only organization owner",
+    is_active: true,
+    is_deleted: true,
 };
 
 const meta = {

@@ -3,14 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/modal_banner/topic_already_exists_warning_banner.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Modal Banner/Topic Already Exists Warning Banner",
-    render: () => render_template_story("modal_banner/topic_already_exists_warning_banner.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "modal_banner/topic_already_exists_warning_banner.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

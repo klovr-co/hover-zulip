@@ -3,18 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/compose_banner/long_paste_options.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "banner_type": "Banner type",
-    "classname": "Classname",
-    "show_paste_button": true
+    banner_type: "Banner type",
+    classname: "Classname",
+    show_paste_button: true,
 };
 
 const meta = {
     title: "Catalogue/Compose Banner/Long Paste Options",
-    render: () => render_template_story("compose_banner/long_paste_options.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("compose_banner/long_paste_options.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

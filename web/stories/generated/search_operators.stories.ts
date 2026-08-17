@@ -3,11 +3,10 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/search_operators.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "can_access_all_public_channels": true
+    can_access_all_public_channels: true,
 };
 
 const meta = {

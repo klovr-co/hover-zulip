@@ -3,14 +3,14 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/confirm_dialog/confirm_resend_invite.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Resend Invite",
-    render: () => render_template_story("confirm_dialog/confirm_resend_invite.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("confirm_dialog/confirm_resend_invite.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

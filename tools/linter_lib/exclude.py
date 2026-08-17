@@ -2,6 +2,8 @@
 EXCLUDED_FILES = [
     # Third-party code that doesn't match our style
     "web/third",
+    # Static design references are not production application assets.
+    "designs/stitch",
 ]
 
 PUPPET_CHECK_RULES_TO_EXCLUDE = [

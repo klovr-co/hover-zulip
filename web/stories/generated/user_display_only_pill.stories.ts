@@ -3,21 +3,20 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/user_display_only_pill.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "is_inline": true,
-    "user_id": 7,
-    "img_src": "Img src",
-    "strikethrough": "Strikethrough",
-    "display_value": "Display value",
-    "is_current_user": true,
-    "should_add_guest_user_indicator": true,
-    "deactivated": "Deactivated",
-    "has_status": true,
-    "is_bot": true,
-    "is_active": true
+    is_inline: true,
+    user_id: 7,
+    img_src: "Img src",
+    strikethrough: "Strikethrough",
+    display_value: "Display value",
+    is_current_user: true,
+    should_add_guest_user_indicator: true,
+    deactivated: "Deactivated",
+    has_status: true,
+    is_bot: true,
+    is_active: true,
 };
 
 const meta = {

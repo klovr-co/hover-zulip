@@ -2,6 +2,7 @@
 
 const assert = require("node:assert/strict");
 
+const {make_realm} = require("./lib/example_realm.cjs");
 const {mock_esm, set_global, zrequire} = require("./lib/namespace.cjs");
 const {run_test} = require("./lib/test.cjs");
 const {$} = require("./lib/zjquery.cjs");
@@ -14,6 +15,9 @@ const {Filter} = zrequire("../src/filter");
 const left_sidebar_navigation_area = zrequire("left_sidebar_navigation_area");
 const scheduled_messages = zrequire("scheduled_messages");
 const message_reminder = zrequire("message_reminder");
+const state_data = zrequire("state_data");
+
+state_data.set_realm(make_realm());
 
 run_test("narrowing", ({override_rewire}) => {
     override_rewire(

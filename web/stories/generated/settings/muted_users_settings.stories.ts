@@ -3,14 +3,14 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/muted_users_settings.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Settings/Muted Users Settings",
-    render: () => render_template_story("settings/muted_users_settings.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/muted_users_settings.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

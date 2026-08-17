@@ -14,8 +14,7 @@ const meta = {
     args: {
         corporate_enabled: true,
     },
-    render: (args) =>
-        `<div style="padding: 24px; width: max-content">${render_help_menu(args)}</div>`,
+    render: (args) => `<div class="storybook-popover-menu">${render_help_menu(args)}</div>`,
 } satisfies Meta<PopoverArgs>;
 
 export default meta;
@@ -25,7 +24,7 @@ export const HelpMenu: Story = {};
 
 export const MessageActions: Story = {
     render: () =>
-        `<div style="padding: 24px; width: max-content">${render_message_actions({
+        `<div class="storybook-popover-menu">${render_message_actions({
             conversation_time_url: "#narrow/near/42",
             editability_menu_item: "Edit message",
             message_id: 42,
@@ -45,7 +44,7 @@ export const MessageActions: Story = {
 
 export const PlaygroundLinks: Story = {
     render: () =>
-        `<div style="padding: 24px; width: max-content">${render_playground_links({
+        `<div class="storybook-popover-menu">${render_playground_links({
             playground_info: [
                 {name: "playground", playground_url: "#playground"},
                 {name: "documentation", playground_url: "#documentation"},

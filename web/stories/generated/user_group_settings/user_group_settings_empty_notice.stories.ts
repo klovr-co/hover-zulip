@@ -3,18 +3,22 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/user_group_settings/user_group_settings_empty_notice.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "empty_user_group_list_message": "Empty user group list message",
-    "show_view_all_groups_button": true,
-    "show_create_user_group_button": true
+    empty_user_group_list_message: "Empty user group list message",
+    show_view_all_groups_button: true,
+    show_create_user_group_button: true,
 };
 
 const meta = {
     title: "Catalogue/User Group Settings/User Group Settings Empty Notice",
-    render: () => render_template_story("user_group_settings/user_group_settings_empty_notice.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "user_group_settings/user_group_settings_empty_notice.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

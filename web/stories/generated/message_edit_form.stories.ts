@@ -3,13 +3,12 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/message_edit_form.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "message_id": 7,
-    "is_editable": true,
-    "content": "Content"
+    message_id: 7,
+    is_editable: true,
+    content: "Content",
 };
 
 const meta = {

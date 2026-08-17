@@ -3,21 +3,20 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/presence_rows.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "presence_rows": [
+    presence_rows: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+        },
+    ],
 };
 
 const meta = {

@@ -3,17 +3,17 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/stream_settings/subscriber_count.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "can_access_subscribers": true,
-    "subscriber_count": 3
+    can_access_subscribers: true,
+    subscriber_count: 3,
 };
 
 const meta = {
     title: "Catalogue/Stream Settings/Subscriber Count",
-    render: () => render_template_story("stream_settings/subscriber_count.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("stream_settings/subscriber_count.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;
