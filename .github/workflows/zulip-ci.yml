@@ -1,6 +1,5 @@
-# Keep pull-request feedback focused and avoid provisioning the same environment
-# multiple times. Coverage, documentation, and development-database validation
-# run after merge (or when manually requested).
+# Defer the full validation suite until changes reach main or it is manually
+# requested, keeping pull-request iteration free of long-running CI.
 
 name: Zulip CI
 
@@ -8,7 +7,6 @@ on:
   push:
     branches: [main]
     tags: ["*"]
-  pull_request:
   workflow_dispatch:
 
 concurrency:

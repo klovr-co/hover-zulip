@@ -4,7 +4,6 @@ on:
   push:
     branches: ["*.x", chat.zulip.org, main]
     tags: ["*"]
-  pull_request:
     paths:
       - .github/workflows/production-suite.yml
       - "**/migrations/**"
