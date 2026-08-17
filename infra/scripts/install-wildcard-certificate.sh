@@ -53,6 +53,8 @@ printf 'dns_cloudflare_api_token = %s\n' "$CLOUDFLARE_CERTBOT_API_TOKEN" \
     | ssh "${ssh_options[@]}" "ubuntu@$instance_ip" \
         'sudo install -d -m 700 /etc/letsencrypt && sudo tee /etc/letsencrypt/cloudflare-dns.ini >/dev/null && sudo chmod 600 /etc/letsencrypt/cloudflare-dns.ini'
 
+# The local domain name is intentionally passed as the remote script's $1.
+# shellcheck disable=SC2029
 ssh "${ssh_options[@]}" "ubuntu@$instance_ip" "sudo bash -s -- '$domain_name'" <<'REMOTE_SCRIPT'
 set -euo pipefail
 domain_name="$1"

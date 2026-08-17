@@ -44,6 +44,8 @@ ssh_options=(
     -o CertificateFile="$work_dir/lightsail-key-cert.pub"
 )
 
+# The local subdomain is intentionally passed as the remote script's $1.
+# shellcheck disable=SC2029
 ssh "${ssh_options[@]}" "ubuntu@$instance_ip" "sudo bash -s -- '$new_subdomain'" <<'REMOTE_SCRIPT'
 set -euo pipefail
 new_subdomain="$1"
