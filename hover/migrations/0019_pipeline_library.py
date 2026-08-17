@@ -21,7 +21,7 @@ PREBUILT_MODULES = (
         "Conversation Digest",
         "zulip-icon-align-left",
         10,
-        ("manual", "schedule"),
+        ("manual", "new_source", "schedule"),
         10,
     ),
     (
@@ -32,7 +32,7 @@ PREBUILT_MODULES = (
         "Progress Tracker",
         "zulip-icon-trending-up",
         20,
-        ("manual", "schedule"),
+        ("manual", "new_source", "schedule"),
         10,
     ),
     (
@@ -43,7 +43,7 @@ PREBUILT_MODULES = (
         "Suggested Actions",
         "zulip-icon-sparkles",
         30,
-        ("manual", "schedule"),
+        ("manual", "new_source", "schedule"),
         10,
     ),
     (
@@ -54,7 +54,7 @@ PREBUILT_MODULES = (
         "Decisions",
         "zulip-icon-check-circle",
         40,
-        ("manual", "schedule"),
+        ("manual", "new_source", "schedule"),
         10,
     ),
     (
@@ -87,7 +87,7 @@ PREBUILT_MODULES = (
         "Signal Monitor",
         "zulip-icon-bell",
         70,
-        ("manual", "schedule"),
+        ("manual", "new_source", "schedule"),
         10,
     ),
 )

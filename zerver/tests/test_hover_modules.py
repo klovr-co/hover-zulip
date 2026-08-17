@@ -119,7 +119,7 @@ class HoverModulesTest(ZulipTestCase):
         signal_monitor = next(
             item for item in modules if item["definition_key"] == "signal_monitor"
         )
-        self.assertEqual(signal_monitor["supported_triggers"], ["manual", "schedule"])
+        self.assertEqual(signal_monitor["supported_triggers"], ["manual", "new_source", "schedule"])
 
         self.version.destination_topic = "Changed"
         with self.assertRaisesRegex(ValidationError, "immutable"):

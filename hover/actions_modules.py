@@ -46,7 +46,7 @@ PREBUILT_MODULES: tuple[dict[str, Any], ...] = (
         "topic": "Conversation Digest",
         "icon": "zulip-icon-align-left",
         "order": 10,
-        "triggers": ("manual", "schedule"),
+        "triggers": ("manual", "new_source", "schedule"),
         "maximum_count": 10,
     },
     {
@@ -57,7 +57,7 @@ PREBUILT_MODULES: tuple[dict[str, Any], ...] = (
         "topic": "Progress Tracker",
         "icon": "zulip-icon-trending-up",
         "order": 20,
-        "triggers": ("manual", "schedule"),
+        "triggers": ("manual", "new_source", "schedule"),
         "maximum_count": 10,
     },
     {
@@ -68,7 +68,7 @@ PREBUILT_MODULES: tuple[dict[str, Any], ...] = (
         "topic": "Suggested Actions",
         "icon": "zulip-icon-sparkles",
         "order": 30,
-        "triggers": ("manual", "schedule"),
+        "triggers": ("manual", "new_source", "schedule"),
         "maximum_count": 10,
     },
     {
@@ -79,7 +79,7 @@ PREBUILT_MODULES: tuple[dict[str, Any], ...] = (
         "topic": "Decisions",
         "icon": "zulip-icon-check-circle",
         "order": 40,
-        "triggers": ("manual", "schedule"),
+        "triggers": ("manual", "new_source", "schedule"),
         "maximum_count": 10,
     },
     {
@@ -112,7 +112,7 @@ PREBUILT_MODULES: tuple[dict[str, Any], ...] = (
         "topic": "Signal Monitor",
         "icon": "zulip-icon-bell",
         "order": 70,
-        "triggers": ("manual", "schedule"),
+        "triggers": ("manual", "new_source", "schedule"),
         "maximum_count": 10,
     },
 )
