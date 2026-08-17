@@ -3,16 +3,16 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/buddy_list/view_all_subscribers.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "stream_edit_hash": "Stream edit hash"
+    stream_edit_hash: "Stream edit hash",
 };
 
 const meta = {
     title: "Catalogue/Buddy List/View All Subscribers",
-    render: () => render_template_story("buddy_list/view_all_subscribers.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("buddy_list/view_all_subscribers.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

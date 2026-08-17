@@ -41,7 +41,7 @@ body {
 .storybook-conversation-screen {
     border: 1px solid hsl(210deg 15% 84%);
     border-radius: 8px;
-    box-shadow: 0 8px 28px rgb(35 53 64 / 12%);
+    box-shadow: 0 8px 28px hsl(204deg 29% 19% / 12%);
     color: hsl(210deg 20% 20%);
     min-width: 980px;
     overflow: hidden;
@@ -50,63 +50,76 @@ body {
 .storybook-conversation-screen .header {
     position: relative;
 }
+
 .storybook-conversation-screen .header-main {
     min-height: 52px;
 }
+
 .storybook-conversation-body {
-    background: white;
+    background: hsl(0deg 0% 100%);
     display: flex;
     min-height: 660px;
 }
+
 .storybook-conversation-body .left-sidebar {
     display: block;
     flex: 0 0 248px;
     position: relative;
 }
+
 .storybook-conversation-body .left-sidebar-navigation-area,
 .storybook-conversation-body #left_sidebar_scroll_container {
     height: auto;
 }
+
 .storybook-conversation-body .stream-list,
 .storybook-conversation-body .user-list {
     list-style: none;
     margin: 0;
     padding: 0;
 }
+
 .storybook-conversation-body .stream-list-subscription {
     align-items: center;
     display: flex;
     justify-content: space-between;
     padding: 5px 12px 5px 22px;
 }
+
 .storybook-conversation-body .stream-name {
     color: inherit;
     text-decoration: none;
 }
+
 .storybook-message-pane {
     border-left: 1px solid hsl(210deg 15% 88%);
     flex: 1 1 auto;
     min-width: 450px;
     position: relative;
 }
+
 .storybook-message-pane .message-view-header .message_header {
     margin: 0;
 }
+
 .storybook-message-pane .message-list {
     padding: 8px 18px 64px;
 }
+
 .storybook-message-pane .message_row {
     min-height: 84px;
 }
+
 .storybook-message-pane .message-avatar img {
     border-radius: 7px;
     height: 36px;
     object-fit: cover;
     width: 36px;
 }
+
 .storybook-compose {
     align-items: center;
-    background: white;
+    background: hsl(0deg 0% 100%);
     border: 1px solid hsl(210deg 20% 78%);
     border-radius: 6px;
     bottom: 14px;
@@ -117,18 +130,22 @@ body {
     position: absolute;
     right: 18px;
 }
+
 .storybook-compose-placeholder {
     color: hsl(210deg 10% 48%);
     flex: 1;
 }
+
 .storybook-compose kbd {
     color: hsl(210deg 10% 48%);
     font-size: 11px;
 }
+
 .storybook-right-sidebar {
     border-left: 1px solid hsl(210deg 15% 88%);
     flex: 0 0 210px;
 }
+
 .storybook-right-sidebar .right-sidebar-header {
     align-items: baseline;
     border-bottom: 1px solid hsl(210deg 15% 88%);
@@ -136,7 +153,13 @@ body {
     justify-content: space-between;
     padding: 15px 12px;
 }
+
 .storybook-right-sidebar .right-sidebar-header span {
     color: hsl(210deg 12% 48%);
     font-size: 12px;
+}
+
+.storybook-popover-menu {
+    padding: 24px;
+    width: max-content;
 }

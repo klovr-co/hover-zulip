@@ -3,13 +3,12 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/inbox_view/inbox_view.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "unknown_channel": "Unknown channel",
-    "show_channel_folder_toggle": true,
-    "normal_view": "Normal view"
+    unknown_channel: "Unknown channel",
+    show_channel_folder_toggle: true,
+    normal_view: "Normal view",
 };
 
 const meta = {

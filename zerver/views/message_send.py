@@ -5,12 +5,11 @@ from typing import Annotated, Literal, cast
 
 from django.core import validators
 from django.core.exceptions import ValidationError
-from django.db import transaction
 from django.http import HttpRequest, HttpResponse
 from django.utils.translation import gettext as _
 from pydantic import Json
 
-from hover.actions_responses import create_response, prepare_response
+from hover.actions_responses import create_response, prepare_response, validate_response_destination
 from zerver.actions.message_send import (
     check_send_message,
     compute_irc_user_fullname,
@@ -104,7 +103,6 @@ def same_realm_jabber_user(user_profile: UserProfile, email: str) -> bool:
     return RealmDomain.objects.filter(realm=user_profile.realm, domain=domain).exists()
 
 
-@transaction.atomic(durable=True)
 @typed_endpoint
 def send_message_backend(
     request: HttpRequest,
@@ -239,6 +237,12 @@ def send_message_backend(
             response_type=hover_response_type,
             review_field=hover_review_field,
             review_value=hover_review_value,
+        )
+        validate_response_destination(
+            prepared_response,
+            recipient_type_name=recipient_type_name,
+            message_to=message_to,
+            topic_name=topic_name,
         )
 
     data: dict[str, object] = {}

@@ -3,18 +3,18 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/team/total_contributor_count.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "contributor_count": 3,
-    "hundred_plus_contributor_count": 3,
-    "twenty_plus_contributor_count": 3
+    contributor_count: 3,
+    hundred_plus_contributor_count: 3,
+    twenty_plus_contributor_count: 3,
 };
 
 const meta = {
     title: "Catalogue/Team/Total Contributor Count",
-    render: () => render_template_story("team/total_contributor_count.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("team/total_contributor_count.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

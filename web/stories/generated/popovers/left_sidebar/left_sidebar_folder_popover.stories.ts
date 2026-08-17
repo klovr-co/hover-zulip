@@ -3,16 +3,20 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../../templates/popovers/left_sidebar/left_sidebar_folder_popover.hbs";
-
 import {render_template_story} from "../../../template_story_utils.ts";
 
 const fixture = {
-    "can_manage_folder": true
+    can_manage_folder: true,
 };
 
 const meta = {
     title: "Catalogue/Popovers/Left Sidebar/Left Sidebar Folder Popover",
-    render: () => render_template_story("popovers/left_sidebar/left_sidebar_folder_popover.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "popovers/left_sidebar/left_sidebar_folder_popover.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

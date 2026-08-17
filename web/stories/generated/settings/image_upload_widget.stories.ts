@@ -3,21 +3,21 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/image_upload_widget.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "widget": "Widget",
-    "disabled_text": true,
-    "is_editable_by_current_user": true,
-    "delete_text": "Delete text",
-    "upload_text": "Upload text",
-    "image": "Image"
+    widget: "Widget",
+    disabled_text: true,
+    is_editable_by_current_user: true,
+    delete_text: "Delete text",
+    upload_text: "Upload text",
+    image: "Image",
 };
 
 const meta = {
     title: "Catalogue/Settings/Image Upload Widget",
-    render: () => render_template_story("settings/image_upload_widget.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/image_upload_widget.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

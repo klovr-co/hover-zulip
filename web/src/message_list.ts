@@ -689,7 +689,6 @@ export class MessageList {
         // But in any case, we need to rerender the list for user muting,
         // to make sure only the right messages are hidden.
         this.rerender();
-
     }
 
     all_messages(): Message[] {

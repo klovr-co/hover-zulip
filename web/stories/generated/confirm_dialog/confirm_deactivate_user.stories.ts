@@ -3,41 +3,45 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/confirm_dialog/confirm_deactivate_user.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "number_of_invites_by_user": "Number of invites by user",
-    "bots_owned_by_user": [
+    number_of_invites_by_user: "Number of invites by user",
+    bots_owned_by_user: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "full_name": "Full name"
-        }
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            full_name: "Full name",
+        },
     ],
-    "user_deactivation_actions": [
+    user_deactivation_actions: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "key": "Key",
-            "value": "Value"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            key: "Key",
+            value: "Value",
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Confirm Dialog/Confirm Deactivate User",
-    render: () => render_template_story("confirm_dialog/confirm_deactivate_user.hbs", render_template, fixture),
+    render: () =>
+        render_template_story(
+            "confirm_dialog/confirm_deactivate_user.hbs",
+            render_template,
+            fixture,
+        ),
 } satisfies Meta;
 
 export default meta;

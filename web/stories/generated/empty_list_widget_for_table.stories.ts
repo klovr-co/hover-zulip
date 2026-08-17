@@ -3,17 +3,17 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/empty_list_widget_for_table.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "column_count": 3,
-    "empty_list_message": "Empty list message"
+    column_count: 3,
+    empty_list_message: "Empty list message",
 };
 
 const meta = {
     title: "Catalogue/Empty List Widget For Table",
-    render: () => render_template_story("empty_list_widget_for_table.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("empty_list_widget_for_table.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

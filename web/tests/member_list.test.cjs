@@ -25,9 +25,6 @@ mock_esm("../src/list_widget", {
         create_options = options;
         return list_widget_result;
     },
-    default_get_item(item) {
-        return item;
-    },
     generic_sort_functions() {
         return {full_name_alphabetic: "alphabetic-sort"};
     },
@@ -96,6 +93,8 @@ run_test("create reusable member list", ({mock_template}) => {
     assert.equal(create_options.filter.$element, filter);
     assert.equal(create_options.filter.predicate(ada, "love"), true);
     assert.equal(create_options.filter.predicate(ada, "hopper"), false);
+    assert.equal(email_sort(), 0);
+    assert.equal(user_id_sort(), 0);
     assert.deepEqual(create_options.sort_fields, {
         email: email_sort,
         id: user_id_sort,

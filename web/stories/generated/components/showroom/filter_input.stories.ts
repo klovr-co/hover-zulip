@@ -3,14 +3,14 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../../templates/components/showroom/filter_input.hbs";
-
 import {render_template_story} from "../../../template_story_utils.ts";
 
 const fixture = {};
 
 const meta = {
     title: "Catalogue/Components/Showroom/Filter Input",
-    render: () => render_template_story("components/showroom/filter_input.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("components/showroom/filter_input.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

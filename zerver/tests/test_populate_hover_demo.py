@@ -1,4 +1,5 @@
 import datetime
+import io
 from collections import Counter
 
 from django.core.management import call_command
@@ -32,7 +33,13 @@ class PopulateHoverDemoTest(ZulipTestCase):
             call_command("populate_hover_demo", "--realm=zulip")
 
     def test_command_builds_native_aimto_space_idempotently(self) -> None:
-        call_command("populate_hover_demo", "--realm=zulip", "--viewer-email=hamlet@zulip.com")
+        command_output = io.StringIO()
+        call_command(
+            "populate_hover_demo",
+            "--realm=zulip",
+            "--viewer-email=hamlet@zulip.com",
+            stdout=command_output,
+        )
 
         realm = get_realm("zulip")
         stream = Stream.objects.select_related("folder", "recipient").get(
@@ -330,7 +337,12 @@ class PopulateHoverDemoTest(ZulipTestCase):
             len(DEMO_POSTS) + 2,
         )
 
-        call_command("populate_hover_demo", "--realm=zulip", "--viewer-email=hamlet@zulip.com")
+        call_command(
+            "populate_hover_demo",
+            "--realm=zulip",
+            "--viewer-email=hamlet@zulip.com",
+            stdout=command_output,
+        )
         self.assertEqual(
             Message.objects.filter(realm_id=realm.id, recipient=stream.recipient).count(),
             len(DEMO_POSTS) + 1,
@@ -361,6 +373,12 @@ class PopulateHoverDemoTest(ZulipTestCase):
             ),
             reminder_ids,
         )
+        summary = (
+            "AIMTO Events is ready with 18 native Hover posts, 5 live Sources, "
+            "6 enabled Modules, 7 For You items, 3 Saved items, and "
+            "3 Suggested Actions awaiting confirmation in zulip."
+        )
+        self.assertEqual(command_output.getvalue().splitlines(), [summary, summary])
 
     def test_command_rejects_unknown_viewer(self) -> None:
         with self.assertRaisesRegex(CommandError, "No user with email nobody@example.com"):

@@ -113,7 +113,8 @@ export function rerender(): void {
             );
         return;
     }
-    $list.html(accounts.map((account) => card_html(account)).join(""));
+    const rendered_account_cards_html = accounts.map((account) => card_html(account)).join("");
+    $list.html(rendered_account_cards_html);
 }
 
 function parse_selector_lines():

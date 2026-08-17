@@ -3,28 +3,28 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/settings/dropdown_options_widget.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "option_values": [
+    option_values: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "code": "Code",
-            "description": "Description"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            code: "Code",
+            description: "Description",
+        },
+    ],
 };
 
 const meta = {
     title: "Catalogue/Settings/Dropdown Options Widget",
-    render: () => render_template_story("settings/dropdown_options_widget.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("settings/dropdown_options_widget.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

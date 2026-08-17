@@ -378,7 +378,6 @@ export function mark_unsubscribed(sub: StreamSubscription): void {
         // This update would likely be better implemented by having it
         // disappear whenever no unread messages remain.
         unread_ui.hide_unread_banner();
-
     }
 
     // Unread messages in the now-unsubscribe stream need to be
@@ -414,7 +413,4 @@ export function process_subscriber_update(user_ids: number[], stream_ids: number
         stream_settings_ui.update_subscribers_ui(sub);
     }
     user_profile.update_user_profile_streams_list_for_users(user_ids);
-    const narrow_stream_id = narrow_state.stream_id();
-    if (narrow_stream_id && stream_ids.includes(narrow_stream_id)) {
-    }
 }

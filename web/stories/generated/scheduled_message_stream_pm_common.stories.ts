@@ -3,17 +3,17 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../templates/scheduled_message_stream_pm_common.hbs";
-
 import {render_template_story} from "../template_story_utils.ts";
 
 const fixture = {
-    "failed": "Failed",
-    "formatted_send_at_time": "10:45 AM"
+    failed: "Failed",
+    formatted_send_at_time: "10:45 AM",
 };
 
 const meta = {
     title: "Catalogue/Scheduled Message Stream Pm Common",
-    render: () => render_template_story("scheduled_message_stream_pm_common.hbs", render_template, fixture),
+    render: () =>
+        render_template_story("scheduled_message_stream_pm_common.hbs", render_template, fixture),
 } satisfies Meta;
 
 export default meta;

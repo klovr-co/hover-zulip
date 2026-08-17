@@ -3,25 +3,24 @@
 import type {Meta, StoryObj} from "@storybook/html";
 
 import render_template from "../../../templates/widgets/zform_choices.hbs";
-
 import {render_template_story} from "../../template_story_utils.ts";
 
 const fixture = {
-    "heading": "Heading",
-    "choices": [
+    heading: "Heading",
+    choices: [
         {
-            "custom_classes": "",
-            "disabled": false,
-            "icon": "check",
-            "intent": "primary",
-            "label": "Sample action",
-            "name": "Sample name",
-            "variant": "primary",
-            "idx": "Idx",
-            "short_name": "Short name",
-            "long_name": "Long name"
-        }
-    ]
+            custom_classes: "",
+            disabled: false,
+            icon: "check",
+            intent: "primary",
+            label: "Sample action",
+            name: "Sample name",
+            variant: "primary",
+            idx: "Idx",
+            short_name: "Short name",
+            long_name: "Long name",
+        },
+    ],
 };
 
 const meta = {
