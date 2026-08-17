@@ -21,6 +21,11 @@ variable "domain_name" {
   type        = string
 }
 
+variable "cloudflare_zone_id" {
+  description = "Cloudflare zone ID that contains domain_name. Required to manage the primary and wildcard Zulip DNS records."
+  type        = string
+}
+
 variable "administrator_email" {
   description = "Operations contact used by the Zulip installer and certificate renewal."
   type        = string
