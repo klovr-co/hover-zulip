@@ -73,3 +73,22 @@ run_test("replace and validate API response", () => {
         }),
     );
 });
+
+run_test("accounts and grants have deterministic ordering", () => {
+    const other_account = {...account, id: 8, provider_name: "Email", display_name: "Inbox"};
+    const same_provider_account = {...account, id: 9, display_name: "Archive"};
+    const other_grant = {...grant, id: 13, user_id: 10};
+    hover_connected_accounts.initialize({
+        hover_connected_accounts: [account, other_account, same_provider_account],
+        hover_connected_account_grants: [grant, other_grant],
+    });
+
+    assert.deepEqual(
+        hover_connected_accounts.get_accounts().map(({id}) => id),
+        [other_account.id, same_provider_account.id, account.id],
+    );
+    assert.deepEqual(
+        hover_connected_accounts.get_grants_for_account(account.id).map(({id}) => id),
+        [other_grant.id, grant.id],
+    );
+});

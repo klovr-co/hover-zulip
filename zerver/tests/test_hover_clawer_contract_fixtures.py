@@ -80,6 +80,7 @@ class HoverClawerContractFixtureTest(TestCase):
             {**modules["topic_analysis"]["output"], "sentiment": None},
             modules["negative_sentiment_output"],
         ]
+        # This parses a version-controlled test fixture, not untrusted input.
         parsed_action = ET.fromstring(f"<root>{suggested['complete']}</root>").find(
             ".//suggested_action"
         )

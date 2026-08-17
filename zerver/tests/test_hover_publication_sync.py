@@ -1,4 +1,6 @@
+from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
+from functools import wraps
 from typing import Any, cast
 from unittest.mock import patch
 from uuid import UUID, uuid4
@@ -51,6 +53,29 @@ from zerver.lib.test_classes import ZulipTestCase
 from zerver.lib.user_groups import get_system_user_group_by_name
 from zerver.models import Message, Subscription, UserMessage
 from zerver.models.groups import SystemGroups
+
+
+def capture_hover_telemetry(
+    test_method: Callable[["HoverPublicationSyncTest"], None],
+) -> Callable[["HoverPublicationSyncTest"], None]:
+    @wraps(test_method)
+    def wrapped(self: "HoverPublicationSyncTest") -> None:
+        with (
+            self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
+            test_method(self)
+        for line in telemetry.output:
+            self.assertRegex(
+                line,
+                (
+                    r"^INFO:zulip\.hover\.telemetry:Hover telemetry "
+                    r"event=[a-z_]+ outcome=[a-z_]+"
+                    r"(?: [a-z_]+=(?:[a-z0-9_]+|[0-9]+|true|false))*$"
+                ),
+            )
+
+    return wrapped
 
 
 class HoverPublicationSyncTest(ZulipTestCase):
@@ -335,6 +360,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
             "8be2243ab0e08f1c3919b77fa4e3d340469629c41a58a69c3d569aad3228a22f",
         )
 
+    @capture_hover_telemetry
     def test_all_six_outputs_materialize_once_and_replay_advances_cursor(self) -> None:
         publications = self.six_publications()
         self.set_page(cursor=None, next_cursor="cursor:one", publications=publications)
@@ -410,6 +436,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.attachment.refresh_from_db()
         self.assertEqual(self.attachment.publication_cursor, "cursor:two")
 
+    @capture_hover_telemetry
     def test_mixed_reordered_replay_and_lost_response_converge_once(self) -> None:
         first, second, third = self.six_publications()[:3]
         self.set_page(
@@ -446,6 +473,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 3)
         self.assertTrue(any("outcome=duplicate_replayed" in line for line in telemetry.output))
 
+    @capture_hover_telemetry
     def test_interrupted_pagination_retries_from_last_committed_cursor(self) -> None:
         first, second = self.six_publications()[:2]
         first_page = ClawerPublicationPage(
@@ -505,6 +533,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
             ["success", "error", "success"],
         )
 
+    @capture_hover_telemetry
     def test_retry_after_native_message_creation_rolls_back_then_converges(self) -> None:
         publication = self.six_publications()[0]
         self.set_page(
@@ -545,6 +574,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.assertEqual(GeneratedItem.objects.count(), 1)
         self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 1)
 
+    @capture_hover_telemetry
     def test_lineage_history_uses_event_time_when_transport_is_reordered(self) -> None:
         parent, child = self.six_publications()[:2]
         parent.lineage_key = "scenario-lineage"
@@ -581,6 +611,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
             [child_item.message_id, parent_item.message_id],
         )
 
+    @capture_hover_telemetry
     def test_attachment_failure_does_not_undo_another_attachment_success(self) -> None:
         publication = self.six_publications()[0]
         self.set_page(cursor=None, next_cursor="cursor:healthy", publications=[publication])
@@ -641,6 +672,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.assertEqual(GeneratedItem.objects.filter(attachment=self.attachment).count(), 1)
         self.assertEqual(GeneratedItem.objects.filter(attachment=second_attachment).count(), 0)
 
+    @capture_hover_telemetry
     def test_batch_failure_rolls_back_message_provenance_and_cursor(self) -> None:
         publications = self.six_publications()[:2]
         progress = publications[1]
@@ -672,6 +704,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.assertFalse(attempt.retryable)
         self.assertEqual(attempt.publication_count, 2)
 
+    @capture_hover_telemetry
     def test_authorized_evidence_resolution_uses_stored_refs_in_order(self) -> None:
         publication = self.six_publications()[0]
         self.set_page(
@@ -718,6 +751,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
         )
         self.assertEqual(self.adapter.evidence_calls[-1]["refs"], publication.evidence_refs)
 
+    @capture_hover_telemetry
     def test_evidence_resolution_rechecks_membership_and_classifies_failures(self) -> None:
         publication = self.six_publications()[0]
         self.set_page(cursor=None, next_cursor="cursor:evidence-errors", publications=[publication])
@@ -768,26 +802,25 @@ class HoverPublicationSyncTest(ZulipTestCase):
                 "hover.views_publications.get_clawer_sync",
                 return_value=RetryableEvidenceAdapter(),
             ),
-            self.assertLogs("django.request", level="ERROR") as request_logs,
         ):
             self.client.raise_request_exception = False
             try:
-                retrying = self.client_post(
-                    f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
-                )
+                with self.assertLogs("django.request", level="ERROR") as request_log:
+                    retrying = self.client_post(
+                        f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
+                    )
             finally:
                 self.client.raise_request_exception = True
+        self.assertEqual(
+            [record.getMessage() for record in request_log.records],
+            [
+                f"Gateway Timeout: /json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
+            ],
+        )
         retrying_payload = orjson.loads(retrying.content)
         self.assertEqual(retrying.status_code, 504)
         self.assertTrue(retrying_payload["retryable"])
         self.assertEqual(retrying_payload["error_code"], "clawer_timeout")
-        self.assert_length(request_logs.output, 1)
-        self.assertTrue(
-            request_logs.output[0].startswith(
-                "ERROR:django.request:Gateway Timeout: "
-                f"/json/hover/spaces/{self.space.id}/generated-items/{item.id}/evidence"
-            )
-        )
 
         self.account.approval_state = ConnectedAccount.ApprovalState.REVOKED
         self.account.save(update_fields=["approval_state", "date_updated"])
@@ -816,6 +849,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
         )
         self.assert_json_error(revoked, "Invalid Space ID")
 
+    @capture_hover_telemetry
     def test_invalid_upstream_contract_records_content_free_failure(self) -> None:
         class InvalidAdapter(InMemoryClawerSync):
             @override
@@ -838,6 +872,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.attachment.refresh_from_db()
         self.assertEqual(self.attachment.last_publication_sync_error, "invalid_upstream_contract")
 
+    @capture_hover_telemetry
     def test_changed_replay_is_rejected_by_immutable_envelope_hash(self) -> None:
         publication = self.six_publications()[0]
         self.set_page(cursor=None, next_cursor="cursor:accepted", publications=[publication])
@@ -869,6 +904,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
             SpaceAttachment.PublicationSyncState.BLOCKED,
         )
 
+    @capture_hover_telemetry
     def test_material_dispute_creates_one_native_targeted_request_and_resolves(self) -> None:
         raw = self.six_publications()[1].model_dump(mode="json")
         raw["schema_version"] = "1.1"
@@ -999,6 +1035,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
             "resolved",
         )
 
+    @capture_hover_telemetry
     def test_non_material_dispute_is_visible_without_request_or_notification(self) -> None:
         raw = self.six_publications()[3].model_dump(mode="json")
         raw["schema_version"] = "1.1"
@@ -1025,6 +1062,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.assertFalse(ReviewRequest.objects.exists())
         self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 1)
 
+    @capture_hover_telemetry
     def test_material_dispute_targets_verified_involved_space_member(self) -> None:
         participant_ref = f"person_{'d' * 32}"
         SourceParticipantBinding.objects.create(
@@ -1089,6 +1127,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
         with self.assertRaisesRegex(ValueError, "provider identifier"):
             ClawerPublication.model_validate(raw)
 
+    @capture_hover_telemetry
     def test_publication_identity_is_scoped_to_each_space_attachment(self) -> None:
         second_space = do_create_space(
             self.actor,
@@ -1159,13 +1198,30 @@ class HoverPublicationSyncTest(ZulipTestCase):
         )
         self.attachment.save(update_fields=["publication_sync_lease_expires_at"])
         self.set_page(cursor=None, next_cursor="cursor:recovered", publications=[])
-        result = sync_space_attachment(
-            attachment_id=self.attachment.id,
-            assistant=self.assistant,
-            clawer_sync=self.adapter,
+        with (
+            self.assertLogs("zulip.hover.telemetry", level="INFO") as telemetry,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
+            result = sync_space_attachment(
+                attachment_id=self.attachment.id,
+                assistant=self.assistant,
+                clawer_sync=self.adapter,
+            )
+        self.assertEqual(
+            telemetry.output,
+            [
+                (
+                    "INFO:zulip.hover.telemetry:Hover telemetry event=publication_sync "
+                    f"outcome=success attachment_id={self.attachment.id} "
+                    "created_count_bucket=zero lag_bucket=unknown "
+                    "publication_count_bucket=zero "
+                    f"realm_id={self.realm.id} replayed_count_bucket=zero retryable=false"
+                )
+            ],
         )
         self.assertEqual(result.next_cursor, "cursor:recovered")
 
+    @capture_hover_telemetry
     def test_retryable_transport_failure_enters_exponential_backoff(self) -> None:
         class RetryableAdapter(InMemoryClawerSync):
             @override
@@ -1208,6 +1264,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
             )
         self.assertEqual(self.adapter.sync_calls, [])
 
+    @capture_hover_telemetry
     def test_attachment_lifecycle_is_rechecked_after_fetch(self) -> None:
         publication = self.six_publications()[0]
 
@@ -1233,6 +1290,7 @@ class HoverPublicationSyncTest(ZulipTestCase):
         self.assertEqual(GeneratedItem.objects.count(), 0)
         self.assertEqual(Message.objects.filter(realm=self.realm, sender=self.assistant).count(), 0)
 
+    @capture_hover_telemetry
     def test_connected_account_approval_is_rechecked_after_fetch(self) -> None:
         publication = self.six_publications()[0]
 

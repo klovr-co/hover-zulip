@@ -2,7 +2,7 @@
 
 const assert = require("node:assert/strict");
 
-const {mock_esm, zrequire} = require("./lib/namespace.cjs");
+const {clock, mock_esm, zrequire} = require("./lib/namespace.cjs");
 const {run_test} = require("./lib/test.cjs");
 const {$} = require("./lib/zjquery.cjs");
 
@@ -70,7 +70,27 @@ function generated_item() {
     };
 }
 
+function awareness_item() {
+    return {
+        message_id: 42,
+        generated_item_id: 7,
+        space_id: 3,
+        space_name: "AIMTO Events",
+        stream_id: 4,
+        topic: "Project updates",
+        rendered_content: "<p>Current plan</p>",
+        sender_id: 9,
+        sender_name: "Hover",
+        timestamp: "2026-08-11T09:02:00+00:00",
+        is_unread: true,
+        rank: 780,
+        reasons: ["mention", "important"],
+        hover_generated_item: generated_item(),
+    };
+}
+
 run_test("For You loads ranked canonical items with accessible actions", ({override}) => {
+    hover_awareness_view.test.reset();
     let request;
     let inbox_hidden = false;
     let recent_hidden = false;
@@ -93,24 +113,7 @@ run_test("For You loads ranked canonical items with accessible actions", ({overr
     assert.deepEqual(request.data, {surface: '"for_you"'});
     request.success({
         surface: "for_you",
-        items: [
-            {
-                message_id: 42,
-                generated_item_id: 7,
-                space_id: 3,
-                space_name: "AIMTO Events",
-                stream_id: 4,
-                topic: "Project updates",
-                rendered_content: "<p>Current plan</p>",
-                sender_id: 9,
-                sender_name: "Hover",
-                timestamp: "2026-08-11T09:02:00+00:00",
-                is_unread: true,
-                rank: 780,
-                reasons: ["mention", "important"],
-                hover_generated_item: generated_item(),
-            },
-        ],
+        items: [awareness_item()],
     });
 
     const html = $("#hover-awareness-view").html();
@@ -128,6 +131,7 @@ run_test("For You loads ranked canonical items with accessible actions", ({overr
 });
 
 run_test("Team Pulse exposes an empty state and retryable loading error", ({override}) => {
+    hover_awareness_view.test.reset();
     const requests = [];
     override(inbox_ui, "hide", () => {});
     override(recent_view_ui, "hide", () => {});
@@ -146,4 +150,107 @@ run_test("Team Pulse exposes an empty state and retryable loading error", ({over
     const html = $("#hover-awareness-view").html();
     assert.match(html, /Live awareness could not be loaded/);
     assert.match(html, /id="hover-awareness-retry"/);
+});
+
+run_test("renders review fallbacks and suppresses unknown reasons", ({override}) => {
+    hover_awareness_view.test.reset();
+    let request;
+    override(inbox_ui, "hide", () => {});
+    override(recent_view_ui, "hide", () => {});
+    override(channel, "get", (options) => {
+        request = options;
+        return {abort() {}};
+    });
+
+    hover_awareness_view.show("for_you");
+    const without_review = awareness_item();
+    without_review.message_id = 43;
+    without_review.hover_generated_item.revisions = [];
+    without_review.hover_generated_item.lineage.history = [];
+    without_review.hover_generated_item.lineage.history_count = 1;
+    without_review.reasons = ["unknown_reason"];
+
+    const reviewed_without_summary = awareness_item();
+    reviewed_without_summary.message_id = 44;
+    reviewed_without_summary.is_unread = false;
+    reviewed_without_summary.reasons = ["unknown_reason"];
+    reviewed_without_summary.hover_generated_item.reviewed_payload = {};
+
+    request.success({
+        surface: "for_you",
+        items: [without_review, reviewed_without_summary],
+    });
+
+    const html = $("#hover-awareness-view").html();
+    assert.doesNotMatch(html, /Why this is here/);
+    assert.match(html, /Updated through Review/);
+    assert.match(html, /near\/43/);
+});
+
+run_test("ignores stale, mismatched, and aborted responses", ({override}) => {
+    hover_awareness_view.test.reset();
+    const requests = [];
+    let abort_count = 0;
+    override(inbox_ui, "hide", () => {});
+    override(recent_view_ui, "hide", () => {});
+    override(channel, "get", (options) => {
+        requests.push(options);
+        return {
+            abort() {
+                abort_count += 1;
+            },
+        };
+    });
+
+    hover_awareness_view.show("for_you");
+    hover_awareness_view.show("team_pulse");
+    assert.equal(abort_count, 1);
+
+    requests[0].success({surface: "for_you", items: [awareness_item()]});
+    requests[0].error({}, "error");
+    requests[1].success({surface: "for_you", items: [awareness_item()]});
+    assert.doesNotMatch($("#hover-awareness-view").html(), /Current plan/);
+
+    requests[1].error({}, "abort");
+    requests[1].success({surface: "team_pulse", items: []});
+    assert.match($("#hover-awareness-view").html(), /No important team developments yet/);
+
+    const request_count = requests.length;
+    hover_awareness_view.show("team_pulse");
+    assert.equal(requests.length, request_count);
+
+    hover_awareness_view.hide();
+    requests[1].success({surface: "team_pulse", items: [awareness_item()]});
+    hover_awareness_view.hide();
+    assert.equal($("#hover-awareness-view").html(), "");
+});
+
+run_test("retries and refreshes only while visible", ({override}) => {
+    hover_awareness_view.test.reset();
+    const requests = [];
+    override(inbox_ui, "hide", () => {});
+    override(recent_view_ui, "hide", () => {});
+    override(channel, "get", (options) => {
+        requests.push(options);
+        return {abort() {}};
+    });
+
+    hover_awareness_view.initialize();
+    hover_awareness_view.test.render();
+    $("body").get_on_handler("click", "#hover-awareness-retry")();
+    assert.equal(requests.length, 0);
+
+    hover_awareness_view.show("for_you");
+    hover_awareness_view.handle_realtime_change();
+    hover_awareness_view.handle_realtime_change();
+    clock.tick(100);
+    assert.equal(requests.length, 2);
+
+    $("body").get_on_handler("click", "#hover-awareness-retry")();
+    assert.equal(requests.length, 3);
+
+    hover_awareness_view.hide();
+    hover_awareness_view.handle_realtime_change();
+    clock.tick(100);
+    assert.equal(requests.length, 3);
 });

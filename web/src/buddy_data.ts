@@ -39,16 +39,6 @@ export function rewire_max_channel_size_to_show_all_subscribers(
     max_channel_size_to_show_all_subscribers = value;
 }
 
-let is_searching_users = false;
-
-export function get_is_searching_users(): boolean {
-    return is_searching_users;
-}
-
-export function set_is_searching_users(val: boolean): void {
-    is_searching_users = val;
-}
-
 export function get_user_circle_class(user_id: number, use_deactivated_circle = false): string {
     if (use_deactivated_circle) {
         return "user-circle-deactivated";
@@ -67,8 +57,8 @@ export function get_user_circle_class(user_id: number, use_deactivated_circle = 
 }
 
 export function level(user_id: number): number {
-    // Put current user at the top, unless we're in a user search view.
-    if (people.is_my_user_id(user_id) && !is_searching_users) {
+    // Put the current user at the top.
+    if (people.is_my_user_id(user_id)) {
         return 0;
     }
 
@@ -84,7 +74,7 @@ export function level(user_id: number): number {
     }
 }
 
-export let user_matches_narrow_using_loaded_data = (
+export const user_matches_narrow_using_loaded_data = (
     user_id: number,
     pm_ids: Set<number>,
     stream_id: number | undefined,
@@ -101,12 +91,6 @@ export let user_matches_narrow_using_loaded_data = (
     }
     return false;
 };
-
-export function rewire_user_matches_narrow_using_loaded_data(
-    value: typeof user_matches_narrow_using_loaded_data,
-): void {
-    user_matches_narrow_using_loaded_data = value;
-}
 
 export function compare_function(
     a: number,

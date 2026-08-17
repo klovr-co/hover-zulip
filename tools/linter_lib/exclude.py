@@ -1,5 +1,7 @@
 # Exclude some directories and files from lint checking
 EXCLUDED_FILES = [
+    # Standalone design prototypes intentionally use CDN dependencies and inline styles.
+    "designs/stitch/cofounder-inspired-web-design",
     # Third-party code that doesn't match our style
     "web/third",
     # Static design references are not production application assets.

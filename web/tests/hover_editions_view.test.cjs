@@ -3,6 +3,7 @@
 const assert = require("node:assert/strict");
 
 const {clock, mock_esm, zrequire} = require("./lib/namespace.cjs");
+const {make_stub} = require("./lib/stub.cjs");
 const {run_test} = require("./lib/test.cjs");
 const {$} = require("./lib/zjquery.cjs");
 
@@ -336,4 +337,92 @@ run_test("shows cached degradation and reloads when confirmed access changes", (
     hover_editions_view.handle_access_change();
     assert.notEqual(request, previous_request);
     assert.equal(request.url, "/json/hover/personal-editions");
+});
+
+run_test("selects the available edition when Morning is unavailable", () => {
+    hover_editions_view.test.reset();
+    hover_editions_view.initialize();
+    hover_editions_view.show();
+    const response = edition_response();
+    response.editions.morning = null;
+    request.success(response);
+
+    const html = $("#hover-editions-view").html();
+    assert.match(opening_tab_tag(html, "end_of_day"), /aria-selected="true"/);
+    assert.match(html, /Your day in motion/);
+});
+
+run_test("ignores callbacks from stale and aborted requests", () => {
+    hover_editions_view.test.reset();
+    hover_editions_view.initialize();
+    hover_editions_view.show();
+    const stale_request = request;
+
+    hover_editions_view.hide();
+    assert.equal(stale_request.aborted, true);
+    stale_request.success(edition_response());
+    stale_request.error({}, "error");
+    assert.equal($("#hover-editions-view").visible(), false);
+    assert.doesNotMatch($("#hover-editions-view").html(), /A good place to start/);
+
+    hover_editions_view.show();
+    const current_request = request;
+    assert.notEqual(current_request, stale_request);
+    current_request.error({}, "abort");
+    assert.doesNotMatch($("#hover-editions-view").html(), /could not be loaded/);
+});
+
+run_test("reuses loaded data and defers hidden access refresh", () => {
+    hover_editions_view.test.reset();
+    hover_editions_view.initialize();
+    hover_editions_view.show();
+    request.success(edition_response());
+    const loaded_request = request;
+
+    hover_editions_view.hide();
+    hover_editions_view.hide();
+    hover_editions_view.show();
+    assert.equal(request, loaded_request);
+    assert.match($("#hover-editions-view").html(), /A good place to start/);
+
+    hover_editions_view.hide();
+    hover_editions_view.handle_access_change();
+    assert.equal(request, loaded_request);
+    hover_editions_view.show();
+    assert.notEqual(request, loaded_request);
+});
+
+run_test("ignores invalid controls and supports button carousel navigation", () => {
+    hover_editions_view.test.reset();
+    hover_editions_view.initialize();
+
+    $("body").get_on_handler("click", "#hover-edition-view-all")();
+    $("body").get_on_handler("click", "#hover-edition-next")();
+
+    const tab_handler = $("body").get_on_handler("click", ".hover-edition-tab");
+    const $invalid_tab = $(".invalid-edition-tab").attr("data-edition", "weekly");
+    tab_handler({currentTarget: $invalid_tab[0]});
+
+    const key_handler = $("body").get_on_handler("keydown", ".hover-edition-tab");
+    const prevent_default_stub = make_stub();
+    key_handler({
+        currentTarget: $invalid_tab[0],
+        key: "ArrowRight",
+        preventDefault: prevent_default_stub.f,
+    });
+    const $morning_tab = $(".unhandled-key-tab").attr("data-edition", "morning");
+    key_handler({
+        currentTarget: $morning_tab[0],
+        key: "PageDown",
+        preventDefault: prevent_default_stub.f,
+    });
+    assert.equal(prevent_default_stub.num_calls, 0);
+
+    hover_editions_view.show();
+    request.success(edition_response());
+    $("body").get_on_handler("click", "#hover-edition-focus-view")();
+    $("body").get_on_handler("click", "#hover-edition-next")();
+    assert.match($("#hover-editions-view").html(), /Item 2 of 2/);
+    $("body").get_on_handler("click", "#hover-edition-previous")();
+    assert.match($("#hover-editions-view").html(), /Item 1 of 2/);
 });

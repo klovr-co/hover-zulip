@@ -221,6 +221,15 @@ class HoverResponseTest(ZulipTestCase):
                 field="venue",
                 value='"Hall B"',
             )
+        self.assertEqual(
+            [record.getMessage() for record in telemetry.records],
+            [
+                (
+                    "Hover telemetry event=review outcome=success material=false "
+                    f"realm_id={self.realm.id} space_id={self.space.id} target_count_bucket=zero"
+                )
+            ],
+        )
         response_data = self.assert_json_success(result)
         self.assertEqual(
             telemetry.output,

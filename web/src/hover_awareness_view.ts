@@ -223,3 +223,18 @@ export function initialize(): void {
         load();
     });
 }
+
+export const test = {
+    render,
+    reset(): void {
+        request?.abort();
+        refresh_after_realtime_change.cancel();
+        current_surface = undefined;
+        request = undefined;
+        request_generation = 0;
+        status = "";
+        show_retry = false;
+        items = [];
+        hover_awareness_state.clear();
+    },
+};

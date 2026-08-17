@@ -40,3 +40,16 @@ run_test("Review action opens the native composer and preselects its field", ({o
     });
     assert.equal(selected_field, "status");
 });
+
+run_test("Review action ignores missing messages and field paths", () => {
+    hover_review_request.initialize();
+    const handler = $("#main_div").get_on_handler("click", ".hover-dispute-review-button");
+
+    const $missing_message = $("#missing-message")
+        .attr("data-hover-message-id", "404")
+        .attr("data-hover-field-path", "status");
+    handler({preventDefault() {}, currentTarget: $missing_message[0]});
+
+    const $missing_field = $("#missing-field").attr("data-hover-message-id", "42");
+    handler({preventDefault() {}, currentTarget: $missing_field[0]});
+});

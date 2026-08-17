@@ -539,6 +539,9 @@ exports.FakeJQuery = class extends RejectMissing {
         assert.ok(0 in this);
         return fake_element_state.get(this[0]).is_focused;
     }
+    first() {
+        return new exports.FakeJQuery([...this].slice(0, 1));
+    }
     last() {
         return new exports.FakeJQuery([...this].slice(-1));
     }

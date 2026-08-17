@@ -326,7 +326,7 @@ export function get_time_from_date_muted(date_muted: number | undefined): number
     return date_muted * 1000;
 }
 
-export let call_function_periodically = (callback: () => void, delay: number): void => {
+export const call_function_periodically = (callback: () => void, delay: number): void => {
     // We previously used setInterval for this purpose, but
     // empirically observed that after unsuspend, Chrome can end
     // up trying to "catch up" by doing dozens of these requests
@@ -349,10 +349,6 @@ export let call_function_periodically = (callback: () => void, delay: number): v
         callback();
     }, delay);
 };
-
-export function rewire_call_function_periodically(value: typeof call_function_periodically): void {
-    call_function_periodically = value;
-}
 
 export function get_string_diff(string1: string, string2: string): [number, number, number] {
     // This function specifies the single minimal diff between 2 strings. For
