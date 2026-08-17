@@ -119,6 +119,24 @@ run_test("validates and selects the browser-safe Pipeline Library projection", (
     assert.equal(pipeline_library.can_edit_draft(parsed.drafts[0], 10), false);
 });
 
+run_test("clears stale projections and orders equally recent drafts by name", () => {
+    pipeline_library.clear();
+    assert.deepEqual(pipeline_library.visible_definitions(), []);
+
+    const raw = response();
+    raw.drafts.push({
+        ...raw.drafts[0],
+        id: 22,
+        contract: contract({name: "Account Brief", stable_key: "account_brief"}),
+    });
+    const parsed = pipeline_library.replace(raw);
+    assert.ok(parsed);
+    assert.deepEqual(
+        pipeline_library.sorted_drafts().map((draft) => draft.contract.name),
+        ["Account Brief", "Campaign Brief"],
+    );
+});
+
 run_test("administrators can inspect archived entries and published drafts stay immutable", () => {
     const parsed = pipeline_library.replace(response({can_archive: true}));
     assert.ok(parsed);

@@ -9,6 +9,7 @@ const {$} = require("./lib/zjquery.cjs");
 global.HTMLFormElement = class HTMLFormElement {};
 
 const requests = [];
+const reports = [];
 let dialog_config;
 
 function request(method, options) {
@@ -20,7 +21,17 @@ mock_esm("../src/channel", {
     post: (options) => request("POST", options),
     patch: (options) => request("PATCH", options),
     del: (options) => request("DELETE", options),
-    xhr_error_message: (message) => message,
+});
+mock_esm("../src/ui_report", {
+    client_error(message) {
+        reports.push({type: "client_error", message});
+    },
+    error(message) {
+        reports.push({type: "error", message});
+    },
+    success(message) {
+        reports.push({type: "success", message});
+    },
 });
 mock_esm("../src/dialog_widget", {
     launch(config) {
@@ -138,10 +149,33 @@ function library() {
     };
 }
 
+function populate_contract_fields(draft_contract = contract) {
+    const fields = {
+        stable_key: draft_contract.stable_key,
+        name: draft_contract.name,
+        description: draft_contract.description,
+        version: draft_contract.version,
+        input_contract: JSON.stringify(draft_contract.input_contract),
+        lookback_days: String(draft_contract.lookback_days),
+        runtime_key: draft_contract.runtime_key,
+        prompt_key: draft_contract.prompt_key,
+        integration_keys: draft_contract.integration_keys.join(", "),
+        output_type: draft_contract.output_type,
+        output_template: JSON.stringify(draft_contract.output_template),
+        maximum_runtime_seconds: String(draft_contract.maximum_runtime_seconds),
+        destination_topic: draft_contract.destination_topic,
+        navigation_icon: draft_contract.navigation_icon,
+        navigation_order: String(draft_contract.navigation_order),
+        requirements: JSON.stringify(draft_contract.requirements),
+    };
+    for (const [name, value] of Object.entries(fields)) {
+        $(`#hover_pipeline_draft_form [name='${name}']`).val(value);
+    }
+}
 run_test("opens, validates, and renders examples through the ordinary definition path", () => {
     pipeline_library_ui.open();
-    assert.equal(dialog_config.id, "hover-pipeline-library-modal");
     assert.equal(requests.length, 1);
+    assert.equal(dialog_config.id, "hover-pipeline-library-modal");
     assert.equal(requests[0].method, "GET");
     assert.equal(requests[0].url, "/json/hover/pipeline-library");
 
@@ -291,6 +325,46 @@ run_test("opens, validates, and renders examples through the ordinary definition
     $.clear_all_elements();
 });
 
+run_test("reports sanitized load and mutation failures", () => {
+    reports.length = 0;
+    pipeline_library_ui.open();
+    requests.at(-1).success({});
+    assert.equal(reports.at(-1).type, "client_error");
+    assert.match(reports.at(-1).message, /unexpected response/);
+    dialog_config.on_hidden();
+    $.clear_all_elements();
+
+    pipeline_library_ui.open();
+    requests.at(-1).error({untrusted_detail: "must not render"});
+    assert.equal(reports.at(-1).type, "error");
+    assert.match(reports.at(-1).message, /Could not open the Pipeline Library/);
+    dialog_config.on_hidden();
+    $.clear_all_elements();
+
+    pipeline_library_ui.open();
+    requests.at(-1).success(library());
+    const $root = $("#hover_pipeline_library_root");
+    $("#hover_pipeline_creator_user").val("7");
+    const $grant_form = $("#pipeline-grant-form-for-error-test");
+    $grant_form.set_find_results(
+        "button[type='submit']",
+        $("#pipeline-grant-button-for-error-test"),
+    );
+    const grant_creator = $root.get_on_handler("submit", "[data-pipeline-grant-creator]");
+    const grant_event = {preventDefault() {}, currentTarget: $grant_form};
+
+    grant_creator(grant_event);
+    requests.at(-1).success({});
+    assert.equal(reports.at(-1).type, "client_error");
+    grant_creator(grant_event);
+    requests.at(-1).success(library());
+    grant_creator(grant_event);
+    requests.at(-1).error({untrusted_detail: "must not render"});
+    assert.equal(reports.at(-1).type, "error");
+    assert.match(reports.at(-1).message, /could not save that change/i);
+    dialog_config.on_hidden();
+    $.clear_all_elements();
+});
 run_test("ordinary members receive a read-only published shelf", () => {
     pipeline_library_ui.open();
     const request = requests.at(-1);
@@ -315,6 +389,225 @@ run_test("ordinary members receive a read-only published shelf", () => {
     assert.doesNotMatch(html, /Draft successor/);
     assert.doesNotMatch(html, /Archive version/);
 
+    dialog_config.on_hidden();
+    $.clear_all_elements();
+});
+
+run_test("guards editor navigation and invalid local input", () => {
+    reports.length = 0;
+    const editable_library = library();
+    editable_library.creator_user_ids = [7, 8, 9];
+    editable_library.drafts[0].definition_id = 1;
+    editable_library.drafts[0].collaborator_user_ids = [99];
+    pipeline_library_ui.open();
+    const first_open_request_count = requests.length;
+    pipeline_library_ui.open();
+    assert.equal(requests.length, first_open_request_count);
+    requests.at(-1).success(editable_library);
+    const $root = $("#hover_pipeline_library_root");
+    $root.get_on_handler("click", "[data-pipeline-create-draft]")({});
+    $root.get_on_handler("click", "[data-pipeline-back]")({});
+    $("#hover_pipeline_creator_user").val("not-a-user");
+    const $grant_form = $("#pipeline-grant-form-for-validation-test");
+    $grant_form.set_find_results(
+        "button[type='submit']",
+        $("#pipeline-grant-button-for-validation-test"),
+    );
+    const before_invalid_grant = requests.length;
+    $root.get_on_handler(
+        "submit",
+        "[data-pipeline-grant-creator]",
+    )({
+        preventDefault() {},
+        currentTarget: $grant_form,
+    });
+    assert.equal(requests.length, before_invalid_grant);
+    const $draft_button = $("#pipeline-definition-draft-for-validation-test").attr(
+        "data-pipeline-open-draft",
+        "21",
+    );
+    $root.get_on_handler("click", "[data-pipeline-open-draft]")({currentTarget: $draft_button});
+    assert.equal($("#hover_pipeline_draft_form input[name='stable_key']").prop("readonly"), true);
+    assert.match($root.html(), /Former teammate/);
+    const $form = $("#hover_pipeline_draft_form");
+    let reported_native_validity = 0;
+    $form[0].checkValidity = () => false;
+    $form[0].reportValidity = () => {
+        reported_native_validity += 1;
+    };
+    const original_form_prototype = Object.getPrototypeOf($form[0]);
+    Object.setPrototypeOf($form[0], global.HTMLFormElement.prototype);
+    const submit = $root.get_on_handler("submit", "#hover_pipeline_draft_form");
+    submit({preventDefault() {}, currentTarget: $form});
+    Object.setPrototypeOf($form[0], original_form_prototype);
+    assert.equal(reported_native_validity, 1);
+    populate_contract_fields();
+    $("#hover_pipeline_draft_form [name='input_contract']").val("not json");
+    submit({preventDefault() {}, currentTarget: $form});
+    assert.equal(reports.at(-1).type, "client_error");
+    populate_contract_fields();
+    $.set_results("#hover_pipeline_draft_form input[name='supported_trigger']:checked", []);
+    submit({preventDefault() {}, currentTarget: $form});
+    assert.match(reports.at(-1).message, /Choose at least one supported trigger/);
+    dialog_config.on_hidden();
+    $.clear_all_elements();
+});
+
+run_test("saves drafts and refreshes collaborator changes from validated state", () => {
+    reports.length = 0;
+    const editable_library = library();
+    editable_library.creator_user_ids = [7, 8, 9];
+    pipeline_library_ui.open();
+    requests.at(-1).success(editable_library);
+    const $root = $("#hover_pipeline_library_root");
+    $root.get_on_handler("click", "[data-pipeline-create-draft]")({});
+    populate_contract_fields();
+    $("#hover_pipeline_draft_form input[name='supported_trigger']:checked").val("manual");
+    const $new_form = $("#hover_pipeline_draft_form");
+    $new_form.set_find_results("button[type='submit']", $("#pipeline-new-draft-submit-for-test"));
+    const submit_draft = $root.get_on_handler("submit", "#hover_pipeline_draft_form");
+    submit_draft({preventDefault() {}, currentTarget: $new_form});
+    const create_request = requests.at(-1);
+    assert.equal(create_request.method, "POST");
+    assert.equal(create_request.url, "/json/hover/pipeline-library/drafts");
+    const saved_library = library();
+    saved_library.creator_user_ids = [7, 8, 9];
+    create_request.success({...saved_library, draft: saved_library.drafts[0]});
+    assert.match($root.html(), /Private version workshop/);
+    assert.equal(reports.at(-1).type, "success");
+
+    $(".hover-pipeline-editor").attr("data-draft-id", "21");
+    populate_contract_fields();
+    $("#hover_pipeline_draft_form input[name='supported_trigger']:checked").val("manual");
+    const $fallback_form = $("#hover_pipeline_draft_form");
+    $fallback_form.set_find_results(
+        "button[type='submit']",
+        $("#pipeline-fallback-draft-submit-for-test"),
+    );
+    submit_draft({preventDefault() {}, currentTarget: $fallback_form});
+    requests.at(-1).success(saved_library);
+    assert.equal(reports.at(-1).type, "success");
+
+    populate_contract_fields();
+    $("#hover_pipeline_draft_form input[name='supported_trigger']:checked").val("manual");
+    const $saved_form = $("#hover_pipeline_draft_form");
+    $saved_form.set_find_results(
+        "button[type='submit']",
+        $("#pipeline-saved-draft-submit-for-test"),
+    );
+    submit_draft({preventDefault() {}, currentTarget: $saved_form});
+    requests.at(-1).success({...library(), drafts: []});
+    assert.equal(reports.at(-1).type, "client_error");
+    dialog_config.on_hidden();
+    $.clear_all_elements();
+
+    const collaborator_library = library();
+    collaborator_library.creator_user_ids = [7, 8, 9];
+    pipeline_library_ui.open();
+    requests.at(-1).success(collaborator_library);
+    const $collaborator_root = $("#hover_pipeline_library_root");
+    const $draft_button = $("#pipeline-draft-button-for-collaborator-test").attr(
+        "data-pipeline-open-draft",
+        "21",
+    );
+    $collaborator_root.get_on_handler(
+        "click",
+        "[data-pipeline-open-draft]",
+    )({
+        currentTarget: $draft_button,
+    });
+    $(".hover-pipeline-editor").attr("data-draft-id", "21");
+
+    $("#hover_pipeline_collaborator_user").val("not-a-user");
+    const requests_before_invalid_collaborator = requests.length;
+    $collaborator_root.get_on_handler("click", "[data-pipeline-add-collaborator]")({});
+    assert.equal(requests.length, requests_before_invalid_collaborator);
+    $("#hover_pipeline_collaborator_user").val("7");
+    const add_collaborator = $collaborator_root.get_on_handler(
+        "click",
+        "[data-pipeline-add-collaborator]",
+    );
+    add_collaborator({});
+    const added_library = library();
+    added_library.creator_user_ids = [7, 8, 9];
+    added_library.drafts[0].collaborator_user_ids = [7, 9];
+    requests.at(-1).success(added_library);
+    assert.match($collaborator_root.html(), /Ada Admin/);
+
+    const remove_collaborator = $collaborator_root.get_on_handler(
+        "click",
+        "[data-pipeline-remove-collaborator]",
+    );
+    const $remove = $("#pipeline-remove-collaborator-for-continuation-test").attr(
+        "data-pipeline-remove-collaborator",
+        "7",
+    );
+    remove_collaborator({currentTarget: $remove});
+    const removed_library = library();
+    removed_library.creator_user_ids = [7, 8, 9];
+    requests.at(-1).success(removed_library);
+    assert.match($collaborator_root.html(), /Morgan Maker/);
+    $collaborator_root.get_on_handler("click", "[data-pipeline-back]")({});
+    $.reset_selector(".hover-pipeline-editor");
+    const requests_before_missing_draft = requests.length;
+    remove_collaborator({currentTarget: $remove});
+    assert.equal(requests.length, requests_before_missing_draft);
+    dialog_config.on_hidden();
+    $.clear_all_elements();
+});
+
+run_test("guards publish and successor resolution with authoritative drafts", () => {
+    reports.length = 0;
+    pipeline_library_ui.open();
+    requests.at(-1).success(library());
+    const $root = $("#hover_pipeline_library_root");
+    const publish = $root.get_on_handler("click", "[data-pipeline-publish]");
+    const requests_before_missing_draft = requests.length;
+    publish({});
+    assert.equal(requests.length, requests_before_missing_draft);
+
+    const $draft_button = $("#pipeline-draft-button-for-publish-guard-test").attr(
+        "data-pipeline-open-draft",
+        "21",
+    );
+    $root.get_on_handler("click", "[data-pipeline-open-draft]")({currentTarget: $draft_button});
+    $(".hover-pipeline-editor").attr("data-draft-id", "21");
+    $("#hover_pipeline_draft_form [name='input_contract']").val("not json");
+    publish({});
+    assert.equal(reports.at(-1).type, "client_error");
+
+    populate_contract_fields();
+    $("#hover_pipeline_draft_form input[name='supported_trigger']:checked").val("manual");
+    publish({});
+    const save_request = requests.at(-1);
+    assert.equal(save_request.method, "PATCH");
+    const mismatched_library = library();
+    mismatched_library.drafts[0].id = 22;
+    save_request.success(mismatched_library);
+    assert.equal(reports.at(-1).type, "client_error");
+    dialog_config.on_hidden();
+    $.clear_all_elements();
+
+    pipeline_library_ui.open();
+    requests.at(-1).success(library());
+    const $successor_root = $("#hover_pipeline_library_root");
+    const create_successor = $successor_root.get_on_handler(
+        "click",
+        "[data-pipeline-create-successor]",
+    );
+    const $successor_button = $("#pipeline-successor-button-for-resolution-test").attr(
+        "data-pipeline-create-successor",
+        "11",
+    );
+    create_successor({currentTarget: $successor_button});
+    const successor_library = library();
+    successor_library.drafts[0].based_on_version_id = 11;
+    requests.at(-1).success(successor_library);
+    assert.match($successor_root.html(), /Private version workshop/);
+
+    create_successor({currentTarget: $successor_button});
+    requests.at(-1).success(library());
+    assert.equal(reports.at(-1).type, "client_error");
     dialog_config.on_hidden();
     $.clear_all_elements();
 });
