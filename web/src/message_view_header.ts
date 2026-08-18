@@ -172,6 +172,17 @@ function append_and_display_title_area(context: MessageViewHeaderContext): void 
 }
 
 function build_message_view_header(filter: Filter | undefined): void {
+    const is_non_message_feed_surface =
+        hover_awareness_state.get_surface() !== undefined ||
+        recent_view_util.is_visible() ||
+        inbox_util.is_visible();
+    document.body.classList.toggle(
+        "hover-topic-screen",
+        !is_non_message_feed_surface &&
+            filter?.has_operator("channel") === true &&
+            filter.has_operator("topic"),
+    );
+
     // This makes sure we don't waste time appending
     // message_view_header on a template where it's never used
     if (filter && !filter.is_common_narrow()) {
