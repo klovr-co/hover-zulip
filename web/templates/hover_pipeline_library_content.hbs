@@ -10,13 +10,13 @@
         <div>
             <p class="hover-pipeline-library__eyebrow">
                 {{t
-                  "Organization automation"
+                  "Automation"
                   }}
             </p>
-            <h2>{{t "Pipelines, pinned with intent."}}</h2>
+            <h2>{{t "Build and share pipelines"}}</h2>
             <p>
                 {{t
-                  "Discover immutable published versions. Creators can shape private drafts without changing anything already installed in a Space."
+                  "Create reusable pipelines for your organization. You can edit a draft without changing the version already used in a Space."
                   }}
             </p>
         </div>
@@ -35,7 +35,7 @@
         {{else}}
             <span class="hover-pipeline-library__readonly">
                 <i class="zulip-icon zulip-icon-lock" aria-hidden="true"></i>
-                {{t "Published library · Read-only"}}
+                {{t "Published pipelines · View only"}}
             </span>
         {{/if}}
     </header>
@@ -44,10 +44,10 @@
         <details class="hover-pipeline-library__creator-panel">
             <summary>
                 <span>
-                    <strong>{{t "Pipeline Creators"}}</strong>
+                    <strong>{{t "Who can create pipelines"}}</strong>
                     <small>
                         {{t
-                          "Grant draft and publication access without changing organization roles."
+                          "Choose who can create and publish pipelines without making them an organization administrator."
                           }}
                     </small>
                 </span>
@@ -62,7 +62,7 @@
                   >
                     <label for="hover_pipeline_creator_user">
                         {{t
-                          "Add a creator"
+                          "Add someone"
                           }}
                     </label>
                     <select
@@ -75,7 +75,7 @@
                         {{/each}}
                     </select>
                     <button type="submit" class="button rounded">
-                        {{t "Grant"}}
+                        {{t "Add"}}
                     </button>
                 </form>
                 {{#if has_creators}}
@@ -84,20 +84,20 @@
                             <li>
                                 <span>
                                     <strong>{{full_name}}</strong>
-                                    <small>{{t "Pipeline Creator"}}</small>
+                                    <small>{{t "Can create and publish pipelines"}}</small>
                                 </span>
                                 <button
                                   type="button"
                                   class="button rounded small"
                                   data-pipeline-revoke-creator="{{user_id}}"
-                                  >{{t "Revoke"}}</button>
+                                  >{{t "Remove access"}}</button>
                             </li>
                         {{/each}}
                     </ul>
                 {{else}}
                     <p class="hover-pipeline-library__empty-inline">
                         {{t
-                          "No explicit Pipeline Creators yet. Organization administrators can still publish."
+                          "No one has been added yet. Organization administrators can always create and publish pipelines."
                           }}
                     </p>
                 {{/if}}
@@ -113,15 +113,15 @@
             <div class="hover-pipeline-library__section-heading">
                 <div>
                     <p class="hover-pipeline-library__eyebrow">
-                        {{t "Private workshop"}}
+                        {{t "Work in progress"}}
                     </p>
                     <h3 id="hover_pipeline_drafts_heading">
-                        {{t "Visible drafts"}}
+                        {{t "Drafts you can see"}}
                     </h3>
                 </div>
                 <span>
                     {{t
-                      "Only authors, explicit collaborators, and administrators can see these."
+                      "Only each draft's author, collaborators, and organization administrators can see it."
                       }}
                 </span>
             </div>
@@ -152,7 +152,7 @@
                                 <dd>{{contract.version}}</dd>
                             </div>
                             <div>
-                                <dt>{{t "Lookback"}}</dt>
+                                <dt>{{t "Activity range"}}</dt>
                                 <dd>{{contract.lookback_days}} {{t "days"}}</dd>
                             </div>
                             <div>
@@ -190,15 +190,15 @@
         <div class="hover-pipeline-library__section-heading">
             <div>
                 <p class="hover-pipeline-library__eyebrow">
-                    {{t "Published shelf"}}
+                    {{t "Ready to use"}}
                 </p>
                 <h3 id="hover_pipeline_published_heading">
-                    {{t "Pipeline Library"}}
+                    {{t "Published pipelines"}}
                 </h3>
             </div>
             <span>
                 {{t
-                  "Every version is immutable; Spaces stay pinned until explicitly upgraded."
+                  "Published versions cannot be edited. A Space keeps using its current version until someone updates it."
                   }}
             </span>
         </div>
@@ -219,7 +219,7 @@
                                     {{#if archived}}
                                         <span
                                           class="hover-pipeline-library__state is-archived"
-                                          >{{t "Definition archived"}}</span>
+                                          >{{t "Pipeline archived"}}</span>
                                     {{/if}}
                                 </div>
                                 <p>{{description}}</p>
@@ -230,7 +230,7 @@
                                   type="button"
                                   class="button rounded small"
                                   data-pipeline-archive-definition="{{id}}"
-                                  >{{t "Archive definition"}}</button>
+                                  >{{t "Archive pipeline"}}</button>
                             {{/if}}
                         </header>
                         <div class="hover-pipeline-library__versions">
@@ -249,17 +249,17 @@
                                             {{#if archived}}
                                                 {{t "Archived"}}
                                             {{else}}
-                                                {{t "Immutable"}}
+                                                {{t "Locked"}}
                                             {{/if}}
                                         </span>
                                     </div>
                                     <dl class="hover-pipeline-library__facts">
                                         <div>
-                                            <dt>{{t "Lookback"}}</dt>
+                                            <dt>{{t "Activity range"}}</dt>
                                             <dd>{{lookback_days}} {{t "days"}}</dd>
                                         </div>
                                         <div>
-                                            <dt>{{t "Runtime ceiling"}}</dt>
+                                            <dt>{{t "Time limit"}}</dt>
                                             <dd>{{maximum_runtime_seconds}}s</dd>
                                         </div>
                                         <div>
@@ -267,7 +267,7 @@
                                             <dd>{{trigger_summary}}</dd>
                                         </div>
                                         <div>
-                                            <dt>{{t "Sources"}}</dt>
+                                            <dt>{{t "Required sources"}}</dt>
                                             <dd>{{requirement_summary}}</dd>
                                         </div>
                                     </dl>
@@ -282,7 +282,7 @@
                                                   class="button rounded small"
                                                   data-pipeline-create-successor="{{id}}"
                                                   >{{t
-                                                        "Draft successor"
+                                                        "Create next version"
                                                     }}</button>
                                             {{/if}}
                                             {{#if can_archive_version}}
@@ -308,7 +308,7 @@
                 <strong>{{t "No published pipelines yet"}}</strong>
                 <span>
                     {{t
-                      "A Pipeline Creator can prepare the first private draft."
+                      "Create a draft, then publish it when it is ready to use."
                       }}
                 </span>
             </div>
