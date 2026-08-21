@@ -43,6 +43,23 @@
         --hover-topic-frame-radius: 18px;
         --hover-topic-control-radius: 9px;
         --hover-topic-row-radius: 7px;
+        --hover-overlay-surface: #fff;
+        --hover-overlay-surface-subtle: #f7f8fa;
+        --hover-overlay-hover: #f1f3f5;
+        --hover-overlay-selected: #edf8f1;
+        --hover-overlay-danger: #b4232f;
+        --hover-overlay-danger-soft: #fff1f2;
+        --hover-overlay-border: #dfe1e5;
+        --hover-overlay-backdrop: hsl(230deg 14% 14% / 34%);
+        --hover-overlay-radius: 12px;
+        --hover-overlay-control-radius: 8px;
+        --hover-overlay-shadow:
+            0 16px 42px hsl(230deg 18% 18% / 14%),
+            0 2px 8px hsl(230deg 18% 18% / 7%);
+        --hover-overlay-dialog-shadow:
+            0 24px 64px hsl(230deg 18% 14% / 22%),
+            0 4px 14px hsl(230deg 18% 14% / 9%);
+        --user-card-popover-min-width: 260px;
         /* stylelint-enable color-no-hex */
         --ds-header-height: var(--hover-topic-header);
         --header-height: var(--hover-topic-header);
@@ -190,8 +207,18 @@
     }
 
     body.hover-enabled.hover-topic-screen #searchbox .navbar-search.expanded {
+        position: fixed;
+        top: calc(var(--navbar-alerts-wrapper-height) + 8px);
         right: auto;
-        width: min(620px, 50vw);
+        left: 50%;
+        width: min(620px, calc(100vw - 48px));
+        height: 36px;
+        border-color: var(--hover-overlay-border);
+        border-radius: var(--hover-overlay-radius) var(--hover-overlay-radius) 0
+            0;
+        background: var(--hover-overlay-surface);
+        box-shadow: var(--hover-overlay-shadow);
+        transform: translateX(-50%);
     }
 
     body.hover-enabled.hover-topic-screen .header-main > .column-right {
@@ -1009,70 +1036,1370 @@
         color: var(--hover-topic-ink);
     }
 
-    /* Topic actions inherit the same neutral/emerald component language. */
-    body.hover-enabled.hover-topic-screen #topic-actions-menu-popover {
-        border-color: var(--hover-topic-line-strong);
-        border-radius: 12px;
-        background: var(--hover-topic-panel);
+    /* Shared anchored surfaces: menus, profile cards, pickers, and tooltips. */
+    body.hover-enabled.hover-topic-screen
+        .tippy-box:has(
+            :is(
+                .popover-menu,
+                .emoji-picker-popover,
+                .user-card-popover-actions,
+                .dropdown-list-container
+            )
+        ) {
+        border: 1px solid var(--hover-overlay-border);
+        border-radius: var(--hover-overlay-radius);
+        background: var(--hover-overlay-surface);
+        box-shadow: var(--hover-overlay-shadow);
         color: var(--hover-topic-ink);
-        box-shadow: 0 8px 24px hsl(240deg 14% 19% / 12%);
     }
 
     body.hover-enabled.hover-topic-screen
-        #topic-actions-menu-popover
-        .popover-topic-header {
+        .tippy-box:has(
+            :is(
+                #personal-menu-dropdown,
+                #gear-menu-dropdown,
+                #help-menu-dropdown,
+                #stream-actions-menu-popover,
+                #topic-actions-menu-popover,
+                #channel-folder-menu-popover
+            )
+        ) {
+        border: 1px solid var(--hover-overlay-border);
+        border-radius: var(--hover-overlay-radius);
+        background: var(--hover-overlay-surface);
+        box-shadow: var(--hover-overlay-shadow);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .tippy-box:has(
+            :is(
+                .popover-menu,
+                .emoji-picker-popover,
+                .user-card-popover-actions,
+                .dropdown-list-container
+            )
+        )
+        > .tippy-content {
+        overflow: hidden;
+        border-radius: calc(var(--hover-overlay-radius) - 1px);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .popover-menu,
+            .emoji-picker-popover,
+            .user-card-popover-actions,
+            .dropdown-list-container
+        ) {
+        border-radius: calc(var(--hover-overlay-radius) - 1px);
+        background: var(--hover-overlay-surface);
+        box-shadow: none;
         color: var(--hover-topic-ink);
-        font-weight: 600;
     }
 
     body.hover-enabled.hover-topic-screen
-        #topic-actions-menu-popover
-        .popover-menu-separator {
-        border-color: var(--hover-topic-line);
+        .dropdown-list-container
+        .popover-filter-input-wrapper {
+        padding: 6px;
+        border-bottom: 1px solid var(--hover-overlay-border);
+        background: var(--hover-overlay-surface);
     }
 
     body.hover-enabled.hover-topic-screen
-        #topic-actions-menu-popover
-        .popover-menu-link {
-        border-radius: var(--hover-topic-row-radius);
+        .dropdown-list-container
+        .popover-filter-input {
+        border: 1px solid var(--hover-overlay-border);
+        border-radius: var(--hover-overlay-control-radius);
+        background: var(--hover-overlay-surface-subtle);
+        box-shadow: none;
         color: var(--hover-topic-copy);
+        font-size: 13px;
     }
 
     body.hover-enabled.hover-topic-screen
-        #topic-actions-menu-popover
-        .popover-menu-link:is(:hover, :focus-visible) {
-        background: var(--hover-topic-sidebar-hover);
+        .dropdown-list-container
+        .popover-filter-input:focus {
+        border-color: var(--hover-topic-accent);
+        background: var(--hover-overlay-surface);
+        box-shadow: 0 0 0 2px hsl(147deg 58% 33% / 14%);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .dropdown-list-container
+        .dropdown-list-viewport-padding {
+        padding: 4px;
+        background: var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen .dropdown-list-container .list-item {
+        min-height: 30px;
+        border-radius: var(--hover-overlay-control-radius);
+        color: var(--hover-topic-copy);
+        font-size: 13px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .dropdown-list-container
+        .list-item
+        .dropdown-list-item-common-styles {
+        color: inherit;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .dropdown-list-container
+        .list-item:is(:hover, :focus-visible, .highlight_value) {
+        background: var(--hover-overlay-selected);
+        color: var(--hover-topic-active-ink);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .dropdown-list-container
+        .sticky-bottom-option-button {
+        min-height: 34px;
+        padding: 7px 12px;
+        border-top: 1px solid var(--hover-overlay-border);
+        background: var(--hover-overlay-surface);
+        color: var(--hover-topic-copy);
+        font-size: 13px;
+        font-weight: 500;
+        text-align: left;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .dropdown-list-container
+        .sticky-bottom-option-button:is(:hover, :focus-visible) {
+        background: var(--hover-overlay-selected);
+        color: var(--hover-topic-active-ink);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            #personal-menu-dropdown,
+            #gear-menu-dropdown,
+            #help-menu-dropdown,
+            #stream-actions-menu-popover,
+            #topic-actions-menu-popover,
+            #channel-folder-menu-popover
+        ) {
+        border: 0;
+        border-radius: calc(var(--hover-overlay-radius) - 1px);
+        background: var(--hover-overlay-surface);
+        box-shadow: none;
         color: var(--hover-topic-ink);
     }
 
+    body.hover-enabled.hover-topic-screen ul.popover-menu-list {
+        padding: 6px 0;
+    }
+
+    body.hover-enabled.hover-topic-screen .popover-menu-separator {
+        margin: 5px 0;
+        border-color: var(--hover-overlay-border);
+    }
+
+    body.hover-enabled.hover-topic-screen .popover-menu-link,
+    body.hover-enabled.hover-topic-screen .popover-menu-list .text-item {
+        color: var(--hover-topic-copy);
+        font-size: 13px;
+        font-weight: 450;
+        line-height: 20px;
+    }
+
+    body.hover-enabled.hover-topic-screen .popover-menu-link {
+        min-height: 32px;
+        margin: 0 5px;
+        padding: 5px 9px;
+        border-radius: var(--hover-overlay-control-radius);
+    }
+
     body.hover-enabled.hover-topic-screen
-        #topic-actions-menu-popover
+        :is(
+            #personal-menu-dropdown,
+            #gear-menu-dropdown,
+            #help-menu-dropdown,
+            #stream-actions-menu-popover,
+            #topic-actions-menu-popover,
+            #channel-folder-menu-popover
+        )
+        .popover-menu-link {
+        color: var(--hover-topic-copy) !important;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .popover-menu-link:is(:hover, :focus-visible, .selected) {
+        background: var(--hover-overlay-selected);
+        color: var(--hover-topic-active-ink);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen .popover-menu-link:focus-visible {
+        box-shadow: inset 0 0 0 1px var(--hover-topic-accent);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            #personal-menu-dropdown,
+            #gear-menu-dropdown,
+            #help-menu-dropdown,
+            #stream-actions-menu-popover,
+            #topic-actions-menu-popover,
+            #channel-folder-menu-popover
+        )
+        .popover-menu-link:is(:hover, :focus-visible, .selected) {
+        background: var(--hover-overlay-selected);
+        color: var(--hover-topic-active-ink) !important;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            #personal-menu-dropdown,
+            #gear-menu-dropdown,
+            #help-menu-dropdown,
+            #stream-actions-menu-popover,
+            #topic-actions-menu-popover,
+            #channel-folder-menu-popover
+        )
         .popover-menu-icon {
         color: var(--hover-topic-muted);
     }
 
     body.hover-enabled.hover-topic-screen
-        #topic-actions-menu-popover
+        :is(
+            #personal-menu-dropdown,
+            #gear-menu-dropdown,
+            #help-menu-dropdown,
+            #stream-actions-menu-popover,
+            #topic-actions-menu-popover,
+            #channel-folder-menu-popover
+        )
+        .popover-menu-link:is(:hover, :focus-visible)
+        .popover-menu-icon {
+        color: var(--hover-topic-accent);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(#stream-actions-menu-popover, #topic-actions-menu-popover)
         .popover-menu-tab-group {
-        border-radius: var(--hover-topic-row-radius);
-        background: var(--hover-topic-sidebar-hover);
+        background: var(--hover-overlay-hover);
     }
 
     body.hover-enabled.hover-topic-screen
-        #topic-actions-menu-popover
+        :is(#stream-actions-menu-popover, #topic-actions-menu-popover)
         .popover-menu-tab-group
-        .slider {
-        border-color: var(--hover-topic-line-strong);
-        border-radius: 6px;
-        background: var(--hover-topic-panel);
-        box-shadow: 0 1px 2px hsl(240deg 14% 19% / 6%);
+        .tab-option-content {
+        color: var(--hover-topic-muted);
     }
 
     body.hover-enabled.hover-topic-screen
-        #topic-actions-menu-popover
+        :is(#stream-actions-menu-popover, #topic-actions-menu-popover)
         .popover-menu-tab-group
         .tab-option:checked
         + .tab-option-content {
         color: var(--hover-topic-accent);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(.sidebar-popover-delete-topic-messages, .delete_message) {
+        color: var(--hover-overlay-danger) !important;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(.sidebar-popover-delete-topic-messages, .delete_message):is(
+            :hover,
+            :focus-visible
+        ) {
+        background: var(--hover-overlay-danger-soft);
+        color: var(--hover-overlay-danger) !important;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(.sidebar-popover-delete-topic-messages, .delete_message)
+        .popover-menu-icon {
+        color: currentcolor;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(.popover-menu-icon, .popover-menu-hotkey-hint) {
+        color: var(--hover-topic-muted);
+    }
+
+    body.hover-enabled.hover-topic-screen .popover-menu-hotkey-hint {
+        border-color: var(--hover-overlay-border);
+        border-radius: 5px;
+        background: var(--hover-overlay-surface-subtle);
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(#topic-actions-menu-popover, #message-actions-menu-popover)
+        :is(.sidebar-popover-delete-topic-messages, .delete_message) {
+        color: var(--hover-overlay-danger) !important;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(#topic-actions-menu-popover, #message-actions-menu-popover)
+        :is(.sidebar-popover-delete-topic-messages, .delete_message):is(
+            :hover,
+            :focus-visible,
+            .selected
+        ) {
+        background: var(--hover-overlay-danger-soft);
+        color: var(--hover-overlay-danger) !important;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(#topic-actions-menu-popover, #message-actions-menu-popover)
+        :is(.sidebar-popover-delete-topic-messages, .delete_message)
+        .popover-menu-icon {
+        color: var(--hover-overlay-danger) !important;
+    }
+
+    body.hover-enabled.hover-topic-screen .popover-topic-header {
+        color: var(--hover-topic-ink);
+        font-weight: 600;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .color-picker-popover
+        .message-header-contents {
+        border-bottom: 1px solid var(--hover-overlay-border);
+        background: var(--hover-overlay-surface) !important;
+        color: var(--hover-topic-ink);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .color-picker-popover
+        .message-header-stream-name {
+        color: var(--hover-topic-ink);
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .color-picker-popover
+        .color_picker_confirm_button {
+        border-radius: var(--hover-overlay-control-radius);
+        color: var(--hover-topic-accent);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .color-picker-popover
+        .color_picker_confirm_button:is(:hover, :focus-visible) {
+        background: var(--hover-overlay-selected);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .color-picker-popover
+        .color-swatch-input:checked
+        + .color-swatch-label,
+    body.hover-enabled.hover-topic-screen
+        .color-picker-popover
+        .color-swatch-label:focus-visible {
+        outline-color: var(--hover-topic-accent);
+    }
+
+    body.hover-enabled.hover-topic-screen .popover-menu-tab-group {
+        border-radius: var(--hover-overlay-control-radius);
+        background: var(--hover-overlay-hover);
+    }
+
+    body.hover-enabled.hover-topic-screen .popover-menu-tab-group .slider {
+        border-color: var(--hover-overlay-border);
+        border-radius: 6px;
+        background: var(--hover-overlay-surface);
+        box-shadow: 0 1px 2px hsl(230deg 18% 18% / 8%);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .popover-menu-tab-group
+        .tab-option:checked
+        + .tab-option-content {
+        color: var(--hover-topic-accent);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .popover-menu-tab-group
+        .tab-option-content:focus-visible {
+        border-radius: 6px;
+        box-shadow: inset 0 0 0 1px var(--hover-topic-accent);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #personal-menu-dropdown
+        .info-density-button {
+        border-color: var(--hover-overlay-border);
+        background: var(--hover-overlay-surface);
+        color: var(--hover-topic-muted);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #personal-menu-dropdown
+        .info-density-button:not(:disabled):is(:hover, :focus-visible) {
+        border-color: var(--hover-topic-accent);
+        background: var(--hover-overlay-selected);
+        color: var(--hover-topic-accent);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #personal-menu-dropdown
+        .info-density-button:disabled {
+        border-color: var(--hover-overlay-border);
+        background: var(--hover-overlay-hover);
+        color: var(--hover-topic-quiet);
+        opacity: 1;
+    }
+
+    body.hover-enabled.hover-topic-screen .emoji-picker-popover {
+        --color-background-emoji-picker-popover: var(--hover-overlay-surface);
+        --color-background-emoji-picker-popover-tab-item-active: var(
+            --hover-overlay-selected
+        );
+        --color-background-emoji-picker-emoji-focus: var(
+            --hover-overlay-selected
+        );
+        --color-background-emoji-picker-emoji-reacted: var(
+            --hover-topic-accent-soft
+        );
+
+        border: 0;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #send_later_popover
+        .enter_sends_choice {
+        margin: 1px 5px;
+        border-radius: var(--hover-overlay-control-radius);
+        color: var(--hover-topic-copy);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #send_later_popover
+        .enter_sends_choice:is(:hover, :focus-visible) {
+        background: var(--hover-overlay-selected);
+        box-shadow: inset 0 0 0 1px var(--hover-topic-accent);
+        outline: none !important;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #send_later_popover
+        .enter_sends_major {
+        color: var(--hover-topic-ink);
+        font-weight: 500;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #send_later_popover
+        .enter_sends_minor {
+        color: var(--hover-topic-muted);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #send_later_popover
+        .enter_sends_choice_radio {
+        accent-color: var(--hover-topic-accent);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #send_later_popover
+        .enter_sends_choice_radio:checked
+        + .enter_sends_choice_text_container
+        .popover-menu-hotkey-hint {
+        border-color: var(--hover-topic-selected-border);
+        color: var(--hover-topic-accent);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .emoji-picker-popover
+        #emoji-popover-filter {
+        border: 1px solid var(--hover-overlay-border);
+        border-radius: var(--hover-overlay-control-radius);
+        background: var(--hover-overlay-surface-subtle);
+        box-shadow: none;
+        color: var(--hover-topic-copy);
+        font-size: 13px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .emoji-picker-popover
+        #emoji-popover-filter:focus {
+        border-color: var(--hover-topic-accent);
+        background: var(--hover-overlay-surface);
+        box-shadow: 0 0 0 2px hsl(147deg 58% 33% / 14%);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .message-user-card-popover-root
+        > .tippy-box {
+        margin-block: 6px;
+    }
+
+    body.hover-enabled.hover-topic-screen #user_card_popover {
+        max-width: min(300px, calc(100vw - 24px));
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #user_card_popover
+        .popover-menu-user-header {
+        padding: 12px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #user_card_popover
+        :is(.popover-menu-user-avatar-container, .popover-menu-user-avatar) {
+        width: 44px;
+        height: 44px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #user_card_popover
+        .popover-menu-user-full-name {
+        color: var(--hover-topic-ink);
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 20px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #user_card_popover
+        .popover-menu-user-type {
+        color: var(--hover-topic-muted);
+        font-size: 13px;
+        line-height: 18px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .tippy-box[role="tooltip"]:not(
+            :has(
+                :is(
+                    .popover-menu,
+                    .emoji-picker-popover,
+                    .user-card-popover-actions,
+                    .dropdown-list-container
+                )
+            )
+        ) {
+        border: 0;
+        border-radius: 7px;
+        background: var(--hover-topic-ink);
+        box-shadow: 0 4px 12px hsl(230deg 18% 14% / 18%);
+        color: var(--hover-overlay-surface);
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 16px;
+    }
+
+    /* Legacy help overlays share the same shell as modern dialogs. */
+    body.hover-enabled.hover-topic-screen .informational-overlays {
+        background: var(--hover-overlay-backdrop);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .informational-overlays
+        .overlay-content {
+        border: 1px solid var(--hover-overlay-border);
+        border-radius: 14px;
+        background: var(--hover-overlay-surface);
+        box-shadow: var(--hover-overlay-dialog-shadow);
+        color: var(--hover-topic-copy);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .informational-overlays
+        .overlay-tabs {
+        border-color: var(--hover-overlay-border);
+        background: var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .informational-overlays
+        .tab-switcher
+        .ind-tab {
+        border-color: var(--hover-overlay-border);
+        background: var(--hover-overlay-surface);
+        color: var(--hover-topic-copy);
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .informational-overlays
+        .tab-switcher
+        .ind-tab:is(:hover, :focus-visible) {
+        background: var(--hover-overlay-hover);
+        color: var(--hover-topic-ink);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .informational-overlays
+        .tab-switcher
+        .ind-tab.selected {
+        border-color: var(--hover-topic-accent);
+        background: var(--hover-topic-accent);
+        color: var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .informational-overlays
+        .tab-switcher
+        .ind-tab.selected:focus-visible {
+        box-shadow: inset 0 0 0 2px var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .informational-overlays
+        .overlay-tabs
+        .exit {
+        border-radius: var(--hover-overlay-control-radius);
+        color: var(--hover-topic-muted);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .informational-overlays
+        .overlay-tabs
+        .exit:is(:hover, :focus-visible) {
+        background: var(--hover-overlay-hover);
+        color: var(--hover-topic-ink);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .informational-overlays
+        :is(.overlay-container, .overlay-modal, .overlay-scroll-container) {
+        background: var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .informational-overlays
+        :is(.help-table, .hotkeys_table) {
+        border-color: var(--hover-overlay-border);
+        background: var(--hover-overlay-surface);
+        color: var(--hover-topic-copy);
+        font-size: 14px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .informational-overlays
+        :is(.help-table, .hotkeys_table)
+        :is(th, td) {
+        border-color: var(--hover-overlay-border);
+        background: var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .informational-overlays
+        :is(.help-table, .hotkeys_table)
+        tbody
+        tr:nth-child(even)
+        > td {
+        background: var(--hover-overlay-surface-subtle);
+    }
+
+    body.hover-enabled.hover-topic-screen .informational-overlays kbd {
+        border-color: var(--hover-overlay-border);
+        border-radius: 5px;
+        background: var(--hover-overlay-surface-subtle);
+        box-shadow: none;
+        color: var(--hover-topic-copy);
+    }
+
+    body.hover-enabled.hover-topic-screen .informational-overlays a {
+        color: var(--hover-topic-accent);
+    }
+
+    /* Date/time pickers are shared by compose, scheduling, and reminders. */
+    body.hover-enabled.hover-topic-screen .flatpickr-calendar {
+        border: 1px solid var(--hover-overlay-border);
+        border-radius: var(--hover-overlay-radius);
+        background: var(--hover-overlay-surface);
+        box-shadow: var(--hover-overlay-shadow);
+        color: var(--hover-topic-copy);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar:is(.arrowTop, .arrowBottom)::after {
+        border-bottom-color: var(--hover-overlay-surface);
+        border-top-color: var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar:is(.arrowTop, .arrowBottom)::before {
+        border-bottom-color: var(--hover-overlay-border);
+        border-top-color: var(--hover-overlay-border);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        :is(
+            .flatpickr-months,
+            .flatpickr-month,
+            .flatpickr-weekdays,
+            .flatpickr-days,
+            .dayContainer,
+            .flatpickr-time
+        ) {
+        border-color: var(--hover-overlay-border);
+        background: var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        .flatpickr-current-month,
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        .flatpickr-current-month
+        input.cur-year,
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        .flatpickr-current-month
+        .flatpickr-monthDropdown-months,
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        .flatpickr-weekday,
+    body.hover-enabled.hover-topic-screen .flatpickr-calendar .flatpickr-time,
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        .flatpickr-time
+        input,
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        .flatpickr-time
+        .flatpickr-am-pm {
+        background: transparent;
+        color: var(--hover-topic-copy);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        :is(.flatpickr-prev-month, .flatpickr-next-month)
+        svg {
+        fill: var(--hover-topic-muted);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        :is(.flatpickr-prev-month, .flatpickr-next-month):hover
+        svg {
+        fill: var(--hover-topic-accent);
+    }
+
+    body.hover-enabled.hover-topic-screen .flatpickr-calendar .flatpickr-day {
+        border-color: transparent;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--hover-topic-copy);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        .flatpickr-day:is(.prevMonthDay, .nextMonthDay, .flatpickr-disabled) {
+        color: var(--hover-topic-quiet);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        .flatpickr-day:is(:hover, :focus, .today) {
+        border-color: var(--hover-topic-accent);
+        background: var(--hover-overlay-selected);
+        color: var(--hover-topic-active-ink);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        .flatpickr-day:is(.selected, .startRange, .endRange) {
+        border-color: var(--hover-topic-accent);
+        background: var(--hover-topic-accent);
+        color: var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        .flatpickr-time
+        input:is(:hover, :focus),
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        .flatpickr-time
+        .flatpickr-am-pm:is(:hover, :focus) {
+        background: var(--hover-overlay-selected);
+        color: var(--hover-topic-ink);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        .flatpickr-confirm {
+        background: var(--hover-topic-accent);
+        color: var(--hover-overlay-surface);
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .flatpickr-calendar
+        .flatpickr-confirm:is(:hover, :focus-visible) {
+        background: var(--hover-topic-accent-hover);
+        outline: none;
+    }
+
+    /* Search suggestions share the centered search control's geometry. */
+    body.hover-enabled.hover-topic-screen
+        #searchbox
+        .navbar-search.expanded
+        .typeahead.dropdown-menu {
+        width: 100%;
+        max-height: min(420px, calc(100vh - 76px));
+        overflow: hidden;
+        border: 1px solid var(--hover-overlay-border);
+        border-top: 1px solid var(--hover-topic-line);
+        border-radius: 0 0 var(--hover-overlay-radius)
+            var(--hover-overlay-radius);
+        background: var(--hover-overlay-surface);
+        box-shadow: var(--hover-overlay-shadow);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #searchbox
+        .typeahead
+        .typeahead-item-link {
+        min-height: 34px;
+        padding: 4px 12px;
+        background: var(--hover-overlay-surface);
+        color: var(--hover-topic-copy);
+        font-size: 14px;
+        line-height: 20px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #searchbox
+        .typeahead-item.active
+        .typeahead-item-link,
+    body.hover-enabled.hover-topic-screen
+        #searchbox
+        .typeahead-item-link:hover {
+        background: var(--hover-overlay-selected);
+        color: var(--hover-topic-active-ink);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #searchbox
+        .typeahead
+        :is(.pill-container, .user-pill-container, .pill) {
+        border-color: transparent;
+        border-radius: 7px;
+        background: transparent;
+        color: inherit;
+        font-size: inherit;
+    }
+
+    /* Inline editing uses the same compact focus treatment as the composer. */
+    body.hover-enabled.hover-topic-screen .inline_topic_edit {
+        border-color: var(--hover-topic-accent);
+        border-radius: var(--hover-overlay-control-radius);
+        box-shadow: 0 0 0 2px hsl(147deg 58% 33% / 14%);
+    }
+
+    /* Dialogs and nested settings screens use one restrained modal shell. */
+    body.hover-enabled.hover-topic-screen :is(.modal__overlay, .overlay.show) {
+        background: var(--hover-overlay-backdrop);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container
+        ) {
+        --color-background-input: var(--hover-overlay-surface);
+        --color-background-input-focus: var(--hover-overlay-surface);
+        --color-outline-input: var(--hover-overlay-border);
+        --color-outline-input-hover: var(--hover-topic-line-strong);
+        --color-outline-input-focus: var(--hover-topic-accent);
+        --color-box-shadow-input-focus: hsl(147deg 58% 33% / 14%);
+        --color-text-brand-solid-action-button: var(--hover-overlay-surface);
+        --color-background-brand-solid-action-button: var(--hover-topic-accent);
+        --color-background-brand-solid-action-button-hover: var(
+            --hover-topic-accent-hover
+        );
+        --color-background-brand-solid-action-button-active: var(
+            --hover-topic-accent-hover
+        );
+        --color-text-brand-subtle-action-button: var(--hover-topic-accent);
+        --color-background-brand-subtle-action-button: var(
+            --hover-topic-accent-soft
+        );
+        --color-background-brand-subtle-action-button-hover: var(
+            --hover-overlay-selected
+        );
+        --color-background-brand-subtle-action-button-active: var(
+            --hover-overlay-selected
+        );
+        --color-text-brand-text-action-button: var(--hover-topic-accent);
+        --color-background-brand-text-action-button-hover: var(
+            --hover-overlay-selected
+        );
+        --color-background-brand-text-action-button-active: var(
+            --hover-overlay-selected
+        );
+        --color-outline-button-focus: var(--hover-topic-accent);
+
+        border: 1px solid var(--hover-overlay-border);
+        border-radius: 14px;
+        background: var(--hover-overlay-surface);
+        box-shadow: var(--hover-overlay-dialog-shadow);
+        color: var(--hover-topic-copy);
+    }
+
+    body.hover-enabled.hover-topic-screen .modal__header,
+    body.hover-enabled.hover-topic-screen .modal__footer,
+    body.hover-enabled.hover-topic-screen
+        .overlay-container
+        :is(.overlay-messages-header, .header-body),
+    body.hover-enabled.hover-topic-screen
+        #settings_page
+        .sidebar-wrapper
+        > .tab-container,
+    body.hover-enabled.hover-topic-screen
+        #settings_page
+        .content-wrapper
+        > .settings-header,
+    body.hover-enabled.hover-topic-screen
+        .two-pane-settings-container
+        .two-pane-settings-header,
+    body.hover-enabled.hover-topic-screen
+        .two-pane-settings-container
+        .two-pane-settings-subheader {
+        border-color: var(--hover-overlay-border);
+        background: var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen .modal__title,
+    body.hover-enabled.hover-topic-screen #settings_page .settings-header h1,
+    body.hover-enabled.hover-topic-screen
+        .two-pane-settings-container
+        .two-pane-settings-header,
+    body.hover-enabled.hover-topic-screen .settings-section-title,
+    body.hover-enabled.hover-topic-screen .settings-subsection-title {
+        color: var(--hover-topic-ink);
+        font-family: inherit;
+        font-weight: 600;
+        letter-spacing: -0.015em;
+    }
+
+    body.hover-enabled.hover-topic-screen .modal__content,
+    body.hover-enabled.hover-topic-screen
+        .overlay-container
+        :is(
+            .overlay-messages-list,
+            .drafts-tab-pane,
+            .scheduled-messages-list,
+            .reminders-list
+        ),
+    body.hover-enabled.hover-topic-screen
+        #settings_page
+        .content-wrapper
+        #settings_content,
+    body.hover-enabled.hover-topic-screen .two-pane-settings-container .right,
+    body.hover-enabled.hover-topic-screen
+        .two-pane-settings-container
+        .two-pane-settings-body {
+        background: var(--hover-overlay-surface);
+    }
+
+    /* Drafts, reminders, and scheduled messages share this card primitive.
+       Some channel headers receive an inline channel color, so the scoped
+       !important is required to keep Hover overlays in the light system. */
+    body.hover-enabled.hover-topic-screen
+        .overlay-container
+        .overlay-message-info-box {
+        border-radius: 10px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .overlay-container
+        .overlay-message-info-box.active {
+        outline: 2px solid var(--hover-topic-accent);
+        outline-offset: 1px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .overlay-container
+        .overlay-message-info-box
+        .message-header-contents {
+        border-color: var(--hover-overlay-border);
+        border-radius: 9px 9px 0 0;
+        background: var(--hover-overlay-surface-subtle) !important;
+        color: var(--hover-topic-copy);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .overlay-container
+        .overlay-message-info-box.active
+        .message-header-contents {
+        background: var(--hover-overlay-selected) !important;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .overlay-container
+        .overlay-message-info-box
+        .message_row {
+        border-color: var(--hover-overlay-border);
+        background: var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen #settings_page .sidebar-wrapper,
+    body.hover-enabled.hover-topic-screen #settings_page .sidebar,
+    body.hover-enabled.hover-topic-screen .two-pane-settings-container .left {
+        background: var(--hover-overlay-surface-subtle);
+    }
+
+    body.hover-enabled.hover-topic-screen #settings_page .sidebar-item,
+    body.hover-enabled.hover-topic-screen
+        .two-pane-settings-container
+        .stream-row {
+        border-color: var(--hover-overlay-border);
+        color: var(--hover-topic-copy);
+    }
+
+    body.hover-enabled.hover-topic-screen #settings_page .sidebar-item:hover,
+    body.hover-enabled.hover-topic-screen
+        .two-pane-settings-container
+        .stream-row:hover {
+        background: var(--hover-overlay-hover);
+    }
+
+    body.hover-enabled.hover-topic-screen #settings_page .sidebar-item.active,
+    body.hover-enabled.hover-topic-screen
+        .two-pane-settings-container
+        .stream-row.active {
+        background: var(--hover-overlay-selected);
+        box-shadow: inset 3px 0 0 var(--hover-topic-accent);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .modal__container
+        .tab-switcher
+        .ind-tab {
+        border-color: var(--hover-overlay-border);
+        background: var(--hover-overlay-surface);
+        color: var(--hover-topic-copy);
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .modal__container
+        .tab-switcher
+        .ind-tab:is(:hover, :focus-visible) {
+        background: var(--hover-overlay-hover);
+        color: var(--hover-topic-ink);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container
+        )
+        .tab-switcher
+        .ind-tab.selected {
+        border-color: var(--hover-topic-accent);
+        background: var(--hover-topic-accent);
+        color: var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .modal__container
+        .tab-switcher
+        .ind-tab.selected:focus-visible {
+        box-shadow: inset 0 0 0 2px var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen .modal__button {
+        min-height: 34px;
+        border: 1px solid var(--hover-overlay-border);
+        border-radius: var(--hover-overlay-control-radius);
+        background: var(--hover-overlay-surface);
+        box-shadow: none;
+        color: var(--hover-topic-copy);
+        font-size: 13px;
+        font-weight: 550;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .modal__button:is(:hover, :focus-visible) {
+        border-color: var(--hover-topic-line-strong);
+        background: var(--hover-overlay-hover);
+        color: var(--hover-topic-ink);
+        transform: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .modal__container
+        .dialog_submit_button,
+    body.hover-enabled.hover-topic-screen
+        .two-pane-settings-container
+        .create_stream_button,
+    body.hover-enabled.hover-topic-screen
+        .two-pane-settings-container
+        .create_user_group_button {
+        border-color: var(--hover-topic-accent);
+        background: var(--hover-topic-accent);
+        color: var(--hover-overlay-surface) !important;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .modal__container
+        .dialog_submit_button:is(:hover, :focus-visible),
+    body.hover-enabled.hover-topic-screen
+        .two-pane-settings-container
+        .create_stream_button:is(:hover, :focus-visible),
+    body.hover-enabled.hover-topic-screen
+        .two-pane-settings-container
+        .create_user_group_button:is(:hover, :focus-visible) {
+        border-color: var(--hover-topic-accent-hover);
+        background: var(--hover-topic-accent-hover);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .modal__container
+        .modal__button:disabled {
+        border-color: var(--hover-overlay-border);
+        background: var(--hover-overlay-hover);
+        color: var(--hover-topic-quiet) !important;
+        opacity: 1;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container
+        )
+        :is(.action-button, .zulip-button):disabled {
+        border-color: var(--hover-overlay-border);
+        background: var(--hover-overlay-hover);
+        color: var(--hover-topic-quiet) !important;
+        opacity: 1;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(#delete-topic-modal, #delete-message-modal)
+        .dialog_submit_button {
+        border-color: var(--hover-overlay-danger);
+        background: var(--hover-overlay-danger);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(#delete-topic-modal, #delete-message-modal)
+        .dialog_submit_button:is(:hover, :focus-visible) {
+        border-color: var(--hover-overlay-danger);
+        background: color-mix(
+            in srgb,
+            var(--hover-overlay-danger) 88%,
+            hsl(0deg 0% 0%)
+        );
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container,
+            .popover-menu
+        )
+        :is(
+            input:not([type="checkbox"], [type="radio"]),
+            select,
+            textarea
+        ):focus {
+        border-color: var(--hover-topic-accent);
+        box-shadow: 0 0 0 3px hsl(147deg 58% 33% / 14%);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container,
+            .popover-menu
+        )
+        :is(input:not([type="checkbox"], [type="radio"]), select, textarea) {
+        border-color: var(--hover-overlay-border);
+        border-radius: var(--hover-overlay-control-radius);
+        background-color: var(--hover-overlay-surface);
+        box-shadow: none;
+        color: var(--hover-topic-copy);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container,
+            .popover-menu
+        )
+        input:is([type="checkbox"], [type="radio"]) {
+        accent-color: var(--hover-topic-accent);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container,
+            .popover-menu
+        )
+        input[type="checkbox"] {
+        box-sizing: border-box;
+        width: 16px;
+        height: 16px;
+        margin: 0 6px 0 0;
+        appearance: none;
+        border: 1px solid var(--hover-topic-muted);
+        border-radius: 4px;
+        background-color: var(--hover-overlay-surface);
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 12px;
+        cursor: pointer;
+        vertical-align: -3px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container,
+            .popover-menu
+        )
+        input[type="checkbox"]:checked {
+        border-color: var(--hover-topic-accent);
+        background-color: var(--hover-topic-accent);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3.25 8.1 3.05 3.05 6.45-6.45' fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'/%3E%3C/svg%3E");
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container,
+            .popover-menu
+        )
+        input[type="checkbox"]:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px hsl(147deg 58% 33% / 14%);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container,
+            .popover-menu
+        )
+        input[type="checkbox"]:disabled {
+        cursor: default;
+        opacity: 0.5;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container,
+            .popover-menu
+        )
+        label.checkbox
+        input[type="checkbox"]
+        ~ .rendered-checkbox {
+        border-color: var(--hover-topic-muted);
+        background-color: var(--hover-overlay-surface);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container,
+            .popover-menu
+        )
+        label.checkbox
+        input[type="checkbox"]:checked
+        ~ .rendered-checkbox {
+        border-color: var(--hover-topic-accent);
+        background-color: var(--hover-topic-accent);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3.25 8.1 3.05 3.05 6.45-6.45' fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'/%3E%3C/svg%3E");
+        background-size: 12px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container,
+            .popover-menu
+        )
+        label.checkbox
+        input[type="checkbox"]:focus
+        ~ .rendered-checkbox {
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        :is(
+            .modal__container,
+            #settings_page,
+            .two-pane-settings-container,
+            .overlay-container,
+            .popover-menu
+        )
+        label.checkbox
+        input[type="checkbox"]:focus-visible
+        ~ .rendered-checkbox {
+        outline: none;
+        box-shadow: 0 0 0 3px hsl(147deg 58% 33% / 14%);
+    }
+
+    body.hover-enabled.hover-topic-screen .overlay-container .exit {
+        border-radius: var(--hover-overlay-control-radius);
+        color: var(--hover-topic-muted);
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .overlay-container
+        .exit:is(:hover, :focus-visible) {
+        background: var(--hover-overlay-hover);
+        color: var(--hover-topic-ink);
+        outline: none;
+    }
+
+    body.hover-enabled.hover-topic-screen .overlay-container :is(h1, h2, h3) {
+        color: var(--hover-topic-ink);
+        font-family: inherit;
+        font-weight: 600;
+        letter-spacing: -0.015em;
     }
 }

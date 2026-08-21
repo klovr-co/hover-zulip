@@ -20,6 +20,7 @@ import * as feedback_widget from "./feedback_widget.ts";
 import {Filter} from "./filter.ts";
 import * as hash_parser from "./hash_parser.ts";
 import * as hash_util from "./hash_util.ts";
+import * as hover_awareness_view from "./hover_awareness_view.ts";
 import {$t} from "./i18n.ts";
 import * as inbox_ui from "./inbox_ui.ts";
 import * as inbox_util from "./inbox_util.ts";
@@ -532,6 +533,7 @@ export let show = (raw_terms: NarrowTerm[], show_opts: ShowMessageViewOpts): voi
 
     const coming_from_recent_view = recent_view_util.is_visible();
     const coming_from_inbox = inbox_util.is_visible();
+    const coming_from_hover_awareness = hover_awareness_view.is_visible();
 
     const preserve_zoomed_in_channel =
         stream_list.is_zoomed_in() &&
@@ -707,6 +709,9 @@ export let show = (raw_terms: NarrowTerm[], show_opts: ShowMessageViewOpts): voi
         // recursively.
         reset_ui_state(opts);
 
+        if (coming_from_hover_awareness) {
+            hover_awareness_view.hide();
+        }
         if (coming_from_recent_view) {
             recent_view_ui.hide();
         } else if (coming_from_inbox) {

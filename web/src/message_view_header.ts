@@ -14,7 +14,7 @@ import * as peer_data from "./peer_data.ts";
 import * as recent_view_util from "./recent_view_util.ts";
 import * as rendered_markdown from "./rendered_markdown.ts";
 import * as search from "./search.ts";
-import {current_user} from "./state_data.ts";
+import {current_user, realm} from "./state_data.ts";
 import * as stream_data from "./stream_data.ts";
 import type {StreamSubscription} from "./sub_store.ts";
 
@@ -172,15 +172,14 @@ function append_and_display_title_area(context: MessageViewHeaderContext): void 
 }
 
 function build_message_view_header(filter: Filter | undefined): void {
-    const is_non_message_feed_surface =
-        hover_awareness_state.get_surface() !== undefined ||
-        recent_view_util.is_visible() ||
-        inbox_util.is_visible();
+    // Despite its historical name, this class owns the shared Slack-light
+    // application shell as well as topic-specific message styling. Keep the
+    // shell stable while navigating between Hover's built-in surfaces; rules
+    // for topic-only elements remain inert when those elements are absent.
+    document.body.classList.toggle("hover-topic-screen", realm.realm_hover_enabled);
     document.body.classList.toggle(
-        "hover-topic-screen",
-        !is_non_message_feed_surface &&
-            filter?.has_operator("channel") === true &&
-            filter.has_operator("topic"),
+        "hover-saved-screen",
+        realm.realm_hover_enabled && filter?.has_operand("is", "starred") === true,
     );
 
     // This makes sure we don't waste time appending
