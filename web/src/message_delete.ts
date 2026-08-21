@@ -116,6 +116,7 @@ export function delete_message(msg_id: number): void {
     }
 
     confirm_dialog.launch({
+        id: "delete-message-modal",
         modal_title_html: $t_html({defaultMessage: "Delete message?"}),
         modal_content_html: $t_html({
             defaultMessage: "Deleting a message permanently removes it for everyone.",
