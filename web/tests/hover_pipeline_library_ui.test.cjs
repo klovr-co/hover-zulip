@@ -181,12 +181,12 @@ run_test("opens, validates, and renders examples through the ordinary definition
 
     requests[0].success(library());
     const html = $("#hover_pipeline_library_root").html();
-    assert.match(html, /Pipeline Creator/);
+    assert.match(html, /Can create and publish pipelines/);
     assert.match(html, /Private draft/);
     assert.match(html, /Campaign Brief/);
     assert.match(html, /Topic Analysis/);
     assert.match(html, /Marketing Digest/);
-    assert.match(html, /Immutable/);
+    assert.match(html, /Locked/);
     assert.doesNotMatch(html, /pipeline_runtime_v1/);
     assert.doesNotMatch(html, /campaign_brief_v1/);
 
@@ -381,12 +381,12 @@ run_test("ordinary members receive a read-only published shelf", () => {
     });
 
     const html = $("#hover_pipeline_library_root").html();
-    assert.match(html, /Published library · Read-only/);
+    assert.match(html, /Published pipelines · View only/);
     assert.match(html, /Topic Analysis/);
     assert.match(html, /Marketing Digest/);
     assert.doesNotMatch(html, /New pipeline/);
-    assert.doesNotMatch(html, /Visible drafts/);
-    assert.doesNotMatch(html, /Draft successor/);
+    assert.doesNotMatch(html, /Drafts you can see/);
+    assert.doesNotMatch(html, /Create next version/);
     assert.doesNotMatch(html, /Archive version/);
 
     dialog_config.on_hidden();

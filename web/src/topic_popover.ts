@@ -202,6 +202,7 @@ export function initialize(): void {
                     });
 
                     confirm_dialog.launch({
+                        id: "delete-topic-modal",
                         modal_title_html: $t_html({defaultMessage: "Delete topic"}),
                         help_link: "/help/delete-a-topic",
                         modal_content_html,
