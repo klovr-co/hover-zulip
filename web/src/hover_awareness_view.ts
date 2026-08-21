@@ -126,7 +126,19 @@ function render(): void {
     $("#hover-awareness-view").html(
         render_hover_awareness_view({
             title: for_you ? $t({defaultMessage: "For You"}) : $t({defaultMessage: "Team Pulse"}),
+            description: for_you
+                ? $t({
+                      defaultMessage:
+                          "Updates that need your attention, ranked from your confirmed Spaces.",
+                  })
+                : $t({
+                      defaultMessage: "Important team movement across the Spaces you can access.",
+                  }),
             status,
+            status_class:
+                formatted_items.length > 0
+                    ? "hover-awareness-status"
+                    : "hover-awareness-status hover-awareness-status--panel",
             show_retry,
             has_items: formatted_items.length > 0,
             items: formatted_items,
@@ -185,6 +197,11 @@ export function handle_realtime_change(): void {
     refresh_after_realtime_change();
 }
 
+export function is_visible(): boolean {
+    const $view = $("#hover-awareness-view");
+    return $view.length > 0 && $view.css("display") !== "none";
+}
+
 export function show(surface: AwarenessSurface): void {
     hover_awareness_state.set_surface(surface);
     inbox_ui.hide();
@@ -202,9 +219,6 @@ export function show(surface: AwarenessSurface): void {
 }
 
 export function hide(): void {
-    if (current_surface === undefined) {
-        return;
-    }
     request?.abort();
     refresh_after_realtime_change.cancel();
     request_generation += 1;

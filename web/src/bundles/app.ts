@@ -64,6 +64,7 @@ import "@uppy/image-editor/css/style.min.css";
 import "../../styles/cofounder/design-system.css";
 import "../../styles/cofounder/typography.css";
 import "../../styles/cofounder/app.css";
+import "../../styles/cofounder/topic-screen.css";
 
 // This should be last.
 import "../ui_init.js";
