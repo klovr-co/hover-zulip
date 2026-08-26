@@ -459,47 +459,50 @@ class NarrowBuilderTest(ZulipTestCase):
     def test_add_term_using_dm_operator_the_same_user_as_operand_no_direct_message_group(
         self,
     ) -> None:
-        # Without a DM group, no messages are possible
+        # Self-DM narrows are not supported.
         term = NarrowParameter(operator="dm", operand=self.hamlet_email)
-        with self.assertRaises(EmptyResultSet):
+        with self.assertRaisesRegex(
+            BadNarrowOperatorError, "direct messages with yourself are not supported"
+        ):
             self._do_add_term_test(term, "")
 
     def test_add_term_using_dm_operator_the_same_user_as_operand(self) -> None:
-        # Create a direct message group with the user
+        # Self-DM narrows remain unsupported even if old data exists.
         get_or_create_direct_message_group(
             [
                 self.example_user("hamlet").id,
             ]
         )
         term = NarrowParameter(operator="dm", operand=self.hamlet_email)
-        # Query uses DM group recipient for self-DM
-        self._do_add_term_test(
-            term,
-            'WHERE "zerver_message"."recipient_id" = %s',
-        )
+        with self.assertRaisesRegex(
+            BadNarrowOperatorError, "direct messages with yourself are not supported"
+        ):
+            self._do_add_term_test(term, "")
 
     def test_add_term_using_dm_operator_the_same_user_as_operand_no_direct_message_group_and_negated(
         self,
     ) -> None:  # NEGATED
-        # Without a DM group, negated false() becomes true
+        # Negated self-DM narrows are not supported either.
         term = NarrowParameter(operator="dm", operand=self.hamlet_email, negated=True)
-        self._do_add_term_test_always_true(term)
+        with self.assertRaisesRegex(
+            BadNarrowOperatorError, "direct messages with yourself are not supported"
+        ):
+            self._do_add_term_test(term, "")
 
     def test_add_term_using_dm_operator_the_same_user_as_operand_and_negated(
         self,
     ) -> None:  # NEGATED
-        # Create a direct message group with the user
+        # Self-DM narrows remain unsupported even if old data exists.
         get_or_create_direct_message_group(
             [
                 self.example_user("hamlet").id,
             ]
         )
         term = NarrowParameter(operator="dm", operand=self.hamlet_email, negated=True)
-        # Query uses DM group recipient (negated)
-        self._do_add_term_test(
-            term,
-            'WHERE NOT ("zerver_message"."recipient_id" = %s)',
-        )
+        with self.assertRaisesRegex(
+            BadNarrowOperatorError, "direct messages with yourself are not supported"
+        ):
+            self._do_add_term_test(term, "")
 
     def test_add_term_using_dm_operator_and_self_and_user_as_operand_no_direct_message_group(
         self,
@@ -798,33 +801,31 @@ class NarrowBuilderTest(ZulipTestCase):
         term = NarrowParameter(operator="is", operand="private", negated=True)
         self._do_add_term_test(term, 'WHERE NOT ("zerver_usermessage"."flags" & %s != 0)')
 
-    # Test that "pm-with" (legacy alias for "dm") works.
+    # Self-DM narrows are unsupported through legacy aliases as well.
     def test_add_term_using_pm_with_operator_no_direct_message_group(self) -> None:
         term = NarrowParameter(operator="pm-with", operand=self.hamlet_email)
-        with self.assertRaises(EmptyResultSet):
+        with self.assertRaisesRegex(
+            BadNarrowOperatorError, "direct messages with yourself are not supported"
+        ):
             self._do_add_term_test(term, "")
 
-    # Test that "pm-with" (legacy alias for "dm") works.
+    # Self-DM narrows are unsupported through legacy aliases even with old data.
     def test_add_term_using_pm_with_operator(self) -> None:
-        # Create a direct message group with the user
         get_or_create_direct_message_group([self.user_profile.id])
         term = NarrowParameter(operator="pm-with", operand=self.hamlet_email)
-        # Query uses DM group recipient for self-DM
-        self._do_add_term_test(
-            term,
-            'WHERE "zerver_message"."recipient_id" = %s',
-        )
+        with self.assertRaisesRegex(
+            BadNarrowOperatorError, "direct messages with yourself are not supported"
+        ):
+            self._do_add_term_test(term, "")
 
-    # Test that the underscore version of "pm-with" works.
+    # The underscore alias is likewise unsupported for self-DM narrows.
     def test_add_term_using_underscore_version_of_pm_with_operator(self) -> None:
-        # Create a direct message group with the user
         get_or_create_direct_message_group([self.user_profile.id])
         term = NarrowParameter(operator="pm_with", operand=self.hamlet_email)
-        # Query uses DM group recipient for self-DM
-        self._do_add_term_test(
-            term,
-            'WHERE "zerver_message"."recipient_id" = %s',
-        )
+        with self.assertRaisesRegex(
+            BadNarrowOperatorError, "direct messages with yourself are not supported"
+        ):
+            self._do_add_term_test(term, "")
 
     # Test that deprecated "group-pm-with" (replaced by "dm-including" ) works.
     def test_add_term_using_dm_including_operator_with_non_existing_user(self) -> None:
@@ -2163,7 +2164,6 @@ class GetOldMessagesTest(ZulipTestCase):
             tuple(sorted(get_recursive_membership_groups(hamlet_user).values_list("id", flat=True)))
         )
         query_ids["othello_id"] = othello_user.id
-        query_ids["hamlet_recipient"] = self.get_dm_group_recipient(hamlet_user).id
         query_ids["hamlet_and_othello_recipient"] = self.get_dm_group_recipient(
             hamlet_user, othello_user
         ).id
@@ -2715,27 +2715,26 @@ class GetOldMessagesTest(ZulipTestCase):
             self.assertIn(message["id"], message_ids)
             self.assertEqual(message["recipient_id"], direct_message_group.recipient_id)
 
-    def test_get_messages_to_self_with_existent_group_dm(self) -> None:
+    def test_get_messages_to_self_is_not_supported(self) -> None:
         me = self.example_user("hamlet")
 
         user_ids = [me.id]
-        direct_message_group = get_or_create_direct_message_group(user_ids)
+        get_or_create_direct_message_group(user_ids)
 
         self.login_user(me)
         narrow = [dict(operator="dm", operand=user_ids)]
-        result = self.get_and_check_messages(dict(narrow=orjson.dumps(narrow).decode()))
-        self.assertEqual(result["messages"], [])
-
-        message_ids = [
-            self.send_group_direct_message(me, [me]),
-            self.send_personal_message(me, me),
-        ]
-
-        result = self.get_and_check_messages(dict(narrow=orjson.dumps(narrow).decode()))
-        for message in result["messages"]:
-            self.assertIn(message["id"], message_ids)
-            self.assertEqual(message["sender_id"], me.id)
-            self.assertEqual(message["recipient_id"], direct_message_group.recipient_id)
+        result = self.client_get(
+            "/json/messages",
+            {
+                "anchor": 1,
+                "num_before": 1,
+                "num_after": 1,
+                "narrow": orjson.dumps(narrow).decode(),
+            },
+        )
+        self.assert_json_error(
+            result, "Invalid narrow operator: direct messages with yourself are not supported"
+        )
 
     def test_get_visible_messages_with_narrow_dm(self) -> None:
         me = self.example_user("hamlet")
@@ -5276,7 +5275,6 @@ WHERE (U0."active" AND U0."recipient_id" = ("zerver_message"."recipient_id") AND
     def test_get_messages_with_narrow_queries(self) -> None:
         # The query includes DM group recipients
         query_ids = self.get_query_ids()
-        hamlet_email = self.example_user("hamlet").email
         othello_email = self.example_user("othello").email
 
         sql_template = """\
@@ -5449,28 +5447,6 @@ WHERE ("zerver_message"."realm_id" = 2 AND "zerver_message"."recipient_id" = {sc
                 "num_before": 0,
                 "num_after": 9,
                 "narrow": '[["channel", "Scotland"], ["topic", "blah"]]',
-            },
-            sql,
-        )
-
-        # Narrow to direct messages with yourself
-        sql_template = """\
-SELECT "zerver_message"."id" AS "id", "zerver_usermessage"."flags" AS "user_flags" \
-FROM "zerver_message" LEFT OUTER JOIN "zerver_usermessage" ON ("zerver_message"."id" = "zerver_usermessage"."message_id") INNER JOIN "zerver_recipient" ON ("zerver_message"."recipient_id" = "zerver_recipient"."id") \
-WHERE ("zerver_usermessage"."user_profile_id" = {hamlet_id} AND (NOT ("zerver_recipient"."type" = 2) OR EXISTS(SELECT 1 AS "a" \
-FROM "zerver_stream" U0 \
-WHERE (U0."recipient_id" = ("zerver_message"."recipient_id") AND (NOT U0."invite_only" OR U0."can_subscribe_group_id" IN {hamlet_groups} OR U0."can_add_subscribers_group_id" IN {hamlet_groups})) LIMIT 1) OR EXISTS(SELECT 1 AS "a" \
-FROM "zerver_subscription" U0 \
-WHERE (U0."active" AND U0."recipient_id" = ("zerver_message"."recipient_id") AND U0."user_profile_id" = {hamlet_id}) LIMIT 1)) AND "zerver_message"."recipient_id" = {hamlet_recipient}) ORDER BY "zerver_usermessage"."message_id" ASC\
- LIMIT 10\
-"""
-        sql = sql_template.format(**query_ids)
-        self.common_check_get_messages_query(
-            {
-                "anchor": 0,
-                "num_before": 0,
-                "num_after": 9,
-                "narrow": f'[["dm", "{hamlet_email}"]]',
             },
             sql,
         )
