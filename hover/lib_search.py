@@ -19,12 +19,7 @@ HOVER_SEARCH_SOURCE_LIMIT = 8
 
 
 def _authorized_spaces(user_profile: UserProfile) -> QuerySet[Space]:
-    if (
-        not user_profile.realm.hover_enabled
-        or not user_profile.is_active
-        or user_profile.is_guest
-        or user_profile.is_bot
-    ):
+    if not user_profile.is_active or user_profile.is_guest or user_profile.is_bot:
         return Space.objects.none()
     return (
         Space.objects.filter(

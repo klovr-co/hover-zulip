@@ -51,8 +51,6 @@ def _account_recipient_ids(account: ConnectedAccount) -> set[int]:
 
 
 def _notify_account(account: ConnectedAccount, *, op: str) -> None:
-    if not account.realm.hover_enabled:
-        return
     send_event_on_commit(
         account.realm,
         {
@@ -65,8 +63,6 @@ def _notify_account(account: ConnectedAccount, *, op: str) -> None:
 
 
 def _notify_grant(grant: ConnectedAccountGrant, *, op: str) -> None:
-    if not grant.realm.hover_enabled:
-        return
     recipient_ids = get_realm_administrator_ids(grant.realm_id)
     recipient_ids.add(grant.user_id)
     send_event_on_commit(

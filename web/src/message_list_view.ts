@@ -209,9 +209,24 @@ function same_recipient(a: MessageContainer | undefined, b: MessageContainer | u
     return util.same_recipient(a.msg, b.msg);
 }
 
+function date_render_style(): timerender.DateRenderStyle {
+    return document.body?.classList.contains("hover-enabled") ? "day_divider" : "compact";
+}
+
+export function get_message_rows_below_sticky_header(
+    sticky_header_props: Pick<DOMRect, "left" | "width">,
+    y_position: number,
+): HTMLElement[] {
+    const horizontal_center = sticky_header_props.left + sticky_header_props.width / 2;
+    return document
+        .elementsFromPoint(horizontal_center, y_position)
+        .filter((element) => element instanceof HTMLElement)
+        .filter((element) => element.classList.contains("message_row"));
+}
+
 function get_group_display_date(message: Message, display_year: boolean): string {
     const time = new Date(message.timestamp * 1000);
-    const date_element = timerender.render_date(time, display_year);
+    const date_element = timerender.render_date(time, display_year, date_render_style());
 
     return date_element.outerHTML;
 }
@@ -304,7 +319,8 @@ function get_date_divider_data(opts: {
 
     return {
         want_date_divider: true,
-        date_divider_html: timerender.render_date(curr_time, display_year).outerHTML,
+        date_divider_html: timerender.render_date(curr_time, display_year, date_render_style())
+            .outerHTML,
     };
 }
 
@@ -2520,7 +2536,7 @@ export class MessageListView {
             if (group !== undefined) {
                 const rendered_date = group.date_html;
                 dom_updates.html_updates.push({
-                    $element: $current_sticky_header.find(".recipient_row_date"),
+                    $element: $current_sticky_header.find(".recipient_row_date > .scroll-to-time"),
                     rendered_date,
                 });
             }
@@ -2595,14 +2611,10 @@ export class MessageListView {
             const sticky_header_bottom = sticky_header_props.top + sticky_header_props.height;
             const possible_new_date_separator_start = sticky_header_bottom - date_separator_padding;
             /* Get `message_row` under the sticky header. */
-            const elements_below_sticky_header = document.elementsFromPoint(
-                sticky_header_props.left,
+            const message_rows = get_message_rows_below_sticky_header(
+                sticky_header_props,
                 possible_new_date_separator_start,
-            );
-            const message_rows = elements_below_sticky_header
-                .filter((element) => element instanceof HTMLElement)
-                .filter((element) => element.classList.contains("message_row"))
-                .filter((element) => !rows.is_overlay_row($(element)));
+            ).filter((element) => !rows.is_overlay_row($(element)));
             if (message_rows.length === 0) {
                 /* If there is no message row under the header, it means it is not sticky yet,
                    so we just get the message next to the header. */
@@ -2630,9 +2642,13 @@ export class MessageListView {
         this.sticky_recipient_message_id = message.id;
         const time = new Date(message.timestamp * 1000);
         const message_container = this.message_containers.get(message.id)!;
-        const rendered_date = timerender.render_date(time, message_container.year_changed);
+        const rendered_date = timerender.render_date(
+            time,
+            message_container.year_changed,
+            date_render_style(),
+        );
         dom_updates.html_updates.push({
-            $element: $sticky_header.find(".recipient_row_date"),
+            $element: $sticky_header.find(".recipient_row_date > .scroll-to-time"),
             rendered_date,
         });
 

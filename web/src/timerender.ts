@@ -207,7 +207,61 @@ export type TimeRender = {
     needs_update: boolean;
 };
 
-export function render_now(time: Date, today = new Date(), display_year?: boolean): TimeRender {
+export type DateRenderStyle = "compact" | "day_divider";
+
+function year_in_display_time_zone(date: Date): string {
+    return new Intl.DateTimeFormat("en-US-u-nu-latn", {
+        timeZone: display_time_zone,
+        year: "numeric",
+    }).format(date);
+}
+
+function english_ordinal_suffix(day: number, locale: string): string {
+    const category = new Intl.PluralRules(locale, {type: "ordinal"}).select(day);
+    switch (category) {
+        case "one":
+            return "st";
+        case "two":
+            return "nd";
+        case "few":
+            return "rd";
+        default:
+            return "th";
+    }
+}
+
+function format_day_divider_date(time: Date, include_year: boolean): string {
+    const locale = user_settings.default_language;
+    const formatter = new Intl.DateTimeFormat(locale, {
+        timeZone: display_time_zone,
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        ...(include_year && {year: "numeric"}),
+    });
+
+    if (!locale.toLowerCase().startsWith("en")) {
+        return formatter.format(time);
+    }
+
+    return formatter
+        .formatToParts(time)
+        .map((part) => {
+            if (part.type !== "day") {
+                return part.value;
+            }
+            const day = Number.parseInt(part.value, 10);
+            return `${part.value}${english_ordinal_suffix(day, locale)}`;
+        })
+        .join("");
+}
+
+export function render_now(
+    time: Date,
+    today = new Date(),
+    display_year?: boolean,
+    date_style: DateRenderStyle = "compact",
+): TimeRender {
     let time_str;
     let needs_update;
     // render formal time to be used for tippy tooltip
@@ -226,6 +280,12 @@ export function render_now(time: Date, today = new Date(), display_year?: boolea
     } else if (days_old === 1) {
         time_str = $t({defaultMessage: "Yesterday"});
         needs_update = true;
+    } else if (date_style === "day_divider") {
+        const include_year =
+            display_year === true ||
+            year_in_display_time_zone(time) !== year_in_display_time_zone(today);
+        time_str = format_day_divider_date(time, include_year);
+        needs_update = false;
     } else if (time.getFullYear() !== today.getFullYear() || display_year) {
         // For long running servers, searching backlog can get ambiguous
         // without a year stamp. Only show year if message is from an older year
@@ -349,6 +409,8 @@ type UpdateEntry = {
     needs_update: boolean;
     className: string;
     time: Date;
+    display_year: boolean | undefined;
+    date_style: DateRenderStyle;
 };
 let update_list: UpdateEntry[] = [];
 
@@ -390,17 +452,23 @@ function render_date_span($elem: JQuery, rendered_time: TimeRender): JQuery {
 // (What's actually spliced into the message template is the contents
 // of this DOM node as HTML, so effectively a copy of the node. That's
 // okay since to update the time later we look up the node by its id.)
-export function render_date(time: Date, display_year?: boolean): HTMLElement {
+export function render_date(
+    time: Date,
+    display_year?: boolean,
+    date_style: DateRenderStyle = "compact",
+): HTMLElement {
     const className = `timerender${next_timerender_id}`;
     next_timerender_id += 1;
     const today = new Date();
-    const rendered_time = render_now(time, today, display_year);
+    const rendered_time = render_now(time, today, display_year, date_style);
     let $node = $("<span>").attr("class", `date_row_text timerender-content ${className}`);
     $node = render_date_span($node, rendered_time);
     maybe_add_update_list_entry({
         needs_update: rendered_time.needs_update,
         className,
         time,
+        display_year,
+        date_style,
     });
     return util.the($node);
 }
@@ -435,7 +503,7 @@ export function update_timestamps(): void {
             // or because we added messages above it and re-collapsed).
             if ($elements.length > 0) {
                 const time = entry.time;
-                const rendered_time = render_now(time, today);
+                const rendered_time = render_now(time, today, entry.display_year, entry.date_style);
                 for (const element of $elements) {
                     render_date_span($(element), rendered_time);
                 }
@@ -443,6 +511,8 @@ export function update_timestamps(): void {
                     needs_update: rendered_time.needs_update,
                     className,
                     time,
+                    display_year: entry.display_year,
+                    date_style: entry.date_style,
                 });
             }
         }

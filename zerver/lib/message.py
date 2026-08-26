@@ -376,8 +376,7 @@ def messages_for_ids(
         msg_dict["can_access_sender"] = msg_dict["sender_id"] not in inaccessible_sender_ids
         message_list.append(msg_dict)
 
-    if realm.hover_enabled:
-        add_hover_metadata(message_list, realm_id=realm.id, user_profile=user_profile)
+    add_hover_metadata(message_list, realm_id=realm.id, user_profile=user_profile)
     MessageDict.post_process_dicts(
         message_list,
         apply_markdown=apply_markdown,

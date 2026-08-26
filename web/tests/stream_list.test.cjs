@@ -248,7 +248,7 @@ test_ui("create_sidebar_row", ({override, override_rewire, mock_template}) => {
     assert.ok(removed);
 });
 
-test_ui("AIMTO modules are native topic links", ({mock_template, override}) => {
+test_ui("AIMTO modules are native topic links", ({mock_template}) => {
     const aimto = make_stream({
         name: "AIMTO Events",
         stream_id: 222,
@@ -259,7 +259,6 @@ test_ui("AIMTO modules are native topic links", ({mock_template, override}) => {
         can_send_message_group: everyone_group.id,
     });
     stream_data.add_sub_for_tests(aimto);
-    override(realm, "realm_hover_enabled", true);
     hover_spaces.initialize({
         hover_spaces: [
             {
@@ -384,7 +383,6 @@ test_ui(
             order: 0,
         };
         channel_folders.initialize({channel_folders: [events_folder]});
-        override(realm, "realm_hover_enabled", true);
         override(user_settings, "web_left_sidebar_show_channel_folders", true);
         hover_spaces.initialize({
             hover_spaces: [

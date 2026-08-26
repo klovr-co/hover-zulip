@@ -104,7 +104,19 @@
                             <p>{{t 'Choose a field and value to apply it now. Leave either blank and Hover will ask for clarification without changing the update.' }}</p>
                         </div>
                     </div>
-                    <div class="messagebox">
+                    <div class="messagebox hover-formatting-expanded">
+                        <div id="hover-compose-formatting-controls" class="hover-compose-formatting-controls" aria-label="{{t 'Message formatting' }}">
+                            <button type="button" data-format-type="bold" class="hover-compose-format-button compose_button_tooltip zulip-icon zulip-icon-bold formatting_button" aria-label="{{t 'Bold' }}" data-tippy-content="{{t 'Bold' }}"></button>
+                            <button type="button" data-format-type="italic" class="hover-compose-format-button compose_button_tooltip zulip-icon zulip-icon-italic formatting_button" aria-label="{{t 'Italic' }}" data-tippy-content="{{t 'Italic' }}"></button>
+                            <button type="button" data-format-type="strikethrough" class="hover-compose-format-button compose_button_tooltip zulip-icon zulip-icon-strikethrough formatting_button" aria-label="{{t 'Strikethrough' }}" data-tippy-content="{{t 'Strikethrough' }}"></button>
+                            <span class="hover-compose-format-divider" aria-hidden="true"></span>
+                            <button type="button" data-format-type="link" class="hover-compose-format-button compose_button_tooltip zulip-icon zulip-icon-link formatting_button" aria-label="{{t 'Link' }}" data-tippy-content="{{t 'Link' }}"></button>
+                            <button type="button" data-format-type="numbered" class="hover-compose-format-button compose_button_tooltip zulip-icon zulip-icon-ordered-list formatting_button" aria-label="{{t 'Numbered list' }}" data-tippy-content="{{t 'Numbered list' }}"></button>
+                            <button type="button" data-format-type="bulleted" class="hover-compose-format-button compose_button_tooltip zulip-icon zulip-icon-unordered-list formatting_button" aria-label="{{t 'Bulleted list' }}" data-tippy-content="{{t 'Bulleted list' }}"></button>
+                            <span class="hover-compose-format-divider" aria-hidden="true"></span>
+                            <button type="button" data-format-type="quote" class="hover-compose-format-button compose_button_tooltip zulip-icon zulip-icon-quote formatting_button" aria-label="{{t 'Quote' }}" data-tippy-content="{{t 'Quote' }}"></button>
+                            <button type="button" data-format-type="code" class="hover-compose-format-button compose_button_tooltip zulip-icon zulip-icon-code formatting_button" aria-label="{{t 'Code' }}" data-tippy-content="{{t 'Code' }}"></button>
+                        </div>
                         <div id="message-content-container" class="surround-formatting-buttons-row">
                             <textarea class="new_message_textarea message-textarea" name="content" id='compose-textarea' placeholder="{{t 'Compose your message here' }}" tabindex="0" aria-label="{{t 'Compose your message here…' }}"></textarea>
                             <div id="preview-message-area-container">
@@ -121,6 +133,20 @@
                             <div class="drag"></div>
                         </div>
 
+                        <div class="hover-compose-quick-controls" aria-label="{{t 'Message actions' }}">
+                            {{#if file_upload_enabled }}
+                            <button type="button" class="hover-compose-tool-button hover-compose-add-button compose_upload_file" aria-label="{{t 'Add attachment' }}">
+                                <i class="zulip-icon zulip-icon-plus" aria-hidden="true"></i>
+                            </button>
+                            {{/if}}
+                            <button type="button" class="hover-compose-tool-button hover-compose-format-toggle" data-hover-compose-action="format" aria-label="{{t 'Show or hide formatting controls' }}" aria-controls="hover-compose-formatting-controls" aria-expanded="true"><span aria-hidden="true">Aa</span></button>
+                            <button type="button" class="hover-compose-tool-button emoji_map" aria-label="{{t 'Add emoji' }}">
+                                <i class="zulip-icon zulip-icon-smile-bigger" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" class="hover-compose-tool-button hover-compose-mention-button" data-hover-compose-action="mention" aria-label="{{t 'Mention a user' }}"><span aria-hidden="true">@</span></button>
+                            <button type="button" class="hover-compose-tool-button hover-compose-more-button compose_help_button" data-overlay-trigger="message-formatting" aria-label="{{t 'More message options' }}"><span aria-hidden="true">•••</span></button>
+                        </div>
+
                         <div id="message-send-controls-container">
                             <a id="compose-drafts-button" role="button" class="send-control-button hide-sm" tabindex=0 href="#drafts">
                                 <span class="compose-drafts-text">{{t 'Drafts' }}</span><span class="compose-drafts-count-container">(<span class="compose-drafts-count"></span>)</span>
@@ -130,9 +156,11 @@
                                 <button type="submit" id="compose-send-button" class="send_message compose-submit-button compose-send-or-save-button" aria-label="{{t 'Send' }}">
                                     <img class="loader" alt="" src="" />
                                     <i class="zulip-icon zulip-icon-send"></i>
+                                    <span class="hover-compose-send-label">{{t 'Send' }}</span>
                                 </button>
                                 <button class="send-control-button send-related-action-button" id="send_later" tabindex=0 type="button" data-tippy-content="{{t 'Send options' }}" aria-label="{{t 'Send options' }}">
                                     <i class="zulip-icon zulip-icon-more-vertical"></i>
+                                    <i class="hover-compose-send-chevron zulip-icon zulip-icon-chevron-down"></i>
                                 </button>
                             </div>
                         </div>

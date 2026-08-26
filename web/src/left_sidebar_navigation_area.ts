@@ -5,14 +5,12 @@ import * as drafts from "./drafts.ts";
 import type {Filter} from "./filter.ts";
 import * as hover_todos from "./hover_todos.ts";
 import {localstorage} from "./localstorage.ts";
-import * as message_reminder from "./message_reminder.ts";
 import * as navigation_views from "./navigation_views.ts";
 import {page_params} from "./page_params.ts";
 import * as people from "./people.ts";
 import * as resize from "./resize.ts";
 import * as scheduled_messages from "./scheduled_messages.ts";
 import * as settings_config from "./settings_config.ts";
-import {realm} from "./state_data.ts";
 import type {NarrowTerm} from "./state_data.ts";
 import * as ui_util from "./ui_util.ts";
 import * as unread from "./unread.ts";
@@ -72,10 +70,8 @@ export function update_scheduled_messages_row(): void {
 
 export function update_reminders_row(): void {
     const $reminders_li = $(".top_left_reminders");
-    const count = realm.realm_hover_enabled
-        ? hover_todos.get_count()
-        : message_reminder.get_count();
-    $reminders_li.toggleClass("hidden-by-filters", !realm.realm_hover_enabled && count === 0);
+    const count = hover_todos.get_count();
+    $reminders_li.toggleClass("hidden-by-filters", false);
     ui_util.update_unread_count_in_dom($reminders_li, count);
 }
 
@@ -330,12 +326,7 @@ export function get_built_in_popover_condensed_views(): navigation_views.BuiltIn
             return true;
         }
         if (view.fragment === "reminders") {
-            const reminders_count = realm.realm_hover_enabled
-                ? hover_todos.get_count()
-                : message_reminder.get_count();
-            if (!realm.realm_hover_enabled && reminders_count === 0) {
-                return false;
-            }
+            const reminders_count = hover_todos.get_count();
             view.unread_count = reminders_count;
             return true;
         }

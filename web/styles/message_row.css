@@ -1252,6 +1252,20 @@
             padding: 0 var(--date-divider-text-padding);
             cursor: pointer;
         }
+
+        > .scroll-to-time {
+            appearance: none;
+            display: inline-flex;
+            align-items: center;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: inherit;
+            cursor: pointer;
+            font: inherit;
+            letter-spacing: inherit;
+            text-transform: inherit;
+        }
     }
 
     .stream-status,

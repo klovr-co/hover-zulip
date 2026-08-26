@@ -8,7 +8,15 @@ const {mock_esm, set_global, zrequire} = require("./lib/namespace.cjs");
 const {run_test, noop} = require("./lib/test.cjs");
 const {$} = require("./lib/zjquery.cjs");
 
-set_global("document", "document-stub");
+let elements_from_point = () => [];
+set_global("document", {
+    elementsFromPoint(...args) {
+        return elements_from_point(...args);
+    },
+});
+
+class HTMLElementStub {}
+set_global("HTMLElement", HTMLElementStub);
 
 // timerender calls setInterval when imported
 mock_esm("../src/timerender", {
@@ -32,7 +40,9 @@ mock_esm("../src/people", {
 });
 
 const {Filter} = zrequire("../src/filter");
-const {MessageListView} = zrequire("../src/message_list_view");
+const {get_message_rows_below_sticky_header, MessageListView} = zrequire(
+    "../src/message_list_view",
+);
 const message_list = zrequire("message_list");
 const {MessageListData} = zrequire("message_list_data");
 const muted_users = zrequire("muted_users");
@@ -46,6 +56,23 @@ function test(label, f) {
         f({override, mock_template});
     });
 }
+
+run_test("sticky header samples the horizontal center of the message feed", () => {
+    const message_row = new HTMLElementStub();
+    message_row.classList = {contains: (class_name) => class_name === "message_row"};
+    const other_element = new HTMLElementStub();
+    other_element.classList = {contains: () => false};
+    const calls = [];
+    elements_from_point = (x_position, y_position) => {
+        calls.push([x_position, y_position]);
+        return [other_element, message_row];
+    };
+
+    const actual = get_message_rows_below_sticky_header({left: 328, width: 1072}, 146);
+
+    assert.deepEqual(calls, [[864, 146]]);
+    assert.deepEqual(actual, [message_row]);
+});
 
 test("msg_edited_and_moved_vars", () => {
     // This is a test to verify that when the stream or topic is changed

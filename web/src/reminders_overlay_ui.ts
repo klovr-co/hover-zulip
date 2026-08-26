@@ -1,21 +1,12 @@
 import {$} from "jquery";
 import assert from "minimalistic-assert";
 
-import render_reminder_list from "../templates/reminder_list.hbs";
-import render_reminders_overlay from "../templates/reminders_overlay.hbs";
-
 import * as browser_history from "./browser_history.ts";
 import * as hover_todos_overlay_ui from "./hover_todos_overlay_ui.ts";
 import * as message_reminder from "./message_reminder.ts";
 import type {Reminder} from "./message_reminder.ts";
 import * as messages_overlay_ui from "./messages_overlay_ui.ts";
 import * as overlays from "./overlays.ts";
-import {realm} from "./state_data.ts";
-import * as timerender from "./timerender.ts";
-
-type ReminderRenderContext = Reminder & {
-    formatted_send_at_time: string;
-};
 
 export const keyboard_handling_context = {
     get_items_ids() {
@@ -61,83 +52,12 @@ export function handle_keyboard_events(event_key: string): void {
     messages_overlay_ui.modals_handle_events(event_key, keyboard_handling_context);
 }
 
-function format(reminders: Map<number, Reminder>): ReminderRenderContext[] {
-    const formatted_reminders = [];
-    const sorted_reminders = sort_reminders(reminders);
-
-    for (const reminder of sorted_reminders) {
-        const time = new Date(reminder.scheduled_delivery_timestamp * 1000);
-        const formatted_send_at_time = timerender.get_full_datetime(time, "time");
-        const reminder_render_context = {
-            ...reminder,
-            formatted_send_at_time,
-        };
-        formatted_reminders.push(reminder_render_context);
-    }
-    return formatted_reminders;
-}
-
-export function launch(select_reminder_id?: number): void {
-    if (realm.realm_hover_enabled) {
-        hover_todos_overlay_ui.launch();
-        return;
-    }
-    $("#reminders-overlay-container").html(render_reminders_overlay());
-    overlays.open_overlay({
-        name: "reminders",
-        $overlay: $("#reminders-overlay"),
-        on_close() {
-            browser_history.exit_overlay();
-        },
-    });
-
-    const rendered_list = render_reminder_list({
-        reminders_data: format(message_reminder.reminders_by_id),
-    });
-    const $messages_list = $("#reminders-overlay .overlay-messages-list");
-    $messages_list.append($(rendered_list));
-
-    const restore_id = messages_overlay_ui.get_and_clear_pending_restore_element_id();
-    if (
-        restore_id !== undefined &&
-        messages_overlay_ui.try_set_initial_element(restore_id, keyboard_handling_context)
-    ) {
-        return;
-    }
-
-    if (select_reminder_id !== undefined) {
-        // Check that the reminder to be focused exists.
-        const $reminder_to_be_focused = $(
-            `#reminders-overlay .reminder-row[data-reminder-id=${CSS.escape(
-                select_reminder_id.toString(),
-            )}]`,
-        );
-        if ($reminder_to_be_focused.length > 0) {
-            messages_overlay_ui.set_initial_element(
-                select_reminder_id.toString(),
-                keyboard_handling_context,
-            );
-            return;
-        }
-    }
-    const first_element_id = keyboard_handling_context.get_items_ids()[0];
-    messages_overlay_ui.set_initial_element(first_element_id, keyboard_handling_context);
+export function launch(): void {
+    hover_todos_overlay_ui.launch();
 }
 
 export function rerender(): void {
-    if (realm.realm_hover_enabled) {
-        hover_todos_overlay_ui.rerender();
-        return;
-    }
-    if (!overlays.reminders_open()) {
-        return;
-    }
-    const rendered_list = render_reminder_list({
-        reminders_data: format(message_reminder.reminders_by_id),
-    });
-    const $messages_list = $("#reminders-overlay .overlay-messages-list");
-    $messages_list.find(".reminder-row").remove();
-    $messages_list.append($(rendered_list));
+    hover_todos_overlay_ui.rerender();
 }
 
 export function remove_reminder_id(reminder_id: number): void {
@@ -163,13 +83,11 @@ export function initialize(): void {
         messages_overlay_ui.activate_element(this, keyboard_handling_context);
     });
 
-    $("body").on("click", ".message-reminder-overlay-link", function (e) {
+    $("body").on("click", ".message-reminder-overlay-link", (e) => {
         e.stopPropagation();
         e.preventDefault();
 
-        const reminder_id = $(this).attr("data-reminder-id");
-        assert(reminder_id !== undefined);
-        launch(Number.parseInt(reminder_id, 10));
+        launch();
     });
 
     $("body").on("click", ".reminder-row .restore-overlay-message", (e) => {

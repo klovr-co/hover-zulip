@@ -238,8 +238,6 @@ class Realm(models.Model):
 
     # Whether digest emails are enabled for the organization.
     digest_emails_enabled = models.BooleanField(default=False)
-    # Whether this organization uses the Hover product surface.
-    hover_enabled = models.BooleanField(default=False)
     # Day of the week on which the digest is sent (default: Tuesday).
     digest_weekday = models.SmallIntegerField(default=1)
 
@@ -773,7 +771,6 @@ class Realm(models.Model):
         enable_read_receipts=bool,
         enable_spectator_access=bool,
         gif_rating_policy=int,
-        hover_enabled=bool,
         media_preview_size=int,
         inline_image_preview=bool,
         inline_url_embed_preview=bool,

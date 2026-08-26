@@ -58,7 +58,7 @@ mock_esm("../src/people", {
 });
 mock_esm("../src/state_data", {
     current_user: {user_id: 7, is_guest: false},
-    realm: {realm_hover_enabled: true},
+    realm: {},
 });
 
 const pipeline_library_ui = zrequire("hover_pipeline_library_ui");

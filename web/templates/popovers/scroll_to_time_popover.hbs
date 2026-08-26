@@ -1,26 +1,109 @@
-<div class="popover-menu" id="scroll-to-time-popover" data-simplebar data-simplebar-tab-index="-1">
+<div
+  class="popover-menu"
+  id="scroll-to-time-popover"
+  data-simplebar
+  data-simplebar-tab-index="-1"
+  >
     <ul role="menu" class="popover-menu-list">
-        <li role="none" class="text-item popover-menu-list-item">
-            <span class="popover-header-name">{{t "Scroll to" }}</span>
-        </li>
-        <li role="separator" class="popover-menu-separator"></li>
-        <li role="none" class="link-item popover-menu-list-item">
-            <a role="menuitem" class="popover-menu-link" id="scroll_to_oldest" tabindex="0">
-                <span class="popover-menu-label">{{t "Oldest message" }}</span>
-            </a>
-        </li>
-        {{#each suggested_dates}}
+        {{#if slack_style}}
+            <li role="none" class="text-item popover-menu-list-item">
+                <span class="popover-header-name">{{t "Jump to…"}}</span>
+            </li>
             <li role="none" class="link-item popover-menu-list-item">
-                <a role="menuitem" class="popover-menu-link scroll-to-suggested-date" data-iso-date="{{this.iso_date_string}}" tabindex="0">
-                    <span class="popover-menu-label">{{this.label}}</span>
+                <a
+                  role="menuitem"
+                  class="popover-menu-link"
+                  id="scroll_to_newest"
+                  tabindex="0"
+                  >
+                    <span class="popover-menu-label">{{t "Most recent"}}</span>
                 </a>
             </li>
-        {{/each}}
-        <li role="separator" class="popover-menu-separator"></li>
-        <li role="none" class="link-item popover-menu-list-item">
-            <a role="menuitem" class="popover-menu-link" id="scroll_to_custom" tabindex="0">
-                <span class="popover-menu-label">{{t "Custom" }}</span>
-            </a>
-        </li>
+            <li role="none" class="link-item popover-menu-list-item">
+                <a
+                  role="menuitem"
+                  class="popover-menu-link"
+                  id="scroll_to_last_week"
+                  tabindex="0"
+                  >
+                    <span class="popover-menu-label">{{t "Last week"}}</span>
+                </a>
+            </li>
+            <li role="none" class="link-item popover-menu-list-item">
+                <a
+                  role="menuitem"
+                  class="popover-menu-link"
+                  id="scroll_to_last_month"
+                  tabindex="0"
+                  >
+                    <span class="popover-menu-label">{{t "Last month"}}</span>
+                </a>
+            </li>
+            <li role="none" class="link-item popover-menu-list-item">
+                <a
+                  role="menuitem"
+                  class="popover-menu-link"
+                  id="scroll_to_oldest"
+                  tabindex="0"
+                  >
+                    <span class="popover-menu-label">{{t
+                            "The very beginning"
+                        }}</span>
+                </a>
+            </li>
+            <li role="separator" class="popover-menu-separator"></li>
+            <li role="none" class="link-item popover-menu-list-item">
+                <a
+                  role="menuitem"
+                  class="popover-menu-link"
+                  id="scroll_to_custom"
+                  tabindex="0"
+                  >
+                    <span class="popover-menu-label">{{t
+                            "Jump to a specific date"
+                        }}</span>
+                </a>
+            </li>
+        {{else}}
+            <li role="none" class="text-item popover-menu-list-item">
+                <span class="popover-header-name">{{t "Scroll to"}}</span>
+            </li>
+            <li role="separator" class="popover-menu-separator"></li>
+            <li role="none" class="link-item popover-menu-list-item">
+                <a
+                  role="menuitem"
+                  class="popover-menu-link"
+                  id="scroll_to_oldest"
+                  tabindex="0"
+                  >
+                    <span class="popover-menu-label">{{t
+                            "Oldest message"
+                        }}</span>
+                </a>
+            </li>
+            {{#each suggested_dates}}
+                <li role="none" class="link-item popover-menu-list-item">
+                    <a
+                      role="menuitem"
+                      class="popover-menu-link scroll-to-suggested-date"
+                      data-iso-date="{{this.iso_date_string}}"
+                      tabindex="0"
+                      >
+                        <span class="popover-menu-label">{{this.label}}</span>
+                    </a>
+                </li>
+            {{/each}}
+            <li role="separator" class="popover-menu-separator"></li>
+            <li role="none" class="link-item popover-menu-list-item">
+                <a
+                  role="menuitem"
+                  class="popover-menu-link"
+                  id="scroll_to_custom"
+                  tabindex="0"
+                  >
+                    <span class="popover-menu-label">{{t "Custom"}}</span>
+                </a>
+            </li>
+        {{/if}}
     </ul>
 </div>

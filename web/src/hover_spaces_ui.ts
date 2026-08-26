@@ -12,7 +12,7 @@ import * as hover_connected_accounts from "./hover_connected_accounts.ts";
 import * as hover_spaces from "./hover_spaces.ts";
 import {$t, $t_html} from "./i18n.ts";
 import * as people from "./people.ts";
-import {current_user, realm} from "./state_data.ts";
+import {current_user} from "./state_data.ts";
 import * as stream_list from "./stream_list.ts";
 import * as ui_report from "./ui_report.ts";
 
@@ -87,9 +87,6 @@ export function open_create_space(): void {
 }
 
 export function open_setup_space(space_id: number): void {
-    if (!realm.realm_hover_enabled) {
-        return;
-    }
     const maybe_space = hover_spaces.get_by_id(space_id);
     if (maybe_space?.state !== "setup") {
         return;

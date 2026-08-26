@@ -21211,10 +21211,6 @@ paths:
                           **Changes**: New in Zulip 5.0 (feature level 109).
 
                           [server-settings]: https://zulip.readthedocs.io/en/stable/production/settings.html
-                      realm_hover_enabled:
-                        type: boolean
-                        description: |
-                          Present if `realm` is present in `fetch_event_types`.
 
                           Whether Hover features are enabled for this organization.
                       realm_want_advertise_in_communities_directory:

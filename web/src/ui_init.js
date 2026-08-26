@@ -57,6 +57,7 @@ import * as hashchange from "./hashchange.ts";
 import * as hotkey from "./hotkey.ts";
 import * as hover_all_view from "./hover_all_view.ts";
 import * as hover_awareness_view from "./hover_awareness_view.ts";
+import * as hover_compose_ui from "./hover_compose_ui.ts";
 import * as hover_connected_accounts from "./hover_connected_accounts.ts";
 import * as hover_editions_view from "./hover_editions_view.ts";
 import * as hover_evidence from "./hover_evidence.ts";
@@ -471,7 +472,7 @@ export async function initialize_everything(state_data) {
 
     set_current_user(state_data.current_user);
     set_realm(state_data.realm);
-    $("body").toggleClass("hover-enabled", realm.realm_hover_enabled);
+    $("body").addClass("hover-enabled");
     set_realm_billing(state_data.realm_billing);
 
     if (page_params.narrow_stream !== undefined) {
@@ -504,7 +505,6 @@ export async function initialize_everything(state_data) {
     // This populates data for scheduled messages.
     scheduled_messages.initialize(state_data.scheduled_messages);
     message_reminder.initialize(state_data.reminders);
-    navigation_views.set_hover_enabled(realm.realm_hover_enabled);
     navigation_views.initialize(state_data.navigation_views);
     scheduled_messages_ui.initialize();
     reminders_overlay_ui.initialize();
@@ -548,9 +548,7 @@ export async function initialize_everything(state_data) {
     hover_response.initialize();
     hover_review_request.initialize();
     hover_suggested_actions.initialize();
-    if (realm.realm_hover_enabled) {
-        hover_todos.initialize();
-    }
+    hover_todos.initialize();
     hover_spaces.initialize(state_data.hover_spaces);
     hover_all_view.initialize();
     hover_awareness_view.initialize();
@@ -565,6 +563,7 @@ export async function initialize_everything(state_data) {
     initialize_bottom_whitespace();
     sidebar_ui.initialize_left_sidebar();
     initialize_compose_box();
+    hover_compose_ui.initialize();
     settings.initialize();
     initialize_navbar();
     initialize_message_feed_errors();
