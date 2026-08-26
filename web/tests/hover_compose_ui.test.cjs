@@ -18,21 +18,18 @@ const hover_compose_ui = zrequire("hover_compose_ui");
 
 function initialize_dom() {
     const $compose = $("#compose");
-    const $messagebox = $("#messagebox-for-test").addClass("hover-formatting-expanded");
-    const $format_button = $("#format-button-for-test")
-        .attr("data-hover-compose-action", "format")
-        .attr("aria-expanded", "true");
+    const $messagebox = $("#send_message_form .messagebox").addClass(
+        "hover-formatting-expanded",
+    );
+    const $format_button = $("[data-hover-compose-action='format']").attr(
+        "aria-expanded",
+        "true",
+    );
     const $mention_button = $("#mention-button-for-test").attr(
         "data-hover-compose-action",
         "mention",
     );
     const $textarea = $("#compose-textarea");
-
-    $("#send_message_form .messagebox").set_find_results(".messagebox", $messagebox);
-    $("[data-hover-compose-action='format']").set_find_results(
-        "[data-hover-compose-action='format']",
-        $format_button,
-    );
 
     hover_compose_ui.initialize();
 
@@ -61,5 +58,5 @@ run_test("inserts a mention trigger at the caret", () => {
 
     assert.equal(insertions.length, 1);
     assert.equal(insertions[0].content, "@");
-    assert.equal(insertions[0].$textarea, $textarea);
+    assert.equal(insertions[0].$textarea[0], $textarea[0]);
 });

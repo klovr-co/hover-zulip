@@ -4098,6 +4098,16 @@ a {
 }
 
 #message_feed_container
+    .date-divider-content.date-divider-under-sticky-header {
+    visibility: hidden;
+}
+
+#message_feed_container .recipient_row_date.sticky-date-empty-gap {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#message_feed_container
     .message_feed_divider
     .date-divider-content::before,
 #message_feed_container
@@ -4116,7 +4126,9 @@ a {
     flex: 1;
 }
 
-:is(.recipient_row_date, .date-divider-content) > .scroll-to-time {
+#message_feed_container
+    :is(.recipient_row_date, .date-divider-content)
+    > .scroll-to-time {
     appearance: none;
     display: inline-flex;
     align-items: center;
@@ -4155,12 +4167,15 @@ a {
     transform: translateY(-2px) rotate(45deg);
 }
 
-:is(.recipient_row_date, .date-divider-content) > .scroll-to-time:hover {
+#message_feed_container
+    :is(.recipient_row_date, .date-divider-content)
+    > .scroll-to-time:hover {
     border-color: var(--hover-topic-muted);
     background: var(--hover-topic-control-hover);
 }
 
-:is(.recipient_row_date, .date-divider-content)
+#message_feed_container
+    :is(.recipient_row_date, .date-divider-content)
     > .scroll-to-time:is(:focus-visible, [aria-expanded="true"]) {
     border-color: var(--hover-topic-accent);
     box-shadow: 0 0 0 2px hsl(147deg 58% 33% / 18%);

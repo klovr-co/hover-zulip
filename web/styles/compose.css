@@ -1477,12 +1477,6 @@ textarea.new_message_textarea {
     }
 }
 
-/* The Hover topic presentation uses a text label to match its compact,
-   action-oriented composer. Other Zulip layouts retain the familiar icon. */
-.hover-compose-send-label {
-    display: none;
-}
-
 .hover-compose-quick-controls {
     display: none;
 }

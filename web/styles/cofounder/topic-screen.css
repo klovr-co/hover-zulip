@@ -5,7 +5,7 @@
  * topic. Zulip continues to own the DOM and all behavior; this file maps the
  * approved Slack-light prototype onto those existing components.
  */
-@media (width >= 1101px) {
+@media (width >= 768px) {
     /* The topic frame is stationary; only its message feed may scroll. */
     html:has(body.hover-enabled.hover-topic-screen) {
         overflow: hidden;
@@ -798,6 +798,15 @@
     }
 
     body.hover-enabled.hover-topic-screen
+        .message_header.sticky_header
+        .recipient_row_date::before,
+    body.hover-enabled.hover-topic-screen
+        .message_header.sticky_header
+        .recipient_row_date::after {
+        display: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
         #message_feed_container
         .message_row:has(> .message_feed_divider .date-divider-content)
         > .message_feed_divider {
@@ -1284,10 +1293,6 @@
         .zulip-icon-send {
         display: block;
         font-size: 18px;
-    }
-
-    body.hover-topic-screen .hover-compose-send-label {
-        display: none;
     }
 
     body.hover-topic-screen .send-related-action-button {

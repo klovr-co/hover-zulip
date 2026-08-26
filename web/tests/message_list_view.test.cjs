@@ -8,15 +8,9 @@ const {mock_esm, set_global, zrequire} = require("./lib/namespace.cjs");
 const {run_test, noop} = require("./lib/test.cjs");
 const {$} = require("./lib/zjquery.cjs");
 
-let elements_from_point = () => [];
-set_global("document", {
-    elementsFromPoint(...args) {
-        return elements_from_point(...args);
-    },
-});
+set_global("document", {});
 
 class HTMLElementStub {}
-set_global("HTMLElement", HTMLElementStub);
 
 // timerender calls setInterval when imported
 mock_esm("../src/timerender", {
@@ -40,9 +34,7 @@ mock_esm("../src/people", {
 });
 
 const {Filter} = zrequire("../src/filter");
-const {get_message_rows_below_sticky_header, MessageListView} = zrequire(
-    "../src/message_list_view",
-);
+const {get_message_row_at_sticky_date, MessageListView} = zrequire("../src/message_list_view");
 const message_list = zrequire("message_list");
 const {MessageListData} = zrequire("message_list_data");
 const muted_users = zrequire("muted_users");
@@ -57,21 +49,62 @@ function test(label, f) {
     });
 }
 
-run_test("sticky header samples the horizontal center of the message feed", () => {
-    const message_row = new HTMLElementStub();
-    message_row.classList = {contains: (class_name) => class_name === "message_row"};
-    const other_element = new HTMLElementStub();
-    other_element.classList = {contains: () => false};
-    const calls = [];
-    elements_from_point = (x_position, y_position) => {
-        calls.push([x_position, y_position]);
-        return [other_element, message_row];
-    };
+run_test("sticky date belongs to the message row occupying its center", () => {
+    const friday_row = new HTMLElementStub();
+    friday_row.getBoundingClientRect = () => ({top: 156, bottom: 350});
+    const saturday_row = new HTMLElementStub();
+    saturday_row.getBoundingClientRect = () => ({top: 380, bottom: 520});
 
-    const actual = get_message_rows_below_sticky_header({left: 328, width: 1072}, 146);
+    const actual = get_message_row_at_sticky_date([friday_row, saturday_row], {
+        top: 159,
+        height: 30,
+    });
 
-    assert.deepEqual(calls, [[864, 146]]);
-    assert.deepEqual(actual, [message_row]);
+    assert.equal(actual, friday_row);
+});
+
+run_test("sticky date is absent in the gap between days", () => {
+    const friday_row = new HTMLElementStub();
+    friday_row.getBoundingClientRect = () => ({top: 80, bottom: 160});
+    const saturday_row = new HTMLElementStub();
+    saturday_row.getBoundingClientRect = () => ({top: 190, bottom: 350});
+    saturday_row.querySelector = (selector) => (selector === ".date-divider-content" ? {} : null);
+
+    const actual = get_message_row_at_sticky_date([friday_row, saturday_row], {
+        top: 159,
+        height: 30,
+    });
+
+    assert.equal(actual, undefined);
+});
+
+run_test("sticky date persists through spacing between messages on the same day", () => {
+    const first_friday_row = new HTMLElementStub();
+    first_friday_row.getBoundingClientRect = () => ({top: 80, bottom: 160});
+    const second_friday_row = new HTMLElementStub();
+    second_friday_row.getBoundingClientRect = () => ({top: 190, bottom: 350});
+    second_friday_row.querySelector = () => null;
+
+    const actual = get_message_row_at_sticky_date([first_friday_row, second_friday_row], {
+        top: 159,
+        height: 30,
+    });
+
+    assert.equal(actual, first_friday_row);
+});
+
+run_test("next day owns the sticky date at the exact row boundary", () => {
+    const friday_row = new HTMLElementStub();
+    friday_row.getBoundingClientRect = () => ({top: 80, bottom: 174});
+    const saturday_row = new HTMLElementStub();
+    saturday_row.getBoundingClientRect = () => ({top: 174, bottom: 350});
+
+    const actual = get_message_row_at_sticky_date([friday_row, saturday_row], {
+        top: 159,
+        height: 30,
+    });
+
+    assert.equal(actual, saturday_row);
 });
 
 test("msg_edited_and_moved_vars", () => {
