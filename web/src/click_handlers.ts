@@ -13,6 +13,7 @@ import * as buddy_data from "./buddy_data.ts";
 import * as compose_actions from "./compose_actions.ts";
 import * as compose_reply from "./compose_reply.ts";
 import * as compose_state from "./compose_state.ts";
+import * as date_util from "./date_util.ts";
 import * as emoji_picker from "./emoji_picker.ts";
 import * as flatpickr from "./flatpickr.ts";
 import * as hash_util from "./hash_util.ts";
@@ -465,13 +466,14 @@ export function initialize(): void {
     function open_scroll_to_time_popover(trigger_element: HTMLElement, message_id: number): void {
         popover_menus.toggle_popover_menu(trigger_element, {
             theme: "popover-menu",
-            placement: "bottom",
+            placement: "bottom-start",
+            offset: [0, 4],
             popperOptions: {
                 modifiers: [
                     {
                         name: "flip",
                         options: {
-                            fallbackPlacements: ["top"],
+                            fallbackPlacements: ["top-start"],
                         },
                     },
                 ],
@@ -481,15 +483,39 @@ export function initialize(): void {
                 assert(message_lists.current !== undefined);
                 const messages = message_lists.current.all_messages();
                 const clicked_message = message_lists.current.get(message_id)!;
-                const suggested_dates = popover_menus_data.get_scroll_to_date_suggestions(
-                    messages,
-                    clicked_message.timestamp,
+                const slack_style = document.body.classList.contains("hover-enabled");
+                const suggested_dates = slack_style
+                    ? []
+                    : popover_menus_data.get_scroll_to_date_suggestions(
+                          messages,
+                          clicked_message.timestamp,
+                      );
+                instance.setContent(
+                    parse_html(render_scroll_to_time_popover({slack_style, suggested_dates})),
                 );
-                instance.setContent(parse_html(render_scroll_to_time_popover({suggested_dates})));
             },
             onMount(instance) {
                 const $popper = $(instance.popper);
                 popover_menus.popover_instances.scroll_to_time = instance;
+
+                $popper.on("click", "#scroll_to_newest", () => {
+                    message_view.fast_track_current_msg_list_to_anchor("newest");
+                    popover_menus.hide_current_popover_if_visible(instance);
+                });
+
+                $popper.on("click", "#scroll_to_last_week, #scroll_to_last_month", function () {
+                    const default_dates = date_util.get_default_suggestions();
+                    const operand = $(this).is("#scroll_to_last_week")
+                        ? default_dates.a_week_ago.operand
+                        : default_dates.a_month_ago.operand;
+                    const date_anchor = date_util.maybe_get_date_anchor(operand);
+                    assert(date_anchor !== undefined);
+                    message_view.fast_track_current_msg_list_to_anchor(
+                        date_anchor.anchor,
+                        date_anchor.anchor_date,
+                    );
+                    popover_menus.hide_current_popover_if_visible(instance);
+                });
 
                 $popper.on("click", "#scroll_to_oldest", () => {
                     message_view.fast_track_current_msg_list_to_anchor("oldest");
@@ -519,8 +545,9 @@ export function initialize(): void {
         e.stopPropagation();
 
         assert(message_lists.current !== undefined);
-        if ($(this).hasClass("recipient_row_date")) {
-            const $recipient_row = $(this).closest(".recipient_row");
+        const $recipient_row_date = $(this).closest(".recipient_row_date");
+        if ($recipient_row_date.length > 0) {
+            const $recipient_row = $recipient_row_date.closest(".recipient_row");
             const message_id = rows.id_for_recipient_row($recipient_row);
             open_scroll_to_time_popover(this, message_id);
             return;

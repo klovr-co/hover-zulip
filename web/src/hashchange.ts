@@ -24,7 +24,6 @@ import * as overlays from "./overlays.ts";
 import {page_params} from "./page_params.ts";
 import * as people from "./people.ts";
 import * as popovers from "./popovers.ts";
-import * as recent_view_ui from "./recent_view_ui.ts";
 import * as reminders_overlay_ui from "./reminders_overlay_ui.ts";
 import * as scheduled_messages_overlay_ui from "./scheduled_messages_overlay_ui.ts";
 import * as settings from "./settings.ts";
@@ -32,7 +31,7 @@ import * as settings_panel_menu from "./settings_panel_menu.ts";
 import * as settings_toggle from "./settings_toggle.ts";
 import * as sidebar_ui from "./sidebar_ui.ts";
 import * as spectators from "./spectators.ts";
-import {current_user, realm} from "./state_data.ts";
+import {current_user} from "./state_data.ts";
 import * as stream_settings_ui from "./stream_settings_ui.ts";
 import * as ui_report from "./ui_report.ts";
 import * as user_group_edit from "./user_group_edit.ts";
@@ -146,11 +145,7 @@ function show_home_view(narrow_opts?: message_view.ShowMessageViewOpts): void {
     // rendered without a hash.
     switch (user_settings.web_home_view) {
         case "recent": {
-            if (realm.realm_hover_enabled) {
-                hover_awareness_view.show("team_pulse");
-            } else {
-                recent_view_ui.show();
-            }
+            hover_awareness_view.show("team_pulse");
             break;
         }
         case "all_messages": {
@@ -159,11 +154,7 @@ function show_home_view(narrow_opts?: message_view.ShowMessageViewOpts): void {
             break;
         }
         case "inbox": {
-            if (realm.realm_hover_enabled) {
-                hover_awareness_view.show("for_you");
-            } else {
-                inbox_ui.show();
-            }
+            hover_awareness_view.show("for_you");
             break;
         }
         default: {
@@ -264,26 +255,14 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
             // for #recent permanently. We show the view and then
             // replace the current URL hash in a way designed to hide
             // this detail in the browser's forward/back session history.
-            if (realm.realm_hover_enabled) {
-                hover_awareness_view.show("team_pulse");
-            } else {
-                recent_view_ui.show();
-            }
+            hover_awareness_view.show("team_pulse");
             window.location.replace("#recent");
             break;
         case "#recent":
-            if (realm.realm_hover_enabled) {
-                hover_awareness_view.show("team_pulse");
-            } else {
-                recent_view_ui.show();
-            }
+            hover_awareness_view.show("team_pulse");
             break;
         case "#inbox":
-            if (realm.realm_hover_enabled) {
-                hover_awareness_view.show("for_you");
-            } else {
-                inbox_ui.show();
-            }
+            hover_awareness_view.show("for_you");
             break;
         case "#all_messages":
             // "#all_messages" was renamed to "#feed" in 2024. Unlike
@@ -300,7 +279,7 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
             if (hash.length === 3 && hash[1] === "editions" && hash[2] === "") {
                 hash.pop();
             }
-            if (hash.length === 2 && hash[1] === "editions" && realm.realm_hover_enabled) {
+            if (hash.length === 2 && hash[1] === "editions") {
                 hover_source_view.hide();
                 hover_search_view.hide();
                 hover_editions_view.show();

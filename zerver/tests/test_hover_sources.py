@@ -37,11 +37,10 @@ class HoverSourcesTest(ZulipTestCase):
         super().setUp()
         self.actor = self.example_user("hamlet")
         self.realm = self.actor.realm
-        self.realm.hover_enabled = True
         self.realm.can_create_spaces_group = get_system_user_group_by_name(
             SystemGroups.MEMBERS, self.realm.id
         )
-        self.realm.save(update_fields=["hover_enabled", "can_create_spaces_group"])
+        self.realm.save(update_fields=["can_create_spaces_group"])
         self.category = check_add_channel_folder(
             self.realm,
             "Programs",

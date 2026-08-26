@@ -38,8 +38,6 @@ class HoverPersonalEditionsTest(ZulipTestCase):
         super().setUp()
         self.user = self.example_user("hamlet")
         self.realm = self.user.realm
-        self.realm.hover_enabled = True
-        self.realm.save(update_fields=["hover_enabled"])
         category = check_add_channel_folder(
             self.realm, "Programs", "", acting_user=self.example_user("iago")
         )

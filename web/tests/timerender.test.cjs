@@ -273,6 +273,53 @@ run_test("render_now_returns_month_and_day", () => {
     clock.reset();
 });
 
+run_test("render_now_returns_slack_style_day_divider_dates", ({override}) => {
+    clock.setSystemTime(date_2019.getTime());
+    override(user_settings, "default_language", "en");
+
+    const same_year = add(date_2019, {months: -3});
+    const previous_year = add(date_2019, {years: -1});
+
+    assert.equal(
+        timerender.render_now(same_year, date_2019, false, "day_divider").time_str,
+        "Saturday, January 12th",
+    );
+    assert.equal(
+        timerender.render_now(previous_year, date_2019, false, "day_divider").time_str,
+        "Thursday, April 12th, 2018",
+    );
+    assert.equal(
+        timerender.render_now(date_2019, date_2019, false, "day_divider").time_str,
+        $t({defaultMessage: "Today"}),
+    );
+
+    clock.reset();
+});
+
+run_test("day divider dates preserve localization", ({override}) => {
+    override(user_settings, "default_language", "fr");
+    const same_year = add(date_2019, {months: -3});
+
+    assert.equal(
+        timerender.render_now(same_year, date_2019, false, "day_divider").time_str,
+        "samedi 12 janvier",
+    );
+});
+
+run_test("day divider year boundaries use the display time zone", ({override}) => {
+    override(user_settings, "default_language", "en");
+    timerender.set_display_time_zone("America/Los_Angeles");
+
+    const message_time = new Date("2020-01-01T02:00:00.000Z");
+    const today = new Date("2020-06-01T12:00:00.000Z");
+    assert.equal(
+        timerender.render_now(message_time, today, false, "day_divider").time_str,
+        "Tuesday, December 31st, 2019",
+    );
+
+    timerender.set_display_time_zone("UTC");
+});
+
 run_test("format_time_modern", () => {
     const today = date_2021;
 

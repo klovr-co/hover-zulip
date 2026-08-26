@@ -50,7 +50,6 @@ class PopulateHoverDemoTest(ZulipTestCase):
         self.assertTrue(stream.invite_only)
         self.assertFalse(stream.history_public_to_subscribers)
         self.assertFalse(stream.is_web_public)
-        self.assertTrue(realm.hover_enabled)
         space = Space.objects.get(realm=realm, name="AIMTO Events")
         self.assertEqual(space.state, Space.State.LAUNCHED)
         self.assertEqual(space.category, stream.folder)

@@ -1,5 +1,27 @@
 ## Agent skills
 
+## CI and testing
+
+Run CI-style checks through the Conductor Spotlight host rather than
+provisioning Docker or a worktree-local development environment. The Spotlight
+host has the repository's supported development dependencies and is the
+appropriate environment for frontend lint and test commands.
+
+## Product direction
+
+Hover is the product and the only supported user experience. This repository
+is transitioning its inherited Zulip implementation into Hover; treat Zulip as
+the legacy technical foundation, not as a presentation mode that must remain
+available.
+
+- Build new UI and UX as unconditional Hover behavior. Do not introduce or
+  preserve `hover-enabled` feature gates merely to keep an ordinary Zulip UI.
+- Prefer one canonical Hover implementation over parallel Hover and Zulip
+  variants.
+- Preserve inherited Zulip DOM, behavior, and infrastructure only where Hover
+  still depends on them during the migration. Do not remove those foundations
+  without tracing their consumers.
+
 ### Issue tracker
 
 Issues and PRDs live in GitHub Issues. Use the `gh` CLI. See

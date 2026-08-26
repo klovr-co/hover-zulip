@@ -12,9 +12,9 @@ mock_esm("../src/resize", {
 });
 
 const {Filter} = zrequire("../src/filter");
+const hover_todos = zrequire("hover_todos");
 const left_sidebar_navigation_area = zrequire("left_sidebar_navigation_area");
 const scheduled_messages = zrequire("scheduled_messages");
-const message_reminder = zrequire("message_reminder");
 const state_data = zrequire("state_data");
 
 state_data.set_realm(make_realm());
@@ -106,7 +106,8 @@ run_test("update_count_in_dom", () => {
         stream_unread_messages: 666,
         stream_count: new Map(),
     };
-    message_reminder.set_reminders_by_id_for_testing(new Map([[1, {id: 1}]]));
+    hover_todos.todos.clear();
+    hover_todos.todos.set(1, {state: "active"});
     scheduled_messages.set_scheduled_messages_by_id_for_testing(
         new Map([
             [1, {id: 1}],
@@ -145,7 +146,7 @@ run_test("update_count_in_dom", () => {
     assert.ok(!$(".top_left_reminders").hasClass("hidden-by-filters"));
 
     counts.mentioned_message_count = 0;
-    message_reminder.set_reminders_by_id_for_testing(new Map());
+    hover_todos.todos.clear();
     scheduled_messages.set_scheduled_messages_by_id_for_testing(new Map());
 
     left_sidebar_navigation_area.update_dom_with_unread_counts(counts, false);
@@ -159,5 +160,5 @@ run_test("update_count_in_dom", () => {
     assert.equal($("<starred-count>").text(), "444");
     assert.ok($(".top_left_starred_messages").hasClass("hide_starred_message_count"));
     assert.ok($(".top_left_scheduled_messages").hasClass("hidden-by-filters"));
-    assert.ok($(".top_left_reminders").hasClass("hidden-by-filters"));
+    assert.ok(!$(".top_left_reminders").hasClass("hidden-by-filters"));
 });

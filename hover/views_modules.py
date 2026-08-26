@@ -375,8 +375,6 @@ def archive_module_version(
 @require_non_guest_user
 @typed_endpoint_without_parameters
 def list_module_catalog(request: HttpRequest, user_profile: UserProfile) -> HttpResponse:
-    if not user_profile.realm.hover_enabled:
-        raise JsonableError(_("Hover is not enabled for this organization."))
     return json_success(request, data={"modules": get_module_catalog(user_profile.realm)})
 
 

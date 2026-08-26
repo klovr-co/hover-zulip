@@ -24,9 +24,6 @@ def get_realm_administrator_ids(realm_id: int) -> set[int]:
 
 def get_visible_connected_accounts(user_profile: UserProfile) -> QuerySet[ConnectedAccount]:
     accounts = ConnectedAccount.objects.filter(realm=user_profile.realm)
-    if not user_profile.realm.hover_enabled:
-        return accounts.none()
-
     if not user_profile.is_realm_admin:
         accounts = accounts.filter(
             Q(created_by=user_profile) | Q(owner=user_profile) | Q(grants__user=user_profile)
@@ -57,9 +54,7 @@ def access_connected_account(
         .select_related("created_by", "owner")
         .prefetch_related("grants__user", "grants__selectors")
     )
-    if not user_profile.realm.hover_enabled:
-        queryset = queryset.none()
-    elif not require_administrator:
+    if not require_administrator:
         queryset = get_visible_connected_accounts(user_profile)
 
     try:
@@ -154,8 +149,7 @@ def user_can_use_connected_account(
     grant and deliberately treats an empty selector list as deny-all.
     """
     if (
-        not user_profile.realm.hover_enabled
-        or account.realm_id != user_profile.realm_id
+        account.realm_id != user_profile.realm_id
         or account.approval_state != ConnectedAccount.ApprovalState.APPROVED
         or (
             account.provider_key == "whatsapp"

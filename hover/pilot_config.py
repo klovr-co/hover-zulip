@@ -780,10 +780,6 @@ class PilotReconciler:
         self.actions = []
         operator = self.users[self.config.metadata.operator_email.casefold()]
         with transaction.atomic(durable=True):
-            if not self.realm.hover_enabled:
-                self.realm.hover_enabled = True
-                self.realm.save(update_fields=["hover_enabled"])
-                self.actions.append("enable Hover for realm")
             category = self._reconcile_category(operator)
             space = self._reconcile_space(operator, category)
             accounts = self._reconcile_accounts(operator)

@@ -138,19 +138,12 @@ def user_can_create_pipelines(user: UserProfile) -> bool:
     return user.is_realm_admin or user_is_pipeline_creator(user)
 
 
-def _assert_hover_enabled(user: UserProfile) -> None:
-    if not user.realm.hover_enabled:
-        raise JsonableError(_("Hover is not enabled for this organization."))
-
-
 def _assert_creator(user: UserProfile) -> None:
-    _assert_hover_enabled(user)
     if not user_can_create_pipelines(user):
         raise JsonableError(_("You do not have permission to create Pipelines."))
 
 
 def _assert_realm_admin(user: UserProfile) -> None:
-    _assert_hover_enabled(user)
     if not user.is_realm_admin:
         raise JsonableError(_("Must be an organization administrator"))
 
@@ -450,7 +443,6 @@ def visible_drafts(user: UserProfile) -> QuerySet[ModuleDraft]:
 
 
 def get_pipeline_library_data(user: UserProfile) -> dict[str, object]:
-    _assert_hover_enabled(user)
     from hover.actions_modules import ensure_prebuilt_module_catalog
 
     ensure_prebuilt_module_catalog(user.realm)

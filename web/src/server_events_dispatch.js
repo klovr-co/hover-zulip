@@ -8,7 +8,6 @@ import * as audible_notifications from "./audible_notifications.ts";
 import * as blueslip from "./blueslip.ts";
 import * as bot_data from "./bot_data.ts";
 import * as browser_history from "./browser_history.ts";
-import * as channel from "./channel.ts";
 import * as channel_folders from "./channel_folders.ts";
 import {compose_call_session_manager} from "./compose_call_session.ts";
 import * as compose_call_ui from "./compose_call_ui.ts";
@@ -413,40 +412,6 @@ export function dispatch_normal_event(event) {
                 video_chat_provider: compose_call_ui.update_audio_and_video_chat_button_display,
                 jitsi_server_url: compose_call_ui.update_audio_and_video_chat_button_display,
                 gif_rating_policy: gif_state.update_gif_icon_visibility,
-                hover_enabled() {
-                    $("body").toggleClass("hover-enabled", realm.realm_hover_enabled);
-                    $(".hover-connected-account-settings-entry").toggleClass(
-                        "hide",
-                        !realm.realm_hover_enabled,
-                    );
-                    navigation_views.set_hover_enabled(realm.realm_hover_enabled);
-                    stream_list.update_streams_sidebar(true);
-                    if (realm.realm_hover_enabled) {
-                        void channel.get({
-                            url: "/json/hover/spaces",
-                            success(raw_data) {
-                                // The setting may have been disabled again while this request
-                                // was in flight. In that case, retain the response for the next
-                                // enable without exposing it in the disabled UI.
-                                const {spaces} =
-                                    hover_spaces.hover_spaces_response_schema.parse(raw_data);
-                                hover_spaces.initialize({hover_spaces: spaces});
-                                if (realm.realm_hover_enabled) {
-                                    stream_list.update_streams_sidebar(true);
-                                }
-                            },
-                        });
-                        void channel.get({
-                            url: "/json/hover/connected_accounts",
-                            success(raw_data) {
-                                hover_connected_accounts.replace_from_response(raw_data);
-                                if (realm.realm_hover_enabled) {
-                                    settings_connected_accounts.rerender();
-                                }
-                            },
-                        });
-                    }
-                },
                 waiting_period_threshold: noop,
                 want_advertise_in_communities_directory: noop,
                 welcome_message_custom_text: noop,

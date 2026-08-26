@@ -40,12 +40,7 @@ class PersonalEditionError(Exception):
 def _verified_personal_edition_targets(
     user_profile: UserProfile,
 ) -> list[tuple[ConnectedAccount, str]]:
-    if (
-        not user_profile.realm.hover_enabled
-        or not user_profile.is_active
-        or user_profile.is_guest
-        or user_profile.is_bot
-    ):
+    if not user_profile.is_active or user_profile.is_guest or user_profile.is_bot:
         return []
     bindings = list(
         SourceParticipantBinding.objects.select_related("source__account")
@@ -350,12 +345,7 @@ def _project_personal_edition(
 
 
 def get_personal_editions_for_user(*, user_profile: UserProfile) -> dict[str, Any]:
-    if (
-        not user_profile.realm.hover_enabled
-        or not user_profile.is_active
-        or user_profile.is_guest
-        or user_profile.is_bot
-    ):
+    if not user_profile.is_active or user_profile.is_guest or user_profile.is_bot:
         return {"morning": None, "end_of_day": None}
     verified_targets = {
         (account.id, teammate_ref)

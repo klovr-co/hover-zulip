@@ -5,7 +5,12 @@
  * topic. Zulip continues to own the DOM and all behavior; this file maps the
  * approved Slack-light prototype onto those existing components.
  */
-@media (width >= 1101px) and (height >= 600px) {
+@media (width >= 768px) {
+    /* The topic frame is stationary; only its message feed may scroll. */
+    html:has(body.hover-enabled.hover-topic-screen) {
+        overflow: hidden;
+    }
+
     body.hover-enabled.hover-topic-screen {
         /* stylelint-disable color-no-hex */
         --hover-topic-frame: 10px;
@@ -515,12 +520,23 @@
         border-color: var(--hover-topic-line-strong);
     }
 
-    body.hover-enabled.hover-topic-screen .unread_count:not(:empty) {
+    body.hover-enabled.hover-topic-screen .unread_count:not(.hide) {
+        display: inline-grid;
+        min-width: 24px;
+        height: 20px;
+        place-items: center;
+        padding: 0 7px;
         border-radius: 999px;
         background: var(--hover-topic-badge);
-        color: var(--hover-topic-badge-ink);
+        color: color-mix(
+            in srgb,
+            var(--hover-topic-ink) 78%,
+            var(--hover-topic-muted)
+        );
         font-size: 11px;
-        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        line-height: 1;
     }
 
     body.hover-enabled.hover-topic-screen
@@ -563,7 +579,9 @@
         );
         margin: var(--navbar-fixed-height) var(--hover-topic-frame)
             var(--hover-topic-frame) var(--left-sidebar-width);
-        overflow: hidden;
+        /* Keep the frame clipped; the message feed is the dedicated scroll
+           surface inside this panel. */
+        overflow: clip;
         border-radius: 0 var(--hover-topic-frame-radius)
             var(--hover-topic-frame-radius) 0;
         background: var(--hover-topic-panel);
@@ -588,6 +606,8 @@
                 var(--hover-topic-frame)
         );
         padding: 0 18px 174px;
+        overflow-y: auto;
+        overscroll-behavior-y: contain;
         background: var(--hover-topic-panel);
     }
 
@@ -729,20 +749,39 @@
 
     body.hover-enabled.hover-topic-screen .message_header .recipient_row_date {
         position: absolute;
-        top: 77px;
+        top: 70px;
         right: 18px;
         left: 18px;
         display: flex !important;
-        gap: 12px;
+        gap: 8px;
         align-items: center;
         justify-content: center;
-        height: 16px;
+        height: 30px;
         padding: 0;
-        color: var(--hover-topic-quiet);
-        font-size: 11px;
-        font-weight: 500;
-        letter-spacing: 0.01em;
+        color: var(--hover-topic-ink);
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: -0.005em;
         text-transform: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .message_header
+        .recipient_row_date.recipient_row_date_unchanged {
+        display: none !important;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .message_header.sticky_header
+        .recipient_row_date.recipient_row_date_unchanged {
+        display: flex !important;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .message_header
+        .recipient_row_date.hide-date-separator-header {
+        display: none !important;
     }
 
     body.hover-enabled.hover-topic-screen
@@ -759,12 +798,19 @@
     }
 
     body.hover-enabled.hover-topic-screen
-        .message_header
-        .recipient_row_date
-        .date_row_text {
-        padding: 0;
-        color: inherit;
-        font: inherit;
+        .message_header.sticky_header
+        .recipient_row_date::before,
+    body.hover-enabled.hover-topic-screen
+        .message_header.sticky_header
+        .recipient_row_date::after {
+        display: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #message_feed_container
+        .message_row:has(> .message_feed_divider .date-divider-content)
+        > .message_feed_divider {
+        margin-inline: -16px -14px;
     }
 
     body.hover-enabled.hover-topic-screen
@@ -794,8 +840,60 @@
         box-shadow: none;
     }
 
+    body.hover-enabled.hover-topic-screen
+        #message_feed_container
+        .message_row.selected_message:has(
+            > .message_feed_divider .date-divider-content
+        ) {
+            border-color: transparent;
+            background: transparent;
+            outline: 0;
+        }
+
+    body.hover-enabled.hover-topic-screen
+        #message_feed_container
+        .message_row.selected_message:has(
+            > .message_feed_divider .date-divider-content
+        )
+        > .messagebox {
+        position: relative;
+        z-index: 0;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #message_feed_container
+        .message_row.selected_message:has(
+            > .message_feed_divider .date-divider-content
+        )
+        > .messagebox::before {
+        position: absolute;
+        z-index: 0;
+        inset: 0 -6px 0 -16px;
+        border: 1px solid var(--hover-topic-selected-border);
+        border-radius: var(--hover-topic-control-radius);
+        background: var(--hover-topic-selected);
+        content: "";
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #message_feed_container
+        .message_row.selected_message:has(
+            > .message_feed_divider .date-divider-content
+        )
+        > .messagebox
+        > .messagebox-content {
+        position: relative;
+        z-index: 1;
+    }
+
     body.hover-enabled.hover-topic-screen .message_header + .message_row {
         margin-top: 40px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .message_header:has(.recipient_row_date_unchanged)
+        + .message_row {
+        margin-top: 12px;
     }
 
     body.hover-enabled.hover-topic-screen .message_row .messagebox {
@@ -854,94 +952,120 @@
     }
 
     /* Composer uses the same control language while preserving all states. */
-    body.hover-enabled.hover-topic-screen #compose {
+    body.hover-topic-screen #compose {
+        /* Keep the composer available while the message feed scrolls. */
         right: var(--hover-topic-frame);
-        bottom: 26px;
+        bottom: 16px;
         left: var(--left-sidebar-width);
         width: auto;
     }
 
-    body.hover-enabled.hover-topic-screen #compose-content {
-        margin: 0 18px;
+    body.hover-topic-screen #compose-content {
+        margin: 0 22px;
+        padding: 0;
         overflow: hidden;
         border: 1px solid var(--hover-topic-line-strong);
-        border-radius: 12px;
+        border-radius: 14px;
         background: var(--hover-topic-panel);
         box-shadow: 0 1px 2px hsl(240deg 14% 19% / 4%);
+        transition:
+            border-color 160ms cubic-bezier(0.2, 0.75, 0.35, 1),
+            box-shadow 160ms cubic-bezier(0.2, 0.75, 0.35, 1);
     }
 
-    body.hover-enabled.hover-topic-screen #compose.compose-box-open,
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen #compose.compose-box-open,
+    body.hover-topic-screen
         #compose.compose-box-open
         #compose-container,
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen
         #compose.compose-box-open
         #compose-content {
-        height: 139px !important;
+        height: 140px !important;
     }
 
-    body.hover-enabled.hover-topic-screen #compose-content:focus-within {
+    body.hover-topic-screen
+        #compose.compose-box-open:has(.hover-formatting-expanded),
+    body.hover-topic-screen
+        #compose.compose-box-open:has(.hover-formatting-expanded)
+        #compose-container,
+    body.hover-topic-screen
+        #compose.compose-box-open:has(.hover-formatting-expanded)
+        #compose-content {
+        height: 176px !important;
+    }
+
+    body.hover-topic-screen #compose-content:focus-within {
         border-color: var(--hover-topic-accent);
-        box-shadow: 0 0 0 2px hsl(147deg 58% 33% / 12%);
+        box-shadow: 0 0 0 3px hsl(147deg 58% 33% / 11%);
     }
 
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen
         :is(
             #message-content-container,
-            #message-formatting-controls-container
+            #message-formatting-controls-container,
+            #hover-compose-formatting-controls
         ) {
         background: var(--hover-topic-panel);
     }
 
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen
         #compose.compose-box-open
         .message_comp {
-        height: 138px;
+        height: 139px;
         padding-right: 0;
     }
 
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen
         #compose.compose-box-open
         #send_message_form {
-        height: 138px;
+        height: 139px;
     }
 
-    body.hover-enabled.hover-topic-screen #compose_top {
+    body.hover-topic-screen
+        #compose.compose-box-open:has(.hover-formatting-expanded)
+        .message_comp,
+    body.hover-topic-screen
+        #compose.compose-box-open:has(.hover-formatting-expanded)
+        #send_message_form {
+        height: 175px;
+    }
+
+    body.hover-topic-screen #compose_top {
         min-height: 36px;
         margin-right: 0;
         padding: 0 74px 0 0;
     }
 
-    body.hover-enabled.hover-topic-screen #compose-recipient {
+    body.hover-topic-screen #compose-recipient {
         min-height: 36px;
         border-bottom-color: var(--hover-topic-line);
         color: var(--hover-topic-muted);
         font-size: 13px;
     }
 
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen
         :is(#compose_select_recipient_widget, #compose-channel-recipient) {
         border-radius: var(--hover-topic-row-radius);
     }
 
-    body.hover-enabled.hover-topic-screen #compose-textarea {
+    body.hover-topic-screen #compose-textarea {
         margin-bottom: 0;
         padding: 10px 12px;
         background: transparent;
         color: var(--hover-topic-copy);
-        font-size: 14px;
-        line-height: 1.5;
+        font-size: 13px;
+        line-height: 1.45;
         outline: 0;
     }
 
-    body.hover-enabled.hover-topic-screen #compose-textarea::placeholder {
+    body.hover-topic-screen #compose-textarea::placeholder {
         color: var(--hover-topic-placeholder);
     }
 
-    body.hover-enabled.hover-topic-screen #message-content-container,
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen #message-content-container,
+    body.hover-topic-screen
         #message-content-container:has(.new_message_textarea:focus),
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen
         #message-content-container:has(
             ~ #message-formatting-controls-container:active
         ) {
@@ -953,73 +1077,250 @@
         padding-bottom: 0;
     }
 
-    body.hover-enabled.hover-topic-screen #send_message_form .messagebox {
-        grid-template-rows: 60px 42px;
+    body.hover-topic-screen #send_message_form .messagebox {
+        position: relative;
+        grid-template:
+            "message-content-container message-content-container" 60px
+            "hover-compose-quick-controls message-send-controls-container" 42px /
+            minmax(0, 1fr) auto;
+        gap: 0;
     }
 
-    body.hover-enabled.hover-topic-screen #message-content-container {
-        grid-column: 1 / -1;
+    body.hover-topic-screen #message-content-container {
+        grid-area: message-content-container;
     }
 
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen
+        #send_message_form
+        .messagebox.hover-formatting-expanded {
+        grid-template:
+            "hover-compose-formatting-controls hover-compose-formatting-controls" 36px
+            "message-content-container message-content-container" 60px
+            "hover-compose-quick-controls message-send-controls-container" 42px /
+            minmax(0, 1fr) auto;
+    }
+
+    body.hover-topic-screen .hover-compose-formatting-controls {
+        grid-area: hover-compose-formatting-controls;
+        display: none;
+        align-items: center;
+        min-width: 0;
+        padding: 2px 8px;
+        border-bottom: 1px solid var(--hover-topic-line);
+        background: var(--hover-topic-control-hover);
+    }
+
+    body.hover-topic-screen
+        .messagebox.hover-formatting-expanded
+        .hover-compose-formatting-controls {
+        display: flex;
+    }
+
+    body.hover-topic-screen .hover-compose-format-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border: 0;
+        border-radius: 5px;
+        background: transparent;
+        color: var(--hover-topic-muted);
+        font-size: 18px;
+        transition:
+            color 160ms cubic-bezier(0.2, 0.75, 0.35, 1),
+            background-color 160ms cubic-bezier(0.2, 0.75, 0.35, 1),
+            transform 160ms cubic-bezier(0.2, 0.75, 0.35, 1);
+    }
+
+    body.hover-topic-screen .hover-compose-format-button:hover {
+        background: var(--hover-topic-sidebar-hover);
+        color: var(--hover-topic-ink);
+    }
+
+    body.hover-topic-screen .hover-compose-format-button:active {
+        transform: translateY(1px);
+    }
+
+    body.hover-topic-screen .hover-compose-format-divider {
+        width: 1px;
+        height: 20px;
+        margin: 0 5px;
+        background: var(--hover-topic-line-strong);
+    }
+
+    body.hover-topic-screen .hover-compose-quick-controls {
+        grid-area: hover-compose-quick-controls;
+        display: flex;
+        gap: 3px;
+        align-items: center;
+        min-width: 0;
+        padding: 5px 8px 6px;
+        border-top: 1px solid var(--hover-topic-line);
+    }
+
+    body.hover-topic-screen .hover-compose-tool-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--hover-topic-muted);
+        font-size: 18px;
+        line-height: 1;
+        transition:
+            color 160ms cubic-bezier(0.2, 0.75, 0.35, 1),
+            background-color 160ms cubic-bezier(0.2, 0.75, 0.35, 1),
+            transform 160ms cubic-bezier(0.2, 0.75, 0.35, 1);
+    }
+
+    body.hover-topic-screen .hover-compose-tool-button:hover {
+        background: var(--hover-topic-sidebar-hover);
+        color: var(--hover-topic-ink);
+    }
+
+    body.hover-topic-screen .hover-compose-tool-button:active {
+        transform: translateY(1px);
+    }
+
+    body.hover-topic-screen .hover-compose-add-button {
+        margin-right: 2px;
+        border-radius: 50%;
+        background: var(--hover-topic-sidebar-hover);
+        color: var(--hover-topic-copy);
+    }
+
+    body.hover-topic-screen .hover-compose-format-toggle {
+        width: 32px;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: underline;
+        text-decoration-thickness: 1.5px;
+        text-underline-offset: 2px;
+    }
+
+    body.hover-topic-screen
+        .hover-compose-format-toggle[aria-expanded="true"] {
+        color: var(--hover-topic-ink);
+    }
+
+    body.hover-topic-screen .hover-compose-mention-button {
+        font-family: var(--font-family-sans-serif);
+        font-size: 21px;
+        font-weight: 500;
+    }
+
+    body.hover-topic-screen .hover-compose-more-button {
+        width: 36px;
+        font-size: 10px;
+        letter-spacing: 1px;
+    }
+
+    body.hover-topic-screen
         #message-formatting-controls-container {
-        height: 42px;
-        min-height: 42px;
-        border-radius: 0 0 11px 11px;
+        display: none !important;
     }
 
-    body.hover-enabled.hover-topic-screen #compose-drafts-button {
-        position: absolute;
-        z-index: 2;
-        top: 7px;
-        right: 8px;
-        min-height: 28px;
+    body.hover-topic-screen #compose-drafts-button {
+        display: none;
     }
 
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen
         :is(#recipient_box_clear_topic_button, #compose_close) {
         display: none;
     }
 
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen
         .topic-list-item:not(.active-sub-filter)
         .sidebar-topic-name {
         font-weight: 400;
     }
 
-    body.hover-enabled.hover-topic-screen .compose_control_button,
-    body.hover-enabled.hover-topic-screen .send-control-button {
+    body.hover-topic-screen .compose_control_button,
+    body.hover-topic-screen .send-control-button {
         border-radius: var(--hover-topic-row-radius);
         color: var(--hover-topic-muted);
+        transition:
+            color 160ms cubic-bezier(0.2, 0.75, 0.35, 1),
+            background-color 160ms cubic-bezier(0.2, 0.75, 0.35, 1),
+            transform 160ms cubic-bezier(0.2, 0.75, 0.35, 1);
     }
 
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen
         :is(.compose_control_button, .send-control-button):hover {
-        background: var(--hover-topic-sidebar-hover);
-        color: var(--hover-topic-ink);
+        background: var(--hover-topic-accent-soft);
+        color: var(--hover-topic-accent-hover);
     }
 
-    body.hover-enabled.hover-topic-screen #compose-send-button {
-        min-width: 64px;
+    body.hover-topic-screen
+        :is(.compose_control_button, .send-control-button):active {
+        transform: translateY(1px);
+    }
+
+    body.hover-topic-screen #compose-send-button {
+        width: 40px;
+        min-width: 40px;
         min-height: 30px;
+        margin: 6px 0;
+        padding: 0;
         border: 0;
-        border-radius: var(--hover-topic-control-radius);
-        background: var(--hover-topic-accent);
-        color: var(--hover-topic-panel);
+        border-radius: 6px 0 0 6px;
+        background: transparent;
+        color: var(--hover-topic-accent);
+        line-height: 1;
+        transition:
+            color 160ms cubic-bezier(0.2, 0.75, 0.35, 1),
+            background-color 160ms cubic-bezier(0.2, 0.75, 0.35, 1),
+            transform 160ms cubic-bezier(0.2, 0.75, 0.35, 1);
+    }
+
+    body.hover-topic-screen #compose-send-button:hover {
+        background: var(--hover-topic-accent-soft);
+        color: var(--hover-topic-accent-hover);
+    }
+
+    body.hover-topic-screen #compose-send-button:active {
+        transform: translateY(1px);
+    }
+
+    body.hover-topic-screen
+        #compose-send-button
+        .zulip-icon-send {
+        display: block;
+        font-size: 18px;
+    }
+
+    body.hover-topic-screen .send-related-action-button {
+        align-self: center;
+        width: 28px;
+        height: 30px;
+        margin-right: 4px;
+        border-left: 1px solid var(--hover-topic-line-strong);
+        border-radius: 0 6px 6px 0;
         font-size: 12px;
-        font-weight: 600;
     }
 
-    body.hover-enabled.hover-topic-screen #compose-send-button:hover {
-        background: var(--hover-topic-accent-hover);
+    body.hover-topic-screen
+        .send-related-action-button
+        .zulip-icon-more-vertical {
+        display: none;
     }
 
-    body.hover-enabled.hover-topic-screen #legacy-closed-compose-box {
+    body.hover-topic-screen .hover-compose-send-chevron {
+        display: inline;
+    }
+
+    body.hover-topic-screen #legacy-closed-compose-box {
         min-height: 44px;
         background: var(--hover-topic-panel);
     }
 
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen
         #legacy-closed-compose-box
         :is(button, .compose_reply_button) {
         border-color: transparent;
@@ -1029,7 +1330,7 @@
         font-size: 13px;
     }
 
-    body.hover-enabled.hover-topic-screen
+    body.hover-topic-screen
         #legacy-closed-compose-box
         :is(button, .compose_reply_button):hover {
         background: var(--hover-topic-sidebar-hover);
@@ -1237,6 +1538,81 @@
 
     body.hover-enabled.hover-topic-screen .popover-menu-link:focus-visible {
         box-shadow: inset 0 0 0 1px var(--hover-topic-accent);
+    }
+
+    body.hover-enabled.hover-topic-screen #scroll-to-time-popover {
+        width: 320px;
+        border: 1px solid var(--hover-overlay-border);
+        border-radius: 8px;
+        background: var(--hover-overlay-surface);
+        box-shadow: 0 5px 18px hsl(240deg 14% 19% / 16%);
+        overflow: hidden;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .tippy-box[data-theme="popover-menu"]:has(#scroll-to-time-popover) {
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        .tippy-box[data-theme="popover-menu"]:has(#scroll-to-time-popover)
+        .tippy-content {
+        padding: 0;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #scroll-to-time-popover
+        ul.popover-menu-list {
+        padding: 4px 0;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #scroll-to-time-popover
+        .popover-menu-list
+        .text-item {
+        min-height: 26px;
+        padding: 4px 16px 2px;
+        color: var(--hover-topic-muted);
+        font-size: 13px;
+        font-weight: 400;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #scroll-to-time-popover
+        .popover-header-name {
+        margin: 0;
+        color: inherit;
+        font: inherit;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #scroll-to-time-popover
+        .popover-menu-link {
+        min-height: 32px;
+        margin: 0;
+        padding: 5px 16px;
+        border-radius: 0;
+        color: var(--hover-topic-ink);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 22px;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #scroll-to-time-popover
+        .popover-menu-link:is(:hover, :focus-visible, .selected) {
+        background: var(--hover-overlay-hover);
+        color: var(--hover-topic-ink);
+        box-shadow: none;
+    }
+
+    body.hover-enabled.hover-topic-screen
+        #scroll-to-time-popover
+        .popover-menu-separator {
+        margin: 4px 0;
     }
 
     body.hover-enabled.hover-topic-screen
