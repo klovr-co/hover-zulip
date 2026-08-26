@@ -68,21 +68,6 @@ export function initialize(): void {
                 });
             });
 
-            $popper.one("click", ".narrow-self-direct-message", (e) => {
-                const user_id = current_user.user_id;
-                message_view.show(
-                    [
-                        {
-                            operator: "dm",
-                            operand: [user_id],
-                        },
-                    ],
-                    {trigger: "personal menu"},
-                );
-                popovers.hide_all();
-                e.preventDefault();
-            });
-
             $popper.one("click", ".narrow-messages-sent", (e) => {
                 const user_id = current_user.user_id;
                 message_view.show(
