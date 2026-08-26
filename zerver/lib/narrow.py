@@ -539,6 +539,9 @@ class NarrowBuilder:
                 cond = Q(pk__in=[])  # Always false.
                 return query.filter(maybe_negate(cond))
 
+            if len(user_profiles) == 1 and user_profiles[0].id == self.user_profile.id:
+                raise BadNarrowOperatorError("direct messages with yourself are not supported")
+
             recipient = recipient_for_user_profiles(
                 user_profiles=user_profiles,
                 forwarded_mirror_message=False,
@@ -547,6 +550,8 @@ class NarrowBuilder:
                 allow_deactivated=True,
                 create=False,
             )
+        except BadNarrowOperatorError:
+            raise
         except (JsonableError, ValidationError):
             raise BadNarrowOperatorError("unknown user in " + str(operand))
         except DirectMessageGroup.DoesNotExist:
