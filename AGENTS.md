@@ -1,5 +1,12 @@
 ## Agent skills
 
+## CI and testing
+
+Run CI-style checks through the Conductor Spotlight host rather than
+provisioning Docker or a worktree-local development environment. The Spotlight
+host has the repository's supported development dependencies and is the
+appropriate environment for frontend lint and test commands.
+
 ## Product direction
 
 Hover is the product and the only supported user experience. This repository
