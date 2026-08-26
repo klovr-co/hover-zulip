@@ -10,8 +10,6 @@ class HoverGeneratedMessageTest(BaseAction):
     @override
     def setUp(self) -> None:
         super().setUp()
-        self.user_profile.realm.hover_enabled = True
-        self.user_profile.realm.save(update_fields=["hover_enabled"])
 
     def test_generated_item_rejects_message_from_another_realm(self) -> None:
         hamlet = self.example_user("hamlet")
@@ -71,8 +69,6 @@ class HoverGeneratedMessageTest(BaseAction):
 
     def test_initial_fetch_and_realtime_event_share_structured_metadata(self) -> None:
         hamlet = self.example_user("hamlet")
-        hamlet.realm.hover_enabled = True
-        hamlet.realm.save(update_fields=["hover_enabled"])
         self.login_user(hamlet)
 
         with self.verify_action(client_gravatar=False) as events:
@@ -134,8 +130,6 @@ class HoverGeneratedMessageTest(BaseAction):
 
     def test_message_edit_event_refreshes_generated_metadata(self) -> None:
         hamlet = self.example_user("hamlet")
-        hamlet.realm.hover_enabled = True
-        hamlet.realm.save(update_fields=["hover_enabled"])
         self.login_user(hamlet)
         message_id = self.send_stream_message(
             hamlet,
@@ -168,8 +162,6 @@ class HoverGeneratedMessageTest(BaseAction):
 
     def test_lineage_projects_latest_state_and_authorized_history(self) -> None:
         hamlet = self.example_user("hamlet")
-        hamlet.realm.hover_enabled = True
-        hamlet.realm.save(update_fields=["hover_enabled"])
         self.login_user(hamlet)
         first_id = self.send_stream_message(hamlet, "Verona", "First state", "Decisions")
         latest_id = self.send_stream_message(hamlet, "Verona", "Latest state", "Decisions")

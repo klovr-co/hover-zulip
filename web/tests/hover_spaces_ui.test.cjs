@@ -19,9 +19,9 @@ let client_errors;
 let spinner_hide_count;
 let sidebar_update_count;
 
-const state_data = mock_esm("../src/state_data", {
+mock_esm("../src/state_data", {
     current_user: {user_id: 5},
-    realm: {realm_hover_enabled: true},
+    realm: {},
 });
 mock_esm("../src/channel_folders", {get_channel_folders: () => folders});
 mock_esm("../src/people", {get_realm_active_human_users: () => users});
@@ -237,7 +237,6 @@ function reset() {
     client_errors = [];
     spinner_hide_count = 0;
     sidebar_update_count = 0;
-    state_data.realm.realm_hover_enabled = true;
     hover_spaces.initialize({hover_spaces: [space()]});
 }
 
@@ -269,13 +268,8 @@ run_test("creates a Space from trimmed modal input", () => {
     assert.equal(sidebar_update_count, 1);
 });
 
-run_test("setup ignores disabled realms and non-setup Spaces", () => {
+run_test("setup ignores non-setup and unknown Spaces", () => {
     reset();
-    state_data.realm.realm_hover_enabled = false;
-    hover_spaces_ui.open_setup_space(11);
-    assert.equal(launches.length, 0);
-
-    state_data.realm.realm_hover_enabled = true;
     hover_spaces.initialize({hover_spaces: [space({state: "launched", stream_id: 99})]});
     hover_spaces_ui.open_setup_space(11);
     hover_spaces_ui.open_setup_space(404);

@@ -29,8 +29,6 @@ class HoverPipelineLibraryTest(ZulipTestCase):
         self.outsider = self.example_user("aaron")
         self.other_realm_user = self.lear_user("cordelia")
         self.realm = self.author.realm
-        self.realm.hover_enabled = True
-        self.realm.save(update_fields=["hover_enabled"])
         self.login_user(self.admin)
 
     def draft_data(self, **overrides: object) -> dict[str, str]:
@@ -182,8 +180,6 @@ class HoverPipelineLibraryTest(ZulipTestCase):
         outsider_view = orjson.loads(self.client_get("/json/hover/pipeline-library").content)
         self.assertEqual(outsider_view["drafts"], [])
 
-        self.other_realm_user.realm.hover_enabled = True
-        self.other_realm_user.realm.save(update_fields=["hover_enabled"])
         self.login_user(self.other_realm_user)
         other_realm = orjson.loads(
             self.client_get(

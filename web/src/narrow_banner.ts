@@ -48,22 +48,6 @@ const HOVER_MENTIONS_VIEW_EMPTY_BANNER = {
     ),
 };
 
-const MENTIONS_VIEW_EMPTY_BANNER = {
-    title: $t({defaultMessage: "This view will show messages where you are mentioned."}),
-    html: $t_html(
-        {
-            defaultMessage:
-                "To call attention to a message, you can mention a user, a group, topic participants, or all subscribers to a channel. Type @ in the compose box, and choose who you'd like to mention from the list of suggestions. <z-link>Learn more</z-link>",
-        },
-        {
-            "z-link": (content_html) =>
-                `<a target="_blank" rel="noopener noreferrer" href="/help/mention-a-user-or-group">${content_html.join(
-                    "",
-                )}</a>`,
-        },
-    ),
-};
-
 const STARRED_MESSAGES_VIEW_EMPTY_BANNER = {
     title: $t({defaultMessage: "You have no starred messages."}),
     html: $t_html(
@@ -352,9 +336,7 @@ export function pick_empty_narrow_banner(
                 case "starred":
                     return STARRED_MESSAGES_VIEW_EMPTY_BANNER;
                 case "mentioned":
-                    return realm.realm_hover_enabled
-                        ? HOVER_MENTIONS_VIEW_EMPTY_BANNER
-                        : MENTIONS_VIEW_EMPTY_BANNER;
+                    return HOVER_MENTIONS_VIEW_EMPTY_BANNER;
                 case "dm":
                     // You have no direct messages.
                     return {

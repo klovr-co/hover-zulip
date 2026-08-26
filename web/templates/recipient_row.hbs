@@ -92,7 +92,9 @@
                 {{> components/icon_button icon="more-vertical" intent="neutral" custom_classes="recipient-bar-control-icon" data-tippy-content=(t "Topic actions") aria-label=(t "Topic actions") }}
             </span>
         </span>
-        <span class="recipient_row_date scroll-to-time {{#if (and (not always_display_date) date_unchanged )}}recipient_row_date_unchanged{{/if}}" role="button" tabindex="0">{{{date_html}}}</span>
+        <div class="recipient_row_date {{#if (and (not always_display_date) date_unchanged )}}recipient_row_date_unchanged{{/if}}">
+            <button type="button" class="scroll-to-time" aria-haspopup="menu">{{{date_html}}}</button>
+        </div>
     </div>
 </div>
 {{else}}
@@ -118,7 +120,9 @@
             {{/if}}
         </span>
         </a>
-        <span class="recipient_row_date scroll-to-time {{#if (and (not always_display_date) date_unchanged )}}recipient_row_date_unchanged{{/if}}" role="button" tabindex="0">{{{date_html}}}</span>
+        <div class="recipient_row_date {{#if (and (not always_display_date) date_unchanged )}}recipient_row_date_unchanged{{/if}}">
+            <button type="button" class="scroll-to-time" aria-haspopup="menu">{{{date_html}}}</button>
+        </div>
     </div>
 </div>
 {{/if}}

@@ -33,7 +33,6 @@ def capture_integration_message_provenance(messages: Sequence[Message]) -> None:
             attachment__source__account__connection_kind="native_integration",
             attachment__source__account__incoming_webhook_bot_id=F("bot_id"),
             attachment__space__state="launched",
-            realm__hover_enabled=True,
         )
     )
     routes_by_key = {(route.bot_id, route.stream_id): route for route in routes}

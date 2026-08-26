@@ -144,7 +144,7 @@ function scroll_finish(): void {
 }
 
 export function initialize(): void {
-    $(document).on(
+    message_viewport.$scroll_container.on(
         "scroll",
         _.throttle(() => {
             if (message_lists.current === undefined) {

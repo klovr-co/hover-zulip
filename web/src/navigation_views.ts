@@ -199,53 +199,30 @@ export const built_in_views_meta_data: Record<string, BuiltInViewBasicMetadata> 
     },
 };
 
-let hover_enabled = false;
-
-export function set_hover_enabled(enabled: boolean): void {
-    hover_enabled = enabled;
+function configure_hover_navigation(): void {
     Object.assign(built_in_views_meta_data["inbox"]!, {
-        name: enabled ? $t({defaultMessage: "For You"}) : $t({defaultMessage: "Inbox"}),
-        tooltip_template_id: enabled ? "hover-inbox-tooltip-template" : "inbox-tooltip-template",
-        menu_aria_label: enabled
-            ? $t({defaultMessage: "For You options"})
-            : $t({defaultMessage: "Inbox options"}),
+        name: $t({defaultMessage: "For You"}),
+        tooltip_template_id: "hover-inbox-tooltip-template",
+        menu_aria_label: $t({defaultMessage: "For You options"}),
     });
     Object.assign(built_in_views_meta_data["recent_view"]!, {
-        name: enabled
-            ? $t({defaultMessage: "Team Pulse"})
-            : $t({defaultMessage: "Recent conversations"}),
-        menu_aria_label: enabled
-            ? $t({defaultMessage: "Team Pulse options"})
-            : $t({defaultMessage: "Recent conversations options"}),
-        tooltip_template_id: enabled
-            ? "hover-recent-conversations-tooltip-template"
-            : "recent-conversations-tooltip-template",
+        name: $t({defaultMessage: "Team Pulse"}),
+        menu_aria_label: $t({defaultMessage: "Team Pulse options"}),
+        tooltip_template_id: "hover-recent-conversations-tooltip-template",
     });
     Object.assign(built_in_views_meta_data["all_messages"]!, {
-        name: enabled
-            ? $t({defaultMessage: "All activity"})
-            : $t({defaultMessage: "Combined feed"}),
-        tooltip_template_id: enabled
-            ? "hover-all-message-tooltip-template"
-            : "all-message-tooltip-template",
-        menu_aria_label: enabled
-            ? $t({defaultMessage: "All activity options"})
-            : $t({defaultMessage: "Combined feed options"}),
+        name: $t({defaultMessage: "All activity"}),
+        tooltip_template_id: "hover-all-message-tooltip-template",
+        menu_aria_label: $t({defaultMessage: "All activity options"}),
     });
     Object.assign(built_in_views_meta_data["starred_messages"]!, {
-        name: enabled ? $t({defaultMessage: "Saved"}) : $t({defaultMessage: "Starred messages"}),
-        tooltip_template_id: enabled
-            ? "hover-starred-message-tooltip-template"
-            : "starred-message-tooltip-template",
-        menu_aria_label: enabled
-            ? $t({defaultMessage: "Saved options"})
-            : $t({defaultMessage: "Starred messages options"}),
+        name: $t({defaultMessage: "Saved"}),
+        tooltip_template_id: "hover-starred-message-tooltip-template",
+        menu_aria_label: $t({defaultMessage: "Saved options"}),
     });
     Object.assign(built_in_views_meta_data["reminders"]!, {
-        name: enabled ? $t({defaultMessage: "Todos"}) : $t({defaultMessage: "Reminders"}),
-        tooltip_template_id: enabled
-            ? "hover-reminders-tooltip-template"
-            : "reminders-tooltip-template",
+        name: $t({defaultMessage: "Todos"}),
+        tooltip_template_id: "hover-reminders-tooltip-template",
     });
 }
 
@@ -282,12 +259,7 @@ export type BuiltInViewMetadata = BuiltInViewBasicMetadata & {
 
 export function get_built_in_views(): BuiltInViewMetadata[] {
     return Object.values(built_in_views_meta_data)
-        .filter((view) => {
-            if (hover_enabled) {
-                return view.fragment !== "narrow/is/mentioned";
-            }
-            return view.fragment !== "hover/search" && view.fragment !== "hover/editions";
-        })
+        .filter((view) => view.fragment !== "narrow/is/mentioned")
         .map((view) => {
             const view_current_data = get_navigation_view_by_fragment(view.fragment);
             return {
@@ -312,6 +284,7 @@ export function get_all_navigation_views(): NavigationView[] {
 }
 
 export const initialize = (params: StateData["navigation_views"]): void => {
+    configure_hover_navigation();
     navigation_views_dict = new Map<string, NavigationView>(
         params.navigation_views.map((view) => [view.fragment, view]),
     );

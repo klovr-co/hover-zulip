@@ -116,7 +116,7 @@
                         <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if is_admin}}style="display: none;"{{/if}} data-tippy-content="{{t 'Only organization administrators can edit these settings.' }}"></i>
                     </li>
                     {{#if is_admin}}
-                    <li class="sidebar-item hover-connected-account-settings-entry {{#unless realm_hover_enabled}}hide{{/unless}}" tabindex="0" data-section="connected-account-settings">
+                    <li class="sidebar-item hover-connected-account-settings-entry" tabindex="0" data-section="connected-account-settings">
                         <i class="sidebar-item-icon fa fa-plug" aria-hidden="true"></i>
                         <div class="text">{{t "Connected Accounts"}}</div>
                     </li>

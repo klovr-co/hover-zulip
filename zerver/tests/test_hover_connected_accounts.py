@@ -31,8 +31,6 @@ class HoverConnectedAccountTest(ZulipTestCase):
         super().setUp()
         self.creator = self.example_user("hamlet")
         self.realm = self.creator.realm
-        self.realm.hover_enabled = True
-        self.realm.save(update_fields=["hover_enabled"])
         # Fetch these users after enabling Hover so their related Realm cache
         # matches the database state used by permission helpers.
         self.admin = self.example_user("iago")
@@ -313,8 +311,6 @@ class HoverConnectedAccountTest(ZulipTestCase):
         )
         other_admin = self.lear_user("cordelia")
         self.set_user_role(other_admin, UserProfile.ROLE_REALM_ADMINISTRATOR)
-        other_admin.realm.hover_enabled = True
-        other_admin.realm.save(update_fields=["hover_enabled"])
         self.login_user(other_admin)
 
         with self.assertLogs(level="WARNING") as logs:

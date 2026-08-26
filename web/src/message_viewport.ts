@@ -14,7 +14,7 @@ export type MessageViewportInfo = {
     visible_height: number;
 };
 
-export const $scroll_container = $(":root");
+export let $scroll_container = $(":root");
 
 let window_resize_handler: () => void;
 
@@ -601,10 +601,16 @@ export function maybe_scroll_to_selected(): void {
 
 export function can_scroll(): boolean {
     const full_height = util.the($scroll_container).scrollHeight;
-    return full_height > window.innerHeight;
+    return full_height > height();
 }
 
 export function initialize(): void {
+    // Hover's topic screen keeps the pane itself fixed and scrolls only its
+    // messages. All other views retain Zulip's document-level scroll model.
+    $scroll_container = $("#message_feed_container");
+    cached_width.reset();
+    cached_height.reset();
+
     // This handler must be placed before all resize handlers in our application
     $(window).on("resize", () => {
         cached_width.reset();

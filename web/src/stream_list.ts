@@ -436,7 +436,7 @@ export function build_stream_list(force_rerender: boolean): void {
     const search_term =
         ui_util.get_left_sidebar_topic_search_term() ?? ui_util.get_left_sidebar_search_term();
     const stream_groups = stream_list_sort.sort_groups(streams, search_term);
-    const setup_spaces = realm.realm_hover_enabled ? hover_spaces.get_setup_spaces() : [];
+    const setup_spaces = hover_spaces.get_setup_spaces();
     const normalized_search_term = search_term.toLocaleLowerCase();
     const visible_setup_spaces = setup_spaces.filter(
         (space) =>
@@ -445,7 +445,6 @@ export function build_stream_list(force_rerender: boolean): void {
             space.category.name.toLocaleLowerCase().includes(normalized_search_term),
     );
     const setup_projection_signature = JSON.stringify({
-        hover_enabled: realm.realm_hover_enabled,
         show_channel_folders: user_settings.web_left_sidebar_show_channel_folders,
         search_term: normalized_search_term,
         spaces: visible_setup_spaces,
@@ -595,32 +594,28 @@ export function build_stream_list(force_rerender: boolean): void {
         }
     }
 
-    if (realm.realm_hover_enabled) {
-        const display_section_ids = new Set(display_sections.map((section) => section.id));
-        for (const space of visible_setup_spaces) {
-            const section_id =
-                user_settings.web_left_sidebar_show_channel_folders &&
-                display_section_ids.has(space.category.id.toString())
-                    ? space.category.id.toString()
-                    : "normal-streams";
-            const hover_attached_sources = hover_spaces
-                .get_sidebar_sources(space)
-                .map((source) => ({
-                    ...source,
-                    url: `#hover/space/${space.id}/setup`,
-                }));
-            $(`#stream-list-${section_id}`).append(
-                $(
-                    render_hover_space_setup_sidebar_row({
-                        id: space.id,
-                        name: space.name,
-                        hover_attached_sources,
-                        has_hover_attached_sources: hover_attached_sources.length > 0,
-                    }),
-                ),
-            );
-            $(`#stream-list-${section_id}-container`).removeClass("no-display");
-        }
+    const display_section_ids = new Set(display_sections.map((section) => section.id));
+    for (const space of visible_setup_spaces) {
+        const section_id =
+            user_settings.web_left_sidebar_show_channel_folders &&
+            display_section_ids.has(space.category.id.toString())
+                ? space.category.id.toString()
+                : "normal-streams";
+        const hover_attached_sources = hover_spaces.get_sidebar_sources(space).map((source) => ({
+            ...source,
+            url: `#hover/space/${space.id}/setup`,
+        }));
+        $(`#stream-list-${section_id}`).append(
+            $(
+                render_hover_space_setup_sidebar_row({
+                    id: space.id,
+                    name: space.name,
+                    hover_attached_sources,
+                    has_hover_attached_sources: hover_attached_sources.length > 0,
+                }),
+            ),
+        );
+        $(`#stream-list-${section_id}-container`).removeClass("no-display");
     }
 
     // Rerendering can moving channels between folders and change heading unread counts.
@@ -948,9 +943,7 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
     const name = sub.name;
     const is_muted = stream_data.is_muted(sub.stream_id);
     const can_post_messages = stream_data.can_post_messages_in_stream(sub);
-    const hover_space = realm.realm_hover_enabled
-        ? hover_spaces.get_by_stream_id(sub.stream_id)
-        : undefined;
+    const hover_space = hover_spaces.get_by_stream_id(sub.stream_id);
     const hover_ai_modules = hover_space ? hover_spaces.get_sidebar_modules(hover_space) : [];
     const aggregate_url = hash_util.by_stream_url(sub.stream_id);
     const url = hover_space ? aggregate_url : hash_util.channel_url_by_user_setting(sub.stream_id);

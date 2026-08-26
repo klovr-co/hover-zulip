@@ -36,7 +36,6 @@ mock_esm("../src/hover_search_view", {
 const message_viewport = mock_esm("../src/message_viewport");
 const overlays = mock_esm("../src/overlays");
 const popovers = mock_esm("../src/popovers");
-const recent_view_ui = mock_esm("../src/recent_view_ui");
 const settings = mock_esm("../src/settings");
 mock_esm("../src/settings_data", {
     user_can_create_public_streams: () => true,
@@ -61,7 +60,7 @@ const {Filter} = zrequire("../src/filter");
 const {initialize_user_settings} = zrequire("user_settings");
 
 state_data.set_current_user({is_guest: false});
-state_data.set_realm({realm_hover_enabled: false});
+state_data.set_realm({});
 
 const user_settings = {};
 initialize_user_settings({user_settings});
@@ -212,9 +211,9 @@ run_test("hash_interactions", ({override, override_rewire}) => {
 
     const helper = test_helper({override, override_rewire, change_tab: true});
 
-    let recent_view_ui_shown = false;
-    override(recent_view_ui, "show", () => {
-        recent_view_ui_shown = true;
+    let awareness_surface;
+    override(hover_awareness_view, "show", (surface) => {
+        awareness_surface = surface;
     });
     let hide_all_called = false;
     override(popovers, "hide_all", () => {
@@ -229,7 +228,7 @@ run_test("hash_interactions", ({override, override_rewire}) => {
     browser_history.clear_for_testing();
     hashchange.initialize();
     // If it's an unknown hash it should show the home view.
-    assert.equal(recent_view_ui_shown, true);
+    assert.equal(awareness_surface, "team_pulse");
     assert.equal(hide_all_called, true);
     assert.equal(sidebar_hide_all_called, true);
     helper.assert_events([
@@ -260,23 +259,18 @@ run_test("hash_interactions", ({override, override_rewire}) => {
     ]);
 
     // Test old "#recent_topics" hash redirects to "#recent".
-    recent_view_ui_shown = false;
+    awareness_surface = undefined;
     window.location.hash = "#recent_topics";
 
     helper.clear_events();
     $window_stub.trigger("hashchange");
-    assert.equal(recent_view_ui_shown, true);
+    assert.equal(awareness_surface, "team_pulse");
     helper.assert_events([
         [overlays, "close_for_hash_change"],
         [message_viewport, "stop_auto_scrolling"],
     ]);
     assert.equal(window.location.hash, "#recent");
 
-    let awareness_surface;
-    override(hover_awareness_view, "show", (surface) => {
-        awareness_surface = surface;
-    });
-    state_data.realm.realm_hover_enabled = true;
     window.location.hash = "#inbox";
     $window_stub.trigger("hashchange");
     assert.equal(awareness_surface, "for_you");
@@ -291,7 +285,6 @@ run_test("hash_interactions", ({override, override_rewire}) => {
     window.location.hash = "#hover/editions";
     $window_stub.trigger("hashchange");
     assert.equal(editions_shown, true);
-    state_data.realm.realm_hover_enabled = false;
 
     window.location.hash = "#hover/search";
     hover_search_shown = false;
@@ -377,14 +370,14 @@ run_test("hash_interactions", ({override, override_rewire}) => {
         [stream_settings_ui, "launch"],
     ]);
 
-    recent_view_ui_shown = false;
+    awareness_surface = undefined;
     window.location.hash = "#reload:send_after_reload=0...";
 
     helper.clear_events();
     $window_stub.trigger("hashchange");
     helper.assert_events([]);
     // If it's reload hash it shouldn't show the home view.
-    assert.equal(recent_view_ui_shown, false);
+    assert.equal(awareness_surface, undefined);
 
     window.location.hash = "#keyboard-shortcuts/whatever";
 

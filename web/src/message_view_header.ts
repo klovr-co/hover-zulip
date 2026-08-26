@@ -14,7 +14,7 @@ import * as peer_data from "./peer_data.ts";
 import * as recent_view_util from "./recent_view_util.ts";
 import * as rendered_markdown from "./rendered_markdown.ts";
 import * as search from "./search.ts";
-import {current_user, realm} from "./state_data.ts";
+import {current_user} from "./state_data.ts";
 import * as stream_data from "./stream_data.ts";
 import type {StreamSubscription} from "./sub_store.ts";
 
@@ -176,10 +176,13 @@ function build_message_view_header(filter: Filter | undefined): void {
     // application shell as well as topic-specific message styling. Keep the
     // shell stable while navigating between Hover's built-in surfaces; rules
     // for topic-only elements remain inert when those elements are absent.
-    document.body.classList.toggle("hover-topic-screen", realm.realm_hover_enabled);
+    document.body.classList.add("hover-topic-screen");
+    // The Hover shell locks document scrolling, so clear any offset from the
+    // preceding view before its fixed frame is displayed.
+    window.scrollTo(0, 0);
     document.body.classList.toggle(
         "hover-saved-screen",
-        realm.realm_hover_enabled && filter?.has_operand("is", "starred") === true,
+        filter?.has_operand("is", "starred") === true,
     );
 
     // This makes sure we don't waste time appending

@@ -3,39 +3,57 @@
 :root.dark-theme {
     color-scheme: light;
 
-    /* Cofounder primitives */
+    /* Hover light primitives. Keep the historic `blue` aliases below while
+       callers migrate; they intentionally resolve to the Hover green action
+       scale rather than introducing a competing accent. */
     /* stylelint-disable color-no-hex */
-    --ds-blue-500: #004ac6;
-    --ds-blue-600: #003ea8;
-    --ds-cyan-400: #38bdf8;
-    --ds-green-500: #22c55e;
-    --ds-navy-950: #131b2e;
+    --ds-blue-50: #dcf5e5;
+    --ds-blue-500: #238653;
+    --ds-blue-600: #176a40;
+    --ds-blue-700: #176a40;
+    --ds-blue-800: #174d31;
+    --ds-cyan-400: #238653;
+    --ds-green-500: #238653;
+    --ds-navy-950: #292a31;
     --ds-neutral-0: #fff;
-    --ds-neutral-25: #faf8ff;
-    --ds-neutral-50: #f2f3ff;
-    --ds-neutral-100: #f6f6fe;
-    --ds-neutral-200: #c3c6d7;
-    --ds-neutral-500: #737686;
-    --ds-neutral-800: #434655;
-    --ds-neutral-950: #131b2e;
+    --ds-neutral-25: #fff;
+    --ds-neutral-50: #f7f7fb;
+    --ds-neutral-100: #fafbfc;
+    --ds-neutral-200: #e3e4e9;
+    --ds-neutral-500: #6f727d;
+    --ds-neutral-700: #474b55;
+    --ds-neutral-800: #292a31;
+    --ds-neutral-950: #292a31;
+    --ds-ambient-start: #b8bce8;
+    --ds-ambient-end: #a2d9bd;
 
     /* Cofounder semantic color */
     --ds-surface-canvas: var(--ds-neutral-50);
-    --ds-surface-paper: var(--ds-neutral-25);
-    --ds-surface-raised: var(--ds-neutral-25);
+    --ds-background-app: linear-gradient(
+        135deg,
+        var(--ds-ambient-start),
+        var(--ds-ambient-end)
+    );
+    --ds-surface-paper: var(--ds-neutral-0);
+    --ds-surface-raised: var(--ds-neutral-0);
     --ds-surface-inverse: var(--ds-navy-950);
     --ds-text-primary: var(--ds-neutral-800);
     --ds-text-secondary: var(--ds-neutral-500);
-    --ds-text-inverse: #f8fbff;
+    --ds-text-tertiary: #9699a3;
+    --ds-text-inverse: #fff;
+    --ds-text-error: #b4232f;
     --ds-border-subtle: var(--ds-neutral-200);
-    --ds-border-muted: var(--ds-neutral-200);
-    --ds-surface-selected: #f8f7ff;
-    --ds-surface-hover: #e2e7ff;
-    --ds-border-selection: #ccd9f4;
+    --ds-border-muted: #d3d5dc;
+    --ds-border-weak: #eff0f3;
+    --ds-border-default: var(--ds-border-muted);
+    --ds-border-strong: var(--ds-border-muted);
+    --ds-surface-selected: #f3fbf6;
+    --ds-surface-hover: #eeeff4;
+    --ds-border-selection: #b9dec7;
     --ds-action-primary: var(--ds-blue-500);
     --ds-action-accent: var(--ds-blue-500);
-    --ds-focus: #0053db;
-    --ds-selection: #dbe1ff;
+    --ds-focus: #176a40;
+    --ds-selection: #dcf5e5;
     /* stylelint-enable color-no-hex */
 
     /* Spacing, shape, depth, and motion */
@@ -52,14 +70,16 @@
     --ds-space-20: 80px;
     --ds-space-24: 96px;
     --ds-space-30: 120px;
-    --ds-radius-sm: 4px;
-    --ds-radius-control: 5px;
-    --ds-radius-card: 9px;
-    --ds-radius-window: 9px;
+    --ds-radius-sm: 6px;
+    --ds-radius-control: 9px;
+    --ds-radius-card: 12px;
+    --ds-radius-window: 18px;
     --ds-radius-pill: 999px;
-    --ds-shadow-control: none;
-    --ds-shadow-card: none;
-    --ds-shadow-float: none;
+    --ds-shadow-control: 0 1px 2px hsl(240deg 10% 19% / 4%);
+    --ds-shadow-card: 0 1px 4px hsl(240deg 10% 19% / 8%);
+    --ds-shadow-float:
+        0 16px 42px hsl(230deg 18% 18% / 14%),
+        0 2px 8px hsl(230deg 18% 18% / 7%);
     --ds-duration-fast: 160ms;
     --ds-duration-base: 240ms;
     --ds-duration-slow: 700ms;
@@ -99,6 +119,44 @@
     --line-height-sidebar-row-with-avatars: 32px;
     --line-height-sidebar-topic-inner: 24px;
     --spacing-top-bottom-sidebar-topic-inner: 5px;
+
+    /* Compatibility aliases used by the first Hover surfaces. Defining them
+       globally lets search, awareness, editions, and future Zulip screens
+       share one system without requiring the topic-screen class. */
+    /* stylelint-disable color-no-hex */
+    --hover-topic-panel: var(--ds-surface-paper);
+    --hover-topic-ambient-start: var(--ds-ambient-start);
+    --hover-topic-ambient-end: var(--ds-ambient-end);
+    --hover-topic-sidebar-surface: var(--ds-surface-canvas);
+    --hover-topic-sidebar-hover: var(--ds-surface-hover);
+    --hover-topic-ink: var(--ds-text-primary);
+    --hover-topic-copy: var(--ds-neutral-700);
+    --hover-topic-muted: var(--ds-text-secondary);
+    --hover-topic-quiet: var(--ds-text-tertiary);
+    --hover-topic-line: var(--ds-border-subtle);
+    --hover-topic-line-strong: var(--ds-border-muted);
+    --hover-topic-accent: var(--ds-action-primary);
+    --hover-topic-accent-hover: var(--ds-blue-600);
+    --hover-topic-accent-soft: var(--ds-blue-50);
+    --hover-topic-accent-soft-hover: #d0efdb;
+    --hover-topic-selected: var(--ds-surface-selected);
+    --hover-topic-selected-border: var(--ds-border-selection);
+    --hover-topic-control-hover: var(--ds-neutral-100);
+    --hover-topic-message-hover: var(--ds-neutral-100);
+    --hover-topic-placeholder: #858893;
+    --hover-overlay-surface: var(--ds-surface-paper);
+    --hover-overlay-surface-subtle: #f7f8fa;
+    --hover-overlay-hover: #f1f3f5;
+    --hover-overlay-selected: #edf8f1;
+    --hover-overlay-danger: var(--ds-text-error);
+    --hover-overlay-danger-soft: #fff1f2;
+    --hover-overlay-border: #dfe1e5;
+    --hover-overlay-border-strong: #c9ccd1;
+    --hover-overlay-backdrop: hsl(230deg 14% 14% / 34%);
+    --hover-overlay-radius: var(--ds-radius-card);
+    --hover-overlay-control-radius: 8px;
+    --hover-overlay-shadow: var(--ds-shadow-float);
+    /* stylelint-enable color-no-hex */
 
     /* Compatibility aliases for incrementally migrated interfaces. */
     --surface: var(--ds-surface-canvas);

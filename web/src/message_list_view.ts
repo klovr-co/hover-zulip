@@ -209,9 +209,36 @@ function same_recipient(a: MessageContainer | undefined, b: MessageContainer | u
     return util.same_recipient(a.msg, b.msg);
 }
 
+function date_render_style(): timerender.DateRenderStyle {
+    return "day_divider";
+}
+
+export function get_message_row_at_sticky_date(
+    message_rows: HTMLElement[],
+    sticky_date_props: Pick<DOMRect, "top" | "height">,
+): HTMLElement | undefined {
+    const sticky_date_center = sticky_date_props.top + sticky_date_props.height / 2;
+    let previous_message_row: HTMLElement | undefined;
+    for (const message_row of message_rows) {
+        const message_row_props = message_row.getBoundingClientRect();
+        if (
+            message_row_props.top <= sticky_date_center &&
+            message_row_props.bottom > sticky_date_center
+        ) {
+            return message_row;
+        }
+        if (message_row_props.top > sticky_date_center) {
+            const starts_new_day = message_row.querySelector(".date-divider-content") !== null;
+            return starts_new_day ? undefined : (previous_message_row ?? message_row);
+        }
+        previous_message_row = message_row;
+    }
+    return undefined;
+}
+
 function get_group_display_date(message: Message, display_year: boolean): string {
     const time = new Date(message.timestamp * 1000);
-    const date_element = timerender.render_date(time, display_year);
+    const date_element = timerender.render_date(time, display_year, date_render_style());
 
     return date_element.outerHTML;
 }
@@ -304,7 +331,8 @@ function get_date_divider_data(opts: {
 
     return {
         want_date_divider: true,
-        date_divider_html: timerender.render_date(curr_time, display_year).outerHTML,
+        date_divider_html: timerender.render_date(curr_time, display_year, date_render_style())
+            .outerHTML,
     };
 }
 
@@ -2520,7 +2548,7 @@ export class MessageListView {
             if (group !== undefined) {
                 const rendered_date = group.date_html;
                 dom_updates.html_updates.push({
-                    $element: $current_sticky_header.find(".recipient_row_date"),
+                    $element: $current_sticky_header.find(".recipient_row_date > .scroll-to-time"),
                     rendered_date,
                 });
             }
@@ -2580,6 +2608,7 @@ export class MessageListView {
         }
         /* Set correct date for the sticky_header. */
         let $message_row;
+        let has_message_at_sticky_date = true;
         if (!$sticky_header) {
             /* If the user is at the top of the scroll container,
                the header is visible for the first message group, and we can display the date for the first visible message.
@@ -2589,26 +2618,22 @@ export class MessageListView {
             $message_row = $sticky_header.nextAll(".message_row").first();
         } else {
             dom_updates.add_classes.push({$element: $sticky_header, class: "sticky_header"});
-            const sticky_header_props = util.the($sticky_header).getBoundingClientRect();
-            /* date separator starts to be hidden at this height difference. */
-            const date_separator_padding = 7;
-            const sticky_header_bottom = sticky_header_props.top + sticky_header_props.height;
-            const possible_new_date_separator_start = sticky_header_bottom - date_separator_padding;
-            /* Get `message_row` under the sticky header. */
-            const elements_below_sticky_header = document.elementsFromPoint(
-                sticky_header_props.left,
-                possible_new_date_separator_start,
-            );
-            const message_rows = elements_below_sticky_header
-                .filter((element) => element instanceof HTMLElement)
-                .filter((element) => element.classList.contains("message_row"))
-                .filter((element) => !rows.is_overlay_row($(element)));
-            if (message_rows.length === 0) {
-                /* If there is no message row under the header, it means it is not sticky yet,
-                   so we just get the message next to the header. */
+            const sticky_date_props = util
+                .the($sticky_header.find(".recipient_row_date"))
+                .getBoundingClientRect();
+            const message_rows = this.$list
+                .find(".message_row")
+                .filter((_index, element) => !rows.is_overlay_row($(element)))
+                .toArray();
+            const message_row = get_message_row_at_sticky_date(message_rows, sticky_date_props);
+            if (message_row === undefined) {
+                /* The sticky date can sit in the gap between two days after the final message
+                   for the current day has scrolled above it. Keep the recipient context, but
+                   do not display a date that has no message beneath it. */
+                has_message_at_sticky_date = false;
                 $message_row = $sticky_header.nextAll(".message_row").first();
             } else {
-                $message_row = $(message_rows[0]!);
+                $message_row = $(message_row);
             }
         }
         // We expect message information to be available for the message row even for failed or
@@ -2630,9 +2655,13 @@ export class MessageListView {
         this.sticky_recipient_message_id = message.id;
         const time = new Date(message.timestamp * 1000);
         const message_container = this.message_containers.get(message.id)!;
-        const rendered_date = timerender.render_date(time, message_container.year_changed);
+        const rendered_date = timerender.render_date(
+            time,
+            message_container.year_changed,
+            date_render_style(),
+        );
         dom_updates.html_updates.push({
-            $element: $sticky_header.find(".recipient_row_date"),
+            $element: $sticky_header.find(".recipient_row_date > .scroll-to-time"),
             rendered_date,
         });
 
@@ -2642,26 +2671,47 @@ export class MessageListView {
         // date. (E.g., both displaying "today"). We avoid this by
         // hiding the date display on the non-sticky previous
         // recipient row.
-        dom_updates.remove_classes.push({
-            $element: $(".hide-date-separator-header"),
-            class: "hide-date-separator-header",
-        });
+        dom_updates.remove_classes.push(
+            {
+                $element: $(".hide-date-separator-header"),
+                class: "hide-date-separator-header",
+            },
+            {
+                $element: $(".date-divider-under-sticky-header"),
+                class: "date-divider-under-sticky-header",
+            },
+            {
+                $element: $(".sticky-date-empty-gap"),
+                class: "sticky-date-empty-gap",
+            },
+        );
+        const $inline_date_divider = $message_row.find(".date-divider-content");
+        if (!has_message_at_sticky_date) {
+            dom_updates.add_classes.push({
+                $element: $sticky_header.find(".recipient_row_date"),
+                class: "sticky-date-empty-gap",
+            });
+        } else if ($inline_date_divider.length > 0) {
+            dom_updates.add_classes.push({
+                $element: $inline_date_divider,
+                class: "date-divider-under-sticky-header",
+            });
+        }
         // This corner case only occurs when the date is unchanged
         // from the previous recipient row.
         if ($sticky_header.find(".recipient_row_date.recipient_row_date_unchanged").length > 0) {
             const $prev_recipient_row = $sticky_header
                 .closest(".recipient_row")
                 .prev(".recipient_row");
-            if ($prev_recipient_row.length === 0) {
-                return;
-            }
-            const $prev_header_date_row = $prev_recipient_row.find(".recipient_row_date");
-            // Check if the recipient row before sticky header is a date separator.
-            if (!$prev_header_date_row.hasClass("recipient_row_date_unchanged")) {
-                dom_updates.add_classes.push({
-                    $element: $prev_header_date_row,
-                    class: "hide-date-separator-header",
-                });
+            if ($prev_recipient_row.length > 0) {
+                const $prev_header_date_row = $prev_recipient_row.find(".recipient_row_date");
+                // Check if the recipient row before sticky header is a date separator.
+                if (!$prev_header_date_row.hasClass("recipient_row_date_unchanged")) {
+                    dom_updates.add_classes.push({
+                        $element: $prev_header_date_row,
+                        class: "hide-date-separator-header",
+                    });
+                }
             }
         }
 

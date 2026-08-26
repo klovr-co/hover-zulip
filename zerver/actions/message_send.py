@@ -954,11 +954,7 @@ def do_send_messages(
     messages = [send_request.message for send_request in send_message_requests]
     Message.objects.bulk_create(messages)
     capture_integration_message_provenance(
-        [
-            send_request.message
-            for send_request in send_message_requests
-            if send_request.realm.hover_enabled
-        ]
+        [send_request.message for send_request in send_message_requests]
     )
     if post_message_persist_hook is not None:
         post_message_persist_hook(messages)

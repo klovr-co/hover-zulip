@@ -15,10 +15,14 @@
 }
 
 :root {
-    /* The first two faces mirror the Stitch export; Source Sans 3 is bundled. */
+    /* The application uses the same compact system stack as the Hover topic
+       screen, so native Zulip controls and new Hover surfaces share metrics. */
     --font-saans:
-        "Be Vietnam Pro", "Avenir Next", "Source Sans 3 VF", sans-serif;
-    --font-headline: "Manrope", "Avenir Next", "Source Sans 3 VF", sans-serif;
+        -apple-system, "BlinkMacSystemFont", "Segoe UI Variable", "Segoe UI",
+        sans-serif;
+    --font-headline:
+        -apple-system, "BlinkMacSystemFont", "Segoe UI Variable", "Segoe UI",
+        sans-serif;
     --font-saans-mono: "SaansMono Local", "SaansMono Fallback", monospace;
     --type-display-xl-size: 72px;
     --type-display-xl-line: 1.05;

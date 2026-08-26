@@ -4,7 +4,6 @@ from typing_extensions import override
 from hover.actions_spaces import do_create_space
 from hover.models import Space, SpaceAdministrator, SpaceMembership
 from zerver.actions.channel_folders import check_add_channel_folder
-from zerver.actions.realm_settings import do_set_realm_property
 from zerver.lib.events import apply_events, fetch_initial_state_data
 from zerver.lib.test_classes import ZulipTestCase
 from zerver.lib.user_groups import get_system_user_group_by_name
@@ -18,11 +17,10 @@ class HoverSpacesTest(ZulipTestCase):
         super().setUp()
         self.creator = self.example_user("hamlet")
         self.realm = self.creator.realm
-        self.realm.hover_enabled = True
         self.realm.can_create_spaces_group = get_system_user_group_by_name(
             SystemGroups.MEMBERS, self.realm.id
         )
-        self.realm.save(update_fields=["hover_enabled", "can_create_spaces_group"])
+        self.realm.save(update_fields=["can_create_spaces_group"])
         self.category = check_add_channel_folder(
             self.realm,
             "Programs",
@@ -87,16 +85,8 @@ class HoverSpacesTest(ZulipTestCase):
         )
         self.assert_json_error(duplicate, "Space name already in use.")
 
-    def test_disabled_and_permission_denied(self) -> None:
+    def test_permission_denied(self) -> None:
         self.login_user(self.creator)
-        self.realm.hover_enabled = False
-        self.realm.save(update_fields=["hover_enabled"])
-        result = self.client_post(
-            "/json/hover/spaces",
-            {"name": "Private program", "category_id": orjson.dumps(self.category.id).decode()},
-        )
-        self.assert_json_error(result, "You do not have permission to create Spaces.")
-
         self.login("iago")
         result = self.client_post(
             "/json/hover/spaces",
@@ -104,13 +94,6 @@ class HoverSpacesTest(ZulipTestCase):
         )
         self.assert_json_error(result, "You do not have permission to create Spaces.")
 
-        self.realm.hover_enabled = True
-        self.realm.save(update_fields=["hover_enabled"])
-        result = self.client_post(
-            "/json/hover/spaces",
-            {"name": "Admin program", "category_id": orjson.dumps(self.category.id).decode()},
-        )
-        self.assert_json_success(result)
 
     def test_realm_admin_can_grant_and_revoke_space_creation_permission(self) -> None:
         administrators = get_system_user_group_by_name(SystemGroups.ADMINISTRATORS, self.realm.id)
@@ -145,11 +128,10 @@ class HoverSpacesTest(ZulipTestCase):
         self.assertTrue(self.creator.can_create_hover_spaces(self.realm))
         self.assertTrue(self.creator.can_create_hover_spaces())
 
-        self.realm.hover_enabled = True
         self.realm.can_create_spaces_group = get_system_user_group_by_name(
             SystemGroups.ADMINISTRATORS, self.realm.id
         )
-        self.realm.save(update_fields=["hover_enabled", "can_create_spaces_group"])
+        self.realm.save(update_fields=["can_create_spaces_group"])
         self.login_user(self.creator)
         result = self.client_post(
             "/json/hover/spaces",
@@ -249,39 +231,6 @@ class HoverSpacesTest(ZulipTestCase):
             include_deactivated_groups=False,
         )
         self.assertEqual(state["hover_spaces"], [])
-
-    def test_disable_enable_cycle_retains_authorized_state_for_convergence(self) -> None:
-        space = self.create_space()
-        state = fetch_initial_state_data(
-            self.creator, realm=self.realm, event_types={"hover_space"}
-        )
-        self.assertEqual(state["hover_spaces"][0]["id"], space.id)
-
-        realm_events = []
-        for enabled in [False, True]:
-            with self.capture_send_event_calls(expected_num_events=1) as events:
-                do_set_realm_property(
-                    self.realm, "hover_enabled", enabled, acting_user=self.example_user("iago")
-                )
-            realm_events.append(events[0]["event"])
-
-        apply_events(
-            self.creator,
-            state=state,
-            events=realm_events,
-            fetch_event_types={"realm", "hover_space"},
-            client_gravatar=False,
-            slim_presence=False,
-            include_subscribers=False,
-            linkifier_url_template=False,
-            user_list_incomplete=False,
-            include_deactivated_groups=False,
-        )
-        fresh_state = fetch_initial_state_data(
-            self.creator, realm=self.realm, event_types={"hover_space"}
-        )
-        self.assertTrue(state["realm_hover_enabled"])
-        self.assertEqual(state["hover_spaces"], fresh_state["hover_spaces"])
 
     def test_cross_realm_and_archived_categories_are_rejected(self) -> None:
         self.login_user(self.creator)

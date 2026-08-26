@@ -87,7 +87,6 @@ exports.make_realm = (opts = {}) => {
         realm_enable_read_receipts: false,
         realm_enable_spectator_access: false,
         realm_gif_rating_policy: 0,
-        realm_hover_enabled: false,
         realm_icon_source: "",
         realm_icon_url: "",
         realm_incoming_webhook_bots: [],

@@ -600,15 +600,11 @@ run_test("user_can_create_private_streams", () => {
     );
 });
 
-run_test("user_can_create_spaces", ({override}) => {
-    override(realm, "realm_hover_enabled", true);
+run_test("user_can_create_spaces", () => {
     test_realm_group_settings(
         "realm_can_create_spaces_group",
         settings_data.user_can_create_spaces,
     );
-
-    override(realm, "realm_hover_enabled", false);
-    assert.equal(settings_data.user_can_create_spaces(), false);
 });
 
 run_test("user_can_create_web_public_streams", ({override}) => {

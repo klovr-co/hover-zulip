@@ -14,7 +14,7 @@ import type {
 } from "./hover_pipeline_library.ts";
 import {$t, $t_html} from "./i18n.ts";
 import * as people from "./people.ts";
-import {current_user, realm} from "./state_data.ts";
+import {current_user} from "./state_data.ts";
 import * as ui_report from "./ui_report.ts";
 
 type LibraryRequest = typeof channel.get;
@@ -525,7 +525,7 @@ function bind_events(): void {
 }
 
 export function open(): void {
-    if (!realm.realm_hover_enabled || current_user.is_guest || modal_is_open) {
+    if (current_user.is_guest || modal_is_open) {
         return;
     }
     hover_pipeline_library.clear();

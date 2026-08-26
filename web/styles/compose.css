@@ -1477,6 +1477,18 @@ textarea.new_message_textarea {
     }
 }
 
+.hover-compose-quick-controls {
+    display: none;
+}
+
+.hover-compose-formatting-controls {
+    display: none;
+}
+
+.hover-compose-send-chevron {
+    display: none;
+}
+
 @media (width < $sm_min), ((width >= $sm_min) and (width < $mc_min)) {
     #compose-send-button {
         /* Drop to a square button,

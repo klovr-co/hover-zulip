@@ -193,7 +193,6 @@ class HomeTest(ZulipTestCase):
         "realm_enable_spectator_access",
         "realm_filters",
         "realm_gif_rating_policy",
-        "realm_hover_enabled",
         "realm_icon_source",
         "realm_icon_url",
         "realm_incoming_webhook_bots",

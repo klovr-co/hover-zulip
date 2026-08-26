@@ -70,8 +70,6 @@ def get_accessible_spaces(user_profile: UserProfile) -> QuerySet[Space]:
         .distinct()
         .order_by("category__order", "name", "id")
     )
-    if not user_profile.realm.hover_enabled:
-        return spaces.none()
     return spaces
 
 

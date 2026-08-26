@@ -903,8 +903,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin, UserBaseSettings):
         if realm is None:
             realm = self.realm
         return (
-            realm.hover_enabled
-            and self.is_active
+            self.is_active
             and not self.is_bot
             and not self.is_guest
             and self.has_permission("can_create_spaces_group", realm)

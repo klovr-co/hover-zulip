@@ -1162,10 +1162,6 @@ class Command(ZulipBaseCommand):
                     f"No user with email {options['viewer_email']} exists in {realm.string_id}."
                 )
 
-        if not realm.hover_enabled:
-            realm.hover_enabled = True
-            realm.save(update_fields=["hover_enabled"])
-
         folder = ChannelFolder.objects.filter(
             realm=realm, name__iexact="Events", is_archived=False
         ).first()

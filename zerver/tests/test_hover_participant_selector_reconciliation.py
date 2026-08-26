@@ -42,8 +42,6 @@ class HoverParticipantSelectorReconciliationTest(ZulipTestCase):
         self.user = self.example_user("hamlet")
         self.admin = self.example_user("iago")
         self.realm = self.user.realm
-        self.realm.hover_enabled = True
-        self.realm.save(update_fields=["hover_enabled"])
         self.category = check_add_channel_folder(
             self.realm, "Selector programs", "", acting_user=self.admin
         )

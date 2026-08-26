@@ -5888,11 +5888,10 @@ class HoverSpaceActionTest(BaseAction):
     def setUp(self) -> None:
         super().setUp()
         realm = self.user_profile.realm
-        realm.hover_enabled = True
         realm.can_create_spaces_group = get_system_user_group_by_name(
             SystemGroups.MEMBERS, realm.id
         )
-        realm.save(update_fields=["hover_enabled", "can_create_spaces_group"])
+        realm.save(update_fields=["can_create_spaces_group"])
 
     def create_space(self) -> Space:
         category = check_add_channel_folder(

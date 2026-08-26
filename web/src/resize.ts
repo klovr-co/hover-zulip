@@ -26,7 +26,11 @@ function get_bottom_whitespace_height(): number {
 }
 
 export function get_stream_filters_max_height(): number {
-    const viewport_height = message_viewport.height();
+    // The left sidebar is constrained by the browser viewport, not the
+    // message scroll surface.  Hover's topic screen uses
+    // #message_feed_container as that surface; it can be temporarily
+    // unmeasurable while the shell is being laid out.
+    const viewport_height = window.innerHeight;
     // Add some gap for bottom element to be properly visible.
     const GAP = 15;
 

@@ -23,7 +23,7 @@ import * as scheduled_messages from "./scheduled_messages.ts";
 import * as scroll_util from "./scroll_util.ts";
 import * as settings_data from "./settings_data.ts";
 import * as spectators from "./spectators.ts";
-import {current_user, realm} from "./state_data.ts";
+import {current_user} from "./state_data.ts";
 import * as stream_list from "./stream_list.ts";
 import * as ui_util from "./ui_util.ts";
 import {user_settings} from "./user_settings.ts";
@@ -254,7 +254,6 @@ export function initialize_left_sidebar(): void {
     const rendered_sidebar = render_left_sidebar({
         is_guest: current_user.is_guest,
         is_spectator: page_params.is_spectator,
-        hover_enabled: realm.realm_hover_enabled,
         can_create_spaces: settings_data.user_can_create_spaces(),
         primary_condensed_views,
         expanded_views,
