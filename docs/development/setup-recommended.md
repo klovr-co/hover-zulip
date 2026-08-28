@@ -1,10 +1,16 @@
-## Recommended environment setup tutorial
+## Legacy Vagrant environment setup tutorial
+
+:::{warning}
+This document describes the inherited Zulip fallback. Hover development uses
+the [repository-owned Docker Compose workflow](hover.md). Vagrant remains
+available only during staged parity acceptance.
+:::
 
 This section guides first-time contributors through installing the
 Zulip development environment on Windows, macOS, and Linux.
 
-The recommended method for installing the Zulip development environment is
-to use WSL 2 on Windows, and Vagrant with Docker on macOS and Linux.
+The inherited Zulip method uses WSL 2 on Windows and Vagrant with Docker on
+macOS and Linux.
 
 All of these recommended methods work by creating a container or VM
 for the Zulip server and related services, with the Git repository

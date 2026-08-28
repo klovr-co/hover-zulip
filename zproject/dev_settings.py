@@ -4,6 +4,46 @@ import pwd
 from scripts.lib.zulip_tools import deport
 from zproject.settings_types import SCIMConfigDict
 
+HOVER_DEV_CONTAINER = os.getenv("HOVER_DEV_CONTAINER") == "1"
+if HOVER_DEV_CONTAINER:
+    _required_hover_dev_variables = [
+        "HOVER_DEV_INSTANCE_ID",
+        "HOVER_DEV_DATABASE_HOST",
+        "HOVER_DEV_DATABASE_NAME",
+        "HOVER_DEV_DATABASE_USER",
+        "HOVER_DEV_DATABASE_PASSWORD",
+        "HOVER_DEV_REDIS_HOST",
+        "HOVER_DEV_REDIS_DATABASE",
+        "HOVER_DEV_REDIS_PASSWORD",
+        "HOVER_DEV_RABBITMQ_HOST",
+        "HOVER_DEV_RABBITMQ_VHOST",
+        "HOVER_DEV_RABBITMQ_USER",
+        "HOVER_DEV_RABBITMQ_PASSWORD",
+        "HOVER_DEV_MEMCACHED_LOCATION",
+    ]
+    _missing_hover_dev_variables = [
+        name for name in _required_hover_dev_variables if not os.getenv(name)
+    ]
+    if _missing_hover_dev_variables:
+        raise RuntimeError(
+            "The Hover development container is missing required settings: "
+            + ", ".join(_missing_hover_dev_variables)
+        )
+
+    HOVER_DEV_INSTANCE_ID = os.environ["HOVER_DEV_INSTANCE_ID"]
+    HOVER_DEV_DATABASE_NAME = os.environ["HOVER_DEV_DATABASE_NAME"]
+    HOVER_DEV_DATABASE_USER = os.environ["HOVER_DEV_DATABASE_USER"]
+    HOVER_DEV_DATABASE_PASSWORD = os.environ["HOVER_DEV_DATABASE_PASSWORD"]
+    HOVER_DEV_CACHE_PREFIX = os.getenv("HOVER_DEV_CACHE_PREFIX", "")
+    REMOTE_POSTGRES_HOST = os.environ["HOVER_DEV_DATABASE_HOST"]
+    REMOTE_POSTGRES_SSLMODE = "disable"
+    REDIS_HOST = os.environ["HOVER_DEV_REDIS_HOST"]
+    REDIS_DATABASE = int(os.environ["HOVER_DEV_REDIS_DATABASE"])
+    RABBITMQ_HOST = os.environ["HOVER_DEV_RABBITMQ_HOST"]
+    RABBITMQ_VHOST = os.environ["HOVER_DEV_RABBITMQ_VHOST"]
+    RABBITMQ_USERNAME = os.environ["HOVER_DEV_RABBITMQ_USER"]
+    MEMCACHED_LOCATION = os.environ["HOVER_DEV_MEMCACHED_LOCATION"]
+
 ZULIP_ADMINISTRATOR = "desdemona+admin@zulip.com"
 
 # Initiatize TEST_SUITE early, so other code can rely on the setting.
@@ -101,8 +141,9 @@ EMBEDDED_BOTS_ENABLED = True
 
 SYSTEM_ONLY_REALMS: set[str] = set()
 USING_PGROONGA = True
-# Flush cache after migration.
-POST_MIGRATION_CACHE_FLUSHING = True
+# Shared development Memcached deliberately disables ``flush_all`` so one
+# workspace cannot invalidate another workspace's cache entries.
+POST_MIGRATION_CACHE_FLUSHING = not HOVER_DEV_CONTAINER
 
 # If a sandbox APNs key or cert is provided, use it.
 # To create such a key or cert, see instructions at:

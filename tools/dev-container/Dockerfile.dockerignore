@@ -1,0 +1,9 @@
+.context
+.git
+.venv
+.vagrant
+node_modules
+starlight_help/node_modules
+var
+**/__pycache__
+**/.DS_Store

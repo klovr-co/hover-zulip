@@ -1,0 +1,128 @@
+name: hover-dev-${HOVER_INSTANCE_ID}
+
+x-app-base: &app-base
+  image: ${HOVER_APP_IMAGE}
+  user: ${HOVER_HOST_UID}:${HOVER_HOST_GID}
+  working_dir: /workspace
+  init: true
+  environment: &app-environment
+    HOME: /home/hover
+    GIT_DIR: ${HOVER_CONTAINER_GIT_DIR}
+    GIT_WORK_TREE: /workspace
+    EXTERNAL_HOST: localhost:${HOVER_HOST_PORT}
+    HOVER_DEV_CONTAINER: "1"
+    HOVER_DEV_INSTANCE_ID: ${HOVER_INSTANCE_ID}
+    HOVER_DEV_DATABASE_HOST: postgres
+    HOVER_DEV_DATABASE_NAME: ${HOVER_DATABASE_NAME}
+    HOVER_DEV_DATABASE_USER: ${HOVER_INFRA_POSTGRES_USER}
+    HOVER_DEV_DATABASE_PASSWORD: ${HOVER_INFRA_POSTGRES_PASSWORD}
+    HOVER_DEV_REDIS_HOST: redis
+    HOVER_DEV_REDIS_DATABASE: ${HOVER_REDIS_DATABASE}
+    HOVER_DEV_REDIS_PASSWORD: ${HOVER_INFRA_REDIS_PASSWORD}
+    HOVER_DEV_RABBITMQ_HOST: rabbitmq
+    HOVER_DEV_RABBITMQ_VHOST: ${HOVER_RABBITMQ_VHOST}
+    HOVER_DEV_RABBITMQ_USER: ${HOVER_INFRA_RABBITMQ_USER}
+    HOVER_DEV_RABBITMQ_PASSWORD: ${HOVER_INFRA_RABBITMQ_PASSWORD}
+    HOVER_DEV_MEMCACHED_LOCATION: memcached:11211
+    HOVER_DEV_FULL_TEXT_HOST: postgres
+    HOVER_DEV_WEBPACK_CACHE: /workspace/var/webpack-cache
+  networks:
+    - hover-dev
+
+services:
+  dependencies:
+    <<: *app-base
+    command: ["/bin/true"]
+    volumes:
+      - ${HOVER_GIT_COMMON_DIR}:/git
+      - venv:/workspace/.venv
+      - node-modules:/workspace/node_modules
+      - starlight-node-modules:/workspace/starlight_help/node_modules
+      - static-generated:/workspace/static/generated
+      - web-generated:/workspace/web/generated
+
+  task:
+    <<: *app-base
+    command: ["/bin/true"]
+    volumes:
+      - ${HOVER_WORKSPACE}:/workspace
+      - ${HOVER_GIT_COMMON_DIR}:/git
+      - venv:/workspace/.venv:ro
+      - node-modules:/workspace/node_modules:ro
+      - starlight-node-modules:/workspace/starlight_help/node_modules:ro
+      - workspace-var:/workspace/var
+      - workspace-uploads:/workspace/var/uploads
+      - static-generated:/workspace/static/generated
+      - web-generated:/workspace/web/generated
+
+  app:
+    <<: *app-base
+    labels:
+      hover.dev.application: "true"
+      hover.dev.instance: ${HOVER_INSTANCE_ID}
+      hover.dev.workspace: ${HOVER_WORKSPACE}
+    command:
+      - /bin/bash
+      - -lc
+      - exec ./tools/run-dev --streamlined --no-clear-memcached --interface=0.0.0.0 --skip-provision-check
+    ports:
+      - 127.0.0.1:${HOVER_HOST_PORT}:9991
+    # Cold webpack compilation briefly exceeds the 1.25 GiB steady-state gate.
+    mem_reservation: 1250m
+    mem_limit: 2g
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "--silent",
+          "http://127.0.0.1:9991/health",
+        ]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+    volumes:
+      - ${HOVER_WORKSPACE}:/workspace
+      - ${HOVER_GIT_COMMON_DIR}:/git
+      - venv:/workspace/.venv:ro
+      - node-modules:/workspace/node_modules:ro
+      - starlight-node-modules:/workspace/starlight_help/node_modules:ro
+      - workspace-var:/workspace/var
+      - workspace-uploads:/workspace/var/uploads
+      - static-generated:/workspace/static/generated
+      - web-generated:/workspace/web/generated
+
+  app-full:
+    extends:
+      service: app
+    profiles: [full]
+    command:
+      - /bin/bash
+      - -lc
+      - exec ./tools/run-dev --no-clear-memcached --interface=0.0.0.0 --skip-provision-check
+
+volumes:
+  venv:
+    name: ${HOVER_VENV_VOLUME}
+    external: true
+  node-modules:
+    name: ${HOVER_NODE_VOLUME}
+    external: true
+  starlight-node-modules:
+    name: ${HOVER_STARLIGHT_VOLUME}
+    external: true
+  workspace-var:
+    name: ${HOVER_VAR_VOLUME}
+  workspace-uploads:
+    name: ${HOVER_UPLOADS_VOLUME}
+  static-generated:
+    name: ${HOVER_STATIC_GENERATED_VOLUME}
+  web-generated:
+    name: ${HOVER_WEB_GENERATED_VOLUME}
+
+networks:
+  hover-dev:
+    name: hover-dev-network
+    external: true
