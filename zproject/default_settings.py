@@ -232,9 +232,20 @@ RABBITMQ_USERNAME = "zulip"
 RABBITMQ_USE_TLS = False
 REDIS_HOST = "127.0.0.1"
 REDIS_PORT = 6379
+REDIS_DATABASE = 0
 REMOTE_POSTGRES_HOST = ""
 REMOTE_POSTGRES_PORT = 5432
 REMOTE_POSTGRES_SSLMODE = "verify-full"
+
+# Repository-owned development containers set these values through the
+# HOVER_DEV_* environment contract in dev_settings.py.  They deliberately
+# remain inert in production.
+HOVER_DEV_CONTAINER = False
+HOVER_DEV_INSTANCE_ID = ""
+HOVER_DEV_DATABASE_NAME = ""
+HOVER_DEV_DATABASE_USER = ""
+HOVER_DEV_DATABASE_PASSWORD = ""
+HOVER_DEV_CACHE_PREFIX = ""
 
 TORNADO_PORTS: list[int] = []
 USING_TORNADO = True

@@ -19,6 +19,12 @@ from zerver.checks import (
 
 
 def flush_cache(sender: AppConfig | None, **kwargs: Any) -> None:
+    if (
+        getattr(settings, "HOVER_DEV_CONTAINER", False)
+        and settings.CACHES["default"]["BACKEND"]
+        == "zerver.lib.singleton_bmemcached.SingletonBMemcached"
+    ):
+        return
     logging.info("Clearing memcached cache after migrations")
     cache.clear()
 

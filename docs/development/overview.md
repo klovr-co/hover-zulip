@@ -1,5 +1,11 @@
 # Development environment installation
 
+:::{important}
+Hover contributors should use the repository-owned
+[Hover development environment](hover.md). The Zulip/Vagrant instructions
+below are retained only as a staged legacy fallback.
+:::
+
 ## Requirements
 
 The Zulip development environment can be installed on **macOS,
@@ -13,9 +19,8 @@ internet connection throughout the entire installation process.** You can
 
 ## Recommended setup
 
-**For first-time contributors, we recommend using the
-[Vagrant development environment][install-vagrant]** on
-macOS and Linux based OS and [WSL 2 setup][install-via-wsl] on Windows.
+The inherited Zulip documentation recommends Vagrant on macOS and Linux and
+WSL 2 on Windows. This is no longer the canonical Hover workflow.
 
 ## Vagrant setup
 

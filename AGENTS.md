@@ -2,10 +2,10 @@
 
 ## CI and testing
 
-Run CI-style checks through the Conductor Spotlight host rather than
-provisioning Docker or a worktree-local development environment. The Spotlight
-host has the repository's supported development dependencies and is the
-appropriate environment for frontend lint and test commands.
+Use the repository-owned development environment for CI-style checks. Run
+frontend lint, Node tests, backend lint, backend tests, and browser tests with
+`./tools/dev exec -- <command>` so each worktree uses its isolated Hover data.
+Do not provision another Vagrant guest or Docker stack for a worktree.
 
 ## Product direction
 

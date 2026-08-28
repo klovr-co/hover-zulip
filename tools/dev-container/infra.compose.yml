@@ -1,0 +1,91 @@
+name: hover-dev-infra
+
+services:
+  postgres:
+    image: groonga/pgroonga:4.0.8-debian-16@sha256:24bc15d68143620bf21eb292d905aa5e9bcff120fd09032f119ab316b38cd19a
+    environment:
+      POSTGRES_USER: ${HOVER_INFRA_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${HOVER_INFRA_POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+    command: ["postgres", "-c", "max_connections=150"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    mem_limit: 512m
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      default:
+        aliases: [postgres]
+
+  redis:
+    image: redis:7.4-alpine@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--requirepass",
+        "${HOVER_INFRA_REDIS_PASSWORD}",
+      ]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${HOVER_INFRA_REDIS_PASSWORD}", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    mem_limit: 128m
+    volumes:
+      - redis-data:/data
+    networks:
+      default:
+        aliases: [redis]
+
+  rabbitmq:
+    image: rabbitmq:3.13-alpine@sha256:d7af1c87c5f1eda13fcfca06db452bf3aeab6619fc3358b68535c0c02c4e52bc
+    environment:
+      RABBITMQ_DEFAULT_USER: ${HOVER_INFRA_RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${HOVER_INFRA_RABBITMQ_PASSWORD}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+    mem_limit: 256m
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      default:
+        aliases: [rabbitmq]
+
+  memcached:
+    image: memcached:1.6-alpine@sha256:c29847751abb41f4c268c84fb3087fee05d4edcbda44409ccb5086e26148e8a7
+    # -F disables the global flush_all command.  Workspace cache reset is
+    # implemented by rotating the per-checkout key prefix instead.
+    command: ["memcached", "-m", "48", "-F"]
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "printf 'version\r\n' | nc 127.0.0.1 11211 | grep -q VERSION",
+        ]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    mem_limit: 64m
+    networks:
+      default:
+        aliases: [memcached]
+
+volumes:
+  postgres-data:
+    name: hover-dev-infra-postgres
+  redis-data:
+    name: hover-dev-infra-redis
+  rabbitmq-data:
+    name: hover-dev-infra-rabbitmq
+
+networks:
+  default:
+    name: hover-dev-network

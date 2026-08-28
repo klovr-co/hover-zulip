@@ -10,6 +10,7 @@ import time
 from django.conf import settings
 from django.db import DEFAULT_DB_ALIAS, ProgrammingError, connection, connections
 from django.db.utils import OperationalError
+from psycopg2 import sql
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from scripts.lib.zulip_tools import (
@@ -20,7 +21,12 @@ from scripts.lib.zulip_tools import (
     write_new_digest,
 )
 
-BACKEND_DATABASE_TEMPLATE = "zulip_test_template"
+if os.getenv("HOVER_DEV_CONTAINER") == "1":
+    TEST_DATABASE_NAME = f"hover_test_{os.environ['HOVER_DEV_INSTANCE_ID']}"
+    BACKEND_DATABASE_TEMPLATE = f"{TEST_DATABASE_NAME}_template"
+else:
+    TEST_DATABASE_NAME = "zulip_test"
+    BACKEND_DATABASE_TEMPLATE = "zulip_test_template"
 UUID_VAR_DIR = get_dev_uuid_var_path()
 
 IMPORTANT_FILES = [
@@ -253,7 +259,7 @@ DEV_DATABASE = Database(
 
 TEST_DATABASE = Database(
     platform="test",
-    database_name="zulip_test_template",
+    database_name=BACKEND_DATABASE_TEMPLATE,
     settings="zproject.test_settings",
 )
 
@@ -319,7 +325,7 @@ def destroy_leaked_test_databases(expiry_time: int = 60 * 60) -> int:
             cursor.execute("SELECT datname FROM pg_database;")
             rows = cursor.fetchall()
             for row in rows:
-                if "zulip_test_template_" in row[0]:
+                if f"{BACKEND_DATABASE_TEMPLATE}_" in row[0]:
                     test_databases.add(row[0])
     except ProgrammingError:
         pass
@@ -328,7 +334,9 @@ def destroy_leaked_test_databases(expiry_time: int = 60 * 60) -> int:
     for file in files:
         if round(time.time()) - os.path.getmtime(file) < expiry_time:
             with open(file) as f:
-                databases_in_use.update(f"zulip_test_template_{line}".rstrip() for line in f)
+                databases_in_use.update(
+                    f"{BACKEND_DATABASE_TEMPLATE}_{line}".rstrip() for line in f
+                )
         else:
             # Any test-backend run older than expiry_time can be
             # cleaned up, both the database and the file listing its
@@ -341,10 +349,22 @@ def destroy_leaked_test_databases(expiry_time: int = 60 * 60) -> int:
         return 0
 
     commands = "\n".join(f"DROP DATABASE IF EXISTS {db};" for db in databases_to_drop)
+    database_settings = settings.DATABASES["default"]
     subprocess.run(
-        ["psql", "-q", "-v", "ON_ERROR_STOP=1", "-h", "localhost", "postgres", "zulip_test"],
+        [
+            "psql",
+            "-q",
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-h",
+            str(database_settings["HOST"]),
+            "-U",
+            str(database_settings["USER"]),
+            "postgres",
+        ],
         input=commands,
         check=True,
+        env={**os.environ, "PGPASSWORD": str(database_settings["PASSWORD"])},
         text=True,
     )
     return len(databases_to_drop)
@@ -373,16 +393,17 @@ def reset_zulip_test_database() -> None:
     from zerver.lib.test_runner import destroy_test_databases
 
     # Make sure default database is 'zulip_test'.
-    assert connections["default"].settings_dict["NAME"] == "zulip_test"
+    assert connections["default"].settings_dict["NAME"] == TEST_DATABASE_NAME
 
     # Clearing all the active PSQL sessions with 'zulip_test'.
     run(
         [
             "env",
-            "PGHOST=localhost",
-            "PGUSER=zulip_test",
+            f"PGHOST={settings.DATABASES['default']['HOST']}",
+            f"PGUSER={settings.DATABASES['default']['USER']}",
+            f"PGPASSWORD={settings.DATABASES['default']['PASSWORD']}",
             "scripts/setup/terminate-psql-sessions",
-            "zulip_test",
+            TEST_DATABASE_NAME,
         ]
     )
 
@@ -399,8 +420,13 @@ def reset_zulip_test_database() -> None:
     # its name is set to original database name + some suffix.
     # Also, we need it to be 'zulip_test' so that our running server can recognize it.
     with connection.cursor() as cursor:
-        cursor.execute("ALTER DATABASE zulip_test_template_clone RENAME TO zulip_test;")
-    settings_dict["NAME"] = "zulip_test"
+        cursor.execute(
+            sql.SQL("ALTER DATABASE {} RENAME TO {};").format(
+                sql.Identifier(f"{BACKEND_DATABASE_TEMPLATE}_clone"),
+                sql.Identifier(TEST_DATABASE_NAME),
+            )
+        )
+    settings_dict["NAME"] = TEST_DATABASE_NAME
     # connection.settings_dict must be updated in place for changes to be
     # reflected in django.db.connections. If the following line assigned
     # connection.settings_dict = settings_dict, new threads would connect

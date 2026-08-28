@@ -1,0 +1,125 @@
+name: Hover development stack
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: Detect relevant changes
+    runs-on: ubuntu-slim
+    outputs:
+      relevant: ${{ steps.detect.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - id: detect
+        name: Check development-stack inputs
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [[ "$EVENT_NAME" == workflow_dispatch ]]; then
+              echo "relevant=true" >>"$GITHUB_OUTPUT"
+              exit 0
+          fi
+
+          changed_files="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")"
+          if grep -Eq '^(\.conductor/|AGENTS\.md$|docs/(adr|development)/|package\.json$|pnpm-lock\.yaml$|pyproject\.toml$|uv\.lock$|tools/dev$|tools/dev-container/|tools/lib/provision|tools/run-dev$|zproject/(config|configured_settings|computed_settings|default_settings|dev_settings|test_extra_settings)\.py$|zerver/lib/redis_utils\.py$)' <<<"$changed_files"; then
+              echo "relevant=true" >>"$GITHUB_OUTPUT"
+          else
+              echo "relevant=false" >>"$GITHUB_OUTPUT"
+          fi
+
+  smoke:
+    name: amd64 core smoke
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      HOVER_DEV_STATE_DIR: ${{ github.workspace }}/.context/ci-state
+      HOVER_DEV_PORT: "19991"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate host
+        run: ./tools/dev doctor
+
+      - name: Set up isolated workspace
+        run: ./tools/dev setup
+
+      - name: Boot core profile and verify authenticated Hover
+        run: |
+          mkdir -p .context/hover-dev
+          ./tools/dev up >.context/hover-dev/ci-app.log 2>&1 &
+          for attempt in {1..60}; do
+              if curl --fail --silent \
+                  --header "Host: localhost:$HOVER_DEV_PORT" \
+                  "http://127.0.0.1:$HOVER_DEV_PORT/api/v1/server_settings" >/dev/null; then
+                  break
+              fi
+              if [[ "$attempt" == 60 ]]; then
+                  cat .context/hover-dev/ci-app.log
+                  exit 1
+              fi
+              sleep 2
+          done
+          curl --fail --silent --header "Host: localhost:$HOVER_DEV_PORT" \
+              --cookie-jar .context/hover-dev/cookies \
+              --data 'direct_email=iago@zulip.com' \
+              "http://127.0.0.1:$HOVER_DEV_PORT/accounts/login/local/" >/dev/null
+          curl --fail --silent --header "Host: localhost:$HOVER_DEV_PORT" \
+              --cookie .context/hover-dev/cookies \
+              "http://127.0.0.1:$HOVER_DEV_PORT/" | grep -q 'id="hover-source-view"'
+
+      - name: Run representative frontend and backend checks
+        run: |
+          ./tools/dev exec -- ./tools/lint --skip=gitlint tools/dev zproject/dev_settings.py zerver/lib/redis_utils.py
+          ./tools/dev exec -- ./tools/test-js-with-node web/tests/hover.test.cjs
+          ./tools/dev exec -- ./tools/test-backend zerver.tests.test_home.HomeTest
+
+      - name: Tear down workspace
+        if: always()
+        run: |
+          ./tools/dev down || true
+          ./tools/dev infra stop || true
+
+      - name: Print application logs on failure
+        if: failure()
+        run: cat .context/hover-dev/ci-app.log || true
+
+  required:
+    name: Development stack check
+    if: always()
+    needs: [changes, smoke]
+    runs-on: ubuntu-slim
+    steps:
+      - name: Report result
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          RELEVANT: ${{ needs.changes.outputs.relevant }}
+          SMOKE_RESULT: ${{ needs.smoke.result }}
+        run: |
+          if [[ "$CHANGES_RESULT" != success ]]; then
+              echo "Change detection failed"
+              exit 1
+          fi
+          if [[ "$RELEVANT" == true && "$SMOKE_RESULT" != success ]]; then
+              echo "Relevant development-stack changes did not pass the smoke job"
+              exit 1
+          fi
+          echo "Development stack check passed (relevant=$RELEVANT, smoke=$SMOKE_RESULT)."
