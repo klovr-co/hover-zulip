@@ -121,6 +121,24 @@ const everyone = make_user_group({
 
 user_groups.initialize({realm_user_groups: [nobody, everyone]});
 
+run_test("narrow_to_message_near highlights only notification navigation", ({override_rewire}) => {
+    const show_calls = [];
+    override_rewire(message_view, "show", (terms, opts) => {
+        show_calls.push({terms, opts});
+    });
+    const message = {
+        id: 123,
+        type: "private",
+        to_user_ids: "5,23",
+    };
+
+    message_view.narrow_to_message_near(message, "notification");
+    message_view.narrow_to_message_near(message, "message link");
+
+    assert.equal(show_calls[0].opts.highlight_as_notification, true);
+    assert.equal(show_calls[1].opts.highlight_as_notification, false);
+});
+
 run_test("empty_narrow_html", ({mock_template}) => {
     mock_template("empty_feed_notice.hbs", true, (_data, html) => html);
 
