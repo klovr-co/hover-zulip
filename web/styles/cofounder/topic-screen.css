@@ -834,7 +834,8 @@
         background: var(--hover-topic-message-hover);
     }
 
-    body.hover-enabled.hover-topic-screen .message_row.selected_message {
+    body.hover-enabled.hover-topic-screen
+        .message_row.notification-highlighted-message {
         border-color: var(--hover-topic-selected-border);
         background: var(--hover-topic-selected);
         box-shadow: none;
@@ -842,17 +843,17 @@
 
     body.hover-enabled.hover-topic-screen
         #message_feed_container
-        .message_row.selected_message:has(
+        .message_row.notification-highlighted-message:has(
             > .message_feed_divider .date-divider-content
         ) {
-            border-color: transparent;
-            background: transparent;
-            outline: 0;
-        }
+        border-color: transparent;
+        background: transparent;
+        outline: 0;
+    }
 
     body.hover-enabled.hover-topic-screen
         #message_feed_container
-        .message_row.selected_message:has(
+        .message_row.notification-highlighted-message:has(
             > .message_feed_divider .date-divider-content
         )
         > .messagebox {
@@ -862,7 +863,7 @@
 
     body.hover-enabled.hover-topic-screen
         #message_feed_container
-        .message_row.selected_message:has(
+        .message_row.notification-highlighted-message:has(
             > .message_feed_divider .date-divider-content
         )
         > .messagebox::before {
@@ -877,7 +878,7 @@
 
     body.hover-enabled.hover-topic-screen
         #message_feed_container
-        .message_row.selected_message:has(
+        .message_row.notification-highlighted-message:has(
             > .message_feed_divider .date-divider-content
         )
         > .messagebox

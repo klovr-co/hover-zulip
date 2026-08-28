@@ -4029,7 +4029,7 @@ a {
     font-variant-numeric: tabular-nums;
 }
 
-.message_row.selected_message {
+.message_row.notification-highlighted-message {
     left: -13px;
     box-sizing: border-box;
     width: calc(100% + 26px);
@@ -4046,7 +4046,7 @@ a {
     outline: 0;
 }
 
-.message_row.hover-generated-update.selected_message {
+.message_row.hover-generated-update.notification-highlighted-message {
     left: auto;
     width: calc(100% - 12px);
     padding-inline: 0;
