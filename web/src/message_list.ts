@@ -31,6 +31,7 @@ export type SelectIdOpts = {
     force_rerender?: boolean;
     from_scroll?: boolean;
     from_rendering?: boolean;
+    highlight_as_notification?: boolean;
 };
 
 export type MessageSelectedEventOpts = {
@@ -42,6 +43,7 @@ export type MessageSelectedEventOpts = {
     force_rerender: boolean;
     from_scroll?: boolean;
     from_rendering?: boolean;
+    highlight_as_notification: boolean;
     id: number;
     msg_list: MessageList;
     previously_selected_id: number;
@@ -426,6 +428,7 @@ export class MessageList {
             empty_ok: false,
             mark_read: true,
             force_rerender: false,
+            highlight_as_notification: false,
             ...select_id_opts,
             id,
             msg_list: this,

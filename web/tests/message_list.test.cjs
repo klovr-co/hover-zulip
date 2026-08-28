@@ -104,6 +104,7 @@ run_test("basics", () => {
 
     assert.equal(document_events.length, 1);
     assert.equal(document_events[0].type, "message_selected.zulip");
+    assert.equal(document_events[0].highlight_as_notification, false);
     assert.equal(list.selected_id(), 50);
     assert.equal(list.selected_idx(), 0);
 
@@ -121,6 +122,9 @@ run_test("basics", () => {
     assert.equal(document_events[1].type, "message_selected.zulip");
     assert.equal(num_renders, 0);
     assert.equal(list.selected_id(), 60);
+
+    list.select_id(70, {highlight_as_notification: true});
+    assert.equal(document_events[2].highlight_as_notification, true);
 
     const old_messages = [
         {

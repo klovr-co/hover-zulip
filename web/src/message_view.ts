@@ -406,9 +406,10 @@ export function try_rendering_locally_for_same_narrow(
 
     assert(message_lists.current !== undefined);
     const currently_selected_id = message_lists.current?.selected_id();
-    if (currently_selected_id !== target_id) {
+    if (currently_selected_id !== target_id || opts.highlight_as_notification) {
         message_lists.current.select_id(target_id, {
             then_scroll: true,
+            highlight_as_notification: opts.highlight_as_notification === true,
             ...(target_scroll_offset !== undefined && {target_scroll_offset}),
         });
     }
@@ -434,6 +435,7 @@ export type ShowMessageViewOpts = {
     then_select_offset?: number | undefined;
     show_more_topics?: boolean;
     remove_current_hash_from_history?: boolean;
+    highlight_as_notification?: boolean;
 };
 
 export function get_id_info(): TargetMessageIdInfo {
@@ -767,6 +769,7 @@ export let show = (raw_terms: NarrowTerm[], show_opts: ShowMessageViewOpts): voi
             select_opts = {
                 empty_ok: true,
                 force_rerender: false,
+                highlight_as_notification: opts.highlight_as_notification === true,
             };
 
             if (opts.then_select_id !== -1) {
@@ -796,6 +799,7 @@ export let show = (raw_terms: NarrowTerm[], show_opts: ShowMessageViewOpts): voi
             select_opts = {
                 empty_ok: false,
                 force_rerender: true,
+                highlight_as_notification: opts.highlight_as_notification === true,
             };
 
             if (id_info.target_id === id_info.final_select_id) {
@@ -1788,7 +1792,7 @@ export function narrow_to_message_near(message: Message, trigger: string): void 
                     },
                     {operator: "near", operand: String(message.id)},
                 ],
-                {trigger},
+                {trigger, highlight_as_notification: trigger === "notification"},
             );
             return;
         case "stream":
@@ -1801,7 +1805,7 @@ export function narrow_to_message_near(message: Message, trigger: string): void 
                     {operator: "topic", operand: message.topic},
                     {operator: "near", operand: String(message.id)},
                 ],
-                {trigger},
+                {trigger, highlight_as_notification: trigger === "notification"},
             );
     }
 }

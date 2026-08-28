@@ -91,6 +91,7 @@ import * as message_list_tooltips from "./message_list_tooltips.ts";
 import * as message_lists from "./message_lists.ts";
 import * as message_reminder from "./message_reminder.ts";
 import * as message_scroll from "./message_scroll.ts";
+import * as message_selection_ui from "./message_selection_ui.ts";
 import * as message_view from "./message_view.ts";
 import * as message_view_header from "./message_view_header.ts";
 import * as message_viewport from "./message_viewport.ts";
@@ -370,8 +371,7 @@ export function initialize_kitchen_sink_stuff() {
             return;
         }
         const $row = event.msg_list.get_row(event.id);
-        $(".selected_message").removeClass("selected_message");
-        $row.addClass("selected_message");
+        message_selection_ui.update_selected_message_row($row, event.highlight_as_notification);
 
         if (event.then_scroll) {
             if ($row.length === 0) {
