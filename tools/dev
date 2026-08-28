@@ -488,7 +488,9 @@ def workspace_values(credentials: dict[str, str], slot: int, port: int) -> dict[
     try:
         container_git_dir = Path("/git") / git_dir.relative_to(git_common_dir)
     except ValueError as error:
-        raise DevError(f"Git directory {git_dir} is outside common directory {git_common_dir}") from error
+        raise DevError(
+            f"Git directory {git_dir} is outside common directory {git_common_dir}"
+        ) from error
     values = {
         **credentials,
         "HOVER_INSTANCE_ID": current_id,
@@ -507,9 +509,7 @@ def workspace_values(credentials: dict[str, str], slot: int, port: int) -> dict[
         "HOVER_STARLIGHT_VOLUME": f"hover-dev-starlight-{dep_generation}",
         "HOVER_VAR_VOLUME": f"hover-dev-var-{current_id}",
         "HOVER_UPLOADS_VOLUME": f"hover-dev-uploads-{current_id}",
-        "HOVER_STATIC_GENERATED_VOLUME": (
-            f"hover-dev-static-generated-{current_id}-{dep_digest}"
-        ),
+        "HOVER_STATIC_GENERATED_VOLUME": (f"hover-dev-static-generated-{current_id}-{dep_digest}"),
         "HOVER_WEB_GENERATED_VOLUME": f"hover-dev-web-generated-{current_id}-{dep_digest}",
     }
     return values
