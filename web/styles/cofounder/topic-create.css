@@ -1,0 +1,299 @@
+.hover-topic-create {
+    display: grid;
+    gap: 20px;
+    color: var(--hover-topic-copy, var(--color-text-default));
+    font-size: 14px;
+}
+
+.hover-topic-create :is(fieldset, section, header, h3, p) {
+    margin: 0;
+}
+
+.hover-topic-create fieldset {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+}
+
+.hover-topic-create :is(legend, h3) {
+    color: var(--hover-topic-ink, var(--color-text-default));
+    font-size: 14px;
+    font-weight: 650;
+    letter-spacing: -0.012em;
+    line-height: 1.35;
+}
+
+.hover-topic-create small,
+.hover-topic-create p {
+    color: var(--hover-topic-muted, var(--color-text-subtle));
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.hover-topic-create__types {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.hover-topic-create__types > :is(legend, p) {
+    grid-column: 1 / -1;
+}
+
+.hover-topic-create__types > legend {
+    margin-bottom: -5px;
+    font-size: 15px;
+}
+
+.hover-topic-create__types > label {
+    position: relative;
+    display: grid;
+    min-height: 92px;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 8px;
+    align-content: start;
+    padding: 12px;
+    border: 1px solid var(--hover-overlay-border, var(--color-border-default));
+    border-radius: 10px;
+    background: var(--hover-overlay-surface, var(--color-background));
+    cursor: pointer;
+    transition:
+        border-color 140ms ease,
+        background-color 140ms ease,
+        box-shadow 140ms ease;
+}
+
+.hover-topic-create__types > label:hover {
+    border-color: var(--hover-topic-line-strong, var(--color-border-default));
+    background: var(--hover-overlay-surface-subtle, var(--color-background));
+}
+
+.hover-topic-create__types > label:has(input:checked) {
+    border-color: var(--hover-topic-accent, var(--color-border-default));
+    background: var(--hover-overlay-selected, var(--color-background));
+    box-shadow: inset 0 0 0 1px var(--hover-topic-accent, transparent);
+}
+
+.hover-topic-create__types > label:has(input:focus-visible) {
+    outline: 2px solid var(--hover-topic-accent, currentcolor);
+    outline-offset: 2px;
+}
+
+.hover-topic-create__types input {
+    width: 16px;
+    height: 16px;
+    margin: 2px 0 0;
+    accent-color: var(--hover-topic-accent, currentcolor);
+}
+
+.hover-topic-create__types label span {
+    display: grid;
+    gap: 5px;
+}
+
+.hover-topic-create__types strong {
+    color: var(--hover-topic-ink, var(--color-text-default));
+    font-size: 14px;
+    font-weight: 650;
+}
+
+.hover-topic-create__panel {
+    display: grid;
+    gap: 14px;
+    padding-top: 18px;
+    border-top: 1px solid
+        var(--hover-overlay-border, var(--color-border-default));
+}
+
+.hover-topic-create__panel.hide {
+    display: none;
+}
+
+.hover-topic-create__section-heading {
+    display: grid;
+    gap: 3px;
+}
+
+.hover-topic-create__section-heading h3 {
+    font-size: 16px;
+}
+
+.hover-topic-create__field {
+    display: grid;
+    gap: 7px;
+}
+
+.hover-topic-create__field > label,
+.hover-topic-create__schedule > label {
+    color: var(--hover-topic-ink, var(--color-text-default));
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.hover-topic-create
+    :is(
+        input:not([type="checkbox"], [type="radio"]),
+        select,
+        button:not(.modal__button)
+    ) {
+    min-height: 38px;
+    border: 1px solid var(--hover-overlay-border, var(--color-border-default));
+    border-radius: 8px;
+    background: var(--hover-overlay-surface, var(--color-background));
+    color: var(--hover-topic-copy, var(--color-text-default));
+    font: inherit;
+}
+
+.hover-topic-create :is(input:not([type="checkbox"], [type="radio"]), select) {
+    width: 100%;
+    padding-inline: 11px;
+}
+
+.hover-topic-create__options {
+    display: grid;
+    gap: 6px;
+    padding-top: 14px !important;
+    border-top: 1px solid
+        var(--hover-overlay-border, var(--color-border-default)) !important;
+}
+
+.hover-topic-create__options > legend {
+    padding: 0;
+}
+
+.hover-topic-create__options > p {
+    margin-top: -5px;
+    margin-bottom: 3px;
+}
+
+.hover-topic-create__options > label {
+    display: grid;
+    min-height: 32px;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 9px;
+    align-items: center;
+    padding: 4px 9px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.hover-topic-create__options > label:hover {
+    background: var(--hover-overlay-surface-subtle, transparent);
+}
+
+.hover-topic-create__options > label span {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.hover-topic-create__options input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--hover-topic-accent, currentcolor);
+}
+
+.hover-topic-create__source-search,
+.hover-topic-create__schedule {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hover-topic-create__source-search input {
+    min-width: 0;
+    flex: 1;
+}
+
+.hover-topic-create__source-search button {
+    padding-inline: 15px;
+    color: var(--hover-topic-accent, var(--color-text-default));
+    font-weight: 650;
+}
+
+.hover-topic-create__source-search button:hover {
+    border-color: var(--hover-topic-accent, var(--color-border-default));
+    background: var(--hover-overlay-selected, var(--color-background));
+}
+
+.hover-topic-create__schedule input {
+    width: 126px !important;
+    flex: none;
+}
+
+.hover-topic-create__schedule small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hover-topic-create__notice {
+    padding: 10px 12px;
+    border-left: 3px solid var(--hover-topic-accent, currentcolor);
+    background: var(--hover-overlay-surface-subtle, transparent);
+}
+
+.hover-topic-create--settings {
+    gap: 18px;
+}
+
+.hover-summary-preview {
+    display: grid;
+    gap: 10px;
+    padding-block-start: 16px;
+    border-block-start: 1px solid var(--color-border-default);
+}
+
+.hover-summary-preview h3,
+.hover-summary-preview h4,
+.hover-summary-preview p {
+    margin: 0;
+}
+
+.hover-summary-preview > button {
+    justify-self: start;
+}
+
+#hover_summary_preview_status {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--hover-overlay-surface-subtle, transparent);
+}
+
+body.hover-topic-screen #hover-topic-create-modal.modal__container {
+    width: min(680px, calc(100vw - 32px));
+    max-height: calc(100vh - 24px);
+}
+
+body.hover-topic-screen #hover-topic-create-modal .modal__content {
+    padding: 22px 28px 26px;
+}
+
+@media (width <= 700px) {
+    .hover-topic-create {
+        gap: 20px;
+    }
+
+    .hover-topic-create__types {
+        grid-template-columns: 1fr;
+    }
+
+    .hover-topic-create__types > label {
+        min-height: 0;
+        padding: 12px;
+    }
+
+    .hover-topic-create__source-search {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    body.hover-topic-screen #hover-topic-create-modal .modal__content {
+        padding: 18px;
+    }
+}

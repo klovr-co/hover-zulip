@@ -1,13 +1,8 @@
-import {$} from "jquery";
 import * as z from "zod/mini";
 
-import render_hover_evidence_modal from "../templates/hover_evidence_modal.hbs";
-
 import * as channel from "./channel.ts";
-import * as dialog_widget from "./dialog_widget.ts";
-import {$t} from "./i18n.ts";
 
-const evidence_schema = z.object({
+const legacy_evidence_schema = z.object({
     evidence_ref: z.string(),
     source_ref: z.string(),
     sender: z.object({ref: z.string(), display_name: z.string()}),
@@ -28,108 +23,140 @@ const evidence_schema = z.object({
     ),
 });
 
-const evidence_response_schema = z.object({evidence: z.array(evidence_schema)});
+const grouped_message_schema = z.object({
+    message_id: z.number(),
+    sender_name: z.string(),
+    timestamp: z.number(),
+    rendered_content: z.string(),
+    edited_since_generation: z._default(z.boolean(), false),
+});
+
+const grouped_evidence_schema = z.object({
+    groups: z.array(
+        z.object({
+            topic: z.object({
+                stream_id: z.number(),
+                topic_name: z.string(),
+                kind: z.enum(["regular", "source"]),
+                provider_name: z.optional(z.string()),
+            }),
+            messages: z.array(grouped_message_schema),
+        }),
+    ),
+    forbidden_count: z.number(),
+});
+
+const legacy_evidence_response_schema = z.object({evidence: z.array(legacy_evidence_schema)});
 const error_response_schema = z.object({retryable: z.optional(z.boolean())});
 
-function present_evidence(
-    response: unknown,
-): (z.infer<typeof evidence_schema> & {display_timestamp: string})[] {
-    const {evidence} = evidence_response_schema.parse(response);
-    return evidence.map((item) => ({
-        ...item,
-        display_timestamp: new Intl.DateTimeFormat(undefined, {
-            dateStyle: "medium",
-            timeStyle: "short",
-        }).format(new Date(item.timestamp)),
-    }));
+type LegacyEvidence = z.infer<typeof legacy_evidence_schema>;
+type GroupedEvidence = z.infer<typeof grouped_evidence_schema>;
+
+export type PresentedEvidence = {
+    groups: {
+        topic: GroupedEvidence["groups"][number]["topic"];
+        messages: {
+            message_id?: number;
+            can_open_message: boolean;
+            stream_id?: number;
+            topic_name?: string;
+            sender_name: string;
+            timestamp: string;
+            display_timestamp: string;
+            rendered_content_html?: string;
+            edited_since_generation?: boolean;
+            legacy_content?: LegacyEvidence["content"];
+            media?: LegacyEvidence["media"];
+        }[];
+    }[];
+    forbidden_count: number;
+};
+
+function display_timestamp(value: string | number): string {
+    const date = typeof value === "number" ? new Date(value * 1000) : new Date(value);
+    return new Intl.DateTimeFormat(undefined, {dateStyle: "medium", timeStyle: "short"}).format(
+        date,
+    );
 }
 
-function focus_result($content: JQuery): void {
-    $content.find("[data-hover-evidence-result]").trigger("focus");
+export function present_evidence(response: unknown): PresentedEvidence {
+    const grouped = grouped_evidence_schema.safeParse(response);
+    if (grouped.success) {
+        return {
+            forbidden_count: grouped.data.forbidden_count,
+            groups: grouped.data.groups.map((group) => ({
+                topic: group.topic,
+                messages: group.messages.map((message) => {
+                    const {rendered_content, ...metadata} = message;
+                    return {
+                        ...metadata,
+                        can_open_message: true,
+                        stream_id: group.topic.stream_id,
+                        topic_name: group.topic.topic_name,
+                        timestamp: new Date(message.timestamp * 1000).toISOString(),
+                        display_timestamp: display_timestamp(message.timestamp),
+                        rendered_content_html: rendered_content,
+                    };
+                }),
+            })),
+        };
+    }
+
+    const {evidence} = legacy_evidence_response_schema.parse(response);
+    return {
+        forbidden_count: 0,
+        groups:
+            evidence.length === 0
+                ? []
+                : [
+                      {
+                          topic: {
+                              stream_id: 0,
+                              topic_name: "Sources",
+                              kind: "source" as const,
+                          },
+                          messages: evidence.map((item) => ({
+                              sender_name: item.sender.display_name,
+                              can_open_message: false,
+                              timestamp: item.timestamp,
+                              display_timestamp: display_timestamp(item.timestamp),
+                              legacy_content: item.content,
+                              media: item.media,
+                          })),
+                      },
+                  ],
+    };
 }
 
-function replace_content($content: JQuery, html: string): void {
-    const $simplebar_content = $content.find(".simplebar-content");
-    ($simplebar_content.length > 0 ? $simplebar_content : $content).html(html);
-}
+export type EvidenceError = {retryable: boolean};
 
-export function load_evidence($content: JQuery, url: string): void {
-    replace_content($content, render_hover_evidence_modal({loading: true}));
+export function fetch_evidence(
+    url: string,
+    callbacks: {
+        success: (evidence: PresentedEvidence) => void;
+        error: (error: EvidenceError) => void;
+    },
+): void {
     void channel.post({
         url,
         success(response) {
+            let evidence: PresentedEvidence;
             try {
-                const evidence = present_evidence(response);
-                replace_content(
-                    $content,
-                    render_hover_evidence_modal({evidence, empty: evidence.length === 0}),
-                );
+                evidence = present_evidence(response);
             } catch {
-                replace_content(
-                    $content,
-                    render_hover_evidence_modal({error: true, retryable: false}),
-                );
+                callbacks.error({retryable: false});
+                return;
             }
-            focus_result($content);
+            callbacks.success(evidence);
         },
         error(xhr) {
             const parsed = error_response_schema.safeParse(xhr.responseJSON);
-            const retryable =
-                parsed.success && parsed.data.retryable !== undefined
-                    ? parsed.data.retryable
-                    : [429, 502, 503, 504].includes(xhr.status);
-            replace_content(
-                $content,
-                render_hover_evidence_modal({
-                    error: true,
-                    retryable,
-                    evidence_url: url,
-                }),
-            );
-            focus_result($content);
+            callbacks.error({
+                retryable:
+                    parsed.success && parsed.data.retryable !== undefined
+                        ? parsed.data.retryable
+                        : [429, 502, 503, 504].includes(xhr.status),
+            });
         },
-    });
-}
-
-export function show_evidence(url: string): void {
-    const modal_id = dialog_widget.launch({
-        modal_title_text: $t({defaultMessage: "Sources"}),
-        modal_content_html: render_hover_evidence_modal({loading: true}),
-        modal_submit_button_text: $t({defaultMessage: "Close"}),
-        single_footer_button: true,
-        close_on_submit: true,
-    });
-    const $content = $(`#${CSS.escape(modal_id)} .modal__content`);
-    load_evidence($content, url);
-}
-
-export function initialize(): void {
-    document.body.addEventListener(
-        "click",
-        (event) => {
-            if (!(event.target instanceof Element)) {
-                return;
-            }
-            const button = event.target.closest<HTMLElement>(".hover-view-evidence");
-            if (button === null) {
-                return;
-            }
-            const url = button.dataset["evidenceUrl"];
-            if (url === undefined) {
-                return;
-            }
-            event.preventDefault();
-            event.stopPropagation();
-            show_evidence(url);
-        },
-        {capture: true},
-    );
-    $("body").on("click", ".hover-evidence-retry", (event) => {
-        event.preventDefault();
-        const $button = $(event.currentTarget);
-        const url = $button.attr("data-evidence-url");
-        if (url !== undefined) {
-            load_evidence($button.closest(".modal__content"), url);
-        }
     });
 }

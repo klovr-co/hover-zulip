@@ -413,7 +413,9 @@ def install_module(
         request,
         data={
             "installation": installation_data(installation),
-            "space": get_space_data(space_projection_queryset().get(id=space.id)),
+            "space": get_space_data(
+                space_projection_queryset().get(id=space.id), viewer=user_profile
+            ),
             "created": created,
         },
     )

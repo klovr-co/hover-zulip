@@ -136,7 +136,7 @@ class HoverMembershipsTest(ZulipTestCase):
             SpaceMembership.objects.filter(space=self.space, user=self.member).exists()
         )
         self.assertFalse(get_accessible_spaces(self.member).filter(id=self.space.id).exists())
-        projected = get_space_data(self.space)
+        projected = get_space_data(self.space, viewer=self.creator)
         serialized = str(projected)
         self.assertNotIn("observation_basis", serialized)
         self.assertNotIn("0123456789abcdef0123456789abcdef", serialized)
@@ -181,7 +181,9 @@ class HoverMembershipsTest(ZulipTestCase):
         )
         suggestion.refresh_from_db()
         self.assertEqual(suggestion.state, SpaceMembershipSuggestion.State.CONFIRMED)
-        self.assertEqual(get_space_data(self.space)["membership_suggestions"], [])
+        self.assertEqual(
+            get_space_data(self.space, viewer=self.creator)["membership_suggestions"], []
+        )
         self.assertEqual(membership.role, SpaceMembership.Role.CONTRIBUTOR)
 
         do_confirm_space_member(

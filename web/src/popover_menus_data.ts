@@ -5,6 +5,7 @@ import assert from "minimalistic-assert";
 
 import * as buddy_data from "./buddy_data.ts";
 import * as hash_util from "./hash_util.ts";
+import * as hover_spaces from "./hover_spaces.ts";
 import {$t} from "./i18n.ts";
 import * as message_delete from "./message_delete.ts";
 import * as message_edit from "./message_edit.ts";
@@ -70,6 +71,8 @@ type TopicPopoverContext = {
     all_visibility_policies: AllVisibilityPolicies;
     can_summarize_topics: boolean;
     show_ai_features: boolean;
+    can_manage_hover_summary: boolean;
+    hover_summary_installation_id: number | undefined;
 };
 
 type VisibilityChangePopoverContext = {
@@ -286,6 +289,7 @@ export function get_topic_popover_content_context({
     const all_visibility_policies = user_topics.all_visibility_policies;
     const is_spectator = page_params.is_spectator;
     const is_topic_empty = is_topic_definitely_empty(stream_id, topic_name);
+    const descriptor = hover_spaces.get_topic_descriptor(stream_id, topic_name);
     return {
         stream_name: sub.name,
         stream_id: sub.stream_id,
@@ -308,6 +312,10 @@ export function get_topic_popover_content_context({
         all_visibility_policies,
         can_summarize_topics: settings_data.user_can_summarize_topics(),
         show_ai_features: !user_settings.hide_ai_features,
+        can_manage_hover_summary:
+            descriptor?.kind === "summary" && descriptor.summary?.can_manage === true,
+        hover_summary_installation_id:
+            descriptor?.kind === "summary" ? descriptor.summary?.installation_id : undefined,
     };
 }
 

@@ -5,8 +5,10 @@ import type * as tippy from "tippy.js";
 import render_delete_topic_modal from "../templates/confirm_dialog/confirm_delete_topic.hbs";
 import render_left_sidebar_topic_actions_popover from "../templates/popovers/left_sidebar/left_sidebar_topic_actions_popover.hbs";
 
+import * as channel from "./channel.ts";
 import * as clipboard_handler from "./clipboard_handler.ts";
 import * as confirm_dialog from "./confirm_dialog.ts";
+import * as hover_topic_create from "./hover_topic_create.ts";
 import {$t_html} from "./i18n.ts";
 import * as message_delete from "./message_delete.ts";
 import * as message_edit from "./message_edit.ts";
@@ -52,7 +54,7 @@ function get_conversation(instance: tippy.Instance): {
         const $stream_li = $elt.closest(".narrow-filter").expectOne();
         topic_name = $elt.closest("li").expectOne().attr("data-topic-name")!;
         url = util.the($elt.closest("li").find<HTMLAnchorElement>("a.topic-box")).href;
-        stream_id = stream_popover.elem_to_stream_id($stream_li);
+        stream_id = Number($elt.attr("data-stream-id")) || stream_popover.elem_to_stream_id($stream_li);
     }
 
     return {stream_id, topic_name, url};
@@ -176,10 +178,6 @@ export function initialize(): void {
                     );
                 });
 
-                if (is_topic_empty) {
-                    return;
-                }
-
                 $popper.one("click", ".sidebar-popover-unstar-all-in-topic", () => {
                     starred_messages_ui.confirm_unstar_all_messages_in_topic(stream_id, topic_name);
                     popover_menus.hide_current_popover_if_visible(instance);
@@ -219,6 +217,38 @@ export function initialize(): void {
 
                     popover_menus.hide_current_popover_if_visible(instance);
                 });
+
+                $popper.one("click", ".sidebar-popover-edit-hover-summary", (event) => {
+                    const installation_id = Number(
+                        $(event.currentTarget).attr("data-installation-id"),
+                    );
+                    popover_menus.hide_current_popover_if_visible(instance);
+                    hover_topic_create.open_summary_settings(installation_id);
+                });
+
+                $popper.one("click", ".sidebar-popover-disable-hover-summary", (event) => {
+                    const installation_id = Number(
+                        $(event.currentTarget).attr("data-installation-id"),
+                    );
+                    confirm_dialog.launch({
+                        id: "disable-hover-summary-modal",
+                        modal_title_html: $t_html({defaultMessage: "Disable Summary?"}),
+                        modal_content_html: $t_html({
+                            defaultMessage:
+                                "This removes the Summary from the topic list and withdraws member access. Existing editions remain stored.",
+                        }),
+                        on_click() {
+                            void channel.post({
+                                url: `/json/hover/module-installations/${installation_id}/disable`,
+                            });
+                        },
+                    });
+                    popover_menus.hide_current_popover_if_visible(instance);
+                });
+
+                if (is_topic_empty) {
+                    return;
+                }
 
                 $popper.one("click", ".sidebar-popover-toggle-resolved", () => {
                     message_edit.with_first_message_id(stream_id, topic_name, (message_id) => {

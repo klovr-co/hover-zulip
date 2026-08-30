@@ -140,7 +140,7 @@ def attach_source(
     return json_success(
         request,
         data={
-            "space": get_space_data(refreshed_space),
+            "space": get_space_data(refreshed_space, viewer=user_profile),
             "attachment": get_attachment_data(attachment),
             "created": created,
         },
@@ -163,7 +163,9 @@ def detach_source(
     return json_success(
         request,
         data={
-            "space": get_space_data(space_projection_queryset().get(id=space.id)),
+            "space": get_space_data(
+                space_projection_queryset().get(id=space.id), viewer=user_profile
+            ),
             "attachment_id": attachment.id,
             "changed": changed,
         },
@@ -190,7 +192,9 @@ def delete_source_evidence(
     return json_success(
         request,
         data={
-            "space": get_space_data(space_projection_queryset().get(id=space.id)),
+            "space": get_space_data(
+                space_projection_queryset().get(id=space.id), viewer=user_profile
+            ),
             "attachment_id": attachment.id,
             "changed": changed,
             "deleted_evidence_link_count": deleted_count,
