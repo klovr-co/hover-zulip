@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.core.management.base import BaseCommand
+from typing_extensions import override
 
 from hover.actions_summary_executions import (
     do_publish_summary_execution,
@@ -15,6 +16,7 @@ from zerver.lib.exceptions import JsonableError
 class Command(BaseCommand):
     help = "Dispatch due Hover Summary intervals and recover stale dispatches."
 
+    @override
     def handle(self, *args: Any, **options: Any) -> None:
         dispatcher = get_summary_dispatcher()
         dispatches = [
