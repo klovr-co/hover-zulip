@@ -5,8 +5,13 @@ from django.db import transaction
 from django.utils.timezone import now as timezone_now
 from django.utils.translation import gettext as _
 
-from hover.lib_spaces import get_space_data, user_is_space_administrator
+from hover.lib_spaces import (
+    get_space_data,
+    send_space_update_on_commit,
+    user_is_space_administrator,
+)
 from hover.models import (
+    ModuleInstallation,
     Source,
     SourceParticipantBinding,
     Space,
@@ -70,11 +75,7 @@ def _send_admin_update(space: Space) -> None:
             "user_id", flat=True
         )
     )
-    send_event_on_commit(
-        space.realm,
-        {"type": "hover_space", "op": "update", "space": get_space_data(space)},
-        administrator_ids,
-    )
+    send_space_update_on_commit(space, administrator_ids)
 
 
 def _send_launched_membership_update(
@@ -88,18 +89,18 @@ def _send_launched_membership_update(
     other_member_ids = [user_id for user_id in member_ids if user_id != target.id]
     update_ids = other_member_ids if removed or added else member_ids
     if update_ids:
-        send_event_on_commit(
-            space.realm,
-            {"type": "hover_space", "op": "update", "space": get_space_data(space)},
-            update_ids,
-        )
+        send_space_update_on_commit(space, update_ids)
     if removed or added:
         send_event_on_commit(
             space.realm,
             (
                 {"type": "hover_space", "op": "delete", "space_id": space.id}
                 if removed
-                else {"type": "hover_space", "op": "add", "space": get_space_data(space)}
+                else {
+                    "type": "hover_space",
+                    "op": "add",
+                    "space": get_space_data(space, viewer=target),
+                }
             ),
             [target.id],
         )
@@ -132,7 +133,38 @@ def _set_native_launched_membership(
         ).delete()
 
     if role is None:
-        bulk_remove_subscriptions(space.realm, [target], [stream], acting_user=acting_user)
+        summary_streams = list(
+            ModuleInstallation.objects.filter(
+                space=space,
+                summary_stream__isnull=False,
+            ).select_related("summary_stream")
+        )
+        summary_native_streams = []
+        for installation in summary_streams:
+            summary_stream = installation.summary_stream
+            assert summary_stream is not None
+            summary_native_streams.append(summary_stream)
+        native_streams = [stream, *summary_native_streams]
+        bulk_remove_subscriptions(
+            space.realm,
+            [target],
+            native_streams,
+            acting_user=acting_user,
+        )
+        summary_group_ids = {
+            group_id
+            for summary_stream in summary_native_streams
+            for group_id in (
+                summary_stream.can_send_message_group_id,
+                summary_stream.can_administer_channel_group_id,
+                summary_stream.can_add_subscribers_group_id,
+                summary_stream.can_remove_subscribers_group_id,
+            )
+        }
+        UserGroupMembership.objects.filter(
+            user_group_id__in=summary_group_ids,
+            user_profile=target,
+        ).delete()
     else:
         bulk_add_subscriptions(space.realm, [stream], [target], acting_user=acting_user)
 

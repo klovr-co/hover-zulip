@@ -99,6 +99,7 @@ class HoverIntegrationProvenanceTest(ZulipTestCase):
             history_window=SpaceAttachment.HistoryWindow.TODAY,
             history_timezone="UTC",
             history_start_at=datetime(2026, 8, 11, tzinfo=timezone.utc),
+            destination_topic="Source events",
             attached_by=self.actor,
         )
         self.space, _ = do_launch_space(self.space, acting_user=self.actor)
@@ -185,7 +186,7 @@ class HoverIntegrationProvenanceTest(ZulipTestCase):
         )
         message = Message.objects.get(id=message_id)
         self.assertEqual(message.content, "native body")
-        self.assertEqual(message.topic_name(), "push")
+        self.assertEqual(message.topic_name(), "Source events")
         provenance = IntegrationMessageProvenance.objects.get(message=message)
         self.assertEqual(provenance.association, route)
         self.assertEqual(provenance.external_url, "https://github.com/klovr-co/aimto")
@@ -220,7 +221,7 @@ class HoverIntegrationProvenanceTest(ZulipTestCase):
             content_type="application/json",
         )
 
-        self.assertEqual(message.topic_name(), "public-repo / changes")
+        self.assertEqual(message.topic_name(), "Source events")
         self.assertIn("baxterthehacker", message.content)
         provenance = IntegrationMessageProvenance.objects.get(message=message)
         self.assertEqual(provenance.association, route)
@@ -256,7 +257,7 @@ class HoverIntegrationProvenanceTest(ZulipTestCase):
             content_type="application/json",
         )
 
-        self.assertEqual(message.topic_name(), "")
+        self.assertEqual(message.topic_name(), "Source events")
         self.assertEqual(message.content, "New Instagram mention from Apify")
         provenance = IntegrationMessageProvenance.objects.get(message=message)
         self.assertEqual(provenance.association, route)

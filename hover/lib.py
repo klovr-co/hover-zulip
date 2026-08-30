@@ -66,6 +66,7 @@ def add_hover_metadata(
         )
         .select_related(
             "attachment",
+            "installation",
             "message",
             "suggested_action__assignee",
             "suggested_action__todo",
@@ -180,7 +181,13 @@ def add_hover_metadata(
             if evidence.url and not source["url"]:
                 source["url"] = evidence.url
 
-        attachment_space_id = item.attachment.space_id if item.attachment is not None else None
+        owner_space_id = (
+            item.attachment.space_id
+            if item.attachment is not None
+            else item.installation.space_id
+            if item.installation is not None
+            else None
+        )
         payload = item.payload if isinstance(item.payload, dict) else {}
         lifecycle = payload.get("lifecycle")
         status = payload.get("status")
@@ -227,9 +234,9 @@ def add_hover_metadata(
                     "state": detail.state,
                     "evidence_count": len(detail.conflicting_evidence.all()),
                     "evidence_url": (
-                        f"/json/hover/spaces/{attachment_space_id}/generated-items/{item.id}"
+                        f"/json/hover/spaces/{owner_space_id}/generated-items/{item.id}"
                         f"/disputed-details/{detail.id}/evidence"
-                        if attachment_space_id is not None
+                        if owner_space_id is not None
                         else None
                     ),
                     "review_request": (
@@ -300,8 +307,8 @@ def add_hover_metadata(
             },
             "evidence_available": bool(sources),
             "evidence_url": (
-                f"/json/hover/spaces/{attachment_space_id}/generated-items/{item.id}/evidence"
-                if attachment_space_id is not None and sources
+                f"/json/hover/spaces/{owner_space_id}/generated-items/{item.id}/evidence"
+                if owner_space_id is not None and sources
                 else None
             ),
             "sources": list(sources.values()),

@@ -69,6 +69,7 @@ from hover.views_spaces import (
     remove_space_member,
 )
 from hover.views_suggested_actions import decide_suggested_action_view
+from hover.views_summaries import create_summary, update_summary
 from hover.views_todos import list_todos, mutate_todo_view
 from zerver.forms import LoggingSetPasswordForm
 from zerver.lib.integrations import INCOMING_WEBHOOK_INTEGRATIONS
@@ -710,6 +711,14 @@ v1_api_and_json_patterns = [
     rest_path(
         "hover/spaces/<int:space_id>/modules",
         POST=(install_module, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/summaries",
+        POST=create_summary,
+    ),
+    rest_path(
+        "hover/summaries/<int:installation_id>",
+        PATCH=update_summary,
     ),
     rest_path(
         "hover/module-installations/<int:installation_id>/disable",

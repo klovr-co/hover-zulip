@@ -5,6 +5,7 @@ const assert = require("node:assert/strict");
 const {make_realm} = require("./lib/example_realm.cjs");
 const {mock_esm, zrequire} = require("./lib/namespace.cjs");
 const {run_test, noop} = require("./lib/test.cjs");
+const {$} = require("./lib/zjquery.cjs");
 
 const stream_topic_history_util = mock_esm("../src/stream_topic_history_util");
 mock_esm("../src/people.ts", {
@@ -78,4 +79,41 @@ test("is_full_topic_history_available", ({override}) => {
     };
     assert.equal(topic_list.is_full_topic_history_available(stream_id), true);
     assert.equal(full_topic_history_fetched_and_widget_updated, true);
+});
+
+test("topic click uses the topic row stream", () => {
+    let clicked_topic;
+    topic_list.initialize({
+        on_topic_click(stream_id, topic) {
+            clicked_topic = {stream_id, topic};
+        },
+    });
+
+    const $target = $(".summary-topic-name");
+    const $topic_row = $(".summary-topic-row")
+        .attr("data-stream-id", "23")
+        .attr("data-topic-name", "Daily migration brief");
+    const $parent_stream_row = $(".parent-stream-row").attr("data-stream-id", "22");
+
+    $target.set_closest_results(".show-more-topics", []);
+    $target.set_closest_results(".visibility-policy-icon", []);
+    $target.set_closest_results(".topic-sidebar-menu-icon", []);
+    $target.set_closest_results("li", $topic_row);
+    $target.set_closest_results(".narrow-filter", $parent_stream_row);
+
+    const handler = $("#stream_filters").get_on_handler("click", ".topic-box");
+    handler({
+        target: {
+            to_$() {
+                return $target;
+            },
+        },
+        preventDefault() {},
+        stopPropagation() {},
+    });
+
+    assert.deepEqual(clicked_topic, {
+        stream_id: 23,
+        topic: "Daily migration brief",
+    });
 });

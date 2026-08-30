@@ -43,7 +43,7 @@ def create_space(
         raise JsonableError(_("Invalid Space category."))
 
     space = do_create_space(user_profile, name=name, description=description, category=category)
-    return json_success(request, data={"space": get_space_data(space)})
+    return json_success(request, data={"space": get_space_data(space, viewer=user_profile)})
 
 
 @require_non_guest_user
@@ -51,7 +51,12 @@ def create_space(
 def list_spaces(request: HttpRequest, user_profile: UserProfile) -> HttpResponse:
     return json_success(
         request,
-        data={"spaces": [get_space_data(space) for space in get_accessible_spaces(user_profile)]},
+        data={
+            "spaces": [
+                get_space_data(space, viewer=user_profile)
+                for space in get_accessible_spaces(user_profile)
+            ]
+        },
     )
 
 
@@ -61,7 +66,7 @@ def get_space(
     request: HttpRequest, user_profile: UserProfile, *, space_id: PathOnly[int]
 ) -> HttpResponse:
     space = access_space_by_id(user_profile, space_id)
-    return json_success(request, data={"space": get_space_data(space)})
+    return json_success(request, data={"space": get_space_data(space, viewer=user_profile)})
 
 
 @require_non_guest_user
@@ -117,7 +122,7 @@ def confirm_space_member(
         raise JsonableError(_("Invalid user ID"))
     do_confirm_space_member(space, target, role=role, acting_user=user_profile)
     updated_space = space_projection_queryset().get(id=space.id)
-    return json_success(request, data={"space": get_space_data(updated_space)})
+    return json_success(request, data={"space": get_space_data(updated_space, viewer=user_profile)})
 
 
 @require_non_guest_user
@@ -136,7 +141,7 @@ def remove_space_member(
         raise JsonableError(_("Invalid user ID"))
     do_remove_space_member(space, target, acting_user=user_profile)
     updated_space = space_projection_queryset().get(id=space.id)
-    return json_success(request, data={"space": get_space_data(updated_space)})
+    return json_success(request, data={"space": get_space_data(updated_space, viewer=user_profile)})
 
 
 @require_non_guest_user
@@ -146,4 +151,10 @@ def launch_space(
 ) -> HttpResponse:
     space = access_space_for_administration(user_profile, space_id)
     launched_space, created = do_launch_space(space, acting_user=user_profile)
-    return json_success(request, data={"space": get_space_data(launched_space), "created": created})
+    return json_success(
+        request,
+        data={
+            "space": get_space_data(launched_space, viewer=user_profile),
+            "created": created,
+        },
+    )

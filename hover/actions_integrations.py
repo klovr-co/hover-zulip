@@ -3,7 +3,11 @@ from django.db import IntegrityError, transaction
 from django.utils.timezone import now as timezone_now
 from django.utils.translation import gettext as _
 
-from hover.lib_spaces import get_space_data, space_projection_queryset, user_is_space_administrator
+from hover.lib_spaces import (
+    send_space_update_on_commit,
+    space_projection_queryset,
+    user_is_space_administrator,
+)
 from hover.models import (
     ConnectedAccount,
     ConnectedAccountGrant,
@@ -15,7 +19,6 @@ from hover.models import (
 )
 from zerver.lib.exceptions import InvalidJSONError, JsonableError
 from zerver.models.users import UserProfile, get_user_profile_by_id
-from zerver.tornado.django_api import send_event_on_commit
 
 
 def get_integration_route_data(route: IntegrationRouteAssociation) -> dict[str, object]:
@@ -25,6 +28,7 @@ def get_integration_route_data(route: IntegrationRouteAssociation) -> dict[str, 
         "bot_user_id": route.bot_id,
         "bot_name": route.bot.full_name,
         "stream_id": route.stream_id,
+        "topic_name": route.attachment.destination_topic,
         "live_since": route.live_since.isoformat(),
     }
 
@@ -39,11 +43,7 @@ def _member_ids(space: Space) -> list[int]:
 
 def _notify_space(space: Space) -> None:
     projected = space_projection_queryset().get(id=space.id)
-    send_event_on_commit(
-        space.realm,
-        {"type": "hover_space", "op": "update", "space": get_space_data(projected)},
-        _member_ids(space),
-    )
+    send_space_update_on_commit(projected, _member_ids(space))
 
 
 def _assert_launched_space_administrator(*, acting_user: UserProfile, space: Space) -> None:

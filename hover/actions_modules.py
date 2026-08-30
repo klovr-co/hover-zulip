@@ -11,7 +11,7 @@ from django.utils.timezone import is_naive
 from django.utils.timezone import now as timezone_now
 from django.utils.translation import gettext as _
 
-from hover.lib_spaces import get_space_data, user_is_space_administrator
+from hover.lib_spaces import send_space_update_on_commit, user_is_space_administrator
 from hover.models import (
     ConnectedAccount,
     ConnectedAccountGrant,
@@ -28,9 +28,9 @@ from hover.models import (
     SpaceMembership,
 )
 from zerver.lib.exceptions import JsonableError
+from zerver.models.groups import UserGroupMembership
 from zerver.models.realms import Realm
 from zerver.models.users import UserProfile
-from zerver.tornado.django_api import send_event_on_commit
 
 
 class ModuleConfigurationConflictError(JsonableError):
@@ -241,10 +241,12 @@ def installation_data(installation: ModuleInstallation) -> dict[str, Any]:
         "state": installation.state,
         "version_id": version.id,
         "definition_key": version.definition.stable_key,
-        "name": version.definition.name,
+        "name": installation.label or version.definition.name,
+        "label": installation.label or version.definition.name,
         "version": version.version,
         "output_type": version.output_type,
         "destination_topic": version.destination_topic,
+        "summary_stream_id": installation.summary_stream_id,
         "navigation_icon": version.navigation_icon,
         "navigation_order": version.navigation_order,
         "content_hash": version.content_hash,
@@ -276,6 +278,15 @@ def installation_data(installation: ModuleInstallation) -> dict[str, Any]:
                 "debounce_seconds": trigger.debounce_seconds,
             }
             for trigger in installation.triggers.all()
+        ],
+        "inputs": [
+            {
+                "stream_id": item.stream_id,
+                "topic_name": item.topic_name,
+                "kind": item.kind,
+                "attachment_id": item.source_attachment_id,
+            }
+            for item in installation.summary_inputs.all()
         ],
     }
 
@@ -391,11 +402,7 @@ def _event_user_ids(space: Space) -> list[int]:
 
 
 def _send_space_update(space: Space) -> None:
-    send_event_on_commit(
-        space.realm,
-        {"type": "hover_space", "op": "update", "space": get_space_data(space)},
-        _event_user_ids(space),
-    )
+    send_space_update_on_commit(space, _event_user_ids(space))
 
 
 @transaction.atomic(durable=True)
@@ -570,6 +577,27 @@ def do_disable_module(
     current.state = ModuleInstallation.State.DISABLED
     current.disabled_by = acting_user
     current.save(update_fields=["state", "disabled_by", "date_updated"])
+    if current.summary_stream_id is not None:
+        from zerver.actions.streams import bulk_remove_subscriptions
+
+        summary_stream = current.summary_stream
+        assert summary_stream is not None
+        members = list(
+            UserProfile.objects.filter(
+                subscription__recipient=summary_stream.recipient,
+                subscription__active=True,
+            )
+        )
+        if members:
+            bulk_remove_subscriptions(
+                locked_space.realm,
+                members,
+                [summary_stream],
+                acting_user=acting_user,
+            )
+        UserGroupMembership.objects.filter(
+            user_group_id=summary_stream.can_send_message_group_id
+        ).delete()
     _send_space_update(locked_space)
     return current, True
 

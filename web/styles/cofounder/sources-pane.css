@@ -1,0 +1,277 @@
+/* stylelint-disable color-no-hex -- fallback colors cover non-topic Hover surfaces. */
+#hover-sources-pane {
+    position: fixed;
+    z-index: 99;
+    top: 0;
+    right: 0;
+    width: 388px;
+    min-width: 340px;
+    height: calc(
+        var(--full-height-dynamic-viewport) - var(--navbar-fixed-height) - 12px
+    );
+    margin: var(--navbar-fixed-height) 6px 6px 0;
+    overflow: hidden;
+    border: 1px solid var(--hover-overlay-border, #dfe1e5);
+    border-radius: 14px;
+    background: var(--hover-overlay-surface, #fff);
+    color: var(--hover-topic-ink, #292a31);
+    box-shadow:
+        0 14px 36px hsl(220deg 18% 20% / 8%),
+        0 2px 5px hsl(220deg 18% 20% / 5%);
+}
+
+body.hover-topic-screen.hover-sources-pane-open .app-main .column-middle {
+    margin-right: 401px;
+}
+
+.hover-sources-pane__frame {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+}
+
+.hover-sources-pane__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 22px 22px 18px;
+    border-bottom: 1px solid var(--hover-overlay-border, #dfe1e5);
+}
+
+.hover-sources-pane__header h2,
+.hover-sources-pane__header p,
+.hover-sources-pane__group h3 {
+    margin: 0;
+}
+
+.hover-sources-pane__header h2 {
+    font-size: 19px;
+    font-weight: 680;
+    letter-spacing: -0.025em;
+    line-height: 1.3;
+}
+
+.hover-sources-pane__header p {
+    max-width: 28ch;
+    margin-top: 4px;
+    color: var(--hover-topic-muted, #6f727d);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.hover-sources-pane-close {
+    display: inline-grid;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    place-items: center;
+    margin: -5px -5px 0 12px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--hover-topic-muted, #6f727d);
+    font-size: 17px;
+}
+
+.hover-sources-pane-close:hover {
+    border-color: var(--hover-overlay-border, #dfe1e5);
+    background: var(--hover-overlay-surface-subtle, #f4f5f6);
+    color: var(--hover-topic-ink, #292a31);
+}
+
+.hover-sources-pane-close:focus-visible,
+.hover-sources-pane-retry:focus-visible,
+.hover-open-source-message:focus-visible {
+    outline: 2px solid var(--hover-topic-accent, #238653);
+    outline-offset: 2px;
+}
+
+.hover-sources-pane__content {
+    min-height: 0;
+    flex: 1;
+    padding: 20px 22px 36px;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+}
+
+.hover-sources-pane__content > [data-hover-sources-result]:focus {
+    outline: none;
+}
+
+.hover-sources-pane__content > p[data-hover-sources-result] {
+    margin: 0;
+    color: var(--hover-topic-muted, #6f727d);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.hover-sources-pane__forbidden {
+    margin: 0 0 20px;
+    padding: 10px 12px;
+    border-left: 3px solid var(--hover-topic-line-strong, #c9ccd1);
+    background: var(--hover-overlay-surface-subtle, #f4f5f6);
+    color: var(--hover-topic-muted, #6f727d);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.hover-sources-pane__group {
+    padding-block: 0 22px;
+}
+
+.hover-sources-pane__group + .hover-sources-pane__group {
+    padding-top: 22px;
+    border-top: 1px solid var(--hover-overlay-border, #dfe1e5);
+}
+
+.hover-sources-pane__group > header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 5px;
+}
+
+.hover-sources-pane__group h3 {
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 680;
+    letter-spacing: -0.012em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hover-sources-pane__group > header span {
+    color: var(--hover-topic-muted, #6f727d);
+    font-size: 11px;
+    font-weight: 550;
+}
+
+.hover-sources-pane__group ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hover-sources-pane__group li {
+    padding: 14px 0 0;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.hover-sources-pane__group li + li {
+    margin-top: 16px;
+    border-top: 1px solid var(--hover-overlay-border, #dfe1e5);
+}
+
+.hover-sources-pane__group li > :is(p, .rendered_markdown) {
+    margin-block: 8px 0;
+    color: var(--hover-topic-copy, #474b55);
+}
+
+.hover-sources-pane__group .rendered_markdown > :first-child {
+    margin-top: 0;
+}
+
+.hover-sources-pane__group .rendered_markdown > :last-child {
+    margin-bottom: 0;
+}
+
+.hover-sources-pane__message-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--hover-topic-muted, #6f727d);
+    font-size: 11px;
+}
+
+.hover-sources-pane__message-meta strong {
+    overflow: hidden;
+    color: var(--hover-topic-copy, #474b55);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hover-sources-pane__message-meta time {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+}
+
+.hover-open-source-message {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 30px;
+    margin-top: 10px;
+    padding: 0 2px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--hover-topic-accent, #238653);
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 680;
+}
+
+.hover-open-source-message::after {
+    content: "↗";
+    font-size: 14px;
+    line-height: 1;
+}
+
+.hover-open-source-message:hover {
+    color: var(--hover-topic-accent-hover, #176a40);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+@media (width <= 700px) {
+    #hover-sources-pane {
+        position: fixed;
+        z-index: 105;
+        inset: var(--navbar-fixed-height) 0 0;
+        width: 100%;
+        min-width: 0;
+        height: calc(
+            var(--full-height-dynamic-viewport) - var(--navbar-fixed-height)
+        );
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    body.hover-topic-screen.hover-sources-pane-open .app-main .column-middle {
+        margin-right: 7px;
+    }
+
+    .hover-sources-pane__header {
+        position: sticky;
+        z-index: 1;
+        top: 0;
+        padding: 20px 20px 17px;
+        background: var(--hover-overlay-surface, #fff);
+    }
+
+    .hover-sources-pane__content {
+        padding: 22px 20px 36px;
+    }
+
+    .hover-sources-pane__group + .hover-sources-pane__group {
+        padding-top: 24px;
+    }
+
+    .hover-sources-pane__group li {
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .hover-open-source-message {
+        min-height: 42px;
+        font-size: 14px;
+    }
+}
+/* stylelint-enable color-no-hex */

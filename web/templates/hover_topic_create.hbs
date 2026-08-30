@@ -1,0 +1,165 @@
+<form id="hover_topic_create_form" class="hover-topic-create">
+    <fieldset class="hover-topic-create__types">
+        <legend>{{t "Choose a topic type"}}</legend>
+        <p>{{t "Pick the kind of conversation you want to create."}}</p>
+        <label>
+            <input
+                type="radio"
+                name="hover_topic_kind"
+                value="regular"
+                checked
+            />
+            <span><strong>{{t "Regular"}}</strong><small>{{t
+                        "A conversation with teammates"
+                    }}</small></span>
+        </label>
+        {{#if can_create_source}}
+            <label>
+                <input type="radio" name="hover_topic_kind" value="source" />
+                <span><strong>{{t "Source"}}</strong><small>{{t
+                            "Live GitHub or PostHog activity"
+                        }}</small></span>
+            </label>
+        {{/if}}
+        {{#if can_create_summary}}
+            <label>
+                <input type="radio" name="hover_topic_kind" value="summary" />
+                <span><strong>{{t "Summary"}}</strong><small>{{t
+                            "A scheduled overview from selected topics"
+                        }}</small></span>
+            </label>
+        {{/if}}
+    </fieldset>
+
+    <section class="hover-topic-create__panel" data-hover-topic-panel="regular">
+        <header class="hover-topic-create__section-heading">
+            <h3>{{t "Name your topic"}}</h3>
+            <p>{{t "Use a short name your teammates will recognize."}}</p>
+        </header>
+        <div class="hover-topic-create__field">
+            <label for="hover_regular_topic_name">{{t "Topic name"}}</label>
+            <input
+                id="hover_regular_topic_name"
+                type="text"
+                maxlength="60"
+                value="{{prefilled_topic}}"
+                required
+            />
+            <small>{{t
+                    "The topic is created when you send its first message."
+                }}</small>
+        </div>
+    </section>
+
+    <section
+        class="hover-topic-create__panel hide"
+        data-hover-topic-panel="source"
+    >
+        <header class="hover-topic-create__section-heading">
+            <h3>{{t "Choose a live source"}}</h3>
+            <p>{{t
+                    "Find an approved GitHub or PostHog destination to follow."
+                }}</p>
+        </header>
+        <div class="hover-topic-create__field">
+            <label for="hover_topic_source_account">{{t
+                    "Connected account"
+                }}</label>
+            <select id="hover_topic_source_account">
+                {{#each accounts}}
+                    <option value="{{this.id}}">{{this.provider_name}}
+                        ·
+                        {{this.display_name}}</option>
+                {{/each}}
+            </select>
+        </div>
+        <div class="hover-topic-create__source-search">
+            <input
+                id="hover_topic_source_query"
+                type="search"
+                placeholder="{{t 'Search permitted Sources'}}"
+            />
+            <button id="hover_topic_source_search" type="button">{{t
+                    "Search"
+                }}</button>
+        </div>
+        <p id="hover_topic_source_status" aria-live="polite"></p>
+        <div id="hover_topic_source_results"></div>
+    </section>
+
+    <section
+        class="hover-topic-create__panel hide"
+        data-hover-topic-panel="summary"
+    >
+        <header class="hover-topic-create__section-heading">
+            <h3>{{t "Configure your Summary"}}</h3>
+            <p>{{t
+                    "Choose what it covers, when it runs, and who can read it."
+                }}</p>
+        </header>
+        <div class="hover-topic-create__field">
+            <label for="hover_summary_name">{{t "Summary name"}}</label>
+            <input
+                id="hover_summary_name"
+                type="text"
+                maxlength="60"
+                required
+            />
+        </div>
+        <fieldset class="hover-topic-create__options">
+            <legend>{{t "Inputs"}}</legend>
+            <p>{{t "Select the topics this Summary will include."}}</p>
+            {{#each summary_inputs}}
+                <label>
+                    <input
+                        type="checkbox"
+                        name="hover_summary_input"
+                        value="{{this.value}}"
+                    />
+                    <span>{{this.topic_name}}
+                        <small>{{this.kind}}</small></span>
+                </label>
+            {{/each}}
+        </fieldset>
+        <fieldset class="hover-topic-create__options">
+            <legend>{{t "Generation schedule"}}</legend>
+            <p>{{t "Set when Hover generates a new edition."}}</p>
+            <div class="hover-topic-create__schedule">
+                <label for="hover_summary_time">{{t "Every day at"}}</label>
+                <input
+                    id="hover_summary_time"
+                    type="time"
+                    value="09:00"
+                    required
+                />
+                <small>{{timezone}}</small>
+            </div>
+        </fieldset>
+        <fieldset class="hover-topic-create__options">
+            <legend>{{t "Members"}}</legend>
+            <p>{{t
+                    "Only selected members can open this Summary or its history."
+                }}</p>
+            {{#each members}}
+                <label>
+                    {{#if this.selected}}
+                        <input
+                            type="checkbox"
+                            name="hover_summary_member"
+                            value="{{this.user_id}}"
+                            checked
+                            disabled
+                        />
+                    {{else}}
+                        <input
+                            type="checkbox"
+                            name="hover_summary_member"
+                            value="{{this.user_id}}"
+                        />
+                    {{/if}}
+                    <span>{{this.full_name}}</span>
+                </label>
+            {{/each}}
+        </fieldset>
+    </section>
+</form>

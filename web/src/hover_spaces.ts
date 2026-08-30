@@ -19,6 +19,7 @@ export const hover_space_attachment_schema = z.object({
     history_timezone: z.string(),
     history_start_at: z.string(),
     custom_start_date: z.nullable(z.string()),
+    destination_topic: z._default(z.string(), ""),
     can_browse_records: z.boolean(),
     evidence_deleted: z._default(z.boolean(), false),
     source: hover_source_schema,
@@ -29,6 +30,7 @@ export const hover_space_attachment_schema = z.object({
             bot_user_id: z.number(),
             bot_name: z.string(),
             stream_id: z.number(),
+            topic_name: z._default(z.string(), ""),
             live_since: z.string(),
         }),
     ),
@@ -67,9 +69,11 @@ export const hover_module_installation_schema = z.object({
     version_id: z.number(),
     definition_key: z.string(),
     name: z.string(),
+    label: z._default(z.string(), ""),
     version: z.string(),
     output_type: z.string(),
     destination_topic: z.string(),
+    summary_stream_id: z._default(z.nullable(z.number()), null),
     navigation_icon: z.string(),
     navigation_order: z.number(),
     content_hash: z.string(),
@@ -90,6 +94,38 @@ export const hover_module_installation_schema = z.object({
         }),
     ),
     generated_count: z._default(z.number(), 0),
+    inputs: z._default(
+        z.array(
+            z.object({
+                stream_id: z.number(),
+                topic_name: z.string(),
+                kind: z.enum(["regular", "source"]),
+                attachment_id: z.nullable(z.number()),
+            }),
+        ),
+        [],
+    ),
+    member_ids: z._default(z.array(z.number()), []),
+});
+
+export const hover_topic_descriptor_schema = z.object({
+    stream_id: z.number(),
+    topic_name: z.string(),
+    kind: z.enum(["source", "summary"]),
+    source: z.optional(
+        z.object({
+            attachment_id: z.number(),
+            provider_key: z.enum(["github", "posthog", "whatsapp"]),
+            state: z.enum(["setup_required", "live", "paused", "error"]),
+        }),
+    ),
+    summary: z.optional(
+        z.object({
+            installation_id: z.number(),
+            schedule_label: z.string(),
+            can_manage: z.boolean(),
+        }),
+    ),
 });
 
 export const hover_space_schema = z.object({
@@ -129,6 +165,7 @@ export const hover_space_schema = z.object({
     ),
     module_installations: z._default(z.array(hover_module_installation_schema), []),
     module_catalog: z._default(z.array(hover_module_version_schema), []),
+    topic_descriptors: z._default(z.array(hover_topic_descriptor_schema), []),
 });
 
 export const hover_spaces_response_schema = z.object({
@@ -137,6 +174,7 @@ export const hover_spaces_response_schema = z.object({
 
 export type HoverSpace = z.infer<typeof hover_space_schema>;
 export type HoverSource = z.infer<typeof hover_source_schema>;
+export type HoverTopicDescriptor = z.infer<typeof hover_topic_descriptor_schema>;
 
 let spaces_by_id = new Map<number, HoverSpace>();
 
@@ -161,7 +199,54 @@ export function get_by_id(space_id: number): HoverSpace | undefined {
 }
 
 export function get_by_stream_id(stream_id: number): HoverSpace | undefined {
-    return spaces_by_id.values().find((space) => space.stream_id === stream_id);
+    return spaces_by_id
+        .values()
+        .find(
+            (space) =>
+                space.stream_id === stream_id ||
+                (space.module_installations ?? []).some(
+                    (installation) => installation.summary_stream_id === stream_id,
+                ) ||
+                (space.topic_descriptors ?? []).some(
+                    (descriptor) =>
+                        descriptor.kind === "summary" && descriptor.stream_id === stream_id,
+                ),
+        );
+}
+
+export function parent_stream_id(stream_id: number): number {
+    return get_by_stream_id(stream_id)?.stream_id ?? stream_id;
+}
+
+export function is_summary_stream(stream_id: number): boolean {
+    const space = get_by_stream_id(stream_id);
+    return (
+        space !== undefined &&
+        space.stream_id !== stream_id &&
+        ((space.module_installations ?? []).some(
+            (installation) => installation.summary_stream_id === stream_id,
+        ) ||
+            (space.topic_descriptors ?? []).some(
+                (descriptor) =>
+                    descriptor.kind === "summary" && descriptor.stream_id === stream_id,
+            ))
+    );
+}
+
+export function get_topic_descriptor(
+    stream_id: number,
+    topic_name: string,
+): HoverTopicDescriptor | undefined {
+    const space = get_by_stream_id(stream_id);
+    return space?.topic_descriptors?.find(
+        (descriptor) =>
+            descriptor.stream_id === stream_id &&
+            descriptor.topic_name.toLocaleLowerCase() === topic_name.toLocaleLowerCase(),
+    );
+}
+
+export function get_descriptors_for_parent(stream_id: number): HoverTopicDescriptor[] {
+    return get_by_stream_id(stream_id)?.topic_descriptors ?? [];
 }
 
 export function get_all(): HoverSpace[] {
