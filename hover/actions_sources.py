@@ -13,7 +13,7 @@ from hover.lib_sources import (
     get_actor_grant,
     history_boundary,
 )
-from hover.lib_spaces import get_space_data, user_is_space_administrator
+from hover.lib_spaces import send_space_update_on_commit, user_is_space_administrator
 from hover.models import (
     ConnectedAccount,
     ConnectedAccountGrant,
@@ -30,9 +30,9 @@ from hover.models import (
 )
 from hover.participant_selector_reconciliation import schedule_participant_selector_reconciliation
 from zerver.lib.exceptions import ErrorCode, InvalidJSONError, JsonableError
+from zerver.models.messages import Message
 from zerver.models.realm_audit_logs import AuditLogEventType, RealmAuditLog
 from zerver.models.users import UserProfile
-from zerver.tornado.django_api import send_event_on_commit
 
 
 class HistoryWindowConflictError(JsonableError):
@@ -43,6 +43,38 @@ class HistoryWindowConflictError(JsonableError):
     def __init__(self) -> None:
         super().__init__(_("This Source is already attached with a different history window."))
         self.error_code = "history_window_conflict"
+
+
+def _available_destination_topic(space: Space, display_name: str) -> str:
+    base = display_name.strip()[:60] or _("Source")
+    used = {
+        topic.casefold()
+        for topic in SpaceAttachment.objects.filter(space=space).values_list(
+            "destination_topic", flat=True
+        )
+        if topic
+    }
+    if space.stream_id is not None:
+        assert space.stream is not None
+        used.update(
+            topic.casefold()
+            for topic in Message.objects.filter(
+                realm=space.realm,
+                recipient=space.stream.recipient,
+                is_channel_message=True,
+            )
+            .values_list("subject", flat=True)
+            .distinct()
+        )
+    if base.casefold() not in used:
+        return base
+    suffix = 2
+    while True:
+        candidate_suffix = f" ({suffix})"
+        candidate = f"{base[: 60 - len(candidate_suffix)]}{candidate_suffix}"
+        if candidate.casefold() not in used:
+            return candidate
+        suffix += 1
 
 
 def _space_administrator_ids(space: Space) -> list[int]:
@@ -109,7 +141,7 @@ def _attach_canonical_source(
         locked_space = Space.objects.select_for_update(no_key=True).get(
             id=space.id, realm=space.realm
         )
-        if locked_space.state != Space.State.SETUP:
+        if locked_space.state not in [Space.State.SETUP, Space.State.LAUNCHED]:
             raise JsonableError(_("Invalid Space ID"))
         locked_account = ConnectedAccount.objects.select_for_update(no_key=True).get(
             id=account.id, realm=space.realm
@@ -129,6 +161,12 @@ def _attach_canonical_source(
                 "provider_name": locked_account.provider_name,
                 "source_type": canonical_source.source_type,
                 "display_name": canonical_source.display_name,
+                "supports_live_capture": (
+                    locked_account.connection_kind
+                    == ConnectedAccount.ConnectionKind.NATIVE_INTEGRATION
+                    and locked_account.incoming_webhook_bot_id is not None
+                    and canonical_source.provider in {"github", "posthog"}
+                ),
             },
         )
         if source_created:
@@ -185,6 +223,9 @@ def _attach_canonical_source(
             history_timezone=boundary.history_timezone,
             history_start_at=boundary.history_start_at,
             custom_start_date=boundary.custom_start_date,
+            destination_topic=_available_destination_topic(
+                locked_space, canonical_source.display_name
+            ),
             attached_by=acting_user,
         )
         RealmAuditLog.objects.create(
@@ -206,11 +247,17 @@ def _attach_canonical_source(
             .prefetch_related("attachments__source__account")
             .get(id=attachment.space_id)
         )
-        send_event_on_commit(
-            attachment.realm,
-            {"type": "hover_space", "op": "update", "space": get_space_data(projected_space)},
-            _space_administrator_ids(locked_space),
+        recipients = (
+            _space_administrator_ids(locked_space)
+            if locked_space.state == Space.State.SETUP
+            else list(
+                SpaceMembership.objects.filter(
+                    space=locked_space,
+                    user__is_active=True,
+                ).values_list("user_id", flat=True)
+            )
         )
+        send_space_update_on_commit(projected_space, recipients)
         schedule_participant_selector_reconciliation(locked_account.id)
         return attachment, True
 
@@ -360,16 +407,13 @@ def do_detach_source(
         },
     )
     projected_space = Space.objects.get(id=locked_space.id)
-    send_event_on_commit(
-        locked_space.realm,
-        {"type": "hover_space", "op": "update", "space": get_space_data(projected_space)},
-        (
-            _space_administrator_ids(locked_space)
-            if locked_space.state == Space.State.SETUP
-            else list(
-                SpaceMembership.objects.filter(
-                    space=locked_space, user__is_active=True
-                ).values_list("user_id", flat=True)
+    send_space_update_on_commit(
+        projected_space,
+        _space_administrator_ids(locked_space)
+        if locked_space.state == Space.State.SETUP
+        else list(
+            SpaceMembership.objects.filter(space=locked_space, user__is_active=True).values_list(
+                "user_id", flat=True
             )
         ),
     )
@@ -430,9 +474,8 @@ def do_delete_source_evidence(
         },
     )
     projected_space = Space.objects.get(id=locked_space.id)
-    send_event_on_commit(
-        locked_space.realm,
-        {"type": "hover_space", "op": "update", "space": get_space_data(projected_space)},
+    send_space_update_on_commit(
+        projected_space,
         list(
             SpaceMembership.objects.filter(space=locked_space, user__is_active=True).values_list(
                 "user_id", flat=True

@@ -34,6 +34,9 @@ class zulip::app_frontend_once {
   zulip::cron { 'send_zulip_update_announcements':
     minute => '47',
   }
+  zulip::cron { 'process-summary-schedules':
+    minute => '*',
+  }
 
   # Daily
   zulip::cron { 'soft-deactivate-users':
