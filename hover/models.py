@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 from typing import Any
+from uuid import uuid4
 
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
@@ -521,6 +522,7 @@ class SpaceAttachment(models.Model):
     history_timezone = models.CharField(max_length=MAX_TIMEZONE_LENGTH)
     history_start_at = models.DateTimeField()
     custom_start_date = models.DateField(null=True)
+    destination_topic = models.CharField(max_length=60, default="")
     publication_cursor = models.TextField(default="")
     last_publication_sync_at = models.DateTimeField(null=True)
     last_publication_sync_error = models.CharField(max_length=64, default="")
@@ -561,6 +563,12 @@ class SpaceAttachment(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["space", "source"], name="hover_space_attachment_unique_source"
+            ),
+            models.UniqueConstraint(
+                Lower("destination_topic"),
+                "space",
+                condition=~Q(destination_topic=""),
+                name="hover_space_attachment_unique_topic",
             ),
             models.CheckConstraint(
                 condition=(
@@ -1176,6 +1184,14 @@ class ModuleInstallation(models.Model):
     realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_module_installations")
     space = models.ForeignKey(Space, on_delete=CASCADE, related_name="module_installations")
     version = models.ForeignKey(ModuleVersion, on_delete=RESTRICT, related_name="installations")
+    label = models.CharField(max_length=60, default="")
+    summary_stream = models.OneToOneField(
+        Stream,
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="hover_summary_installation",
+    )
     state = models.TextField(choices=State.choices)
     activation_timezone = models.CharField(max_length=SpaceAttachment.MAX_TIMEZONE_LENGTH)
     activated_at = models.DateTimeField(null=True)
@@ -1209,9 +1225,10 @@ class ModuleInstallation(models.Model):
                 name="hover_module_installation_activation_matches_state",
             ),
             models.UniqueConstraint(
-                fields=["space", "version"],
+                Lower("label"),
+                "space",
                 condition=Q(state__in=["configured", "enabled", "paused_detached"]),
-                name="hover_module_installation_unique_current_version",
+                name="hover_module_installation_unique_current_label",
             ),
         ]
 
@@ -1225,6 +1242,11 @@ class ModuleInstallation(models.Model):
         if self.realm_id != self.version.definition.realm_id:
             raise ValidationError(
                 {"version": "Module installations must use an organization Module version."}
+            )
+        summary_stream = self.summary_stream
+        if summary_stream is not None and self.realm_id != summary_stream.realm_id:
+            raise ValidationError(
+                {"summary_stream": "Summaries and native containers must share an organization."}
             )
         configured_by = self.configured_by
         if configured_by is not None and self.realm_id != configured_by.realm_id:
@@ -1277,6 +1299,13 @@ class ModuleInstallationTrigger(models.Model):
     local_time = models.TimeField(null=True)
     timezone = models.CharField(max_length=SpaceAttachment.MAX_TIMEZONE_LENGTH, default="")
     debounce_seconds = models.PositiveIntegerField(null=True)
+    # Summary schedules use contiguous elapsed-UTC intervals.  These fields are
+    # intentionally nullable because inherited non-Summary Modules retain their
+    # daily/weekly wall-clock trigger contract.
+    anchor_at = models.DateTimeField(null=True)
+    interval_seconds = models.PositiveIntegerField(null=True)
+    next_due_at = models.DateTimeField(null=True)
+    lease_expires_at = models.DateTimeField(null=True)
 
     class Meta:
         constraints = [
@@ -1295,6 +1324,252 @@ class ModuleInstallationTrigger(models.Model):
             )
 
 
+class SummaryTopicInput(models.Model):
+    class Kind(models.TextChoices):
+        REGULAR = "regular", "Regular"
+        SOURCE = "source", "Source"
+
+    installation = models.ForeignKey(
+        ModuleInstallation, on_delete=CASCADE, related_name="summary_inputs"
+    )
+    stream = models.ForeignKey(Stream, on_delete=RESTRICT, related_name="hover_summary_inputs")
+    topic_name = models.CharField(max_length=60)
+    kind = models.TextField(choices=Kind.choices)
+    source_attachment = models.ForeignKey(
+        SpaceAttachment,
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="summary_inputs",
+    )
+    position = models.PositiveSmallIntegerField()
+
+    class Meta:
+        ordering = ["position"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["installation", "position"],
+                name="hover_summary_input_unique_position",
+            ),
+            models.UniqueConstraint(
+                Lower("topic_name"),
+                "installation",
+                "stream",
+                name="hover_summary_input_unique_topic",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(kind="source", source_attachment__isnull=False)
+                    | Q(kind="regular", source_attachment__isnull=True)
+                ),
+                name="hover_summary_input_source_matches_kind",
+            ),
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        space = self.installation.space
+        if self.stream_id != space.stream_id:
+            raise ValidationError({"stream": "Summary inputs must belong to the parent Space."})
+        attachment = self.source_attachment
+        if attachment is not None and (
+            attachment.space_id != space.id or attachment.destination_topic != self.topic_name
+        ):
+            raise ValidationError(
+                {"source_attachment": "Source inputs must use their persisted destination topic."}
+            )
+
+
+class SummaryExecution(models.Model):
+    """One immutable Summary generation attempt owned by Hover."""
+
+    class Kind(models.TextChoices):
+        MANUAL = "manual", "Manual"
+        SCHEDULED = "scheduled", "Scheduled"
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        DISPATCHED = "dispatched", "Dispatched"
+        SUCCEEDED = "succeeded", "Succeeded"
+        NO_CHANGE = "no_change", "No change"
+        FAILED = "failed", "Failed"
+        PUBLISHED = "published", "Published"
+
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    installation = models.ForeignKey(
+        ModuleInstallation, on_delete=RESTRICT, related_name="summary_executions"
+    )
+    kind = models.TextField(choices=Kind.choices)
+    window_start = models.DateTimeField()
+    window_end = models.DateTimeField()
+    policy_revision = models.PositiveIntegerField()
+    policy_hash = models.CharField(max_length=64)
+    status = models.TextField(choices=Status.choices, default=Status.PENDING)
+    request_hash = models.CharField(max_length=64, default="")
+    snapshot_hash = models.CharField(max_length=64, default="")
+    result_hash = models.CharField(max_length=64, default="")
+    callback_token_hash = models.CharField(max_length=64, default="")
+    requester = models.ForeignKey(
+        UserProfile,
+        null=True,
+        blank=True,
+        on_delete=SET_NULL,
+        related_name="requested_summary_executions",
+    )
+    manual_request_id = models.CharField(max_length=64, null=True, blank=True)
+    scheduled_for = models.DateTimeField(null=True, blank=True)
+    failure_code = models.CharField(max_length=64, default="")
+    result = models.JSONField(default=dict)
+    eligible_message_count = models.PositiveIntegerField(default=0)
+    snapshot_message_count = models.PositiveSmallIntegerField(default=0)
+    published_item = models.OneToOneField(
+        "GeneratedItem",
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="summary_execution",
+    )
+    date_created = models.DateTimeField(default=timezone_now)
+    dispatched_at = models.DateTimeField(null=True)
+    completed_at = models.DateTimeField(null=True)
+    published_at = models.DateTimeField(null=True)
+
+    class Meta:
+        ordering = ["date_created", "id"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(window_end__gt=models.F("window_start")),
+                name="hover_summary_execution_valid_window",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(kind="manual", manual_request_id__isnull=False, scheduled_for__isnull=True)
+                    | Q(
+                        kind="scheduled",
+                        manual_request_id__isnull=True,
+                        scheduled_for__isnull=False,
+                    )
+                ),
+                name="hover_summary_execution_identity_matches_kind",
+            ),
+            models.UniqueConstraint(
+                fields=["installation", "manual_request_id"],
+                condition=Q(kind="manual", manual_request_id__isnull=False),
+                name="hover_summary_execution_unique_manual_request",
+            ),
+            models.UniqueConstraint(
+                fields=["installation", "scheduled_for"],
+                condition=Q(kind="scheduled", scheduled_for__isnull=False),
+                name="hover_summary_execution_unique_occurrence",
+            ),
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        requester = self.requester
+        if requester is not None and requester.realm_id != self.installation.realm_id:
+            raise ValidationError(
+                {"requester": "Summary executions and requesters must share an organization."}
+            )
+        if self.kind == self.Kind.MANUAL and self.requester_id is None:
+            raise ValidationError({"requester": "Manual Summary executions require a requester."})
+        published_item = self.published_item
+        if published_item is not None and published_item.installation_id != self.installation_id:
+            raise ValidationError(
+                {"published_item": "Published editions must belong to the same Summary."}
+            )
+
+
+class SummaryExecutionInput(models.Model):
+    """Generation-time topic identity for an execution, including no-change runs."""
+
+    execution = models.ForeignKey(
+        SummaryExecution, on_delete=CASCADE, related_name="input_snapshots"
+    )
+    stream = models.ForeignKey(Stream, on_delete=RESTRICT)
+    topic_name = models.CharField(max_length=60)
+    kind = models.TextField(choices=SummaryTopicInput.Kind.choices)
+    source_attachment = models.ForeignKey(
+        SpaceAttachment, null=True, blank=True, on_delete=RESTRICT
+    )
+    provider_name = models.CharField(
+        max_length=ConnectedAccount.MAX_PROVIDER_NAME_LENGTH, default=""
+    )
+    position = models.PositiveSmallIntegerField()
+
+    class Meta:
+        ordering = ["position"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["execution", "position"],
+                name="hover_summary_execution_input_unique_position",
+            ),
+            models.UniqueConstraint(
+                Lower("topic_name"),
+                "execution",
+                "stream",
+                name="hover_summary_execution_input_unique_topic",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(kind="source", source_attachment__isnull=False)
+                    | Q(kind="regular", source_attachment__isnull=True)
+                ),
+                name="hover_summary_execution_input_source_matches_kind",
+            ),
+        ]
+
+
+class SummaryExecutionMessage(models.Model):
+    """Frozen message text and sender metadata sent to the generator."""
+
+    execution = models.ForeignKey(
+        SummaryExecution, on_delete=CASCADE, related_name="message_snapshots"
+    )
+    input = models.ForeignKey(
+        SummaryExecutionInput, on_delete=CASCADE, related_name="message_snapshots"
+    )
+    message = models.ForeignKey(
+        Message, on_delete=RESTRICT, related_name="hover_summary_execution_snapshots"
+    )
+    frozen_content = models.TextField()
+    frozen_rendered_content = models.TextField()
+    content_digest = models.CharField(max_length=64)
+    sender_label = models.CharField(max_length=100)
+    sent_at = models.DateTimeField()
+    position = models.PositiveSmallIntegerField()
+    citation_token = models.CharField(max_length=32)
+
+    class Meta:
+        ordering = ["position"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["execution", "position"],
+                name="hover_summary_execution_message_unique_position",
+            ),
+            models.UniqueConstraint(
+                fields=["execution", "message"],
+                name="hover_summary_execution_message_unique_native",
+            ),
+            models.UniqueConstraint(
+                fields=["execution", "citation_token"],
+                name="hover_summary_execution_message_unique_token",
+            ),
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.input.execution_id != self.execution_id:
+            raise ValidationError({"input": "Execution messages must use their own input."})
+        if self.message.realm_id != self.execution.installation.realm_id:
+            raise ValidationError(
+                {"message": "Execution messages must share the Summary organization."}
+            )
+
+
 class GeneratedItem(models.Model):
     class OutputType(models.TextChoices):
         FEED_UPDATE = "feed_update", "Feed update"
@@ -1309,6 +1584,14 @@ class GeneratedItem(models.Model):
     attachment = models.ForeignKey(
         SpaceAttachment,
         null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="generated_items",
+    )
+    installation = models.ForeignKey(
+        ModuleInstallation,
+        null=True,
+        blank=True,
         on_delete=RESTRICT,
         related_name="generated_items",
     )
@@ -1357,6 +1640,23 @@ class GeneratedItem(models.Model):
                 condition=Q(attachment__isnull=False, idempotency_key__isnull=False),
                 name="hover_generated_item_unique_attachment_idempotency",
             ),
+            models.UniqueConstraint(
+                fields=["installation", "publication_id"],
+                condition=Q(installation__isnull=False, publication_id__isnull=False),
+                name="hover_generated_item_unique_installation_publication",
+            ),
+            models.UniqueConstraint(
+                fields=["installation", "idempotency_key"],
+                condition=Q(installation__isnull=False, idempotency_key__isnull=False),
+                name="hover_generated_item_unique_installation_idempotency",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(attachment__isnull=False, installation__isnull=True)
+                    | Q(attachment__isnull=True, installation__isnull=False)
+                ),
+                name="hover_generated_item_exactly_one_owner",
+            ),
         ]
 
     @override
@@ -1370,6 +1670,72 @@ class GeneratedItem(models.Model):
         if attachment is not None and self.realm_id != attachment.realm_id:
             raise ValidationError(
                 {"attachment": "Generated items and attachments must share an organization."}
+            )
+        installation = self.installation
+        if installation is not None and self.realm_id != installation.realm_id:
+            raise ValidationError(
+                {"installation": "Generated items and Summaries must share an organization."}
+            )
+        if attachment is not None and installation is not None:
+            raise ValidationError(
+                "Generated items must belong to either a Source or a Summary, not both."
+            )
+
+
+class GeneratedInputSnapshot(models.Model):
+    """The exact topic boundary used to produce one Summary edition."""
+
+    generated_item = models.ForeignKey(
+        GeneratedItem, on_delete=CASCADE, related_name="input_snapshots"
+    )
+    stream = models.ForeignKey(Stream, on_delete=RESTRICT)
+    topic_name = models.CharField(max_length=60)
+    kind = models.TextField(choices=SummaryTopicInput.Kind.choices)
+    source_attachment = models.ForeignKey(
+        SpaceAttachment, null=True, blank=True, on_delete=RESTRICT
+    )
+    provider_name = models.CharField(
+        max_length=ConnectedAccount.MAX_PROVIDER_NAME_LENGTH, default=""
+    )
+    position = models.PositiveSmallIntegerField()
+
+    class Meta:
+        ordering = ["position"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["generated_item", "position"],
+                name="hover_generated_input_unique_position",
+            ),
+            models.UniqueConstraint(
+                Lower("topic_name"),
+                "generated_item",
+                "stream",
+                name="hover_generated_input_unique_topic",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(kind="source", source_attachment__isnull=False)
+                    | Q(kind="regular", source_attachment__isnull=True)
+                ),
+                name="hover_generated_input_source_matches_kind",
+            ),
+        ]
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        installation = self.generated_item.installation
+        if installation is None:
+            raise ValidationError({"generated_item": "Only Summary editions have input snapshots."})
+        if self.stream_id != installation.space.stream_id:
+            raise ValidationError({"stream": "Snapshot inputs must belong to the parent Space."})
+        attachment = self.source_attachment
+        if attachment is not None and (
+            attachment.space_id != installation.space_id
+            or attachment.destination_topic.casefold() != self.topic_name.casefold()
+        ):
+            raise ValidationError(
+                {"source_attachment": "Snapshot Sources must belong to the Summary input topic."}
             )
 
 
@@ -1542,14 +1908,22 @@ class EvidenceLink(models.Model):
     source = models.ForeignKey(
         Source,
         null=True,
+        blank=True,
         on_delete=RESTRICT,
         related_name="evidence_links",
     )
-    evidence_ref = models.TextField(default="")
+    citation_message = models.ForeignKey(
+        Message,
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="hover_evidence_citations",
+    )
+    evidence_ref = models.TextField(default="", blank=True)
     position = models.PositiveIntegerField()
-    provider_key = models.TextField()
-    provider_name = models.TextField()
-    display_name = models.TextField()
+    provider_key = models.TextField(blank=True)
+    provider_name = models.TextField(blank=True)
+    display_name = models.TextField(blank=True)
     url = models.URLField(blank=True)
 
     class Meta:
@@ -1562,6 +1936,13 @@ class EvidenceLink(models.Model):
                 fields=["generated_item", "evidence_ref"],
                 condition=~Q(evidence_ref=""),
                 name="hover_evidence_link_unique_ref",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(citation_message__isnull=False, source__isnull=True, evidence_ref="")
+                    | Q(citation_message__isnull=True, source__isnull=False) & ~Q(evidence_ref="")
+                ),
+                name="hover_evidence_link_exactly_one_kind",
             ),
         ]
 
@@ -1577,6 +1958,45 @@ class EvidenceLink(models.Model):
             raise ValidationError(
                 {"source": "Evidence links and Sources must share an organization."}
             )
+        citation = self.citation_message
+        if citation is not None:
+            if any(
+                [
+                    self.evidence_ref,
+                    self.provider_key,
+                    self.provider_name,
+                    self.display_name,
+                    self.url,
+                ]
+            ):
+                raise ValidationError("Native citations cannot contain external Source metadata.")
+            if citation.realm_id != self.realm_id or not citation.is_channel_message:
+                raise ValidationError(
+                    {
+                        "citation_message": (
+                            "Citations must be channel messages in the generated item's organization."
+                        )
+                    }
+                )
+            if self.generated_item.installation_id is None:
+                raise ValidationError(
+                    {"citation_message": "Native citations may only belong to Summary editions."}
+                )
+            if not self.generated_item.input_snapshots.filter(
+                stream_id=citation.recipient.type_id,
+                topic_name__iexact=citation.topic_name(),
+            ).exists():
+                raise ValidationError(
+                    {"citation_message": "Citations must belong to a generation-time input."}
+                )
+        if source is not None and citation is not None:
+            raise ValidationError(
+                "Evidence must use either an external Source or a native citation."
+            )
+        if source is not None and not all(
+            [self.evidence_ref, self.provider_key, self.provider_name, self.display_name]
+        ):
+            raise ValidationError("External evidence must include its Source metadata.")
 
 
 class Response(models.Model):

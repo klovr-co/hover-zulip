@@ -1089,6 +1089,28 @@ def bulk_remove_subscriptions(
     users = list(users)
     streams = list(streams)
 
+    # Hover projects each independently authorized Summary stream beneath its
+    # parent Space. Losing the parent must therefore withdraw every child
+    # container too; otherwise direct links and search could retain access even
+    # though generation-time inputs are no longer readable.
+    from hover.models import ModuleInstallation, Space
+
+    parent_stream_ids = {stream.id for stream in streams}
+    hover_space_ids = Space.objects.filter(stream_id__in=parent_stream_ids).values_list(
+        "id", flat=True
+    )
+    summary_streams = list(
+        Stream.objects.filter(
+            hover_summary_installation__space_id__in=hover_space_ids,
+            hover_summary_installation__state__in=[
+                ModuleInstallation.State.CONFIGURED,
+                ModuleInstallation.State.ENABLED,
+                ModuleInstallation.State.PAUSED_DETACHED,
+            ],
+        ).exclude(id__in=parent_stream_ids)
+    )
+    streams.extend(summary_streams)
+
     # Sanity check our callers
     for stream in streams:
         assert stream.realm_id == realm.id

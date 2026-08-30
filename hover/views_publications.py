@@ -1,5 +1,7 @@
+import hashlib
 from typing import NoReturn
 
+from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.utils.translation import gettext as _
 
@@ -17,6 +19,7 @@ from zerver.decorator import require_non_guest_user
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.message import access_message
 from zerver.lib.response import json_success
+from zerver.lib.streams import access_stream_by_id
 from zerver.lib.typed_endpoint import PathOnly, typed_endpoint
 from zerver.models.users import UserProfile
 
@@ -84,6 +87,90 @@ def _resolve_evidence(
     return evidence
 
 
+def _resolve_summary_evidence(
+    *, user_profile: UserProfile, generated_item: GeneratedItem
+) -> dict[str, object]:
+    snapshots = list(generated_item.input_snapshots.all())
+    snapshot_by_topic = {
+        (snapshot.stream_id, snapshot.topic_name.casefold()): snapshot for snapshot in snapshots
+    }
+
+    # Strict history policy: access to an edition is withdrawn if any of the
+    # exact inputs used for that edition is no longer available to the reader.
+    for snapshot in snapshots:
+        access_stream_by_id(user_profile, snapshot.stream_id)
+
+    messages_by_snapshot_id: dict[int, list[dict[str, object]]] = {
+        snapshot.id: [] for snapshot in snapshots
+    }
+    execution = getattr(generated_item, "summary_execution", None)
+    execution_messages = (
+        {snapshot.message_id: snapshot for snapshot in execution.message_snapshots.all()}
+        if execution is not None
+        else {}
+    )
+    forbidden_count = 0
+    for link in generated_item.evidence_links.all():
+        citation = link.citation_message
+        if citation is None:
+            forbidden_count += 1
+            continue
+        matched_snapshot = snapshot_by_topic.get(
+            (citation.recipient.type_id, citation.topic_name().casefold())
+        )
+        if matched_snapshot is None:
+            # Never reveal the identity or position of a rogue citation.
+            forbidden_count += 1
+            continue
+        try:
+            access_message(user_profile, citation.id, is_modifying_message=False)
+        except JsonableError:
+            forbidden_count += 1
+            continue
+        frozen = execution_messages.get(citation.id)
+        edited_since_generation = (
+            frozen is not None
+            and frozen.content_digest != hashlib.sha256(citation.content.encode()).hexdigest()
+        )
+        messages_by_snapshot_id[matched_snapshot.id].append(
+            {
+                "message_id": citation.id,
+                "sender_name": (
+                    frozen.sender_label if frozen is not None else citation.sender.full_name
+                ),
+                "timestamp": int(
+                    (frozen.sent_at if frozen is not None else citation.date_sent).timestamp()
+                ),
+                "rendered_content": (
+                    frozen.frozen_rendered_content
+                    if frozen is not None
+                    else citation.rendered_content or ""
+                ),
+                "edited_since_generation": edited_since_generation,
+            }
+        )
+
+    return {
+        "groups": [
+            {
+                "topic": {
+                    "stream_id": snapshot.stream_id,
+                    "topic_name": snapshot.topic_name,
+                    "kind": snapshot.kind,
+                    **(
+                        {"provider_name": snapshot.provider_name}
+                        if snapshot.kind == "source" and snapshot.provider_name
+                        else {}
+                    ),
+                },
+                "messages": messages_by_snapshot_id[snapshot.id],
+            }
+            for snapshot in snapshots
+        ],
+        "forbidden_count": forbidden_count,
+    }
+
+
 @require_non_guest_user
 @typed_endpoint
 def resolve_generated_item_evidence(
@@ -99,21 +186,43 @@ def resolve_generated_item_evidence(
         raise JsonableError(_("Invalid generated item ID"))
     try:
         generated_item = (
-            GeneratedItem.objects.select_related("attachment__source__account", "message")
-            .prefetch_related("evidence_links")
+            GeneratedItem.objects.select_related(
+                "attachment__source__account",
+                "installation__space__stream",
+                "message",
+            )
+            .prefetch_related(
+                "input_snapshots",
+                "evidence_links__citation_message__sender",
+                "summary_execution__message_snapshots",
+            )
             .get(
+                Q(attachment__space=space) | Q(installation__space=space),
                 id=generated_item_id,
                 realm=user_profile.realm,
-                attachment__space=space,
-                message__recipient=space.stream.recipient,
             )
         )
     except GeneratedItem.DoesNotExist:
         raise JsonableError(_("Invalid generated item ID"))
 
-    assert generated_item.attachment is not None
-    source = generated_item.attachment.source
     access_message(user_profile, generated_item.message_id, is_modifying_message=False)
+    if generated_item.installation_id is not None:
+        assert generated_item.installation is not None
+        summary_stream = generated_item.installation.summary_stream
+        if summary_stream is None or generated_item.message.recipient != summary_stream.recipient:
+            raise JsonableError(_("Invalid generated item ID"))
+        return json_success(
+            request,
+            data=_resolve_summary_evidence(
+                user_profile=user_profile,
+                generated_item=generated_item,
+            ),
+        )
+
+    assert generated_item.attachment is not None
+    if generated_item.message.recipient != space.stream.recipient:
+        raise JsonableError(_("Invalid generated item ID"))
+    source = generated_item.attachment.source
     if source.account.approval_state != ConnectedAccount.ApprovalState.APPROVED:
         _evidence_unavailable(
             realm_id=user_profile.realm_id,

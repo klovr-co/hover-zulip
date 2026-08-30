@@ -65,6 +65,8 @@ import "../../styles/cofounder/design-system.css";
 import "../../styles/cofounder/typography.css";
 import "../../styles/cofounder/app.css";
 import "../../styles/cofounder/topic-screen.css";
+import "../../styles/cofounder/topic-create.css";
+import "../../styles/cofounder/sources-pane.css";
 
 // This should be last.
 import "../ui_init.js";

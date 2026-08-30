@@ -4,7 +4,7 @@ from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from django.core import signing
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Prefetch, Q, QuerySet
 from django.utils.timezone import now as timezone_now
 from django.utils.translation import gettext as _
 
@@ -75,6 +75,7 @@ def get_attachment_data(attachment: SpaceAttachment) -> dict[str, Any]:
             "bot_user_id": route.bot_id,
             "bot_name": route.bot.full_name,
             "stream_id": route.stream_id,
+            "topic_name": attachment.destination_topic,
             "live_since": route.live_since.isoformat(),
         }
         for route in attachment.integration_routes.all()
@@ -91,6 +92,7 @@ def get_attachment_data(attachment: SpaceAttachment) -> dict[str, Any]:
             if attachment.custom_start_date is not None
             else None
         ),
+        "destination_topic": attachment.destination_topic,
         "can_browse_records": (
             attachment.space.state == Space.State.LAUNCHED
             and attachment.state in [SpaceAttachment.State.ACTIVE, SpaceAttachment.State.DETACHED]
@@ -126,11 +128,19 @@ def get_actor_grant(user_profile: UserProfile, account: ConnectedAccount) -> Con
         raise JsonableError(_("This Connected Account is not available."))
 
 
-def _allowed_whatsapp_refs(grant: ConnectedAccountGrant) -> set[str] | None:
+def _allowed_source_refs(grant: ConnectedAccountGrant) -> set[str] | None:
     if grant.all_selectors:
         return None
+    account = grant.account
+    selector_types = {
+        account.provider_key,
+        f"{account.provider_key}_source",
+    }
     return set(
-        grant.selectors.filter(selector_type="whatsapp_group").values_list("source_ref", flat=True)
+        grant.selectors.filter(
+            Q(selector_type__in=selector_types)
+            | Q(selector_type__startswith=f"{account.provider_key}_")
+        ).values_list("source_ref", flat=True)
     )
 
 
@@ -202,7 +212,7 @@ def _collect_allowed_sources(
     query: str,
     clawer_sync: ClawerSync,
 ) -> list[ClawerSource]:
-    allowed_refs = _allowed_whatsapp_refs(grant)
+    allowed_refs = _allowed_source_refs(grant)
     if allowed_refs == set():
         return []
 
@@ -218,7 +228,9 @@ def _collect_allowed_sources(
             query=query or None,
         )
         for source in page.sources:
-            if source.provider != "whatsapp" or source.source_type != "group":
+            if source.provider != account.provider_key:
+                continue
+            if source.provider == "whatsapp" and source.source_type != "group":
                 continue
             if allowed_refs is not None and source.source_ref not in allowed_refs:
                 continue
@@ -306,7 +318,7 @@ def canonical_source_for_attachment(
     source_ref: str,
     clawer_sync: ClawerSync,
 ) -> ClawerSource:
-    allowed_refs = _allowed_whatsapp_refs(grant)
+    allowed_refs = _allowed_source_refs(grant)
     if allowed_refs is not None and source_ref not in allowed_refs:
         raise ResourceNotFoundError(_("Source not found."))
     sources = _collect_allowed_sources(

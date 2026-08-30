@@ -28175,8 +28175,10 @@ paths:
       tags: ["messages"]
       description: |
         Resolve the exact evidence attached to a generated item in a launched
-        Hover Space. The server uses its stored opaque evidence references;
-        clients cannot submit provider identifiers or evidence references.
+        Hover Space. Source-generated items return resolved external evidence.
+        Summary editions return native messages grouped by their generation-time
+        input topics. The server uses only stored evidence identities; clients
+        cannot submit provider identifiers or evidence references.
 
         The requesting user must be a confirmed member of the Space. Evidence
         that no longer exists returns an `evidence_not_resolvable` error, while
@@ -28204,19 +28206,37 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/JsonSuccessBase"
-                  - additionalProperties: false
-                    required:
-                      - evidence
-                    properties:
-                      result: {}
-                      msg: {}
-                      ignored_parameters_unsupported: {}
-                      evidence:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/HoverResolvedEvidence"
+                oneOf:
+                  - allOf:
+                      - $ref: "#/components/schemas/JsonSuccessBase"
+                      - additionalProperties: false
+                        required:
+                          - evidence
+                        properties:
+                          result: {}
+                          msg: {}
+                          ignored_parameters_unsupported: {}
+                          evidence:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/HoverResolvedEvidence"
+                  - allOf:
+                      - $ref: "#/components/schemas/JsonSuccessBase"
+                      - additionalProperties: false
+                        required:
+                          - groups
+                          - forbidden_count
+                        properties:
+                          result: {}
+                          msg: {}
+                          ignored_parameters_unsupported: {}
+                          groups:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/HoverSummaryEvidenceGroup"
+                          forbidden_count:
+                            type: integer
+                            minimum: 0
                     example:
                       {
                         "evidence":
@@ -32340,6 +32360,52 @@ components:
               nullable: true
             available:
               type: boolean
+    HoverSummaryEvidenceGroup:
+      type: object
+      additionalProperties: false
+      required:
+        - topic
+        - messages
+      properties:
+        topic:
+          type: object
+          additionalProperties: false
+          required:
+            - stream_id
+            - topic_name
+            - kind
+          properties:
+            stream_id:
+              type: integer
+            topic_name:
+              type: string
+            kind:
+              type: string
+              enum: [regular, source]
+            provider_name:
+              type: string
+        messages:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - message_id
+              - sender_name
+              - timestamp
+              - rendered_content
+              - edited_since_generation
+            properties:
+              message_id:
+                type: integer
+              sender_name:
+                type: string
+              timestamp:
+                type: integer
+              rendered_content:
+                type: string
+              edited_since_generation:
+                type: boolean
     JsonResponseBase:
       type: object
       properties:

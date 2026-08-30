@@ -248,7 +248,7 @@ test_ui("create_sidebar_row", ({override, override_rewire, mock_template}) => {
     assert.ok(removed);
 });
 
-test_ui("AIMTO modules are native topic links", ({mock_template}) => {
+test_ui("Hover Spaces keep one native topic list", ({mock_template}) => {
     const aimto = make_stream({
         name: "AIMTO Events",
         stream_id: 222,
@@ -345,22 +345,9 @@ test_ui("AIMTO modules are native topic links", ({mock_template}) => {
 
     mock_template("stream_sidebar_row.hbs", false, (data) => {
         assert.equal(data.url, "#narrow/channel/222-AIMTO-Events");
-        assert.equal(data.hover_ai_modules.length, 2);
-        assert.equal(data.has_hover_ai_modules, true);
-        assert.equal(
-            data.hover_ai_modules[0].url,
-            "#narrow/channel/222-AIMTO-Events/topic/Conversation.20Digest",
-        );
-        assert.deepEqual(data.hover_ai_modules[1], {
-            key: "suggested_actions",
-            name: "Suggested Actions",
-            icon: "zulip-icon-sparkles",
-            topic: "Suggested Actions",
-            count: 0,
-            has_count: true,
-            url: "#narrow/channel/222-AIMTO-Events/topic/Suggested.20Actions",
-        });
-        assert.equal(data.hover_attached_sources[0].url, "#hover/space/1/source/1");
+        assert.equal(data.is_hover_space, true);
+        assert.equal(data.hover_ai_modules, undefined);
+        assert.equal(data.hover_attached_sources, undefined);
         return "<aimto-sidebar-row-stub>";
     });
 

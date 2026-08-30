@@ -831,11 +831,13 @@ export function initialize({
             e.preventDefault();
             return;
         }
-        const $stream_row = $(e.target).parents(".narrow-filter");
-        const stream_id_string = $stream_row.attr("data-stream-id");
+        const $topic_row = $target.closest("li");
+        const $stream_row = $target.closest(".narrow-filter");
+        const stream_id_string =
+            $topic_row.attr("data-stream-id") ?? $stream_row.attr("data-stream-id");
         assert(stream_id_string !== undefined);
         const stream_id = Number.parseInt(stream_id_string, 10);
-        const topic = $(e.target).parents("li").attr("data-topic-name")!;
+        const topic = $topic_row.attr("data-topic-name")!;
         on_topic_click(stream_id, topic);
 
         e.preventDefault();

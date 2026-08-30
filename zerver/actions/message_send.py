@@ -18,7 +18,10 @@ from django.utils.translation import gettext as _
 from django.utils.translation import override as override_language
 from django_stubs_ext import WithAnnotations
 
-from hover.integration_capture import capture_integration_message_provenance
+from hover.integration_capture import (
+    capture_integration_message_provenance,
+    route_integration_messages,
+)
 from zerver.actions.uploads import do_claim_attachments
 from zerver.actions.user_topics import (
     bulk_do_set_user_topic_visibility_policy,
@@ -952,6 +955,7 @@ def do_send_messages(
     user_message_flags: dict[int, dict[int, list[str]]] = defaultdict(dict)
 
     messages = [send_request.message for send_request in send_message_requests]
+    route_integration_messages(messages)
     Message.objects.bulk_create(messages)
     capture_integration_message_provenance(
         [send_request.message for send_request in send_message_requests]
