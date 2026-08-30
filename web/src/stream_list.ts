@@ -20,6 +20,7 @@ import * as compose_actions from "./compose_actions.ts";
 import type {Filter} from "./filter.ts";
 import * as hash_util from "./hash_util.ts";
 import * as hover_spaces from "./hover_spaces.ts";
+import * as hover_topic_create from "./hover_topic_create.ts";
 import {$t} from "./i18n.ts";
 import * as keydown_util from "./keydown_util.ts";
 import * as left_sidebar_navigation_area from "./left_sidebar_navigation_area.ts";
@@ -432,7 +433,9 @@ export function build_stream_list(force_rerender: boolean): void {
     // bottom; we skip that for dormant streams to simplify discovery.
     //
     // The main logic to build the list is in stream_list_sort.ts
-    const streams = stream_data.subscribed_stream_ids();
+    const streams = stream_data
+        .subscribed_stream_ids()
+        .filter((stream_id) => !hover_spaces.is_summary_stream(stream_id));
     const search_term =
         ui_util.get_left_sidebar_topic_search_term() ?? ui_util.get_left_sidebar_search_term();
     const stream_groups = stream_list_sort.sort_groups(streams, search_term);
@@ -944,7 +947,6 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
     const is_muted = stream_data.is_muted(sub.stream_id);
     const can_post_messages = stream_data.can_post_messages_in_stream(sub);
     const hover_space = hover_spaces.get_by_stream_id(sub.stream_id);
-    const hover_ai_modules = hover_space ? hover_spaces.get_sidebar_modules(hover_space) : [];
     const aggregate_url = hash_util.by_stream_url(sub.stream_id);
     const url = hover_space ? aggregate_url : hash_util.channel_url_by_user_setting(sub.stream_id);
     const args = {
@@ -965,18 +967,6 @@ function build_stream_sidebar_li(sub: StreamSubscription, for_modal = false): JQ
         ...(hover_space && {
             is_hover_space: true,
             hover_space,
-            has_hover_ai_modules: hover_ai_modules.length > 0,
-            hover_ai_modules: hover_ai_modules.map((hover_module) => ({
-                ...hover_module,
-                has_count: true,
-                url: hash_util.by_stream_topic_url(sub.stream_id, hover_module.topic),
-            })),
-            hover_attached_sources: hover_spaces.get_sidebar_sources(hover_space).map((source) => ({
-                ...source,
-                url: source.can_browse_records
-                    ? hash_util.hover_source_url(hover_space.id, source.attachment_id)
-                    : (source.url ?? aggregate_url),
-            })),
         }),
     };
     const $list_item = $(render_stream_sidebar_row(args));
@@ -1300,7 +1290,7 @@ export function get_sidebar_stream_topic_info(filter: Filter): {
         return result;
     }
 
-    result.stream_id = stream_id;
+    result.stream_id = hover_spaces.parent_stream_id(stream_id);
 
     const topic_terms = filter.terms_with_operator("topic");
     result.topic_selected = topic_terms.length === 1;
@@ -1705,6 +1695,13 @@ export function set_event_handlers({
         if ($(e.target).closest(".zoomed-new-topic").length > 0) {
             trigger = "zoomed new topic";
             topic = $("#topic_filter_query").text().trim().slice(0, realm.max_topic_length);
+        }
+
+        if (hover_spaces.get_by_stream_id(stream_id) !== undefined) {
+            hover_topic_create.open(stream_id, topic, () => {
+                update_streams_sidebar(true);
+            });
+            return;
         }
 
         compose_actions.start({

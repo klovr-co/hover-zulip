@@ -1,7 +1,11 @@
 from django.db import IntegrityError, transaction
 from django.utils.translation import gettext as _
 
-from hover.lib_spaces import get_space_data, user_is_space_administrator
+from hover.lib_spaces import (
+    get_space_data,
+    send_space_update_on_commit,
+    user_is_space_administrator,
+)
 from hover.models import (
     ConnectedAccount,
     ModuleInstallation,
@@ -44,11 +48,7 @@ def _send_space_update_to_administrators(
         target_ids = [user_id for user_id in target_ids if user_id not in exclude_user_ids]
     if not target_ids:
         return
-    send_event_on_commit(
-        space.realm,
-        {"type": "hover_space", "op": "update", "space": get_space_data(space)},
-        target_ids,
-    )
+    send_space_update_on_commit(space, target_ids)
 
 
 @transaction.atomic(durable=True)
@@ -102,7 +102,7 @@ def do_create_space(
     )
     send_event_on_commit(
         realm,
-        {"type": "hover_space", "op": "add", "space": get_space_data(space)},
+        {"type": "hover_space", "op": "add", "space": get_space_data(space, viewer=user_profile)},
         [user_profile.id],
     )
     return space
@@ -137,7 +137,7 @@ def do_add_space_administrator(
     _send_space_update_to_administrators(space, exclude_user_ids={target.id})
     send_event_on_commit(
         space.realm,
-        {"type": "hover_space", "op": "add", "space": get_space_data(space)},
+        {"type": "hover_space", "op": "add", "space": get_space_data(space, viewer=target)},
         [target.id],
     )
 
@@ -331,10 +331,6 @@ def do_launch_space(space: Space, *, acting_user: UserProfile) -> tuple[Space, b
         installation.save(
             update_fields=["state", "activated_at", "processing_start_at", "date_updated"]
         )
-    send_event_on_commit(
-        space.realm,
-        {"type": "hover_space", "op": "update", "space": get_space_data(space)},
-        sorted(member_ids),
-    )
+    send_space_update_on_commit(space, sorted(member_ids))
     schedule_space_participant_reconciliations(space.id)
     return space, True

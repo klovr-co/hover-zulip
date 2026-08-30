@@ -35,7 +35,7 @@ def associate_integration_route(
         request,
         data={
             "integration_route": get_integration_route_data(route),
-            "space": get_space_data(projected_space),
+            "space": get_space_data(projected_space, viewer=user_profile),
             "created": created,
         },
     )
@@ -57,6 +57,6 @@ def detach_integration_route(
         request,
         data={
             "integration_route": get_integration_route_data(route),
-            "space": get_space_data(projected_space),
+            "space": get_space_data(projected_space, viewer=user_profile),
         },
     )

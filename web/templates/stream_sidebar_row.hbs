@@ -31,42 +31,5 @@
             <span class="sidebar-menu-icon stream-sidebar-menu-icon" tabindex="0"><i class="zulip-icon zulip-icon-more-vertical" aria-hidden="true"></i></span>
         </a>
     </div>
-    {{#if is_hover_space}}
-    {{#if has_hover_ai_modules}}
-    <section class="hover-ai-modules" aria-label="{{t 'AI Modules' }}">
-        <div class="hover-ai-modules__header">{{t "AI Modules"}}</div>
-        <ul class="hover-ai-modules__list">
-            {{#each hover_ai_modules}}
-                <li>
-                    <a class="hover-ai-modules__item hover-ai-modules__item--{{key}}" href="{{url}}" data-hover-module-key="{{key}}">
-                        <i class="zulip-icon {{icon}} hover-ai-modules__icon" aria-hidden="true"></i>
-                        <span class="hover-ai-modules__name">{{name}}</span>
-                        {{#if has_count}}<span class="hover-ai-modules__count">{{count}}</span>{{/if}}
-                    </a>
-                </li>
-            {{/each}}
-        </ul>
-    </section>
-    {{/if}}
-    <section class="hover-source-ledger" aria-label="{{t 'Attached sources' }}">
-        <div class="hover-source-ledger__header">
-            <span>{{t "Sources"}}</span>
-        </div>
-        <ul class="hover-source-ledger__list">
-            {{#each hover_attached_sources}}
-                <li>
-                    <a class="hover-source-ledger__item hover-source-ledger__item--{{key}}" href="{{url}}" data-hover-source-key="{{source_key}}" {{#if is_external}}target="_blank" rel="noopener noreferrer"{{/if}}>
-                        <span class="hover-source-ledger__icon" aria-hidden="true"><i class="{{icon_class}}"></i></span>
-                        <span class="hover-source-ledger__copy">
-                            <span class="hover-source-ledger__name">{{name}}</span>
-                            <span class="hover-source-ledger__detail">{{detail}}</span>
-                        </span>
-                        {{#if is_external}}<i class="zulip-icon zulip-icon-external-link hover-source-ledger__external" aria-hidden="true"></i>{{/if}}
-                    </a>
-                </li>
-            {{/each}}
-        </ul>
-    </section>
-    {{/if}}
     {{#if for_modal}}<div class="topic-list-scroll-container" data-simplebar data-simplebar-tab-index="-1"></div>{{/if}}
 </li>

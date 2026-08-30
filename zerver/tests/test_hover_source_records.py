@@ -259,7 +259,7 @@ class HoverSourceRecordsTest(ZulipTestCase):
         with patch("hover.views_source_records.get_clawer_sync", return_value=self.adapter):
             payload = self.assert_json_success(self.post())
         self.assertEqual(payload["source"]["state"], "detached")
-        projected = get_space_data(self.space)["attachments"][0]
+        projected = get_space_data(self.space, viewer=self.member)["attachments"][0]
         self.assertEqual(projected["state"], "detached")
         self.assertTrue(projected["can_browse_records"])
 
@@ -357,7 +357,7 @@ class HoverSourceRecordsTest(ZulipTestCase):
         self.assertTrue(Message.objects.filter(id=message_id, sender=self.member).exists())
         self.attachment.refresh_from_db()
         self.assertIsNotNone(self.attachment.evidence_deleted_at)
-        projected = get_space_data(self.space)["attachments"][0]
+        projected = get_space_data(self.space, viewer=self.member)["attachments"][0]
         self.assertEqual(projected["state"], "detached")
         self.assertTrue(projected["evidence_deleted"])
         self.assertFalse(projected["can_browse_records"])

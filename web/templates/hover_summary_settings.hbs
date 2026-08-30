@@ -1,0 +1,92 @@
+<form
+    id="hover_summary_settings_form"
+    class="hover-topic-create hover-topic-create--settings"
+>
+    <div class="hover-topic-create__field">
+        <label for="hover_summary_settings_name">{{t "Summary name"}}</label>
+        <input
+            id="hover_summary_settings_name"
+            type="text"
+            maxlength="60"
+            value="{{label}}"
+            required
+        />
+    </div>
+    <fieldset class="hover-topic-create__options">
+        <legend>{{t "Inputs"}}</legend>
+        <p>{{t "Select the topics future editions will include."}}</p>
+        {{#each inputs}}
+            <label>
+                {{#if this.selected}}
+                    <input
+                        type="checkbox"
+                        name="hover_summary_settings_input"
+                        value="{{this.value}}"
+                        checked
+                    />
+                {{else}}
+                    <input
+                        type="checkbox"
+                        name="hover_summary_settings_input"
+                        value="{{this.value}}"
+                    />
+                {{/if}}
+                <span>{{this.topic_name}} <small>{{this.kind}}</small></span>
+            </label>
+        {{/each}}
+    </fieldset>
+    <fieldset class="hover-topic-create__options">
+        <legend>{{t "Generation schedule"}}</legend>
+        <div class="hover-topic-create__schedule">
+            <label for="hover_summary_settings_time">{{t
+                    "Every day at"
+                }}</label>
+            <input
+                id="hover_summary_settings_time"
+                type="time"
+                value="{{local_time}}"
+                required
+            />
+            <small
+                id="hover_summary_settings_timezone"
+                data-timezone="{{timezone}}"
+            >{{timezone}}</small>
+        </div>
+    </fieldset>
+    <fieldset class="hover-topic-create__options">
+        <legend>{{t "Members"}}</legend>
+        <p>{{t
+                "Removing a member immediately withdraws access to every edition."
+            }}</p>
+        {{#each members}}
+            <label>
+                {{#if this.fixed}}
+                    <input
+                        type="checkbox"
+                        name="hover_summary_settings_member"
+                        value="{{this.user_id}}"
+                        checked
+                        disabled
+                    />
+                {{else if this.selected}}
+                    <input
+                        type="checkbox"
+                        name="hover_summary_settings_member"
+                        value="{{this.user_id}}"
+                        checked
+                    />
+                {{else}}
+                    <input
+                        type="checkbox"
+                        name="hover_summary_settings_member"
+                        value="{{this.user_id}}"
+                    />
+                {{/if}}
+                <span>{{this.full_name}}</span>
+            </label>
+        {{/each}}
+    </fieldset>
+    <p class="hover-topic-create__notice">{{t
+            "Changes to inputs apply to future editions."
+        }}</p>
+</form>

@@ -179,6 +179,8 @@ test("get_list_info w/real stream_topic_history", ({override}) => {
         is_active_topic: true,
         url: "#narrow/channel/556-general/topic/topic.2011",
         contains_unread_mention: false,
+        hover_kind: "regular",
+        hover_kind_label: "Regular",
     });
 
     override(narrow_state, "topic", () => "topic 6");
@@ -203,6 +205,8 @@ test("get_list_info w/real stream_topic_history", ({override}) => {
         is_empty_string_topic: false,
         unread: 0,
         url: `#narrow/channel/556-general/topic/.E2.9C.94.20topic.209/with/${1000 + 9}`,
+        hover_kind: "regular",
+        hover_kind_label: "Regular",
     });
 
     assert.deepEqual(list_info.items[1], {
@@ -219,6 +223,8 @@ test("get_list_info w/real stream_topic_history", ({override}) => {
         is_empty_string_topic: false,
         unread: 0,
         url: `#narrow/channel/556-general/topic/topic.208/with/${1000 + 8}`,
+        hover_kind: "regular",
+        hover_kind_label: "Regular",
     });
 
     // Empty string as topic name.
@@ -244,6 +250,8 @@ test("get_list_info w/real stream_topic_history", ({override}) => {
         is_empty_string_topic: true,
         unread: 0,
         url: "#narrow/channel/556-general/topic//with/2025",
+        hover_kind: "regular",
+        hover_kind_label: "Regular",
     });
 
     // If we zoom in, our results are based on topic filter.

@@ -6,6 +6,34 @@ from hover.models import IntegrationMessageProvenance, IntegrationRouteAssociati
 from zerver.models.messages import Message
 
 
+def route_integration_messages(messages: Sequence[Message]) -> None:
+    """Apply the server-owned Source topic before messages become durable."""
+
+    channel_messages = [message for message in messages if message.is_channel_message]
+    if not channel_messages:
+        return
+    route_keys = {(message.sender_id, message.recipient.type_id) for message in channel_messages}
+    route_filter = Q()
+    for bot_id, stream_id in route_keys:
+        route_filter |= Q(bot_id=bot_id, stream_id=stream_id)
+    routes = IntegrationRouteAssociation.objects.select_related("attachment").filter(
+        route_filter,
+        state=IntegrationRouteAssociation.State.ACTIVE,
+        bot__is_active=True,
+        attachment__state=SpaceAttachment.State.ACTIVE,
+        attachment__source__supports_live_capture=True,
+        attachment__source__account__approval_state="approved",
+        attachment__source__account__connection_kind="native_integration",
+        attachment__source__account__incoming_webhook_bot_id=F("bot_id"),
+        attachment__space__state="launched",
+    )
+    routes_by_key = {(route.bot_id, route.stream_id): route for route in routes}
+    for message in channel_messages:
+        route = routes_by_key.get((message.sender_id, message.recipient.type_id))
+        if route is not None and route.attachment.destination_topic:
+            message.set_topic_name(route.attachment.destination_topic)
+
+
 def capture_integration_message_provenance(messages: Sequence[Message]) -> None:
     """Persist native integration provenance before any message payload is serialized.
 
@@ -46,7 +74,11 @@ def capture_integration_message_provenance(messages: Sequence[Message]) -> None:
         if message.id in existing_message_ids:
             continue
         route = routes_by_key.get((message.sender_id, message.recipient.type_id))
-        if route is None or route.attachment.space.stream_id != route.stream_id:
+        if (
+            route is None
+            or route.attachment.space.stream_id != route.stream_id
+            or message.topic_name().casefold() != route.attachment.destination_topic.casefold()
+        ):
             continue
         source = route.attachment.source
         provenance.append(
