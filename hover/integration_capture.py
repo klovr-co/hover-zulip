@@ -3,6 +3,12 @@ from collections.abc import Sequence
 from django.db.models import F, Q
 
 from hover.models import IntegrationMessageProvenance, IntegrationRouteAssociation, SpaceAttachment
+from hover.telemetry import (
+    HoverTelemetryEvent,
+    HoverTelemetryOutcome,
+    count_bucket,
+    emit_hover_telemetry_on_commit,
+)
 from zerver.models.messages import Message
 
 
@@ -64,6 +70,7 @@ def capture_integration_message_provenance(messages: Sequence[Message]) -> None:
         )
     )
     routes_by_key = {(route.bot_id, route.stream_id): route for route in routes}
+    routes_by_id = {route.id: route for route in routes_by_key.values()}
     existing_message_ids = set(
         IntegrationMessageProvenance.objects.filter(
             message_id__in=[message.id for message in channel_messages]
@@ -96,3 +103,20 @@ def capture_integration_message_provenance(messages: Sequence[Message]) -> None:
             )
         )
     IntegrationMessageProvenance.objects.bulk_create(provenance)
+    counts_by_route: dict[int, int] = {}
+    for item in provenance:
+        counts_by_route[item.association_id] = counts_by_route.get(item.association_id, 0) + 1
+    for route_id, message_count in counts_by_route.items():
+        route = routes_by_id[route_id]
+        emit_hover_telemetry_on_commit(
+            HoverTelemetryEvent.NATIVE_INGESTION,
+            HoverTelemetryOutcome.SUCCESS,
+            dimensions={
+                "realm_id": route.realm_id,
+                "space_id": route.attachment.space_id,
+                "attachment_id": route.attachment_id,
+                "message_count_bucket": count_bucket(message_count),
+                "posthog": route.attachment.source.provider_key == "posthog",
+                "provisioned": False,
+            },
+        )

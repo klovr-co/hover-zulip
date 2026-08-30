@@ -35,14 +35,71 @@ const attach_response_schema = z.object({
     attachment: hover_spaces.hover_space_attachment_schema,
     created: z.boolean(),
 });
+const provision_native_source_response_schema = z.object({
+    space: hover_spaces.hover_space_schema,
+    attachment_id: z.number(),
+    provider_key: z.enum(["github", "posthog"]),
+    webhook_url: z.string(),
+});
 const topic_kind_schema = z.enum(["regular", "source", "summary"]);
 const summary_input_value_schema = z.object({
     topic_name: z.string(),
     kind: z.enum(["regular", "source"]),
     attachment_id: z.nullable(z.number()),
 });
+const summary_execution_schema = z.object({
+    id: z.string(),
+    kind: z.enum(["manual", "scheduled"]),
+    status: z.enum(["pending", "dispatched", "succeeded", "no_change", "failed", "published"]),
+    window_start: z.string(),
+    window_end: z.string(),
+    policy_revision: z.number(),
+    uses_previous_settings: z.boolean(),
+    eligible_message_count: z.number(),
+    snapshot_message_count: z.number(),
+    failure_code: z.string(),
+    result: z.unknown(),
+    published_message_id: z.nullable(z.number()),
+    can_publish: z.boolean(),
+});
+const summary_execution_response_schema = z.object({execution: summary_execution_schema});
+const summary_digest_schema = z.object({
+    digest: z.object({
+        title: z.string(),
+        main_thread: z.string(),
+        what_changed: z.array(z.string()),
+        confirmed_facts: z.array(z.string()),
+        unresolved_points: z.array(z.string()),
+        why_it_matters: z.string(),
+    }),
+    evidence_tokens: z.array(z.string()),
+});
 
 type DiscoveredSource = z.output<typeof discovered_source_schema>;
+
+const summary_interval_presets = new Set([3600, 21600, 43200, 86400, 604800]);
+
+function summary_interval_seconds(prefix: string): number {
+    const selection = String($<HTMLSelectElement>(`#${prefix}_interval`).val());
+    if (selection !== "custom") {
+        return Number(selection);
+    }
+    return Number($<HTMLInputElement>(`#${prefix}_custom_hours`).val()) * 60 * 60;
+}
+
+function bind_summary_interval(prefix: string, current = 86400): void {
+    const $select = $<HTMLSelectElement>(`#${prefix}_interval`);
+    const preset = summary_interval_presets.has(current);
+    $select.val(preset ? String(current) : "custom");
+    if (!preset) {
+        $<HTMLInputElement>(`#${prefix}_custom_hours`).val(String(current / 3600));
+    }
+    function update_custom_visibility(): void {
+        $(`[data-hover-summary-custom]`).toggleClass("hide", $select.val() !== "custom");
+    }
+    $select.on("change", update_custom_visibility);
+    update_custom_visibility();
+}
 
 export function start_regular(stream_id: number, topic: string, trigger: string): void {
     compose_actions.start({
@@ -60,11 +117,7 @@ function refresh_space(raw_data: unknown, on_space_updated?: () => void): void {
     on_space_updated?.();
 }
 
-export function open(
-    stream_id: number,
-    prefilled_topic = "",
-    on_space_updated?: () => void,
-): void {
+export function open(stream_id: number, prefilled_topic = "", on_space_updated?: () => void): void {
     const space = hover_spaces.get_by_stream_id(stream_id);
     if (space === undefined) {
         start_regular(stream_id, prefilled_topic, "new topic");
@@ -118,6 +171,7 @@ export function open(
     }));
     const timezone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
     let selected_source: DiscoveredSource | undefined;
+    let native_source_provisioned = false;
 
     function selected_kind(): "regular" | "source" | "summary" {
         return topic_kind_schema.parse(
@@ -131,6 +185,52 @@ export function open(
 
     function account_id(): number {
         return Math.trunc(Number($<HTMLSelectElement>("#hover_topic_source_account").val()));
+    }
+
+    function selected_source_mode(): "native" | "existing" {
+        return String($("input[name='hover_source_mode']:checked").val()) === "existing"
+            ? "existing"
+            : "native";
+    }
+
+    function provision_native_source(): void {
+        const display_name = $<HTMLInputElement>("#hover_topic_native_source_name").val()!.trim();
+        if (!display_name) {
+            dialog_widget.hide_dialog_spinner();
+            ui_report.client_error(
+                $t_html({defaultMessage: "Enter a name for this Source."}),
+                $("#dialog_error"),
+            );
+            return;
+        }
+        void channel.post({
+            url: `/json/hover/spaces/${space_id}/native-sources`,
+            data: {
+                provider_key: JSON.stringify(
+                    String($<HTMLSelectElement>("#hover_topic_source_provider").val()),
+                ),
+                display_name: JSON.stringify(display_name),
+            },
+            success(raw_data) {
+                const response = provision_native_source_response_schema.parse(raw_data);
+                hover_spaces.upsert(response.space);
+                native_source_provisioned = true;
+                $("[data-hover-source-mode], .hover-topic-create__options").addClass("hide");
+                $("#hover_topic_native_source_result").removeClass("hide");
+                $<HTMLInputElement>("#hover_topic_native_webhook_url").val(response.webhook_url);
+                $(`[data-hover-native-guidance='${response.provider_key}']`).removeClass("hide");
+                $(".dialog_submit_button").text($t({defaultMessage: "Done"}));
+                dialog_widget.hide_dialog_spinner();
+                on_space_updated?.();
+            },
+            error() {
+                dialog_widget.hide_dialog_spinner();
+                ui_report.client_error(
+                    $t_html({defaultMessage: "Could not create this live Source."}),
+                    $("#dialog_error"),
+                );
+            },
+        });
     }
 
     function source_error(): void {
@@ -177,11 +277,17 @@ export function open(
         set_source_status($t({defaultMessage: "Verifying Source identity…"}), "loading");
         void channel.post({
             url: `/json/hover/spaces/${space_id}/sources/preview`,
-            data: {account_id: JSON.stringify(account_id()), source_ref: JSON.stringify(source_ref)},
+            data: {
+                account_id: JSON.stringify(account_id()),
+                source_ref: JSON.stringify(source_ref),
+            },
             success(raw_data) {
                 selected_source = preview_response_schema.parse(raw_data).source;
                 set_source_status(
-                    $t({defaultMessage: "Source identity verified: {name}"}, {name: selected_source.display_name}),
+                    $t(
+                        {defaultMessage: "Source identity verified: {name}"},
+                        {name: selected_source.display_name},
+                    ),
                 );
             },
             error: source_error,
@@ -272,7 +378,7 @@ export function open(
                 version_id: JSON.stringify(summary_version.id),
                 label: $<HTMLInputElement>("#hover_summary_name").val()!.trim(),
                 inputs: JSON.stringify(inputs),
-                local_time: $<HTMLInputElement>("#hover_summary_time").val()!,
+                interval_seconds: JSON.stringify(summary_interval_seconds("hover_summary")),
                 timezone,
                 member_ids: JSON.stringify(member_ids),
             },
@@ -295,7 +401,13 @@ export function open(
                 break;
             }
             case "source":
-                attach_source();
+                if (native_source_provisioned) {
+                    dialog_widget.close();
+                } else if (selected_source_mode() === "native") {
+                    provision_native_source();
+                } else {
+                    attach_source();
+                }
                 break;
             case "summary":
                 create_summary();
@@ -309,7 +421,8 @@ export function open(
         modal_content_html: render_hover_topic_create({
             prefilled_topic,
             accounts,
-            can_create_source: can_manage && accounts.length > 0,
+            has_accounts: accounts.length > 0,
+            can_create_source: can_manage,
             can_create_summary: can_manage && summary_version !== undefined,
             summary_inputs,
             members: space.memberships.map((membership) => ({
@@ -331,13 +444,32 @@ export function open(
                     kind === "regular"
                         ? $t({defaultMessage: "Start message"})
                         : kind === "source"
-                          ? $t({defaultMessage: "Attach Source"})
+                          ? selected_source_mode() === "native"
+                              ? $t({defaultMessage: "Create Source"})
+                              : $t({defaultMessage: "Attach Source"})
                           : $t({defaultMessage: "Create Summary"}),
                 );
             }
             $("input[name='hover_topic_kind']").on("change", () => {
                 update_panel();
-                if (selected_kind() === "source" && accounts.length > 0) {
+                if (
+                    selected_kind() === "source" &&
+                    selected_source_mode() === "existing" &&
+                    accounts.length > 0
+                ) {
+                    discover();
+                }
+            });
+            $("input[name='hover_source_mode']").on("change", () => {
+                const mode = selected_source_mode();
+                $("[data-hover-source-mode]").addClass("hide");
+                $(`[data-hover-source-mode='${mode}']`).removeClass("hide");
+                $(".dialog_submit_button").text(
+                    mode === "native"
+                        ? $t({defaultMessage: "Create Source"})
+                        : $t({defaultMessage: "Attach Source"}),
+                );
+                if (mode === "existing") {
                     discover();
                 }
             });
@@ -353,7 +485,12 @@ export function open(
                     preview(String($(event.currentTarget).val() ?? ""));
                 },
             );
+            $("#hover_topic_copy_webhook").on("click", () => {
+                const value = String($("#hover_topic_native_webhook_url").val() ?? "");
+                void navigator.clipboard.writeText(value);
+            });
             update_panel();
+            bind_summary_interval("hover_summary");
             $("#hover_regular_topic_name").trigger("focus");
         },
     });
@@ -394,11 +531,127 @@ export function open_summary_settings(
         })),
     ];
     const selected_inputs = new Set(
-        installation.inputs.map(
-            (input) => `${input.kind}:${input.topic_name.toLocaleLowerCase()}`,
-        ),
+        installation.inputs.map((input) => `${input.kind}:${input.topic_name.toLocaleLowerCase()}`),
     );
     const schedule = installation.triggers.find((trigger) => trigger.kind === "schedule");
+    let preview_active = true;
+    let preview_request_id: string | undefined;
+    let preview_execution_id: string | undefined;
+
+    function local_datetime_value(date: Date): string {
+        const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+        return local.toISOString().slice(0, 16);
+    }
+
+    function show_preview(raw_data: unknown): void {
+        if (!preview_active) {
+            return;
+        }
+        const {execution} = summary_execution_response_schema.parse(raw_data);
+        preview_execution_id = execution.id;
+        const $status = $("#hover_summary_preview_status").removeClass("hide");
+        $status.find("[data-hover-summary-preview-counts]").text(
+            $t(
+                {defaultMessage: "{eligible} eligible messages · {selected} in snapshot"},
+                {
+                    eligible: execution.eligible_message_count,
+                    selected: execution.snapshot_message_count,
+                },
+            ),
+        );
+        $status
+            .find("[data-hover-summary-previous-settings]")
+            .toggleClass("hide", !execution.uses_previous_settings);
+        $("#hover_summary_publish_preview").toggleClass("hide", !execution.can_publish);
+        const $result_panel = $status.find("[data-hover-summary-preview-result]").addClass("hide");
+        const messages = {
+            pending: $t({defaultMessage: "Preparing the bounded snapshot…"}),
+            dispatched: $t({defaultMessage: "Generating from the bounded snapshot…"}),
+            succeeded: $t({defaultMessage: "Preview ready. Review it before publishing."}),
+            no_change: $t({defaultMessage: "Nothing meaningful was found in this range."}),
+            failed: $t({defaultMessage: "This preview could not be generated."}),
+            published: $t({defaultMessage: "Preview published."}),
+        };
+        $status.find("[data-hover-summary-preview-message]").text(messages[execution.status]);
+        if (execution.status === "succeeded") {
+            const result = summary_digest_schema.parse(execution.result);
+            $result_panel.removeClass("hide");
+            $result_panel.find("[data-hover-summary-preview-title]").text(result.digest.title);
+            $result_panel
+                .find("[data-hover-summary-preview-main-thread]")
+                .text(result.digest.main_thread);
+        }
+        if (["pending", "dispatched"].includes(execution.status)) {
+            window.setTimeout(poll_preview, 1500);
+        }
+    }
+
+    function poll_preview(): void {
+        if (!preview_active || preview_execution_id === undefined) {
+            return;
+        }
+        void channel.get({
+            url: `/json/hover/summaries/${installation_id}/executions/${preview_execution_id}`,
+            success: show_preview,
+            error() {
+                if (preview_active) {
+                    window.setTimeout(poll_preview, 3000);
+                }
+            },
+        });
+    }
+
+    function generate_preview(): void {
+        const start = new Date(String($("#hover_summary_preview_start").val()));
+        const end = new Date(String($("#hover_summary_preview_end").val()));
+        if (
+            Number.isNaN(start.getTime()) ||
+            Number.isNaN(end.getTime()) ||
+            start >= end ||
+            end > new Date()
+        ) {
+            ui_report.client_error(
+                $t_html({defaultMessage: "Choose a valid range ending no later than now."}),
+                $("#dialog_error"),
+            );
+            return;
+        }
+        preview_request_id ??= crypto.randomUUID();
+        $("#hover_summary_preview_status").removeClass("hide");
+        $("[data-hover-summary-preview-message]").text(
+            $t({defaultMessage: "Preparing the bounded snapshot…"}),
+        );
+        void channel.post({
+            url: `/json/hover/summaries/${installation_id}/executions`,
+            data: {
+                start_at: JSON.stringify(start.toISOString()),
+                end_at: JSON.stringify(end.toISOString()),
+                request_id: preview_request_id,
+            },
+            success: show_preview,
+            error() {
+                $("[data-hover-summary-preview-message]").text(
+                    $t({defaultMessage: "Summary generation is temporarily unavailable."}),
+                );
+            },
+        });
+    }
+
+    function publish_preview(): void {
+        if (preview_execution_id === undefined) {
+            return;
+        }
+        void channel.post({
+            url: `/json/hover/summaries/${installation_id}/executions/${preview_execution_id}/publish`,
+            success: show_preview,
+            error() {
+                ui_report.client_error(
+                    $t_html({defaultMessage: "Could not publish this Summary preview."}),
+                    $("#dialog_error"),
+                );
+            },
+        });
+    }
 
     dialog_widget.launch({
         id: "hover-summary-settings-modal",
@@ -419,9 +672,10 @@ export function open_summary_settings(
                     installation.member_ids.includes(membership.user_id),
                 fixed: membership.user_id === current_user.user_id,
             })),
-            local_time: schedule?.local_time?.slice(0, 5) ?? "09:00",
-            timezone:
-                schedule?.timezone ?? new Intl.DateTimeFormat().resolvedOptions().timeZone,
+            interval_seconds: schedule?.interval_seconds ?? 86400,
+            custom_interval_hours: (schedule?.interval_seconds ?? 86400) / 3600,
+            timezone: schedule?.timezone ?? new Intl.DateTimeFormat().resolvedOptions().timeZone,
+            latest_scheduled_failure: installation.latest_scheduled_failure,
         }),
         modal_submit_button_text: $t({defaultMessage: "Save changes"}),
         form_id: "hover_summary_settings_form",
@@ -442,7 +696,9 @@ export function open_summary_settings(
                 {
                     label: $<HTMLInputElement>("#hover_summary_settings_name").val()!.trim(),
                     inputs: JSON.stringify(inputs),
-                    local_time: $<HTMLInputElement>("#hover_summary_settings_time").val()!,
+                    interval_seconds: JSON.stringify(
+                        summary_interval_seconds("hover_summary_settings"),
+                    ),
                     timezone: String($("#hover_summary_settings_timezone").data("timezone")),
                     member_ids: JSON.stringify(member_ids),
                 },
@@ -457,7 +713,17 @@ export function open_summary_settings(
             );
         },
         on_shown() {
+            bind_summary_interval("hover_summary_settings", schedule?.interval_seconds ?? 86400);
+            const end = new Date();
+            const start = new Date(end.getTime() - 24 * 60 * 60 * 1000);
+            $<HTMLInputElement>("#hover_summary_preview_start").val(local_datetime_value(start));
+            $<HTMLInputElement>("#hover_summary_preview_end").val(local_datetime_value(end));
+            $("#hover_summary_generate_preview").on("click", generate_preview);
+            $("#hover_summary_publish_preview").on("click", publish_preview);
             $("#hover_summary_settings_name").trigger("focus");
+        },
+        on_hidden() {
+            preview_active = false;
         },
     });
 }

@@ -1,3 +1,4 @@
+import hashlib
 from typing import NoReturn
 
 from django.db.models import Q
@@ -102,6 +103,12 @@ def _resolve_summary_evidence(
     messages_by_snapshot_id: dict[int, list[dict[str, object]]] = {
         snapshot.id: [] for snapshot in snapshots
     }
+    execution = getattr(generated_item, "summary_execution", None)
+    execution_messages = (
+        {snapshot.message_id: snapshot for snapshot in execution.message_snapshots.all()}
+        if execution is not None
+        else {}
+    )
     forbidden_count = 0
     for link in generated_item.evidence_links.all():
         citation = link.citation_message
@@ -120,12 +127,26 @@ def _resolve_summary_evidence(
         except JsonableError:
             forbidden_count += 1
             continue
+        frozen = execution_messages.get(citation.id)
+        edited_since_generation = (
+            frozen is not None
+            and frozen.content_digest != hashlib.sha256(citation.content.encode()).hexdigest()
+        )
         messages_by_snapshot_id[matched_snapshot.id].append(
             {
                 "message_id": citation.id,
-                "sender_name": citation.sender.full_name,
-                "timestamp": int(citation.date_sent.timestamp()),
-                "rendered_content": citation.rendered_content or "",
+                "sender_name": (
+                    frozen.sender_label if frozen is not None else citation.sender.full_name
+                ),
+                "timestamp": int(
+                    (frozen.sent_at if frozen is not None else citation.date_sent).timestamp()
+                ),
+                "rendered_content": (
+                    frozen.frozen_rendered_content
+                    if frozen is not None
+                    else citation.rendered_content or ""
+                ),
+                "edited_since_generation": edited_since_generation,
             }
         )
 
@@ -173,6 +194,7 @@ def resolve_generated_item_evidence(
             .prefetch_related(
                 "input_snapshots",
                 "evidence_links__citation_message__sender",
+                "summary_execution__message_snapshots",
             )
             .get(
                 Q(attachment__space=space) | Q(installation__space=space),

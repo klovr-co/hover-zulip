@@ -236,6 +236,28 @@ def get_module_catalog(realm: Realm) -> list[dict[str, Any]]:
 
 def installation_data(installation: ModuleInstallation) -> dict[str, Any]:
     version = installation.version
+    latest_scheduled_failure = None
+    if installation.summary_stream_id is not None:
+        from hover.models import SummaryExecution
+
+        failure = (
+            installation.summary_executions.filter(
+                kind=SummaryExecution.Kind.SCHEDULED,
+                status=SummaryExecution.Status.FAILED,
+            )
+            .order_by("-completed_at", "-id")
+            .first()
+        )
+        if failure is not None:
+            latest_scheduled_failure = {
+                "failure_code": failure.failure_code,
+                "scheduled_for": failure.scheduled_for.isoformat()
+                if failure.scheduled_for is not None
+                else None,
+                "completed_at": failure.completed_at.isoformat()
+                if failure.completed_at is not None
+                else None,
+            }
     return {
         "id": installation.id,
         "state": installation.state,
@@ -262,6 +284,7 @@ def installation_data(installation: ModuleInstallation) -> dict[str, Any]:
         "policy_revision": installation.policy_revision,
         "policy_hash": installation.policy_hash,
         "predecessor_id": installation.predecessor_id,
+        "latest_scheduled_failure": latest_scheduled_failure,
         "bindings": [
             {
                 "requirement_key": binding.requirement.key,
@@ -276,6 +299,9 @@ def installation_data(installation: ModuleInstallation) -> dict[str, Any]:
                 "local_time": trigger.local_time.isoformat() if trigger.local_time else None,
                 "timezone": trigger.timezone or None,
                 "debounce_seconds": trigger.debounce_seconds,
+                "anchor_at": trigger.anchor_at.isoformat() if trigger.anchor_at else None,
+                "interval_seconds": trigger.interval_seconds,
+                "next_due_at": trigger.next_due_at.isoformat() if trigger.next_due_at else None,
             }
             for trigger in installation.triggers.all()
         ],

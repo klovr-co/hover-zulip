@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
-from datetime import time
+from datetime import timedelta
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from django.db import IntegrityError, transaction
@@ -64,6 +64,11 @@ def _validate_timezone(value: str) -> None:
         raise JsonableError(_("Invalid IANA timezone."))
 
 
+def _validate_interval(interval_seconds: int) -> None:
+    if not 60 * 60 <= interval_seconds <= 30 * 24 * 60 * 60:
+        raise JsonableError(_("Summary intervals must be between 1 hour and 30 days."))
+
+
 @transaction.atomic(durable=True)
 def do_create_summary(
     *,
@@ -72,7 +77,7 @@ def do_create_summary(
     version_id: int,
     label: str,
     inputs: list[SummaryInputSpec],
-    local_time: time,
+    interval_seconds: int,
     timezone: str,
     member_ids: list[int],
 ) -> ModuleInstallation:
@@ -125,6 +130,7 @@ def do_create_summary(
         raise JsonableError(_("A topic already uses that name."))
 
     _validate_timezone(timezone)
+    _validate_interval(interval_seconds)
     try:
         version = (
             ModuleVersion.objects.select_for_update(no_key=True, of=("self",))
@@ -142,8 +148,8 @@ def do_create_summary(
     except (ModuleVersion.DoesNotExist, ModuleSupportedTrigger.DoesNotExist):
         raise JsonableError(_("Invalid scheduled Summary version."))
 
-    if not inputs:
-        raise JsonableError(_("Select at least one Summary input."))
+    if not 1 <= len(inputs) <= 20:
+        raise JsonableError(_("Select between 1 and 20 Summary inputs."))
     normalized_topics: set[str] = set()
     source_attachment_ids = {
         item.attachment_id for item in inputs if item.attachment_id is not None
@@ -245,8 +251,7 @@ def do_create_summary(
             for item, _attachment in validated_inputs
         ],
         "schedule": {
-            "cadence": "daily",
-            "local_time": local_time.isoformat(),
+            "interval_seconds": interval_seconds,
             "timezone": timezone,
         },
         "member_ids": sorted(member_ids),
@@ -300,8 +305,9 @@ def do_create_summary(
     ModuleInstallationTrigger.objects.create(
         installation=installation,
         supported_trigger=schedule_trigger,
-        cadence=ModuleInstallationTrigger.Cadence.DAILY,
-        local_time=local_time,
+        anchor_at=installation.date_created,
+        interval_seconds=interval_seconds,
+        next_due_at=installation.date_created + timedelta(seconds=interval_seconds),
         timezone=timezone,
     )
     member_ids_for_space = list(
@@ -320,7 +326,7 @@ def do_update_summary(
     installation: ModuleInstallation,
     label: str,
     inputs: list[SummaryInputSpec],
-    local_time: time,
+    interval_seconds: int,
     timezone: str,
     member_ids: list[int],
 ) -> ModuleInstallation:
@@ -373,9 +379,10 @@ def do_update_summary(
     ):
         raise JsonableError(_("A topic already uses that name."))
     _validate_timezone(timezone)
+    _validate_interval(interval_seconds)
 
-    if not inputs:
-        raise JsonableError(_("Select at least one Summary input."))
+    if not 1 <= len(inputs) <= 20:
+        raise JsonableError(_("Select between 1 and 20 Summary inputs."))
     attachment_ids = {item.attachment_id for item in inputs if item.attachment_id is not None}
     attachments = {
         attachment.id: attachment
@@ -487,12 +494,28 @@ def do_update_summary(
                 if attachment is not None
             ]
         )
-    trigger = current.triggers.select_for_update().get(
+    trigger = current.triggers.select_for_update(no_key=True).get(
         supported_trigger__kind=ModuleSupportedTrigger.Kind.SCHEDULE
     )
-    trigger.local_time = local_time
+    anchor_at = timezone_now()
+    trigger.cadence = None
+    trigger.local_time = None
     trigger.timezone = timezone
-    trigger.save(update_fields=["local_time", "timezone"])
+    trigger.anchor_at = anchor_at
+    trigger.interval_seconds = interval_seconds
+    trigger.next_due_at = anchor_at + timedelta(seconds=interval_seconds)
+    trigger.lease_expires_at = None
+    trigger.save(
+        update_fields=[
+            "cadence",
+            "local_time",
+            "timezone",
+            "anchor_at",
+            "interval_seconds",
+            "next_due_at",
+            "lease_expires_at",
+        ]
+    )
 
     policy = {
         "version_id": current.version_id,
@@ -506,8 +529,7 @@ def do_update_summary(
             for item, _attachment in validated_inputs
         ],
         "schedule": {
-            "cadence": "daily",
-            "local_time": local_time.isoformat(),
+            "interval_seconds": interval_seconds,
             "timezone": timezone,
         },
         "member_ids": sorted(member_ids),

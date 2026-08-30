@@ -25,6 +25,9 @@ class HoverTelemetryEvent(str, Enum):
     NOTIFICATION = "notification"
     EDITION = "edition"
     SOURCE_RECORDS = "source_records"
+    SUMMARY_EXECUTION = "summary_execution"
+    SUMMARY_SCHEDULER = "summary_scheduler"
+    NATIVE_INGESTION = "native_ingestion"
 
 
 class HoverTelemetryOutcome(str, Enum):
@@ -100,6 +103,20 @@ _ALLOWED_DIMENSIONS: Mapping[HoverTelemetryEvent, frozenset[str]] = {
     | {"edition_kind", "edition_count_bucket", "failure_count_bucket", "cache_used"},
     HoverTelemetryEvent.SOURCE_RECORDS: _COMMON_DIMENSIONS
     | {"attachment_id", "duration_bucket", "result_count_bucket"},
+    HoverTelemetryEvent.SUMMARY_EXECUTION: _COMMON_DIMENSIONS
+    | {
+        "installation_id",
+        "scheduled",
+        "duration_bucket",
+        "eligible_count_bucket",
+        "snapshot_count_bucket",
+        "callback_retry",
+        "citation_rejected",
+        "published",
+    },
+    HoverTelemetryEvent.SUMMARY_SCHEDULER: _COMMON_DIMENSIONS | {"installation_id", "lag_bucket"},
+    HoverTelemetryEvent.NATIVE_INGESTION: _COMMON_DIMENSIONS
+    | {"space_id", "attachment_id", "message_count_bucket", "posthog", "provisioned"},
 }
 _ALLOWED_OUTCOMES: Mapping[HoverTelemetryEvent, frozenset[HoverTelemetryOutcome]] = {
     HoverTelemetryEvent.PUBLICATION_SYNC: frozenset(
@@ -154,6 +171,27 @@ _ALLOWED_OUTCOMES: Mapping[HoverTelemetryEvent, frozenset[HoverTelemetryOutcome]
         }
     ),
     HoverTelemetryEvent.SOURCE_RECORDS: frozenset(
+        {
+            HoverTelemetryOutcome.SUCCESS,
+            HoverTelemetryOutcome.DENIED,
+            HoverTelemetryOutcome.RETRYABLE_FAILURE,
+            HoverTelemetryOutcome.PERMANENT_FAILURE,
+        }
+    ),
+    HoverTelemetryEvent.SUMMARY_EXECUTION: frozenset(
+        {
+            HoverTelemetryOutcome.REQUESTED,
+            HoverTelemetryOutcome.SUCCESS,
+            HoverTelemetryOutcome.EMPTY,
+            HoverTelemetryOutcome.PERMANENT_FAILURE,
+            HoverTelemetryOutcome.CONTRACT_REJECTED,
+            HoverTelemetryOutcome.DUPLICATE_REPLAYED,
+        }
+    ),
+    HoverTelemetryEvent.SUMMARY_SCHEDULER: frozenset(
+        {HoverTelemetryOutcome.REQUESTED, HoverTelemetryOutcome.SUPPRESSED}
+    ),
+    HoverTelemetryEvent.NATIVE_INGESTION: frozenset(
         {
             HoverTelemetryOutcome.SUCCESS,
             HoverTelemetryOutcome.DENIED,

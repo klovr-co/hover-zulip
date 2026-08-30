@@ -41,7 +41,7 @@ used, and revoked access must not be bypassable through a direct message URL.
   edition.
 - Summary creation is one server transaction: validate the parent Space and
   member subset, create the private native stream and subscriptions, persist
-  input bindings and daily schedule, and project the empty Summary. No
+  input bindings and elapsed-interval schedule, and project the empty Summary. No
   placeholder message is created.
 
 ## Consequences
