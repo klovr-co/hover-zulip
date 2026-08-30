@@ -17,6 +17,13 @@ config_file.read("/etc/zulip/zulip.conf")
 # Whether this instance of Zulip is running in a production environment.
 PRODUCTION = config_file.has_option("machine", "deploy_type")
 DEVELOPMENT = not PRODUCTION
+if PRODUCTION:
+    hover_dev_variables = sorted(name for name in os.environ if name.startswith("HOVER_DEV_"))
+    if hover_dev_variables:
+        raise ZulipSettingsError(
+            "Development-only HOVER_DEV_* settings cannot be used in production: "
+            + ", ".join(hover_dev_variables)
+        )
 secrets_file = configparser.RawConfigParser()
 if PRODUCTION:  # nocoverage
     secrets_file.read("/etc/zulip/zulip-secrets.conf")

@@ -31,6 +31,9 @@ const config = (
         context: import.meta.dirname,
         cache: {
             type: "filesystem",
+            ...(process.env["HOVER_DEV_WEBPACK_CACHE"] && {
+                cacheDirectory: process.env["HOVER_DEV_WEBPACK_CACHE"],
+            }),
             buildDependencies: {
                 config: [import.meta.filename],
             },

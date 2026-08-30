@@ -1,0 +1,26 @@
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+
+[scripts]
+setup = "./tools/dev setup"
+run_mode = "concurrent"
+
+[scripts.run.dev]
+available_in = [ "local" ]
+command = "./tools/dev up --port \"$CONDUCTOR_PORT\""
+default = true
+icon = "play"
+
+[scripts.run.dev-full]
+available_in = [ "local" ]
+command = "./tools/dev up --profile full --port \"$CONDUCTOR_PORT\""
+icon = "layers"
+
+[scripts.run.logs]
+available_in = [ "local" ]
+command = "./tools/dev logs"
+icon = "scroll-text"
+
+[scripts.run.down]
+available_in = [ "local" ]
+command = "./tools/dev down"
+icon = "square"

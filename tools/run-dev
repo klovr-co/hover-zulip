@@ -200,7 +200,7 @@ def server_processes() -> list[list[str]]:
         ["./manage.py", "process_queue", "--all", *manage_args, "--automated"],
         [
             "env",
-            "PGHOST=127.0.0.1",  # Force password authentication using .pgpass
+            f"PGHOST={os.getenv('HOVER_DEV_FULL_TEXT_HOST', '127.0.0.1')}",
             "./puppet/zulip/files/postgresql/process_fts_updates",
             "--quiet",
         ],
