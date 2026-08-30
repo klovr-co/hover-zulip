@@ -13,8 +13,12 @@ from .settings import (
     CACHES,
     DATABASES,
     EXTERNAL_HOST,
-    LOCAL_DATABASE_PASSWORD,
+    HOVER_DEV_CONTAINER,
+    HOVER_DEV_DATABASE_PASSWORD,
+    HOVER_DEV_DATABASE_USER,
+    HOVER_DEV_INSTANCE_ID,
     LOGGING,
+    REMOTE_POSTGRES_HOST,
 )
 
 FULL_STACK_ZULIP_TEST = "FULL_STACK_ZULIP_TEST" in os.environ
@@ -26,13 +30,25 @@ FAKE_EMAIL_DOMAIN = "zulip.testserver"
 # Clear out the REALM_HOSTS set in dev_settings.py
 REALM_HOSTS: dict[str, str] = {}
 
+TEST_DATABASE_NAME = f"hover_test_{HOVER_DEV_INSTANCE_ID}" if HOVER_DEV_CONTAINER else "zulip_test"
+TEST_DATABASE_TEMPLATE = (
+    f"{TEST_DATABASE_NAME}_template" if HOVER_DEV_CONTAINER else "zulip_test_template"
+)
+TEST_DATABASE_PASSWORD = (
+    HOVER_DEV_DATABASE_PASSWORD if HOVER_DEV_CONTAINER else DATABASES["default"]["PASSWORD"]
+)
+
 DATABASES["default"] = {
-    "NAME": os.getenv("ZULIP_DB_NAME", "zulip_test"),
-    "USER": "zulip_test",
-    "PASSWORD": LOCAL_DATABASE_PASSWORD,
-    "HOST": "localhost",
+    "NAME": os.getenv("ZULIP_DB_NAME", TEST_DATABASE_NAME),
+    "USER": HOVER_DEV_DATABASE_USER if HOVER_DEV_CONTAINER else "zulip_test",
+    "PASSWORD": TEST_DATABASE_PASSWORD,
+    "HOST": REMOTE_POSTGRES_HOST if HOVER_DEV_CONTAINER else "localhost",
     "ENGINE": "django.db.backends.postgresql",
-    "TEST_NAME": "django_zulip_tests",
+    "TEST_NAME": (
+        f"django_hover_tests_{HOVER_DEV_INSTANCE_ID}"
+        if HOVER_DEV_CONTAINER
+        else "django_zulip_tests"
+    ),
     "OPTIONS": {
         "connection_factory": TimeTrackingConnection,
         "cursor_factory": TimeTrackingCursor,

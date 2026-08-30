@@ -125,7 +125,10 @@ def clear_database() -> None:
     # With `zproject.test_settings`, we aren't using real memcached
     # and; we only need to flush memcached if we're populating a
     # database that would be used with it (i.e. zproject.dev_settings).
-    if default_cache["BACKEND"] == "zerver.lib.singleton_bmemcached.SingletonBMemcached":
+    uses_shared_memcached = (
+        default_cache["BACKEND"] == "zerver.lib.singleton_bmemcached.SingletonBMemcached"
+    )
+    if uses_shared_memcached and not getattr(settings, "HOVER_DEV_CONTAINER", False):
         assert isinstance(default_cache["OPTIONS"], dict)
         memcached_client = bmemcached.Client(
             (default_cache["LOCATION"],),

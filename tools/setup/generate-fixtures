@@ -2,13 +2,33 @@
 set -e
 
 run() {
-    PGHOST=localhost PGUSER=zulip \
-        "$(dirname "$0")/../../scripts/setup/terminate-psql-sessions" zulip_test zulip_test_base zulip_test_template
-    psql -v ON_ERROR_STOP=1 -h localhost postgres zulip_test <<EOF
-DROP DATABASE IF EXISTS zulip_test;
-CREATE DATABASE zulip_test TEMPLATE zulip_test_template;
+    if [[ ${HOVER_DEV_CONTAINER:-} == 1 ]]; then
+        test_database="hover_test_${HOVER_DEV_INSTANCE_ID}"
+        test_template="${test_database}_template"
+        postgres_host="${HOVER_DEV_DATABASE_HOST}"
+        postgres_user="${HOVER_DEV_DATABASE_USER}"
+        export PGPASSWORD="${HOVER_DEV_DATABASE_PASSWORD}"
+    else
+        test_database=zulip_test
+        test_template=zulip_test_template
+        postgres_host=localhost
+        postgres_user=zulip
+    fi
+    [[ $test_database =~ ^[a-z0-9_]+$ && $test_template =~ ^[a-z0-9_]+$ ]] || exit 1
+    PGHOST="$postgres_host" PGUSER="$postgres_user" \
+        "$(dirname "$0")/../../scripts/setup/terminate-psql-sessions" \
+        "$test_database" "$test_template"
+    psql -v ON_ERROR_STOP=1 -h "$postgres_host" -U "$postgres_user" postgres \
+        -v test_database="$test_database" -v test_template="$test_template" <<'EOF'
+DROP DATABASE IF EXISTS :"test_database";
+CREATE DATABASE :"test_database" TEMPLATE :"test_template";
 EOF
-    "$(dirname "$0")/../../scripts/setup/flush-memcached"
+    # PGroonga database-local objects do not survive PostgreSQL database cloning.
+    psql -v ON_ERROR_STOP=1 -h "$postgres_host" -U "$postgres_user" "$test_database" \
+        -c "REINDEX DATABASE \"$test_database\";"
+    if [[ ${HOVER_DEV_CONTAINER:-} != 1 ]]; then
+        "$(dirname "$0")/../../scripts/setup/flush-memcached"
+    fi
 }
 
 run

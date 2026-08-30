@@ -84,6 +84,8 @@ def update_cached_cache_key_prefixes() -> list[str]:
 
 
 def get_or_create_key_prefix() -> str:
+    if settings.DEVELOPMENT and settings.HOVER_DEV_CONTAINER and settings.HOVER_DEV_CACHE_PREFIX:
+        return settings.HOVER_DEV_CACHE_PREFIX
     if settings.PUPPETEER_TESTS:
         # This sets the prefix for the benefit of the Puppeteer tests.
         #

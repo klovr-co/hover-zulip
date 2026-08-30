@@ -42,6 +42,10 @@ from .configured_settings import (
     EXTERNAL_URI_SCHEME,
     EXTRA_INSTALLED_APPS,
     GOOGLE_OAUTH2_CLIENT_ID,
+    HOVER_DEV_CONTAINER,
+    HOVER_DEV_DATABASE_NAME,
+    HOVER_DEV_DATABASE_PASSWORD,
+    HOVER_DEV_DATABASE_USER,
     IS_DEV_DROPLET,
     LOCAL_UPLOADS_DIR,
     MEMCACHED_LOCATION,
@@ -371,7 +375,16 @@ DATABASES: dict[str, dict[str, Any]] = {
     }
 }
 
-if DEVELOPMENT:
+if DEVELOPMENT and HOVER_DEV_CONTAINER:
+    DATABASES["default"].update(
+        NAME=HOVER_DEV_DATABASE_NAME,
+        USER=HOVER_DEV_DATABASE_USER,
+        PASSWORD=HOVER_DEV_DATABASE_PASSWORD,
+        HOST=REMOTE_POSTGRES_HOST,
+        PORT=REMOTE_POSTGRES_PORT,
+    )
+    DATABASES["default"]["OPTIONS"]["sslmode"] = REMOTE_POSTGRES_SSLMODE
+elif DEVELOPMENT:
     LOCAL_DATABASE_PASSWORD = get_secret("local_database_password")
     DATABASES["default"].update(
         PASSWORD=LOCAL_DATABASE_PASSWORD,
@@ -405,7 +418,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ########################################################################
 
 USING_RABBITMQ = True
-RABBITMQ_PASSWORD = get_secret("rabbitmq_password")
+if not (DEVELOPMENT and HOVER_DEV_CONTAINER):
+    RABBITMQ_PASSWORD = get_secret("rabbitmq_password")
+else:
+    RABBITMQ_PASSWORD = os.environ["HOVER_DEV_RABBITMQ_PASSWORD"]
 
 ########################################################################
 # CACHING CONFIGURATION
@@ -456,7 +472,10 @@ RATE_LIMITING_MIRROR_REALM_RULES = [
 ]
 
 DEBUG_RATE_LIMITING = DEBUG
-REDIS_PASSWORD = get_secret("redis_password")
+if not (DEVELOPMENT and HOVER_DEV_CONTAINER):
+    REDIS_PASSWORD = get_secret("redis_password")
+else:
+    REDIS_PASSWORD = os.environ["HOVER_DEV_REDIS_PASSWORD"]
 
 # See RATE_LIMIT_TOR_TOGETHER
 if DEVELOPMENT:
