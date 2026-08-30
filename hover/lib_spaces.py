@@ -14,7 +14,9 @@ from hover.models import (
     SpaceMembershipSuggestion,
 )
 from zerver.lib.exceptions import JsonableError
+from zerver.models.streams import Subscription
 from zerver.models.users import UserProfile
+from zerver.tornado.django_api import send_event_on_commit
 
 
 def space_projection_queryset() -> QuerySet[Space]:
@@ -40,11 +42,14 @@ def space_projection_queryset() -> QuerySet[Space]:
         ),
         Prefetch(
             "module_installations",
-            queryset=ModuleInstallation.objects.select_related("version__definition")
+            queryset=ModuleInstallation.objects.select_related(
+                "version__definition", "summary_stream"
+            )
             .prefetch_related(
                 "bindings__requirement",
                 "bindings__attachment",
                 "triggers__supported_trigger",
+                "summary_inputs",
             )
             .order_by("version__navigation_order", "id"),
         ),
@@ -98,7 +103,7 @@ def access_space_for_administration(user_profile: UserProfile, space_id: int) ->
         raise JsonableError(_("Invalid Space ID"))
 
 
-def get_space_data(space: Space) -> dict[str, Any]:
+def get_space_data(space: Space, *, viewer: UserProfile) -> dict[str, Any]:
     required_prefetches = {
         "attachments",
         "memberships",
@@ -119,7 +124,9 @@ def get_space_data(space: Space) -> dict[str, Any]:
 
     module_counts = {
         row["module_key"]: row["count"]
-        for row in GeneratedItem.objects.filter(attachment__space=space)
+        for row in GeneratedItem.objects.filter(
+            Q(attachment__space=space) | Q(installation__space=space)
+        )
         .values("module_key")
         .annotate(count=Count("id"))
     }
@@ -137,10 +144,94 @@ def get_space_data(space: Space) -> dict[str, Any]:
     for attachment in attachments:
         attachment["generated_count"] = source_counts.get(attachment["source"]["id"], 0)
     installations = []
+    summary_recipient_ids: set[int] = set()
     for installation in space.module_installations.all():
+        summary_stream = installation.summary_stream
+        if summary_stream is not None:
+            summary_recipient_id = summary_stream.recipient_id
+            assert summary_recipient_id is not None
+            summary_recipient_ids.add(summary_recipient_id)
+    accessible_summary_recipient_ids = set(
+        Subscription.objects.filter(
+            user_profile=viewer,
+            recipient_id__in=summary_recipient_ids,
+            active=True,
+        ).values_list("recipient_id", flat=True)
+    )
+    summary_member_ids_by_recipient: dict[int, list[int]] = {}
+    if viewer.is_realm_admin or viewer.id in administrator_ids:
+        for recipient_id, user_id in Subscription.objects.filter(
+            recipient_id__in=summary_recipient_ids,
+            active=True,
+            is_user_active=True,
+        ).values_list("recipient_id", "user_profile_id"):
+            summary_member_ids_by_recipient.setdefault(recipient_id, []).append(user_id)
+    for installation in space.module_installations.all():
+        summary_stream = installation.summary_stream
+        if (
+            summary_stream is not None
+            and summary_stream.recipient_id not in accessible_summary_recipient_ids
+        ):
+            continue
         data = installation_data(installation)
         data["generated_count"] = module_counts.get(data["definition_key"], 0)
+        if summary_stream is not None and (viewer.is_realm_admin or viewer.id in administrator_ids):
+            summary_recipient_id = summary_stream.recipient_id
+            assert summary_recipient_id is not None
+            data["member_ids"] = sorted(
+                summary_member_ids_by_recipient.get(summary_recipient_id, [])
+            )
         installations.append(data)
+    topic_descriptors: list[dict[str, Any]] = []
+    if space.stream_id is not None:
+        attachments_by_id = {attachment.id: attachment for attachment in space.attachments.all()}
+        for attachment in attachments:
+            if not attachment["destination_topic"]:
+                continue
+            routes = attachment["integration_routes"]
+            attachment_model = attachments_by_id[attachment["id"]]
+            if attachment["state"] == "detached":
+                source_state = "paused"
+            elif attachment_model.source.account.health_status in ["degraded", "unavailable"]:
+                source_state = "error"
+            else:
+                source_state = "live" if routes else "setup_required"
+            topic_descriptors.append(
+                {
+                    "stream_id": space.stream_id,
+                    "topic_name": attachment["destination_topic"],
+                    "kind": "source",
+                    "source": {
+                        "attachment_id": attachment["id"],
+                        "provider_key": attachment["source"]["provider_key"],
+                        "state": source_state,
+                    },
+                }
+            )
+        for installation in space.module_installations.all():
+            summary_stream = installation.summary_stream
+            if (
+                summary_stream is None
+                or installation.state != "enabled"
+                or summary_stream.recipient_id not in accessible_summary_recipient_ids
+            ):
+                continue
+            trigger = next(iter(installation.triggers.all()), None)
+            schedule_label = ""
+            if trigger is not None and trigger.local_time is not None:
+                schedule_label = f"{trigger.local_time.isoformat()} {trigger.timezone}"
+            topic_descriptors.append(
+                {
+                    "stream_id": installation.summary_stream_id,
+                    "topic_name": installation.label,
+                    "kind": "summary",
+                    "summary": {
+                        "installation_id": installation.id,
+                        "schedule_label": schedule_label,
+                        "can_manage": viewer.is_realm_admin or viewer.id in administrator_ids,
+                    },
+                }
+            )
 
     return {
         "id": space.id,
@@ -178,7 +269,28 @@ def get_space_data(space: Space) -> dict[str, Any]:
         ],
         "module_installations": installations,
         "module_catalog": get_module_catalog(space.realm),
+        "topic_descriptors": topic_descriptors,
     }
+
+
+def send_space_update_on_commit(space: Space, user_ids: list[int]) -> None:
+    """Send a projection sanitized independently for every recipient."""
+
+    viewers = UserProfile.objects.filter(
+        id__in=user_ids,
+        realm=space.realm,
+        is_active=True,
+    )
+    for viewer in viewers:
+        send_event_on_commit(
+            space.realm,
+            {
+                "type": "hover_space",
+                "op": "update",
+                "space": get_space_data(space, viewer=viewer),
+            },
+            [viewer.id],
+        )
 
 
 def user_is_space_administrator(user_profile: UserProfile, space: Space) -> bool:

@@ -50,6 +50,28 @@ class HoverTelemetryContractTest(TestCase):
             " lag_bucket=under_1m realm_id=7 retryable=false",
         )
 
+    def test_summary_metrics_accept_only_bounded_operational_dimensions(self) -> None:
+        with patch("hover.telemetry.logger.info") as info:
+            emit_hover_telemetry(
+                HoverTelemetryEvent.SUMMARY_EXECUTION,
+                HoverTelemetryOutcome.CONTRACT_REJECTED,
+                dimensions={
+                    "realm_id": 7,
+                    "installation_id": 11,
+                    "scheduled": True,
+                    "duration_bucket": HoverTelemetryBucket.UNDER_2S,
+                    "eligible_count_bucket": HoverTelemetryBucket.OVER_TWENTY,
+                    "snapshot_count_bucket": HoverTelemetryBucket.SIX_TO_TWENTY,
+                    "citation_rejected": True,
+                },
+            )
+
+        rendered = " ".join(str(item) for item in info.call_args.args)
+        self.assertIn("summary_execution", rendered)
+        self.assertIn("citation_rejected=true", rendered)
+        self.assertNotIn("prompt", rendered)
+        self.assertNotIn("evidence_", rendered)
+
     def test_arbitrary_event_outcome_and_dimension_names_are_rejected(self) -> None:
         with patch("hover.telemetry.logger.info") as info:
             with self.assertRaises(TypeError):

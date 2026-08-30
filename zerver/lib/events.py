@@ -859,7 +859,10 @@ def fetch_initial_state_data(
         state["hover_spaces"] = (
             []
             if user_profile is None
-            else [get_space_data(space) for space in get_accessible_spaces(user_profile)]
+            else [
+                get_space_data(space, viewer=user_profile)
+                for space in get_accessible_spaces(user_profile)
+            ]
         )
 
     if want("hover_connected_account"):

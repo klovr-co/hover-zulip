@@ -121,6 +121,7 @@ class HoverIntegrationRoute(BaseModel):
     bot_user_id: int
     bot_name: str
     stream_id: int
+    topic_name: str
     live_since: str
 
 
@@ -131,6 +132,7 @@ class HoverSpaceAttachment(BaseModel):
     history_timezone: str
     history_start_at: str
     custom_start_date: str | None
+    destination_topic: str
     can_browse_records: bool
     source: HoverSpaceSource
     integration_routes: list[HoverIntegrationRoute]
@@ -204,9 +206,11 @@ class HoverModuleInstallation(BaseModel):
     version_id: int
     definition_key: str
     name: str
+    label: str
     version: str
     output_type: str
     destination_topic: str
+    summary_stream_id: int | None
     navigation_icon: str
     navigation_order: int
     content_hash: str
@@ -219,6 +223,15 @@ class HoverModuleInstallation(BaseModel):
     bindings: list[HoverModuleBinding]
     triggers: list[HoverModuleTrigger]
     generated_count: int
+    inputs: list[dict[str, object]]
+
+
+class HoverTopicDescriptor(BaseModel):
+    stream_id: int
+    topic_name: str
+    kind: Literal["source", "summary"]
+    source: dict[str, object] | None = None
+    summary: dict[str, object] | None = None
 
 
 class HoverSpace(BaseModel):
@@ -235,6 +248,7 @@ class HoverSpace(BaseModel):
     membership_suggestions: list[HoverSpaceMembershipSuggestion]
     module_installations: list[HoverModuleInstallation]
     module_catalog: list[HoverModuleVersion]
+    topic_descriptors: list[HoverTopicDescriptor]
 
 
 class HoverSpaceAddEvent(BaseEvent):

@@ -1,5 +1,6 @@
 import assert from "minimalistic-assert";
 
+import * as hover_spaces from "./hover_spaces.ts";
 import * as narrow_state from "./narrow_state.ts";
 import * as resolved_topic from "./resolved_topic.ts";
 import * as stream_topic_history from "./stream_topic_history.ts";
@@ -26,6 +27,9 @@ export type TopicInfo = {
     is_active_topic: boolean;
     url: string;
     contains_unread_mention: boolean;
+    hover_kind: "regular" | "source" | "summary";
+    hover_kind_label: string;
+    hover_source_state?: "setup_required" | "live" | "paused" | "error";
 };
 
 type TopicChoiceState = {
@@ -47,6 +51,8 @@ function build_topic_info_item(
     is_active_topic: boolean,
     contains_unread_mention: boolean,
 ): TopicInfo {
+    const descriptor = hover_spaces.get_topic_descriptor(stream_id, topic_name);
+    const hover_kind = descriptor?.kind ?? "regular";
     const is_topic_followed = user_topics.is_topic_followed(stream_id, topic_name);
     const is_topic_unmuted_or_followed = user_topics.is_topic_unmuted_or_followed(
         stream_id,
@@ -67,6 +73,10 @@ function build_topic_info_item(
         is_active_topic,
         url: stream_topic_history.channel_topic_permalink_hash(stream_id, topic_name),
         contains_unread_mention,
+        hover_kind,
+        hover_kind_label:
+            hover_kind === "source" ? "Source" : hover_kind === "summary" ? "Summary" : "Regular",
+        ...(descriptor?.source && {hover_source_state: descriptor.source.state}),
     };
     return topic_info;
 }
@@ -78,7 +88,9 @@ function show_all_topics(
 ): void {
     for (const topic_name of topic_names) {
         const num_unread = unread.num_unread_for_topic(stream_id, topic_name);
-        const is_active_topic = topic_choice_state.active_topic === topic_name.toLowerCase();
+        const is_active_topic =
+            narrow_state.stream_id() === stream_id &&
+            topic_choice_state.active_topic === topic_name.toLowerCase();
         const is_topic_muted = user_topics.is_topic_muted(stream_id, topic_name);
         // Important: Topics are lower-case in this set.
         const contains_unread_mention = topic_choice_state.topics_with_unread_mentions.has(
@@ -103,7 +115,9 @@ function choose_topics(
 ): void {
     for (const topic_name of topic_names) {
         const num_unread = unread.num_unread_for_topic(stream_id, topic_name);
-        const is_active_topic = topic_choice_state.active_topic === topic_name.toLowerCase();
+        const is_active_topic =
+            narrow_state.stream_id() === stream_id &&
+            topic_choice_state.active_topic === topic_name.toLowerCase();
         const is_topic_muted = user_topics.is_topic_muted(stream_id, topic_name);
         // Important: Topics are lower-case in this set.
         const contains_unread_mention = topic_choice_state.topics_with_unread_mentions.has(
@@ -241,6 +255,17 @@ export function get_filtered_topic_names(
     filter_topics: (topic_names: string[]) => string[],
 ): string[] {
     const topic_names = stream_topic_history.get_recent_topic_names(stream_id);
+    for (const descriptor of hover_spaces.get_descriptors_for_parent(stream_id)) {
+        if (
+            descriptor.kind === "source" &&
+            topic_names.every(
+                (topic_name) =>
+                    topic_name.toLocaleLowerCase() !== descriptor.topic_name.toLocaleLowerCase(),
+            )
+        ) {
+            topic_names.push(descriptor.topic_name);
+        }
+    }
     const narrowed_topic = narrow_state.topic();
 
     // If the user is viewing a topic with no messages, include
@@ -293,6 +318,37 @@ export function get_list_info(
         choose_topics(stream_id, topic_names, topic_choice_state);
     }
 
+    let summary_topic_count = 0;
+    for (const descriptor of hover_spaces.get_descriptors_for_parent(stream_id)) {
+        if (
+            descriptor.kind !== "summary" ||
+            filter_topics([descriptor.topic_name]).length === 0 ||
+            topic_choice_state.items.some(
+                (item) =>
+                    item.stream_id === descriptor.stream_id &&
+                    item.topic_name.toLocaleLowerCase() ===
+                        descriptor.topic_name.toLocaleLowerCase(),
+            )
+        ) {
+            continue;
+        }
+        summary_topic_count += 1;
+        topic_choice_state.items.push(
+            build_topic_info_item(
+                descriptor.stream_id,
+                descriptor.topic_name,
+                unread.num_unread_for_topic(descriptor.stream_id, descriptor.topic_name),
+                user_topics.is_topic_muted(descriptor.stream_id, descriptor.topic_name),
+                narrow_state.stream_id() === descriptor.stream_id &&
+                    narrow_state.topic()?.toLocaleLowerCase() ===
+                        descriptor.topic_name.toLocaleLowerCase(),
+                unread
+                    .get_topics_with_unread_mentions(descriptor.stream_id)
+                    .has(descriptor.topic_name.toLocaleLowerCase()),
+            ),
+        );
+    }
+
     if (
         topic_choice_state.more_topics_unmuted_unreads === 0 &&
         topic_choice_state.more_topics_muted_unreads > 0 &&
@@ -302,7 +358,7 @@ export function get_list_info(
         // we have a muted styling "all topics" row.
         return {
             items: topic_choice_state.items,
-            num_possible_topics: topic_names.length,
+            num_possible_topics: topic_names.length + summary_topic_count,
             more_topics_unreads: topic_choice_state.more_topics_muted_unreads,
             more_topics_have_unread_mention_messages:
                 topic_choice_state.more_topics_have_muted_unread_mention_messages,
@@ -311,7 +367,7 @@ export function get_list_info(
     }
     return {
         items: topic_choice_state.items,
-        num_possible_topics: topic_names.length,
+        num_possible_topics: topic_names.length + summary_topic_count,
         more_topics_unreads: topic_choice_state.more_topics_unmuted_unreads,
         more_topics_have_unread_mention_messages:
             // Because mentions are important, and get displayed in the
