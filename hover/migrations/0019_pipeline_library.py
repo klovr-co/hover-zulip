@@ -112,7 +112,7 @@ def seed_and_backfill_pipeline_contracts(
     default_lookback_seconds = 30 * 24 * 60 * 60
     default_maximum_runtime_seconds = 300
 
-    for realm in Realm.objects.filter(hover_enabled=True).iterator():
+    for realm in Realm.objects.iterator():
         for (
             key,
             name,
