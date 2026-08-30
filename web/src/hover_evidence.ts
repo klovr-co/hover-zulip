@@ -28,6 +28,7 @@ const grouped_message_schema = z.object({
     sender_name: z.string(),
     timestamp: z.number(),
     rendered_content: z.string(),
+    edited_since_generation: z._default(z.boolean(), false),
 });
 
 const grouped_evidence_schema = z.object({
@@ -62,7 +63,8 @@ export type PresentedEvidence = {
             sender_name: string;
             timestamp: string;
             display_timestamp: string;
-            rendered_content?: string;
+            rendered_content_html?: string;
+            edited_since_generation?: boolean;
             legacy_content?: LegacyEvidence["content"];
             media?: LegacyEvidence["media"];
         }[];
@@ -84,14 +86,18 @@ export function present_evidence(response: unknown): PresentedEvidence {
             forbidden_count: grouped.data.forbidden_count,
             groups: grouped.data.groups.map((group) => ({
                 topic: group.topic,
-                messages: group.messages.map((message) => ({
-                    ...message,
-                    can_open_message: true,
-                    stream_id: group.topic.stream_id,
-                    topic_name: group.topic.topic_name,
-                    timestamp: new Date(message.timestamp * 1000).toISOString(),
-                    display_timestamp: display_timestamp(message.timestamp),
-                })),
+                messages: group.messages.map((message) => {
+                    const {rendered_content, ...metadata} = message;
+                    return {
+                        ...metadata,
+                        can_open_message: true,
+                        stream_id: group.topic.stream_id,
+                        topic_name: group.topic.topic_name,
+                        timestamp: new Date(message.timestamp * 1000).toISOString(),
+                        display_timestamp: display_timestamp(message.timestamp),
+                        rendered_content_html: rendered_content,
+                    };
+                }),
             })),
         };
     }

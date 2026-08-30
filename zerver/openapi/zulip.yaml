@@ -32394,6 +32394,7 @@ components:
               - sender_name
               - timestamp
               - rendered_content
+              - edited_since_generation
             properties:
               message_id:
                 type: integer
@@ -32403,6 +32404,8 @@ components:
                 type: integer
               rendered_content:
                 type: string
+              edited_since_generation:
+                type: boolean
     JsonResponseBase:
       type: object
       properties:

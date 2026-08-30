@@ -47,7 +47,10 @@ run_test("validates and presents grouped native-message evidence", () => {
     assert.equal(presented.groups[0].topic.topic_name, "GitHub activity");
     assert.equal(presented.groups[0].messages[0].message_id, 42);
     assert.equal(presented.groups[0].messages[0].can_open_message, true);
-    assert.equal(presented.groups[0].messages[0].rendered_content, "<p>Validated server HTML</p>");
+    assert.equal(
+        presented.groups[0].messages[0].rendered_content_html,
+        "<p>Validated server HTML</p>",
+    );
     assert.equal(presented.forbidden_count, 2);
 });
 

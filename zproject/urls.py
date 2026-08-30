@@ -25,7 +25,12 @@ from hover.views_connected_accounts import (
     update_connected_account,
     upsert_connected_account_grant,
 )
-from hover.views_integrations import associate_integration_route, detach_integration_route
+from hover.views_integrations import (
+    associate_integration_route,
+    detach_integration_route,
+    provision_native_source,
+    rotate_native_source_webhook,
+)
 from hover.views_modules import (
     add_module_draft_collaborator,
     archive_module_definition,
@@ -69,7 +74,14 @@ from hover.views_spaces import (
     remove_space_member,
 )
 from hover.views_suggested_actions import decide_suggested_action_view
-from hover.views_summaries import create_summary, update_summary
+from hover.views_summaries import (
+    create_summary,
+    generate_summary_preview,
+    get_summary_execution,
+    publish_summary_preview,
+    summary_execution_callback,
+    update_summary,
+)
 from hover.views_todos import list_todos, mutate_todo_view
 from zerver.forms import LoggingSetPasswordForm
 from zerver.lib.integrations import INCOMING_WEBHOOK_INTEGRATIONS
@@ -721,6 +733,18 @@ v1_api_and_json_patterns = [
         PATCH=update_summary,
     ),
     rest_path(
+        "hover/summaries/<int:installation_id>/executions",
+        POST=generate_summary_preview,
+    ),
+    rest_path(
+        "hover/summaries/<int:installation_id>/executions/<uuid:execution_id>",
+        GET=get_summary_execution,
+    ),
+    rest_path(
+        "hover/summaries/<int:installation_id>/executions/<uuid:execution_id>/publish",
+        POST=publish_summary_preview,
+    ),
+    rest_path(
         "hover/module-installations/<int:installation_id>/disable",
         POST=(disable_module, {"intentionally_undocumented"}),
     ),
@@ -763,6 +787,14 @@ v1_api_and_json_patterns = [
     rest_path(
         "hover/spaces/<int:space_id>/integration-routes",
         POST=(associate_integration_route, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/native-sources",
+        POST=(provision_native_source, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/spaces/<int:space_id>/native-sources/<int:attachment_id>/rotate",
+        POST=(rotate_native_source_webhook, {"intentionally_undocumented"}),
     ),
     rest_path(
         "hover/spaces/<int:space_id>/integration-routes/<int:route_id>",
@@ -1004,6 +1036,17 @@ i18n_urls = [
 
 # Make a copy of i18n_urls so that they appear without prefix for english
 urls: list[URLPattern | URLResolver] = list(i18n_urls)
+
+# Summary result callbacks authenticate with a short-lived, execution-scoped
+# bearer token rather than a Zulip user session or API key.  Register this
+# machine-to-machine endpoint outside rest_dispatch so the callback view can
+# validate that credential itself.
+urls += [
+    path(
+        "json/hover/v1/summary-executions/<uuid:execution_id>/callback",
+        summary_execution_callback,
+    ),
+]
 
 # Include the dual-use patterns twice
 urls += [

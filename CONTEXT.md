@@ -64,7 +64,7 @@ _Avoid_: Latest Module, inferred Source, cron string
 **Summary**:
 A scheduled Module Installation presented as a focused, independently
 authorized feed beneath a parent Space. Each Summary owns a private native
-container, selected Regular or Source topic inputs, a daily local schedule,
+container, selected Regular or Source topic inputs, an elapsed UTC interval,
 and immutable generation-time input and citation provenance. Generated
 editions are ordinary native messages in that container.
 _Avoid_: Dashboard, client-side digest, Space-wide Module Topic

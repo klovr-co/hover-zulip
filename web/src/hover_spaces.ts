@@ -83,6 +83,16 @@ export const hover_module_installation_schema = z.object({
     policy_revision: z.number(),
     policy_hash: z.string(),
     predecessor_id: z.nullable(z.number()),
+    latest_scheduled_failure: z._default(
+        z.nullable(
+            z.object({
+                failure_code: z.string(),
+                scheduled_for: z.nullable(z.string()),
+                completed_at: z.nullable(z.string()),
+            }),
+        ),
+        null,
+    ),
     bindings: z.array(z.object({requirement_key: z.string(), attachment_id: z.number()})),
     triggers: z.array(
         z.object({
@@ -91,6 +101,9 @@ export const hover_module_installation_schema = z.object({
             local_time: z.nullable(z.string()),
             timezone: z.nullable(z.string()),
             debounce_seconds: z.nullable(z.number()),
+            anchor_at: z._default(z.nullable(z.string()), null),
+            interval_seconds: z._default(z.nullable(z.number()), null),
+            next_due_at: z._default(z.nullable(z.string()), null),
         }),
     ),
     generated_count: z._default(z.number(), 0),
@@ -227,8 +240,7 @@ export function is_summary_stream(stream_id: number): boolean {
             (installation) => installation.summary_stream_id === stream_id,
         ) ||
             (space.topic_descriptors ?? []).some(
-                (descriptor) =>
-                    descriptor.kind === "summary" && descriptor.stream_id === stream_id,
+                (descriptor) => descriptor.kind === "summary" && descriptor.stream_id === stream_id,
             ))
     );
 }

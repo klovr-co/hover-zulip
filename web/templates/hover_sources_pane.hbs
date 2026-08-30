@@ -1,119 +1,140 @@
 <div
-    class="hover-sources-pane__frame"
-    role="region"
-    aria-label="{{t 'Sources'}}"
->
+  class="hover-sources-pane__frame"
+  role="region"
+  aria-label="{{t 'Sources'}}"
+  >
     <header class="hover-sources-pane__header">
         <div>
             <h2>{{t "Sources"}}</h2>
             <p>{{t "Messages used to generate this Summary"}}</p>
         </div>
         <button
-            type="button"
-            class="button-reset-style hover-sources-pane-close"
-            aria-label="{{t 'Close sources'}}"
-        >
+          type="button"
+          class="button-reset-style hover-sources-pane-close"
+          aria-label="{{t 'Close sources'}}"
+          >
             <i class="zulip-icon zulip-icon-close" aria-hidden="true"></i>
         </button>
     </header>
     <div class="hover-sources-pane__content">
         {{#if loading}}
             <p
-                role="status"
-                aria-live="polite"
-                tabindex="-1"
-                data-hover-sources-result
-            >
+              role="status"
+              aria-live="polite"
+              tabindex="-1"
+              data-hover-sources-result
+              >
                 {{t "Resolving the exact source messages…"}}
             </p>
         {{else if error}}
             <div
-                class="alert {{alert_class}} show"
-                role="alert"
-                tabindex="-1"
-                data-hover-sources-result
-            >
+              class="alert {{alert_class}} show"
+              role="alert"
+              tabindex="-1"
+              data-hover-sources-result
+              >
                 {{#if retryable}}
                     {{t
-                        "Sources are temporarily unavailable. Please try again."
-                    }}
+                      "Sources are temporarily unavailable. Please try again."
+                      }}
                     <button
-                        type="button"
-                        class="button rounded small hover-sources-pane-retry"
-                    >{{t "Retry"}}</button>
+                      type="button"
+                      class="button rounded small hover-sources-pane-retry"
+                      >{{t "Retry"}}</button>
                 {{else}}
                     {{t "These sources are no longer available."}}
                 {{/if}}
             </div>
         {{else if empty}}
-            <p tabindex="-1" data-hover-sources-result>{{t
-                    "No exact source messages are available for this update."
-                }}</p>
+            <p tabindex="-1" data-hover-sources-result>
+                {{t "No exact source messages are available for this update."}}
+            </p>
         {{else}}
             <div tabindex="-1" data-hover-sources-result>
                 {{#if has_forbidden}}
-                    <p
-                        class="hover-sources-pane__forbidden"
-                    >{{forbidden_message}}</p>
+                    <p class="hover-sources-pane__forbidden">
+                        {{forbidden_message}}
+                    </p>
                 {{/if}}
                 {{#each evidence.groups}}
                     <section class="hover-sources-pane__group">
                         <header>
                             <h3>{{topic.topic_name}}</h3>
-                            <span>{{#if
-                                    topic.provider_name
-                                }}{{topic.provider_name}}{{else if
-                                    (eq topic.kind "source")
-                                }}{{t "Source"}}{{else}}{{t
-                                        "Regular"
-                                    }}{{/if}}</span>
+                            <span>
+                                {{#if topic.provider_name}}
+                                    {{topic.provider_name}}
+                                {{else if (eq topic.kind "source")}}
+                                    {{t "Source"}}
+                                {{else}}
+                                    {{t "Regular"}}
+                                {{/if}}
+                            </span>
                         </header>
                         <ol>
                             {{#each messages}}
                                 <li>
                                     <div
-                                        class="hover-sources-pane__message-meta"
-                                    >
+                                      class="hover-sources-pane__message-meta"
+                                      >
                                         <strong>{{sender_name}}</strong>
                                         <time
-                                            datetime="{{timestamp}}"
-                                        >{{display_timestamp}}</time>
+                                          datetime="{{timestamp}}"
+                                          >
+                                            {{display_timestamp}}
+                                        </time>
+                                        {{#if edited_since_generation}}
+                                            <span
+                                              class="hover-sources-pane__edited"
+                                              >
+                                                {{t "Edited since generation"}}
+                                            </span>
+                                        {{/if}}
                                     </div>
-                                    {{#if rendered_content}}
-                                        <div
-                                            class="rendered_markdown"
-                                        >{{{rendered_content}}}</div>
+                                    {{#if rendered_content_html}}
+                                        <div class="rendered_markdown">
+                                            {{{rendered_content_html}}}
+                                        </div>
                                     {{else}}
-                                        {{#if legacy_content.text}}<p
-                                            >{{legacy_content.text}}</p>{{/if}}
-                                        {{#if
-                                            legacy_content.voice_transcript
-                                        }}<p
-                                            >{{legacy_content.voice_transcript}}</p>{{/if}}
-                                        {{#if
-                                            legacy_content.media_description
-                                        }}<p
-                                            >{{legacy_content.media_description}}</p>{{/if}}
+                                        {{#if legacy_content.text}}
+                                            <p>{{legacy_content.text}}</p>
+                                        {{/if}}
+                                        {{#if legacy_content.voice_transcript}}
+                                            <p
+                                              >{{legacy_content.voice_transcript}}</p>
+                                        {{/if}}
+                                        {{#if legacy_content.media_description}}
+                                            <p
+                                              >{{legacy_content.media_description}}</p>
+                                        {{/if}}
                                         {{#if media}}
                                             {{#unless
-                                                legacy_content.media_description
-                                            }}<p><em>{{t "Media evidence"}}
+                                              legacy_content.media_description
+                                              }}
+                                                <p>
+                                                    <em>{{t "Media evidence"}}
                                                         ·
-                                                        {{media.type}}</em></p>{{/unless}}
-                                            {{#unless media.available}}<p><em
-                                                    >{{t
+                                                        {{media.type}}</em>
+                                                </p>
+                                            {{/unless}}
+                                            {{#unless media.available}}
+                                                <p>
+                                                    <em>{{t
                                                             "Media is no longer available."
-                                                        }}</em></p>{{/unless}}
+                                                        }}</em>
+                                                </p>
+                                            {{/unless}}
                                         {{/if}}
                                     {{/if}}
                                     {{#if can_open_message}}
                                         <button
-                                            type="button"
-                                            class="button-reset-style hover-open-source-message"
-                                            data-message-id="{{message_id}}"
-                                            data-stream-id="{{stream_id}}"
-                                            data-topic-name="{{topic_name}}"
-                                        >{{t "Open in source"}}</button>
+                                          type="button"
+                                          class="button-reset-style hover-open-source-message"
+                                          data-message-id="{{message_id}}"
+                                          data-stream-id="{{stream_id}}"
+                                          data-topic-name="{{topic_name}}"
+                                          >
+                                            {{t "Open in source"}}
+                                        </button>
                                     {{/if}}
                                 </li>
                             {{/each}}

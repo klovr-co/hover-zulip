@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from unittest.mock import patch
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 from uuid import uuid4
 
 import orjson
@@ -11,11 +11,17 @@ from hover.actions_connected_accounts import (
     do_set_connected_account_approval_state,
     do_upsert_connected_account_grant,
 )
-from hover.actions_integrations import do_associate_integration_route, do_detach_integration_route
+from hover.actions_integrations import (
+    do_associate_integration_route,
+    do_detach_integration_route,
+    do_provision_native_source,
+    do_rotate_native_source_webhook,
+)
 from hover.actions_spaces import do_create_space, do_launch_space
 from hover.lib import add_hover_metadata
 from hover.models import (
     ConnectedAccount,
+    ConnectedAccountGrant,
     IntegrationMessageProvenance,
     IntegrationRouteAssociation,
     Source,
@@ -226,6 +232,73 @@ class HoverIntegrationProvenanceTest(ZulipTestCase):
         provenance = IntegrationMessageProvenance.objects.get(message=message)
         self.assertEqual(provenance.association, route)
         self.assertEqual(provenance.provider_name, "GitHub")
+
+    def test_native_source_provisioning_and_rotation_are_end_to_end(self) -> None:
+        provisioned = do_provision_native_source(
+            acting_user=self.actor,
+            space=self.space,
+            provider_key="posthog",
+            display_name="Product analytics",
+        )
+        attachment = provisioned.attachment
+        route = provisioned.route
+        self.assertEqual(attachment.history_start_at, route.live_since)
+        self.assertEqual(attachment.source.provider_name, "PostHog")
+        self.assertEqual(
+            attachment.source.account.approval_state,
+            ConnectedAccount.ApprovalState.APPROVED,
+        )
+        self.assertTrue(
+            ConnectedAccountGrant.objects.filter(
+                account=attachment.source.account,
+                user=self.actor,
+                state=ConnectedAccountGrant.State.ACTIVE,
+                all_selectors=True,
+            ).exists()
+        )
+        self.assertIn("/api/v1/external/slack_incoming?", provisioned.webhook_url)
+        self.assertIn(route.bot.api_key, provisioned.webhook_url)
+
+        relative_url = urlsplit(provisioned.webhook_url)
+        message = self.send_webhook_payload(
+            route.bot,
+            f"{relative_url.path}?{relative_url.query}",
+            {"text": "A PostHog insight crossed its threshold."},
+            content_type="application/json",
+        )
+        provenance = IntegrationMessageProvenance.objects.get(message=message)
+        self.assertEqual(provenance.provider_key, "posthog")
+        self.assertEqual(message.topic_name(), attachment.destination_topic)
+
+        old_api_key = route.bot.api_key
+        rotated_url = do_rotate_native_source_webhook(
+            acting_user=self.actor,
+            space=self.space,
+            attachment_id=attachment.id,
+        )
+        route.bot.refresh_from_db()
+        self.assertNotEqual(route.bot.api_key, old_api_key)
+        self.assertNotIn(old_api_key, rotated_url)
+        self.assertIn(route.bot.api_key, rotated_url)
+
+    def test_native_source_provisioning_rolls_back_as_one_unit(self) -> None:
+        bot_count = UserProfile.objects.filter(realm=self.realm, is_bot=True).count()
+        account_count = ConnectedAccount.objects.filter(realm=self.realm).count()
+        with (
+            self.artificial_transaction_savepoint(),
+            patch("hover.actions_integrations.Source.objects.create", side_effect=RuntimeError),
+            self.assertRaises(RuntimeError),
+        ):
+            do_provision_native_source(
+                acting_user=self.actor,
+                space=self.space,
+                provider_key="github",
+                display_name="klovr-co/hover",
+            )
+        self.assertEqual(
+            UserProfile.objects.filter(realm=self.realm, is_bot=True).count(), bot_count
+        )
+        self.assertEqual(ConnectedAccount.objects.filter(realm=self.realm).count(), account_count)
 
     def test_slack_compatible_webhook_uses_configured_provider_metadata(self) -> None:
         self.account.provider_key = "apify"

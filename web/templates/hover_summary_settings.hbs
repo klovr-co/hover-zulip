@@ -1,16 +1,16 @@
 <form
-    id="hover_summary_settings_form"
-    class="hover-topic-create hover-topic-create--settings"
->
+  id="hover_summary_settings_form"
+  class="hover-topic-create hover-topic-create--settings"
+  >
     <div class="hover-topic-create__field">
         <label for="hover_summary_settings_name">{{t "Summary name"}}</label>
         <input
-            id="hover_summary_settings_name"
-            type="text"
-            maxlength="60"
-            value="{{label}}"
-            required
-        />
+          id="hover_summary_settings_name"
+          type="text"
+          maxlength="60"
+          value="{{label}}"
+          required
+          />
     </div>
     <fieldset class="hover-topic-create__options">
         <legend>{{t "Inputs"}}</legend>
@@ -19,17 +19,17 @@
             <label>
                 {{#if this.selected}}
                     <input
-                        type="checkbox"
-                        name="hover_summary_settings_input"
-                        value="{{this.value}}"
-                        checked
-                    />
+                      type="checkbox"
+                      name="hover_summary_settings_input"
+                      value="{{this.value}}"
+                      checked
+                      />
                 {{else}}
                     <input
-                        type="checkbox"
-                        name="hover_summary_settings_input"
-                        value="{{this.value}}"
-                    />
+                      type="checkbox"
+                      name="hover_summary_settings_input"
+                      value="{{this.value}}"
+                      />
                 {{/if}}
                 <span>{{this.topic_name}} <small>{{this.kind}}</small></span>
             </label>
@@ -38,55 +38,132 @@
     <fieldset class="hover-topic-create__options">
         <legend>{{t "Generation schedule"}}</legend>
         <div class="hover-topic-create__schedule">
-            <label for="hover_summary_settings_time">{{t
-                    "Every day at"
-                }}</label>
-            <input
-                id="hover_summary_settings_time"
-                type="time"
-                value="{{local_time}}"
-                required
-            />
+            <label for="hover_summary_settings_interval">{{t "Generate every"}}</label>
+            <select
+              id="hover_summary_settings_interval"
+              data-current-interval="{{interval_seconds}}"
+              >
+                <option value="3600">{{t "1 hour"}}</option>
+                <option value="21600">{{t "6 hours"}}</option>
+                <option value="43200">{{t "12 hours"}}</option>
+                <option value="86400">{{t "1 day"}}</option>
+                <option value="604800">{{t "1 week"}}</option>
+                <option value="custom">{{t "Custom"}}</option>
+            </select>
+            <label
+              class="hide"
+              data-hover-summary-custom
+              for="hover_summary_settings_custom_hours"
+              >
+                {{t "Custom hours"}}
+                <input
+                  id="hover_summary_settings_custom_hours"
+                  type="number"
+                  min="1"
+                  max="720"
+                  step="1"
+                  value="{{custom_interval_hours}}"
+                  />
+            </label>
             <small
-                id="hover_summary_settings_timezone"
-                data-timezone="{{timezone}}"
-            >{{timezone}}</small>
+              id="hover_summary_settings_timezone"
+              data-timezone="{{timezone}}"
+              >
+                {{timezone}}
+            </small>
         </div>
     </fieldset>
     <fieldset class="hover-topic-create__options">
         <legend>{{t "Members"}}</legend>
-        <p>{{t
-                "Removing a member immediately withdraws access to every edition."
-            }}</p>
+        <p>
+            {{t
+              "Removing a member immediately withdraws access to every edition."
+              }}
+        </p>
         {{#each members}}
             <label>
                 {{#if this.fixed}}
                     <input
-                        type="checkbox"
-                        name="hover_summary_settings_member"
-                        value="{{this.user_id}}"
-                        checked
-                        disabled
-                    />
+                      type="checkbox"
+                      name="hover_summary_settings_member"
+                      value="{{this.user_id}}"
+                      checked
+                      disabled
+                      />
                 {{else if this.selected}}
                     <input
-                        type="checkbox"
-                        name="hover_summary_settings_member"
-                        value="{{this.user_id}}"
-                        checked
-                    />
+                      type="checkbox"
+                      name="hover_summary_settings_member"
+                      value="{{this.user_id}}"
+                      checked
+                      />
                 {{else}}
                     <input
-                        type="checkbox"
-                        name="hover_summary_settings_member"
-                        value="{{this.user_id}}"
-                    />
+                      type="checkbox"
+                      name="hover_summary_settings_member"
+                      value="{{this.user_id}}"
+                      />
                 {{/if}}
                 <span>{{this.full_name}}</span>
             </label>
         {{/each}}
     </fieldset>
-    <p class="hover-topic-create__notice">{{t
-            "Changes to inputs apply to future editions."
-        }}</p>
+    <p class="hover-topic-create__notice">
+        {{t
+          "Changes to inputs apply to future editions."
+          }}
+    </p>
+    {{#if latest_scheduled_failure}}
+        <section class="hover-topic-create__notice" role="status">
+            <strong>{{t "A scheduled edition failed."}}</strong>
+            <span>
+                {{t
+                  "No failure message was posted. Hover will continue with the next interval."
+                  }}
+            </span>
+            {{#if latest_scheduled_failure.completed_at}}
+                <time datetime="{{latest_scheduled_failure.completed_at}}">
+                    {{latest_scheduled_failure.completed_at}}
+                </time>
+            {{/if}}
+        </section>
+    {{/if}}
+    <section class="hover-summary-preview" aria-labelledby="hover_summary_preview_heading">
+        <h3 id="hover_summary_preview_heading">{{t "Generate preview"}}</h3>
+        <p>
+            {{t
+              "Choose any historical range. The preview stays private until you publish it."
+              }}
+        </p>
+        <div class="hover-topic-create__schedule">
+            <label for="hover_summary_preview_start">{{t "Start"}}</label>
+            <input id="hover_summary_preview_start" type="datetime-local" />
+            <label for="hover_summary_preview_end">{{t "End"}}</label>
+            <input id="hover_summary_preview_end" type="datetime-local" />
+            <small>{{timezone}}</small>
+        </div>
+        <button id="hover_summary_generate_preview" type="button" class="button rounded">
+            {{t "Generate preview"}}
+        </button>
+        <div id="hover_summary_preview_status" class="hide" aria-live="polite">
+            <p data-hover-summary-preview-message></p>
+            <p data-hover-summary-preview-counts></p>
+            <p class="hide" data-hover-summary-previous-settings>
+                {{t
+                  "Generated using previous settings."
+                  }}
+            </p>
+            <div class="hide" data-hover-summary-preview-result>
+                <h4 data-hover-summary-preview-title></h4>
+                <p data-hover-summary-preview-main-thread></p>
+            </div>
+            <button
+              id="hover_summary_publish_preview"
+              type="button"
+              class="button rounded hide"
+              >
+                {{t "Publish"}}
+            </button>
+        </div>
+    </section>
 </form>

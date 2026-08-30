@@ -240,6 +240,31 @@
     gap: 18px;
 }
 
+.hover-summary-preview {
+    display: grid;
+    gap: 10px;
+    padding-block-start: 16px;
+    border-block-start: 1px solid var(--color-border-default);
+}
+
+.hover-summary-preview h3,
+.hover-summary-preview h4,
+.hover-summary-preview p {
+    margin: 0;
+}
+
+.hover-summary-preview > button {
+    justify-self: start;
+}
+
+#hover_summary_preview_status {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--hover-overlay-surface-subtle, transparent);
+}
+
 body.hover-topic-screen #hover-topic-create-modal.modal__container {
     width: min(680px, calc(100vw - 32px));
     max-height: calc(100vh - 24px);
