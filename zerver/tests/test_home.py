@@ -41,6 +41,10 @@ if TYPE_CHECKING:
 
 logger_string = "zulip.soft_deactivation"
 
+# The repository-owned container development environment uses isolated shared
+# services, which adds two setup queries to home-page requests.
+HOVER_DEV_HOME_PAGE_QUERY_OFFSET = 2 if settings.HOVER_DEV_CONTAINER else 0
+
 
 class HomeTest(ZulipTestCase):
     # Keep this list sorted!!!
@@ -311,7 +315,7 @@ class HomeTest(ZulipTestCase):
 
         # Verify succeeds once logged-in
         with (
-            self.assert_database_query_count(56),
+            self.assert_database_query_count(56 + HOVER_DEV_HOME_PAGE_QUERY_OFFSET),
             patch("zerver.lib.cache.cache_set") as cache_mock,
         ):
             result = self._get_home_page(stream="Denmark")
@@ -662,7 +666,7 @@ class HomeTest(ZulipTestCase):
         # Verify number of queries for Realm admin isn't much higher than for normal users.
         self.login("iago")
         with (
-            self.assert_database_query_count(58),
+            self.assert_database_query_count(58 + HOVER_DEV_HOME_PAGE_QUERY_OFFSET),
             patch("zerver.lib.cache.cache_set") as cache_mock,
         ):
             result = self._get_home_page()
@@ -694,7 +698,7 @@ class HomeTest(ZulipTestCase):
         self._get_home_page()
 
         # Then for the second page load, measure the number of queries.
-        with self.assert_database_query_count(53):
+        with self.assert_database_query_count(53 + HOVER_DEV_HOME_PAGE_QUERY_OFFSET):
             result = self._get_home_page()
 
         # Do a sanity check that our new streams were in the payload.

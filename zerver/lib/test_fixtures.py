@@ -7,8 +7,10 @@ import subprocess
 import sys
 import time
 
+import psycopg2
 from django.conf import settings
 from django.db import DEFAULT_DB_ALIAS, ProgrammingError, connection, connections
+from django.db.backends.base.base import BaseDatabaseWrapper
 from django.db.utils import OperationalError
 from psycopg2 import sql
 
@@ -433,3 +435,30 @@ def reset_zulip_test_database() -> None:
     # to the default database instead of the appropriate clone.
     connection.settings_dict.update(settings_dict)
     connection.close()
+    reindex_pgroonga_database(connection)
+
+
+def reindex_pgroonga_database(connection: BaseDatabaseWrapper) -> None:
+    """Rebuild PGroonga's database-local objects after a database clone."""
+    database_settings = connection.settings_dict
+    connection_kwargs = {
+        "dbname": database_settings["NAME"],
+        "host": database_settings["HOST"],
+        "password": database_settings["PASSWORD"],
+        "user": database_settings["USER"],
+    }
+    if database_settings["PORT"]:
+        connection_kwargs["port"] = database_settings["PORT"]
+
+    # This database-maintenance query must not be included in the test suite's
+    # SQL instrumentation, so use a separate connection without its custom
+    # connection and cursor factories.
+    database_connection = psycopg2.connect(**connection_kwargs)
+    try:
+        database_connection.autocommit = True
+        with database_connection.cursor() as cursor:
+            cursor.execute(
+                sql.SQL("REINDEX DATABASE {}").format(sql.Identifier(database_settings["NAME"]))
+            )
+    finally:
+        database_connection.close()

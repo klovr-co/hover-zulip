@@ -24,7 +24,7 @@ from scripts.lib.zulip_tools import (
 )
 from zerver.lib import test_helpers, upload
 from zerver.lib.partial import partial
-from zerver.lib.test_fixtures import BACKEND_DATABASE_TEMPLATE
+from zerver.lib.test_fixtures import BACKEND_DATABASE_TEMPLATE, reindex_pgroonga_database
 from zerver.lib.test_helpers import append_instrumentation_data, write_instrumentation_reports
 
 
@@ -190,6 +190,7 @@ def create_test_databases(worker_id: int) -> None:
         # to the default database instead of the appropriate clone.
         connection.settings_dict.update(settings_dict)
         connection.close()
+        reindex_pgroonga_database(connection)
 
 
 def init_worker(

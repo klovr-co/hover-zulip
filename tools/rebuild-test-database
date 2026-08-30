@@ -39,12 +39,19 @@ EOF
     fi
 }
 
+reindex_pgroonga() {
+    # PGroonga database-local objects do not survive PostgreSQL database cloning.
+    psql -v ON_ERROR_STOP=1 -h "$postgres_host" -U "$postgres_user" "$1" \
+        -c "REINDEX DATABASE \"$1\";"
+}
+
 create_zulip_test_template() {
     psql -v ON_ERROR_STOP=1 -h "$postgres_host" -U "$postgres_user" postgres \
         -v test_database="$test_database" -v test_template="$test_template" <<'EOF'
 DROP DATABASE IF EXISTS :"test_template";
 CREATE DATABASE :"test_template" TEMPLATE :"test_database";
 EOF
+    reindex_pgroonga "$test_template"
 }
 
 mkdir -p zerver/tests/fixtures
