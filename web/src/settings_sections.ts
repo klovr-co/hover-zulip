@@ -4,8 +4,8 @@ import * as alert_words_ui from "./alert_words_ui.ts";
 import * as attachments_ui from "./attachments_ui.ts";
 import * as blueslip from "./blueslip.ts";
 import * as settings_account from "./settings_account.ts";
-import * as settings_bots from "./settings_bots.ts";
 import * as settings_connected_accounts from "./settings_connected_accounts.ts";
+import * as settings_connectors from "./settings_connectors.ts";
 import * as settings_emoji from "./settings_emoji.ts";
 import * as settings_exports from "./settings_exports.ts";
 import * as settings_folders from "./settings_folders.ts";
@@ -35,11 +35,11 @@ export function get_group(section: string, base: string): string {
         case "auth-methods":
             return "org_misc";
 
-        case "bots": {
+        case "connectors": {
             if (base === "organization") {
-                return "org_bots";
+                return "org_connectors";
             }
-            return "personal_bots";
+            return "personal_connectors";
         }
 
         case "users":
@@ -71,8 +71,8 @@ export function initialize(): void {
 
     // org
     load_func_dict.set("org_misc", settings_org.set_up);
-    load_func_dict.set("org_bots", settings_bots.set_up_bots);
-    load_func_dict.set("personal_bots", settings_bots.set_up_bots_for_personal_tab);
+    load_func_dict.set("org_connectors", settings_connectors.set_up_connectors);
+    load_func_dict.set("personal_connectors", settings_connectors.set_up_connectors);
     load_func_dict.set("org_users", settings_users.set_up_humans);
     load_func_dict.set("emoji-settings", settings_emoji.set_up);
     load_func_dict.set("default-channels-list", settings_streams.set_up);

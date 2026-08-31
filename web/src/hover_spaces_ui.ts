@@ -53,6 +53,7 @@ export function open_create_space(): void {
         .filter((folder) => !folder.is_archived);
     const modal_content_html = render_create_hover_space_modal({
         categories,
+        has_categories: categories.length > 0,
         max_name_length: 60,
         max_description_length: 1024,
     });
@@ -64,7 +65,7 @@ export function open_create_space(): void {
         const data = {
             name: $<HTMLInputElement>("#new_hover_space_name").val()!.trim(),
             description: $<HTMLTextAreaElement>("#new_hover_space_description").val()!.trim(),
-            category_id: JSON.stringify(category_id),
+            category_id: JSON.stringify(categories.length > 0 ? category_id : null),
         };
         dialog_widget.submit_api_request(channel.post, "/json/hover/spaces", data, {
             success_continuation(response_data) {

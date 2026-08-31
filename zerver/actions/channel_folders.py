@@ -12,10 +12,15 @@ from zerver.models.users import active_user_ids
 from zerver.tornado.django_api import send_event_on_commit
 
 
-@transaction.atomic(durable=True)
-def check_add_channel_folder(
+def do_create_channel_folder(
     realm: Realm, name: str, description: str, *, acting_user: UserProfile
 ) -> ChannelFolder:
+    """Create a channel folder inside the caller's transaction.
+
+    Most callers should use ``check_add_channel_folder``.  Hover's Space
+    creation transaction also needs to be able to create its initial category
+    atomically with the Space, so it uses this transaction-neutral helper.
+    """
     rendered_description = render_channel_folder_description(
         description, realm, acting_user=acting_user
     )
@@ -46,6 +51,13 @@ def check_add_channel_folder(
     send_event_on_commit(realm, event, active_user_ids(realm.id))
 
     return channel_folder
+
+
+@transaction.atomic(durable=True)
+def check_add_channel_folder(
+    realm: Realm, name: str, description: str, *, acting_user: UserProfile
+) -> ChannelFolder:
+    return do_create_channel_folder(realm, name, description, acting_user=acting_user)
 
 
 @transaction.atomic(durable=True)

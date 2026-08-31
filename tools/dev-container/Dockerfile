@@ -13,6 +13,7 @@ RUN ln -sf /usr/share/zoneinfo/Etc/UTC /etc/localtime \
         ca-certificates \
         curl \
         git \
+        libasound2t64 \
         passwd \
         python3 \
         sudo \

@@ -12,21 +12,27 @@
           required
           />
     </div>
-    <div>
-        <label for="new_hover_space_category" class="modal-field-label">{{t
-                "Category"
-            }}</label>
-        <select
-          id="new_hover_space_category"
-          class="modal_select"
-          name="category_id"
-          required
-          >
-            {{#each categories}}
-                <option value="{{id}}">{{name}}</option>
-            {{/each}}
-        </select>
-    </div>
+    {{#if has_categories}}
+        <div>
+            <label for="new_hover_space_category" class="modal-field-label">{{t
+                    "Category"
+                }}</label>
+            <select
+              id="new_hover_space_category"
+              class="modal_select"
+              name="category_id"
+              required
+              >
+                {{#each categories}}
+                    <option value="{{id}}">{{name}}</option>
+                {{/each}}
+            </select>
+        </div>
+    {{else}}
+        <p class="settings-field-description">
+            {{t "A Spaces category will be created automatically."}}
+        </p>
+    {{/if}}
     <div>
         <label for="new_hover_space_description" class="modal-field-label">{{t
                 "Description"

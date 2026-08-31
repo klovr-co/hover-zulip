@@ -17,12 +17,29 @@ from version import ZULIP_VERSION
 webpack_command = ["node", "../node_modules/webpack-cli/bin/cli.js"]
 
 
+def configure_node_heap_for_low_memory_environment() -> None:
+    with open("/proc/meminfo") as meminfo:
+        available_memory_kib = int(next(meminfo).split()[1])
+
+    cgroup_memory_limit_path = "/sys/fs/cgroup/memory.max"
+    if os.path.exists(cgroup_memory_limit_path):
+        with open(cgroup_memory_limit_path) as cgroup_memory_limit_file:
+            cgroup_memory_limit = cgroup_memory_limit_file.read().strip()
+        if cgroup_memory_limit != "max":
+            available_memory_kib = min(available_memory_kib, int(cgroup_memory_limit) // 1024)
+
+    if available_memory_kib < 3 * 1024 * 1024:
+        max_old_space_size_mb = min(
+            1536,
+            max(512, available_memory_kib * 3 // (8 * 1024)),
+        )
+        os.environ["NODE_OPTIONS"] = f"--max-old-space-size={max_old_space_size_mb}"
+
+
 def build_for_prod_or_puppeteer(quiet: bool, config_name: str | None = None) -> NoReturn:
     """Builds for production, writing the output to disk"""
 
-    with open("/proc/meminfo") as meminfo:
-        if int(next(meminfo).split()[1]) < 3 * 1024 * 1024:
-            os.environ["NODE_OPTIONS"] = "--max-old-space-size=1536"
+    configure_node_heap_for_low_memory_environment()
     webpack_args = [
         *webpack_command,
         "build",
@@ -50,6 +67,8 @@ def build_for_prod_or_puppeteer(quiet: bool, config_name: str | None = None) -> 
 
 def build_for_dev_server(host: str, port: str, minify: bool, disable_host_check: bool) -> None:
     """watches and rebuilds on changes, serving files from memory via webpack-dev-server"""
+
+    configure_node_heap_for_low_memory_environment()
 
     # This is our most dynamic configuration, which we use for our
     # dev server.  The key piece here is that we identify changes to

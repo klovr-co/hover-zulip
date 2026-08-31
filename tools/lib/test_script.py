@@ -121,7 +121,15 @@ def find_js_test_files(test_dir: str, files: Iterable[str]) -> list[str]:
 def prepare_puppeteer_run(is_firefox: bool = False) -> None:
     os.chdir(ZULIP_PATH)
     # This will determine if the browser will be firefox or chrome.
-    os.environ["PUPPETEER_PRODUCT"] = "firefox" if is_firefox else "chrome"
+    browser = "firefox" if is_firefox else "chrome"
+    os.environ["PUPPETEER_BROWSER"] = browser
+    # Keep this for the test suite's browser-specific behavior while supporting
+    # Puppeteer releases that still read the legacy setting.
+    os.environ["PUPPETEER_PRODUCT"] = browser
+    if is_firefox:
+        os.environ["PUPPETEER_FIREFOX_SKIP_DOWNLOAD"] = "false"
+        os.environ["PUPPETEER_CHROME_SKIP_DOWNLOAD"] = "true"
+        os.environ["PUPPETEER_CHROME_HEADLESS_SHELL_SKIP_DOWNLOAD"] = "true"
     subprocess.check_call(["node", "install.mjs"], cwd="node_modules/puppeteer")
     os.makedirs("var/puppeteer", exist_ok=True)
     for f in glob.glob("var/puppeteer/failure-*.png"):

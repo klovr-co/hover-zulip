@@ -10,7 +10,9 @@ import {Filter} from "./filter.ts";
 import * as hash_parser from "./hash_parser.ts";
 import * as hash_util from "./hash_util.ts";
 import * as hover_awareness_view from "./hover_awareness_view.ts";
+import * as hover_data_sources_view from "./hover_data_sources_view.ts";
 import * as hover_editions_view from "./hover_editions_view.ts";
+import * as hover_pipelines_view from "./hover_pipelines_view.ts";
 import * as hover_search_view from "./hover_search_view.ts";
 import * as hover_source_view from "./hover_source_view.ts";
 import {$t_html} from "./i18n.ts";
@@ -100,7 +102,7 @@ function channels_overlay_state_from_hash(): {
 }
 
 function get_settings_tab(section: string): string | undefined {
-    if (section === "users" || section === "bots") {
+    if (section === "users" || section === "connectors") {
         const current_settings_tab = hash_parser.get_current_nth_hash_section(2);
         // URL will be updated in hash_util.validate_settings_hash to contain
         // the correct tab value.
@@ -178,7 +180,9 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
     // be #ABCD.
     const hash = window.location.hash.split("/");
     if (hash[0] !== "#hover") {
+        hover_data_sources_view.hide();
         hover_editions_view.hide();
+        hover_pipelines_view.hide();
         hover_source_view.hide();
         hover_search_view.hide();
     }
@@ -276,6 +280,29 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
             show_all_message_view(narrow_opts);
             break;
         case "#hover": {
+            hover_data_sources_view.hide();
+            hover_pipelines_view.hide();
+            if (hash.length === 3 && hash[1] === "data-sources" && hash[2] === "") {
+                hash.pop();
+            }
+            if (hash.length === 2 && hash[1] === "data-sources") {
+                hover_source_view.hide();
+                hover_search_view.hide();
+                hover_editions_view.hide();
+                hover_pipelines_view.hide();
+                hover_data_sources_view.show();
+                return true;
+            }
+            if (hash.length === 3 && hash[1] === "pipelines" && hash[2] === "") {
+                hash.pop();
+            }
+            if (hash.length === 2 && hash[1] === "pipelines") {
+                hover_source_view.hide();
+                hover_search_view.hide();
+                hover_editions_view.hide();
+                hover_pipelines_view.show();
+                return true;
+            }
             if (hash.length === 3 && hash[1] === "editions" && hash[2] === "") {
                 hash.pop();
             }
@@ -473,7 +500,7 @@ function do_hashchange_overlay(old_hash: string | undefined): void {
     if (is_hashchange_internal) {
         if (base === "settings") {
             settings_panel_menu.normal_settings.set_current_tab(section);
-            if (section === "bots") {
+            if (section === "connectors") {
                 settings_panel_menu.normal_settings.set_bot_settings_tab(
                     get_settings_tab(section)!,
                     "personal",
@@ -483,7 +510,7 @@ function do_hashchange_overlay(old_hash: string | undefined): void {
             settings_panel_menu.org_settings.set_current_tab(section);
             if (section === "users") {
                 settings_panel_menu.org_settings.set_user_settings_tab(get_settings_tab(section));
-            } else if (section === "bots") {
+            } else if (section === "connectors") {
                 settings_panel_menu.org_settings.set_bot_settings_tab(
                     get_settings_tab(section)!,
                     "org",

@@ -1,0 +1,53 @@
+<tr data-connector-id="{{id}}">
+    <td>
+        <div class="connector-identity">
+            {{#if provider_logo_url}}
+                <img src="{{provider_logo_url}}" alt="" />
+            {{else}}
+                <span class="connector-logo-fallback" aria-hidden="true"><i class="fa fa-link"></i></span>
+            {{/if}}
+            <strong>{{provider_name}}</strong>
+        </div>
+    </td>
+    <td>
+        {{#if destination}}
+            <span class="connector-destination">#{{destination}}</span>
+            {{#if topic}}<span class="connector-topic"> · {{topic}}</span>{{/if}}
+        {{else}}
+            <span class="connector-muted">{{t "Needs attention"}}</span>
+        {{/if}}
+    </td>
+    <td>
+        <span class="connector-status connector-status-{{status_key}}">
+            <span class="connector-status-dot" aria-hidden="true"></span>{{status_label}}
+        </span>
+    </td>
+    <td><span title="{{last_update_title}}">{{last_update}}</span></td>
+    <td>{{#if owner}}{{owner}}{{else}}{{t "No owner"}}{{/if}}</td>
+    <td>
+        <div class="connector-row-actions">
+            {{#if can_copy}}
+                <button type="button" class="button small copy-connector-url" data-connector-id="{{id}}">{{t "Copy URL"}}</button>
+            {{else}}
+                <button type="button" class="button small view-connector" data-connector-id="{{id}}">{{t "View"}}</button>
+            {{/if}}
+            <details class="connector-actions-menu">
+                <summary aria-label="{{t 'More connector actions'}}"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></summary>
+                <div class="connector-actions-menu-popover">
+                    <button type="button" class="view-connector" data-connector-id="{{id}}">{{t "View details"}}</button>
+                    {{#if needs_reconciliation}}
+                        <button type="button" class="reconcile-connector" data-connector-id="{{id}}">{{t "Reconcile"}}</button>
+                    {{/if}}
+                    {{#if can_manage}}
+                        {{#if can_rotate}}
+                            <button type="button" class="rotate-connector" data-connector-id="{{id}}">{{t "Rotate URL"}}</button>
+                        {{/if}}
+                        {{#unless is_disabled}}
+                            <button type="button" class="disable-connector danger" data-connector-id="{{id}}">{{t "Disable"}}</button>
+                        {{/unless}}
+                    {{/if}}
+                </div>
+            </details>
+        </div>
+    </td>
+</tr>

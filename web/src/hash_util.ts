@@ -382,20 +382,20 @@ export function validate_group_settings_hash(hash: string): string {
 
 function handle_invalid_settings_tab(
     base: string,
-    section: "bots" | "users",
+    section: "connectors" | "users",
     settings_tab: string,
 ): string {
     const valid_tab_values = {
         users: new Set(["active", "imported", "deactivated", "invitations"]),
-        bots: new Set(["all-bots", "your-bots"]),
+        connectors: new Set(["all", "yours"]),
     };
 
     if (!valid_tab_values[section].has(settings_tab)) {
         let default_tab = [...valid_tab_values[section]][0]!;
-        if (section === "bots" && base === "settings") {
-            // For bots panel in "Personal" tab we open "Your bots"
+        if (section === "connectors" && base === "settings") {
+            // For connectors panel in "Personal" tab we open "Your connectors"
             // tab by default.
-            default_tab = "your-bots";
+            default_tab = "yours";
         }
         return default_tab;
     }
@@ -403,7 +403,7 @@ function handle_invalid_settings_tab(
 }
 
 function get_settings_tab(base: string, section: string): string | undefined {
-    if (section === "users" || section === "bots") {
+    if (section === "users" || section === "connectors") {
         const current_settings_tab = hash_parser.get_current_nth_hash_section(2);
         return handle_invalid_settings_tab(base, section, current_settings_tab);
     }
@@ -436,9 +436,14 @@ export function validate_settings_hash(
         section = "preferences";
     }
     if (base === "organization" && section === "bot-list-admin") {
-        // #organization/bot-list-admin is being redirected to #organization/bots/all-bots.
-        section = "bots";
-        settings_tab = "all-bots";
+        // #organization/bot-list-admin is being redirected to #organization/connectors/all.
+        section = "connectors";
+        settings_tab = "all";
+    }
+    if (section === "bots") {
+        // Keep old bookmarks useful while presenting Connectors as the sole Hover UI.
+        section = "connectors";
+        settings_tab = base === "settings" ? "yours" : "all";
     }
     if (base === "organization" && section === "user-list-admin") {
         // #organization/user-list-admin is being redirected to #organization/users/active
@@ -447,9 +452,9 @@ export function validate_settings_hash(
         settings_tab = "active";
     }
     if (base === "settings" && section === "your-bots") {
-        // #settings/your-bots is being redirected to #settings/bots/your-bots.
-        section = "bots";
-        settings_tab = "your-bots";
+        // #settings/your-bots is being redirected to #settings/connectors/yours.
+        section = "connectors";
+        settings_tab = "yours";
     }
 
     const valid_personal_section_values = new Set([
@@ -457,7 +462,7 @@ export function validate_settings_hash(
         "account-and-privacy",
         "preferences",
         "notifications",
-        "bots",
+        "connectors",
         "alert-words",
         "uploaded-files",
         "topics",
@@ -471,7 +476,7 @@ export function validate_settings_hash(
         "linkifier-settings",
         "playground-settings",
         "users",
-        "bots",
+        "connectors",
         "profile-field-settings",
         "organization-level-user-defaults",
         "channel-folders",

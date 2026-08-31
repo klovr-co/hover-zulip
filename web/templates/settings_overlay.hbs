@@ -28,10 +28,10 @@
                         <div class="text">{{t "Notifications" }}</div>
                     </li>
                     {{#unless is_guest}}
-                        <li class="sidebar-item" tabindex="0" data-section="bots">
-                            <i class="sidebar-item-icon zulip-icon zulip-icon-bot" aria-hidden="true"></i>
-                            <div class="text">{{t 'Bots'}}</div>
-                            <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if (or can_create_new_bots can_manage_bot)}}style="display: none;"{{/if}} data-tippy-content="{{t 'You do not have permission to create or manage bots.' }}"></i>
+                        <li class="sidebar-item" tabindex="0" data-section="connectors">
+                            <i class="sidebar-item-icon fa fa-link" aria-hidden="true"></i>
+                            <div class="text">{{t 'Connectors'}}</div>
+                            <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if (or can_create_new_bots can_manage_bot)}}style="display: none;"{{/if}} data-tippy-content="{{t 'You do not have permission to create or manage connectors.' }}"></i>
                         </li>
                     {{/unless}}
                     <li class="sidebar-item" tabindex="0" data-section="alert-words">
@@ -93,10 +93,10 @@
                     </li>
                     {{/unless}}
                     {{#unless is_guest}}
-                    <li class="sidebar-item" tabindex="0" data-section="bots">
-                        <i class="sidebar-item-icon zulip-icon zulip-icon-bot" aria-hidden="true"></i>
-                        <div class="text">{{t "Bots" }}</div>
-                        <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if (or can_create_new_bots can_manage_bot)}}style="display: none;"{{/if}} data-tippy-content="{{t 'You do not have permission to create or manage bots.' }}"></i>
+                    <li class="sidebar-item" tabindex="0" data-section="connectors">
+                        <i class="sidebar-item-icon fa fa-link" aria-hidden="true"></i>
+                        <div class="text">{{t "Connectors" }}</div>
+                        <i class="locked fa fa-lock tippy-zulip-tooltip" {{#if (or can_create_new_bots can_manage_bot)}}style="display: none;"{{/if}} data-tippy-content="{{t 'You do not have permission to create or manage connectors.' }}"></i>
                     </li>
                     {{/unless}}
                     {{#if is_admin}}

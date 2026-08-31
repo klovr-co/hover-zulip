@@ -313,6 +313,12 @@ class HoverConnectedAccountGrantEvent(BaseEvent):
     grant: HoverConnectedAccountGrant
 
 
+class HoverConnectorEvent(BaseEvent):
+    type: Literal["hover_connector"]
+    op: Literal["add", "update"]
+    connector_id: int
+
+
 class DetailedCustomProfileCore(BaseModel):
     id: int
     type: int

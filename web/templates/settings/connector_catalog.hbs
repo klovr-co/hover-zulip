@@ -1,0 +1,42 @@
+<div class="connector-catalog">
+    <p>{{t "Search for the service you want to connect."}}</p>
+    <label class="connector-catalog-search">
+        <i class="fa fa-search" aria-hidden="true"></i>
+        <input class="connector-provider-search" type="search" value="{{query}}" placeholder="{{t 'Search services'}}" aria-label="{{t 'Search services'}}" autocomplete="off" />
+    </label>
+
+    <div class="connector-catalog-results">
+        {{#if has_results}}
+            <div class="connector-catalog-section-label">{{t "Integrations"}}</div>
+            <div class="connector-provider-results">
+                {{#each providers}}
+                    <button type="button" class="connector-provider-choice" data-provider="{{key}}">
+                        <img src="{{logo_url}}" alt="" />
+                        <strong>{{name}}</strong>
+                        <span>{{description}}</span>
+                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                    </button>
+                {{/each}}
+            </div>
+        {{else}}
+            {{#if query}}
+                <p class="connector-no-results">{{t "No matching service found."}}</p>
+            {{else}}
+                <p class="connector-no-results">{{t "Start typing to search the incoming webhook catalogue."}}</p>
+            {{/if}}
+            <div class="connector-fallbacks">
+                <strong>{{t "Can’t find your service?"}}</strong>
+                <button type="button" class="connector-fallback connector-provider-choice" data-provider="slack_incoming">
+                    <img src="{{slack_logo_url}}" alt="" />
+                    <span><strong>{{t "Try a Slack-compatible webhook"}}</strong><small>{{t "Works with services that can send Slack Incoming Webhooks."}}</small></span>
+                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="connector-fallback connector-provider-choice" data-provider="rest_api">
+                    <span class="connector-rest-logo" aria-hidden="true">{ }</span>
+                    <span><strong>{{t "Use the REST API endpoint"}}</strong><small>{{t "For internal tools and full control over message formatting."}}</small></span>
+                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                </button>
+            </div>
+        {{/if}}
+    </div>
+</div>
