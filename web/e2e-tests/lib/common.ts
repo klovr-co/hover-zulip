@@ -117,8 +117,10 @@ export async function page_url_with_fragment(page: Page): Promise<string> {
 // This function will clear the existing value of the element and
 // replace it with the text.
 export async function clear_and_type(page: Page, selector: string, text: string): Promise<void> {
-    // Select all text currently in the element.
-    await page.click(selector, {count: 3});
+    await page.focus(selector);
+    await page.keyboard.down("Control");
+    await page.keyboard.press("A");
+    await page.keyboard.up("Control");
     await page.keyboard.press("Delete");
     await page.type(selector, text);
 }
@@ -274,7 +276,7 @@ export async function log_in(
         form.submit();
     });
 
-    await page.waitForSelector("#inbox-main", {visible: true});
+    await page.waitForSelector("#hover-awareness-view .hover-awareness-shell", {visible: true});
 }
 
 export async function log_out(page: Page): Promise<void> {

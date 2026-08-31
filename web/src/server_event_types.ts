@@ -29,6 +29,7 @@ export const FETCH_EVENT_TYPES: string[] = [
     "drafts",
     "giphy",
     "hover_connected_account",
+    "hover_connector",
     "hover_space",
     "hover_suggested_action",
     "hover_todo",
@@ -184,3 +185,11 @@ export const hover_connected_account_event_schema = z.discriminatedUnion("op", [
     }),
 ]);
 export type HoverConnectedAccountEvent = z.output<typeof hover_connected_account_event_schema>;
+
+export const hover_connector_event_schema = z.object({
+    id: z.number(),
+    type: z.literal("hover_connector"),
+    op: z.enum(["add", "update"]),
+    connector_id: z.number(),
+});
+export type HoverConnectorEvent = z.output<typeof hover_connector_event_schema>;

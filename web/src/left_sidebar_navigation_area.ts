@@ -23,9 +23,11 @@ const hover_home_view_order = new Map([
     ["inbox", 0],
     ["recent", 1],
     ["hover/editions", 2],
-    ["reminders", 3],
-    ["hover/search", 4],
-    ["narrow/is/starred", 5],
+    ["hover/data-sources", 3],
+    ["hover/pipelines", 4],
+    ["reminders", 5],
+    ["hover/search", 6],
+    ["narrow/is/starred", 7],
 ]);
 
 const STATES = {

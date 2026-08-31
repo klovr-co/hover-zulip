@@ -1,5 +1,5 @@
 from typing import Any
-from unittest import mock
+from unittest import TestCase, mock
 
 import orjson
 from django.test import override_settings
@@ -13,6 +13,27 @@ from zerver.lib.queue import (
     queue_json_publish_rollback_unsafe,
 )
 from zerver.lib.test_classes import ZulipTestCase
+
+
+class TestSimpleQueueClient(TestCase):
+    def test_check_connection_reconnects_after_broker_restart(self) -> None:
+        client = SimpleQueueClient.__new__(SimpleQueueClient)
+        stale_connection = mock.MagicMock()
+        stale_connection.is_open = True
+        stale_connection.process_data_events.side_effect = ValueError("Timeout closed before call")
+        fresh_connection = mock.MagicMock()
+        fresh_connection.is_open = True
+        client.connection = stale_connection
+
+        def reconnect() -> None:
+            client.connection = fresh_connection
+
+        with mock.patch.object(client, "_reconnect", side_effect=reconnect) as reconnect_mock:
+            client.check_connection()
+
+        stale_connection.process_data_events.assert_called_once_with()
+        reconnect_mock.assert_called_once_with()
+        fresh_connection.process_data_events.assert_called_once_with()
 
 
 class TestTornadoQueueClient(ZulipTestCase):

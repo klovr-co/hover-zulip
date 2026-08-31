@@ -18,13 +18,8 @@ const hover_compose_ui = zrequire("hover_compose_ui");
 
 function initialize_dom() {
     const $compose = $("#compose");
-    const $messagebox = $("#send_message_form .messagebox").addClass(
-        "hover-formatting-expanded",
-    );
-    const $format_button = $("[data-hover-compose-action='format']").attr(
-        "aria-expanded",
-        "true",
-    );
+    const $messagebox = $("#send_message_form .messagebox").addClass("hover-formatting-expanded");
+    const $format_button = $("[data-hover-compose-action='format']").attr("aria-expanded", "true");
     const $mention_button = $("#mention-button-for-test").attr(
         "data-hover-compose-action",
         "mention",

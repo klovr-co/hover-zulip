@@ -108,7 +108,7 @@ function insert_tip_box(): void {
         .find(".settings-section, .user-settings-section")
         .not("#emoji-settings")
         .not("#organization-auth-settings")
-        .not("#admin-bot-list")
+        .not("#admin-connector-list")
         .not("#admin-invites-list")
         .not("#admin-user-list")
         .not("#admin-active-users-list")
@@ -366,7 +366,7 @@ export function launch(section: string, settings_tab: string | undefined): void 
     }
     if (section === "users") {
         settings_panel_menu.org_settings.set_user_settings_tab(settings_tab);
-    } else if (section === "bots") {
+    } else if (section === "connectors") {
         assert(settings_tab !== undefined);
         settings_panel_menu.org_settings.set_bot_settings_tab(settings_tab, "org");
     }

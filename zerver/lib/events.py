@@ -12,6 +12,7 @@ from django.utils.translation import gettext as _
 from typing_extensions import NotRequired, TypedDict
 
 from hover.lib_connected_accounts import get_visible_connected_account_data
+from hover.lib_connectors import get_connector_provider_metadata
 from hover.lib_spaces import get_accessible_spaces, get_space_data
 from version import API_FEATURE_LEVEL, ZULIP_MERGE_BASE, ZULIP_VERSION
 from zerver.actions.default_streams import default_stream_groups_to_dicts_sorted
@@ -785,6 +786,14 @@ def fetch_initial_state_data(
             {
                 "name": integration.name,
                 "display_name": integration.display_name,
+                "logo_url": get_connector_provider_metadata(integration.name)["logo_url"],
+                "description": get_connector_provider_metadata(integration.name)["description"],
+                "supports_event_filters": get_connector_provider_metadata(integration.name)[
+                    "supports_event_filters"
+                ],
+                "setup_instructions_url": get_connector_provider_metadata(integration.name)[
+                    "setup_instructions_url"
+                ],
                 "all_event_types": get_all_event_types_for_integration(integration),
                 "config_options": [
                     {

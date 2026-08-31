@@ -215,11 +215,11 @@ export function update_lock_icon_in_sidebar(): void {
         current_user.is_admin ||
         bot_data.get_all_bots_ids_for_current_user().length > 0
     ) {
-        $(".org-settings-list li[data-section='bots'] .locked").hide();
-        $(".normal-settings-list li[data-section='bots'] .locked").hide();
+        $(".normal-settings-list li[data-section='connectors'] .locked").hide();
+        $(".org-settings-list li[data-section='connectors'] .locked").hide();
     } else {
-        $(".org-settings-list li[data-section='bots'] .locked").show();
-        $(".normal-settings-list li[data-section='bots'] .locked").show();
+        $(".normal-settings-list li[data-section='connectors'] .locked").show();
+        $(".org-settings-list li[data-section='connectors'] .locked").show();
     }
 }
 

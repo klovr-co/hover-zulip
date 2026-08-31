@@ -708,6 +708,153 @@ class IntegrationRouteAssociation(models.Model):
             raise ValidationError({"bot": "Use the bot configured for this native Source."})
 
 
+class Connector(models.Model):
+    """Hover's product-facing record for an inbound webhook identity."""
+
+    MAX_PROVIDER_KEY_LENGTH = 80
+    MAX_PROVIDER_NAME_LENGTH = 100
+    MAX_NAME_LENGTH = 80
+    MAX_TOPIC_LENGTH = 60
+
+    class State(models.TextChoices):
+        ACTIVE = "active", "Active"
+        DISABLED = "disabled", "Disabled"
+        NEEDS_ATTENTION = "needs_attention", "Needs attention"
+
+    class ReconciliationState(models.TextChoices):
+        CANONICAL = "canonical", "Canonical"
+        LEGACY = "legacy", "Configured in existing URL"
+        AMBIGUOUS = "ambiguous", "Needs reconciliation"
+
+    class HealthStatus(models.TextChoices):
+        UNKNOWN = "unknown", "Waiting for first delivery"
+        HEALTHY = "healthy", "Healthy"
+        DEGRADED = "degraded", "Delivery failed"
+
+    class LastDeliveryStatus(models.TextChoices):
+        NEVER = "never", "Not yet delivered"
+        SUCCESS = "success", "Delivered"
+        FAILURE = "failure", "Delivery failed"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE)
+    bot = models.OneToOneField(UserProfile, on_delete=RESTRICT, related_name="hover_connector")
+    provider_key = models.CharField(max_length=MAX_PROVIDER_KEY_LENGTH)
+    provider_name = models.CharField(max_length=MAX_PROVIDER_NAME_LENGTH)
+    name = models.CharField(max_length=MAX_NAME_LENGTH, blank=True)
+    destination = models.ForeignKey(
+        Stream,
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="hover_connectors",
+    )
+    topic = models.CharField(max_length=MAX_TOPIC_LENGTH, blank=True)
+    event_options = models.JSONField(default=list, blank=True)
+    state = models.TextField(choices=State.choices, default=State.ACTIVE)
+    reconciliation_state = models.TextField(
+        choices=ReconciliationState.choices, default=ReconciliationState.CANONICAL
+    )
+    created_by = models.ForeignKey(
+        UserProfile, null=True, on_delete=SET_NULL, related_name="created_hover_connectors"
+    )
+    owner = models.ForeignKey(
+        UserProfile, null=True, on_delete=SET_NULL, related_name="owned_hover_connectors"
+    )
+    health_status = models.TextField(choices=HealthStatus.choices, default=HealthStatus.UNKNOWN)
+    last_delivery_status = models.TextField(
+        choices=LastDeliveryStatus.choices, default=LastDeliveryStatus.NEVER
+    )
+    last_successful_delivery = models.DateTimeField(null=True, blank=True)
+    last_delivery_attempt = models.DateTimeField(null=True, blank=True)
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.bot.realm_id != self.realm_id:
+            raise ValidationError(
+                {"bot": "Connectors and webhook identities must share an organization."}
+            )
+        destination = self.destination
+        if destination is not None and destination.realm_id != self.realm_id:
+            raise ValidationError(
+                {"destination": "Connector destinations must share an organization."}
+            )
+        created_by = self.created_by
+        if created_by is not None and created_by.realm_id != self.realm_id:
+            raise ValidationError({"created_by": "Connector creators must share an organization."})
+        owner = self.owner
+        if owner is not None and owner.realm_id != self.realm_id:
+            raise ValidationError({"owner": "Connector owners must share an organization."})
+
+
+class Pipeline(models.Model):
+    """A scheduled Hover summary built from exactly one inbound Connector."""
+
+    MAX_NAME_LENGTH = 80
+    MAX_INSTRUCTION_LENGTH = 2000
+    MAX_TOPIC_LENGTH = 60
+
+    class State(models.TextChoices):
+        ACTIVE = "active", "Active"
+        DRAFT = "draft", "Draft"
+        NEEDS_ATTENTION = "needs_attention", "Needs attention"
+
+    class Cadence(models.TextChoices):
+        DAILY = "daily", "Every day"
+        WEEKDAYS = "weekdays", "Weekdays"
+        WEEKLY = "weekly", "Every week"
+
+    class Weekday(models.IntegerChoices):
+        MONDAY = 0, "Monday"
+        TUESDAY = 1, "Tuesday"
+        WEDNESDAY = 2, "Wednesday"
+        THURSDAY = 3, "Thursday"
+        FRIDAY = 4, "Friday"
+        SATURDAY = 5, "Saturday"
+        SUNDAY = 6, "Sunday"
+
+    realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_pipelines")
+    connector = models.OneToOneField(Connector, on_delete=RESTRICT, related_name="pipeline")
+    name = models.CharField(max_length=MAX_NAME_LENGTH)
+    instruction = models.TextField(max_length=MAX_INSTRUCTION_LENGTH)
+    cadence = models.TextField(choices=Cadence.choices, default=Cadence.DAILY)
+    weekday = models.PositiveSmallIntegerField(choices=Weekday.choices, null=True, blank=True)
+    local_time = models.TimeField()
+    timezone = models.CharField(max_length=SpaceAttachment.MAX_TIMEZONE_LENGTH)
+    output_destination = models.ForeignKey(
+        Stream, on_delete=RESTRICT, related_name="hover_pipeline_outputs"
+    )
+    output_topic = models.CharField(max_length=MAX_TOPIC_LENGTH)
+    state = models.TextField(choices=State.choices, default=State.ACTIVE)
+    created_by = models.ForeignKey(
+        UserProfile, null=True, on_delete=SET_NULL, related_name="created_hover_pipelines"
+    )
+    last_run_at = models.DateTimeField(null=True, blank=True)
+    date_created = models.DateTimeField(default=timezone_now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.cadence == self.Cadence.WEEKLY and self.weekday is None:
+            raise ValidationError({"weekday": "Weekly Pipelines require a weekday."})
+        if self.cadence != self.Cadence.WEEKLY and self.weekday is not None:
+            raise ValidationError({"weekday": "Only weekly Pipelines can specify a weekday."})
+        if self.connector.realm_id != self.realm_id:
+            raise ValidationError(
+                {"connector": "Pipelines and connectors must share an organization."}
+            )
+        if self.output_destination.realm_id != self.realm_id:
+            raise ValidationError(
+                {"output_destination": "Pipeline outputs must stay in the organization."}
+            )
+        created_by = self.created_by
+        if created_by is not None and created_by.realm_id != self.realm_id:
+            raise ValidationError({"created_by": "Pipeline creators must share the organization."})
+
+
 class IntegrationMessageProvenance(models.Model):
     message = models.OneToOneField(
         Message, on_delete=CASCADE, related_name="hover_source_provenance"

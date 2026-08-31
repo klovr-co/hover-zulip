@@ -73,6 +73,7 @@ import * as settings_bots from "./settings_bots.ts";
 import * as settings_components from "./settings_components.ts";
 import * as settings_config from "./settings_config.ts";
 import * as settings_connected_accounts from "./settings_connected_accounts.ts";
+import * as settings_connectors from "./settings_connectors.ts";
 import * as settings_emoji from "./settings_emoji.ts";
 import * as settings_exports from "./settings_exports.ts";
 import * as settings_folders from "./settings_folders.ts";
@@ -198,6 +199,10 @@ export function dispatch_normal_event(event) {
                 hover_connected_accounts.upsert_account(event.account);
             }
             settings_connected_accounts.rerender();
+            break;
+
+        case "hover_connector":
+            settings_connectors.handle_live_update();
             break;
 
         case "custom_profile_fields":

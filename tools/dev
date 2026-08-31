@@ -347,6 +347,7 @@ def start_infrastructure() -> dict[str, str]:
     credentials = ensure_infra_credentials()
     run([*infra_compose_args(), "up", "-d", "--wait"])
     initialize_registry(credentials)
+    reconcile_registered_rabbitmq_vhosts(credentials)
     return credentials
 
 
@@ -543,9 +544,7 @@ def seed_dependency_volumes(values: dict[str, str]) -> None:
     run([*workspace_compose_args(), "run", "--rm", "--no-deps", "dependencies"])
 
 
-def configure_rabbitmq(values: dict[str, str]) -> None:
-    vhost = values["HOVER_RABBITMQ_VHOST"]
-    user = values["HOVER_INFRA_RABBITMQ_USER"]
+def ensure_rabbitmq_vhosts(vhosts: list[str], user: str) -> None:
     existing = command_output(
         [
             *infra_compose_args(),
@@ -558,7 +557,22 @@ def configure_rabbitmq(values: dict[str, str]) -> None:
             "--quiet",
         ]
     )
-    if vhost not in existing.splitlines():
+    existing_vhosts = set(existing.splitlines())
+    for vhost in vhosts:
+        if not re.fullmatch(r"hover_(?:[1-9]|1[0-5])", vhost):
+            raise DevError(f"Refusing to configure unexpected RabbitMQ vhost: {vhost}")
+        if vhost not in existing_vhosts:
+            run(
+                [
+                    *infra_compose_args(),
+                    "exec",
+                    "-T",
+                    "rabbitmq",
+                    "rabbitmqctl",
+                    "add_vhost",
+                    vhost,
+                ]
+            )
         run(
             [
                 *infra_compose_args(),
@@ -566,25 +580,32 @@ def configure_rabbitmq(values: dict[str, str]) -> None:
                 "-T",
                 "rabbitmq",
                 "rabbitmqctl",
-                "add_vhost",
+                "set_permissions",
+                "-p",
                 vhost,
+                user,
+                ".*",
+                ".*",
+                ".*",
             ]
         )
-    run(
-        [
-            *infra_compose_args(),
-            "exec",
-            "-T",
-            "rabbitmq",
-            "rabbitmqctl",
-            "set_permissions",
-            "-p",
-            vhost,
-            user,
-            ".*",
-            ".*",
-            ".*",
-        ]
+
+
+def reconcile_registered_rabbitmq_vhosts(credentials: dict[str, str]) -> None:
+    slots = psql(
+        "SELECT slot FROM hover_dev_workspace_registry ORDER BY slot;",
+        credentials,
+    ).splitlines()
+    ensure_rabbitmq_vhosts(
+        [f"hover_{slot}" for slot in slots],
+        credentials["HOVER_INFRA_RABBITMQ_USER"],
+    )
+
+
+def configure_rabbitmq(values: dict[str, str]) -> None:
+    ensure_rabbitmq_vhosts(
+        [values["HOVER_RABBITMQ_VHOST"]],
+        values["HOVER_INFRA_RABBITMQ_USER"],
     )
 
 
@@ -812,8 +833,10 @@ def load_workspace_values(*, port: int | None = None) -> dict[str, str]:
 
 def up(args: argparse.Namespace) -> None:
     port = selected_port(args.port)
-    load_workspace_values(port=port)
+    values = load_workspace_values(port=port)
     assert_port_available(port)
+    start_infrastructure()
+    configure_rabbitmq(values)
     service = "app" if args.profile == "core" else "app-full"
     profile_args = [] if args.profile == "core" else ["--profile", "full"]
     run([*workspace_compose_args(), *profile_args, "up", "--no-deps", service])

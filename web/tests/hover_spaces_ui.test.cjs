@@ -268,6 +268,20 @@ run_test("creates a Space from trimmed modal input", () => {
     assert.equal(sidebar_update_count, 1);
 });
 
+run_test("creates a default category when the organization has none", () => {
+    reset();
+    folders = [];
+    hover_spaces_ui.open_create_space();
+
+    const options = launches.at(-1);
+    assert.match(options.modal_content_html, /Spaces category will be created automatically/);
+    $("#new_hover_space_name").val("First Space");
+    options.on_click();
+
+    const submission = submissions.at(-1);
+    assert.equal(submission.data.category_id, "null");
+});
+
 run_test("setup ignores non-setup and unknown Spaces", () => {
     reset();
     hover_spaces.initialize({hover_spaces: [space({state: "launched", stream_id: 99})]});

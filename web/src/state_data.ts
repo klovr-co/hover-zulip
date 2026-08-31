@@ -554,6 +554,10 @@ export const realm_schema = z.object({
         z.object({
             display_name: z.string(),
             name: z.string(),
+            logo_url: z.string(),
+            description: z.string(),
+            supports_event_filters: z.boolean(),
+            setup_instructions_url: z.string(),
             all_event_types: z.nullable(z.array(z.string())),
             config_options: z.optional(
                 z.array(

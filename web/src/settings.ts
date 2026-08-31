@@ -57,7 +57,7 @@ export function update_lock_icon_in_sidebar(): void {
         settings_bots.can_create_incoming_webhooks() ||
         bot_data.get_all_bots_ids_for_current_user().length > 0
     ) {
-        $(".org-settings-list li[data-section='bots'] .locked").hide();
+        $(".org-settings-list li[data-section='connectors'] .locked").hide();
     }
 
     if (settings_data.user_can_add_custom_emoji()) {
@@ -197,7 +197,7 @@ export function launch(section: string, settings_tab: string | undefined): void 
     if (section !== "") {
         settings_panel_menu.normal_settings.set_current_tab(section);
     }
-    if (section === "bots") {
+    if (section === "connectors") {
         assert(settings_tab !== undefined);
         settings_panel_menu.normal_settings.set_bot_settings_tab(settings_tab, "personal");
     }

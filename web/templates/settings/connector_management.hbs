@@ -1,0 +1,30 @@
+<div id="{{prefix}}-connector-list" class="settings-section connector-management" data-name="connectors">
+    <div class="connector-management-header">
+        <div>
+            <h3>{{t "Connectors"}}</h3>
+            <p>{{t "Manage sources that send updates to Hover."}}</p>
+        </div>
+        {{> ../components/action_button label=(t "Add connector") variant="primary" intent="brand" custom_classes="add-connector"}}
+    </div>
+    <div class="tab-container"></div>
+    <div class="connector-search-row">
+        <i class="fa fa-search" aria-hidden="true"></i>
+        <input class="connector-search" type="search" placeholder="{{t "Search connectors…"}}" aria-label="{{t "Search connectors"}}" />
+    </div>
+    <div class="progressive-table-wrapper connector-table-wrapper" data-simplebar data-simplebar-tab-index="-1">
+        <table class="table table-striped wrapped-table connector-table">
+            <thead class="table-sticky-headers">
+                <tr>
+                    <th>{{t "Connector"}}</th>
+                    <th>{{t "Destination"}}</th>
+                    <th>{{t "Status"}}</th>
+                    <th>{{t "Last update"}}</th>
+                    <th>{{t "Owner"}}</th>
+                    <th>{{t "Actions"}}</th>
+                </tr>
+            </thead>
+            <tbody class="connector-rows"></tbody>
+        </table>
+    </div>
+    <div class="connector-list-status" role="status" aria-live="polite"></div>
+</div>

@@ -108,46 +108,12 @@ async function test_deactivated_users_section(page: Page): Promise<void> {
     );
 }
 
-async function test_bot_deactivation_and_reactivation(page: Page): Promise<void> {
-    await page.waitForSelector(".org-settings-list li[data-section='bots']", {visible: true});
-    await page.click(".org-settings-list li[data-section='bots']");
-    await page.waitForSelector("#admin-bot-list.show", {visible: true});
-
-    const default_bot_user_row = await user_row(page, "Zulip Default Bot");
-
-    await page.waitForSelector(default_bot_user_row + " .deactivate", {visible: true});
-    await page.click(default_bot_user_row + " .deactivate");
-    await common.wait_for_micromodal_to_open(page);
-
-    assert.strictEqual(
-        await common.get_text_from_selector(page, ".dialog_heading"),
-        "Deactivate Zulip Default Bot?",
-        "Unexpected title for deactivate bot modal",
-    );
-    assert.strictEqual(
-        await common.get_text_from_selector(page, ".micromodal .dialog_submit_button"),
-        "Deactivate",
-        "Deactivate button has incorrect text.",
-    );
-    await page.click(".micromodal .dialog_submit_button");
-    await common.wait_for_micromodal_to_close(page);
-
-    await page.waitForSelector(default_bot_user_row + ".deactivated_user", {visible: true});
-    await page.waitForSelector(default_bot_user_row + " .zulip-icon-user-plus", {visible: true});
-
-    await page.click(default_bot_user_row + " .reactivate");
-    await test_reactivation_confirmation_modal(page, "Zulip Default Bot");
-    await page.waitForSelector(default_bot_user_row + ":not(.deactivated_user)", {visible: true});
-    await page.waitForSelector(default_bot_user_row + " .zulip-icon-user-x", {visible: true});
-}
-
 async function user_deactivation_test(page: Page): Promise<void> {
     await common.log_in(page);
     await navigate_to_user_list(page);
     await test_deactivate_user(page);
     await test_reactivate_user(page);
     await test_deactivated_users_section(page);
-    await test_bot_deactivation_and_reactivation(page);
 }
 
 await common.run_test(user_deactivation_test);

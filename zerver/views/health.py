@@ -3,11 +3,10 @@ from django.db.migrations.recorder import MigrationRecorder
 from django.http import HttpRequest, HttpResponse
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext as _
-from pika import BlockingConnection
 
 from zerver.lib.cache import cache_delete, cache_get, cache_set
 from zerver.lib.exceptions import ServerNotReadyError
-from zerver.lib.queue import get_queue_client
+from zerver.lib.queue import SimpleQueueClient, get_queue_client
 from zerver.lib.redis_utils import get_redis_client
 from zerver.lib.response import json_success
 
@@ -24,13 +23,9 @@ def check_database() -> None:
 
 def check_rabbitmq() -> None:  # nocoverage
     try:
-        conn = get_queue_client().connection
-        if conn is None:
-            raise ServerNotReadyError(_("Cannot connect to rabbitmq"))
-        assert isinstance(conn, BlockingConnection)
-        conn.process_data_events()
-    except ServerNotReadyError:
-        raise
+        queue_client = get_queue_client()
+        assert isinstance(queue_client, SimpleQueueClient)
+        queue_client.check_connection()
     except Exception:
         raise ServerNotReadyError(_("Cannot query rabbitmq"))
 
