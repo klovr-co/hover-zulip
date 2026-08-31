@@ -713,6 +713,7 @@ class Connector(models.Model):
 
     MAX_PROVIDER_KEY_LENGTH = 80
     MAX_PROVIDER_NAME_LENGTH = 100
+    MAX_NAME_LENGTH = 80
     MAX_TOPIC_LENGTH = 60
 
     class State(models.TextChoices):
@@ -739,6 +740,7 @@ class Connector(models.Model):
     bot = models.OneToOneField(UserProfile, on_delete=RESTRICT, related_name="hover_connector")
     provider_key = models.CharField(max_length=MAX_PROVIDER_KEY_LENGTH)
     provider_name = models.CharField(max_length=MAX_PROVIDER_NAME_LENGTH)
+    name = models.CharField(max_length=MAX_NAME_LENGTH, blank=True)
     destination = models.ForeignKey(
         Stream,
         null=True,

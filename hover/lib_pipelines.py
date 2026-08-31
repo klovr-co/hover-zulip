@@ -26,7 +26,10 @@ def pipeline_data(pipeline: Pipeline) -> dict[str, Any]:
     status: str
     if connector.state != connector.State.ACTIVE:
         status = Pipeline.State.NEEDS_ATTENTION
-    elif pipeline.state == Pipeline.State.ACTIVE and connector.health_status == connector.HealthStatus.DEGRADED:
+    elif (
+        pipeline.state == Pipeline.State.ACTIVE
+        and connector.health_status == connector.HealthStatus.DEGRADED
+    ):
         status = Pipeline.State.NEEDS_ATTENTION
     else:
         status = pipeline.state
@@ -40,6 +43,7 @@ def pipeline_data(pipeline: Pipeline) -> dict[str, Any]:
         "connector_id": connector.id,
         "provider_key": connector.provider_key,
         "provider_name": connector.provider_name,
+        "source_name": connector.name or connector.provider_name,
         "provider_logo_url": provider_logo_url,
         "source_destination": connector.destination.name if connector.destination else None,
         "source_topic": connector.topic,

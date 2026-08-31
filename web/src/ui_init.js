@@ -59,6 +59,7 @@ import * as hover_all_view from "./hover_all_view.ts";
 import * as hover_awareness_view from "./hover_awareness_view.ts";
 import * as hover_compose_ui from "./hover_compose_ui.ts";
 import * as hover_connected_accounts from "./hover_connected_accounts.ts";
+import * as hover_data_sources_view from "./hover_data_sources_view.ts";
 import * as hover_editions_view from "./hover_editions_view.ts";
 import * as hover_generated_details from "./hover_generated_details.ts";
 import * as hover_pipelines_view from "./hover_pipelines_view.ts";
@@ -554,6 +555,7 @@ export async function initialize_everything(state_data) {
     hover_all_view.initialize();
     hover_awareness_view.initialize();
     hover_editions_view.initialize();
+    hover_data_sources_view.initialize();
     hover_pipelines_view.initialize();
     hover_source_view.initialize();
     hover_search_view.initialize();

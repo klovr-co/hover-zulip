@@ -10,6 +10,7 @@ import {Filter} from "./filter.ts";
 import * as hash_parser from "./hash_parser.ts";
 import * as hash_util from "./hash_util.ts";
 import * as hover_awareness_view from "./hover_awareness_view.ts";
+import * as hover_data_sources_view from "./hover_data_sources_view.ts";
 import * as hover_editions_view from "./hover_editions_view.ts";
 import * as hover_pipelines_view from "./hover_pipelines_view.ts";
 import * as hover_search_view from "./hover_search_view.ts";
@@ -179,6 +180,7 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
     // be #ABCD.
     const hash = window.location.hash.split("/");
     if (hash[0] !== "#hover") {
+        hover_data_sources_view.hide();
         hover_editions_view.hide();
         hover_pipelines_view.hide();
         hover_source_view.hide();
@@ -278,7 +280,19 @@ function do_hashchange_normal(from_reload: boolean, restore_selected_id: boolean
             show_all_message_view(narrow_opts);
             break;
         case "#hover": {
+            hover_data_sources_view.hide();
             hover_pipelines_view.hide();
+            if (hash.length === 3 && hash[1] === "data-sources" && hash[2] === "") {
+                hash.pop();
+            }
+            if (hash.length === 2 && hash[1] === "data-sources") {
+                hover_source_view.hide();
+                hover_search_view.hide();
+                hover_editions_view.hide();
+                hover_pipelines_view.hide();
+                hover_data_sources_view.show();
+                return true;
+            }
             if (hash.length === 3 && hash[1] === "pipelines" && hash[2] === "") {
                 hash.pop();
             }

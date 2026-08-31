@@ -48,6 +48,7 @@ def create_connector(
     user_profile: UserProfile,
     *,
     provider_key: Json[ProviderKey],
+    name: Json[str] = "",
     destination_name: Json[DestinationName],
     topic: Json[str] = "",
     event_options: Json[list[str]] | None = None,
@@ -55,6 +56,7 @@ def create_connector(
     connector = do_create_connector(
         acting_user=user_profile,
         provider_key=provider_key,
+        name=name,
         destination_name=destination_name,
         topic=topic,
         event_options=event_options or [],
@@ -87,6 +89,7 @@ def update_connector(
     user_profile: UserProfile,
     *,
     connector_id: PathOnly[int],
+    name: Json[str] | None = None,
     destination_name: Json[DestinationName] | None = None,
     topic: Json[str] | None = None,
     event_options: Json[list[str]] | None = None,
@@ -95,6 +98,7 @@ def update_connector(
     connector = do_update_connector(
         connector,
         acting_user=user_profile,
+        name=name,
         destination_name=destination_name,
         topic=topic,
         event_options=event_options,

@@ -93,7 +93,9 @@ class HoverPipelinesTest(ZulipTestCase):
     def test_pipeline_enforces_exactly_one_source(self) -> None:
         self.login_user(self.actor)
         connector = self.create_connector()
-        self.assert_json_success(self.client_post(self.PIPELINES_URL, self.pipeline_data(connector)))
+        self.assert_json_success(
+            self.client_post(self.PIPELINES_URL, self.pipeline_data(connector))
+        )
         self.assert_json_error(
             self.client_post(
                 self.PIPELINES_URL,
@@ -124,6 +126,17 @@ class HoverPipelinesTest(ZulipTestCase):
     def test_pipeline_validates_schedule_and_output(self) -> None:
         self.login_user(self.actor)
         connector = self.create_connector()
+        self.assert_json_error(
+            self.client_post(
+                self.PIPELINES_URL,
+                self.pipeline_data(
+                    connector,
+                    output_destination_name=self.source_stream.name,
+                    output_topic="github ACTIVITY",
+                ),
+            ),
+            "A Pipeline cannot post summaries to the topic it reads from.",
+        )
         self.assert_json_error(
             self.client_post(
                 self.PIPELINES_URL,

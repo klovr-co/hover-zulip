@@ -58,6 +58,7 @@ class HoverConnectorsTest(ZulipTestCase):
 
         self.assertEqual(connector.provider_key, "github")
         self.assertEqual(connector.provider_name, "GitHub")
+        self.assertEqual(connector.name, "GitHub")
         self.assertEqual(connector.destination, self.stream)
         self.assertEqual(connector.created_by, self.actor)
         self.assertEqual(connector.owner, self.actor)
@@ -125,6 +126,7 @@ class HoverConnectorsTest(ZulipTestCase):
             self.client_patch(
                 f"{self.CONNECTORS_URL}/{connector.id}",
                 self.connector_update_data(
+                    name="GitHub deployments",
                     destination_name=self.stream.name,
                     topic="Release readiness",
                     event_options=["deployment"],
@@ -132,6 +134,7 @@ class HoverConnectorsTest(ZulipTestCase):
             )
         )["connector"]
         self.assertEqual(updated["topic"], "Release readiness")
+        self.assertEqual(updated["name"], "GitHub deployments")
         self.assertEqual(updated["event_options"], ["deployment"])
 
         rotated = self.assert_json_success(

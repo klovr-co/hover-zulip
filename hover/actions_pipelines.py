@@ -9,7 +9,7 @@ from hover.actions_connectors import access_connector
 from hover.actions_pipeline_library import user_can_create_pipelines
 from hover.models import Connector, Pipeline
 from zerver.lib.exceptions import InvalidJSONError, JsonableError
-from zerver.lib.streams import access_stream_by_name
+from zerver.lib.streams import access_stream_by_name, access_stream_for_send_message
 from zerver.models.users import UserProfile
 
 
@@ -50,19 +50,19 @@ def do_create_pipeline(
             raise JsonableError(_("Choose a weekday for a weekly Pipeline."))
     elif weekday is not None:
         raise JsonableError(_("A weekday is only valid for a weekly Pipeline."))
-    if (
-        local_time.utcoffset() is not None
-        or local_time.second != 0
-        or local_time.microsecond != 0
-    ):
+    if local_time.utcoffset() is not None or local_time.second != 0 or local_time.microsecond != 0:
         raise JsonableError(_("Pipeline schedules must use whole minutes."))
     try:
         ZoneInfo(timezone)
     except (ZoneInfoNotFoundError, ValueError):
         raise JsonableError(_("Invalid IANA timezone."))
-    output_destination, _subscription = access_stream_by_name(
-        acting_user, output_destination_name
-    )
+    output_destination, _subscription = access_stream_by_name(acting_user, output_destination_name)
+    access_stream_for_send_message(acting_user, output_destination, None)
+    if (
+        connector.destination_id == output_destination.id
+        and connector.topic.casefold() == normalized_topic.casefold()
+    ):
+        raise JsonableError(_("A Pipeline cannot post summaries to the topic it reads from."))
     pipeline = Pipeline(
         realm=acting_user.realm,
         connector=connector,
