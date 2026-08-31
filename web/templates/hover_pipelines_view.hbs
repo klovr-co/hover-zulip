@@ -22,17 +22,19 @@
             <table class="hover-pipeline-table">
                 <thead><tr><th>{{t "Pipeline"}}</th><th>{{t "Data source"}}</th><th>{{t "Schedule"}}</th><th>{{t "Status"}}</th><th>{{t "Last run"}}</th></tr></thead>
                 <tbody>
-                    {{#each pipelines}}
-                        <tr>
-                            <td><strong>{{name}}</strong><small>{{instruction}}</small></td>
-                            <td><div class="hover-pipeline-provider">{{#if provider_logo_url}}<img src="{{provider_logo_url}}" alt="" />{{else}}<span class="hover-pipeline-provider-fallback">{{provider_initial}}</span>{{/if}}<span>{{provider_name}}</span></div></td>
-                            <td>{{schedule_label}}</td>
-                            <td><span class="hover-pipeline-status hover-pipeline-status--{{status}}"><i aria-hidden="true"></i>{{status_label}}</span></td>
-                            <td>{{last_run_label}}</td>
-                        </tr>
+                    {{#if pipelines}}
+                        {{#each pipelines}}
+                            <tr>
+                                <td><strong>{{name}}</strong><small>{{instruction}}</small></td>
+                                <td><div class="hover-pipeline-provider">{{#if provider_logo_url}}<img src="{{provider_logo_url}}" alt="" />{{else}}<span class="hover-pipeline-provider-fallback">{{provider_initial}}</span>{{/if}}<span>{{provider_name}}</span></div></td>
+                                <td>{{schedule_label}}</td>
+                                <td><span class="hover-pipeline-status hover-pipeline-status--{{status}}"><i aria-hidden="true"></i>{{status_label}}</span></td>
+                                <td>{{last_run_label}}</td>
+                            </tr>
+                        {{/each}}
                     {{else}}
                         <tr class="hover-pipeline-empty"><td colspan="5"><strong>{{empty_heading}}</strong><span>{{empty_description}}</span></td></tr>
-                    {{/each}}
+                    {{/if}}
                 </tbody>
             </table>
         </div>
