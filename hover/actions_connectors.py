@@ -60,6 +60,7 @@ def do_create_connector(
     *,
     acting_user: UserProfile,
     provider_key: str,
+    name: str,
     destination_name: str,
     topic: str,
     event_options: Iterable[str],
@@ -71,6 +72,9 @@ def do_create_connector(
     if len(normalized_topic) > Connector.MAX_TOPIC_LENGTH:
         raise JsonableError(_("Topic is too long."))
     validated_event_options = validate_event_options(provider_key, event_options)
+    normalized_name = name.strip() or provider_name
+    if len(normalized_name) > Connector.MAX_NAME_LENGTH:
+        raise JsonableError(_("Data source names must contain 1 to 80 characters."))
 
     token = uuid4().hex[:12]
     _short_name, email = validate_short_name_and_construct_bot_email(
@@ -92,6 +96,7 @@ def do_create_connector(
         bot=bot,
         provider_key=provider_key,
         provider_name=provider_name,
+        name=normalized_name,
         destination=destination,
         topic=normalized_topic,
         event_options=validated_event_options,
@@ -110,11 +115,17 @@ def do_update_connector(
     connector: Connector,
     *,
     acting_user: UserProfile,
+    name: str | None,
     destination_name: str | None,
     topic: str | None,
     event_options: Iterable[str] | None,
 ) -> Connector:
     _ensure_active(connector)
+    if name is not None:
+        normalized_name = name.strip()
+        if not normalized_name or len(normalized_name) > Connector.MAX_NAME_LENGTH:
+            raise JsonableError(_("Data source names must contain 1 to 80 characters."))
+        connector.name = normalized_name
     if destination_name is not None:
         destination, _subscription = access_stream_by_name(acting_user, destination_name)
         connector.destination = destination
