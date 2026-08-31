@@ -1285,6 +1285,18 @@ def do_update_message(
                 users_losing_access=users_losing_access,
             )
         )
+        # Hover Pipelines use the same composite Topic identity as messages.
+        # Only follow an edit once this operation has proven that it moved the
+        # complete Topic visible to the actor; partial edits retain the source
+        # Topic and therefore must not rebind a Pipeline.
+        from hover.pipeline_lifecycle import do_update_pipeline_inputs_for_topic_move
+
+        do_update_pipeline_inputs_for_topic_move(
+            source_stream=stream_being_edited,
+            source_topic=orig_topic_name,
+            target_stream=target_stream,
+            target_topic=target_topic_name,
+        )
 
     elif message_edit_request.is_stream_edited or message_edit_request.is_topic_edited:
         sender = target_message.sender
