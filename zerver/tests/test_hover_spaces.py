@@ -85,6 +85,20 @@ class HoverSpacesTest(ZulipTestCase):
         )
         self.assert_json_error(duplicate, "Space name already in use.")
 
+    def test_create_space_creates_default_category_when_none_is_selected(self) -> None:
+        self.login_user(self.creator)
+        self.category.delete()
+
+        result = self.client_post(
+            "/json/hover/spaces",
+            {"name": "First Space", "category_id": orjson.dumps(None).decode()},
+        )
+        self.assert_json_success(result)
+
+        space = Space.objects.get(name="First Space")
+        self.assertEqual(space.category.name, "Spaces")
+        self.assertEqual(space.category.creator, self.creator)
+
     def test_permission_denied(self) -> None:
         self.login_user(self.creator)
         self.login("iago")
@@ -93,7 +107,6 @@ class HoverSpacesTest(ZulipTestCase):
             {"name": "Admin program", "category_id": orjson.dumps(self.category.id).decode()},
         )
         self.assert_json_error(result, "You do not have permission to create Spaces.")
-
 
     def test_realm_admin_can_grant_and_revoke_space_creation_permission(self) -> None:
         administrators = get_system_user_group_by_name(SystemGroups.ADMINISTRATORS, self.realm.id)

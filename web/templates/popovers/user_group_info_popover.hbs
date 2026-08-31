@@ -51,9 +51,9 @@
                                 {{#if is_system_group}}
                                     {{#if has_bots}}
                                         {{#tr class="popover-group-menu-member"}}
-                                            View all <z-link-users>users</z-link-users> and <z-link-bots>bots</z-link-bots>
+                                            View all <z-link-users>users</z-link-users> and <z-link-bots>connectors</z-link-bots>
                                             {{#*inline "z-link-users"}}<a href="#organization/users">{{> @partial-block}}</a>{{/inline}}
-                                            {{#*inline "z-link-bots"}}<a href="#organization/bots">{{> @partial-block}}</a>{{/inline}}
+                                            {{#*inline "z-link-bots"}}<a href="#organization/connectors">{{> @partial-block}}</a>{{/inline}}
                                         {{/tr}}
                                     {{else}}
                                         <a href="#organization/users" role="menuitem">

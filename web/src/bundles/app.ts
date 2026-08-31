@@ -67,6 +67,7 @@ import "../../styles/cofounder/app.css";
 import "../../styles/cofounder/topic-screen.css";
 import "../../styles/cofounder/topic-create.css";
 import "../../styles/cofounder/sources-pane.css";
+import "../../styles/hover_pipelines.css";
 
 // This should be last.
 import "../ui_init.js";

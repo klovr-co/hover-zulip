@@ -78,8 +78,9 @@ def run_single_test(test_file: str, test_number: int, total_tests: int) -> int:
     reset_zulip_test_database()
 
     # We are calling to /flush_caches to remove all the server-side caches.
-    response = requests.post("http://zulip.zulipdev.com:9981/flush_caches")
-    assert response.status_code == 200
+    if os.getenv("HOVER_DEV_CONTAINER") != "1":
+        response = requests.post("http://zulip.zulipdev.com:9981/flush_caches")
+        assert response.status_code == 200
 
     return ret
 

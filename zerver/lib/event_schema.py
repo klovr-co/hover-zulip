@@ -41,6 +41,7 @@ from zerver.lib.event_types import (
     HasWebexTokenEvent,
     HasZoomTokenEvent,
     HeartbeatEvent,
+    HoverConnectorEvent,
     HoverSpaceAddEvent,
     HoverSpaceDeleteEvent,
     HoverSpaceUpdateEvent,
@@ -197,6 +198,7 @@ check_draft_add = make_checker(DraftsAddEvent)
 check_draft_remove = make_checker(DraftsRemoveEvent)
 check_draft_update = make_checker(DraftsUpdateEvent)
 check_heartbeat = make_checker(HeartbeatEvent)
+check_hover_connector = make_checker(HoverConnectorEvent)
 check_hover_suggested_action = make_checker(HoverSuggestedActionEvent)
 check_hover_todo = make_checker(HoverTodoProjectionEvent)
 check_hover_space_add = make_checker(HoverSpaceAddEvent)

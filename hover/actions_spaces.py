@@ -16,6 +16,7 @@ from hover.models import (
     SpaceMembershipSuggestion,
 )
 from hover.participant_selector_reconciliation import schedule_space_participant_reconciliations
+from zerver.actions.channel_folders import do_create_channel_folder
 from zerver.actions.streams import bulk_add_subscriptions
 from zerver.lib.exceptions import JsonableError
 from zerver.lib.streams import create_stream_if_needed
@@ -57,7 +58,7 @@ def do_create_space(
     *,
     name: str,
     description: str,
-    category: ChannelFolder,
+    category: ChannelFolder | None,
 ) -> Space:
     realm = user_profile.realm
     name = name.strip()
@@ -67,6 +68,19 @@ def do_create_space(
         raise JsonableError(_("You do not have permission to create Spaces."))
     if not name:
         raise JsonableError(_("Space name can't be empty."))
+    if category is None:
+        category = ChannelFolder.objects.filter(
+            realm=realm, name__iexact="Spaces", is_archived=False
+        ).first()
+        if category is None:
+            try:
+                category = do_create_channel_folder(realm, "Spaces", "", acting_user=user_profile)
+            except IntegrityError:
+                # A concurrent first-Space request may have created it after
+                # the lookup above.
+                category = ChannelFolder.objects.get(
+                    realm=realm, name__iexact="Spaces", is_archived=False
+                )
     if category.realm_id != realm.id or category.is_archived:
         raise JsonableError(_("Invalid Space category."))
     if Space.objects.filter(realm=realm, name__iexact=name).exists():

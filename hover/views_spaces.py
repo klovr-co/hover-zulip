@@ -33,14 +33,16 @@ def create_space(
     request: HttpRequest,
     user_profile: UserProfile,
     *,
-    category_id: Json[int],
+    category_id: Json[int] | None = None,
     description: Annotated[str, StringConstraints(max_length=Space.MAX_DESCRIPTION_LENGTH)] = "",
     name: Annotated[str, StringConstraints(max_length=Space.MAX_NAME_LENGTH)],
 ) -> HttpResponse:
-    try:
-        category = ChannelFolder.objects.get(id=category_id, realm=user_profile.realm)
-    except ChannelFolder.DoesNotExist:
-        raise JsonableError(_("Invalid Space category."))
+    category: ChannelFolder | None = None
+    if category_id is not None:
+        try:
+            category = ChannelFolder.objects.get(id=category_id, realm=user_profile.realm)
+        except ChannelFolder.DoesNotExist:
+            raise JsonableError(_("Invalid Space category."))
 
     space = do_create_space(user_profile, name=name, description=description, category=category)
     return json_success(request, data={"space": get_space_data(space, viewer=user_profile)})

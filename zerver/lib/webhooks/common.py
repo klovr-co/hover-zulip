@@ -184,9 +184,15 @@ def check_send_webhook_message(
     assert client is not None
     if stream is None:
         assert user_profile.bot_owner is not None
-        return check_send_private_message(
-            user_profile, client, user_profile.bot_owner, body, no_previews=no_previews
-        )
+        try:
+            message_id = check_send_private_message(
+                user_profile, client, user_profile.bot_owner, body, no_previews=no_previews
+            )
+        except JsonableError:
+            from hover.actions_connectors import record_connector_delivery
+
+            record_connector_delivery(user_profile, successful=False)
+            raise
     else:
         # Some third-party websites (such as Atlassian's Jira), tend to
         # double escape their URLs in a manner that escaped space characters
@@ -202,11 +208,11 @@ def check_send_webhook_message(
 
         try:
             if stream.isdecimal():
-                return check_send_stream_message_by_id(
+                message_id = check_send_stream_message_by_id(
                     user_profile, client, int(stream), topic, body, no_previews=no_previews
                 )
             else:
-                return check_send_stream_message(
+                message_id = check_send_stream_message(
                     user_profile, client, stream, topic, body, no_previews=no_previews
                 )
         except StreamDoesNotExistError:
@@ -214,7 +220,20 @@ def check_send_webhook_message(
             # notifying that the webhook bot just tried to send a message to a
             # non-existent stream, so we don't need to re-raise it since it
             # clutters up webhook-errors.log
+            from hover.actions_connectors import record_connector_delivery
+
+            record_connector_delivery(user_profile, successful=False)
             return None
+        except JsonableError:
+            from hover.actions_connectors import record_connector_delivery
+
+            record_connector_delivery(user_profile, successful=False)
+            raise
+
+    from hover.actions_connectors import record_connector_delivery
+
+    record_connector_delivery(user_profile, successful=True)
+    return message_id
 
 
 def standardize_headers(input_headers: dict[str, Any] | None) -> dict[str, str]:

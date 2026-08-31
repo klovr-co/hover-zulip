@@ -168,6 +168,17 @@ class SimpleQueueClient(QueueClient[BlockingChannel]):
         if self.connection is not None:
             self.connection.close()
 
+    def check_connection(self) -> None:
+        try:
+            if self.connection is None or not self.connection.is_open:
+                self._reconnect()
+            assert self.connection is not None
+            self.connection.process_data_events()
+        except Exception:
+            self._reconnect()
+            assert self.connection is not None
+            self.connection.process_data_events()
+
     @override
     def ensure_queue(self, queue_name: str, callback: Callable[[BlockingChannel], object]) -> None:
         """Ensure that a given queue has been declared, and then call

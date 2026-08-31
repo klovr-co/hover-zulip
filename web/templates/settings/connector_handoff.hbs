@@ -1,0 +1,54 @@
+<div class="connector-handoff">
+    <div class="connector-step-header">
+        <span class="connector-back-label"><i class="fa fa-chevron-left" aria-hidden="true"></i> {{provider_name}}</span>
+        {{#if provider_logo_url}}
+            <div class="connector-step-provider"><img src="{{provider_logo_url}}" alt="" /><strong>{{provider_name}}</strong></div>
+        {{/if}}
+    </div>
+
+    {{#if is_disabled}}
+        <div class="connector-disabled-state">
+            <span class="connector-disabled-icon" aria-hidden="true"><i class="fa fa-ban"></i></span>
+            <h2>{{t "Connector disabled"}}</h2>
+            <p>{{t "This endpoint no longer accepts webhook deliveries. Create a new connector when you’re ready to receive updates again."}}</p>
+        </div>
+        <dl class="connector-detail-list">
+            <div><dt>{{t "Provider"}}</dt><dd>{{provider_name}}</dd></div>
+            <div><dt>{{t "Destination"}}</dt><dd>{{#if destination}}#{{destination}}{{else}}{{t "Needs attention"}}{{/if}}</dd></div>
+            <div><dt>{{t "Owner"}}</dt><dd>{{owner}}</dd></div>
+        </dl>
+    {{else if webhook_url}}
+        <h2>{{#if ready}}{{t "Webhook URL ready"}}{{else}}{{t "Connector details"}}{{/if}}</h2>
+        <p>{{setup_instruction}}</p>
+        <label for="connector_webhook_url">{{t "Webhook URL"}}</label>
+        <div class="connector-url">
+            <code id="connector_webhook_url">{{webhook_url}}</code>
+            <button type="button" class="copy-connector-handoff" aria-label="{{t 'Copy webhook URL'}}"><i class="fa fa-copy" aria-hidden="true"></i></button>
+        </div>
+        <button type="button" class="button sea-green copy-connector-handoff connector-copy-primary">{{t "Copy webhook URL"}}</button>
+        <div class="connector-setup-instructions">
+            <p>{{provider_instruction}}</p>
+            {{#if setup_instructions_url}}<a href="{{setup_instructions_url}}" target="_blank" rel="noopener">{{setup_link_label}}</a>{{/if}}
+        </div>
+        <p class="connector-security-guidance"><i class="fa fa-shield" aria-hidden="true"></i> {{t "Keep this URL secret. You can rotate it from this connector later."}}</p>
+        {{#if can_manage}}
+            <div class="connector-detail-actions">
+                <button type="button" class="button edit-connector" data-connector-id="{{id}}">{{t "Edit destination"}}</button>
+                <button type="button" class="button rotate-connector" data-connector-id="{{id}}">{{t "Rotate URL"}}</button>
+                <button type="button" class="button danger disable-connector" data-connector-id="{{id}}">{{t "Disable connector"}}</button>
+            </div>
+        {{/if}}
+    {{else}}
+        <h2>{{#if is_legacy}}{{t "Configured in existing URL"}}{{else}}{{t "Webhook URL unavailable"}}{{/if}}</h2>
+        <p>{{t "This migrated connector keeps its existing webhook URL. Hover cannot display, copy, or rotate that URL until the connector is reconciled."}}</p>
+        <dl class="connector-detail-list">
+            <div><dt>{{t "Provider"}}</dt><dd>{{provider_name}}</dd></div>
+            <div><dt>{{t "Destination"}}</dt><dd>{{#if destination}}#{{destination}}{{else}}{{t "Needs attention"}}{{/if}}</dd></div>
+            <div><dt>{{t "Owner"}}</dt><dd>{{owner}}</dd></div>
+        </dl>
+        {{#if needs_reconciliation}}
+            <button type="button" class="button sea-green reconcile-connector" data-connector-id="{{id}}">{{t "Reconcile connector"}}</button>
+        {{/if}}
+    {{/if}}
+    <div class="connector-action-status" role="status" aria-live="polite"></div>
+</div>

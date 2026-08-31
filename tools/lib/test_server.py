@@ -74,6 +74,8 @@ def test_server_running(
 
         # Run this not through the shell, so that we have the actual PID.
         run_dev_server_command = ["tools/run-dev", "--test", "--streamlined"]
+        if os.getenv("HOVER_DEV_CONTAINER") == "1":
+            run_dev_server_command.append("--no-clear-memcached")
         if skip_provision_check:
             run_dev_server_command.append("--skip-provision-check")
         if enable_help_center:

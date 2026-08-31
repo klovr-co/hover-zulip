@@ -429,7 +429,10 @@ else:
 
 SESSION_ENGINE = "zerver.lib.safe_session_cached_db"
 
-MEMCACHED_PASSWORD = get_secret("memcached_password")
+if DEVELOPMENT and HOVER_DEV_CONTAINER:
+    MEMCACHED_PASSWORD = None
+else:
+    MEMCACHED_PASSWORD = get_secret("memcached_password")
 
 CACHES: dict[str, dict[str, object]] = {
     "default": {

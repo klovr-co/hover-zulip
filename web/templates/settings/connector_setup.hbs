@@ -1,0 +1,40 @@
+<form id="connector_setup_form" class="connector-setup">
+    <div class="connector-step-header">
+        <button type="button" class="connector-back" aria-label="{{t 'Back to integrations'}}"><i class="fa fa-chevron-left" aria-hidden="true"></i> {{t "Integrations"}}</button>
+        <div class="connector-step-provider">
+            <img src="{{provider.logo_url}}" alt="" />
+            <strong>{{provider.name}}</strong>
+        </div>
+    </div>
+    <p>{{intro}}</p>
+    <div class="input-group">
+        <label for="connector_destination">{{t "Channel"}}</label>
+        <select id="connector_destination" class="modal_select connector-destination">
+            {{#each destinations}}
+                <option value="{{name}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+            {{/each}}
+        </select>
+    </div>
+    <div class="input-group">
+        <label for="connector_topic">{{t "Topic"}}</label>
+        <input id="connector_topic" class="modal_text_input connector-topic" type="text" maxlength="60" value="{{topic}}" placeholder="{{t 'Optional topic'}}" />
+    </div>
+    {{#if provider.supports_event_filters}}
+        <details class="connector-events">
+            <summary>
+                <strong>{{event_filter_label}}</strong>
+                <span>{{t "Receive all supported events by default"}}</span>
+            </summary>
+            <div class="connector-event-options">
+                {{#each events}}
+                    <label><input type="checkbox" value="{{name}}" {{#if selected}}checked{{/if}} /> {{label}}</label>
+                {{/each}}
+            </div>
+        </details>
+    {{else}}
+        <p class="connector-provider-event-note">{{event_note}}</p>
+    {{/if}}
+    <div class="connector-modal-actions">
+        <button type="submit" class="button sea-green connector-save">{{submit_label}}</button>
+    </div>
+</form>
