@@ -11,8 +11,8 @@ import * as keydown_util from "./keydown_util.ts";
 import * as people from "./people.ts";
 import * as popovers from "./popovers.ts";
 import * as scroll_util from "./scroll_util.ts";
-import {redraw_all_bots_list, redraw_your_bots_list} from "./settings_bots.ts";
 import {resize_textareas_in_section} from "./settings_components.ts";
+import {redraw_connectors} from "./settings_connectors.ts";
 import * as settings_sections from "./settings_sections.ts";
 import {
     redraw_active_users_list,
@@ -88,8 +88,8 @@ export class SettingsPanelMenu {
         this.current_tab = this.$curr_li.attr("data-section")!;
         this.current_user_settings_tab = "active";
         this.current_bot_settings_tab = {
-            org: "all-bots",
-            personal: "your-bots",
+            org: "all",
+            personal: "yours",
         };
         this.org_user_settings_toggler = components.toggle({
             html_class: "org-user-settings-switcher",
@@ -144,22 +144,16 @@ export class SettingsPanelMenu {
             html_class: `${prefix}-bot-settings-switcher`,
             child_wants_focus: true,
             values: [
-                {label: $t({defaultMessage: "All bots"}), key: "all-bots"},
+                {label: $t({defaultMessage: "All connectors"}), key: "all"},
                 {
-                    label: $t({defaultMessage: "Your bots"}),
-                    key: "your-bots",
+                    label: $t({defaultMessage: "Your connectors"}),
+                    key: "yours",
                 },
             ],
             callback: (_name, key) => {
-                browser_history.update(`#${this.base}/bots/${key}`);
+                browser_history.update(`#${this.base}/connectors/${key}`);
                 this.set_bot_settings_tab(key, prefix);
-                $(".bot-settings-section").hide();
-                if (key === "all-bots") {
-                    redraw_all_bots_list();
-                } else if (key === "your-bots") {
-                    redraw_your_bots_list();
-                }
-                $(`[data-bot-settings-section="${CSS.escape(key)}"]`).show();
+                redraw_connectors();
             },
         });
     }
@@ -271,7 +265,7 @@ export class SettingsPanelMenu {
             return this.current_user_settings_tab;
         }
 
-        if (section === "bots") {
+        if (section === "connectors") {
             if (this.base === "organization") {
                 return this.current_bot_settings_tab["org"];
             }
@@ -314,7 +308,7 @@ export class SettingsPanelMenu {
         this.$curr_li.addClass("active");
         this.set_current_tab(section);
 
-        if (section !== "users" && section !== "bots") {
+        if (section !== "users" && section !== "connectors") {
             const settings_section_hash = "#" + this.hash_prefix + section;
 
             // It could be that the hash has already been set.
@@ -326,10 +320,13 @@ export class SettingsPanelMenu {
             this.org_user_settings_toggler.goto(settings_tab);
         }
 
-        if (section === "bots") {
+        if (section === "connectors") {
             if (this.org_bot_settings_toggler !== undefined && this.base === "organization") {
                 assert(settings_tab !== undefined);
-                this.show_bot_settings_toggler(this.org_bot_settings_toggler, $("#admin-bot-list"));
+                this.show_bot_settings_toggler(
+                    this.org_bot_settings_toggler,
+                    $("#admin-connector-list"),
+                );
                 this.org_bot_settings_toggler.goto(settings_tab);
             }
 
@@ -337,7 +334,7 @@ export class SettingsPanelMenu {
                 assert(settings_tab !== undefined);
                 this.show_bot_settings_toggler(
                     this.personal_bot_settings_toggler,
-                    $("#personal-bot-list"),
+                    $("#personal-connector-list"),
                 );
                 this.personal_bot_settings_toggler.goto(settings_tab);
             }

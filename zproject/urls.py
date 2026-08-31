@@ -25,6 +25,15 @@ from hover.views_connected_accounts import (
     update_connected_account,
     upsert_connected_account_grant,
 )
+from hover.views_connectors import (
+    create_connector,
+    disable_connector,
+    get_connector,
+    list_connectors,
+    reconcile_connector,
+    rotate_connector,
+    update_connector,
+)
 from hover.views_integrations import (
     associate_integration_route,
     detach_integration_route,
@@ -50,6 +59,7 @@ from hover.views_modules import (
     upgrade_module,
 )
 from hover.views_personal_editions import personal_editions
+from hover.views_pipelines import create_pipeline, list_pipelines
 from hover.views_publications import (
     resolve_disputed_detail_evidence,
     resolve_generated_item_evidence,
@@ -389,6 +399,25 @@ v1_api_and_json_patterns = [
     # realm/emoji -> zerver.views.realm_emoji
     rest_path("realm/emoji", GET=list_emoji),
     rest_path(
+        "hover/connectors",
+        GET=(list_connectors, {"intentionally_undocumented"}),
+        POST=(create_connector, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/connectors/<int:connector_id>",
+        GET=(get_connector, {"intentionally_undocumented"}),
+        PATCH=(update_connector, {"intentionally_undocumented"}),
+        DELETE=(disable_connector, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/connectors/<int:connector_id>/reconcile",
+        PATCH=(reconcile_connector, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/connectors/<int:connector_id>/rotate",
+        POST=(rotate_connector, {"intentionally_undocumented"}),
+    ),
+    rest_path(
         "realm/emoji/<path:emoji_name>",
         POST=upload_emoji,
         DELETE=delete_emoji,
@@ -662,6 +691,11 @@ v1_api_and_json_patterns = [
     rest_path("hover/awareness", GET=get_awareness),
     rest_path("hover/search", POST=hover_search),
     rest_path("hover/personal-editions", GET=personal_editions),
+    rest_path(
+        "hover/pipelines",
+        GET=(list_pipelines, {"intentionally_undocumented"}),
+        POST=(create_pipeline, {"intentionally_undocumented"}),
+    ),
     rest_path("hover/spaces/<int:space_id>", GET=(get_space, {"intentionally_undocumented"})),
     rest_path(
         "hover/spaces/<int:space_id>/members",

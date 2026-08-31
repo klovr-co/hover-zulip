@@ -115,6 +115,29 @@ run_test("get_reload_hash", () => {
     assert.equal(hash_util.get_reload_hash(), "");
 });
 
+run_test("legacy bot settings hashes redirect to Connectors", () => {
+    const settings_panel_object = {
+        current_tab: "profile",
+        get_settings_tab: () => undefined,
+    };
+    assert.equal(
+        hash_util.validate_settings_hash("#settings/bots", settings_panel_object),
+        "#settings/connectors/yours",
+    );
+    assert.equal(
+        hash_util.validate_settings_hash("#settings/your-bots", settings_panel_object),
+        "#settings/connectors/yours",
+    );
+    assert.equal(
+        hash_util.validate_settings_hash("#organization/bots", settings_panel_object),
+        "#organization/connectors/all",
+    );
+    assert.equal(
+        hash_util.validate_settings_hash("#organization/bot-list-admin", settings_panel_object),
+        "#organization/connectors/all",
+    );
+});
+
 run_test("test is_editing_stream", () => {
     window.location.hash = "#channels/1/announce";
     assert.equal(hash_parser.is_editing_stream(1), true);
