@@ -74,7 +74,10 @@ def do_create_space(
         ).first()
         if category is None:
             try:
-                category = do_create_channel_folder(realm, "Spaces", "", acting_user=user_profile)
+                with transaction.atomic():
+                    category = do_create_channel_folder(
+                        realm, "Spaces", "", acting_user=user_profile
+                    )
             except IntegrityError:
                 # A concurrent first-Space request may have created it after
                 # the lookup above.
