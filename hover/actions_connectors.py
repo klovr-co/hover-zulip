@@ -69,8 +69,8 @@ def do_create_connector(
     provider_name = get_connector_provider_name(provider_key)
     destination, _subscription = access_stream_by_name(acting_user, destination_name)
     normalized_topic = topic.strip()
-    if len(normalized_topic) > Connector.MAX_TOPIC_LENGTH:
-        raise JsonableError(_("Topic is too long."))
+    if not normalized_topic or len(normalized_topic) > Connector.MAX_TOPIC_LENGTH:
+        raise JsonableError(_("Data Sources require a Topic containing 1 to 60 characters."))
     validated_event_options = validate_event_options(provider_key, event_options)
     normalized_name = name.strip() or provider_name
     if len(normalized_name) > Connector.MAX_NAME_LENGTH:
@@ -131,8 +131,8 @@ def do_update_connector(
         connector.destination = destination
     if topic is not None:
         normalized_topic = topic.strip()
-        if len(normalized_topic) > Connector.MAX_TOPIC_LENGTH:
-            raise JsonableError(_("Topic is too long."))
+        if not normalized_topic or len(normalized_topic) > Connector.MAX_TOPIC_LENGTH:
+            raise JsonableError(_("Data Sources require a Topic containing 1 to 60 characters."))
         connector.topic = normalized_topic
     if event_options is not None:
         connector.event_options = validate_event_options(connector.provider_key, event_options)
@@ -157,8 +157,8 @@ def do_reconcile_connector(
     destination, _subscription = access_stream_by_name(acting_user, destination_name)
     connector.destination = destination
     connector.topic = topic.strip()
-    if len(connector.topic) > Connector.MAX_TOPIC_LENGTH:
-        raise JsonableError(_("Topic is too long."))
+    if not connector.topic or len(connector.topic) > Connector.MAX_TOPIC_LENGTH:
+        raise JsonableError(_("Data Sources require a Topic containing 1 to 60 characters."))
     connector.event_options = validate_event_options(provider_key, event_options)
     connector.state = Connector.State.ACTIVE
     connector.reconciliation_state = Connector.ReconciliationState.CANONICAL

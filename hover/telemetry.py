@@ -27,6 +27,8 @@ class HoverTelemetryEvent(str, Enum):
     SOURCE_RECORDS = "source_records"
     SUMMARY_EXECUTION = "summary_execution"
     SUMMARY_SCHEDULER = "summary_scheduler"
+    PIPELINE_EXECUTION = "pipeline_execution"
+    PIPELINE_LIFECYCLE = "pipeline_lifecycle"
     NATIVE_INGESTION = "native_ingestion"
 
 
@@ -53,6 +55,10 @@ class HoverTelemetryOutcome(str, Enum):
     CURRENT = "current"
     DEGRADED = "degraded"
     EMPTY = "empty"
+    DRAFT_SAVED = "draft_saved"
+    ACTIVATED = "activated"
+    PAUSED = "paused"
+    RESUMED = "resumed"
 
 
 class HoverTelemetryBucket(str, Enum):
@@ -115,6 +121,16 @@ _ALLOWED_DIMENSIONS: Mapping[HoverTelemetryEvent, frozenset[str]] = {
         "published",
     },
     HoverTelemetryEvent.SUMMARY_SCHEDULER: _COMMON_DIMENSIONS | {"installation_id", "lag_bucket"},
+    HoverTelemetryEvent.PIPELINE_EXECUTION: _COMMON_DIMENSIONS
+    | {
+        "pipeline_id",
+        "input_message_count_bucket",
+        "skipped_authored_count_bucket",
+        "same_topic",
+        "permission_failure",
+        "published",
+    },
+    HoverTelemetryEvent.PIPELINE_LIFECYCLE: _COMMON_DIMENSIONS | {"pipeline_id"},
     HoverTelemetryEvent.NATIVE_INGESTION: _COMMON_DIMENSIONS
     | {"space_id", "attachment_id", "message_count_bucket", "posthog", "provisioned"},
 }
@@ -190,6 +206,23 @@ _ALLOWED_OUTCOMES: Mapping[HoverTelemetryEvent, frozenset[HoverTelemetryOutcome]
     ),
     HoverTelemetryEvent.SUMMARY_SCHEDULER: frozenset(
         {HoverTelemetryOutcome.REQUESTED, HoverTelemetryOutcome.SUPPRESSED}
+    ),
+    HoverTelemetryEvent.PIPELINE_EXECUTION: frozenset(
+        {
+            HoverTelemetryOutcome.SUCCESS,
+            HoverTelemetryOutcome.DENIED,
+            HoverTelemetryOutcome.RETRYABLE_FAILURE,
+            HoverTelemetryOutcome.DUPLICATE_REPLAYED,
+            HoverTelemetryOutcome.EMPTY,
+        }
+    ),
+    HoverTelemetryEvent.PIPELINE_LIFECYCLE: frozenset(
+        {
+            HoverTelemetryOutcome.DRAFT_SAVED,
+            HoverTelemetryOutcome.ACTIVATED,
+            HoverTelemetryOutcome.PAUSED,
+            HoverTelemetryOutcome.RESUMED,
+        }
     ),
     HoverTelemetryEvent.NATIVE_INGESTION: frozenset(
         {

@@ -10,6 +10,7 @@ import * as left_sidebar_navigation_area from "./left_sidebar_navigation_area.ts
 import * as recent_view_ui from "./recent_view_ui.ts";
 import {realm} from "./state_data.ts";
 import * as stream_data from "./stream_data.ts";
+import * as stream_topic_history from "./stream_topic_history.ts";
 import * as timerender from "./timerender.ts";
 
 const connector_schema = z.object({
@@ -26,7 +27,6 @@ const connector_schema = z.object({
     health_status: z.enum(["unknown", "healthy", "degraded"]),
     last_successful_delivery: z.nullable(z.string()),
     last_delivery_attempt: z.nullable(z.string()),
-    pipeline_name: z.nullable(z.string()),
     webhook_url: z.optional(z.string()),
 });
 type Connector = z.infer<typeof connector_schema>;
@@ -46,6 +46,18 @@ let provider: Provider | undefined;
 let provider_query = "";
 let index_query = "";
 let source_filter: SourceFilter = "all";
+let setup_name = "";
+let setup_destination = "";
+let setup_topic = "";
+let topic_menu_open = false;
+let setup_error = "";
+
+function focus_input_at_end(selector: string): void {
+    const input = $(selector).trigger("focus").get(0);
+    if (input instanceof HTMLInputElement) {
+        input.setSelectionRange(input.value.length, input.value.length);
+    }
+}
 
 function provider_from_registry(provider_key: string): Provider | undefined {
     const key = provider_key === "rest_api" ? "json" : provider_key;
@@ -137,6 +149,14 @@ function default_topic(selected: Provider): string {
     return $t({defaultMessage: "{provider} activity"}, {provider: selected.name});
 }
 
+function setup_topic_options(): string[] {
+    const stream = stream_data.subscribed_subs().find((item) => item.name === setup_destination);
+    if (stream === undefined) {
+        return [];
+    }
+    return stream_topic_history.get_recent_topic_names(stream.stream_id);
+}
+
 function render(): void {
     if (!visible) {
         return;
@@ -157,7 +177,22 @@ function render(): void {
     const destinations = stream_data
         .subscribed_subs()
         .filter((stream) => stream_data.can_post_messages_in_stream(stream))
-        .map((stream) => ({name: stream.name}));
+        .map((stream) => ({name: stream.name, selected: stream.name === setup_destination}));
+    const topic_options = setup_topic_options().map((name) => ({name}));
+    const destination_preview =
+        setup_destination === "" || setup_topic.trim() === ""
+            ? $t({defaultMessage: "Choose a Space and Topic to see the publishing destination."})
+            : $t(
+                  {defaultMessage: "{source} syncs into {space} › {topic}"},
+                  {
+                      source:
+                          setup_name !== ""
+                              ? setup_name
+                              : (provider?.name ?? $t({defaultMessage: "This data source"})),
+                      space: setup_destination,
+                      topic: setup_topic.trim(),
+                  },
+              );
     const events =
         provider?.all_event_types?.map((name) => ({name, label: title_case(name)})) ?? [];
     $("#hover-data-sources-view").html(
@@ -195,8 +230,15 @@ function render(): void {
             slack_logo_url: provider_from_registry("slack_incoming")?.logo_url,
             provider,
             destinations,
-            source_name: provider === undefined ? "" : provider.name,
-            source_topic: provider === undefined ? "" : default_topic(provider),
+            has_destinations: destinations.length > 0,
+            permission_disabled: destinations.length === 0,
+            source_name: setup_name,
+            source_topic: setup_topic,
+            topic_options,
+            has_topic_options: topic_options.length > 0,
+            topic_menu_open,
+            destination_preview,
+            setup_error,
             events,
             has_events: events.length > 0,
             connect_heading:
@@ -266,8 +308,31 @@ function selected_events(): string[] {
     return selected.length === provider.all_event_types.length ? [] : selected;
 }
 
+function update_event_selection_toggle($options: JQuery): void {
+    const $events = $options.find("input[type='checkbox']");
+    const all_selected =
+        $events.length > 0 && $events.get().every((event) => $(event).prop("checked") === true);
+    $options
+        .find(".hover-pipeline-event-selection-toggle")
+        .text(
+            all_selected
+                ? $t({defaultMessage: "Deselect all"})
+                : $t({defaultMessage: "Select all"}),
+        );
+}
+
 function submit_source(): void {
     if (provider === undefined) {
+        return;
+    }
+    setup_name = String($(".hover-data-source-name").val() ?? "").trim();
+    setup_destination = String($(".hover-data-source-destination").val() ?? "");
+    setup_topic = String($(".hover-data-source-topic").val() ?? "").trim();
+    if (setup_name === "" || setup_destination === "" || setup_topic === "") {
+        setup_error = $t({
+            defaultMessage: "Choose a destination Space and Topic before continuing.",
+        });
+        render();
         return;
     }
     const $button = $("#hover_data_source_form button[type='submit']").prop("disabled", true);
@@ -275,11 +340,9 @@ function submit_source(): void {
         url: CONNECTORS_URL,
         data: {
             provider_key: JSON.stringify(provider.key),
-            name: JSON.stringify(String($(".hover-data-source-name").val() ?? "").trim()),
-            destination_name: JSON.stringify(
-                String($(".hover-data-source-destination").val() ?? ""),
-            ),
-            topic: JSON.stringify(String($(".hover-data-source-topic").val() ?? "").trim()),
+            name: JSON.stringify(setup_name),
+            destination_name: JSON.stringify(setup_destination),
+            topic: JSON.stringify(setup_topic),
             event_options: JSON.stringify(selected_events()),
         },
         success(raw) {
@@ -333,11 +396,19 @@ export function initialize(): void {
     $("body").on("input", ".hover-data-source-provider-search", (event) => {
         provider_query = String($(event.currentTarget).val() ?? "");
         render();
-        $(".hover-data-source-provider-search").trigger("focus");
+        focus_input_at_end(".hover-data-source-provider-search");
     });
     $("body").on("click", ".hover-data-source-provider-choice", (event) => {
         provider = provider_from_registry(String($(event.currentTarget).attr("data-provider-key")));
         if (provider !== undefined) {
+            setup_name = provider.name;
+            setup_topic = default_topic(provider);
+            setup_destination =
+                stream_data
+                    .subscribed_subs()
+                    .find((stream) => stream_data.can_post_messages_in_stream(stream))?.name ?? "";
+            topic_menu_open = false;
+            setup_error = "";
             stage = "setup";
             render();
         }
@@ -345,6 +416,49 @@ export function initialize(): void {
     $("body").on("submit", "#hover_data_source_form", (event) => {
         event.preventDefault();
         submit_source();
+    });
+    $("body").on("click", ".hover-pipeline-event-selection-toggle", (event) => {
+        const $options = $(event.currentTarget).closest(".hover-pipeline-event-options");
+        const $events = $options.find<HTMLInputElement>("input[type='checkbox']");
+        const should_select = $events.get().some((event) => !event.checked);
+        $events.prop("checked", should_select);
+        update_event_selection_toggle($options);
+    });
+    $("body").on("change", ".hover-pipeline-event-options input[type='checkbox']", (event) => {
+        update_event_selection_toggle(
+            $(event.currentTarget).closest(".hover-pipeline-event-options"),
+        );
+    });
+    $("body").on("input", ".hover-data-source-name", (event) => {
+        setup_name = String($(event.currentTarget).val() ?? "");
+        $(".hover-data-source-destination-preview strong").text(
+            `${setup_name !== "" ? setup_name : (provider?.name ?? "")} syncs into ${setup_destination} › ${setup_topic}`,
+        );
+    });
+    $("body").on("change", ".hover-data-source-destination", (event) => {
+        setup_destination = String($(event.currentTarget).val() ?? "");
+        topic_menu_open = true;
+        render();
+        $(".hover-data-source-topic").trigger("focus");
+    });
+    $("body").on("focus click", ".hover-data-source-topic", () => {
+        if (!topic_menu_open) {
+            topic_menu_open = true;
+            render();
+            $(".hover-data-source-topic").trigger("focus");
+        }
+    });
+    $("body").on("input", ".hover-data-source-topic", (event) => {
+        setup_topic = String($(event.currentTarget).val() ?? "");
+        setup_error = "";
+        $(".hover-data-source-destination-preview strong").text(
+            `${setup_name !== "" ? setup_name : (provider?.name ?? "")} syncs into ${setup_destination} › ${setup_topic}`,
+        );
+    });
+    $("body").on("click", ".hover-data-source-topic-option", (event) => {
+        setup_topic = $(event.currentTarget).attr("data-topic") ?? "";
+        topic_menu_open = false;
+        render();
     });
     $("body").on("click", ".hover-data-source-copy", () => {
         if (connector?.webhook_url !== undefined) {
@@ -365,7 +479,7 @@ export function initialize(): void {
     $("body").on("input", ".hover-data-source-index-search", (event) => {
         index_query = String($(event.currentTarget).val() ?? "");
         render();
-        $(".hover-data-source-index-search").trigger("focus");
+        focus_input_at_end(".hover-data-source-index-search");
     });
     $("body").on("click", "[data-source-filter]", (event) => {
         const value = $(event.currentTarget).attr("data-source-filter");

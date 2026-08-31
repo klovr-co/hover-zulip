@@ -1,24 +1,21 @@
 <div class="hover-pipelines-shell hover-data-sources-shell">
     {{#if is_index}}
         <header
-            class="hover-pipelines-index-header hover-data-source-index-header"
-        >
-            <div><span class="hover-pipeline-kicker">{{t
+          class="hover-pipelines-index-header hover-data-source-index-header"
+          >
+            <div>
+                <span class="hover-pipeline-kicker">{{t
                         "Data sources"
-                    }}</span><h1>{{t "Data sources"}}</h1><p>{{t
-                        "Connect services and publish every incoming event to a Hover topic."
-                    }}</p></div>
+                    }}</span>
+                <h1>{{t "Data sources"}}</h1>
+                <p>{{t "Connect services and publish every incoming event to a Hover topic."}}</p>
+            </div>
             <button
-                type="button"
-                class="button rounded sea-green hover-data-source-create"
-            >{{t "Add data source"}}</button>
+              type="button"
+              class="button rounded sea-green hover-data-source-create"
+              >{{t "Add data source"}}</button>
         </header>
-        <div class="hover-data-source-notice"><i
-                class="zulip-icon zulip-icon-git-pull-request"
-                aria-hidden="true"
-            ></i>{{t
-                "Each webhook event becomes a message in its destination topic. Pipelines can use these sources to create summaries."
-            }}</div>
+        <div class="hover-data-source-notice"><i class="zulip-icon zulip-icon-git-pull-request" aria-hidden="true"></i>{{t "Each webhook event becomes a message in its destination topic. Pipelines can use these sources to create summaries."}}</div>
         <div class="hover-pipeline-index-tools">
             <label class="hover-pipeline-search"><i
                     class="zulip-icon zulip-icon-search"
@@ -31,100 +28,44 @@
                     aria-label="{{t 'Search data sources'}}"
                 /></label>
             <div
-                class="hover-pipeline-filters"
-                role="group"
-                aria-label="{{t 'Data source status'}}"
-            >
+              class="hover-pipeline-filters"
+              role="group"
+              aria-label="{{t 'Data source status'}}"
+              >
                 <button
-                    type="button"
-                    class="{{filter_all_class}}"
-                    data-source-filter="all"
-                >{{t "All"}}</button>
+                  type="button"
+                  class="{{filter_all_class}}"
+                  data-source-filter="all"
+                  >{{t "All"}}</button>
                 <button
-                    type="button"
-                    class="{{filter_connected_class}}"
-                    data-source-filter="connected"
-                >{{t "Connected"}}</button>
+                  type="button"
+                  class="{{filter_connected_class}}"
+                  data-source-filter="connected"
+                  >{{t "Connected"}}</button>
                 <button
-                    type="button"
-                    class="{{filter_attention_class}}"
-                    data-source-filter="attention"
-                >{{t "Needs attention"}}</button>
+                  type="button"
+                  class="{{filter_attention_class}}"
+                  data-source-filter="attention"
+                  >{{t "Needs attention"}}</button>
             </div>
         </div>
         <div class="hover-pipeline-table-wrap hover-data-source-table-wrap">
             <table class="hover-pipeline-table hover-data-source-table">
-                <thead><tr><th>{{t "Data source"}}</th><th>{{t
-                                "Publishes to"
-                            }}</th><th>{{t "Status"}}</th><th>{{t
-                                "Last event"
-                            }}</th><th>{{t "Used by"}}</th></tr></thead>
-                <tbody>{{#if has_sources}}{{#each sources}}<tr>
-                                <td data-label="{{t 'Data source'}}"><div
-                                        class="hover-pipeline-provider"
-                                    >{{#if provider_logo_url}}<img
-                                                src="{{provider_logo_url}}"
-                                                alt=""
-                                            />{{else}}<span
-                                                class="hover-pipeline-provider-fallback"
-                                            >{{provider_initial}}</span>{{/if}}<span
-                                        ><strong>{{name}}</strong><small
-                                            >{{provider_description}}</small></span></div></td>
-                                <td
-                                    data-label="{{t 'Publishes to'}}"
-                                >{{destination}} › {{topic}}</td>
-                                <td data-label="{{t 'Status'}}"><span
-                                        class="hover-pipeline-status hover-pipeline-status--{{status_key}}"
-                                    ><i
-                                            aria-hidden="true"
-                                        ></i>{{status_label}}</span></td>
-                                <td
-                                    data-label="{{t 'Last event'}}"
-                                >{{last_event}}</td>
-                                <td data-label="{{t 'Used by'}}">{{#if
-                                        pipeline_name
-                                    }}<span
-                                            class="hover-data-source-pipeline-name"
-                                        >{{pipeline_name}}</span>{{else}}—{{/if}}</td>
-                            </tr>{{/each}}{{else}}<tr
-                            class="hover-pipeline-empty"
-                        ><td colspan="5"><strong>{{empty_heading}}</strong><span
-                                >{{empty_description}}</span></td></tr>{{/if}}</tbody>
+                <thead><tr><th>{{t "Data source"}}</th><th>{{t "Publishes to"}}</th><th>{{t "Status"}}</th><th>{{t "Last event"}}</th></tr></thead>
+                <tbody>{{#if has_sources}}{{#each sources}}<tr><td data-label="{{t 'Data source'}}"><div class="hover-pipeline-provider">{{#if provider_logo_url}}<img src="{{provider_logo_url}}" alt="" />{{else}}<span class="hover-pipeline-provider-fallback">{{provider_initial}}</span>{{/if}}<span><strong>{{name}}</strong><small>{{provider_description}}</small></span></div></td><td data-label="{{t 'Publishes to'}}">{{destination}} › {{topic}}</td><td data-label="{{t 'Status'}}"><span class="hover-pipeline-status hover-pipeline-status--{{status_key}}"><i aria-hidden="true"></i>{{status_label}}</span></td><td data-label="{{t 'Last event'}}">{{last_event}}</td></tr>{{/each}}{{else}}<tr class="hover-pipeline-empty"><td colspan="4"><strong>{{empty_heading}}</strong><span>{{empty_description}}</span></td></tr>{{/if}}</tbody>
             </table>
         </div>
-        <p class="hover-pipeline-one-source-note">{{t
-                "Removing a data source does not remove messages already published."
-            }}</p>
+        <p class="hover-pipeline-one-source-note">{{t "Removing a data source does not remove messages already published."}}</p>
     {{else}}
-        <header class="hover-pipeline-create-header"><span
-                class="hover-pipeline-kicker"
-            >{{t "Data sources"}}</span><h1>{{t "Add a data source"}}</h1><p>{{t
-                    "Choose a connector. Hover will publish every incoming event to a topic you select."
-                }}</p></header>
-        <ol
-            class="hover-pipeline-steps"
-            aria-label="{{t 'Data source creation progress'}}"
-        >
-            <li class="{{step_one_class}}"><span>{{#if step_one_complete}}<i
-                            class="zulip-icon zulip-icon-check"
-                        ></i>{{else}}1{{/if}}</span>{{t
-                    "Choose connector"
-                }}</li>
-            <li class="{{step_two_class}}"><span>{{#if step_two_complete}}<i
-                            class="zulip-icon zulip-icon-check"
-                        ></i>{{else}}2{{/if}}</span>{{t
-                    "Configure destination"
-                }}</li>
-            <li class="{{step_three_class}}"><span>3</span>{{t
-                    "Finish setup"
-                }}</li>
-        </ol>
-        {{#if is_catalogue}}<section class="hover-pipeline-stage">
+        <header class="hover-pipeline-create-header"><span class="hover-pipeline-kicker">{{t "Data sources"}}</span><h1>{{t "Add a data source"}}</h1><p>{{t "Choose a connector. Hover will publish every incoming event to a topic you select."}}</p></header>
+        <ol class="hover-pipeline-steps" aria-label="{{t 'Data source creation progress'}}"><li class="{{step_one_class}}"><span>{{#if step_one_complete}}<i class="zulip-icon zulip-icon-check"></i>{{else}}1{{/if}}</span>{{t "Choose connector"}}</li><li class="{{step_two_class}}"><span>{{#if step_two_complete}}<i class="zulip-icon zulip-icon-check"></i>{{else}}2{{/if}}</span>{{t "Configure destination"}}</li><li class="{{step_three_class}}"><span>3</span>{{t "Finish setup"}}</li></ol>
+        {{#if is_catalogue}}
+            <section class="hover-pipeline-stage">
                 <button
-                    type="button"
-                    class="button-reset-style hover-data-source-back"
-                    data-source-back="index"
-                ><i class="zulip-icon zulip-icon-arrow-left"></i>{{t
+                  type="button"
+                  class="button-reset-style hover-data-source-back"
+                  data-source-back="index"
+                  ><i class="zulip-icon zulip-icon-arrow-left"></i>{{t
                         "Back to data sources"
                     }}</button>
                 <h2>{{t "Connector catalogue"}}</h2>
@@ -137,169 +78,36 @@
                         placeholder="{{t 'Search services'}}"
                         autofocus
                     /></label>
-                {{#if has_provider_results}}<div
-                        class="hover-pipeline-provider-results"
-                    >{{#each providers}}<button
-                                type="button"
-                                class="hover-pipeline-provider-choice hover-data-source-provider-choice"
-                                data-provider-key="{{key}}"
-                            ><img src="{{logo_url}}" alt="" /><span><strong
-                                    >{{name}}</strong><small
-                                    >{{description}}</small></span><i
-                                    class="zulip-icon zulip-icon-chevron-right"
-                                ></i></button>{{/each}}</div>
-                {{else}}<p class="hover-pipeline-catalogue-hint">{{t
-                            "Start typing to search the incoming webhook catalogue."
-                        }}</p><div class="hover-pipeline-fallbacks"><strong>{{t
-                                "Can't find your service?"
-                            }}</strong><button
-                            type="button"
-                            class="hover-pipeline-provider-choice hover-data-source-provider-choice"
-                            data-provider-key="slack_incoming"
-                        >{{#if slack_logo_url}}<img
-                                    src="{{slack_logo_url}}"
-                                    alt=""
-                                />{{/if}}<span><b>{{t
-                                        "Slack-compatible webhook"
-                                    }}</b><small>{{t
-                                        "Works with services that can send Slack Incoming Webhooks."
-                                    }}</small></span><i
-                                class="zulip-icon zulip-icon-chevron-right"
-                            ></i></button><button
-                            type="button"
-                            class="hover-pipeline-provider-choice hover-data-source-provider-choice"
-                            data-provider-key="rest_api"
-                        ><span class="hover-pipeline-rest-logo">{ }</span><span
-                            ><b>{{t "REST API endpoint"}}</b><small>{{t
-                                        "For internal tools and full control over message formatting."
-                                    }}</small></span><i
-                                class="zulip-icon zulip-icon-chevron-right"
-                            ></i></button></div>{{/if}}
+                {{#if has_provider_results}}<div class="hover-pipeline-provider-results">{{#each providers}}<button type="button" class="hover-pipeline-provider-choice hover-data-source-provider-choice" data-provider-key="{{key}}"><img src="{{logo_url}}" alt="" /><span><strong>{{name}}</strong><small>{{description}}</small></span><i class="zulip-icon zulip-icon-chevron-right"></i></button>{{/each}}</div>
+                {{else}}<p class="hover-pipeline-catalogue-hint">{{t "Start typing to search the incoming webhook catalogue."}}</p><div class="hover-pipeline-fallbacks"><strong>{{t "Can't find your service?"}}</strong><button type="button" class="hover-pipeline-provider-choice hover-data-source-provider-choice" data-provider-key="slack_incoming">{{#if slack_logo_url}}<img src="{{slack_logo_url}}" alt="" />{{/if}}<span><b>{{t "Slack-compatible webhook"}}</b><small>{{t "Works with services that can send Slack Incoming Webhooks."}}</small></span><i class="zulip-icon zulip-icon-chevron-right"></i></button><button type="button" class="hover-pipeline-provider-choice hover-data-source-provider-choice" data-provider-key="rest_api"><span class="hover-pipeline-rest-logo">{ }</span><span><b>{{t "REST API endpoint"}}</b><small>{{t "For internal tools and full control over message formatting."}}</small></span><i class="zulip-icon zulip-icon-chevron-right"></i></button></div>{{/if}}
             </section>
-        {{else if is_setup}}<section
-                class="hover-pipeline-stage hover-pipeline-source-setup"
-            >
+        {{else if is_setup}}
+            <section
+              class="hover-pipeline-stage hover-pipeline-source-setup"
+              >
                 <button
-                    type="button"
-                    class="button-reset-style hover-data-source-back"
-                    data-source-back="catalogue"
-                ><i class="zulip-icon zulip-icon-chevron-left"></i>{{t
+                  type="button"
+                  class="button-reset-style hover-data-source-back"
+                  data-source-back="catalogue"
+                  ><i class="zulip-icon zulip-icon-chevron-left"></i>{{t
                         "Connector catalogue"
                     }}</button>
-                <div class="hover-pipeline-provider-heading"><img
-                        src="{{provider.logo_url}}"
-                        alt=""
-                    /><strong>{{provider.name}}</strong></div><h2
-                >{{connect_heading}}</h2><p>{{setup_intro}}</p>
-                <form id="hover_data_source_form"><label>{{t
-                            "Data source name"
-                        }}<input
-                            class="hover-data-source-name"
-                            value="{{source_name}}"
-                            maxlength="80"
-                            required
-                        /><small>{{t
-                                "Shown in Data Sources and when selecting inputs for a pipeline."
-                            }}</small></label><label>{{t "Space"}}<select
-                            class="hover-data-source-destination"
-                            required
-                        >{{#each destinations}}<option
-                                    value="{{name}}"
-                                >{{name}}</option>{{/each}}</select></label><label
-                    >{{t "Topic"}}<input
-                            class="hover-data-source-topic"
-                            value="{{source_topic}}"
-                            maxlength="60"
-                            required
-                        /></label>
-                    {{#if has_events}}<details
-                            class="hover-pipeline-event-options"
-                        ><summary><span><strong
-                                    >{{event_filter_label}}</strong><small>{{t
-                                            "Receive all supported events by default"
-                                        }}</small></span><i
-                                    class="zulip-icon zulip-icon-chevron-down"
-                                ></i></summary><div>{{#each events}}<label
-                                    ><input
-                                            type="checkbox"
-                                            value="{{name}}"
-                                            checked
-                                        />{{label}}</label>{{/each}}</div></details>{{/if}}
-                    <div class="hover-data-source-notice">{{t
-                            "Every incoming webhook event will be published as a message in the selected topic."
-                        }}</div><div class="hover-pipeline-actions"><button
-                            type="button"
-                            class="button-reset-style hover-data-source-back"
-                            data-source-back="catalogue"
-                        >{{t "Back"}}</button><button
-                            type="submit"
-                            class="button rounded sea-green hover-pipeline-primary"
-                        >{{t "Create webhook URL"}}</button></div><div
-                        class="hover-pipeline-request-status"
-                    ></div></form>
+                <div class="hover-pipeline-provider-heading"><img src="{{provider.logo_url}}" alt="" /><strong>{{provider.name}}</strong></div><h2>{{connect_heading}}</h2><p>{{setup_intro}}</p>
+                <form id="hover_data_source_form" novalidate><label>{{t "Data source name"}}<input class="hover-data-source-name" value="{{source_name}}" maxlength="80" required /><small>{{t "Shown as metadata for the destination Topic."}}</small></label><label>{{t "Destination Space"}}<select class="hover-data-source-destination" required {{#unless has_destinations}}disabled{{/unless}}><option value="">{{t "Choose a Space"}}</option>{{#each destinations}}<option value="{{name}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}</select></label><label>{{t "Destination Topic"}}<span class="hover-data-source-topic-control"><input class="hover-data-source-topic" value="{{source_topic}}" maxlength="60" required autocomplete="off" aria-expanded="{{#if topic_menu_open}}true{{else}}false{{/if}}" {{#unless has_destinations}}disabled{{/unless}} />{{#if topic_menu_open}}<span class="hover-data-source-topic-menu" role="listbox">{{#if has_topic_options}}{{#each topic_options}}<button type="button" class="hover-data-source-topic-option" data-topic="{{name}}" role="option">{{name}}</button>{{/each}}{{else}}<span class="hover-data-source-topic-menu-empty">{{t "No existing Topics yet. Type a new Topic name."}}</span>{{/if}}</span>{{/if}}</span><small>{{t "Choose an existing Topic or type a new one."}}</small></label>
+                    {{#if permission_disabled}}<div class="hover-data-source-permission-disabled"><i class="zulip-icon zulip-icon-lock" aria-hidden="true"></i><div><strong>{{t "No Space available for publishing"}}</strong><p>{{t "Ask a Space administrator for permission to post before creating this Data Source."}}</p></div></div>{{/if}}
+                    {{#if has_events}}<details class="hover-pipeline-event-options"><summary><span><strong>{{event_filter_label}}</strong><small>{{t "Receive all supported events by default"}}</small></span><i class="zulip-icon zulip-icon-chevron-down"></i></summary><div><button type="button" class="button-reset-style hover-pipeline-event-selection-toggle">{{t "Deselect all"}}</button><div class="hover-pipeline-event-options-list">{{#each events}}<label><input type="checkbox" value="{{name}}" checked />{{label}}</label>{{/each}}</div></div></details>{{/if}}
+                    <div class="hover-data-source-destination-preview"><span>{{t "Publishing preview"}}</span><strong>{{destination_preview}}</strong><small>{{t "Every incoming event becomes a message in this Topic."}}</small></div>{{#if setup_error}}<div class="hover-pipeline-request-status">{{setup_error}}</div>{{/if}}<div class="hover-pipeline-actions"><button type="button" class="button-reset-style hover-data-source-back" data-source-back="catalogue">{{t "Back"}}</button><button type="submit" class="button rounded sea-green hover-pipeline-primary" {{#unless has_destinations}}disabled{{/unless}}>{{t "Create webhook URL"}}</button></div><div class="hover-pipeline-request-status"></div>
+                </form>
             </section>
-        {{else if is_handoff}}<section
-                class="hover-pipeline-stage hover-pipeline-handoff"
-            >
-                <button
-                    type="button"
-                    class="button-reset-style hover-data-source-back"
-                    data-source-back="setup"
-                ><i
-                        class="zulip-icon zulip-icon-arrow-left"
-                    ></i>{{back_to_configuration}}</button><h2
-                >{{handoff_heading}}</h2><p>{{t
-                        "Copy this URL into the service's webhook settings to start publishing events to Hover."
-                    }}</p>
-                <div
-                    class="hover-pipeline-provider-heading hover-pipeline-provider-heading--left"
-                >{{#if connector.provider_logo_url}}<img
-                            src="{{connector.provider_logo_url}}"
-                            alt=""
-                        />{{/if}}<strong>{{connector.name}}</strong><span
-                        class="hover-pipeline-ready"
-                    ><i class="zulip-icon zulip-icon-check"></i>{{t
-                            "Webhook ready"
-                        }}</span></div>
-                <label>{{t "Webhook URL"}}<div
-                        class="hover-pipeline-url-row"
-                    ><input
-                            class="hover-data-source-webhook-url"
-                            value="{{connector.webhook_url}}"
-                            readonly
-                        /><button
-                            type="button"
-                            class="button rounded hover-data-source-copy"
-                        ><i class="zulip-icon zulip-icon-copy"></i>{{t
-                                "Copy URL"
-                            }}</button></div></label>
-                <h3>{{finish_setup_heading}}</h3><ol
-                    class="hover-pipeline-instructions"
-                ><li>{{t "Open the service's webhook settings."}}</li><li>{{t
-                            "Add a webhook and paste the URL above."
-                        }}</li><li>{{t
-                            "Choose the events to send, then save."
-                        }}</li></ol><div class="hover-pipeline-security"><i
-                        class="zulip-icon zulip-icon-lock"
-                    ></i>{{t
-                        "Keep this URL private. Anyone with it can publish events to this data source."
-                    }}</div><div class="hover-pipeline-destination">{{t
-                        "Publishes every event to:"
-                    }}
-                    <strong>{{connector.destination}}</strong>
-                    ›
-                    <strong>{{connector.topic}}</strong><small>{{t
-                            "Messages remain in this topic even if the data source is later removed."
-                        }}</small></div><div
-                    class="hover-pipeline-actions"
-                ><button
-                        type="button"
-                        class="button-reset-style hover-data-source-back"
-                        data-source-back="setup"
-                    >{{t "Back"}}</button><button
-                        type="button"
-                        class="button rounded sea-green hover-pipeline-primary hover-data-source-finish"
-                    >{{t "Finish data source"}}</button></div>
-            </section>{{/if}}
+        {{else if is_handoff}}
+            <section
+              class="hover-pipeline-stage hover-pipeline-handoff"
+              >
+                <button type="button" class="button-reset-style hover-data-source-back" data-source-back="setup"><i class="zulip-icon zulip-icon-arrow-left"></i>{{back_to_configuration}}</button><h2>{{handoff_heading}}</h2><p>{{t "Copy this URL into the service's webhook settings to start publishing events to Hover."}}</p>
+                <div class="hover-pipeline-provider-heading hover-pipeline-provider-heading--left">{{#if connector.provider_logo_url}}<img src="{{connector.provider_logo_url}}" alt="" />{{/if}}<strong>{{connector.name}}</strong><span class="hover-pipeline-ready"><i class="zulip-icon zulip-icon-check"></i>{{t "Webhook ready"}}</span></div>
+                <div class="hover-pipeline-webhook-field"><label for="hover_data_source_webhook_url">{{t "Webhook URL"}}</label><div class="hover-pipeline-url-row"><input id="hover_data_source_webhook_url" class="hover-data-source-webhook-url" value="{{connector.webhook_url}}" readonly /><button type="button" class="button rounded hover-data-source-copy"><i class="zulip-icon zulip-icon-copy"></i>{{t "Copy URL"}}</button></div></div>
+                <h3>{{finish_setup_heading}}</h3><ol class="hover-pipeline-instructions"><li>{{t "Open the service's webhook settings."}}</li><li>{{t "Add a webhook and paste the URL above."}}</li><li>{{t "Choose the events to send, then save."}}</li></ol><div class="hover-pipeline-security"><i class="zulip-icon zulip-icon-lock"></i>{{t "Keep this URL private. Anyone with it can publish events to this data source."}}</div><div class="hover-pipeline-destination">{{t "Published into:"}} <strong>{{connector.destination}}</strong> › <strong>{{connector.topic}}</strong><small>{{t "Messages remain in this topic even if the data source is later removed."}}</small></div><div class="hover-pipeline-actions"><button type="button" class="button-reset-style hover-data-source-back" data-source-back="setup">{{t "Back"}}</button><button type="button" class="button rounded sea-green hover-pipeline-primary hover-data-source-finish">{{t "Finish data source"}}</button></div>
+            </section>
+        {{/if}}
     {{/if}}
 </div>

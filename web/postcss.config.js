@@ -10,6 +10,7 @@ import postcssSimpleVars from "postcss-simple-vars";
 
 import {container_breakpoints, media_breakpoints} from "./src/css_variables.ts";
 
+
 /**
  * @param {object} ctx
  * @returns {import("postcss-load-config").Config}
@@ -39,4 +40,4 @@ const config = (ctx) => ({
         }),
     ],
 });
-export default config; // eslint-disable-line unicorn/default-export-style
+export default config;
