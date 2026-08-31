@@ -64,7 +64,7 @@ def get_connector_provider_metadata(provider_key: str) -> dict[str, Any]:
 
 
 def connector_projection_queryset() -> QuerySet[Connector]:
-    return Connector.objects.select_related("bot", "destination", "owner", "realm", "pipeline")
+    return Connector.objects.select_related("bot", "destination", "owner", "realm")
 
 
 def user_can_manage_connector(user: UserProfile, connector: Connector) -> bool:
@@ -169,7 +169,6 @@ def connector_data(
             connector.last_delivery_attempt.isoformat() if connector.last_delivery_attempt else None
         ),
         "date_updated": connector.date_updated.isoformat(),
-        "pipeline_name": getattr(getattr(connector, "pipeline", None), "name", None),
     }
     if (
         include_url

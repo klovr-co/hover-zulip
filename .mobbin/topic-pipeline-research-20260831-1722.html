@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Topic × Pipeline UX 研究</title>
+  <style>
+    :root {
+      --paper: #f5f3ee;
+      --surface: #ffffff;
+      --ink: #181a17;
+      --muted: #666a62;
+      --line: #dcded7;
+      --green: #245d45;
+      --green-soft: #e3eee7;
+      --amber: #8a5a13;
+      --amber-soft: #f7ead2;
+      --red: #8d3a34;
+      --red-soft: #f4e2df;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.55;
+    }
+    a { color: inherit; }
+    .shell { width: min(1440px, calc(100% - 48px)); margin: 0 auto; }
+    .hero { padding: 72px 0 48px; border-bottom: 1px solid var(--line); }
+    .eyebrow { margin: 0 0 16px; color: var(--green); font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { max-width: 920px; margin: 0; font-size: clamp(42px, 6vw, 82px); line-height: .98; letter-spacing: -.055em; }
+    .lede { max-width: 800px; margin: 28px 0 0; color: var(--muted); font-size: 20px; }
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 36px;
+    }
+    .flow-step { position: relative; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.62); }
+    .flow-step:not(:last-child)::after { content: "→"; position: absolute; z-index: 2; top: 50%; right: -13px; transform: translateY(-50%); color: var(--green); font-weight: 900; }
+    .flow-step b { display: block; font-size: 14px; }
+    .flow-step span { color: var(--muted); font-size: 12px; }
+    .flow-step.focus { color: #fff; background: var(--green); border-color: var(--green); }
+    .flow-step.focus span { color: #dbe9e1; }
+    .summary { display: grid; grid-template-columns: 1.2fr .8fr; gap: 24px; padding: 44px 0 16px; }
+    .summary-card { padding: 28px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
+    .summary-card h2 { margin: 0 0 12px; font-size: 25px; letter-spacing: -.025em; }
+    .summary-card p { margin: 0; color: var(--muted); }
+    .principles { display: grid; gap: 10px; margin-top: 18px; }
+    .principle { display: flex; gap: 12px; align-items: flex-start; padding-top: 10px; border-top: 1px solid var(--line); }
+    .number { min-width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; background: var(--green-soft); color: var(--green); font-size: 12px; font-weight: 800; }
+    section { padding: 68px 0 20px; }
+    .section-head { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 24px; }
+    .section-head h2 { margin: 0; max-width: 720px; font-size: clamp(30px, 4vw, 54px); line-height: 1.05; letter-spacing: -.045em; }
+    .section-head p { margin: 0; max-width: 460px; color: var(--muted); }
+    .tag { display: inline-flex; margin-bottom: 14px; padding: 5px 9px; border-radius: 99px; background: var(--green-soft); color: var(--green); font-size: 12px; font-weight: 800; }
+    .tag.amber { background: var(--amber-soft); color: var(--amber); }
+    .tag.red { background: var(--red-soft); color: var(--red); }
+    .gallery { display: grid; grid-template-columns: repeat(12, 1fr); gap: 18px; }
+    figure { margin: 0; overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
+    figure.wide { grid-column: span 8; }
+    figure.narrow { grid-column: span 4; }
+    figure.half { grid-column: span 6; }
+    .image-link { display: block; overflow: hidden; background: #eceee9; }
+    figure img { display: block; width: 100%; aspect-ratio: 1.52 / 1; object-fit: cover; transition: transform .25s ease; }
+    figure:hover img { transform: scale(1.012); }
+    figcaption { padding: 16px 18px 18px; }
+    .caption-top { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
+    .caption-top b { font-size: 15px; }
+    .caption-top a { color: var(--green); font-size: 12px; font-weight: 800; text-decoration: none; }
+    figcaption p { margin: 7px 0 0; color: var(--muted); font-size: 14px; }
+    .recommendation { margin: 72px 0; padding: 38px; color: white; background: var(--green); border-radius: 22px; }
+    .recommendation h2 { margin: 0 0 12px; font-size: clamp(30px, 4vw, 52px); line-height: 1; letter-spacing: -.04em; }
+    .recommendation > p { max-width: 780px; margin: 0; color: #dceae1; }
+    .blueprint { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 28px; }
+    .blueprint article { padding: 20px; border: 1px solid rgba(255,255,255,.22); border-radius: 14px; background: rgba(255,255,255,.08); }
+    .blueprint small { color: #bcd1c4; text-transform: uppercase; letter-spacing: .08em; }
+    .blueprint h3 { margin: 8px 0 5px; }
+    .blueprint p { margin: 0; color: #dceae1; font-size: 14px; }
+    footer { padding: 24px 0 56px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); }
+    @media (max-width: 900px) {
+      .flow { grid-template-columns: 1fr; }
+      .flow-step:not(:last-child)::after { content: "↓"; top: auto; right: 18px; bottom: -17px; transform: none; }
+      .summary, .blueprint { grid-template-columns: 1fr; }
+      .section-head { display: block; }
+      .section-head p { margin-top: 16px; }
+      figure.wide, figure.narrow, figure.half { grid-column: span 12; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="shell">
+      <p class="eyebrow">Hover · Mobbin UX Research · 2026-08-31</p>
+      <h1>Pipeline 应选择 Topic，而不是 Data Source</h1>
+      <p class="lede">研究连接器、数据同步、知识集合与工作流之间的产品边界。核心结论：Data Source 是同步机制，Topic 是稳定的业务输入。</p>
+      <div class="flow" aria-label="推荐流程">
+        <div class="flow-step"><b>Connector</b><span>建立外部连接</span></div>
+        <div class="flow-step"><b>Select assets</b><span>选择需要同步的内容</span></div>
+        <div class="flow-step"><b>Background sync</b><span>持续同步与健康检查</span></div>
+        <div class="flow-step focus"><b>Topic</b><span>形成稳定的内容边界</span></div>
+        <div class="flow-step"><b>Pipeline</b><span>选择 Topic 并处理</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="summary">
+      <article class="summary-card">
+        <h2>这个流程叫什么？</h2>
+        <p><strong>Knowledge ingestion &amp; collection scoping</strong>，中文可称“知识接入与主题归集”。它不是单纯的数据源设置，也不是 Pipeline 编辑，而是连接二者的领域流程。</p>
+      </article>
+      <article class="summary-card">
+        <h2>三条设计原则</h2>
+        <div class="principles">
+          <div class="principle"><span class="number">1</span><span>连接器负责接入和同步状态。</span></div>
+          <div class="principle"><span class="number">2</span><span>Topic 负责内容范围和业务语义。</span></div>
+          <div class="principle"><span class="number">3</span><span>Pipeline 只引用稳定的 Topic。</span></div>
+        </div>
+      </article>
+    </div>
+
+    <section>
+      <div class="section-head">
+        <div><span class="tag">最接近 Hover</span><h2>Sana AI：Integration 与 Collection 分层</h2></div>
+        <p>连接器是后台同步器；Collection 是用户实际使用、共享和组织知识的边界。这是最接近 Topic 模型的参考。</p>
+      </div>
+      <div class="gallery">
+        <figure class="wide">
+          <a class="image-link" href="https://mobbin.com/api/mcp/short/CeVtqLBH" target="_blank" rel="noreferrer"><img src="https://mobbin.com/api/mcp/short/CeVtqLBH" alt="Sana AI 可用集成列表" loading="lazy"></a>
+          <figcaption><div class="caption-top"><b>① 选择连接器</b><a href="https://mobbin.com/flows/f342a720-9d29-4f26-a736-4f374b44f562" target="_blank" rel="noreferrer">完整流程 ↗</a></div><p>Google Drive、Notion、Dropbox 等被放在 Integrations 层，文案明确为“connect your data sources”。</p></figcaption>
+        </figure>
+        <figure class="narrow">
+          <a class="image-link" href="https://mobbin.com/api/mcp/short/QPx2KPIz" target="_blank" rel="noreferrer"><img src="https://mobbin.com/api/mcp/short/QPx2KPIz" alt="Sana AI Google Drive 同步设置" loading="lazy"></a>
+          <figcaption><div class="caption-top"><b>② 后台同步</b><a href="https://mobbin.com/flows/f342a720-9d29-4f26-a736-4f374b44f562" target="_blank" rel="noreferrer">Mobbin ↗</a></div><p>Connect → Select assets → Ready，并清楚说明文件正在后台同步。</p></figcaption>
+        </figure>
+        <figure class="half">
+          <a class="image-link" href="https://mobbin.com/api/mcp/short/eYNK4kyR" target="_blank" rel="noreferrer"><img src="https://mobbin.com/api/mcp/short/eYNK4kyR" alt="Sana AI 已连接集成及同步状态" loading="lazy"></a>
+          <figcaption><div class="caption-top"><b>③ 集成健康度独立管理</b><a href="https://mobbin.com/flows/f342a720-9d29-4f26-a736-4f374b44f562" target="_blank" rel="noreferrer">Mobbin ↗</a></div><p>状态、资产数和访问范围属于 Integration，不污染 Collection 的业务概念。</p></figcaption>
+        </figure>
+        <figure class="half">
+          <a class="image-link" href="https://mobbin.com/api/mcp/short/Fmp365A0" target="_blank" rel="noreferrer"><img src="https://mobbin.com/api/mcp/short/Fmp365A0" alt="Sana AI 新建 Collection" loading="lazy"></a>
+          <figcaption><div class="caption-top"><b>④ Collection 单独创建</b><a href="https://mobbin.com/flows/525d87f8-e0dd-476c-8a5b-1dd88c3bc5b9" target="_blank" rel="noreferrer">完整流程 ↗</a></div><p>创建时只定义名称和权限，强调它是共享资源的容器，而不是某个连接器的别名。</p></figcaption>
+        </figure>
+        <figure class="wide">
+          <a class="image-link" href="https://mobbin.com/api/mcp/short/fNzdxnxd" target="_blank" rel="noreferrer"><img src="https://mobbin.com/api/mcp/short/fNzdxnxd" alt="Sana AI Collection 内容面板" loading="lazy"></a>
+          <figcaption><div class="caption-top"><b>⑤ 从 Collection 添加来源</b><a href="https://mobbin.com/flows/525d87f8-e0dd-476c-8a5b-1dd88c3bc5b9" target="_blank" rel="noreferrer">Mobbin ↗</a></div><p>Collection 内可以 Add integration 或 Upload file，说明多个入口都可汇入同一个稳定集合。</p></figcaption>
+        </figure>
+        <figure class="narrow">
+          <a class="image-link" href="https://mobbin.com/api/mcp/short/i3FlalqP" target="_blank" rel="noreferrer"><img src="https://mobbin.com/api/mcp/short/i3FlalqP" alt="Sana AI 首页和知识搜索" loading="lazy"></a>
+          <figcaption><div class="caption-top"><b>⑥ 使用层面面向知识</b><a href="https://mobbin.com/flows/525d87f8-e0dd-476c-8a5b-1dd88c3bc5b9" target="_blank" rel="noreferrer">Mobbin ↗</a></div><p>最终体验围绕知识、任务和 Collection，而不是围绕数据连接协议。</p></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div><span class="tag amber">相邻模式</span><h2>Wix：导入方式不是下游依赖</h2></div>
+        <p>CSV 只是创建 Collection 的一种方式。创建完成后，页面和 Dataset 都连接到 Collection，而不是继续引用原始文件。</p>
+      </div>
+      <div class="gallery">
+        <figure class="half">
+          <a class="image-link" href="https://mobbin.com/api/mcp/short/9S1TdATN" target="_blank" rel="noreferrer"><img src="https://mobbin.com/api/mcp/short/9S1TdATN" alt="Wix 创建 Collection 的三种方式" loading="lazy"></a>
+          <figcaption><div class="caption-top"><b>来源是创建方式</b><a href="https://mobbin.com/flows/10372b04-ac44-4058-8994-fc9bbc685d5a" target="_blank" rel="noreferrer">完整流程 ↗</a></div><p>AI、从零创建和 CSV 导入最终都收敛为同一种 Collection。</p></figcaption>
+        </figure>
+        <figure class="half">
+          <a class="image-link" href="https://mobbin.com/api/mcp/short/LVNqvoRh" target="_blank" rel="noreferrer"><img src="https://mobbin.com/api/mcp/short/LVNqvoRh" alt="Wix 页面连接到 Collection" loading="lazy"></a>
+          <figcaption><div class="caption-top"><b>下游只看 Collection</b><a href="https://mobbin.com/flows/10372b04-ac44-4058-8994-fc9bbc685d5a" target="_blank" rel="noreferrer">Mobbin ↗</a></div><p>页面连接面板展示 Collection 名称；来源已被封装，不再成为用户的决策对象。</p></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div><span class="tag red">有用的反例</span><h2>n8n：Workflow 直接选择 Data Source</h2></div>
+        <p>通用自动化产品把 Datastore 当作画布节点。这种方式灵活，但会让 Pipeline 与技术数据源强耦合。</p>
+      </div>
+      <div class="gallery">
+        <figure class="narrow">
+          <a class="image-link" href="https://mobbin.com/api/mcp/short/Ae51ZN1e" target="_blank" rel="noreferrer"><img src="https://mobbin.com/api/mcp/short/Ae51ZN1e" alt="n8n 选择 Customer Datastore 节点" loading="lazy"></a>
+          <figcaption><div class="caption-top"><b>源成为节点</b><a href="https://mobbin.com/flows/6f2348a7-d468-4d3f-a2eb-9c466fc4e9c3" target="_blank" rel="noreferrer">完整流程 ↗</a></div><p>用户在 Workflow 内搜索并选择具体 Datastore。</p></figcaption>
+        </figure>
+        <figure class="wide">
+          <a class="image-link" href="https://mobbin.com/api/mcp/short/IlYVrpY4" target="_blank" rel="noreferrer"><img src="https://mobbin.com/api/mcp/short/IlYVrpY4" alt="n8n Datastore 输入输出预览" loading="lazy"></a>
+          <figcaption><div class="caption-top"><b>配置与样本数据都在节点内</b><a href="https://mobbin.com/flows/6f2348a7-d468-4d3f-a2eb-9c466fc4e9c3" target="_blank" rel="noreferrer">Mobbin ↗</a></div><p>Hover 不必复制这种领域耦合，但可以借鉴其输入、输出、Schema 和执行反馈。</p></figcaption>
+        </figure>
+        <figure class="wide">
+          <a class="image-link" href="https://mobbin.com/api/mcp/short/iUxnAvJG" target="_blank" rel="noreferrer"><img src="https://mobbin.com/api/mcp/short/iUxnAvJG" alt="n8n Workflow 中的 Datastore 节点" loading="lazy"></a>
+          <figcaption><div class="caption-top"><b>最终形成强耦合</b><a href="https://mobbin.com/flows/6f2348a7-d468-4d3f-a2eb-9c466fc4e9c3" target="_blank" rel="noreferrer">Mobbin ↗</a></div><p>更换或合并来源会改变 Workflow；Topic 中间层可以让 Hover 避免这类脆弱依赖。</p></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <aside class="recommendation">
+      <h2>建议的 Hover 方案</h2>
+      <p>Pipeline 创建器直接选择 Topic。Connector 图标、同步状态与最近同步时间作为 Topic 的上下文信息展示，但不成为主选择对象。</p>
+      <div class="blueprint">
+        <article><small>Step 1</small><h3>Choose a topic</h3><p>按名称、描述、内容量和同步状态浏览稳定的业务输入。</p></article>
+        <article><small>Step 2</small><h3>Configure processing</h3><p>设置处理规则，Pipeline 不需要知道 Topic 后面有哪些连接器。</p></article>
+        <article><small>Empty state</small><h3>Create a topic</h3><p>没有 Topic 时进入接入流程；完成同步后返回并自动预选。</p></article>
+      </div>
+    </aside>
+  </main>
+
+  <footer><div class="shell">截图来源：Mobbin。图片链接可能过期；点击卡片中的 Mobbin 链接可查看原始完整流程。</div></footer>
+</body>
+</html>

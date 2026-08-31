@@ -1317,6 +1317,10 @@ def delete_in_topic(
         visibility_policy=UserTopic.VisibilityPolicy.INHERIT,
     )
 
+    from hover.pipeline_lifecycle import do_mark_pipeline_topic_unavailable
+
+    do_mark_pipeline_topic_unavailable(stream=stream, topic=topic_name)
+
     return json_success(request, data={"complete": True})
 
 

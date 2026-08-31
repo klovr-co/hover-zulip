@@ -790,7 +790,7 @@ class Connector(models.Model):
 
 
 class Pipeline(models.Model):
-    """A scheduled Hover summary built from exactly one inbound Connector."""
+    """A scheduled Hover summary built from exactly one Space Topic."""
 
     MAX_NAME_LENGTH = 80
     MAX_INSTRUCTION_LENGTH = 2000
@@ -799,7 +799,16 @@ class Pipeline(models.Model):
     class State(models.TextChoices):
         ACTIVE = "active", "Active"
         DRAFT = "draft", "Draft"
-        NEEDS_ATTENTION = "needs_attention", "Needs attention"
+        PAUSED = "paused", "Paused"
+
+    class InputAvailability(models.TextChoices):
+        AVAILABLE = "available", "Available"
+        TOPIC_UNAVAILABLE = "topic_unavailable", "Topic unavailable"
+
+    class RunHealth(models.TextChoices):
+        NOT_RUN = "not_run", "Not run yet"
+        HEALTHY = "healthy", "Healthy"
+        FAILED = "failed", "Run failed"
 
     class Cadence(models.TextChoices):
         DAILY = "daily", "Every day"
@@ -816,7 +825,14 @@ class Pipeline(models.Model):
         SUNDAY = 6, "Sunday"
 
     realm = models.ForeignKey(Realm, on_delete=CASCADE, related_name="hover_pipelines")
-    connector = models.OneToOneField(Connector, on_delete=RESTRICT, related_name="pipeline")
+    input_destination = models.ForeignKey(
+        Stream,
+        null=True,
+        blank=True,
+        on_delete=RESTRICT,
+        related_name="hover_pipeline_inputs",
+    )
+    input_topic = models.CharField(max_length=MAX_TOPIC_LENGTH, blank=True)
     name = models.CharField(max_length=MAX_NAME_LENGTH)
     instruction = models.TextField(max_length=MAX_INSTRUCTION_LENGTH)
     cadence = models.TextField(choices=Cadence.choices, default=Cadence.DAILY)
@@ -828,12 +844,44 @@ class Pipeline(models.Model):
     )
     output_topic = models.CharField(max_length=MAX_TOPIC_LENGTH)
     state = models.TextField(choices=State.choices, default=State.ACTIVE)
+    input_availability = models.TextField(
+        choices=InputAvailability.choices, default=InputAvailability.AVAILABLE
+    )
+    run_health = models.TextField(choices=RunHealth.choices, default=RunHealth.NOT_RUN)
+    input_cursor_message_id = models.PositiveBigIntegerField(null=True, blank=True)
     created_by = models.ForeignKey(
         UserProfile, null=True, on_delete=SET_NULL, related_name="created_hover_pipelines"
     )
     last_run_at = models.DateTimeField(null=True, blank=True)
     date_created = models.DateTimeField(default=timezone_now)
     date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(state__in=["active", "draft", "paused"]),
+                name="hover_pipeline_lifecycle_state_valid",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(
+                        input_destination__isnull=True,
+                        state="draft",
+                        input_availability="topic_unavailable",
+                    )
+                    | Q(input_destination__isnull=False) & ~Q(input_topic="")
+                ),
+                name="hover_pipeline_input_recoverable_or_resolved",
+            ),
+        ]
+        indexes = [
+            models.Index(
+                "input_destination", Lower("input_topic"), name="hover_pipeline_input_topic"
+            ),
+            models.Index(
+                "state", "input_availability", "local_time", name="hover_pipeline_schedule"
+            ),
+        ]
 
     @override
     def clean(self) -> None:
@@ -842,10 +890,25 @@ class Pipeline(models.Model):
             raise ValidationError({"weekday": "Weekly Pipelines require a weekday."})
         if self.cadence != self.Cadence.WEEKLY and self.weekday is not None:
             raise ValidationError({"weekday": "Only weekly Pipelines can specify a weekday."})
-        if self.connector.realm_id != self.realm_id:
+        input_destination = self.input_destination
+        if input_destination is None:
+            if (
+                self.state != self.State.DRAFT
+                or self.input_availability != self.InputAvailability.TOPIC_UNAVAILABLE
+            ):
+                raise ValidationError(
+                    {
+                        "input_destination": (
+                            "Only recoverable draft Pipelines may omit an input Space."
+                        )
+                    }
+                )
+        elif input_destination.realm_id != self.realm_id:
             raise ValidationError(
-                {"connector": "Pipelines and connectors must share an organization."}
+                {"input_destination": "Pipeline inputs must stay in the organization."}
             )
+        if input_destination is not None and not self.input_topic.strip():
+            raise ValidationError({"input_topic": "Pipeline inputs require a Topic."})
         if self.output_destination.realm_id != self.realm_id:
             raise ValidationError(
                 {"output_destination": "Pipeline outputs must stay in the organization."}
@@ -853,6 +916,56 @@ class Pipeline(models.Model):
         created_by = self.created_by
         if created_by is not None and created_by.realm_id != self.realm_id:
             raise ValidationError({"created_by": "Pipeline creators must share the organization."})
+
+
+class PipelineRun(models.Model):
+    """One deterministic, retry-safe closed input window for a Pipeline."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        SUCCEEDED = "succeeded", "Succeeded"
+        FAILED = "failed", "Failed"
+
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    pipeline = models.ForeignKey(Pipeline, on_delete=CASCADE, related_name="runs")
+    request_key = models.CharField(max_length=64)
+    input_first_message_id = models.PositiveBigIntegerField(null=True, blank=True)
+    input_last_message_id = models.PositiveBigIntegerField(null=True, blank=True)
+    status = models.TextField(choices=Status.choices, default=Status.PENDING)
+    output_message = models.OneToOneField(
+        Message, null=True, blank=True, on_delete=RESTRICT, related_name="hover_pipeline_run"
+    )
+    failure_code = models.CharField(max_length=64, blank=True)
+    date_created = models.DateTimeField(default=timezone_now)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["pipeline", "request_key"], name="hover_pipeline_run_unique_request"
+            ),
+        ]
+
+
+class PipelineAuthoredMessage(models.Model):
+    """Durable provenance used to exclude Pipeline output from future input."""
+
+    message = models.OneToOneField(
+        Message, on_delete=CASCADE, related_name="hover_pipeline_authorship"
+    )
+    pipeline = models.ForeignKey(Pipeline, on_delete=CASCADE, related_name="authored_messages")
+    run = models.OneToOneField(PipelineRun, on_delete=CASCADE, related_name="authorship")
+    date_created = models.DateTimeField(default=timezone_now)
+
+    @override
+    def clean(self) -> None:
+        super().clean()
+        if self.run.pipeline_id != self.pipeline_id:
+            raise ValidationError({"run": "Authored messages must use a run from the Pipeline."})
+        if self.message.realm_id != self.pipeline.realm_id:
+            raise ValidationError(
+                {"message": "Pipeline-authored messages must stay in the organization."}
+            )
 
 
 class IntegrationMessageProvenance(models.Model):

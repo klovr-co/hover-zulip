@@ -23,6 +23,48 @@ details; Hover stores only an opaque Source reference and safe identifying
 metadata.
 _Avoid_: Chat ID, JID, phone number
 
+**Data Source**:
+An independently managed inbound syncer that publishes external activity into
+one configured Space Topic. Its delivery health describes only that syncer;
+it never owns a Pipeline or determines Pipeline visibility or lifecycle.
+_Avoid_: Pipeline input, Pipeline owner, Connector-bound Pipeline
+
+**Topic**:
+The canonical message grouping inside a Space. Until Hover has stable native
+Topic IDs, its durable identity is the launched Space's stream ID plus the
+trimmed, case-insensitively normalized Topic name. Topic-wide rename or move
+operations update dependent Pipeline inputs; deletion or access loss makes the
+input unavailable without deleting the Pipeline.
+_Avoid_: Data Source, Connector, free-floating topic name
+
+**Pipeline Input**:
+Exactly one readable Space Topic whose bounded new-message windows are processed
+by a Pipeline. Any Data Sources publishing there are optional subordinate
+metadata, and ordinary human-only Topics are equally valid inputs.
+_Avoid_: Connector, webhook, Source-owned input
+
+**Pipeline Output**:
+Exactly one writable Space Topic that receives Pipeline-authored results. It may
+be identical to the Pipeline Input; authored messages are recorded and excluded
+from later input windows.
+_Avoid_: forced separate destination, recursive input
+
+**Data Source Health**:
+The delivery state of one Data Source. A warning may be displayed beneath a
+Topic but cannot by itself change Pipeline state.
+_Avoid_: Pipeline health, Topic availability
+
+**Input Topic Availability**:
+Whether the Pipeline's persisted Space Topic exists and remains readable by its
+execution identity. Unavailable inputs pause execution with a recoverable
+`topic_unavailable` state.
+_Avoid_: Source health, run failure
+
+**Pipeline Run Health**:
+The outcome of Pipeline processing and publication for one deterministic input
+window. Retries reuse the run identity and cannot publish a second output.
+_Avoid_: Data Source delivery health, Topic access
+
 **Space Attachment**:
 The durable association between a Space and a Source. It records the actor and
 an immutable, explicitly bounded history start in UTC for later ingestion. A
