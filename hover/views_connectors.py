@@ -25,6 +25,10 @@ DestinationName = Annotated[
     str,
     StringConstraints(strip_whitespace=True, min_length=1, max_length=60),
 ]
+TopicName = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=1, max_length=60),
+]
 
 
 @require_non_guest_user
@@ -50,7 +54,7 @@ def create_connector(
     provider_key: Json[ProviderKey],
     name: Json[str] = "",
     destination_name: Json[DestinationName],
-    topic: Json[str] = "",
+    topic: Json[TopicName],
     event_options: Json[list[str]] | None = None,
 ) -> HttpResponse:
     connector = do_create_connector(
@@ -91,7 +95,7 @@ def update_connector(
     connector_id: PathOnly[int],
     name: Json[str] | None = None,
     destination_name: Json[DestinationName] | None = None,
-    topic: Json[str] | None = None,
+    topic: Json[TopicName] | None = None,
     event_options: Json[list[str]] | None = None,
 ) -> HttpResponse:
     connector = access_connector(user_profile, connector_id)
@@ -118,7 +122,7 @@ def reconcile_connector(
     connector_id: PathOnly[int],
     provider_key: Json[ProviderKey],
     destination_name: Json[DestinationName],
-    topic: Json[str] = "",
+    topic: Json[TopicName],
     event_options: Json[list[str]] | None = None,
 ) -> HttpResponse:
     connector = access_connector(user_profile, connector_id)
