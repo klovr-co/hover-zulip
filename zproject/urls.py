@@ -59,7 +59,7 @@ from hover.views_modules import (
     upgrade_module,
 )
 from hover.views_personal_editions import personal_editions
-from hover.views_pipelines import create_pipeline, list_pipelines
+from hover.views_pipelines import create_pipeline, list_pipelines, update_pipeline
 from hover.views_publications import (
     resolve_disputed_detail_evidence,
     resolve_generated_item_evidence,
@@ -695,6 +695,10 @@ v1_api_and_json_patterns = [
         "hover/pipelines",
         GET=(list_pipelines, {"intentionally_undocumented"}),
         POST=(create_pipeline, {"intentionally_undocumented"}),
+    ),
+    rest_path(
+        "hover/pipelines/<int:pipeline_id>",
+        PATCH=(update_pipeline, {"intentionally_undocumented"}),
     ),
     rest_path("hover/spaces/<int:space_id>", GET=(get_space, {"intentionally_undocumented"})),
     rest_path(

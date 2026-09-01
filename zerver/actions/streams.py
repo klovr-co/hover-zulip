@@ -131,6 +131,10 @@ def do_deactivate_stream(stream: Stream, *, acting_user: UserProfile | None) -> 
     stream.deactivated = True
     stream.save(update_fields=["deactivated"])
 
+    from hover.pipeline_lifecycle import do_mark_stream_pipeline_inputs_unavailable
+
+    do_mark_stream_pipeline_inputs_unavailable(stream=stream)
+
     ChannelEmailAddress.objects.filter(realm=stream.realm, channel=stream).update(deactivated=True)
 
     maybe_set_moderation_or_announcement_channels_none(stream)
@@ -320,6 +324,10 @@ def do_unarchive_stream(stream: Stream, new_name: str, *, acting_user: UserProfi
             stream,
             _("Channel #**{channel_name}** has been unarchived.").format(channel_name=new_name),
         )
+
+    from hover.pipeline_lifecycle import do_restore_stream_pipeline_inputs
+
+    do_restore_stream_pipeline_inputs(stream=stream)
 
 
 def bulk_delete_cache_keys(message_ids_to_clear: list[int]) -> None:

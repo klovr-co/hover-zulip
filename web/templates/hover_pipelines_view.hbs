@@ -1,129 +1,87 @@
 <div class="hover-pipelines-shell">
     {{#if is_index}}
         <header class="hover-pipelines-index-header">
-            <div>
-                <h1>{{t "Pipelines"}}</h1>
-                <p>{{t "Automated summaries from your connected data."}}</p>
-            </div>
-            {{#if can_create}}
-                <button type="button" class="button rounded sea-green hover-pipeline-create">{{t "Create pipeline"}}</button>
-            {{/if}}
+            <div><h1>{{t "Pipelines"}}</h1><p>{{t "Process messages from any accessible Topic on a schedule."}}</p></div>
+            {{#if can_create}}<button type="button" class="button rounded sea-green hover-pipeline-create">{{t "Create pipeline"}}</button>{{/if}}
         </header>
         <div class="hover-pipeline-index-tools">
-            <label class="hover-pipeline-search">
-                <i class="zulip-icon zulip-icon-search"></i>
-                <input type="search" class="hover-pipeline-index-search" value="{{index_query}}" placeholder="{{t 'Search pipelines'}}" />
-            </label>
-            <div class="hover-pipeline-filters">
-                <button data-pipeline-filter="all" class="{{filter_all_class}}">{{t "All"}}</button>
-                <button data-pipeline-filter="active" class="{{filter_active_class}}">{{t "Active"}}</button>
-                <button data-pipeline-filter="draft" class="{{filter_draft_class}}">{{t "Drafts"}}</button>
-            </div>
+            <label class="hover-pipeline-search"><i class="zulip-icon zulip-icon-search" aria-hidden="true"></i><input type="search" class="hover-pipeline-index-search" value="{{index_query}}" placeholder="{{t 'Search pipelines or Topics'}}" aria-label="{{t 'Search pipelines or Topics'}}" /></label>
+            <div class="hover-pipeline-filters" role="group" aria-label="{{t 'Pipeline status'}}"><button type="button" data-pipeline-filter="all" class="{{filter_all_class}}">{{t "All"}}</button><button type="button" data-pipeline-filter="active" class="{{filter_active_class}}">{{t "Active"}}</button><button type="button" data-pipeline-filter="draft" class="{{filter_draft_class}}">{{t "Drafts"}}</button><button type="button" data-pipeline-filter="paused" class="{{filter_paused_class}}">{{t "Paused"}}</button></div>
         </div>
         <div class="hover-pipeline-table-wrap">
-            <table class="hover-pipeline-table">
-                <thead><tr><th>{{t "Pipeline"}}</th><th>{{t "Data source"}}</th><th>{{t "Schedule"}}</th><th>{{t "Status"}}</th><th>{{t "Last run"}}</th></tr></thead>
+            <table class="hover-pipeline-table hover-pipeline-overview-table">
+                <thead><tr><th>{{t "Pipeline"}}</th><th>{{t "Topic input"}}</th><th>{{t "Schedule"}}</th><th>{{t "Status"}}</th><th>{{t "Last run"}}</th><th><span class="visually-hidden">{{t "Details"}}</span></th></tr></thead>
                 <tbody>
                     {{#if has_pipelines}}
                         {{#each pipelines}}
-                            <tr>
+                            <tr class="hover-pipeline-overview-row {{expanded_class}}" data-pipeline-row="{{id}}" tabindex="-1">
                                 <td data-label="{{t 'Pipeline'}}"><strong>{{name}}</strong><small>{{instruction}}</small></td>
-                                <td data-label="{{t 'Data source'}}"><div class="hover-pipeline-provider">{{#if provider_logo_url}}<img src="{{provider_logo_url}}" alt="" />{{else}}<span class="hover-pipeline-provider-fallback">{{provider_initial}}</span>{{/if}}<span>{{source_name}}</span></div></td>
+                                <td data-label="{{t 'Topic input'}}"><strong class="hover-pipeline-topic-path">{{input_destination_label}} <i class="zulip-icon zulip-icon-chevron-right" aria-hidden="true"></i> {{input_topic}}</strong>{{#if has_sources}}<small>{{source_count}} {{t "data source(s) publish here"}}</small>{{else}}<small>{{t "Ordinary Topic"}}</small>{{/if}}</td>
                                 <td data-label="{{t 'Schedule'}}">{{schedule_label}}</td>
-                                <td data-label="{{t 'Status'}}"><span class="hover-pipeline-status hover-pipeline-status--{{status}}"><i></i>{{status_label}}</span></td>
+                                <td data-label="{{t 'Status'}}"><span class="hover-pipeline-status hover-pipeline-status--{{status}}"><i aria-hidden="true"></i>{{status_label}}</span></td>
                                 <td data-label="{{t 'Last run'}}">{{last_run_label}}</td>
+                                <td><div class="hover-pipeline-row-actions">{{#if can_continue_setup}}<button type="button" class="button rounded hover-pipeline-continue-setup" data-pipeline-id="{{id}}">{{t "Continue setup"}}</button>{{/if}}<button type="button" class="button-reset-style hover-pipeline-row-toggle" data-pipeline-id="{{id}}" aria-label="{{expand_label}}" aria-expanded="{{aria_expanded}}"><i class="zulip-icon zulip-icon-chevron-down" aria-hidden="true"></i></button></div></td>
                             </tr>
+                            {{#if expanded}}
+                            <tr class="hover-pipeline-detail-row" data-pipeline-detail="{{id}}">
+                                <td colspan="6">
+                                    <div class="hover-pipeline-flow hover-pipeline-flow--overview" aria-label="{{t 'Pipeline flow'}}">
+                                        <section><span>{{t "Topic input"}}</span><strong>{{input_destination_label}} › {{input_topic}}</strong>{{#if has_sources}}<small>{{t "Published into by"}}</small><div class="hover-pipeline-source-metadata">{{#each source_metadata}}<span>{{#if provider_logo_url}}<img src="{{provider_logo_url}}" alt="" />{{else}}<b>{{provider_initial}}</b>{{/if}}{{name}}</span>{{/each}}</div>{{else}}<small>{{t "No Data Source - team messages are processed normally."}}</small>{{/if}}</section>
+                                        <i class="zulip-icon zulip-icon-arrow-right" aria-hidden="true"></i>
+                                        <section><span>{{t "Processing"}}</span><strong>{{name}}</strong><small>{{schedule_label}}</small></section>
+                                        <i class="zulip-icon zulip-icon-arrow-right" aria-hidden="true"></i>
+                                        <section><span>{{t "Output Topic"}}</span><strong>{{output_destination}} › {{output_topic}}</strong><small>{{run_health_label}}</small></section>
+                                    </div>
+                                    {{#if has_source_warnings}}<div class="hover-pipeline-source-warning"><i class="zulip-icon zulip-icon-warning" aria-hidden="true"></i><div><strong>{{t "Data Source warning"}}</strong>{{#each source_warnings}}<p>{{label}}</p>{{/each}}<small>{{t "This does not change Pipeline status while the Topic remains available."}}</small></div></div>{{/if}}
+                                    {{#if topic_unavailable}}<div class="hover-pipeline-topic-unavailable"><i class="zulip-icon zulip-icon-warning" aria-hidden="true"></i><div><strong>{{t "Input Topic unavailable"}}</strong>{{#if topic_unavailable_while_paused}}<p>{{t "Hover can no longer read this Space and Topic. Repairing the input will leave this Pipeline paused."}}</p>{{else}}<p>{{t "Hover can no longer read this Space and Topic. Scheduled runs wait until its input is repaired."}}</p>{{/if}}<button type="button" class="button rounded hover-pipeline-repair-topic" data-pipeline-id="{{id}}">{{t "Choose another Topic"}}</button></div></div>{{/if}}
+                                    {{#if can_show_pause}}<div class="hover-pipeline-lifecycle-action"><p>{{t "Pausing stops scheduled runs. Configuration and run history are preserved."}}{{#if transition_permission_note}} <small>{{t "Only the creator or a workspace administrator can change this Pipeline."}}</small>{{/if}}</p><button type="button" class="button rounded hover-pipeline-pause" data-pipeline-id="{{id}}" {{#if pause_disabled}}disabled{{/if}}>{{pause_label}}</button></div>{{/if}}
+                                    {{#if can_show_resume}}<div class="hover-pipeline-lifecycle-action"><p>{{t "Resume scheduled runs with the existing configuration and run history."}}{{#if transition_permission_note}} <small>{{t "Only the creator or a workspace administrator can change this Pipeline."}}</small>{{/if}}</p><button type="button" class="button rounded hover-pipeline-resume" data-pipeline-id="{{id}}" {{#if resume_disabled}}disabled{{/if}}>{{resume_label}}</button></div>{{/if}}
+                                    {{#if has_feedback}}<div class="hover-pipeline-request-status {{feedback_class}}" role="status">{{feedback_message}}</div>{{/if}}
+                                </td>
+                            </tr>
+                            {{/if}}
                         {{/each}}
                     {{else}}
-                        <tr class="hover-pipeline-empty"><td colspan="5"><strong>{{empty_heading}}</strong><span>{{empty_description}}</span></td></tr>
+                        <tr class="hover-pipeline-empty {{permission_class}}"><td colspan="6"><strong>{{empty_heading}}</strong><span>{{empty_description}}</span></td></tr>
                     {{/if}}
                 </tbody>
             </table>
         </div>
-        <p class="hover-pipeline-one-source-note">{{t "Each pipeline uses one data source."}}</p>
+        <p class="hover-pipeline-one-source-note">{{t "A Topic can feed multiple Pipelines, with or without Data Sources."}}</p>
     {{else}}
-        <ol class="hover-pipeline-steps">
-            <li class="{{step_one_class}}"><span>{{#if step_one_complete}}<i class="zulip-icon zulip-icon-check"></i>{{else}}1{{/if}}</span>{{t "Choose a data source"}}</li>
-            <li class="{{step_two_class}}"><span>{{#if step_two_complete}}<i class="zulip-icon zulip-icon-check"></i>{{else}}2{{/if}}</span>{{t "Configure pipeline"}}</li>
-            <li class="{{step_three_class}}"><span>3</span>{{t "Review"}}</li>
-        </ol>
+        <ol class="hover-pipeline-steps" aria-label="{{t 'Pipeline creation progress'}}"><li class="{{step_one_class}}"><span>{{#if step_one_complete}}<i class="zulip-icon zulip-icon-check"></i>{{else}}1{{/if}}</span>{{t "Choose Topic"}}</li><li class="{{step_two_class}}"><span>{{#if step_two_complete}}<i class="zulip-icon zulip-icon-check"></i>{{else}}2{{/if}}</span>{{t "Configure pipeline"}}</li><li class="{{step_three_class}}"><span>3</span>{{t "Review"}}</li></ol>
         {{#if is_select}}
-            <section class="hover-pipeline-stage hover-pipeline-source-select">
+            <section class="hover-pipeline-stage hover-pipeline-topic-select">
                 <button type="button" class="button-reset-style hover-pipeline-back" data-pipeline-back="index"><i class="zulip-icon zulip-icon-arrow-left"></i>{{t "Back to pipelines"}}</button>
-                <header class="hover-pipeline-create-header">
-                    <span class="hover-pipeline-kicker">{{t "Pipeline"}}</span>
-                    <h1>{{t "Create a pipeline"}}</h1>
-                    <p>{{t "Choose an existing data source, then define how Hover should summarize its messages."}}</p>
-                </header>
-                <h2>{{t "Choose one data source"}}</h2>
-                <p>{{t "Only data sources you can access are shown."}}</p>
-                <div class="hover-pipeline-index-tools">
-                    <label class="hover-pipeline-search"><i class="zulip-icon zulip-icon-search"></i><input type="search" class="hover-pipeline-source-search" value="{{source_query}}" placeholder="{{t 'Search data sources'}}" /></label>
-                    <div class="hover-pipeline-filters">
-                        <button data-pipeline-source-filter="all" class="{{source_filter_all_class}}">{{t "All"}}</button>
-                        <button data-pipeline-source-filter="connected" class="{{source_filter_connected_class}}">{{t "Connected"}}</button>
-                        <button data-pipeline-source-filter="attention" class="{{source_filter_attention_class}}">{{t "Needs attention"}}</button>
-                    </div>
-                    <a href="#hover/data-sources" class="hover-pipeline-manage-sources">{{t "Manage data sources"}}</a>
+                <header class="hover-pipeline-create-header"><span class="hover-pipeline-kicker">{{t "Pipeline"}}</span><h1>{{t "Choose a Topic input"}}</h1><p>{{t "A Pipeline reads one Topic. Topics are grouped by Space; Data Sources appear only as publishing metadata."}}</p></header>
+                <label class="hover-pipeline-search hover-pipeline-topic-search-wrap"><i class="zulip-icon zulip-icon-search" aria-hidden="true"></i><input type="search" class="hover-pipeline-topic-search" value="{{topic_query}}" placeholder="{{t 'Search Spaces and Topics'}}" aria-label="{{t 'Search Spaces and Topics'}}" /></label>
+                <div class="hover-pipeline-topic-list">
+                    {{#if has_topics}}{{#each topic_groups}}<section class="hover-pipeline-topic-group"><h2>{{space}}</h2><div>{{#each topics}}<button type="button" class="hover-pipeline-topic-choice {{selected_class}} {{unavailable_class}}" data-space="{{input_destination}}" data-topic="{{input_topic}}" aria-disabled="{{aria_disabled}}"><span class="hover-pipeline-source-radio"></span><span class="hover-pipeline-topic-identity"><strong>{{input_topic}}</strong><small>{{input_destination}} › {{input_topic}}</small></span><span class="hover-pipeline-topic-sources">{{#if has_sources}}<span class="hover-pipeline-topic-source-logos">{{#each sources}}{{#if provider_logo_url}}<img src="{{provider_logo_url}}" alt="" title="{{name}}" />{{else}}<b title="{{name}}">{{provider_initial}}</b>{{/if}}{{/each}}</span><small>{{source_count}} {{t "Data Source(s) publish here"}}</small>{{else}}<small>{{t "No Data Source"}}</small>{{/if}}</span>{{#if is_unavailable}}<span class="hover-pipeline-topic-unavailable-label">{{t "Unavailable"}}</span>{{/if}}</button>{{/each}}</div></section>{{/each}}
+                    {{else}}<div class="hover-pipeline-topic-empty"><strong>{{topics_empty_heading}}</strong><p>{{topics_empty_description}}</p></div>{{/if}}
                 </div>
-                <div class="hover-pipeline-source-list">
-                    {{#if has_sources}}
-                        {{#each sources}}
-                            <button type="button" class="hover-pipeline-source-choice {{selected_class}}" data-source-id="{{id}}">
-                                <span class="hover-pipeline-source-radio"></span>
-                                {{#if provider_logo_url}}<img src="{{provider_logo_url}}" alt="" />{{/if}}
-                                <span class="hover-pipeline-source-identity"><strong>{{name}}</strong><small>{{provider_name}}</small></span>
-                                <span class="hover-pipeline-source-destination">{{t "Publishes to:"}} {{destination}} › {{topic}}</span>
-                                <span class="hover-pipeline-status hover-pipeline-status--{{status_key}}"><i></i>{{status_label}}</span>
-                                <span class="hover-pipeline-source-last">{{last_event}}</span>
-                            </button>
-                        {{/each}}
-                    {{else}}
-                        <div class="hover-pipeline-source-empty">{{t "No available data sources. Add or fix one in Data Sources first."}}</div>
-                    {{/if}}
-                </div>
-                <p class="hover-pipeline-stage-note">{{t "This pipeline will read messages published by the selected data source."}}</p>
-                <div class="hover-pipeline-actions">
-                    <button type="button" class="button-reset-style hover-pipeline-back" data-pipeline-back="index">{{t "Cancel"}}</button>
-                    <button type="button" class="button rounded sea-green hover-pipeline-primary hover-pipeline-source-continue">{{t "Continue"}}</button>
-                </div>
+                <div class="hover-pipeline-actions"><button type="button" class="button-reset-style hover-pipeline-back" data-pipeline-back="index">{{t "Cancel"}}</button>{{#if can_continue}}<button type="button" class="button rounded sea-green hover-pipeline-primary hover-pipeline-topic-continue">{{t "Continue"}}</button>{{else}}<button type="button" class="button rounded sea-green hover-pipeline-primary hover-pipeline-topic-continue" disabled>{{t "Continue"}}</button>{{/if}}</div>
             </section>
         {{else if is_configure}}
             <section class="hover-pipeline-stage hover-pipeline-configure">
-                <button type="button" class="button-reset-style hover-pipeline-back" data-pipeline-back="select"><i class="zulip-icon zulip-icon-arrow-left"></i>{{t "Back to data source selection"}}</button>
-                <h2>{{t "Configure pipeline"}}</h2>
-                <p>{{t "Tell Hover what to summarize and when to deliver it."}}</p>
-                <div class="hover-pipeline-source-summary">
-                    {{#if connector.provider_logo_url}}<img src="{{connector.provider_logo_url}}" alt="" />{{/if}}
-                    <span><strong>{{connector.name}}</strong><small>{{t "Reads from"}} {{connector.destination}} › {{connector.topic}}</small></span>
-                    <span class="hover-pipeline-status hover-pipeline-status--active"><i></i>{{t "Connected"}}</span>
-                    <button type="button" class="button rounded hover-pipeline-change-source">{{t "Change source"}}</button>
-                </div>
-                <div class="hover-data-source-notice">{{t "Hover will summarize new messages published by this data source since the previous run."}}</div>
+                <button type="button" class="button-reset-style hover-pipeline-back" data-pipeline-back="select"><i class="zulip-icon zulip-icon-arrow-left"></i>{{t "Back to Topic selection"}}</button>
+                <h2>{{t "Configure pipeline"}}</h2><p>{{t "Tell Hover how to process new messages and where to post the result."}}</p>
+                <div class="hover-pipeline-topic-summary"><span><small>{{t "Topic input"}}</small><strong>{{selected_topic.input_destination}} › {{selected_topic.input_topic}}</strong>{{#if selected_topic_has_sources}}<em>{{selected_topic_source_count}} {{t "Data Source(s) publish here"}}</em>{{else}}<em>{{t "Ordinary Topic · no Data Source"}}</em>{{/if}}</span><button type="button" class="button rounded hover-pipeline-change-topic">{{t "Change Topic"}}</button></div>
                 <form id="hover_pipeline_configure_form">
-                    <div class="hover-pipeline-form-row"><label for="hover_pipeline_name">{{t "Pipeline name"}}</label><div><input id="hover_pipeline_name" value="{{draft.name}}" maxlength="80" required /><small>{{t "A clear name helps your team recognize this pipeline."}}</small></div></div>
-                    <div class="hover-pipeline-form-row"><label for="hover_pipeline_instruction">{{t "What should Hover summarize?"}}</label><div><textarea id="hover_pipeline_instruction" maxlength="2000" required>{{draft.instruction}}</textarea><small>{{t "Hover uses this instruction to focus every summary."}}</small></div></div>
-                    <div class="hover-pipeline-form-row hover-pipeline-schedule-row">
-                        <label for="hover_pipeline_cadence">{{t "Schedule"}}</label>
-                        <div><select id="hover_pipeline_cadence">{{#if cadence_daily}}<option value="daily" selected>{{t "Every day"}}</option>{{else}}<option value="daily">{{t "Every day"}}</option>{{/if}}{{#if cadence_weekdays}}<option value="weekdays" selected>{{t "Weekdays"}}</option>{{else}}<option value="weekdays">{{t "Weekdays"}}</option>{{/if}}{{#if cadence_weekly}}<option value="weekly" selected>{{t "Every week"}}</option>{{else}}<option value="weekly">{{t "Every week"}}</option>{{/if}}</select>{{#if cadence_weekly}}<select id="hover_pipeline_weekday"><option value="4" selected>{{t "Friday"}}</option></select>{{/if}}<span>{{t "at"}}</span><input id="hover_pipeline_time" type="time" value="{{draft.local_time}}" /><span class="hover-pipeline-timezone">{{draft.timezone}}</span></div>
-                    </div>
-                    <div class="hover-pipeline-form-row">
-                        <label for="hover_pipeline_output_destination">{{t "Post summaries to"}}</label>
-                        <div class="hover-pipeline-output-row"><select id="hover_pipeline_output_destination">{{#each output_destinations}}{{#if selected}}<option value="{{name}}" selected>{{name}}</option>{{else}}<option value="{{name}}">{{name}}</option>{{/if}}{{/each}}</select><input id="hover_pipeline_output_topic" value="{{draft.output_topic}}" maxlength="60" required /><small>{{t "Each run creates a new summary in this topic."}}</small></div>
-                    </div>
-                    <div class="hover-pipeline-actions"><button type="button" class="button-reset-style hover-pipeline-back" data-pipeline-back="select">{{t "Back"}}</button><button type="submit" class="button rounded sea-green hover-pipeline-primary">{{t "Review pipeline"}}</button></div>
+                    <div class="hover-pipeline-form-row"><label for="hover_pipeline_name">{{t "Pipeline name"}}</label><div><input id="hover_pipeline_name" value="{{draft.name}}" maxlength="80" required /><small>{{t "A clear name helps your team recognize this Pipeline."}}</small></div></div>
+                    <div class="hover-pipeline-form-row"><label for="hover_pipeline_instruction">{{t "What should Hover do?"}}</label><div><textarea id="hover_pipeline_instruction" maxlength="2000" required>{{draft.instruction}}</textarea><small>{{t "Describe the processing result you want from each input window."}}</small></div></div>
+                    <div class="hover-pipeline-form-row hover-pipeline-schedule-row"><label>{{t "Schedule"}}</label><details class="hover-pipeline-schedule-details"><summary><strong>{{review_schedule}}</strong><small>{{t "Change schedule"}}</small><i class="zulip-icon zulip-icon-chevron-down"></i></summary><div class="hover-pipeline-schedule-controls"><label for="hover_pipeline_cadence">{{t "Frequency"}}</label><select id="hover_pipeline_cadence">{{#if cadence_daily}}<option value="daily" selected>{{t "Every day"}}</option>{{else}}<option value="daily">{{t "Every day"}}</option>{{/if}}{{#if cadence_weekdays}}<option value="weekdays" selected>{{t "Every weekday"}}</option>{{else}}<option value="weekdays">{{t "Every weekday"}}</option>{{/if}}{{#if cadence_weekly}}<option value="weekly" selected>{{t "Every week"}}</option>{{else}}<option value="weekly">{{t "Every week"}}</option>{{/if}}</select>{{#if cadence_weekly}}<label for="hover_pipeline_weekday">{{t "Day"}}</label><select id="hover_pipeline_weekday"><option value="4" selected>{{t "Friday"}}</option></select>{{/if}}<label for="hover_pipeline_time">{{t "Time"}}</label><input id="hover_pipeline_time" type="time" value="{{draft.local_time}}" /><details class="hover-pipeline-timezone-details"><summary>{{t "Time zone details"}}</summary><p>{{t "Inherited from your workspace:"}} <strong>{{draft.timezone}}</strong></p></details></div></details></div>
+                    <div class="hover-pipeline-form-row"><label for="hover_pipeline_output_destination">{{t "Output Topic"}}</label><div class="hover-pipeline-output-row"><select id="hover_pipeline_output_destination">{{#each output_destinations}}{{#if selected}}<option value="{{name}}" selected>{{name}}</option>{{else}}<option value="{{name}}">{{name}}</option>{{/if}}{{/each}}</select><input id="hover_pipeline_output_topic" value="{{draft.output_topic}}" maxlength="60" required /><small>{{t "Input and output may be the same or different Topics."}}</small>{{#if same_topic}}<div class="hover-pipeline-same-topic-note"><i class="zulip-icon zulip-icon-check" aria-hidden="true"></i>{{t "Results post back to the input Topic. Hover excludes its own output from future runs."}}</div>{{else}}<div class="hover-pipeline-same-topic-note" hidden><i class="zulip-icon zulip-icon-check" aria-hidden="true"></i>{{t "Results post back to the input Topic. Hover excludes its own output from future runs."}}</div>{{/if}}</div></div>
+                    <div class="hover-pipeline-actions"><button type="button" class="button-reset-style hover-pipeline-back" data-pipeline-back="select">{{t "Back"}}</button><div class="hover-pipeline-action-buttons">{{#if can_save_as_draft}}<button type="button" class="button rounded hover-pipeline-save-draft">{{t "Save as draft"}}</button>{{/if}}<button type="submit" class="button rounded sea-green hover-pipeline-primary">{{t "Review pipeline"}}</button></div></div><div class="hover-pipeline-request-status" role="status"></div>
                 </form>
             </section>
         {{else if is_review}}
             <section class="hover-pipeline-stage hover-pipeline-review">
-                <button type="button" class="button-reset-style hover-pipeline-back" data-pipeline-back="configure"><i class="zulip-icon zulip-icon-arrow-left"></i>{{t "Back to pipeline configuration"}}</button>
-                <h2>{{t "Review pipeline"}}</h2><p>{{t "Check the details before creating your pipeline."}}</p>
-                <div class="hover-pipeline-review-section"><h3>{{t "Data source"}}</h3><div>{{#if connector.provider_logo_url}}<img src="{{connector.provider_logo_url}}" alt="" />{{/if}}<strong>{{connector.name}}</strong><dl><dt>{{t "Data source:"}}</dt><dd>{{connector.name}}</dd><dt>{{t "Reads from:"}}</dt><dd>{{connector.destination}} › {{connector.topic}}</dd><dt>{{t "Status:"}}</dt><dd><span class="hover-pipeline-ready">{{t "Connected"}}</span></dd></dl></div><button type="button" class="button rounded hover-pipeline-edit-source">{{t "Edit"}}</button></div>
-                <div class="hover-pipeline-review-section"><h3>{{t "Summary"}}</h3><dl><dt>{{t "Pipeline name:"}}</dt><dd>{{draft.name}}</dd><dt>{{t "Instruction:"}}</dt><dd>{{draft.instruction}}</dd></dl><button type="button" class="button rounded hover-pipeline-edit-configure">{{t "Edit"}}</button></div>
-                <div class="hover-pipeline-review-section"><h3>{{t "Schedule & delivery"}}</h3><dl><dt>{{t "Schedule:"}}</dt><dd>{{review_schedule}}</dd><dt>{{t "Time zone:"}}</dt><dd>{{draft.timezone}}</dd><dt>{{t "Posts to:"}}</dt><dd>{{draft.output_destination}} › {{draft.output_topic}}</dd></dl><button type="button" class="button rounded hover-pipeline-edit-configure">{{t "Edit"}}</button></div>
-                <div class="hover-pipeline-review-notice"><i class="zulip-icon zulip-icon-git-pull-request"></i>{{review_notice}}</div>
-                <div class="hover-pipeline-actions"><button type="button" class="button-reset-style hover-pipeline-back" data-pipeline-back="configure">{{t "Back"}}</button><button type="button" class="button rounded sea-green hover-pipeline-primary hover-pipeline-submit">{{t "Create pipeline"}}</button></div>
-                <div class="hover-pipeline-request-status"></div>
+                <button type="button" class="button-reset-style hover-pipeline-back" data-pipeline-back="configure"><i class="zulip-icon zulip-icon-arrow-left"></i>{{t "Back to configuration"}}</button>
+                <h2>{{t "Review pipeline"}}</h2><p>{{t "Check the complete Topic-to-Topic flow before creating it."}}</p>
+                <div class="hover-pipeline-flow" aria-label="{{t 'Pipeline flow'}}"><section><span>{{t "Topic input"}}</span><strong>{{selected_topic.input_destination}} › {{selected_topic.input_topic}}</strong>{{#if selected_topic_has_sources}}<small>{{selected_topic_source_count}} {{t "Data Source(s) publish here"}}</small>{{else}}<small>{{t "Ordinary Topic"}}</small>{{/if}}</section><i class="zulip-icon zulip-icon-arrow-right"></i><section><span>{{t "Processing"}}</span><strong>{{draft.name}}</strong><small>{{draft.instruction}}</small></section><i class="zulip-icon zulip-icon-arrow-right"></i><section><span>{{t "Output Topic"}}</span><strong>{{draft.output_destination}} › {{draft.output_topic}}</strong>{{#if same_topic}}<small>{{t "Posts back safely to the input Topic"}}</small>{{else}}<small>{{t "Posts to a different Topic"}}</small>{{/if}}</section></div>
+                <div class="hover-pipeline-review-section"><h3>{{t "Topic input"}}</h3><dl><dt>{{t "Space:"}}</dt><dd>{{selected_topic.input_destination}}</dd><dt>{{t "Topic:"}}</dt><dd>{{selected_topic.input_topic}}</dd><dt>{{t "Published into by:"}}</dt><dd>{{#if selected_topic_has_sources}}{{#each selected_topic_sources}}<span class="hover-pipeline-review-source">{{name}}</span>{{/each}}{{else}}{{t "No Data Sources"}}{{/if}}</dd></dl><button type="button" class="button rounded hover-pipeline-edit-topic">{{t "Edit"}}</button></div>
+                <div class="hover-pipeline-review-section"><h3>{{t "Processing"}}</h3><dl><dt>{{t "Pipeline name:"}}</dt><dd>{{draft.name}}</dd><dt>{{t "Instruction:"}}</dt><dd>{{draft.instruction}}</dd><dt>{{t "Schedule:"}}</dt><dd>{{review_schedule}} <details class="hover-pipeline-timezone-details"><summary>{{t "Time zone details"}}</summary><p>{{draft.timezone}}</p></details></dd></dl><button type="button" class="button rounded hover-pipeline-edit-configure">{{t "Edit"}}</button></div>
+                <div class="hover-pipeline-actions"><button type="button" class="button-reset-style hover-pipeline-back" data-pipeline-back="configure">{{t "Back"}}</button><div class="hover-pipeline-action-buttons">{{#if can_save_as_draft}}<button type="button" class="button rounded hover-pipeline-save-draft">{{t "Save as draft"}}</button>{{/if}}<button type="button" class="button rounded sea-green hover-pipeline-primary hover-pipeline-submit">{{#if is_repairing}}{{t "Repair pipeline"}}{{else if is_editing_draft}}{{t "Activate pipeline"}}{{else}}{{t "Create pipeline"}}{{/if}}</button></div></div><div class="hover-pipeline-request-status" role="status"></div>
             </section>
         {{/if}}
     {{/if}}
